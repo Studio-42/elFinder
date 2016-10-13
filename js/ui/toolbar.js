@@ -11,6 +11,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			options  = {
 				// default options
 				displayTextLabel: false,
+				labelExcludeUA: ['Mobile'],
 				autoHideUA: ['Mobile']
 			},
 			filter   = function(opts) {
@@ -59,6 +60,8 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			dispre   = null,
 			uiCmdMapPrev = '',
 			l, i, cmd, panel, button, swipeHandle, autoHide;
+		
+		options.displayTextLabel = (options.displayTextLabel && (! options.labelExcludeUA || ! options.labelExcludeUA.length || ! $.map(options.labelExcludeUA, function(v){ return fm.UA[v]? true : null; }).length));
 		
 		self.prev().length && self.parent().prepend(this);
 		
@@ -113,6 +116,29 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			}
 		});
 		
+		// add contextmenu
+		self.data('hasLabel', options.displayTextLabel)
+			.on('contextmenu', function(e) {
+			e.stopPropagation();
+			e.preventDefault();
+			fm.trigger('contextmenu', {
+				raw: [{
+					label    : fm.i18n('textLabel'),
+					icon     : 'accept',
+					callback : function() {
+						var node = fm.getUI(),
+							nodeSize = {width : node.width(), height : node.height()},
+							hasLabel = self.data('hasLabel');
+						
+						self.height('').data('hasLabel', ! hasLabel).find('.elfinder-button-text')[hasLabel? 'hide':'show']();
+						fm.resize(nodeSize.width, nodeSize.height);
+					}
+				}],
+				x: e.pageX,
+				y: e.pageY
+			});
+		});
+		
 		if (fm.UA.Touch) {
 			autoHide = fm.storage('autoHide') || {};
 			if (typeof autoHide.toolbar === 'undefined') {
@@ -136,6 +162,8 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			
 			self.on('toggle', function(e, data) {
 				var wz    = fm.getUI('workzone'),
+					node  = fm.getUI(),
+					nodeSize = {width : node.width(), height : node.height()},
 					toshow= self.is(':hidden'),
 					wzh   = wz.height(),
 					h     = self.height(),
@@ -147,8 +175,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 							fm.trigger('resize');
 						},
 						always: function() {
-							wz.height(wzh + (toshow? self.outerHeight(true) * -1 : tbh));
-							fm.trigger('resize');
+							fm.resize(nodeSize.width, nodeSize.height);
 							if (swipeHandle) {
 								if (toshow) {
 									swipeHandle.stop(true, true).hide();
@@ -160,14 +187,12 @@ $.fn.elfindertoolbar = function(fm, opts) {
 							data.init && fm.trigger('uiautohide');
 						}
 					}, data);
-				self.data('swipeClose', ! toshow).animate({height : 'toggle'}, opt);
+				self.data('swipeClose', ! toshow).stop(true, true).animate({height : 'toggle'}, opt);
 				autoHide.toolbar = !toshow;
 				fm.storage('autoHide', $.extend(fm.storage('autoHide'), {toolbar: autoHide.toolbar}));
 			});
 		}
 	});
-	
-
 	
 	return this;
 };
