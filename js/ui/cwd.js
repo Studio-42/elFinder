@@ -1106,7 +1106,9 @@ $.fn.elfindercwd = function(fm, options) {
 						fm.unbind('resize', attachThumbnails).bind('resize', attachThumbnails);
 					}
 					$.extend(bufferExt.attachTmbs, atmb);
-					attachThumbnails();
+					setTimeout(function() {
+						attachThumbnails();
+					}, 20);
 				}
 			},
 			
