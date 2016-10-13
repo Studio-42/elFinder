@@ -6009,7 +6009,11 @@ elFinder.prototype = {
 		if (! nochkHide && elem.is(':hidden')) {
 			return false;
 		}
-		var rect = elem[0].getBoundingClientRect();
+		var elm, rect;
+		if (! (elm = elem.get(0))) {
+			return false;
+		}
+		rect = elm.getBoundingClientRect();
 		return document.elementFromPoint(rect.left, rect.top)? true : false;
 	},
 	
