@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 1890330) (2016-10-13)
+ * Version 2.1.16 (2.1-src Nightly: 4d9ad81) (2016-10-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6102,7 +6102,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 1890330)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 4d9ad81)';
 
 
 
@@ -11294,7 +11294,7 @@ $.fn.elfindercwd = function(fm, options) {
 				}
 				resize();
 			})
-			.bind('resize', function() {
+			.bind('wzresize', function() {
 				var place = list ? cwd.find('tbody') : cwd,
 					cwdOffset;
 				resize(true);
@@ -12062,7 +12062,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 				wz.data('rectangle', $.extend(wzRect, { cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width() }));
 			};
 
-		fm.bind('resize', function() {
+		fm.bind('wzresize', function() {
 			nav.height(wz.height() - delta);
 		});
 		
@@ -12100,10 +12100,9 @@ $.fn.elfindernavbar = function(fm, opts) {
 							fm.resources.blink(swipeHandle, 'slowonce');
 						}
 					}
-					setWzRect();
-					fm.trigger('navbar'+ mode);
-					fm.getUI('cwd').trigger('resize');
+					fm.trigger('navbar'+ mode).getUI('cwd').trigger('resize');
 					data.init && fm.trigger('uiautohide');
+					setWzRect();
 				});
 				autoHide.navbar = (mode !== 'show');
 				fm.storage('autoHide', $.extend(fm.storage('autoHide'), {navbar: autoHide.navbar}));
@@ -12413,7 +12412,7 @@ $.fn.elfinderpath = function(fm) {
 					toWorkzone();
 					fm.bind('open', toWorkzone);
 				}
-				setTimeout(function() { fm.trigger('resize'); }, 60);
+				fm.trigger('uiresize');
 			})
 			.bind('resize', fit);
 	});
@@ -13186,7 +13185,6 @@ $.fn.elfindersearchbutton = function(cmd) {
 						left  : parseInt(button.width())-icon.outerWidth(true)
 					});
 				}
-				fm.resize();
 			}
 		});
 		
@@ -13554,7 +13552,8 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				});
 			},
 			render = function(disabled){
-				var name;
+				var hasLabel = self.data('hasLabel'),
+					name;
 				$.each(buttons, function(i, b) { b.detach(); });
 				self.empty();
 				l = panels.length;
@@ -13570,7 +13569,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 									buttons[name] = $('<div/>')[button](cmd);
 								}
 								if (buttons[name]) {
-									options.displayTextLabel && buttons[name].find('.elfinder-button-text').show();
+									hasLabel && buttons[name].find('.elfinder-button-text').show();
 									panel.prepend(buttons[name]);
 								}
 							}
@@ -13583,7 +13582,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				}
 				
 				(! self.data('swipeClose') && self.children().length)? self.show() : self.hide();
-				fm.trigger('toolbarload');
+				fm.trigger('toolbarload').trigger('uiresize');
 			},
 			buttons = {},
 			panels   = filter(opts || []),
@@ -13604,12 +13603,10 @@ $.fn.elfindertoolbar = function(fm, opts) {
 						label    : fm.i18n('textLabel'),
 						icon     : 'accept',
 						callback : function() {
-							var node = fm.getUI(),
-								nodeSize = {width : node.width(), height : node.height()},
-								hasLabel = self.data('hasLabel');
+							var hasLabel = self.data('hasLabel');
 							
 							self.height('').data('hasLabel', ! hasLabel).find('.elfinder-button-text')[hasLabel? 'hide':'show']();
-							fm.resize(nodeSize.width, nodeSize.height);
+							fm.trigger('uiresize');
 						}
 					}],
 					x: e.pageX,
@@ -13677,7 +13674,8 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				}
 				if (Object.keys(fm.commandMap).length) {
 					$.each(fm.commandMap, function(from, to){
-						var cmd = fm._commands[to],
+						var hasLabel = self.data('hasLabel'),
+							cmd = fm._commands[to],
 							button = cmd? 'elfinder'+cmd.options.ui : null,
 							btn;
 						if (button && $.fn[button]) {
@@ -13686,7 +13684,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 								if (! buttons[to] && $.fn[button]) {
 									buttons[to] = $('<div/>')[button](fm._commands[to]);
 									if (buttons[to]) {
-										options.displayTextLabel && buttons[to].find('.elfinder-button-text').show();
+										hasLabel && buttons[to].find('.elfinder-button-text').show();
 										if (cmd.extendsCmd) {
 											buttons[to].children('span.elfinder-button-icon').addClass('elfinder-button-icon-' + cmd.extendsCmd)
 										};
@@ -13726,8 +13724,6 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			
 			self.on('toggle', function(e, data) {
 				var wz    = fm.getUI('workzone'),
-					node  = fm.getUI(),
-					nodeSize = {width : node.width(), height : node.height()},
 					toshow= self.is(':hidden'),
 					wzh   = wz.height(),
 					h     = self.height(),
@@ -13739,7 +13735,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 							fm.trigger('resize');
 						},
 						always: function() {
-							fm.resize(nodeSize.width, nodeSize.height);
+							fm.trigger('uiresize');
 							if (swipeHandle) {
 								if (toshow) {
 									swipeHandle.stop(true, true).hide();
@@ -14825,21 +14821,31 @@ $.fn.elfinderworkzone = function(fm) {
 	this.not('.'+cl).each(function() {
 		var wz     = $(this).addClass(cl),
 			wdelta = wz.outerHeight(true) - wz.height(),
-			parent = wz.parent();
-			
-		parent.add(window).on('resize.' + fm.namespace, function() {
-				var height = parent.height();
-
-				parent.children(':visible:not(.'+cl+')').each(function() {
-					var ch = $(this);
-
-					if (ch.css('position') != 'absolute' && ch.css('position') != 'fixed') {
-						height -= ch.outerHeight(true);
-					}
-				});
+			parent = wz.parent(),
+			fitsize = function() {
+				var height = parent.height() - wdelta,
+					ovf    = parent.css('overflow'),
+					prevH  = Math.round(wz.height());
+	
+				parent.css('overflow', 'hidden')
+					.children(':visible:not(.'+cl+')').each(function() {
+						var ch = $(this);
+		
+						if (ch.css('position') != 'absolute' && ch.css('position') != 'fixed') {
+							height -= ch.outerHeight(true);
+						}
+					});
+				parent.css('overflow', ovf);
 				
-				wz.height(height - wdelta);
-			});
+				height = Math.round(height);
+				if (prevH !== height) {
+					wz.height(height);
+					fm.trigger('wzresize');
+				}
+			};
+			
+		parent.add(window).on('resize.' + fm.namespace, fitsize);
+		fm.bind('uiresize', fitsize);
 	});
 	return this;
 };
