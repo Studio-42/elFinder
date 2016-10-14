@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 4d9ad81) (2016-10-14)
+ * Version 2.1.16 (2.1-src Nightly: e538b5c) (2016-10-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6102,7 +6102,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 4d9ad81)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: e538b5c)';
 
 
 
@@ -13552,8 +13552,8 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				});
 			},
 			render = function(disabled){
-				var hasLabel = self.data('hasLabel'),
-					name;
+				var name;
+				
 				$.each(buttons, function(i, b) { b.detach(); });
 				self.empty();
 				l = panels.length;
@@ -13569,7 +13569,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 									buttons[name] = $('<div/>')[button](cmd);
 								}
 								if (buttons[name]) {
-									hasLabel && buttons[name].find('.elfinder-button-text').show();
+									textLabel && buttons[name].find('.elfinder-button-text').show();
 									panel.prepend(buttons[name]);
 								}
 							}
@@ -13588,14 +13588,18 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			panels   = filter(opts || []),
 			dispre   = null,
 			uiCmdMapPrev = '',
-			l, i, cmd, panel, button, swipeHandle, autoHide;
+			l, i, cmd, panel, button, swipeHandle, autoHide, textLabel;
 		
 		// correction of options.displayTextLabel
-		options.displayTextLabel = (options.displayTextLabel && (! options.labelExcludeUA || ! options.labelExcludeUA.length || ! $.map(options.labelExcludeUA, function(v){ return fm.UA[v]? true : null; }).length));
+		textLabel = fm.storage('toolbarTextLabel');
+		if (typeof textLabel === 'undefined') {
+			textLabel = (options.displayTextLabel && (! options.labelExcludeUA || ! options.labelExcludeUA.length || ! $.map(options.labelExcludeUA, function(v){ return fm.UA[v]? true : null; }).length));
+		} else {
+			textLabel = (textLabel == 1);
+		}
 		
 		// add contextmenu
-		self.data('hasLabel', options.displayTextLabel)
-			.on('contextmenu', function(e) {
+		self.on('contextmenu', function(e) {
 				e.stopPropagation();
 				e.preventDefault();
 				fm.trigger('contextmenu', {
@@ -13603,10 +13607,9 @@ $.fn.elfindertoolbar = function(fm, opts) {
 						label    : fm.i18n('textLabel'),
 						icon     : 'accept',
 						callback : function() {
-							var hasLabel = self.data('hasLabel');
-							
-							self.height('').data('hasLabel', ! hasLabel).find('.elfinder-button-text')[hasLabel? 'hide':'show']();
-							fm.trigger('uiresize');
+							textLabel = ! textLabel;
+							self.height('').find('.elfinder-button-text')[textLabel? 'show':'hide']();
+							fm.trigger('uiresize').storage('toolbarTextLabel', textLabel? '1' : '0');
 						}
 					}],
 					x: e.pageX,
@@ -13674,8 +13677,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				}
 				if (Object.keys(fm.commandMap).length) {
 					$.each(fm.commandMap, function(from, to){
-						var hasLabel = self.data('hasLabel'),
-							cmd = fm._commands[to],
+						var cmd = fm._commands[to],
 							button = cmd? 'elfinder'+cmd.options.ui : null,
 							btn;
 						if (button && $.fn[button]) {
@@ -13684,7 +13686,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 								if (! buttons[to] && $.fn[button]) {
 									buttons[to] = $('<div/>')[button](fm._commands[to]);
 									if (buttons[to]) {
-										hasLabel && buttons[to].find('.elfinder-button-text').show();
+										textLabel && buttons[to].find('.elfinder-button-text').show();
 										if (cmd.extendsCmd) {
 											buttons[to].children('span.elfinder-button-icon').addClass('elfinder-button-icon-' + cmd.extendsCmd)
 										};
