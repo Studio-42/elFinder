@@ -20,7 +20,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 				wz.data('rectangle', $.extend(wzRect, { cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width() }));
 			};
 
-		fm.bind('resize', function() {
+		fm.bind('wzresize', function() {
 			nav.height(wz.height() - delta);
 		});
 		
@@ -58,10 +58,9 @@ $.fn.elfindernavbar = function(fm, opts) {
 							fm.resources.blink(swipeHandle, 'slowonce');
 						}
 					}
-					setWzRect();
-					fm.trigger('navbar'+ mode);
-					fm.getUI('cwd').trigger('resize');
+					fm.trigger('navbar'+ mode).getUI('cwd').trigger('resize');
 					data.init && fm.trigger('uiautohide');
+					setWzRect();
 				});
 				autoHide.navbar = (mode !== 'show');
 				fm.storage('autoHide', $.extend(fm.storage('autoHide'), {navbar: autoHide.navbar}));

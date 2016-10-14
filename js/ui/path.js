@@ -162,7 +162,7 @@ $.fn.elfinderpath = function(fm) {
 					toWorkzone();
 					fm.bind('open', toWorkzone);
 				}
-				setTimeout(function() { fm.trigger('resize'); }, 60);
+				fm.trigger('uiresize');
 			})
 			.bind('resize', fit);
 	});

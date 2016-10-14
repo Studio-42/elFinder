@@ -24,7 +24,8 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				});
 			},
 			render = function(disabled){
-				var name;
+				var hasLabel = self.data('hasLabel'),
+					name;
 				$.each(buttons, function(i, b) { b.detach(); });
 				self.empty();
 				l = panels.length;
@@ -40,7 +41,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 									buttons[name] = $('<div/>')[button](cmd);
 								}
 								if (buttons[name]) {
-									options.displayTextLabel && buttons[name].find('.elfinder-button-text').show();
+									hasLabel && buttons[name].find('.elfinder-button-text').show();
 									panel.prepend(buttons[name]);
 								}
 							}
@@ -53,7 +54,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				}
 				
 				(! self.data('swipeClose') && self.children().length)? self.show() : self.hide();
-				fm.trigger('toolbarload');
+				fm.trigger('toolbarload').trigger('uiresize');
 			},
 			buttons = {},
 			panels   = filter(opts || []),
@@ -74,12 +75,10 @@ $.fn.elfindertoolbar = function(fm, opts) {
 						label    : fm.i18n('textLabel'),
 						icon     : 'accept',
 						callback : function() {
-							var node = fm.getUI(),
-								nodeSize = {width : node.width(), height : node.height()},
-								hasLabel = self.data('hasLabel');
+							var hasLabel = self.data('hasLabel');
 							
 							self.height('').data('hasLabel', ! hasLabel).find('.elfinder-button-text')[hasLabel? 'hide':'show']();
-							fm.resize(nodeSize.width, nodeSize.height);
+							fm.trigger('uiresize');
 						}
 					}],
 					x: e.pageX,
@@ -147,7 +146,8 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				}
 				if (Object.keys(fm.commandMap).length) {
 					$.each(fm.commandMap, function(from, to){
-						var cmd = fm._commands[to],
+						var hasLabel = self.data('hasLabel'),
+							cmd = fm._commands[to],
 							button = cmd? 'elfinder'+cmd.options.ui : null,
 							btn;
 						if (button && $.fn[button]) {
@@ -156,7 +156,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 								if (! buttons[to] && $.fn[button]) {
 									buttons[to] = $('<div/>')[button](fm._commands[to]);
 									if (buttons[to]) {
-										options.displayTextLabel && buttons[to].find('.elfinder-button-text').show();
+										hasLabel && buttons[to].find('.elfinder-button-text').show();
 										if (cmd.extendsCmd) {
 											buttons[to].children('span.elfinder-button-icon').addClass('elfinder-button-icon-' + cmd.extendsCmd)
 										};
@@ -196,8 +196,6 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			
 			self.on('toggle', function(e, data) {
 				var wz    = fm.getUI('workzone'),
-					node  = fm.getUI(),
-					nodeSize = {width : node.width(), height : node.height()},
 					toshow= self.is(':hidden'),
 					wzh   = wz.height(),
 					h     = self.height(),
@@ -209,7 +207,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 							fm.trigger('resize');
 						},
 						always: function() {
-							fm.resize(nodeSize.width, nodeSize.height);
+							fm.trigger('uiresize');
 							if (swipeHandle) {
 								if (toshow) {
 									swipeHandle.stop(true, true).hide();
