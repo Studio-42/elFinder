@@ -3378,7 +3378,7 @@ window.elFinder = function(node, opts) {
 					x = touches[0].pageX || null,
 					y = touches[0].pageY || null,
 					ltr = (self.direction === 'ltr'),
-					navbarMode, treeWidth, swipeX, moveX;
+					navbarMode, treeWidth, swipeX, moveX, toolbarT, mode;
 				
 				if (x === null || y === null || (e.type === 'touchstart' && touches.length > 1)) {
 					return;
@@ -3440,14 +3440,16 @@ window.elFinder = function(node, opts) {
 						}
 					}
 					if (toolbar && lastY !== false ) {
+						toolbarT = toolbar.offset().top;
 						if (Math.abs(lastY - y) > Math.min(45, toolbarH / 3)) {
-							var mode = (lastY > y)? 'slideUp' : 'slideDown';
-							
-							if (toolbar.is(mode === 'slideDown' ? ':hidden' : ':visible')) {
-								toolbar.stop(true, true).trigger('toggle', {duration: 100, handleH: handleH});
-								moveOff();
+							mode = (lastY > y)? 'slideUp' : 'slideDown';
+							if (mode === 'slideDown' || toolbarT + 20 > y) {
+								if (toolbar.is(mode === 'slideDown' ? ':hidden' : ':visible')) {
+									toolbar.stop(true, true).trigger('toggle', {duration: 100, handleH: handleH});
+									moveOff();
+								}
+								lastY = false;
 							}
-							lastY = false;
 						}
 					}
 				}
