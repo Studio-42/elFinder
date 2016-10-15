@@ -2777,7 +2777,7 @@ abstract class elFinderVolumeDriver {
 			} else {
 				$ss = $this->options['tmbVideoConvSec'];
 			}
-			$cmd = sprintf('ffmpeg -ss 00:00:%.3f -vframes 1 -i %s -f image2 %s', $ss, escapeshellarg($tmp), escapeshellarg($file));
+			$cmd = sprintf('ffmpeg -i %s -ss 00:00:%.3f -vframes 1 -f image2 %s', escapeshellarg($tmp), $ss, escapeshellarg($file));
 			$r = $this->procExec($cmd);
 			unlink($tmp);
 			return ($r === 0);
