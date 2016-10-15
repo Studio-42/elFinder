@@ -3440,7 +3440,7 @@ window.elFinder = function(node, opts) {
 						}
 					}
 					if (toolbar && lastY !== false ) {
-						if (Math.abs(lastY - y) > toolbarH / 3) {
+						if (Math.abs(lastY - y) > Math.min(45, toolbarH / 3)) {
 							var mode = (lastY > y)? 'slideUp' : 'slideDown';
 							
 							if (toolbar.is(mode === 'slideDown' ? ':hidden' : ':visible')) {

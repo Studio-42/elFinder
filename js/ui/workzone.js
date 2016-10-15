@@ -9,11 +9,12 @@ $.fn.elfinderworkzone = function(fm) {
 	this.not('.'+cl).each(function() {
 		var wz     = $(this).addClass(cl),
 			wdelta = wz.outerHeight(true) - wz.height(),
+			prevH  = Math.round(wz.height()),
 			parent = wz.parent(),
 			fitsize = function() {
 				var height = parent.height() - wdelta,
 					ovf    = parent.css('overflow'),
-					prevH  = Math.round(wz.height());
+					curH   = Math.round(wz.height());
 	
 				parent.css('overflow', 'hidden')
 					.children(':visible:not(.'+cl+')').each(function() {
@@ -25,8 +26,9 @@ $.fn.elfinderworkzone = function(fm) {
 					});
 				parent.css('overflow', ovf);
 				
-				height = Math.round(height);
-				if (prevH !== height) {
+				height = Math.max(0, Math.round(height));
+				if (prevH !== height || curH !== height) {
+					prevH  = Math.round(wz.height());
 					wz.height(height);
 					fm.trigger('wzresize');
 				}
