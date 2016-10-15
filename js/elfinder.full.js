@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: e538b5c) (2016-10-15)
+ * Version 2.1.16 (2.1-src Nightly: 92eae3d) (2016-10-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -3454,7 +3454,7 @@ window.elFinder = function(node, opts) {
 						}
 					}
 					if (toolbar && lastY !== false ) {
-						if (Math.abs(lastY - y) > toolbarH / 3) {
+						if (Math.abs(lastY - y) > Math.min(45, toolbarH / 3)) {
 							var mode = (lastY > y)? 'slideUp' : 'slideDown';
 							
 							if (toolbar.is(mode === 'slideDown' ? ':hidden' : ':visible')) {
@@ -6102,7 +6102,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: e538b5c)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 92eae3d)';
 
 
 
@@ -13621,14 +13621,15 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				}
 				self.data('tmlongtap') && clearTimeout(self.data('tmlongtap'));
 				self.removeData('longtap')
+					.data('longtap', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY})
 					.data('tmlongtap', setTimeout(function() {
-						self.data('longtap', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY})
-							.removeData('longtapTm')
+						self.removeData('longtapTm')
 							.trigger({
 								type: 'contextmenu',
 								pageX: self.data('longtap').x,
 								pageY: self.data('longtap').y
-							});
+							})
+							.data('longtap', {longtap: true});
 					}, 500));
 			}).on('touchmove touchend', function(e) {
 				if (self.data('tmlongtap')) {
@@ -13639,12 +13640,12 @@ $.fn.elfindertoolbar = function(fm, opts) {
 					self.removeData('longtapTm');
 				}
 			}).on('click', function(e) {
-				if (self.data('tmlongtap')) {
+				if (self.data('longtap') && self.data('longtap').longtap) {
 					e.stopImmediatePropagation();
 					e.preventDefault();
 				}
 			}).on('touchend click', '.elfinder-button', function(e) {
-				if (self.data('longtap')) {
+				if (self.data('longtap') && self.data('longtap').longtap) {
 					e.stopImmediatePropagation();
 					e.preventDefault();
 				}
@@ -13737,6 +13738,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 							fm.trigger('resize');
 						},
 						always: function() {
+							self.css('height', '');
 							fm.trigger('uiresize');
 							if (swipeHandle) {
 								if (toshow) {
@@ -14823,11 +14825,12 @@ $.fn.elfinderworkzone = function(fm) {
 	this.not('.'+cl).each(function() {
 		var wz     = $(this).addClass(cl),
 			wdelta = wz.outerHeight(true) - wz.height(),
+			prevH  = Math.round(wz.height()),
 			parent = wz.parent(),
 			fitsize = function() {
 				var height = parent.height() - wdelta,
 					ovf    = parent.css('overflow'),
-					prevH  = Math.round(wz.height());
+					curH   = Math.round(wz.height());
 	
 				parent.css('overflow', 'hidden')
 					.children(':visible:not(.'+cl+')').each(function() {
@@ -14839,8 +14842,9 @@ $.fn.elfinderworkzone = function(fm) {
 					});
 				parent.css('overflow', ovf);
 				
-				height = Math.round(height);
-				if (prevH !== height) {
+				height = Math.max(0, Math.round(height));
+				if (prevH !== height || curH !== height) {
+					prevH  = Math.round(wz.height());
 					wz.height(height);
 					fm.trigger('wzresize');
 				}
