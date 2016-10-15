@@ -93,14 +93,15 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				}
 				self.data('tmlongtap') && clearTimeout(self.data('tmlongtap'));
 				self.removeData('longtap')
+					.data('longtap', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY})
 					.data('tmlongtap', setTimeout(function() {
-						self.data('longtap', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY})
-							.removeData('longtapTm')
+						self.removeData('longtapTm')
 							.trigger({
 								type: 'contextmenu',
 								pageX: self.data('longtap').x,
 								pageY: self.data('longtap').y
-							});
+							})
+							.data('longtap', {longtap: true});
 					}, 500));
 			}).on('touchmove touchend', function(e) {
 				if (self.data('tmlongtap')) {
@@ -111,12 +112,12 @@ $.fn.elfindertoolbar = function(fm, opts) {
 					self.removeData('longtapTm');
 				}
 			}).on('click', function(e) {
-				if (self.data('tmlongtap')) {
+				if (self.data('longtap') && self.data('longtap').longtap) {
 					e.stopImmediatePropagation();
 					e.preventDefault();
 				}
 			}).on('touchend click', '.elfinder-button', function(e) {
-				if (self.data('longtap')) {
+				if (self.data('longtap') && self.data('longtap').longtap) {
 					e.stopImmediatePropagation();
 					e.preventDefault();
 				}
@@ -209,6 +210,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 							fm.trigger('resize');
 						},
 						always: function() {
+							self.css('height', '');
 							fm.trigger('uiresize');
 							if (swipeHandle) {
 								if (toshow) {
