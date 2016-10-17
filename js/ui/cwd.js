@@ -2099,6 +2099,9 @@ $.fn.elfindercwd = function(fm, options) {
 				if (buffer.length < 1 && place.children().length < 1) {
 					wz.addClass('elfinder-cwd-wrapper-empty');
 					selectCheckbox && selectAllCheckbox.find('input').prop('checked', false);
+					bottomMarker.hide();
+					wrapper.off(scrollEvent, render);
+					resize();
 				} else {
 					bottomMarkerShow(place);
 					wrapper.trigger(scrollEvent);
