@@ -941,6 +941,17 @@ $.fn.elfindercwd = function(fm, options) {
 								done.push(hash);
 							}
 						}
+						
+						$.each(done, function(i, h) {
+							delete bufferExt.attachTmbs[h];
+						});
+						if (bufferExt.getTmbs.length) {
+							loadThumbnails();
+						}
+						if (Object.keys(bufferExt.attachTmbs).length < 1 && bufferExt.getTmbs.length < 1) {
+							wrapper.off(scrollEvent, attachThumbnails);
+							fm.unbind('resize', attachThumbnails);
+						}
 					};
 
 				if ($.isPlainObject(image) && Object.keys(image).length) {
@@ -951,17 +962,6 @@ $.fn.elfindercwd = function(fm, options) {
 					bufferExt.attachThumbTm = setTimeout(function() {
 						$.each(bufferExt.attachTmbs, chk);
 					}, 0);
-				}
-				
-				$.each(done, function(i, h) {
-					delete bufferExt.attachTmbs[h];
-				});
-				if (bufferExt.getTmbs.length) {
-					loadThumbnails();
-				}
-				if (Object.keys(bufferExt.attachTmbs).length < 1 && bufferExt.getTmbs.length < 1) {
-					wrapper.off(scrollEvent, attachThumbnails);
-					fm.unbind('resize', attachThumbnails);
 				}
 			},
 			
@@ -1116,9 +1116,7 @@ $.fn.elfindercwd = function(fm, options) {
 							fm.unbind('resize', attachThumbnails).bind('resize', attachThumbnails);
 						}
 						$.extend(bufferExt.attachTmbs, atmb);
-						setTimeout(function() {
-							attachThumbnails();
-						}, 20);
+						attachThumbnails();
 					}
 				}
 			},
