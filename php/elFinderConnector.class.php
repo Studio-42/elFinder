@@ -59,25 +59,40 @@ class elFinderConnector {
 	public function run() {
 		$isPost = $this->reqMethod === 'POST';
 		$src    = $isPost ? $_POST : $_GET;
-		if ($isPost && !$src && $rawPostData = @file_get_contents('php://input')) {
-			// for support IE XDomainRequest()
+		$maxInputVars = (! $src || isset($src['targets']))? ini_get('max_input_vars') : null;
+		if ((! $src || $maxInputVars) && $rawPostData = file_get_contents('php://input')) {
+			// for max_input_vars and supports IE XDomainRequest()
 			$parts = explode('&', $rawPostData);
-			foreach($parts as $part) {
-				list($key, $value) = array_pad(explode('=', $part), 2, '');
-				$key = rawurldecode($key);
-				if (substr($key, -2) === '[]') {
-					$key = substr($key, 0, strlen($key) - 2);
-					if (!isset($src[$key])) {
-						$src[$key] = array();
+			if (! $src || $maxInputVars < count($parts)) {
+				$src = array();
+				foreach($parts as $part) {
+					list($key, $value) = array_pad(explode('=', $part), 2, '');
+					$key = rawurldecode($key);
+					if (preg_match('/^(.+?)\[([^\[\]]*)\]$/', $key, $m)) {
+						$key = $m[1];
+						$idx = $m[2];
+						if (!isset($src[$key])) {
+							$src[$key] = array();
+						}
+						if ($idx) {
+							$src[$key][$idx] = rawurldecode($value);
+						} else {
+							$src[$key][] = rawurldecode($value);
+						}
+					} else {
+						$src[$key] = rawurldecode($value);
 					}
-					$src[$key][] = rawurldecode($value);
-				} else {
-					$src[$key] = rawurldecode($value);
 				}
+				$_POST = $this->input_filter($src);
+				$_REQUEST = $this->input_filter(array_merge_recursive($src, $_REQUEST));
 			}
-			$_POST = $this->input_filter($src);
-			$_REQUEST = $this->input_filter(array_merge_recursive($src, $_REQUEST));
 		}
+		
+		if (isset($src['targets']) && $this->elFinder->maxTargets && count($src['targets']) > $this->elFinder->maxTargets) {
+			$error = $this->elFinder->error(elFinder::ERROR_MAX_TARGTES);
+			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_MAX_TARGTES)));
+		}
+		
 		$cmd    = isset($src['cmd']) ? $src['cmd'] : '';
 		$args   = array();
 		
