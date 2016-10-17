@@ -387,8 +387,15 @@ $.fn.elfindercwd = function(fm, options) {
 
 				selectCheckbox && selectAllCheckbox.find('input').prop('checked', true);
 				fm.lazy(function() {
+					var files;
 					cwd.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').trigger(evtSelect);
-					selectedFiles = (incHashes || cwdHashes).concat();
+					if (fm.maxTargets && (incHashes || cwdHashes).length > fm.maxTargets) {
+						files = $.map(incHashes || cwdHashes, function(hash) { return fm.file(hash) || null });
+						files = fm.sortFiles(files);
+						selectedFiles = $.map(files, function(f) { return f.hash; });
+					} else {
+						selectedFiles = (incHashes || cwdHashes).concat();
+					}
 					trigger();
 					selectCheckbox && selectAllCheckbox.data('pending', false);
 					cwd.addClass('elfinder-cwd-allselected');
@@ -2153,7 +2160,7 @@ $.fn.elfindercwd = function(fm, options) {
 				}
 				if (event === evtSelect || event === evtUnselect) {
 					add  = (event === evtSelect),
-					sels = selectedFiles.concat();
+					sels = add? selectedFiles.concat() : selectedFiles;
 					$.each(files, function(i, hash) {
 						var idx = $.inArray(hash, sels);
 						if (idx === -1) {
@@ -2167,7 +2174,7 @@ $.fn.elfindercwd = function(fm, options) {
 					while (l--) {
 						$('#'+fm.cwdHash2Id(files[l])).trigger(event);
 					}
-					trigger();
+					! e.data.inselect && trigger();
 				}
 				if (wrapper.data('dropover') && parents.indexOf(wrapper.data('dropover')) !== -1) {
 					ctr = e.type !== 'lockfiles';

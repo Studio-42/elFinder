@@ -227,6 +227,13 @@ class elFinder {
 	protected $uploadDebug = '';
 	
 	/**
+	 * Max allowed numbar of @var targets (0 - no limit)
+	 * 
+	 * @var integer
+	 */
+	public $maxTargets = 1000;
+	
+	/**
 	 * Errors from PHP
 	 *
 	 * @var array
@@ -302,18 +309,17 @@ class elFinder {
 	const ERROR_NETMOUNT          = 'errNetMount';
 	const ERROR_NETUNMOUNT        = 'errNetUnMount';
 	const ERROR_NETMOUNT_NO_DRIVER = 'errNetMountNoDriver';
-	const ERROR_NETMOUNT_FAILED       = 'errNetMountFailed';
-
-	const ERROR_SESSION_EXPIRES 	= 'errSessionExpires';
-
-	const ERROR_CREATING_TEMP_DIR 	= 'errCreatingTempDir';
-	const ERROR_FTP_DOWNLOAD_FILE 	= 'errFtpDownloadFile';
-	const ERROR_FTP_UPLOAD_FILE 	= 'errFtpUploadFile';
-	const ERROR_FTP_MKDIR 		= 'errFtpMkdir';
-	const ERROR_ARCHIVE_EXEC 	= 'errArchiveExec';
-	const ERROR_EXTRACT_EXEC 	= 'errExtractExec';
+	const ERROR_NETMOUNT_FAILED   = 'errNetMountFailed';
+	const ERROR_SESSION_EXPIRES   = 'errSessionExpires';
+	const ERROR_CREATING_TEMP_DIR = 'errCreatingTempDir';
+	const ERROR_FTP_DOWNLOAD_FILE = 'errFtpDownloadFile';
+	const ERROR_FTP_UPLOAD_FILE   = 'errFtpUploadFile';
+	const ERROR_FTP_MKDIR         = 'errFtpMkdir';
+	const ERROR_ARCHIVE_EXEC      = 'errArchiveExec';
+	const ERROR_EXTRACT_EXEC      = 'errExtractExec';
 	const ERROR_SEARCH_TIMEOUT    = 'errSearchTimeout';    // 'Timed out while searching "$1". Search result is partial.'
-	const ERROR_REAUTH_REQUIRE  = 'errReauthRequire';  // 'Re-authorization is required.'
+	const ERROR_REAUTH_REQUIRE    = 'errReauthRequire';  // 'Re-authorization is required.'
+	const ERROR_MAX_TARGTES       = 'errMaxTargets'; // 'Max number of selectable items is $1.'
 
 	/**
 	 * Constructor
@@ -371,6 +377,7 @@ class elFinder {
 		$this->timeout = (isset($opts['timeout']) ? $opts['timeout'] : 0);
 		$this->uploadTempPath = (isset($opts['uploadTempPath']) ? $opts['uploadTempPath'] : '');
 		$this->callbackWindowURL = (isset($opts['callbackWindowURL']) ? $opts['callbackWindowURL'] : '');
+		$this->maxTargets = (isset($opts['maxTargets']) ? intval($opts['maxTargets']) : $this->maxTargets);
 		elFinder::$commonTempPath = (isset($opts['commonTempPath']) ? $opts['commonTempPath'] : './.tmp');
 		if (!is_writable(elFinder::$commonTempPath)) {
 			elFinder::$commonTempPath = '';
@@ -1119,6 +1126,7 @@ class elFinder {
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');
 			$result['uplMaxFile'] = ini_get('max_file_uploads');
 			$result['netDrivers'] = array_keys(self::$netDrivers);
+			$result['maxTargets'] = $this->maxTargets;
 			if ($volume) {
 				$result['cwd']['root'] = $volume->root();
 			}

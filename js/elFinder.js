@@ -1542,6 +1542,10 @@ window.elFinder = function(node, opts) {
 						self.netDrivers = response.netDrivers;
 					}
 
+					if (response.maxTargets) {
+						self.maxTargets = response.maxTargets;
+					}
+
 					if (isOpen && !!data.init) {
 						self.uplMaxSize = self.returnBytes(response.uplMaxSize);
 						self.uplMaxFile = !!response.uplMaxFile? parseInt(response.uplMaxFile) : 20;
@@ -1575,11 +1579,6 @@ window.elFinder = function(node, opts) {
 				}
 			};
 
-		if (!cmd) {
-			return dfrd.reject('errCmdReq');
-		}
-
-		defdone && dfrd.done(done);
 		dfrd.fail(function(error, xhr, response) {
 			self.trigger(cmd + 'fail', response);
 			if (error) {
@@ -1588,6 +1587,17 @@ window.elFinder = function(node, opts) {
 			syncOnFail && self.sync();
 		})
 
+		if (!cmd) {
+			syncOnFail = false;
+			return dfrd.reject('errCmdReq');
+		}
+		
+		if (self.maxTargets && data.targets && data.targets.length > self.maxTargets) {
+			syncOnFail = false;
+			return dfrd.reject(['errMaxTargets', self.maxTargets]);
+		}
+
+		defdone && dfrd.done(done);
 		if (notify.type && notify.cnt) {
 			if (cancel) {
 				notify.cancel = dfrd;
@@ -2045,7 +2055,7 @@ window.elFinder = function(node, opts) {
 	 * @return Array
 	 */
 	this.clipboard = function(hashes, cut) {
-		var map = function() { return $.map(clipboard, function(f) { return f.hash }); }
+		var map = function() { return $.map(clipboard, function(f) { return f.hash }); };
 
 		if (hashes !== void(0)) {
 			clipboard.length && this.trigger('unlockfiles', {files : map()});
@@ -2750,7 +2760,20 @@ window.elFinder = function(node, opts) {
 			selected = [];
 		})
 		.select(function(e) {
-			selected = $.map(e.data.selected || e.data.value|| [], function(hash) { return files[hash] ? hash : null; });
+			var cnt = 0,
+				unselects = [];
+			selected = $.map(e.data.selected || e.data.value|| [], function(hash) {
+				if (unselects.length || (self.maxTargets && ++cnt > self.maxTargets)) {
+					unselects.push(hash);
+					return null;
+				} else {
+					return files[hash] ? hash : null;
+				}
+			});
+			if (unselects.length) {
+				self.trigger('unselectfiles', {files: unselects, inselect: true});
+				self.error(['errMaxTargets', self.maxTargets]);
+			}
 		})
 		.error(function(e) { 
 			var opts  = {
@@ -5625,20 +5648,20 @@ elFinder.prototype = {
 		for (i = start; i< arguments.length; i++) {
 			m = arguments[i];
 			
-			if (typeof m == 'string') {
-				input.push(message(m));
-			} else if ($.isArray(m)) {
+			if ($.isArray(m)) {
 				for (j = 0; j < m.length; j++) {
-					if (typeof m[j] == 'string') {
-						input.push(message(m[j]));
-					} else if (m[j] instanceof jQuery) {
+					if (m[j] instanceof jQuery) {
 						// jQuery object is HTML element
 						input.push(m[j]);
+					} else if (typeof m[j] !== 'undefined'){
+						input.push(message('' + m[j]));
 					}
 				}
 			} else if (m instanceof jQuery) {
 				// jQuery object is HTML element
 				input.push(m[j]);
+			} else if (typeof m !== 'undefined'){
+				input.push(message('' + m));
 			}
 		}
 		

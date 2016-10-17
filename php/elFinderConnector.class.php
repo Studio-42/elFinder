@@ -87,6 +87,12 @@ class elFinderConnector {
 				$_REQUEST = $this->input_filter(array_merge_recursive($src, $_REQUEST));
 			}
 		}
+		
+		if (isset($src['targets']) && $this->elFinder->maxTargets && count($src['targets']) > $this->elFinder->maxTargets) {
+			$error = $this->elFinder->error(elFinder::ERROR_MAX_TARGTES);
+			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_MAX_TARGTES)));
+		}
+		
 		$cmd    = isset($src['cmd']) ? $src['cmd'] : '';
 		$args   = array();
 		
