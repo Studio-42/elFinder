@@ -1194,6 +1194,8 @@ class elFinder {
 		$targets = $args['targets'];
 		
 		foreach ($targets as $target) {
+			elFinder::extendTimeLimit();
+			
 			if (($volume = $this->volume($target)) != false
 			&& (($tmb = $volume->tmb($target)) != false)) {
 				$result['images'][$target] = $tmb;
@@ -1490,6 +1492,8 @@ class elFinder {
 		$suffix  = empty($args['suffix']) ? 'copy' : $args['suffix'];
 		
 		foreach ($targets as $target) {
+			elFinder::extendTimeLimit();
+			
 			if (($volume = $this->volume($target)) == false
 			|| ($src = $volume->file($target)) == false) {
 				$result['warning'] = $this->error(self::ERROR_COPY, '#'.$target, self::ERROR_FILE_NOT_FOUND);
@@ -1519,6 +1523,8 @@ class elFinder {
 		$result  = array('removed' => array());
 		
 		foreach ($targets as $target) {
+			elFinder::extendTimeLimit();
+			
 			if (($volume = $this->volume($target)) == false) {
 				$result['warning'] = $this->error(self::ERROR_RM, '#'.$target, self::ERROR_FILE_NOT_FOUND);
 				return $result;
@@ -1542,7 +1548,7 @@ class elFinder {
 	* @param  resource $fp
 	* @return string or bool(false)
 	* @retval string contents
-	* @retval false  error
+	* @rettval false  error
 	* @author Naoki Sawada
 	**/
 	protected function get_remote_contents( &$url, $timeout = 30, $redirect_max = 5, $ua = 'Mozilla/5.0', $fp = null ) {
@@ -1881,6 +1887,8 @@ class elFinder {
 		$files = array();
 		$errors = array();
 		foreach($targets as $target) {
+			elFinder::extendTimeLimit();
+			
 			$file = $volume->chmod($target, $mode);
 			if ($file) {
 				$files = array_merge($files, is_array($file)? $file : array($file));
@@ -2363,6 +2371,8 @@ class elFinder {
 		}
 		
 		foreach ($targets as $target) {
+			elFinder::extendTimeLimit();
+			
 			if (($srcVolume = $this->volume($target)) == false) {
 				$result['warning'] = $this->error($error, '#'.$target, self::ERROR_FILE_NOT_FOUND);
 				break;
