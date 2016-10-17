@@ -6,7 +6,7 @@
 
 	<!-- Section CSS -->
 	<!-- jQuery UI (REQUIRED) -->
-	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" type="text/css">
+	<link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
 
 	<!-- elfinder css -->
 	<link rel="stylesheet" href="css/commands.css"    type="text/css">
@@ -29,8 +29,13 @@
 
 	<!-- Section JavaScript -->
 	<!-- jQuery and jQuery UI (REQUIRED) -->
-	<script src="//code.jquery.com/jquery-1.12.4.min.js" type="text/javascript" charset="utf-8"></script>
-	<script src="//code.jquery.com/ui/1.12.0/jquery-ui.min.js" type="text/javascript" charset="utf-8"></script>
+	<!--[if lt IE 9]>
+	<script src="//code.jquery.com/jquery-1.12.4.min.js"></script>
+	<![endif]-->
+	<!--[if gte IE 9]><!-->
+	<script src="//code.jquery.com/jquery-3.1.1.min.js"></script>
+	<!--<![endif]-->
+	<script src="//code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 	
 	<!-- elfinder core -->
 	<script src="js/elFinder.js"></script>
