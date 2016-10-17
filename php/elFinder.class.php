@@ -227,6 +227,13 @@ class elFinder {
 	protected $uploadDebug = '';
 	
 	/**
+	 * Max allowed numbar of @var targets (0 - no limit)
+	 * 
+	 * @var integer
+	 */
+	public $maxTargets = 1000;
+	
+	/**
 	 * Errors from PHP
 	 *
 	 * @var array
@@ -302,18 +309,17 @@ class elFinder {
 	const ERROR_NETMOUNT          = 'errNetMount';
 	const ERROR_NETUNMOUNT        = 'errNetUnMount';
 	const ERROR_NETMOUNT_NO_DRIVER = 'errNetMountNoDriver';
-	const ERROR_NETMOUNT_FAILED       = 'errNetMountFailed';
-
-	const ERROR_SESSION_EXPIRES 	= 'errSessionExpires';
-
-	const ERROR_CREATING_TEMP_DIR 	= 'errCreatingTempDir';
-	const ERROR_FTP_DOWNLOAD_FILE 	= 'errFtpDownloadFile';
-	const ERROR_FTP_UPLOAD_FILE 	= 'errFtpUploadFile';
-	const ERROR_FTP_MKDIR 		= 'errFtpMkdir';
-	const ERROR_ARCHIVE_EXEC 	= 'errArchiveExec';
-	const ERROR_EXTRACT_EXEC 	= 'errExtractExec';
+	const ERROR_NETMOUNT_FAILED   = 'errNetMountFailed';
+	const ERROR_SESSION_EXPIRES   = 'errSessionExpires';
+	const ERROR_CREATING_TEMP_DIR = 'errCreatingTempDir';
+	const ERROR_FTP_DOWNLOAD_FILE = 'errFtpDownloadFile';
+	const ERROR_FTP_UPLOAD_FILE   = 'errFtpUploadFile';
+	const ERROR_FTP_MKDIR         = 'errFtpMkdir';
+	const ERROR_ARCHIVE_EXEC      = 'errArchiveExec';
+	const ERROR_EXTRACT_EXEC      = 'errExtractExec';
 	const ERROR_SEARCH_TIMEOUT    = 'errSearchTimeout';    // 'Timed out while searching "$1". Search result is partial.'
-	const ERROR_REAUTH_REQUIRE  = 'errReauthRequire';  // 'Re-authorization is required.'
+	const ERROR_REAUTH_REQUIRE    = 'errReauthRequire';  // 'Re-authorization is required.'
+	const ERROR_MAX_TARGTES       = 'errMaxTargets'; // 'Max number of selectable items is $1.'
 
 	/**
 	 * Constructor
@@ -371,6 +377,7 @@ class elFinder {
 		$this->timeout = (isset($opts['timeout']) ? $opts['timeout'] : 0);
 		$this->uploadTempPath = (isset($opts['uploadTempPath']) ? $opts['uploadTempPath'] : '');
 		$this->callbackWindowURL = (isset($opts['callbackWindowURL']) ? $opts['callbackWindowURL'] : '');
+		$this->maxTargets = (isset($opts['maxTargets']) ? intval($opts['maxTargets']) : $this->maxTargets);
 		elFinder::$commonTempPath = (isset($opts['commonTempPath']) ? $opts['commonTempPath'] : './.tmp');
 		if (!is_writable(elFinder::$commonTempPath)) {
 			elFinder::$commonTempPath = '';
@@ -1119,6 +1126,7 @@ class elFinder {
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');
 			$result['uplMaxFile'] = ini_get('max_file_uploads');
 			$result['netDrivers'] = array_keys(self::$netDrivers);
+			$result['maxTargets'] = $this->maxTargets;
 			if ($volume) {
 				$result['cwd']['root'] = $volume->root();
 			}
@@ -1194,6 +1202,8 @@ class elFinder {
 		$targets = $args['targets'];
 		
 		foreach ($targets as $target) {
+			elFinder::extendTimeLimit();
+			
 			if (($volume = $this->volume($target)) != false
 			&& (($tmb = $volume->tmb($target)) != false)) {
 				$result['images'][$target] = $tmb;
@@ -1490,6 +1500,8 @@ class elFinder {
 		$suffix  = empty($args['suffix']) ? 'copy' : $args['suffix'];
 		
 		foreach ($targets as $target) {
+			elFinder::extendTimeLimit();
+			
 			if (($volume = $this->volume($target)) == false
 			|| ($src = $volume->file($target)) == false) {
 				$result['warning'] = $this->error(self::ERROR_COPY, '#'.$target, self::ERROR_FILE_NOT_FOUND);
@@ -1519,6 +1531,8 @@ class elFinder {
 		$result  = array('removed' => array());
 		
 		foreach ($targets as $target) {
+			elFinder::extendTimeLimit();
+			
 			if (($volume = $this->volume($target)) == false) {
 				$result['warning'] = $this->error(self::ERROR_RM, '#'.$target, self::ERROR_FILE_NOT_FOUND);
 				return $result;
@@ -1542,7 +1556,7 @@ class elFinder {
 	* @param  resource $fp
 	* @return string or bool(false)
 	* @retval string contents
-	* @retval false  error
+	* @rettval false  error
 	* @author Naoki Sawada
 	**/
 	protected function get_remote_contents( &$url, $timeout = 30, $redirect_max = 5, $ua = 'Mozilla/5.0', $fp = null ) {
@@ -1881,6 +1895,8 @@ class elFinder {
 		$files = array();
 		$errors = array();
 		foreach($targets as $target) {
+			elFinder::extendTimeLimit();
+			
 			$file = $volume->chmod($target, $mode);
 			if ($file) {
 				$files = array_merge($files, is_array($file)? $file : array($file));
@@ -2363,6 +2379,8 @@ class elFinder {
 		}
 		
 		foreach ($targets as $target) {
+			elFinder::extendTimeLimit();
+			
 			if (($srcVolume = $this->volume($target)) == false) {
 				$result['warning'] = $this->error($error, '#'.$target, self::ERROR_FILE_NOT_FOUND);
 				break;
