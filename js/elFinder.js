@@ -2772,7 +2772,7 @@ window.elFinder = function(node, opts) {
 			});
 			if (unselects.length) {
 				self.trigger('unselectfiles', {files: unselects, inselect: true});
-				self.error(['errMaxTargets', self.maxTargets]);
+				self.toast({mode: 'warning', msg: self.i18n(['errMaxTargets', self.maxTargets])});
 			}
 		})
 		.error(function(e) { 
