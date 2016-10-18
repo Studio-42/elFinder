@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 62ddcea) (2016-10-18)
+ * Version 2.1.16 (2.1-src Nightly: 3f6c52a) (2016-10-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6127,7 +6127,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 62ddcea)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 3f6c52a)';
 
 
 
@@ -9692,7 +9692,6 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 					trigger();
 					selectCheckbox && selectAllCheckbox.data('pending', false);
-					cwd.addClass('elfinder-cwd-allselected');
 				});
 			},
 			
@@ -10958,14 +10957,14 @@ $.fn.elfindercwd = function(fm, options) {
 					
 					if (!selectLock) {
 						$this.removeClass(clSelected).children().removeClass(clHover).find('input:checkbox').prop('checked', false);
+						if (cwd.hasClass('elfinder-cwd-allselected')) {
+							selectCheckbox && selectAllCheckbox.children('input').prop('checked', false);
+							cwd.removeClass('elfinder-cwd-allselected');
+						}
 						ndx = $.inArray(id, selectedFiles);
 						if (ndx !== -1) {
 							lastSelect = void 0;
 							selectedFiles.splice(ndx, 1);
-							if (cwd.hasClass('elfinder-cwd-allselected')) {
-								selectCheckbox && selectAllCheckbox.children('input').prop('checked', false);
-								cwd.removeClass('elfinder-cwd-allselected');
-							}
 						}
 					}
 					
@@ -11454,10 +11453,16 @@ $.fn.elfindercwd = function(fm, options) {
 					add  = (event === evtSelect),
 					sels = add? selectedFiles.concat() : selectedFiles;
 					$.each(files, function(i, hash) {
-						var idx = $.inArray(hash, sels);
+						var idx = $.inArray(hash, sels),
+							all = cwd.hasClass('elfinder-cwd-allselected');
 						if (idx === -1) {
 							add && selectedFiles.push(hash);
 						} else {
+							if (all) {
+								selectCheckbox && selectAllCheckbox.children('input').prop('checked', false);
+								cwd.removeClass('elfinder-cwd-allselected');
+								all = false;
+							}
 							! add && selectedFiles.splice(idx, 1);
 						}
 					});
