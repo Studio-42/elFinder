@@ -2241,7 +2241,7 @@ window.elFinder = function(node, opts) {
 			},
 			dfd  = $.Deferred();
 		
-		delay = delay || 0;
+		delay = delay || 1;
 		busy(true);
 		
 		setTimeout(function() {
