@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 896eccf) (2016-10-18)
+ * Version 2.1.16 (2.1-src Nightly: c1129d8) (2016-10-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2231,26 +2231,34 @@ window.elFinder = function(node, opts) {
 	 * 
 	 * @param  Object  function
 	 * @param  Number  delay
+	 * @param  Object  options
 	 * @return Object  jQuery.Deferred
 	 */
-	this.lazy = function(func, delay) {
+	this.lazy = function(func, delay, opts) {
 		var busy = function(state) {
-				var cnt = node.data('lazycnt');
+				var cnt = node.data('lazycnt'),
+					repaint;
+				
 				if (state) {
+					repaint = node.data('lazyrepaint')? false : opts.repaint;
 					if (! cnt) {
 						node.data('lazycnt', 1)
-							.addClass('elfinder-processing')
-							.css('display'); // for repaint
+							.addClass('elfinder-processing');
 					} else {
 						node.data('lazycnt', ++cnt);
+					}
+					if (repaint) {
+						node.data('lazyrepaint', true).css('display'); // force repaint
 					}
 				} else {
 					if (cnt && cnt > 1) {
 						node.data('lazycnt', --cnt);
 					} else {
+						repaint = node.data('lazyrepaint');
 						node.data('lazycnt', 0)
-							.removeClass('elfinder-processing')
-							.css('display'); // for repaint;
+							.removeData('lazyrepaint')
+							.removeClass('elfinder-processing');
+						repaint && node.css('display'); // force repaint;
 						self.trigger('lazydone');
 					}
 				}
@@ -2258,6 +2266,7 @@ window.elFinder = function(node, opts) {
 			dfd  = $.Deferred();
 		
 		delay = delay || 0;
+		opts = opts || {};
 		busy(true);
 		
 		setTimeout(function() {
@@ -6129,7 +6138,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 896eccf)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: c1129d8)';
 
 
 
@@ -9694,7 +9703,7 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 					trigger();
 					selectCheckbox && selectAllCheckbox.data('pending', false);
-				});
+				}, 0, {repaint: true});
 			},
 			
 			/**
