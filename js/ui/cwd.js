@@ -398,7 +398,7 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 					trigger();
 					selectCheckbox && selectAllCheckbox.data('pending', false);
-				});
+				}, 0, {repaint: true});
 			},
 			
 			/**
