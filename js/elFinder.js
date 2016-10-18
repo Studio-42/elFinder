@@ -2224,8 +2224,9 @@ window.elFinder = function(node, opts) {
 				var cnt = node.data('lazycnt');
 				if (state) {
 					if (! cnt) {
-						node.data('lazycnt', 1);
-						node.addClass('elfinder-processing');
+						node.data('lazycnt', 1)
+							.addClass('elfinder-processing')
+							.css('display'); // for repaint
 					} else {
 						node.data('lazycnt', ++cnt);
 					}
@@ -2233,15 +2234,16 @@ window.elFinder = function(node, opts) {
 					if (cnt && cnt > 1) {
 						node.data('lazycnt', --cnt);
 					} else {
-						node.data('lazycnt', 0);
-						node.removeClass('elfinder-processing');
+						node.data('lazycnt', 0)
+							.removeClass('elfinder-processing')
+							.css('display'); // for repaint;
 						self.trigger('lazydone');
 					}
 				}
 			},
 			dfd  = $.Deferred();
 		
-		delay = delay || 1;
+		delay = delay || 0;
 		busy(true);
 		
 		setTimeout(function() {
