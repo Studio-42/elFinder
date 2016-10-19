@@ -1083,7 +1083,7 @@ window.elFinder = function(node, opts) {
 	 * @return Object
 	 */
 	this.file = function(hash) { 
-		return files[hash]; 
+		return hash? files[hash] : void(0); 
 	};
 	
 	/**
@@ -5407,7 +5407,7 @@ elFinder.prototype = {
 	 */
 	notify : function(opts) {
 		var type     = opts.type,
-			msg      = this.messages['ntf'+type] ? this.i18n('ntf'+type) : this.i18n('ntfsmth'),
+			msg      = this.i18n((typeof opts.msg !== 'undefined')? opts.msg : (this.messages['ntf'+type] ? 'ntf'+type : 'ntfsmth')),
 			ndialog  = this.ui.notify,
 			notify   = ndialog.children('.elfinder-notify-'+type),
 			button   = notify.children('div.elfinder-notify-cancel').children('button'),
@@ -5444,6 +5444,8 @@ elFinder.prototype = {
 					});
 				notify.children('div.elfinder-notify-cancel').append(button);
 			}
+		} else if (typeof opts.msg !== 'undefined') {
+			notify.children('span.elfinder-notify-msg').html(msg);
 		}
 
 		cnt = delta + parseInt(notify.data('cnt'));
@@ -6023,6 +6025,29 @@ elFinder.prototype = {
 			}
 		}
 		return res;
+	},
+	
+	/**
+	 * call chained sequence of async deferred functions
+	 * 
+	 * @param  Array   tasks async functions
+	 * @return Object  jQuery.Deferred
+	 */
+	sequence : function(tasks) {
+		var l = tasks.length,
+			chain = function(task, idx) {
+				++idx;
+				if (tasks[idx]) {
+					return chain(task.then(tasks[idx]), idx);
+				} else {
+					return task;
+				}
+			};
+		if (l > 1) {
+			return chain(tasks[0](), 0);
+		} else {
+			return tasks[0]();
+		}
 	},
 	
 	navHash2Id : function(hash) {

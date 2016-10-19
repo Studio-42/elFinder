@@ -11,24 +11,18 @@ elFinder.prototype.commands.download = function() {
 	var self   = this,
 		fm     = this.fm,
 		zipOn  = false,
+		mixed  = false,
 		filter = function(hashes, inExec) {
 			var czipdl = (fm.api > 2)? fm.getCommand('zipdl') : null,
-				mixed  = false,
-				croot  = '';
+				mixedCmd;
 			
-			if (czipdl !== null && fm.searchStatus.state > 1 && fm.searchStatus.target === '') {
-				croot = fm.root(hashes[0]);
-				$.each(hashes, function(i, h) {
-					if (mixed = (croot !== fm.root(h))) {
-						return false;
-					}
-				});
-			}
-			zipOn = (! mixed && czipdl !== null && fm.isCommandEnabled('zipdl', hashes[0]));
+			mixed = (czipdl !== null && fm.searchStatus.state > 1 && fm.searchStatus.mixed);
+			zipOn = (/*! mixed && */czipdl !== null && fm.isCommandEnabled('zipdl', hashes[0]));
 
 			if (mixed) {
+				mixedCmd = zipOn? 'zipdl' : 'download';
 				hashes = $.map(hashes, function(h) {
-					return fm.isCommandEnabled('download', h)? h : null;
+					return fm.isCommandEnabled(mixedCmd, h)? h : null;
 				});
 			} else {
 				if (!fm.isCommandEnabled('download', hashes[0])) {
@@ -170,87 +164,117 @@ elFinder.prototype.commands.download = function() {
 			dfrd    = $.Deferred(),
 			iframes = '',
 			cdata   = '',
-			i, url;
+			targets = {},
+			i, url,
+			linkdl  = false,
+			getTask = function(hashes) {
+				return function() {
+					var dfd = $.Deferred(),
+						root = fm.file(fm.root(hashes[0])),
+						volName = root? ' ('+(root.i18 || root.name)+')' : '';
+					fm.request({
+						data : {cmd : 'zipdl', targets : hashes},
+						notify : {type : 'zipdl', cnt : 1, hideCnt : true, msg : fm.i18n('ntfzipdl') + volName},
+						cancel : true,
+						preventDefault : true
+					}).done(function(e) {
+						var zipdl, dialog, btn = {}, dllink, form, iframe,
+							uniq = 'dlw' + (+new Date());
+						if (e.error) {
+							fm.error(e.error);
+							dfd.resolve();
+						} else if (e.zipdl) {
+							zipdl = e.zipdl;
+							if (linkdl || (!html5dl && fm.UA.Mobile)) {
+								url = fm.options.url + (fm.options.url.indexOf('?') === -1 ? '?' : '&')
+								+ 'cmd=zipdl&download=1';
+								$.each([hashes[0], zipdl.file, zipdl.name, zipdl.mime], function(key, val) {
+									url += '&targets%5B%5D='+encodeURIComponent(val);
+								});
+								$.each(fm.options.customData, function(key, val) {
+									url += '&'+encodeURIComponent(key)+'='+encodeURIComponent(val);
+								});
+								url += '&'+encodeURIComponent(zipdl.name);
+								dllink = $('<a/>')
+									.attr('href', url)
+									.attr('download', encodeURIComponent(zipdl.name))
+									.attr('target', '_blank')
+									.on('click', function() {
+										dfd.resolve();
+										dialog.elfinderdialog('destroy');
+									})
+									.append('<span class="elfinder-button-icon elfinder-button-icon-download"></span>'+fm.escape(zipdl.name));
+								btn[fm.i18n('btnCancel')] = function() {
+									dialog.elfinderdialog('destroy');
+								};
+								dialog = fm.dialog(dllink, {
+									title: fm.i18n('link'),
+									buttons: btn,
+									width: '200px',
+									destroyOnClose: true,
+									close: function() {
+										(dfd.state() !== 'resolved') && dfd.resolve();
+									}
+								});
+							} else {
+								form = $('<form action="'+fm.options.url+'" method="post" target="'+uniq+'" style="display:none"/>')
+								.append('<input type="hidden" name="cmd" value="zipdl"/>')
+								.append('<input type="hidden" name="download" value="1"/>');
+								$.each([hashes[0], zipdl.file, zipdl.name, zipdl.mime], function(key, val) {
+									form.append('<input type="hidden" name="targets[]" value="'+fm.escape(val)+'"/>');
+								});
+								$.each(fm.options.customData, function(key, val) {
+									form.append('<input type="hidden" name="'+key+'" value="'+fm.escape(val)+'"/>');
+								});
+								form.attr('target', uniq).appendTo('body');
+								iframe = $('<iframe style="display:none" name="'+uniq+'">')
+									.appendTo('body')
+									.ready(function() {
+										form.submit().remove();
+										dfd.resolve();
+										setTimeout(function() {
+											iframe.remove();
+										}, fm.UA.Firefox? 20000 : 1000); // give mozilla 20 sec file to be saved
+									});
+							}
+						}
+					}).fail(function(error) {
+						error && fm.error(error);
+						dfd.resolve();
+					});
+					return dfd.promise();
+				};
+			},
+			link, html5dl;
 			
 		if (!files.length) {
 			return dfrd.reject();
 		}
 		
-		var link    = $('<a>').hide().appendTo($('body')),
-			html5dl = (typeof link.get(0).download === 'string');
+		link = $('<a>').hide().appendTo($('body'));
+		html5dl = (typeof link.get(0).download === 'string');
 		
 		if (zipOn && (files.length > 1 || files[0].mime === 'directory')) {
-			dfrd = fm.request({
-				data : {cmd : 'zipdl', targets : hashes},
-				notify : {type : 'zipdl', cnt : 1, hideCnt : true, multi : true},
-				cancel : true,
-				preventDefault : true
-			}).done(function(e) {
-				var zipdl, dialog, btn = {}, dllink, form,
-					uniq = 'dlw' + (+new Date());
-				if (e.error) {
-					fm.error(e.error);
-					dfrd.reject();
-				} else if (e.zipdl) {
-					zipdl = e.zipdl;
-					if (!html5dl && fm.UA.Mobile) {
-						url = fm.options.url + (fm.options.url.indexOf('?') === -1 ? '?' : '&')
-						+ 'cmd=zipdl&download=1';
-						$.each([hashes[0], zipdl.file, zipdl.name, zipdl.mime], function(key, val) {
-							url += '&targets%5B%5D='+encodeURIComponent(val);
-						});
-						$.each(fm.options.customData, function(key, val) {
-							url += '&'+encodeURIComponent(key)+'='+encodeURIComponent(val);
-						});
-						url += '&'+encodeURIComponent(zipdl.name);
-						dllink = $('<a/>')
-							.attr('href', url)
-							.attr('download', encodeURIComponent(zipdl.name))
-							.attr('target', '_blank')
-							.on('click', function() {
-								fm.trigger('download', {files : files});
-								dfrd.resolve(hashes);
-								dialog.elfinderdialog('close');
-							})
-							.append('<span class="elfinder-button-icon elfinder-button-icon-download"></span>'+fm.escape(zipdl.name));
-						btn[fm.i18n('btnCancel')] = function() {
-							dialog.elfinderdialog('close');
-						};
-						dialog = fm.dialog(dllink, {
-							title: fm.i18n('link'),
-							buttons: btn,
-							width: '200px'
-						});
+			link.remove();
+			if (mixed) {
+				linkdl = fm.UA.Mobile;
+				targets = {};
+				$.each(files, function(i, f) {
+					var p = f.hash.split('_', 2);
+					if (! targets[p[0]]) {
+						targets[p[0]] = [ f.hash ];
 					} else {
-						form = $('<form action="'+fm.options.url+'" method="post" target="'+uniq+'" style="display:none"/>')
-						.append('<input type="hidden" name="cmd" value="zipdl"/>')
-						.append('<input type="hidden" name="download" value="1"/>');
-						$.each([hashes[0], zipdl.file, zipdl.name, zipdl.mime], function(key, val) {
-							form.append('<input type="hidden" name="targets[]" value="'+fm.escape(val)+'"/>');
-						});
-						$.each(fm.options.customData, function(key, val) {
-							form.append('<input type="hidden" name="'+key+'" value="'+fm.escape(val)+'"/>');
-						});
-						form.attr('target', uniq).appendTo('body');
-						iframes = $('<iframe style="display:none" name="'+uniq+'">')
-							.appendTo('body')
-							.ready(function() {
-								form.submit().remove();
-								fm.trigger('download', {files : files});
-								dfrd.resolve(hashes);
-								setTimeout(function() {
-									iframes.remove();
-								}, fm.UA.Firefox? 20000 : 1000); // give mozilla 20 sec file to be saved
-							});
+						targets[p[0]].push(f.hash);
 					}
+				});
+			} else {
+				targets = [ $.map(files, function(f) { return f.hash; }) ];
+			}
+			dfrd = fm.sequence($.map(targets, function(t) { return getTask(t); })).always(
+				function() {
+					fm.trigger('download', {files : files});
 				}
-			}).fail(function(error) {
-				error && fm.error(error);
-				dfrd.reject();
-			}).always(function() {
-				link.remove();
-			});
-			fm.trigger('download', {files : files});
+			);
 			return dfrd;
 		} else {
 			for (i = 0; i < files.length; i++) {
@@ -283,7 +307,7 @@ elFinder.prototype.commands.download = function() {
 					}, fm.UA.Firefox? (20000 + (10000 * i)) : 1000); // give mozilla 20 sec + 10 sec for each file to be saved
 				});
 			fm.trigger('download', {files : files});
-			return dfrd.resolve(hashes);
+			return dfrd.resolve();
 		}
 	};
 
