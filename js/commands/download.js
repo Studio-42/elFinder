@@ -14,16 +14,36 @@ elFinder.prototype.commands.download = function() {
 		mixed  = false,
 		filter = function(hashes, inExec) {
 			var czipdl = (fm.api > 2)? fm.getCommand('zipdl') : null,
-				mixedCmd;
+				volumeid, mixedCmd;
 			
-			mixed = (czipdl !== null && fm.searchStatus.state > 1 && fm.searchStatus.mixed);
-			zipOn = (/*! mixed && */czipdl !== null && fm.isCommandEnabled('zipdl', hashes[0]));
+			if (czipdl !== null) {
+				if (fm.searchStatus.state > 1) {
+					mixed = fm.searchStatus.mixed;
+				} else if (fm.leafRoots[fm.cwd().hash]) {
+					volumeid = fm.cwd().volumeid;
+					$.each(hashes, function(i, h) {
+						if (h.indexOf(volumeid) !== 0) {
+							mixed = true;
+							return false;
+						}
+					});
+				}
+				zipOn = (fm.isCommandEnabled('zipdl', hashes[0]));
+			}
 
 			if (mixed) {
-				mixedCmd = zipOn? 'zipdl' : 'download';
+				mixedCmd = czipdl? 'zipdl' : 'download';
 				hashes = $.map(hashes, function(h) {
-					return fm.isCommandEnabled(mixedCmd, h)? h : null;
+					var f = fm.file(h),
+						res = (! f || (! czipdl && f.mime === 'directory') || ! fm.isCommandEnabled(mixedCmd, h))? null : h;
+					if (f && inExec && ! res) {
+						$('#' + fm.cwdHash2Id(f.hash)).trigger('unselect');
+					}
+					return res;
 				});
+				if (! hashes.length) {
+					return [];
+				}
 			} else {
 				if (!fm.isCommandEnabled('download', hashes[0])) {
 					return [];
@@ -31,8 +51,11 @@ elFinder.prototype.commands.download = function() {
 			}
 			
 			return $.map(self.files(hashes), function(f) { 
-				inExec && ! f.read && $('#' + fm.cwdHash2Id(f.hash)).trigger('unselect');
-				return (! f.read || (! zipOn && f.mime == 'directory')) ? null : f;
+				var res = (! f.read || (! zipOn && f.mime == 'directory')) ? null : f;
+				if (inExec && ! res) {
+					$('#' + fm.cwdHash2Id(f.hash)).trigger('unselect');
+				}
+				return res;
 			});
 		};
 	
