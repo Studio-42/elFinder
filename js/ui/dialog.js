@@ -307,7 +307,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					} else {
 						setTimeout(function() {
 							// return focus to elfNode
-							elfNode.mousedown().click();
+							fm.enable();
 						}, 20);
 					}
 				})
