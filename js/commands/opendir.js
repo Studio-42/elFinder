@@ -31,22 +31,11 @@ elFinder.prototype.commands.opendir = function() {
 		}
 
 		hash = files[0].phash;
-		if (!fm.file(hash)) {
-			// parents check
-			pcheck = fm.request({
-				data   : {cmd  : 'parents', target : hash},
-				syncOnFail : false
-			});
-		}
-		// open folder
-		$.when(pcheck)
-		.done(function(data){
-			fm.trigger('searchend', { noupdate: true });
-			fm.request({
-				data   : {cmd  : 'open', target : hash},
-				notify : {type : 'open', cnt : 1, hideCnt : true},
-				syncOnFail : false
-			});
+		fm.trigger('searchend', { noupdate: true });
+		fm.request({
+			data   : {cmd  : 'open', target : hash},
+			notify : {type : 'open', cnt : 1, hideCnt : true},
+			syncOnFail : false
 		});
 		
 		return dfrd;
