@@ -29,7 +29,10 @@ elFinder.prototype.commands.netmount = function() {
 			dfrd = $.Deferred(),
 			o = self.options,
 			create = function() {
-				var inputs = {
+				var winFocus = function() {
+						inputs.protocol.trigger('change', 'winfocus');
+					},
+					inputs = {
 						protocol : $('<select/>').on('change', function(e, data){
 							var protocol = this.value;
 							content.find('.elfinder-netmount-tr').hide();
@@ -48,9 +51,13 @@ elFinder.prototype.commands.netmount = function() {
 						resizable      : false,
 						modal          : true,
 						destroyOnClose : true,
+						open           : function() {
+							$(window).on('focus.'+fm.namespace, winFocus);
+						},
 						close          : function() { 
 							//delete self.dialog; 
 							dfrd.state() == 'pending' && dfrd.reject();
+							$(window).off('focus.'+fm.namespace, winFocus);
 						},
 						buttons        : {}
 					},

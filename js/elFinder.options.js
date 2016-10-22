@@ -395,7 +395,7 @@ elFinder.prototype._options = {
 				select: function(fm, ev, data){
 					var f = this.inputs, oline = f.offline,
 						data = data || null;
-					if ($(f.host[0]).find('span.elfinder-info-spinner').length || data === 'reset') {
+					if ($(f.host[0]).find('span.elfinder-info-spinner').length || data === 'reset' || data === 'winfocus') {
 						if (oline.parent().children().length === 1) {
 							f.path.parent().prev().html(fm.i18n('folderId'));
 							oline.attr('title', fm.i18n('offlineAccess'));
