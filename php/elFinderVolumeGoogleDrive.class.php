@@ -565,28 +565,26 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 return;
             }
         }
+        // get root id
+        $res = $this->service->files->get('root', ['fields' => 'id']);
+        $root = $res->getId();
+
         $data = [];
         $opts = [
             'fields' => 'files(id, name, parents)',
             'q' => sprintf('trashed=false and mimeType="%s"', self::DIRMIME),
         ];
         $res = $this->query($opts);
-        $root = '';
-        $ids = [];
         foreach ($res as $raw) {
             if ($parents = $raw->getParents()) {
                 $id = $raw->getId();
                 $this->parents[$id] = $parents;
                 $this->names[$id] = $raw->getName();
                 foreach ($parents as $p) {
-                    $ids[$id] = true;
                     if (isset($data[$p])) {
                         $data[$p][] = $id;
                     } else {
                         $data[$p] = [$id];
-                    }
-                    if (!isset($ids[$p])) {
-                        $root = $p;
                     }
                 }
             }
