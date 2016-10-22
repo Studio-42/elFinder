@@ -511,7 +511,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     {
         $itemId = basename($path);
         if (!$this->names) {
-            $this->getDirectories('root');
+            $this->getDirectoryData();
         }
 
         return isset($this->names[$itemId]) ? $this->names[$itemId] : '';
