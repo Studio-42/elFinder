@@ -300,9 +300,11 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      */
     public function netunmount($netVolumes, $key)
     {
-        if ($tmbs = glob(rtrim($this->options['tmbPath'], '\\/').DIRECTORY_SEPARATOR.$this->tmbPrefix.'*.png')) {
-            foreach ($tmbs as $file) {
-                unlink($file);
+        if (!$this->options['useGoogleTmb']) {
+            if ($tmbs = glob(rtrim($this->options['tmbPath'], '\\/').DIRECTORY_SEPARATOR.$this->tmbPrefix.'*.png')) {
+                foreach ($tmbs as $file) {
+                    unlink($file);
+                }
             }
         }
 
