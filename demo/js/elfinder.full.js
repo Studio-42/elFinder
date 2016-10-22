@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 278d274) (2016-10-22)
+ * Version 2.1.16 (2.1-src Nightly: 4ead862) (2016-10-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6174,7 +6174,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 278d274)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 4ead862)';
 
 
 
@@ -6877,7 +6877,7 @@ elFinder.prototype._options = {
 				select: function(fm, ev, data){
 					var f = this.inputs, oline = f.offline,
 						data = data || null;
-					if ($(f.host[0]).find('span.elfinder-info-spinner').length || data === 'reset') {
+					if ($(f.host[0]).find('span.elfinder-info-spinner').length || data === 'reset' || data === 'winfocus') {
 						if (oline.parent().children().length === 1) {
 							f.path.parent().prev().html(fm.i18n('folderId'));
 							oline.attr('title', fm.i18n('offlineAccess'));
@@ -17403,7 +17403,10 @@ elFinder.prototype.commands.netmount = function() {
 			dfrd = $.Deferred(),
 			o = self.options,
 			create = function() {
-				var inputs = {
+				var winFocus = function() {
+						inputs.protocol.trigger('change', 'winfocus');
+					},
+					inputs = {
 						protocol : $('<select/>').on('change', function(e, data){
 							var protocol = this.value;
 							content.find('.elfinder-netmount-tr').hide();
@@ -17422,9 +17425,13 @@ elFinder.prototype.commands.netmount = function() {
 						resizable      : false,
 						modal          : true,
 						destroyOnClose : true,
+						open           : function() {
+							$(window).on('focus.'+fm.namespace, winFocus);
+						},
 						close          : function() { 
 							//delete self.dialog; 
 							dfrd.state() == 'pending' && dfrd.reject();
+							$(window).off('focus.'+fm.namespace, winFocus);
 						},
 						buttons        : {}
 					},
