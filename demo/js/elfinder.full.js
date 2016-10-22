@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: eb215a4) (2016-10-22)
+ * Version 2.1.16 (2.1-src Nightly: 55d2af8) (2016-10-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -133,6 +133,7 @@ window.elFinder = function(node, opts) {
 			uploadOverwrite : true,
 			uploadMaxSize : 0,
 			jpgQuality    : 100,
+			tmbCrop       : false,
 			tmb           : false // old API
 		},
 		
@@ -1272,11 +1273,21 @@ window.elFinder = function(node, opts) {
 	 * @return String
 	 */
 	this.tmb = function(file) {
-		var tmbUrl = (self.searchStatus.state && file.hash.indexOf(self.cwd().volumeid) !== 0)? self.option('tmbUrl', file.hash) : cwdOptions['tmbUrl'],
+		var tmbUrl, tmbCrop,
 			cls    = 'elfinder-cwd-bgurl',
 			url    = '';
 
 		if ($.isPlainObject(file)) {
+			if (self.searchStatus.state && file.hash.indexOf(self.cwd().volumeid) !== 0) {
+				tmbUrl = self.option('tmbUrl', file.hash);
+				tmbCrop = self.option('tmbCrop', file.hash);
+			} else {
+				tmbUrl = cwdOptions['tmbUrl'];
+				tmbCrop = cwdOptions['tmbCrop'];
+			}
+			if (tmbCrop) {
+				cls += ' elfinder-cwd-bgurl-crop';
+			}
 			if (tmbUrl === 'self' && file.mime.indexOf('image/') === 0) {
 				url = self.openUrl(file.hash);
 				cls += ' elfinder-cwd-bgself';
@@ -6163,7 +6174,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: eb215a4)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 55d2af8)';
 
 
 
