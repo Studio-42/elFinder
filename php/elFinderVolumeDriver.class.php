@@ -1387,7 +1387,8 @@ abstract class elFinderVolumeDriver {
 			'uiCmdMap'        => (isset($this->options['uiCmdMap']) && is_array($this->options['uiCmdMap']))? $this->options['uiCmdMap'] : array(),
 			'syncChkAsTs'     => intval($this->options['syncChkAsTs']),
 			'syncMinMs'       => intval($this->options['syncMinMs']),
-			'i18nFolderName'  => intval($this->options['i18nFolderName'])
+			'i18nFolderName'  => intval($this->options['i18nFolderName']),
+			'tmbCrop'         => intval($this->options['tmbCrop'])
 		);
 		if ($hash === null) {
 			// call from getRootStatExtra()
