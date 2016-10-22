@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: cb6d170) (2016-10-19)
+ * Version 2.1.16 (2.1-src Nightly: eb215a4) (2016-10-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6163,7 +6163,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: cb6d170)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: eb215a4)';
 
 
 
@@ -9002,6 +9002,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			
 			close = function() {
 				$(document).off('keydown.' + fm.namespace, keyEvts);
+				currentType = null;
 				
 				if (menu.is(':visible') || menu.children().length) {
 					menu.removeAttr('style').hide().empty().removeData('submenuKeep');
@@ -9033,6 +9034,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					cmdMap = {}, disabled = [], isCwd = (targets[0].indexOf(fm.cwd().volumeid, 0) === 0),
 					selcnt = 0;
 
+				currentType = type;
 				if (menu.data('cmdMaps')) {
 					$.each(menu.data('cmdMaps'), function(i, v){
 						if (targets[0].indexOf(i, 0) == 0) {
@@ -9225,6 +9227,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			},
 			
 			createFromRaw = function(raw) {
+				currentType = 'raw';
 				$.each(raw, function(i, data) {
 					var node;
 					
@@ -9241,7 +9244,9 @@ $.fn.elfindercontextmenu = function(fm) {
 					}
 				});
 				nodes = menu.children('div.'+cmItem);
-			};
+			},
+			
+			currentType = null;
 		
 		fm.one('load', function() {
 			base = fm.getUI();
@@ -9276,10 +9281,9 @@ $.fn.elfindercontextmenu = function(fm) {
 				}
 			})
 			.one('destroy', function() { menu.remove(); })
-			.bind('disable select', function(){
-				// 'mouseEvInternal' for Firefox's bug (maybe)
-				! menu.data('mouseEvInternal') && close();
-				menu.data('mouseEvInternal', false);
+			.bind('disable', close)
+			.bind('select', function(){
+				(currentType === 'files') && close();
 			})
 			.getUI().click(close);
 		})
@@ -11904,7 +11908,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					} else {
 						setTimeout(function() {
 							// return focus to elfNode
-							elfNode.mousedown().click();
+							fm.enable();
 						}, 20);
 					}
 				})
@@ -15567,13 +15571,7 @@ elFinder.prototype.commands.download = function() {
 						.attr({href: link, target: '_blank', title: fm.i18n('link')})
 						.text(file.name)
 						.on('mousedown click touchstart touchmove touchend contextmenu', function(e){
-							var cm = fm.getUI('contextmenu');
 							e.stopPropagation();
-							// 'mouseEvInternal' for Firefox's bug (maybe)
-							cm.data('mouseEvInternal', true);
-							setTimeout(function(){
-								cm.data('mouseEvInternal', false);
-							}, 500);
 						})
 						.on('dragstart', function(e) {
 							var dt = e.dataTransfer || e.originalEvent.dataTransfer || null;
@@ -16782,7 +16780,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				debugUL.after(target);
 				
 				debugDIV.tabs('refresh');
-				debugUL.find('a:first').click();
+				debugUL.find('a:first').on('click', function(e) {e.stopPropagation();}).click();
 			}
 		},
 		content = '',
@@ -17843,22 +17841,11 @@ elFinder.prototype.commands.opendir = function() {
 		}
 
 		hash = files[0].phash;
-		if (!fm.file(hash)) {
-			// parents check
-			pcheck = fm.request({
-				data   : {cmd  : 'parents', target : hash},
-				syncOnFail : false
-			});
-		}
-		// open folder
-		$.when(pcheck)
-		.done(function(data){
-			fm.trigger('searchend', { noupdate: true });
-			fm.request({
-				data   : {cmd  : 'open', target : hash},
-				notify : {type : 'open', cnt : 1, hideCnt : true},
-				syncOnFail : false
-			});
+		fm.trigger('searchend', { noupdate: true });
+		fm.request({
+			data   : {cmd  : 'open', target : hash},
+			notify : {type : 'open', cnt : 1, hideCnt : true},
+			syncOnFail : false
 		});
 		
 		return dfrd;
