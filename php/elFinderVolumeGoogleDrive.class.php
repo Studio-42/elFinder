@@ -28,21 +28,21 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     protected $service = null;
 
     /**
-     * Cache of parents of each directories
+     * Cache of parents of each directories.
      * 
      * @var array
      */
     protected $parents = [];
 
-     /**
-     * Cache of chiled directories of each directories
+    /**
+     * Cache of chiled directories of each directories.
      * 
      * @var array
      */
     protected $directories = null;
 
-   /**
-     * Cache of itemID => name of each items
+    /**
+     * Cache of itemID => name of each items.
      * 
      * @var array
      */
@@ -429,6 +429,10 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
         $this->disabled[] = 'archive';
         $this->disabled[] = 'extract';
+
+        if ($this->isMyReload()) {
+            $this->getDirectoryData(false);
+        }
     }
 
     /**
@@ -543,96 +547,114 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     }
 
     /**
-     * Make cache of $parents, $names and $directories
+     * Make cache of $parents, $names and $directories.
      * 
+     * @param string $usecache
      */
-    protected function getDirectoryData()
+    protected function getDirectoryData($usecache = true)
     {
-    	$data = [];
-    	$opts = [
-    			'fields' => 'files(id, name, parents)',
-    			'q' => sprintf('trashed=false and mimeType="%s"', self::DIRMIME),
-    	];
-    	$res = $this->query($opts);
-    	$root = '';
-    	$ids = [];
-    	foreach ($res as $raw) {
-    		if ($parents = $raw->getParents()) {
-    			$id = $raw->getId();
-    			$this->parents[$id] = $parents;
-    			$this->names[$id] = $raw->getName();
-    			foreach ($parents as $p) {
-    				$ids[$id] = true;
-    				if (isset($data[$p])) {
-    					$data[$p][] = $id;
-    				} else {
-    					$data[$p] = [$id];
-    				}
-    				if (!isset($ids[$p])) {
-    					$root = $p;
-    				}
-    			}
-    		}
-    	}
-    	$data['root'] = $data[$root];
-    	$this->directories = $data;
+        debug($usecache);
+        if ($usecache) {
+            $cache = $this->session->get('GoogleDriveDirectoryData', []);
+            if ($cache) {
+                $this->parents = $cache['parents'];
+                $this->names = $cache['names'];
+                $this->directories = $cache['directories'];
+
+                return;
+            }
+        }
+        $data = [];
+        $opts = [
+            'fields' => 'files(id, name, parents)',
+            'q' => sprintf('trashed=false and mimeType="%s"', self::DIRMIME),
+        ];
+        $res = $this->query($opts);
+        $root = '';
+        $ids = [];
+        foreach ($res as $raw) {
+            if ($parents = $raw->getParents()) {
+                $id = $raw->getId();
+                $this->parents[$id] = $parents;
+                $this->names[$id] = $raw->getName();
+                foreach ($parents as $p) {
+                    $ids[$id] = true;
+                    if (isset($data[$p])) {
+                        $data[$p][] = $id;
+                    } else {
+                        $data[$p] = [$id];
+                    }
+                    if (!isset($ids[$p])) {
+                        $root = $p;
+                    }
+                }
+            }
+        }
+        $data['root'] = $data[$root];
+        $this->directories = $data;
+        $this->session->set('GoogleDriveDirectoryData', [
+            'parents' => $this->parents,
+            'names' => $this->names,
+            'directories' => $this->directories,
+        ]);
     }
-    
+
     /**
-     * Get descendants directories
+     * Get descendants directories.
      * 
      * @param string $itemId
+     *
      * @return array
      */
     protected function getDirectories($itemId)
     {
-    	$ret = [];
-    	if ($this->directories === null) {
-    		$this->getDirectoryData();
-    	}
-    	$data = $this->directories;
-    	if (isset($data[$itemId])) {
-    		$ret = $data[$itemId];
-    		foreach ($data[$itemId] as $cid) {
-    			$ret = array_merge($ret, $this->getDirectories($cid));
-    		}
-    	}
-    
-    	return $ret;
+        $ret = [];
+        if ($this->directories === null) {
+            $this->getDirectoryData();
+        }
+        $data = $this->directories;
+        if (isset($data[$itemId])) {
+            $ret = $data[$itemId];
+            foreach ($data[$itemId] as $cid) {
+                $ret = array_merge($ret, $this->getDirectories($cid));
+            }
+        }
+
+        return $ret;
     }
-    
+
     /**
-     * Get ID based path from item ID
+     * Get ID based path from item ID.
      * 
      * @param string $path
      */
     protected function getMountPaths($id)
     {
-    	$root = false;
-    	if (!$this->parents) {
-    		$this->getDirectoryData();
-    	}
-    	list($pid) = explode('/', $id, 2);
-    	$path = $id;
-    	if ('/'.$pid === $this->root) {
-    		$root = true;
-    	} elseif (!isset($this->parents[$pid])) {
-    		$root = true;
-    		$path = ltrim(substr($path, strlen($pid)), '/');
-    	}
-    	$res = [];
-    	if ($root) {
-    		if ($this->root === '/' || strpos('/'.$path, $this->root) === 0) {
-    			$res = [(strpos($path, '/') === false) ? '/' : ('/'.$path)];
-    		}
-    	} else {
-    		foreach ($this->parents[$pid] as $p) {
-    			$_p = $p.'/'.$path;
-    			$res = array_merge($res, $this->getMountPaths($_p));
-    		}
-    	}
-    
-    	return $res;
+        $root = false;
+        if ($this->directories === null) {
+            $this->getDirectoryData();
+        }
+        list($pid) = explode('/', $id, 2);
+        $path = $id;
+        if ('/'.$pid === $this->root) {
+            $root = true;
+        } elseif (!isset($this->parents[$pid])) {
+            $root = true;
+            $path = ltrim(substr($path, strlen($pid)), '/');
+        }
+        $res = [];
+        if ($root) {
+            if ($this->root === '/' || strpos('/'.$path, $this->root) === 0) {
+                $res = [(strpos($path, '/') === false) ? '/' : ('/'.$path)];
+            }
+        } else {
+            foreach ($this->parents[$pid] as $p) {
+                $_p = $p.'/'.$path;
+                $res = array_merge($res, $this->getMountPaths($_p));
+            }
+        }
+
+        return $res;
     }
 
     /*********************************************************************/
@@ -1419,12 +1441,12 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
             basename(dirname($path)) == '' ? $path = '/'.$createdFile['id'] : $path = dirname($path).'/'.$createdFile['id'];
 
+            $this->getDirectoryData(false);
+
             return $path;
         } catch (Exception $e) {
             return $this->setError('GoogleDrive error: '.$e->getMessage());
         }
-
-        return $path;
     }
 
     /**
@@ -1562,7 +1584,10 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function _rmdir($path)
     {
-        return $this->_unlink($path);
+        $res = $this->_unlink($path);
+        $res && $this->getDirectoryData(false);
+
+        return $res;
     }
 
     /**
