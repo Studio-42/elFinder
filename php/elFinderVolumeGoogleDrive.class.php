@@ -60,14 +60,14 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      *
      * @var string
      */
-    const FETCHFIELDS_LIST = 'files(id,name,mimeType,modifiedTime,parents,permissions,size,imageMediaMetadata(height,width),webContentLink),nextPageToken';
+    const FETCHFIELDS_LIST = 'files(id,name,mimeType,modifiedTime,parents,permissions,size,imageMediaMetadata(height,width),thumbnailLink,webContentLink),nextPageToken';
 
     /**
      * Fetch fields for get.
      *
      * @var string
      */
-    const FETCHFIELDS_GET = 'id,name,mimeType,modifiedTime,parents,permissions,size,imageMediaMetadata(height,width),webContentLink,webViewLink';
+    const FETCHFIELDS_GET = 'id,name,mimeType,modifiedTime,parents,permissions,size,imageMediaMetadata(height,width),thumbnailLink,webContentLink,webViewLink';
 
     /**
      * Directory for tmp files
@@ -109,9 +109,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             'googleApiClient' => '',
             'path' => '/',
             'separator' => '/',
-            'tmbPath' => '',
-            'tmbURL' => '',
-            'tmpPath' => '',
+            'useGoogleTmb' => true,
             'acceptedName' => '#^[^/\\?*:|"<>]*[^./\\?*:|"<>]$#',
             'rootCssClass' => 'elfinder-navbar-root-googledrive',
         ];
@@ -359,7 +357,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 return $this->setError('Class Google_Client not found.');
             }
 
-            $client = new Google_Client();
+            $client = new \Google_Client();
 
             try {
                 $client->setAccessToken($this->options['access_token']);
@@ -370,7 +368,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 return $this->setError($e->getMessage());
             }
             try {
-                $this->service = new Google_Service_Drive($client);
+                $this->service = new \Google_Service_Drive($client);
             } catch (Google_Service_Exception $e) {
                 return $this->setError($e->getMessage());
             }
@@ -414,6 +412,10 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
         // 'lsPlSleep' minmum 10 sec
         $this->options['lsPlSleep'] = max(10, $this->options['lsPlSleep']);
+
+        if ($this->options['useGoogleTmb']) {
+            $this->options['tmbURL'] = 'https://';
+        }
 
         return true;
     }
@@ -489,7 +491,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 $refresh_token = $client->fetchAccessTokenWithRefreshToken();
                 $client->setAccessToken($refresh_token);
                 $this->options['access_token'] = $refresh_token;
-                $this->service = new Google_Service_Drive($client);
+                $this->service = new \Google_Service_Drive($client);
             }
         } catch (Exception $e) {
             return $e->getMessage();
@@ -553,7 +555,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      */
     protected function getDirectoryData($usecache = true)
     {
-        debug($usecache);
         if ($usecache) {
             $cache = $this->session->get('GoogleDriveDirectoryData', []);
             if ($cache) {
@@ -692,6 +693,13 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
         if ($raw['mimeType'] === self::DIRMIME) {
             $stat['dirs'] = (int) $this->_subdirs($stat['iid']);
+        } elseif ($size = $raw->getImageMediaMetadata()) {
+            $stat['width'] = $size['width'];
+            $stat['height'] = $size['height'];
+        }
+
+        if ($this->options['useGoogleTmb'] && isset($raw['thumbnailLink'])) {
+            $stat['tmb'] = substr($raw['thumbnailLink'], 8); // remove "https://"
         }
 
         if ($permissions = $raw->getPermissions()) {
@@ -703,11 +711,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                     $stat['url'] = '1';
                 }
             }
-        }
-
-        if ($raw['mimeType'] !== self::DIRMIME) {
-            isset($raw->getImageMediaMetadata()['width']) ? $stat['width'] = $raw->getImageMediaMetadata()['width'] : $stat['width'] = 0;
-            isset($raw->getImageMediaMetadata()['height']) ? $stat['height'] = $raw->getImageMediaMetadata()['height'] : $stat['height'] = 0;
         }
 
         return $stat;
@@ -992,7 +995,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      */
     protected function getThumbnail($path)
     {
-        //$files = new Google_Service_Drive_DriveFile();                        
         $itemId = basename($path);
 
         try {
@@ -1030,7 +1032,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 }
             }
             try {
-                $permission = new Google_Service_Drive_Permission([
+                $permission = new \Google_Service_Drive_Permission([
                     'type' => 'anyone',
                     'role' => 'reader',
                     'withLink' => true,
@@ -1358,20 +1360,15 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     {
         if (($mode == 'rb' || $mode == 'r')) {
             try {
-                //$files = new Google_Service_Drive_DriveFile();                        
                 $itemId = basename($path);
 
                 $contents = $this->service->files->get($itemId, [
-                    //'fields' => 'id,webContentLink',
                     'alt' => 'media',
                 ]);
 
                 $contents = $contents->getBody()->detach();
                 rewind($contents);
-                //$fp = tmpfile();
-                //fputs($fp , $contents);
-                //while(trim(fgets($fp)) !== ''){};
-                //rewind($fp);              
+
                 return $contents;
             } catch (Exception $e) {
                 return false;
@@ -1430,7 +1427,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         basename(dirname($path)) == '' ? $parentId = 'root' : $parentId = basename(dirname($path));
 
         try {
-            $files = new Google_Service_Drive_DriveFile();
+            $files = new \Google_Service_Drive_DriveFile();
 
             $files->setName($name);
             $files->setMimeType(self::DIRMIME);
@@ -1495,7 +1492,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $path = $this->_normpath($targetDir.'/'.$name);
 
         try {
-            $files = new Google_Service_Drive_DriveFile();
+            $files = new \Google_Service_Drive_DriveFile();
             $files->setName($name);
 
             //Set the Parent id         
@@ -1530,10 +1527,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $target = $this->_normpath($targetDir.'/'.basename($source));
         try {
             //moving and renaming a file or directory
-            $files = new Google_Service_Drive_DriveFile();
+            $files = new \Google_Service_Drive_DriveFile();
             $files->setName($name);
-            //$mimeType = parent::$mimetypes[pathinfo($name, PATHINFO_EXTENSION)];
-            //$files->setMimeType($mimeType);
 
             //Set new Parent and remove old parent          
             $targetDir == '/' || $targetDir == 'root' ? $addParents = 'root' : $addParents = basename($targetDir);
@@ -1561,7 +1556,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     protected function _unlink($path)
     {
         try {
-            $files = new Google_Service_Drive_DriveFile();
+            $files = new \Google_Service_Drive_DriveFile();
             $files->setTrashed(true);
 
             $opts = ['removeParents' => basename(dirname($path))];
@@ -1628,7 +1623,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         }
 
         try {
-            $files = new Google_Service_Drive_DriveFile();
+            $files = new \Google_Service_Drive_DriveFile();
 
             if ($res) {
                 //Update a file
@@ -1694,7 +1689,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $contents = '';
 
         try {
-            //$files = new Google_Service_Drive_DriveFile();                        
             $itemId = basename($path);
 
             $contents = $this->service->files->get($itemId, [
