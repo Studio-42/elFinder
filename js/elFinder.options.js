@@ -395,7 +395,12 @@ elFinder.prototype._options = {
 				select: function(fm, ev, data){
 					var f = this.inputs, oline = f.offline, f0 = $(f.host[0]),
 						data = data || null;
-					if (f0.find('span.elfinder-info-spinner').length || data === 'reset' || (data === 'winfocus' && ! f0.data('inrequest') && ! f0.siblings('span.elfinder-button-icon-reload').length)) {
+					if (! f0.data('inrequest')
+							&& (f0.find('span.elfinder-info-spinner').length
+								|| data === 'reset'
+								|| (data === 'winfocus' && ! f0.siblings('span.elfinder-button-icon-reload').length))
+								)
+					{
 						if (oline.parent().children().length === 1) {
 							f.path.parent().prev().html(fm.i18n('folderId'));
 							oline.attr('title', fm.i18n('offlineAccess'));
