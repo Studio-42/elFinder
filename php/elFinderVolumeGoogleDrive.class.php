@@ -307,6 +307,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 }
             }
         }
+        $this->session->remove('GoogleDriveDirectoryData'.$this->id);
 
         return true;
     }
@@ -558,7 +559,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     protected function getDirectoryData($usecache = true)
     {
         if ($usecache) {
-            $cache = $this->session->get('GoogleDriveDirectoryData', []);
+            $cache = $this->session->get('GoogleDriveDirectoryData'.$this->id, []);
             if ($cache) {
                 $this->parents = $cache['parents'];
                 $this->names = $cache['names'];
@@ -593,7 +594,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         }
         $data['root'] = $data[$root];
         $this->directories = $data;
-        $this->session->set('GoogleDriveDirectoryData', [
+        $this->session->set('GoogleDriveDirectoryData'.$this->id, [
             'parents' => $this->parents,
             'names' => $this->names,
             'directories' => $this->directories,
@@ -690,6 +691,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                               ($raw['mimeType'] == 'image/bmp' ? 'image/x-ms-bmp' :  $raw['mimeType']);
         $stat['size'] = $raw['mimeType'] == self::DIRMIME ? 0 : (int) $raw['size'];
         $stat['ts'] = isset($raw['modifiedTime']) ? strtotime($raw['modifiedTime']) : $_SERVER['REQUEST_TIME'];
+        $stat['locked'] = false;
 
         if ($raw['mimeType'] === self::DIRMIME) {
             $stat['dirs'] = (int) $this->_subdirs($stat['iid']);
@@ -698,8 +700,12 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $stat['height'] = $size['height'];
         }
 
-        if ($this->options['useGoogleTmb'] && isset($raw['thumbnailLink'])) {
-            $stat['tmb'] = substr($raw['thumbnailLink'], 8); // remove "https://"
+        if ($this->options['useGoogleTmb']) {
+            if (isset($raw['thumbnailLink'])) {
+                $stat['tmb'] = substr($raw['thumbnailLink'], 8); // remove "https://"
+            } else {
+                $stat['tmb'] = '';
+            }
         }
 
         if ($permissions = $raw->getPermissions()) {
@@ -792,24 +798,28 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
         $res = $this->query($opts);
 
+        $timeout = $this->options['searchTimeout'] ? $this->searchStart + $this->options['searchTimeout'] : 0;
         foreach ($res as $raw) {
-            $timeout = $this->options['searchTimeout'] ? $this->searchStart + $this->options['searchTimeout'] : 0;
-
             if ($timeout && $timeout < time()) {
-                $this->setError(elFinder::ERROR_SEARCH_TIMEOUT, $this->path($this->encode($path)));
+                $this->setError(elFinder::ERROR_SEARCH_TIMEOUT, $this->_path($path));
                 break;
             }
             if ($stat = $this->parseRaw($raw)) {
-                $paths = $this->getMountPaths($raw->getParents()[0]);
-                foreach ($paths as $path) {
-                    $path = ($path === '') ? '/' : (rtrim($path, '/') . '/');
-                    if (!isset($this->cache[$path.$raw->id])) {
-                        $stat = $this->updateCache($path.$raw->id, $stat);
-                    }
-                    $stat = $this->stat($path.$raw->id);
-                    $stat['path'] = $this->_path($path).$stat['name'];
-                    if (empty($stat['hidden'])) {
-                        $result[] = $stat;
+                if ($parents = $raw->getParents()) {
+                    foreach ($parents as $parent) {
+                        $paths = $this->getMountPaths($parent);
+                        foreach ($paths as $path) {
+                            $path = ($path === '') ? '/' : (rtrim($path, '/').'/');
+                            if (!isset($this->cache[$path.$raw->id])) {
+                                $stat = $this->updateCache($path.$raw->id, $stat);
+                            } else {
+                                $stat = $this->cache[$path.$raw->id];
+                            }
+                            if (empty($stat['hidden'])) {
+                                $stat['path'] = $this->_path($path).$stat['name'];
+                                $result[] = $stat;
+                            }
+                        }
                     }
                 }
             }
