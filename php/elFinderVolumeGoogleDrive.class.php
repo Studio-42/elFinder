@@ -776,7 +776,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $tmp = [];
         if (!$mimes) {
             foreach (explode(' ', $q) as $_v) {
-                $tmp[] = 'name contains \''.str_replace('\'', '\\\'', $_v).'\'';
+                $tmp[] = 'fullText contains \''.str_replace('\'', '\\\'', $_v).'\'';
             }
             $query .= ' and '.implode(' and ', $tmp);
         } else {
@@ -802,7 +802,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             if ($stat = $this->parseRaw($raw)) {
                 $paths = $this->getMountPaths($raw->getParents()[0]);
                 foreach ($paths as $path) {
-                    $path = ($path === '') ? '/' : ($path.'/');
+                    $path = ($path === '') ? '/' : (rtrim($path, '/') . '/');
                     if (!isset($this->cache[$path.$raw->id])) {
                         $stat = $this->updateCache($path.$raw->id, $stat);
                     }
