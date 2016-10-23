@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: e5ce47d) (2016-10-23)
+ * Version 2.1.16 (2.1-src Nightly: 6516038) (2016-10-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -432,6 +432,14 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 
 .elfinder-help-debug dd span {
   /*font-size: 1.2em;*/
+}
+
+/********************** COMMAND "INFO" ****************************/
+.elfinder-info-title .elfinder-cwd-bgurl:after {
+	left: -28px;
+}
+.elfinder-info-title .elfinder-cwd-icon-video:after {
+	left: -7px;
 }
 
 /********************** COMMAND "UPLOAD" ****************************/
@@ -1041,9 +1049,16 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	background-size: auto !important;
 	opacity: .8;
 	filter: Alpha(Opacity=60);
+	-webkit-transform-origin: 54px -24px;
+	-webkit-transform: scale(.6);
 	-moz-transform-origin: 54px -24px;
 	-moz-transform: scale(.6);
-	zoom: 0.6;
+	-ms-transform-origin: 54px -24px;
+	-ms-transform: scale(.6);
+	-o-transform-origin: 54px -24px;
+	-o-transform: scale(.6);
+	transform-origin: 54px -24px;
+	transform: scale(.6);
 }
 /* thumbnail image overlay none */
 .elfinder-cwd-icon-image:after {
@@ -1056,8 +1071,11 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	height: 25px;
 	width: 22px;
 	background-position: 0px -373px;
+	-webkit-transform: scale(1);
 	-moz-transform: scale(1);
-	zoom: 1;
+	-ms-transform: scale(1);
+	-o-transform: scale(1);
+	transform: scale(1);
 }
 
 /* "opened folder" icon on dragover */
