@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 1de2729) (2016-10-23)
+ * Version 2.1.16 (2.1-src Nightly: e5ce47d) (2016-10-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6174,7 +6174,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 1de2729)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: e5ce47d)';
 
 
 
@@ -18546,7 +18546,7 @@ elFinder.prototype.commands.places = function() {
 				tpl     = '<div class="elfinder-quicklook-info-data">{value}</div>',
 				tmb;
 
-			if (file && self.window.data('hash') !== file.hash) {
+			if (file && (e.forceUpdate || self.window.data('hash') !== file.hash)) {
 				!file.read && e.stopImmediatePropagation();
 				self.window.data('hash', file.hash);
 				self.preview.off('changesize').trigger('change').children().remove();
@@ -19343,19 +19343,24 @@ elFinder.prototype.commands.quicklook.plugins = [
 				if (file.url == '1') {
 					$('<div class="elfinder-quicklook-info-data"><button class="elfinder-info-button">'+fm.i18n('getLink')+'</button></div>').appendTo(ql.info.find('.elfinder-quicklook-info'))
 					.on('click', function() {
-						$(this).html('<span class="elfinder-info-spinner">');
+						var self = $(this);
+						self.html('<span class="elfinder-info-spinner">');
 						fm.request({
 							data : {cmd : 'url', target : file.hash},
 							preventDefault : true
 						})
 						.always(function() {
-							$(this).html('');
+							self.html('');
 						})
 						.done(function(data) {
 							var rfile = fm.file(file.hash);
-							ql.value.url = rfile.url = data.url || '';
-							if (ql.value.url) {
-								preview.trigger($.Event('update', {file : ql.value}));
+							file.url = rfile.url = data.url || '';
+							if (file.url) {
+								preview.trigger({
+									type: 'update',
+									file: file,
+									forceUpdate: true
+								});
 							}
 						});
 					});
