@@ -395,20 +395,22 @@ elFinder.prototype._options = {
 				select: function(fm, ev, data){
 					var f = this.inputs, oline = f.offline, f0 = $(f.host[0]),
 						data = data || null;
-					if (f0.find('span.elfinder-info-spinner').length || data === 'reset' || (data === 'winfocus' && ! f0.hasClass('elfinder-info-spinner') && ! f0.siblings('span.elfinder-button-icon-reload').length)) {
+					if (f0.find('span.elfinder-info-spinner').length || data === 'reset' || (data === 'winfocus' && ! f0.data('inrequest') && ! f0.siblings('span.elfinder-button-icon-reload').length)) {
 						if (oline.parent().children().length === 1) {
 							f.path.parent().prev().html(fm.i18n('folderId'));
 							oline.attr('title', fm.i18n('offlineAccess'));
 							oline.uniqueId().after($('<label/>').attr('for', oline.attr('id')).html(' '+fm.i18n('offlineAccess')));
 						}
-						f0.empty().addClass('elfinder-info-spinner')
+						f0.data('inrequest', true).empty().addClass('elfinder-info-spinner')
 							.parent().find('span.elfinder-button-icon').remove();
 						fm.request({
 							data : {cmd : 'netmount', protocol: 'googledrive', host: 'google.com', user: 'init', options: {id: fm.id, offline: oline.prop('checked')? 1:0, pass: f.host[1].value}},
 							preventDefault : true
 						}).done(function(data){
 							f0.removeClass("elfinder-info-spinner").html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1,'Google.com');}));
-						}).fail(function(){});
+						}).always(function(){
+							f0.removeData('inrequest');
+						});
 					} else {
 						oline.parent().parent()[f.user.val()? 'hide':'show']();
 					}
