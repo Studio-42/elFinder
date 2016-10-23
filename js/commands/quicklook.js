@@ -292,7 +292,7 @@
 				tpl     = '<div class="elfinder-quicklook-info-data">{value}</div>',
 				tmb;
 
-			if (file && self.window.data('hash') !== file.hash) {
+			if (file && (e.forceUpdate || self.window.data('hash') !== file.hash)) {
 				!file.read && e.stopImmediatePropagation();
 				self.window.data('hash', file.hash);
 				self.preview.off('changesize').trigger('change').children().remove();
