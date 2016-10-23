@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 2a4795d) (2016-10-23)
+ * Version 2.1.16 (2.1-src Nightly: 036b6a2) (2016-10-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6174,7 +6174,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 2a4795d)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 036b6a2)';
 
 
 
@@ -6890,8 +6890,6 @@ elFinder.prototype._options = {
 							preventDefault : true
 						}).done(function(data){
 							f0.removeClass("elfinder-info-spinner").html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1,'Google.com');}));
-						}).always(function(){
-							f0.removeData('inrequest');
 						});
 					} else {
 						oline.parent().parent()[f.user.val()? 'hide':'show']();
@@ -6932,9 +6930,11 @@ elFinder.prototype._options = {
 						f.pass.val('done');
 						f.offline.parent().parent().hide();
 					}
+					f0.removeData('inrequest');
 				},
 				fail: function(fm, err){
 					this.protocol.trigger('change', 'reset');
+					f0.removeData('inrequest');
 				}
 			}
 		},
