@@ -568,9 +568,13 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 return;
             }
         }
-        // get root id
-        $res = $this->service->files->get('root', ['fields' => 'id']);
-        $root = $res->getId();
+
+        $root = '';
+        if ($this->root === '/') {
+            // get root id
+            $res = $this->service->files->get('root', ['fields' => 'id']);
+            $root = $res->getId();
+        }
 
         $data = [];
         $opts = [
@@ -592,7 +596,9 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 }
             }
         }
-        $data['root'] = $data[$root];
+        if ($root) {
+            $data['root'] = $data[$root];
+        }
         $this->directories = $data;
         $this->session->set('GoogleDriveDirectoryData'.$this->id, [
             'parents' => $this->parents,
@@ -777,8 +783,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $query = '';
 
         if ($itemId !== 'root') {
-	        $dirs = array_merge([$itemId], $this->getDirectories($itemId));
-	        $query = '(\''.implode('\' in parents or \'', $dirs).'\' in parents)';
+            $dirs = array_merge([$itemId], $this->getDirectories($itemId));
+            $query = '(\''.implode('\' in parents or \'', $dirs).'\' in parents)';
         }
 
         $tmp = [];
@@ -786,12 +792,12 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             foreach (explode(' ', $q) as $_v) {
                 $tmp[] = 'fullText contains \''.str_replace('\'', '\\\'', $_v).'\'';
             }
-            $query .= ($query? ' and ' : '').implode(' and ', $tmp);
+            $query .= ($query ? ' and ' : '').implode(' and ', $tmp);
         } else {
             foreach ($mimes as $_v) {
                 $tmp[] = 'mimeType contains \''.str_replace('\'', '\\\'', $_v).'\'';
             }
-            $query .= ($query? ' and ' : '').'('.implode(' or ', $tmp).')';
+            $query .= ($query ? ' and ' : '').'('.implode(' or ', $tmp).')';
         }
 
         $opts = [
