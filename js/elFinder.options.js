@@ -408,8 +408,6 @@ elFinder.prototype._options = {
 							preventDefault : true
 						}).done(function(data){
 							f0.removeClass("elfinder-info-spinner").html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1,'Google.com');}));
-						}).always(function(){
-							f0.removeData('inrequest');
 						});
 					} else {
 						oline.parent().parent()[f.user.val()? 'hide':'show']();
@@ -450,9 +448,11 @@ elFinder.prototype._options = {
 						f.pass.val('done');
 						f.offline.parent().parent().hide();
 					}
+					f0.removeData('inrequest');
 				},
 				fail: function(fm, err){
 					this.protocol.trigger('change', 'reset');
+					f0.removeData('inrequest');
 				}
 			}
 		},
