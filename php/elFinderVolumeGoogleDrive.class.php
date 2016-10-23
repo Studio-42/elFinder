@@ -774,22 +774,24 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
         $path = $this->_normpath($path.'/');
         $result = [];
+        $query = '';
 
-        $dirs = array_merge([$itemId], $this->getDirectories($itemId));
-
-        $query = '(\''.implode('\' in parents or \'', $dirs).'\' in parents)';
+        if ($itemId !== 'root') {
+	        $dirs = array_merge([$itemId], $this->getDirectories($itemId));
+	        $query = '(\''.implode('\' in parents or \'', $dirs).'\' in parents)';
+        }
 
         $tmp = [];
         if (!$mimes) {
             foreach (explode(' ', $q) as $_v) {
                 $tmp[] = 'fullText contains \''.str_replace('\'', '\\\'', $_v).'\'';
             }
-            $query .= ' and '.implode(' and ', $tmp);
+            $query .= ($query? ' and ' : '').implode(' and ', $tmp);
         } else {
             foreach ($mimes as $_v) {
                 $tmp[] = 'mimeType contains \''.str_replace('\'', '\\\'', $_v).'\'';
             }
-            $query .= ' and ('.implode(' or ', $tmp).')';
+            $query .= ($query? ' and ' : '').'('.implode(' or ', $tmp).')';
         }
 
         $opts = [
