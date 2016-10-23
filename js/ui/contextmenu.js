@@ -298,7 +298,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					}
 				}
 				
-				fm.autoSync();
+				fm.searchStatus.state < 1 && ! fm.searchStatus.ininc && fm.autoSync();
 			},
 			
 			create = function(type, targets) {

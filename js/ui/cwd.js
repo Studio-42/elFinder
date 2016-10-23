@@ -1957,12 +1957,10 @@ $.fn.elfindercwd = function(fm, options) {
 				incHashes = void 0;
 				fm.searchStatus.ininc = false;
 				content();
-				//wz.addClass('elfinder-search-result');
 				fm.autoSync('stop');
 				resize();
 			})
 			.bind('searchend', function(e) {
-				//wz.removeClass('elfinder-search-result elfinder-cwd-wrapper-empty');
 				if (query || incHashes) {
 					query = '';
 					if (incHashes) {
