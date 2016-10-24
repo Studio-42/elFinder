@@ -114,12 +114,16 @@
 
 /* main part of quicklook window */
 .elfinder-quicklook-preview {
-	overflow:hidden;
+	overflow: hidden;
 	position:relative;
 	border:0 solid;
 	border-left:1px solid transparent;
 	border-right:1px solid transparent;
 	height:100%;
+}
+.elfinder-quicklook-preview.elfinder-overflow-auto {
+	overflow: auto;
+	-webkit-overflow-scrolling: touch;
 }
 
 /* wrapper for file info/icon */
@@ -269,8 +273,11 @@
 
 /* text preview */
 pre.elfinder-quicklook-preview-text {
+	width: auto;
+	height: auto;
 	margin:0;
 	padding:3px 9px;
+	border: none;
 }
 
 /* html/pdf preview */
@@ -280,8 +287,9 @@ pre.elfinder-quicklook-preview-text {
 	width:100%;
 	height:100%;
 	background:#fff;
-	border:0 solid;
 	margin:0;
+	border: none;
+	display: block;
 }
 
 /* swf preview container */

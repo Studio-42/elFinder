@@ -105,7 +105,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				// stop loading on change file if not loaded yet
 				preview.one('change', function() {
 					jqxhr.state() == 'pending' && jqxhr.reject();
-				});
+				}).addClass('elfinder-overflow-auto');
 				
 				jqxhr = fm.request({
 					data           : {cmd : 'get', target  : file.hash, current : file.phash, conv : 1},
@@ -196,7 +196,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				e.stopImmediatePropagation();
 				preview.one('change', function() {
 					node.off('load').remove();
-				});
+				}).addClass('elfinder-overflow-auto');
 				
 				node = $('<iframe class="elfinder-quicklook-preview-pdf"/>')
 					.hide()
@@ -553,7 +553,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					preview.one('change', function() {
 						loading.remove();
 						node.off('load').remove();
-					});
+					}).addClass('elfinder-overflow-auto');
 					
 					loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 					
