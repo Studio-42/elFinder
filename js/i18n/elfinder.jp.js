@@ -329,7 +329,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'pass'                : 'パスワード', // added 18.04.2012
 			'confirmUnmount'      : '$1をアンマウントしますか?',  // from v2.1 added 30.04.2012
 			'dropFilesBrowser': 'ブラウザからファイルをドロップまたは貼り付け', // from v2.1 added 30.05.2012
-			'dropPasteFiles'  : 'ファイル,URLリストをドロップまたは貼り付け', // from v2.1 added 07.04.2014
+			'dropPasteFiles'  : 'ここにファイルをドロップ または URLリスト, 画像(クリップボード) を貼り付け', // from v2.1 added 07.04.2014
 			'encoding'        : '文字コード', // from v2.1 added 19.12.2014
 			'locale'          : 'ロケール',   // from v2.1 added 19.12.2014
 			'searchTarget'    : '検索範囲: $1',                // from v2.1 added 22.5.2015

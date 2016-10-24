@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 6516038) (2016-10-23)
+ * Version 2.1.16 (2.1-src Nightly: b7d23fc) (2016-10-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1822,11 +1822,15 @@ button.elfinder-info-button {
 /*********************** UPLOAD DIALOG **************************/
 
 .elfinder-upload-dropbox {
+	display: table-cell;
 	text-align:center;
-	padding:2em 0;
+	vertical-align: middle;
+	padding:0.5em;
 	border:3px dashed #aaa;
-	height: 1em;
+	width: 9999px;
+	height: 80px;
 	overflow: hidden;
+	word-break: keep-all;
 }
 
 .elfinder-upload-dropbox.ui-state-hover {
@@ -2292,12 +2296,16 @@ button.elfinder-info-button {
 
 /* main part of quicklook window */
 .elfinder-quicklook-preview {
-	overflow:hidden;
+	overflow: hidden;
 	position:relative;
 	border:0 solid;
 	border-left:1px solid transparent;
 	border-right:1px solid transparent;
 	height:100%;
+}
+.elfinder-quicklook-preview.elfinder-overflow-auto {
+	overflow: auto;
+	-webkit-overflow-scrolling: touch;
 }
 
 /* wrapper for file info/icon */
@@ -2447,8 +2455,11 @@ button.elfinder-info-button {
 
 /* text preview */
 pre.elfinder-quicklook-preview-text {
+	width: auto;
+	height: auto;
 	margin:0;
 	padding:3px 9px;
+	border: none;
 }
 
 /* html/pdf preview */
@@ -2458,8 +2469,9 @@ pre.elfinder-quicklook-preview-text {
 	width:100%;
 	height:100%;
 	background:#fff;
-	border:0 solid;
 	margin:0;
+	border: none;
+	display: block;
 }
 
 /* swf preview container */

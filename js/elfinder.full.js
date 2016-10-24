@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 6516038) (2016-10-23)
+ * Version 2.1.16 (2.1-src Nightly: b7d23fc) (2016-10-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6174,7 +6174,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 6516038)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: b7d23fc)';
 
 
 
@@ -8526,7 +8526,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'pass'                : 'Password', // added 18.04.2012
 			'confirmUnmount'      : 'Are you unmount $1?',  // from v2.1 added 30.04.2012
 			'dropFilesBrowser': 'Drop or Paste files from browser', // from v2.1 added 30.05.2012
-			'dropPasteFiles'  : 'Drop or Paste files here', // from v2.1 added 07.04.2014
+			'dropPasteFiles'  : 'Drop files, Paste URLs or images(clipboard) here', // from v2.1 added 07.04.2014
 			'encoding'        : 'Encoding', // from v2.1 added 19.12.2014
 			'locale'          : 'Locale',   // from v2.1 added 19.12.2014
 			'searchTarget'    : 'Target: $1',                // from v2.1 added 22.5.2015
@@ -18533,7 +18533,7 @@ elFinder.prototype.commands.places = function() {
 		.on('change', function() {
 			navShow();
 			navbar.attr('style', navStyle);
-			self.preview.attr('style', '')
+			self.preview.attr('style', '').removeClass('elfinder-overflow-auto');
 			self.info.attr('style', '').hide();
 			icon.removeAttr('class').attr('style', '');
 			info.html('');
@@ -18922,7 +18922,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				// stop loading on change file if not loaded yet
 				preview.one('change', function() {
 					jqxhr.state() == 'pending' && jqxhr.reject();
-				});
+				}).addClass('elfinder-overflow-auto');
 				
 				jqxhr = fm.request({
 					data           : {cmd : 'get', target  : file.hash, current : file.phash, conv : 1},
@@ -19013,7 +19013,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				e.stopImmediatePropagation();
 				preview.one('change', function() {
 					node.off('load').remove();
-				});
+				}).addClass('elfinder-overflow-auto');
 				
 				node = $('<iframe class="elfinder-quicklook-preview-pdf"/>')
 					.hide()
@@ -19370,7 +19370,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					preview.one('change', function() {
 						loading.remove();
 						node.off('load').remove();
-					});
+					}).addClass('elfinder-overflow-auto');
 					
 					loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 					
