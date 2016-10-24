@@ -279,7 +279,7 @@
 		.on('change', function() {
 			navShow();
 			navbar.attr('style', navStyle);
-			self.preview.attr('style', '')
+			self.preview.attr('style', '').removeClass('elfinder-overflow-auto');
 			self.info.attr('style', '').hide();
 			icon.removeAttr('class').attr('style', '');
 			info.html('');
