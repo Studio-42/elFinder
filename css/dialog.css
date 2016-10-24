@@ -332,11 +332,15 @@ button.elfinder-info-button {
 /*********************** UPLOAD DIALOG **************************/
 
 .elfinder-upload-dropbox {
+	display: table-cell;
 	text-align:center;
-	padding:2em 0;
+	vertical-align: middle;
+	padding:0.5em;
 	border:3px dashed #aaa;
-	height: 1em;
+	width: 9999px;
+	height: 80px;
 	overflow: hidden;
+	word-break: keep-all;
 }
 
 .elfinder-upload-dropbox.ui-state-hover {
