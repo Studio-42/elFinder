@@ -92,13 +92,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     public $netMountKey = '';
 
     /**
-     * Thumbnail prefix.
-     *
-     * @var string
-     **/
-    private $tmbPrefix = '';
-
-    /**
      * Constructor
      * Extend options with required fields.
      *
@@ -299,7 +292,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     protected function _gd_getDirectoryData($usecache = true)
     {
         if ($usecache) {
-            $cache = $this->session->get('GoogleDriveDirectoryData'.$this->id, []);
+            $cache = $this->session->get($this->id.$this->netMountKey, []);
             if ($cache) {
                 $this->parents = $cache['parents'];
                 $this->names = $cache['names'];
@@ -340,7 +333,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $data['root'] = $data[$root];
         }
         $this->directories = $data;
-        $this->session->set('GoogleDriveDirectoryData'.$this->id, [
+        $this->session->set($this->id.$this->netMountKey, [
                 'parents' => $this->parents,
                 'names' => $this->names,
                 'directories' => $this->directories,
@@ -842,13 +835,13 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     public function netunmount($netVolumes, $key)
     {
         if (!$this->options['useGoogleTmb']) {
-            if ($tmbs = glob(rtrim($this->options['tmbPath'], '\\/').DIRECTORY_SEPARATOR.$this->tmbPrefix.'*.png')) {
+            if ($tmbs = glob(rtrim($this->options['tmbPath'], '\\/').DIRECTORY_SEPARATOR.$this->netMountKey.'*.png')) {
                 foreach ($tmbs as $file) {
                     unlink($file);
                 }
             }
         }
-        $this->session->remove('GoogleDriveDirectoryData'.$this->id);
+        $this->session->remove($this->id.$this->netMountKey);
 
         return true;
     }
@@ -891,7 +884,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         }
 
         // make net mount key
-        $this->netMountKey = md5(implode('-', ['googledrive', $this->options['path']]));
+        $aToken = is_array($this->options['access_token'])? $this->options['access_token']['access_token'] : $this->options['access_token'];
+        $this->netMountKey = md5($aToken . '-' . $this->options['path']);
 
         if (!$this->service) {
             if ($this->options['googleApiClient'] && !class_exists('Google_Client')) {
@@ -937,8 +931,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         }
 
         $this->rootName = $this->options['alias'];
-
-        $this->tmbPrefix = 'googledrive'.base_convert($this->root, 10, 32);
 
         if (!empty($this->options['tmpPath'])) {
             if ((is_dir($this->options['tmpPath']) || mkdir($this->options['tmpPath'])) && is_writable($this->options['tmpPath'])) {
@@ -1265,7 +1257,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function tmbname($stat)
     {
-        return $this->tmbPrefix.$stat['iid'].$stat['ts'].'.png';
+        return $this->netMountKey.$stat['iid'].$stat['ts'].'.png';
     }
 
     /**
