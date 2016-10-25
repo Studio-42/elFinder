@@ -26,6 +26,13 @@ class elFinder {
 	protected $volumes = array();
 	
 	/**
+	 * elFinder instance
+	 * 
+	 * @var object
+	 */
+	public static $instance = null;
+	
+	/**
 	 * Network mount drivers
 	 * 
 	 * @var array
@@ -330,6 +337,9 @@ class elFinder {
 	public function __construct($opts) {
 		// set error handler of WARNING, NOTICE
 		set_error_handler('elFinder::phpErrorHandler', E_WARNING | E_NOTICE | E_USER_WARNING | E_USER_NOTICE);
+		
+		// set elFinder instance
+		elFinder::$instance = $this;
 		
 		// setup debug mode
 		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
@@ -835,6 +845,21 @@ class elFinder {
 			return false;
 		}
 		return $volume->realpath($hash);
+	}
+	
+	/**
+	 * Update sesstion value of a NetVolume option
+	 * 
+	 * @param string $netKey
+	 * @param string $optionKey
+	 * @param mixed  $val
+	 */
+	public function updateNetVolumeOption($netKey, $optionKey, $val) {
+		$netVolumes = $this->getNetVolumes();
+		if (is_string($netKey) && isset($netVolumes[$netKey]) && is_string($optionKey)) {
+			$netVolumes[$netKey][$optionKey] = $val;
+			$this->saveNetVolumes($netVolumes);
+		}
 	}
 	
 	/**
