@@ -137,6 +137,527 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $this->options['mimeDetect'] = 'internal';
     }
 
+    /*********************************************************************/
+    /*                        ORIGINAL FUNCTIONS                         */
+    /*********************************************************************/
+
+    /**
+     * Get token and auto refresh.
+     *
+     * @param object $client Google API client
+     *
+     * @return true|string error message
+     */
+    private function _gd_refreshToken($client)
+    {
+        try {
+            $client->setAccessToken($this->options['access_token']);
+            if ($client->isAccessTokenExpired()) {
+                $client->setClientId($this->options['client_id']);
+                $client->setClientSecret($this->options['client_secret']);
+                $refresh_token = $client->fetchAccessTokenWithRefreshToken();
+                $client->setAccessToken($refresh_token);
+                $this->options['access_token'] = $refresh_token;
+                $this->service = new \Google_Service_Drive($client);
+            }
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+
+        return true;
+    }
+
+    /**
+     * Drive query and fetchAll.
+     *
+     * @param string $sql
+     *
+     * @return bool|array
+     */
+    private function _gd_query($opts)
+    {
+        $result = [];
+        $pageToken = null;
+        $parameters = [
+                'fields' => self::FETCHFIELDS_LIST,
+                'pageSize' => 1000,
+                'spaces' => 'drive',
+        ];
+
+        if (is_array($opts)) {
+            $parameters = array_merge($parameters, $opts);
+        }
+        do {
+            try {
+                if ($pageToken) {
+                    $parameters['pageToken'] = $pageToken;
+                }
+                $files = $this->service->files->listFiles($parameters);
+
+                $result = array_merge($result, $files->getFiles());
+                $pageToken = $files->getNextPageToken();
+            } catch (Exception $e) {
+                $pageToken = null;
+            }
+        } while ($pageToken);
+
+        return $result;
+    }
+
+    /**
+     * Get dat(googledrive metadata) from GoogleDrive.
+     *
+     * @param string $path
+     *
+     * @return array googledrive metadata
+     */
+    private function _gd_getFile($path, $fields = '')
+    {
+        if ($path === '/') {
+            $itemId = 'root';
+        } else {
+            $itemId = basename($path);
+        }
+        if (!$fields) {
+            $fields = self::FETCHFIELDS_GET;
+        }
+        try {
+            $file = $this->service->files->get($itemId, ['fields' => $fields]);
+            if ($file instanceof Google_Service_Drive_DriveFile) {
+                return $file;
+            } else {
+                return [];
+            }
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Parse line from googledrive metadata output and return file stat (array).
+     *
+     * @param string $raw line from ftp_rawlist() output
+     *
+     * @return array
+     *
+     * @author Dmitry Levashov
+     **/
+    protected function _gd_parseRaw($raw)
+    {
+        $stat = [];
+
+        $stat['iid'] = isset($raw['id']) ? $raw['id'] : 'root';
+        $stat['name'] = isset($raw['name']) ? $raw['name'] : '';
+        $stat['mime'] = $raw['mimeType'] == self::DIRMIME ? 'directory' :
+        ($raw['mimeType'] == 'image/bmp' ? 'image/x-ms-bmp' :  $raw['mimeType']);
+        $stat['size'] = $raw['mimeType'] == self::DIRMIME ? 0 : (int) $raw['size'];
+        $stat['ts'] = isset($raw['modifiedTime']) ? strtotime($raw['modifiedTime']) : $_SERVER['REQUEST_TIME'];
+        $stat['locked'] = false;
+
+        if ($raw['mimeType'] === self::DIRMIME) {
+            $stat['dirs'] = (int) $this->_subdirs($stat['iid']);
+        } elseif ($size = $raw->getImageMediaMetadata()) {
+            $stat['width'] = $size['width'];
+            $stat['height'] = $size['height'];
+        }
+
+        if ($this->options['useGoogleTmb']) {
+            if (isset($raw['thumbnailLink'])) {
+                $stat['tmb'] = substr($raw['thumbnailLink'], 8); // remove "https://"
+            } else {
+                $stat['tmb'] = '';
+            }
+        }
+
+        $stat['url'] = $this->_gd_isPublished($raw) ? $this->_gd_getLink($raw) : '1';
+
+        return $stat;
+    }
+
+    /**
+     * Get dat(googledrive metadata) from GoogleDrive.
+     *
+     * @param string $path
+     *
+     * @return array googledrive metadata
+     */
+    private function _gd_getNameByPath($path)
+    {
+        $itemId = basename($path);
+        if (!$this->names) {
+            $this->_gd_getDirectoryData();
+        }
+
+        return isset($this->names[$itemId]) ? $this->names[$itemId] : '';
+    }
+
+    /**
+     * Make cache of $parents, $names and $directories.
+     *
+     * @param string $usecache
+     */
+    protected function _gd_getDirectoryData($usecache = true)
+    {
+        if ($usecache) {
+            $cache = $this->session->get('GoogleDriveDirectoryData'.$this->id, []);
+            if ($cache) {
+                $this->parents = $cache['parents'];
+                $this->names = $cache['names'];
+                $this->directories = $cache['directories'];
+
+                return;
+            }
+        }
+
+        $root = '';
+        if ($this->root === '/') {
+            // get root id
+            $res = $this->_gd_getFile('/', 'id');
+            $root = $res->getId();
+        }
+
+        $data = [];
+        $opts = [
+                'fields' => 'files(id, name, parents)',
+                'q' => sprintf('trashed=false and mimeType="%s"', self::DIRMIME),
+        ];
+        $res = $this->_gd_query($opts);
+        foreach ($res as $raw) {
+            if ($parents = $raw->getParents()) {
+                $id = $raw->getId();
+                $this->parents[$id] = $parents;
+                $this->names[$id] = $raw->getName();
+                foreach ($parents as $p) {
+                    if (isset($data[$p])) {
+                        $data[$p][] = $id;
+                    } else {
+                        $data[$p] = [$id];
+                    }
+                }
+            }
+        }
+        if ($root) {
+            $data['root'] = $data[$root];
+        }
+        $this->directories = $data;
+        $this->session->set('GoogleDriveDirectoryData'.$this->id, [
+                'parents' => $this->parents,
+                'names' => $this->names,
+                'directories' => $this->directories,
+        ]);
+    }
+
+    /**
+     * Get descendants directories.
+     *
+     * @param string $itemId
+     *
+     * @return array
+     */
+    protected function _gd_getDirectories($itemId)
+    {
+        $ret = [];
+        if ($this->directories === null) {
+            $this->_gd_getDirectoryData();
+        }
+        $data = $this->directories;
+        if (isset($data[$itemId])) {
+            $ret = $data[$itemId];
+            foreach ($data[$itemId] as $cid) {
+                $ret = array_merge($ret, $this->_gd_getDirectories($cid));
+            }
+        }
+
+        return $ret;
+    }
+
+    /**
+     * Get ID based path from item ID.
+     *
+     * @param string $path
+     */
+    protected function _gd_getMountPaths($id)
+    {
+        $root = false;
+        if ($this->directories === null) {
+            $this->_gd_getDirectoryData();
+        }
+        list($pid) = explode('/', $id, 2);
+        $path = $id;
+        if ('/'.$pid === $this->root) {
+            $root = true;
+        } elseif (!isset($this->parents[$pid])) {
+            $root = true;
+            $path = ltrim(substr($path, strlen($pid)), '/');
+        }
+        $res = [];
+        if ($root) {
+            if ($this->root === '/' || strpos('/'.$path, $this->root) === 0) {
+                $res = [(strpos($path, '/') === false) ? '/' : ('/'.$path)];
+            }
+        } else {
+            foreach ($this->parents[$pid] as $p) {
+                $_p = $p.'/'.$path;
+                $res = array_merge($res, $this->_gd_getMountPaths($_p));
+            }
+        }
+
+        return $res;
+    }
+
+    /**
+     * Return is published.
+     *
+     * @param object $file
+     *
+     * @return bool
+     */
+    protected function _gd_isPublished($file)
+    {
+        $res = false;
+        $pType = $this->options['publishPermission']['type'];
+        $pRole = $this->options['publishPermission']['role'];
+        if ($permissions = $file->getPermissions()) {
+            foreach ($permissions as $permission) {
+                if ($permission->type === $pType && $permission->role === $pRole) {
+                    $res = true;
+                    break;
+                }
+            }
+        }
+
+        return $res;
+    }
+
+    /**
+     * return item URL link.
+     *
+     * @param object $file
+     *
+     * @return string
+     */
+    protected function _gd_getLink($file)
+    {
+        if ($url = $file->getWebContentLink()) {
+            return str_replace('export=download', 'export=media', $url);
+        }
+        if ($url = $file->getWebViewLink()) {
+            return $url;
+        }
+
+        return '';
+    }
+
+    /**
+     * Get download url.
+     *
+     * @param Google_Service_Drive_DriveFile $file
+     *
+     * @return string|false
+     */
+    protected function _gd_getDownloadUrl($file)
+    {
+        if (strpos($file->mimeType, 'application/vnd.google-apps') !== 0) {
+            return 'https://www.googleapis.com/drive/v3/files/'.$file->getId().'?alt=media';
+        } else {
+            $mimeMap = $this->options['appsExportMap'];
+            if (isset($mimeMap[$file->getMimeType()])) {
+                $mime = $mimeMap[$file->getMimeType()];
+            } else {
+                $mime = $mimeMap['default'];
+            }
+            $mime = rawurlencode($mime);
+
+            return 'https://www.googleapis.com/drive/v3/files/'.$file->getId().'/export?mimeType='.$mime;
+        }
+
+        return false;
+    }
+
+    /**
+     * Return stream file pointer for read file.
+     *
+     * @param object $file
+     * @param array  $redirect
+     *
+     * @return resource|false
+     */
+    protected function _gd_getReadStream($file, $redirect = [])
+    {
+        if (!$redirect) {
+            $redirect = [
+                    'cnt' => 0,
+                    'url' => '',
+                    'token' => '',
+                    'cookies' => [],
+            ];
+            if ($dlurl = $this->_gd_getDownloadUrl($file)) {
+                $token = $this->client->getAccessToken();
+                $access_token = '';
+                if (is_array($token)) {
+                    $access_token = $token['access_token'];
+                } else {
+                    if ($token = @json_decode($client->getAccessToken())) {
+                        $access_token = $token->access_token;
+                    }
+                }
+                $redirect = [
+                        'cnt' => 0,
+                        'url' => '',
+                        'token' => $access_token,
+                        'cookies' => [],
+                ];
+            }
+        } else {
+            if ($redirect['cnt'] > 5) {
+                return false;
+            }
+            $dlurl = $redirect['url'];
+            $redirect['url'] = '';
+            $access_token = $redirect['token'];
+        }
+
+        if ($dlurl) {
+            $url = parse_url($dlurl);
+            $cookies = [];
+            if ($redirect['cookies']) {
+                foreach ($redirect['cookies'] as $d => $c) {
+                    if (strpos($url['host'], $d) !== false) {
+                        $cookies[] = $c;
+                    }
+                }
+            }
+            if ($access_token) {
+                $query = isset($url['query']) ? '?'.$url['query'] : '';
+                $stream = stream_socket_client('ssl://'.$url['host'].':443');
+                stream_set_timeout($stream, 300);
+                fputs($stream, "GET {$url['path']}{$query} HTTP/1.1\r\n");
+                fputs($stream, "Host: {$url['host']}\r\n");
+                fputs($stream, "Authorization: Bearer {$access_token}\r\n");
+                fputs($stream, "Connection: Close\r\n");
+                if ($cookies) {
+                    fputs($stream, 'Cookie: '.implode('; ', $cookies)."\r\n");
+                }
+                fputs($stream, "\r\n");
+                while (($res = trim(fgets($stream))) !== '') {
+                    // find redirect
+                    if (preg_match('/^Location: (.+)$/', $res, $m)) {
+                        $redirect['url'] = $m[1];
+                    }
+                    // fetch cookie
+                    if (strpos($res, 'Set-Cookie:') === 0) {
+                        $domain = $url['host'];
+                        if (preg_match('/^Set-Cookie:(.+)(?:domain=\s*([^ ;]+))?/i', $res, $c1)) {
+                            if (!empty($c1[2])) {
+                                $domain = trim($c1[2]);
+                            }
+                            if (preg_match('/([^ ]+=[^;]+)/', $c1[1], $c2)) {
+                                $redirect['cookies'][$domain] = $c2[1];
+                            }
+                        }
+                    }
+                }
+                if ($redirect['url']) {
+                    ++$redirect['cnt'];
+                    fclose($stream);
+
+                    return $this->_gd_getReadStream($file, $redirect);
+                }
+
+                return $stream;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get thumbnail from GoogleDrive.com.
+     *
+     * @param string $path
+     * @param string $size
+     *
+     * @return string | boolean
+     */
+    protected function _gd_getThumbnail($path)
+    {
+        $itemId = basename($path);
+
+        try {
+            $contents = $this->service->files->get($itemId, [
+                    'alt' => 'media',
+            ]);
+            $contents = $contents->getBody()->detach();
+            rewind($contents);
+
+            return $contents;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Publish permissions specified path item.
+     *
+     * @param string $path
+     *
+     * @return bool
+     */
+    protected function _gd_publish($path)
+    {
+        if ($file = $this->_gd_getFile($path)) {
+            if ($this->_gd_isPublished($file)) {
+                return true;
+            }
+            try {
+                if ($this->service->permissions->create($file->getId(), new \Google_Service_Drive_Permission($this->options['publishPermission']))) {
+                    return true;
+                }
+            } catch (Exception $e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * unPublish permissions specified path.
+     *
+     * @param string $path
+     *
+     * @return bool
+     */
+    protected function _gd_unPublish($path)
+    {
+        if ($file = $this->_gd_getFile($path)) {
+            if (!$this->_gd_isPublished($file)) {
+                return true;
+            }
+            $permissions = $file->getPermissions();
+            $pType = $this->options['publishPermission']['type'];
+            $pRole = $this->options['publishPermission']['role'];
+            try {
+                foreach ($permissions as $permission) {
+                    if ($permission->type === $pType && $permission->role === $pRole) {
+                        $this->service->permissions->delete($file->getId(), $permission->getId());
+
+                        return true;
+                        break;
+                    }
+                }
+            } catch (Exception $e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    /*********************************************************************/
+    /*                        EXTENDED FUNCTIONS                         */
+    /*********************************************************************/
+
     /**
      * Prepare
      * Call from elFinder::netmout() before volume->mount().
@@ -384,7 +905,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
             try {
                 $client->setAccessToken($this->options['access_token']);
-                if (true !== ($res = $this->refreshGoogleDriveToken($client))) {
+                if (true !== ($res = $this->_gd_refreshToken($client))) {
                     return $this->setError($res);
                 }
             } catch (InvalidArgumentException $e) {
@@ -409,10 +930,10 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         }
         $this->root = $this->options['path'] = $this->_normpath($this->options['path']);
 
-        $this->options['root'] == '' ?  $this->options['root'] = $this->getPathtoName('root') : $this->options['root'];
+        $this->options['root'] == '' ?  $this->options['root'] = $this->_gd_getNameByPath('root') : $this->options['root'];
 
         if (empty($this->options['alias'])) {
-            $this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] : sprintf($this->options['gdAlias'], $this->getPathtoName($this->options['path']));
+            $this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] : sprintf($this->options['gdAlias'], $this->_gd_getNameByPath($this->options['path']));
         }
 
         $this->rootName = $this->options['alias'];
@@ -458,398 +979,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $this->disabled[] = 'extract';
 
         if ($this->isMyReload()) {
-            $this->getDirectoryData(false);
+            $this->_gd_getDirectoryData(false);
         }
-    }
-
-    /**
-     * Drive query and fetchAll.
-     * 
-     * @param string $sql
-     *
-     * @return bool|array
-     */
-    private function query($opts)
-    {
-        $result = [];
-        $pageToken = null;
-        $parameters = [
-            'fields' => self::FETCHFIELDS_LIST,
-            'pageSize' => 1000,
-            'spaces' => 'drive',
-        ];
-
-        if (is_array($opts)) {
-            $parameters = array_merge($parameters, $opts);
-        }
-        do {
-            try {
-                if ($pageToken) {
-                    $parameters['pageToken'] = $pageToken;
-                }
-                $files = $this->service->files->listFiles($parameters);
-
-                $result = array_merge($result, $files->getFiles());
-                $pageToken = $files->getNextPageToken();
-            } catch (Exception $e) {
-                $pageToken = null;
-            }
-        } while ($pageToken);
-
-        return $result;
-    }
-
-    /**
-     * Get token and auto refresh.
-     * 
-     * @param object $client Google API client
-     *
-     * @return true|string error message
-     */
-    private function refreshGoogleDriveToken($client)
-    {
-        try {
-            $client->setAccessToken($this->options['access_token']);
-            if ($client->isAccessTokenExpired()) {
-                $client->setClientId($this->options['client_id']);
-                $client->setClientSecret($this->options['client_secret']);
-                $refresh_token = $client->fetchAccessTokenWithRefreshToken();
-                $client->setAccessToken($refresh_token);
-                $this->options['access_token'] = $refresh_token;
-                $this->service = new \Google_Service_Drive($client);
-            }
-        } catch (Exception $e) {
-            return $e->getMessage();
-        }
-
-        return true;
-    }
-
-    /**
-     * Get dat(googledrive metadata) from GoogleDrive.
-     * 
-     * @param string $path
-     *
-     * @return array googledrive metadata
-     */
-    private function getPathtoName($path)
-    {
-        $itemId = basename($path);
-        if (!$this->names) {
-            $this->getDirectoryData();
-        }
-
-        return isset($this->names[$itemId]) ? $this->names[$itemId] : '';
-    }
-
-    /**
-     * Get dat(googledrive metadata) from GoogleDrive.
-     * 
-     * @param string $path
-     *
-     * @return array googledrive metadata
-     */
-    private function _gd_getFile($path, $fields = '')
-    {
-        if ($path === '/') {
-            $itemId = 'root';
-        } else {
-            $itemId = basename($path);
-        }
-        if (!$fields) {
-            $fields = self::FETCHFIELDS_GET;
-        }
-        try {
-            $file = $this->service->files->get($itemId, ['fields' => $fields]);
-            debug($file);
-            if ($file instanceof Google_Service_Drive_DriveFile) {
-                return $file;
-            } else {
-                return [];
-            }
-        } catch (Exception $e) {
-            return [];
-        }
-    }
-
-    /**
-     * Make cache of $parents, $names and $directories.
-     * 
-     * @param string $usecache
-     */
-    protected function getDirectoryData($usecache = true)
-    {
-        if ($usecache) {
-            $cache = $this->session->get('GoogleDriveDirectoryData'.$this->id, []);
-            if ($cache) {
-                $this->parents = $cache['parents'];
-                $this->names = $cache['names'];
-                $this->directories = $cache['directories'];
-
-                return;
-            }
-        }
-
-        $root = '';
-        if ($this->root === '/') {
-            // get root id
-            $res = $this->_gd_getFile('/', 'id');
-            $root = $res->getId();
-        }
-
-        $data = [];
-        $opts = [
-            'fields' => 'files(id, name, parents)',
-            'q' => sprintf('trashed=false and mimeType="%s"', self::DIRMIME),
-        ];
-        $res = $this->query($opts);
-        foreach ($res as $raw) {
-            if ($parents = $raw->getParents()) {
-                $id = $raw->getId();
-                $this->parents[$id] = $parents;
-                $this->names[$id] = $raw->getName();
-                foreach ($parents as $p) {
-                    if (isset($data[$p])) {
-                        $data[$p][] = $id;
-                    } else {
-                        $data[$p] = [$id];
-                    }
-                }
-            }
-        }
-        if ($root) {
-            $data['root'] = $data[$root];
-        }
-        $this->directories = $data;
-        $this->session->set('GoogleDriveDirectoryData'.$this->id, [
-            'parents' => $this->parents,
-            'names' => $this->names,
-            'directories' => $this->directories,
-        ]);
-    }
-
-    /**
-     * Get descendants directories.
-     * 
-     * @param string $itemId
-     *
-     * @return array
-     */
-    protected function getDirectories($itemId)
-    {
-        $ret = [];
-        if ($this->directories === null) {
-            $this->getDirectoryData();
-        }
-        $data = $this->directories;
-        if (isset($data[$itemId])) {
-            $ret = $data[$itemId];
-            foreach ($data[$itemId] as $cid) {
-                $ret = array_merge($ret, $this->getDirectories($cid));
-            }
-        }
-
-        return $ret;
-    }
-
-    /**
-     * Get ID based path from item ID.
-     * 
-     * @param string $path
-     */
-    protected function getMountPaths($id)
-    {
-        $root = false;
-        if ($this->directories === null) {
-            $this->getDirectoryData();
-        }
-        list($pid) = explode('/', $id, 2);
-        $path = $id;
-        if ('/'.$pid === $this->root) {
-            $root = true;
-        } elseif (!isset($this->parents[$pid])) {
-            $root = true;
-            $path = ltrim(substr($path, strlen($pid)), '/');
-        }
-        $res = [];
-        if ($root) {
-            if ($this->root === '/' || strpos('/'.$path, $this->root) === 0) {
-                $res = [(strpos($path, '/') === false) ? '/' : ('/'.$path)];
-            }
-        } else {
-            foreach ($this->parents[$pid] as $p) {
-                $_p = $p.'/'.$path;
-                $res = array_merge($res, $this->getMountPaths($_p));
-            }
-        }
-
-        return $res;
-    }
-
-    /**
-     * Return is published.
-     * 
-     * @param object $file
-     *
-     * @return bool
-     */
-    protected function _gd_isPublished($file)
-    {
-        $res = false;
-        $pType = $this->options['publishPermission']['type'];
-        $pRole = $this->options['publishPermission']['role'];
-        if ($permissions = $file->getPermissions()) {
-            foreach ($permissions as $permission) {
-                if ($permission->type === $pType && $permission->role === $pRole) {
-                    $res = true;
-                    break;
-                }
-            }
-        }
-
-        return $res;
-    }
-
-    /**
-     * return item URL link.
-     * 
-     * @param object $file
-     *
-     * @return string
-     */
-    protected function _gd_getLink($file)
-    {
-        if ($url = $file->getWebContentLink()) {
-            return str_replace('export=download', 'export=media', $url);
-        }
-        if ($url = $file->getWebViewLink()) {
-            return $url;
-        }
-
-        return '';
-    }
-
-    /**
-     * Get download url.
-     *
-     * @param Google_Service_Drive_DriveFile $file
-     *
-     * @return string|false
-     */
-    protected function _gd_getDownloadUrl($file)
-    {
-        if (strpos($file->mimeType, 'application/vnd.google-apps') !== 0) {
-            return 'https://www.googleapis.com/drive/v3/files/'.$file->getId().'?alt=media';
-        } else {
-            $mimeMap = $this->options['appsExportMap'];
-            if (isset($mimeMap[$file->getMimeType()])) {
-                $mime = $mimeMap[$file->getMimeType()];
-            } else {
-                $mime = $mimeMap['default'];
-            }
-            $mime = rawurlencode($mime);
-
-            return 'https://www.googleapis.com/drive/v3/files/'.$file->getId().'/export?mimeType='.$mime;
-        }
-
-        return false;
-    }
-
-    /**
-     * Return stream file pointer for read file.
-     * 
-     * @param object $file
-     * @param array  $redirect
-     *
-     * @return resource|false
-     */
-    protected function _gd_getReadStream($file, $redirect = [])
-    {
-        if (!$redirect) {
-            $redirect = [
-                    'cnt' => 0,
-                    'url' => '',
-                    'token' => '',
-                    'cookies' => [],
-            ];
-            if ($dlurl = $this->_gd_getDownloadUrl($file)) {
-                $token = $this->client->getAccessToken();
-                $access_token = '';
-                if (is_array($token)) {
-                    $access_token = $token['access_token'];
-                } else {
-                    if ($token = @json_decode($client->getAccessToken())) {
-                        $access_token = $token->access_token;
-                    }
-                }
-                $redirect = [
-                        'cnt' => 0,
-                        'url' => '',
-                        'token' => $access_token,
-                        'cookies' => [],
-                ];
-            }
-        } else {
-            if ($redirect['cnt'] > 5) {
-                return false;
-            }
-            $dlurl = $redirect['url'];
-            $redirect['url'] = '';
-            $access_token = $redirect['token'];
-        }
-
-        if ($dlurl) {
-            $url = parse_url($dlurl);
-            $cookies = [];
-            if ($redirect['cookies']) {
-                foreach ($redirect['cookies'] as $d => $c) {
-                    if (strpos($url['host'], $d) !== false) {
-                        $cookies[] = $c;
-                    }
-                }
-            }
-            if ($access_token) {
-                $query = isset($url['query']) ? '?'.$url['query'] : '';
-                $stream = stream_socket_client('ssl://'.$url['host'].':443');
-                stream_set_timeout($stream, 300);
-                fputs($stream, "GET {$url['path']}{$query} HTTP/1.1\r\n");
-                fputs($stream, "Host: {$url['host']}\r\n");
-                fputs($stream, "Authorization: Bearer {$access_token}\r\n");
-                fputs($stream, "Connection: Close\r\n");
-                if ($cookies) {
-                    fputs($stream, 'Cookie: '.implode('; ', $cookies)."\r\n");
-                }
-                fputs($stream, "\r\n");
-                while (($res = trim(fgets($stream))) !== '') {
-                    // find redirect
-                    if (preg_match('/^Location: (.+)$/', $res, $m)) {
-                        $redirect['url'] = $m[1];
-                    }
-                    // fetch cookie
-                    if (strpos($res, 'Set-Cookie:') === 0) {
-                        $domain = $url['host'];
-                        if (preg_match('/^Set-Cookie:(.+)(?:domain=\s*([^ ;]+))?/i', $res, $c1)) {
-                            if (!empty($c1[2])) {
-                                $domain = trim($c1[2]);
-                            }
-                            if (preg_match('/([^ ]+=[^;]+)/', $c1[1], $c2)) {
-                                $redirect['cookies'][$domain] = $c2[1];
-                            }
-                        }
-                    }
-                }
-                if ($redirect['url']) {
-                    ++$redirect['cnt'];
-                    fclose($stream);
-
-                    return $this->_gd_getReadStream($file, $redirect);
-                }
-
-                return $stream;
-            }
-        }
-
-        return false;
     }
 
     /*********************************************************************/
@@ -863,47 +994,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     public function umount()
     {
-    }
-
-    /**
-     * Parse line from googledrive metadata output and return file stat (array).
-     *
-     * @param string $raw line from ftp_rawlist() output
-     *
-     * @return array
-     *
-     * @author Dmitry Levashov
-     **/
-    protected function parseRaw($raw)
-    {
-        $stat = [];
-
-        $stat['iid'] = isset($raw['id']) ? $raw['id'] : 'root';
-        $stat['name'] = isset($raw['name']) ? $raw['name'] : '';
-        $stat['mime'] = $raw['mimeType'] == self::DIRMIME ? 'directory' :
-                              ($raw['mimeType'] == 'image/bmp' ? 'image/x-ms-bmp' :  $raw['mimeType']);
-        $stat['size'] = $raw['mimeType'] == self::DIRMIME ? 0 : (int) $raw['size'];
-        $stat['ts'] = isset($raw['modifiedTime']) ? strtotime($raw['modifiedTime']) : $_SERVER['REQUEST_TIME'];
-        $stat['locked'] = false;
-
-        if ($raw['mimeType'] === self::DIRMIME) {
-            $stat['dirs'] = (int) $this->_subdirs($stat['iid']);
-        } elseif ($size = $raw->getImageMediaMetadata()) {
-            $stat['width'] = $size['width'];
-            $stat['height'] = $size['height'];
-        }
-
-        if ($this->options['useGoogleTmb']) {
-            if (isset($raw['thumbnailLink'])) {
-                $stat['tmb'] = substr($raw['thumbnailLink'], 8); // remove "https://"
-            } else {
-                $stat['tmb'] = '';
-            }
-        }
-
-        $stat['url'] = $this->_gd_isPublished($raw) ? $this->_gd_getLink($raw) : '1';
-
-        return $stat;
     }
 
     /**
@@ -923,13 +1013,13 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         ];
 
         $this->dirsCache[$path] = [];
-        $res = $this->query($opts);
+        $res = $this->_gd_query($opts);
 
         $mountPath = $this->_normpath($path.'/');
 
         if ($res) {
             foreach ($res as $raw) {
-                if ($stat = $this->parseRaw($raw)) {
+                if ($stat = $this->_gd_parseRaw($raw)) {
                     $stat = $this->updateCache($mountPath.$raw->id, $stat);
                     if (empty($stat['hidden']) && $path !== $mountPath.$raw->id) {
                         $this->dirsCache[$path][] = $mountPath.$raw->id;
@@ -961,7 +1051,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $query = '';
 
         if ($itemId !== 'root') {
-            $dirs = array_merge([$itemId], $this->getDirectories($itemId));
+            $dirs = array_merge([$itemId], $this->_gd_getDirectories($itemId));
             $query = '(\''.implode('\' in parents or \'', $dirs).'\' in parents)';
         }
 
@@ -982,7 +1072,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             'q' => sprintf('trashed=false and (%s)', $query),
         ];
 
-        $res = $this->query($opts);
+        $res = $this->_gd_query($opts);
 
         $timeout = $this->options['searchTimeout'] ? $this->searchStart + $this->options['searchTimeout'] : 0;
         foreach ($res as $raw) {
@@ -990,10 +1080,10 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 $this->setError(elFinder::ERROR_SEARCH_TIMEOUT, $this->_path($path));
                 break;
             }
-            if ($stat = $this->parseRaw($raw)) {
+            if ($stat = $this->_gd_parseRaw($raw)) {
                 if ($parents = $raw->getParents()) {
                     foreach ($parents as $parent) {
-                        $paths = $this->getMountPaths($parent);
+                        $paths = $this->_gd_getMountPaths($parent);
                         foreach ($paths as $path) {
                             $path = ($path === '') ? '/' : (rtrim($path, '/').'/');
                             if (!isset($this->cache[$path.$raw->id])) {
@@ -1038,7 +1128,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 'q' => sprintf('trashed=false and "%s" in parents', basename($src)),
             ];
 
-            $res = $this->query($opts);
+            $res = $this->_gd_query($opts);
             foreach ($res as $raw) {
                 $raw['mimeType'] == self::DIRMIME ? $this->copy($src.'/'.$raw['id'], $path, $raw['name']) : $this->_copy($src.'/'.$raw['id'], $path, $raw['name']);
             }
@@ -1117,7 +1207,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $tmb = $this->tmbPath.DIRECTORY_SEPARATOR.$name;
 
         // copy image into tmbPath so some drivers does not store files on local fs
-        if (!$data = $this->getThumbnail($path)) {
+        if (!$data = $this->_gd_getThumbnail($path)) {
             return false;
         }
         if (!file_put_contents($tmb, $data)) {
@@ -1179,89 +1269,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     }
 
     /**
-     * Get thumbnail from GoogleDrive.com.
-     *
-     * @param string $path
-     * @param string $size
-     *
-     * @return string | boolean
-     */
-    protected function getThumbnail($path)
-    {
-        $itemId = basename($path);
-
-        try {
-            $contents = $this->service->files->get($itemId, [
-                'alt' => 'media',
-            ]);
-            $contents = $contents->getBody()->detach();
-            rewind($contents);
-
-            return $contents;
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-    /**
-     * Publish permissions specified path item.
-     *
-     * @param  string $path
-     *                       
-     * @return bool
-     */
-    protected function publish($path)
-    {
-        if ($file = $this->_gd_getFile($path)) {
-            if ($this->_gd_isPublished($file)) {
-                return true;
-            }
-            try {
-                if ($this->service->permissions->create($file->getId(), new \Google_Service_Drive_Permission($this->options['publishPermission']))) {
-                    return true;
-                }
-            } catch (Exception $e) {
-                return false;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * unPublish permissions specified path.
-     *
-     * @param  string $path
-     *                       
-     * @return bool
-     */
-    protected function unPublish($path)
-    {
-        if ($file = $this->_gd_getFile($path)) {
-            if (!$this->_gd_isPublished($file)) {
-                return true;
-            }
-            $permissions = $file->getPermissions();
-            $pType = $this->options['publishPermission']['type'];
-            $pRole = $this->options['publishPermission']['role'];
-            try {
-                foreach ($permissions as $permission) {
-                    if ($permission->type === $pType && $permission->role === $pRole) {
-                        $this->service->permissions->delete($file->getId(), $permission->getId());
-
-                        return true;
-                        break;
-                    }
-                }
-            } catch (Exception $e) {
-                return false;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Return content URL (for netmout volume driver)
      * If file.url == 1 requests from JavaScript client with XHR.
      * 
@@ -1277,7 +1284,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         if (($file = $this->file($hash)) == false || !$file['url'] || $file['url'] == 1) {
             $path = $this->decode($hash);
 
-            if ($this->publish($path)) {
+            if ($this->_gd_publish($path)) {
                 if ($raw = $this->_gd_getFile($path)) {
                     return $this->_gd_getLink($raw);
                 }
@@ -1391,7 +1398,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     protected function _path($path)
     {
         if (!$this->names) {
-            $this->getDirectoryData();
+            $this->_gd_getDirectoryData();
         }
         $path = $this->_normpath(substr($path, strlen($this->root)));
         $names = [];
@@ -1443,7 +1450,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     protected function _stat($path)
     {
         if ($raw = $this->_gd_getFile($path)) {
-            return $this->parseRaw($raw);
+            return $this->_gd_parseRaw($raw);
         }
 
         return false;
@@ -1461,7 +1468,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     protected function _subdirs($path)
     {
         if ($this->directories === null) {
-            $this->getDirectoryData();
+            $this->_gd_getDirectoryData();
         }
 
         return isset($this->directories[basename($path)]);
@@ -1596,7 +1603,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
             basename(dirname($path)) == '' ? $path = '/'.$createdFile['id'] : $path = dirname($path).'/'.$createdFile['id'];
 
-            $this->getDirectoryData(false);
+            $this->_gd_getDirectoryData(false);
 
             return $path;
         } catch (Exception $e) {
@@ -1738,7 +1745,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     protected function _rmdir($path)
     {
         $res = $this->_unlink($path);
-        $res && $this->getDirectoryData(false);
+        $res && $this->_gd_getDirectoryData(false);
 
         return $res;
     }
@@ -1771,7 +1778,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $opts = [
                 'q' => sprintf('trashed=false and "%s" in parents and name="%s"', $pid, $name),
             ];
-            $res = $this->query($opts);
+            $res = $this->_gd_query($opts);
             $res = empty($res) ? null : $res[0];
         } else {
             $res = $this->_gd_getFile($path);
