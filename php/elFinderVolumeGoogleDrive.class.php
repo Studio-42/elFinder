@@ -622,6 +622,31 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         return false;
     }
 
+    /**
+     * Read file chunk.
+     *
+     * @param resource $handle
+     * @param int      $chunkSize
+     *
+     * @return string
+     */
+    protected function _gd_readFileChunk($handle, $chunkSize)
+    {
+        $byteCount = 0;
+        $giantChunk = '';
+        while (!feof($handle)) {
+            // fread will never return more than 8192 bytes if the stream is read buffered and it does not represent a plain file
+            $chunk = fread($handle, 8192);
+            $byteCount += strlen($chunk);
+            $giantChunk .= $chunk;
+            if ($byteCount >= $chunkSize) {
+                return $giantChunk;
+            }
+        }
+
+        return $giantChunk;
+    }
+
     /*********************************************************************/
     /*                        EXTENDED FUNCTIONS                         */
     /*********************************************************************/
@@ -1756,67 +1781,114 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $path = $this->_normpath($path);
 
         if (!$stat || empty($stat['iid'])) {
-            $pid = empty(basename(dirname($path))) ? 'root' : basename(dirname($path));
+            $parentId = empty(basename(dirname($path))) ? 'root' : basename(dirname($path));
             $opts = [
-                'q' => sprintf('trashed=false and "%s" in parents and name="%s"', $pid, $name),
+                'q' => sprintf('trashed=false and "%s" in parents and name="%s"', $parentId, $name),
             ];
-            $res = $this->_gd_query($opts);
-            $res = empty($res) ? null : $res[0];
+            $srcFile = $this->_gd_query($opts);
+            $srcFile = empty($srcFile) ? null : $srcFile[0];
         } else {
-            $res = $this->_gd_getFile($path);
+            $parentId = basename($path);
+            $srcFile = $this->_gd_getFile($path);
         }
 
         try {
-            $files = new \Google_Service_Drive_DriveFile();
+            $mode = 'update';
+            $mime = isset($stat['mime']) ? $stat['mime'] : '';
 
-            if ($res) {
-                //Update a file
-                $itemId = $res['id'];
-                $name = $res['name'];
-                $mimeType = $res['mimeType'];
-
-                if (!empty($stat) && empty($stat['iid'])) {
-                    return $this->_normpath(dirname($path).'/'.$itemId);
-                }
-
-                $files->setName($name);
-                $files->setDescription('');
-                if (isset($stat['mime'])) {
-                    $mimeType = $stat['mime'];
-                }
-                // Send the request to the API for updation contents.
-                $data = stream_get_contents($fp);
-                $file = $this->service->files->update($itemId, $files, [
-                    'data' => $data,
-                    'mimeType' => $mimeType,
-                    'uploadType' => 'multipart',
-                ]);
+            $file = new Google_Service_Drive_DriveFile();
+            if ($srcFile) {
+                $mime = $srcFile->getMimeType();
             } else {
-                //Insert or Create a file
-                $name == '' ? $name = basename($path) : $name = $name;
-                $files->setName($name);
-                $files->setDescription('');
-                $mimeType = empty($stat['mime']) ? self::mimetypeInternalDetect($name) : $stat['mime'];
-                $files->setMimeType($mimeType);
-
-                //Set the Folder Parent         
-                basename(dirname($path)) == '' ? $parentId = 'root' : $parentId = basename(dirname($path));
-
-                $files->setParents([$parentId]);
-                // Send the request to the API for new file contents.
-                $data = stream_get_contents($fp);
-                $file = $this->service->files->create($files, [
-                    'data' => $data,
-                    'mimeType' => $mimeType,
-                    'uploadType' => 'media',
+                $mode = 'insert';
+                $file->setName($name);
+                $file->setParents([
+                    $parentId,
                 ]);
+            }
+
+            if (! $mime) {
+                $mime = self::mimetypeInternalDetect($name);
+            }
+            if ($mime === 'unknown') {
+                $mime = 'application/octet-stream';
+            }
+            $file->setMimeType($mime);
+
+            $size = 0;
+            if (isset($stat['size'])) {
+                $size = $stat['size'];
+            } else {
+                $fstat = fstat($fp);
+                if (! empty($fstat['size'])) {
+                    $size = $fstat['size'];
+                }
+            }
+
+            // set chunk size (max: 100MB)
+            $chunkSizeBytes = 100 * 1024 * 1024;
+            if ($size > 0) {
+                $memory = elFinder::getIniBytes('memory_limit');
+                if ($memory) {
+                    $chunkSizeBytes = min([$chunkSizeBytes, (intval($memory / 4 / 256) * 256)]);
+                }
+            }
+
+            if ($size > $chunkSizeBytes) {
+                $client = $this->client;
+                // Call the API with the media upload, defer so it doesn't immediately return.
+                $client->setDefer(true);
+                if ($mode === 'insert') {
+                    $request = $this->service->files->create($file, [
+                        'fields' => self::FETCHFIELDS_GET,
+                    ]);
+                } else {
+                    $request = $this->service->files->update($srcFile->getId(), $file, [
+                        'fields' => self::FETCHFIELDS_GET,
+                    ]);
+                }
+
+                // Create a media file upload to represent our upload process.
+                $media = new Google_Http_MediaFileUpload($client, $request, $mime, null, true, $chunkSizeBytes);
+                $media->setFileSize($size);
+                // Upload the various chunks. $status will be false until the process is
+                // complete.
+                $status = false;
+                while (!$status && !feof($fp)) {
+                    elFinder::extendTimeLimit();
+                    // read until you get $chunkSizeBytes from TESTFILE
+                    // fread will never return more than 8192 bytes if the stream is read buffered and it does not represent a plain file
+                    // An example of a read buffered file is when reading from a URL
+                    $chunk = $this->_gd_readFileChunk($fp, $chunkSizeBytes);
+                    $status = $media->nextChunk($chunk);
+                }
+                // The final value of $status will be the data from the API for the object
+                // that has been uploaded.
+                if ($status !== false) {
+                    $obj = $status;
+                }
+
+                $client->setDefer(false);
+            } else {
+                $params = [
+                    'data' => stream_get_contents($fp),
+                    'uploadType' => 'media',
+                    'fields' => self::FETCHFIELDS_GET,
+                ];
+                if ($mode === 'insert') {
+                    $obj = $this->service->files->create($file, $params);
+                } else {
+                    $obj = $this->service->files->update($srcFile->getId(), $file, $params);
+                }
+            }
+            if ($obj instanceof Google_Service_Drive_DriveFile) {
+                return $this->_normpath(dirname($path).'/'.$obj->getId());
+            } else {
+                return false;
             }
         } catch (Exception $e) {
             return $this->setError('GoogleDrive error: '.$e->getMessage());
         }
-        $path = $this->_normpath(dirname($path).'/'.$file->getId());
-
-        return $path;
     }
 
     /**
