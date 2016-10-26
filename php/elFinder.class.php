@@ -26,6 +26,13 @@ class elFinder {
 	protected $volumes = array();
 	
 	/**
+	 * elFinder instance
+	 * 
+	 * @var object
+	 */
+	public static $instance = null;
+	
+	/**
 	 * Network mount drivers
 	 * 
 	 * @var array
@@ -330,6 +337,9 @@ class elFinder {
 	public function __construct($opts) {
 		// set error handler of WARNING, NOTICE
 		set_error_handler('elFinder::phpErrorHandler', E_WARNING | E_NOTICE | E_USER_WARNING | E_USER_NOTICE);
+		
+		// set elFinder instance
+		elFinder::$instance = $this;
 		
 		// setup debug mode
 		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
@@ -835,6 +845,21 @@ class elFinder {
 			return false;
 		}
 		return $volume->realpath($hash);
+	}
+	
+	/**
+	 * Update sesstion value of a NetVolume option
+	 * 
+	 * @param string $netKey
+	 * @param string $optionKey
+	 * @param mixed  $val
+	 */
+	public function updateNetVolumeOption($netKey, $optionKey, $val) {
+		$netVolumes = $this->getNetVolumes();
+		if (is_string($netKey) && isset($netVolumes[$netKey]) && is_string($optionKey)) {
+			$netVolumes[$netKey][$optionKey] = $val;
+			$this->saveNetVolumes($netVolumes);
+		}
 	}
 	
 	/**
@@ -3112,6 +3137,35 @@ class elFinder {
 			$time = is_null($time)? $defLimit : max($defLimit, $time);
 			set_time_limit($time);
 		}
+	}
+	
+	/**
+	 * Return bytes from php.ini value
+	 * 
+	 * @param string $iniName
+	 * @param string $val
+	 * @return number
+	 */
+	public static function getIniBytes($iniName = '', $val = '') {
+		if ($iniName !== '') {
+			$val = ini_get($iniName);
+			if ($val === false) {
+				return 0;
+			}
+		}
+		$val = trim($val, "bB \t\n\r\0\x0B");
+		$last = strtolower($val[strlen($val) - 1]);
+		switch($last) {
+			case 't':
+				$val *= 1024;
+			case 'g':
+				$val *= 1024;
+			case 'm':
+				$val *= 1024;
+			case 'k':
+				$val *= 1024;
+		}
+		return (int)$val;
 	}
 
 } // END class

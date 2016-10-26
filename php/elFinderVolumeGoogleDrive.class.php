@@ -36,21 +36,21 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
     /**
      * Cache of parents of each directories.
-     * 
+     *
      * @var array
      */
     protected $parents = [];
 
     /**
      * Cache of chiled directories of each directories.
-     * 
+     *
      * @var array
      */
     protected $directories = null;
 
     /**
      * Cache of itemID => name of each items.
-     * 
+     *
      * @var array
      */
     protected $names = [];
@@ -103,7 +103,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $opts = [
             'client_id' => '',
             'client_secret' => '',
-            'access_token' => '',
+            'access_token' => [],
+            'refresh_token' => '',
             'root' => 'My Drive',
             'gdAlias' => '%s@GDrive',
             'googleApiClient' => '',
@@ -133,32 +134,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     /*********************************************************************/
     /*                        ORIGINAL FUNCTIONS                         */
     /*********************************************************************/
-
-    /**
-     * Get token and auto refresh.
-     *
-     * @param object $client Google API client
-     *
-     * @return true|string error message
-     */
-    private function _gd_refreshToken($client)
-    {
-        try {
-            $client->setAccessToken($this->options['access_token']);
-            if ($client->isAccessTokenExpired()) {
-                $client->setClientId($this->options['client_id']);
-                $client->setClientSecret($this->options['client_secret']);
-                $refresh_token = $client->fetchAccessTokenWithRefreshToken();
-                $client->setAccessToken($refresh_token);
-                $this->options['access_token'] = $refresh_token;
-                $this->service = new \Google_Service_Drive($client);
-            }
-        } catch (Exception $e) {
-            return $e->getMessage();
-        }
-
-        return true;
-    }
 
     /**
      * Drive query and fetchAll.
@@ -242,7 +217,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $stat['iid'] = isset($raw['id']) ? $raw['id'] : 'root';
         $stat['name'] = isset($raw['name']) ? $raw['name'] : '';
         $stat['mime'] = $raw['mimeType'] == self::DIRMIME ? 'directory' :
-        ($raw['mimeType'] == 'image/bmp' ? 'image/x-ms-bmp' :  $raw['mimeType']);
+        ($raw['mimeType'] == 'image/bmp' ? 'image/x-ms-bmp' : $raw['mimeType']);
         $stat['size'] = $raw['mimeType'] == self::DIRMIME ? 0 : (int) $raw['size'];
         $stat['ts'] = isset($raw['modifiedTime']) ? strtotime($raw['modifiedTime']) : $_SERVER['REQUEST_TIME'];
         $stat['locked'] = false;
@@ -305,8 +280,9 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $root = '';
         if ($this->root === '/') {
             // get root id
-            $res = $this->_gd_getFile('/', 'id');
-            $root = $res->getId();
+            if ($res = $this->_gd_getFile('/', 'id')) {
+                $root = $res->getId();
+            }
         }
 
         $data = [];
@@ -329,7 +305,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 }
             }
         }
-        if ($root) {
+        if ($root && isset($data[$root])) {
             $data['root'] = $data[$root];
         }
         $this->directories = $data;
@@ -647,6 +623,31 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         return false;
     }
 
+    /**
+     * Read file chunk.
+     *
+     * @param resource $handle
+     * @param int      $chunkSize
+     *
+     * @return string
+     */
+    protected function _gd_readFileChunk($handle, $chunkSize)
+    {
+        $byteCount = 0;
+        $giantChunk = '';
+        while (!feof($handle)) {
+            // fread will never return more than 8192 bytes if the stream is read buffered and it does not represent a plain file
+            $chunk = fread($handle, 8192);
+            $byteCount += strlen($chunk);
+            $giantChunk .= $chunk;
+            if ($byteCount >= $chunkSize) {
+                return $giantChunk;
+            }
+        }
+
+        return $giantChunk;
+    }
+
     /*********************************************************************/
     /*                        EXTENDED FUNCTIONS                         */
     /*********************************************************************/
@@ -827,7 +828,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     /**
      * process of on netunmount
      * Drop `googledrive` & rm thumbs.
-     * 
+     *
      * @param array $options
      *
      * @return bool
@@ -848,7 +849,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
     /**
      * Get script url.
-     * 
+     *
      * @return string full URL
      *
      * @author Naoki Sawada
@@ -879,44 +880,100 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function init()
     {
-        if (!$this->options['access_token']) {
-            return $this->setError('Required options undefined.');
+        if (empty($options['client_id'])) {
+            if (defined('ELFINDER_GOOGLEDRIVE_CLIENTID') && ELFINDER_GOOGLEDRIVE_CLIENTID) {
+                $this->options['client_id'] = ELFINDER_GOOGLEDRIVE_CLIENTID;
+            } else {
+                return $this->setError('Required option "client_id" is undefined.');
+            }
+        }
+        if (empty($options['client_secret'])) {
+            if (defined('ELFINDER_GOOGLEDRIVE_CLIENTSECRET') && ELFINDER_GOOGLEDRIVE_CLIENTSECRET) {
+                $this->options['client_secret'] = ELFINDER_GOOGLEDRIVE_CLIENTSECRET;
+            } else {
+                return $this->setError('Required option "client_secret" is undefined.');
+            }
+        }
+        if (!$this->options['access_token'] && !$this->options['refresh_token']) {
+            return $this->setError('Required option "access_token" or "refresh_token" is undefined.');
         }
 
-        // make net mount key
-        $aToken = is_array($this->options['access_token'])? $this->options['access_token']['access_token'] : $this->options['access_token'];
-        $this->netMountKey = md5($aToken . '-' . $this->options['path']);
-
-        if (!$this->service) {
-            if ($this->options['googleApiClient'] && !class_exists('Google_Client')) {
-                include_once $this->options['googleApiClient'];
-            }
-            if (!class_exists('Google_Client')) {
-                return $this->setError('Class Google_Client not found.');
-            }
-
-            $client = new \Google_Client();
-
-            try {
-                $client->setAccessToken($this->options['access_token']);
-                if (true !== ($res = $this->_gd_refreshToken($client))) {
-                    return $this->setError($res);
+        try {
+            $aTokenFile = '';
+            if ($this->options['refresh_token']) {
+                // permanent mount
+            	$aToken = $this->options['refresh_token'];
+            	$this->options['access_token'] = '';
+                $tmp = elFinder::getStaticVar('commonTempPath');
+                if (!$tmp) {
+                    $tmp = $this->getTempPath();
                 }
-            } catch (InvalidArgumentException $e) {
-                return $this->setError($e->getMessage());
+                if ($tmp) {
+                    $aTokenFile = $tmp.DIRECTORY_SEPARATOR.md5($this->options['client_id'].$this->options['refresh_token']).'.gtoken';
+                    if (is_file($aTokenFile)) {
+                        $this->options['access_token'] = json_decode(file_get_contents($aTokenFile), true);
+                    }
+                }
+            } else {
+                // make net mount key for network mount
+                if (is_array($this->options['access_token'])) {
+                    $aToken = !empty($this->options['access_token']['refresh_token'])
+                        ? $this->options['access_token']['refresh_token']
+                        : $this->options['access_token']['access_token'];
+                } else {
+                    return $this->setError('Required option "access_token" is not Array or empty.');
+                }
             }
-            try {
+            $this->netMountKey = md5($aToken.'-'.$this->options['path']);
+
+            $errors = [];
+            if (!$this->service) {
+                if ($this->options['googleApiClient'] && !class_exists('Google_Client')) {
+                    include_once $this->options['googleApiClient'];
+                }
+                if (!class_exists('Google_Client')) {
+                    return $this->setError('Class Google_Client not found.');
+                }
+
+                $this->client = new \Google_Client();
+
+                $client = $this->client;
+
+                if ($this->options['access_token']) {
+                    $client->setAccessToken($this->options['access_token']);
+                }
+                if ($client->isAccessTokenExpired()) {
+                    $client->setClientId($this->options['client_id']);
+                    $client->setClientSecret($this->options['client_secret']);
+                    $access_token = $client->fetchAccessTokenWithRefreshToken($this->options['refresh_token'] ?: null);
+                    $client->setAccessToken($access_token);
+                    if ($aTokenFile) {
+                        file_put_contents($aTokenFile, json_encode($access_token));
+                    } else {
+                    	$access_token['refresh_token'] = $this->options['access_token']['refresh_token'];
+                    }
+                    if (!empty($this->options['netkey'])) {
+                        elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'access_token', $access_token);
+                    }
+                    $this->options['access_token'] = $access_token;
+                }
                 $this->service = new \Google_Service_Drive($client);
-            } catch (Google_Service_Exception $e) {
-                return $this->setError($e->getMessage());
             }
+        } catch (InvalidArgumentException $e) {
+            $errors[] = $e->getMessage();
+        } catch (Google_Service_Exception $e) {
+            $errors[] = $e->getMessage();
         }
 
         if (!$this->service) {
-            return $this->setError('OAuth extension not loaded.');
-        }
+            $this->session->remove($this->id.$this->netMountKey);
+            if ($aTokenFile) {
+                unlink($aTokenFile);
+            }
+            $errors[] = 'Google Drive Service could not be loaded.';
 
-        $this->client = $client;
+            return $this->setError($errors);
+        }
 
         // normalize root path
         if ($this->options['path'] == 'root') {
@@ -924,7 +981,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         }
         $this->root = $this->options['path'] = $this->_normpath($this->options['path']);
 
-        $this->options['root'] == '' ?  $this->options['root'] = $this->_gd_getNameByPath('root') : $this->options['root'];
+        $this->options['root'] == '' ? $this->options['root'] = $this->_gd_getNameByPath('root') : $this->options['root'];
 
         if (empty($this->options['alias'])) {
             $this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] : sprintf($this->options['gdAlias'], $this->_gd_getNameByPath($this->options['path']));
@@ -1215,7 +1272,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         }
 
         /* If image smaller or equal thumbnail size - just fitting to thumbnail square */
-        if ($s[0] <= $tmbSize && $s[1]  <= $tmbSize) {
+        if ($s[0] <= $tmbSize && $s[1] <= $tmbSize) {
             $result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png');
         } else {
             if ($this->options['tmbCrop']) {
@@ -1263,7 +1320,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     /**
      * Return content URL (for netmout volume driver)
      * If file.url == 1 requests from JavaScript client with XHR.
-     * 
+     *
      * @param string $hash    file hash
      * @param array  $options options array
      *
@@ -1284,6 +1341,21 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         }
 
         return false;
+    }
+
+    /**
+     * Return debug info for client.
+     *
+     * @return array
+     **/
+    public function debug()
+    {
+        $res = parent::debug();
+        if ($this->options['access_token'] && isset($this->options['access_token']['refresh_token'])) {
+            $res['refresh_token'] = $this->options['access_token']['refresh_token'];
+        }
+
+        return $res;
     }
 
     /*********************** paths/urls *************************/
@@ -1652,7 +1724,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $files = new \Google_Service_Drive_DriveFile();
             $files->setName($name);
 
-            //Set the Parent id         
+            //Set the Parent id
             $targetDir == '/' ? $parentId = 'root' : $parentId = basename($targetDir);
             $files->setParents([$parentId]);
 
@@ -1687,7 +1759,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $files = new \Google_Service_Drive_DriveFile();
             $files->setName($name);
 
-            //Set new Parent and remove old parent          
+            //Set new Parent and remove old parent
             $targetDir == '/' || $targetDir == 'root' ? $addParents = 'root' : $addParents = basename($targetDir);
             basename(dirname($source)) == '/' || basename(dirname($source)) == '' ? $removeParents = 'root' : $removeParents = basename(dirname($source));
 
@@ -1766,67 +1838,114 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $path = $this->_normpath($path);
 
         if (!$stat || empty($stat['iid'])) {
-            $pid = empty(basename(dirname($path))) ? 'root' : basename(dirname($path));
+            $parentId = empty(basename(dirname($path))) ? 'root' : basename(dirname($path));
             $opts = [
-                'q' => sprintf('trashed=false and "%s" in parents and name="%s"', $pid, $name),
+                'q' => sprintf('trashed=false and "%s" in parents and name="%s"', $parentId, $name),
             ];
-            $res = $this->_gd_query($opts);
-            $res = empty($res) ? null : $res[0];
+            $srcFile = $this->_gd_query($opts);
+            $srcFile = empty($srcFile) ? null : $srcFile[0];
         } else {
-            $res = $this->_gd_getFile($path);
+            $parentId = basename($path);
+            $srcFile = $this->_gd_getFile($path);
         }
 
         try {
-            $files = new \Google_Service_Drive_DriveFile();
+            $mode = 'update';
+            $mime = isset($stat['mime']) ? $stat['mime'] : '';
 
-            if ($res) {
-                //Update a file
-                $itemId = $res['id'];
-                $name = $res['name'];
-                $mimeType = $res['mimeType'];
-
-                if (!empty($stat) && empty($stat['iid'])) {
-                    return $this->_normpath(dirname($path).'/'.$itemId);
-                }
-
-                $files->setName($name);
-                $files->setDescription('');
-                if (isset($stat['mime'])) {
-                    $mimeType = $stat['mime'];
-                }
-                // Send the request to the API for updation contents.
-                $data = stream_get_contents($fp);
-                $file = $this->service->files->update($itemId, $files, [
-                    'data' => $data,
-                    'mimeType' => $mimeType,
-                    'uploadType' => 'multipart',
-                ]);
+            $file = new Google_Service_Drive_DriveFile();
+            if ($srcFile) {
+                $mime = $srcFile->getMimeType();
             } else {
-                //Insert or Create a file
-                $name == '' ? $name = basename($path) : $name = $name;
-                $files->setName($name);
-                $files->setDescription('');
-                $mimeType = empty($stat['mime']) ? self::mimetypeInternalDetect($name) : $stat['mime'];
-                $files->setMimeType($mimeType);
-
-                //Set the Folder Parent         
-                basename(dirname($path)) == '' ? $parentId = 'root' : $parentId = basename(dirname($path));
-
-                $files->setParents([$parentId]);
-                // Send the request to the API for new file contents.
-                $data = stream_get_contents($fp);
-                $file = $this->service->files->create($files, [
-                    'data' => $data,
-                    'mimeType' => $mimeType,
-                    'uploadType' => 'media',
+                $mode = 'insert';
+                $file->setName($name);
+                $file->setParents([
+                    $parentId,
                 ]);
+            }
+
+            if (!$mime) {
+                $mime = self::mimetypeInternalDetect($name);
+            }
+            if ($mime === 'unknown') {
+                $mime = 'application/octet-stream';
+            }
+            $file->setMimeType($mime);
+
+            $size = 0;
+            if (isset($stat['size'])) {
+                $size = $stat['size'];
+            } else {
+                $fstat = fstat($fp);
+                if (!empty($fstat['size'])) {
+                    $size = $fstat['size'];
+                }
+            }
+
+            // set chunk size (max: 100MB)
+            $chunkSizeBytes = 100 * 1024 * 1024;
+            if ($size > 0) {
+                $memory = elFinder::getIniBytes('memory_limit');
+                if ($memory) {
+                    $chunkSizeBytes = min([$chunkSizeBytes, (intval($memory / 4 / 256) * 256)]);
+                }
+            }
+
+            if ($size > $chunkSizeBytes) {
+                $client = $this->client;
+                // Call the API with the media upload, defer so it doesn't immediately return.
+                $client->setDefer(true);
+                if ($mode === 'insert') {
+                    $request = $this->service->files->create($file, [
+                        'fields' => self::FETCHFIELDS_GET,
+                    ]);
+                } else {
+                    $request = $this->service->files->update($srcFile->getId(), $file, [
+                        'fields' => self::FETCHFIELDS_GET,
+                    ]);
+                }
+
+                // Create a media file upload to represent our upload process.
+                $media = new Google_Http_MediaFileUpload($client, $request, $mime, null, true, $chunkSizeBytes);
+                $media->setFileSize($size);
+                // Upload the various chunks. $status will be false until the process is
+                // complete.
+                $status = false;
+                while (!$status && !feof($fp)) {
+                    elFinder::extendTimeLimit();
+                    // read until you get $chunkSizeBytes from TESTFILE
+                    // fread will never return more than 8192 bytes if the stream is read buffered and it does not represent a plain file
+                    // An example of a read buffered file is when reading from a URL
+                    $chunk = $this->_gd_readFileChunk($fp, $chunkSizeBytes);
+                    $status = $media->nextChunk($chunk);
+                }
+                // The final value of $status will be the data from the API for the object
+                // that has been uploaded.
+                if ($status !== false) {
+                    $obj = $status;
+                }
+
+                $client->setDefer(false);
+            } else {
+                $params = [
+                    'data' => stream_get_contents($fp),
+                    'uploadType' => 'media',
+                    'fields' => self::FETCHFIELDS_GET,
+                ];
+                if ($mode === 'insert') {
+                    $obj = $this->service->files->create($file, $params);
+                } else {
+                    $obj = $this->service->files->update($srcFile->getId(), $file, $params);
+                }
+            }
+            if ($obj instanceof Google_Service_Drive_DriveFile) {
+                return $this->_normpath(dirname($path).'/'.$obj->getId());
+            } else {
+                return false;
             }
         } catch (Exception $e) {
             return $this->setError('GoogleDrive error: '.$e->getMessage());
         }
-        $path = $this->_normpath(dirname($path).'/'.$file->getId());
-
-        return $path;
     }
 
     /**
@@ -1967,4 +2086,3 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         die('Not yet implemented. (_archive)');
     }
 } // END class
-
