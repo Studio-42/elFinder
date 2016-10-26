@@ -36,21 +36,21 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
     /**
      * Cache of parents of each directories.
-     * 
+     *
      * @var array
      */
     protected $parents = [];
 
     /**
      * Cache of chiled directories of each directories.
-     * 
+     *
      * @var array
      */
     protected $directories = null;
 
     /**
      * Cache of itemID => name of each items.
-     * 
+     *
      * @var array
      */
     protected $names = [];
@@ -103,7 +103,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $opts = [
             'client_id' => '',
             'client_secret' => '',
-            'access_token' => '',
+            'access_token' => [],
+            'refresh_token' => '',
             'root' => 'My Drive',
             'gdAlias' => '%s@GDrive',
             'googleApiClient' => '',
@@ -216,7 +217,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $stat['iid'] = isset($raw['id']) ? $raw['id'] : 'root';
         $stat['name'] = isset($raw['name']) ? $raw['name'] : '';
         $stat['mime'] = $raw['mimeType'] == self::DIRMIME ? 'directory' :
-        ($raw['mimeType'] == 'image/bmp' ? 'image/x-ms-bmp' :  $raw['mimeType']);
+        ($raw['mimeType'] == 'image/bmp' ? 'image/x-ms-bmp' : $raw['mimeType']);
         $stat['size'] = $raw['mimeType'] == self::DIRMIME ? 0 : (int) $raw['size'];
         $stat['ts'] = isset($raw['modifiedTime']) ? strtotime($raw['modifiedTime']) : $_SERVER['REQUEST_TIME'];
         $stat['locked'] = false;
@@ -827,7 +828,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     /**
      * process of on netunmount
      * Drop `googledrive` & rm thumbs.
-     * 
+     *
      * @param array $options
      *
      * @return bool
@@ -848,7 +849,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
     /**
      * Get script url.
-     * 
+     *
      * @return string full URL
      *
      * @author Naoki Sawada
@@ -879,55 +880,96 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function init()
     {
-        if (!$this->options['access_token']) {
-            return $this->setError('Required option "access_token" is undefined.');
+        if (empty($options['client_id'])) {
+            if (defined('ELFINDER_GOOGLEDRIVE_CLIENTID') && ELFINDER_GOOGLEDRIVE_CLIENTID) {
+                $this->options['client_id'] = ELFINDER_GOOGLEDRIVE_CLIENTID;
+            } else {
+                return $this->setError('Required option "client_id" is undefined.');
+            }
+        }
+        if (empty($options['client_secret'])) {
+            if (defined('ELFINDER_GOOGLEDRIVE_CLIENTSECRET') && ELFINDER_GOOGLEDRIVE_CLIENTSECRET) {
+                $this->options['client_secret'] = ELFINDER_GOOGLEDRIVE_CLIENTSECRET;
+            } else {
+                return $this->setError('Required option "client_secret" is undefined.');
+            }
+        }
+        if (!$this->options['access_token'] && !$this->options['refresh_token']) {
+            return $this->setError('Required option "access_token" or "refresh_token" is undefined.');
         }
 
-        // make net mount key
-        if (is_array($this->options['access_token'])) {
-            $aToken = !empty($this->options['access_token']['refresh_token'])
-                ? $this->options['access_token']['refresh_token']
-                : $this->options['access_token']['access_token'];
-        } else {
-            $this->options['access_token'];
-        }
-        $this->netMountKey = md5($aToken.'-'.$this->options['path']);
-
-        $errors = [];
-        if (!$this->service) {
-            if ($this->options['googleApiClient'] && !class_exists('Google_Client')) {
-                include_once $this->options['googleApiClient'];
+        try {
+            $aTokenFile = '';
+            if ($this->options['refresh_token']) {
+                // permanent mount
+            	$aToken = $this->options['refresh_token'];
+            	$this->options['access_token'] = '';
+                $tmp = elFinder::getStaticVar('commonTempPath');
+                if (!$tmp) {
+                    $tmp = $this->getTempPath();
+                }
+                if ($tmp) {
+                    $aTokenFile = $tmp.DIRECTORY_SEPARATOR.md5($this->options['client_id'].$this->options['refresh_token']).'.gtoken';
+                    if (is_file($aTokenFile)) {
+                        $this->options['access_token'] = json_decode(file_get_contents($aTokenFile), true);
+                    }
+                }
+            } else {
+                // make net mount key for network mount
+                if (is_array($this->options['access_token'])) {
+                    $aToken = !empty($this->options['access_token']['refresh_token'])
+                        ? $this->options['access_token']['refresh_token']
+                        : $this->options['access_token']['access_token'];
+                } else {
+                    return $this->setError('Required option "access_token" is not Array or empty.');
+                }
             }
-            if (!class_exists('Google_Client')) {
-                return $this->setError('Class Google_Client not found.');
-            }
+            $this->netMountKey = md5($aToken.'-'.$this->options['path']);
 
-            $this->client = new \Google_Client();
+            $errors = [];
+            if (!$this->service) {
+                if ($this->options['googleApiClient'] && !class_exists('Google_Client')) {
+                    include_once $this->options['googleApiClient'];
+                }
+                if (!class_exists('Google_Client')) {
+                    return $this->setError('Class Google_Client not found.');
+                }
 
-            try {
+                $this->client = new \Google_Client();
+
                 $client = $this->client;
-                $client->setAccessToken($this->options['access_token']);
+
+                if ($this->options['access_token']) {
+                    $client->setAccessToken($this->options['access_token']);
+                }
                 if ($client->isAccessTokenExpired()) {
                     $client->setClientId($this->options['client_id']);
                     $client->setClientSecret($this->options['client_secret']);
-                    $access_token = $client->fetchAccessTokenWithRefreshToken();
+                    $access_token = $client->fetchAccessTokenWithRefreshToken($this->options['refresh_token'] ?: null);
                     $client->setAccessToken($access_token);
-                    $access_token['refresh_token'] = $this->options['access_token']['refresh_token'];
+                    if ($aTokenFile) {
+                        file_put_contents($aTokenFile, json_encode($access_token));
+                    } else {
+                    	$access_token['refresh_token'] = $this->options['access_token']['refresh_token'];
+                    }
                     if (!empty($this->options['netkey'])) {
                         elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'access_token', $access_token);
                     }
                     $this->options['access_token'] = $access_token;
                 }
                 $this->service = new \Google_Service_Drive($client);
-            } catch (InvalidArgumentException $e) {
-                $errors[] = $e->getMessage();
-            } catch (Google_Service_Exception $e) {
-                $errors[] = $e->getMessage();
             }
+        } catch (InvalidArgumentException $e) {
+            $errors[] = $e->getMessage();
+        } catch (Google_Service_Exception $e) {
+            $errors[] = $e->getMessage();
         }
 
         if (!$this->service) {
             $this->session->remove($this->id.$this->netMountKey);
+            if ($aTokenFile) {
+                unlink($aTokenFile);
+            }
             $errors[] = 'Google Drive Service could not be loaded.';
 
             return $this->setError($errors);
@@ -939,7 +981,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         }
         $this->root = $this->options['path'] = $this->_normpath($this->options['path']);
 
-        $this->options['root'] == '' ?  $this->options['root'] = $this->_gd_getNameByPath('root') : $this->options['root'];
+        $this->options['root'] == '' ? $this->options['root'] = $this->_gd_getNameByPath('root') : $this->options['root'];
 
         if (empty($this->options['alias'])) {
             $this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] : sprintf($this->options['gdAlias'], $this->_gd_getNameByPath($this->options['path']));
@@ -1230,7 +1272,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         }
 
         /* If image smaller or equal thumbnail size - just fitting to thumbnail square */
-        if ($s[0] <= $tmbSize && $s[1]  <= $tmbSize) {
+        if ($s[0] <= $tmbSize && $s[1] <= $tmbSize) {
             $result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png');
         } else {
             if ($this->options['tmbCrop']) {
@@ -1278,7 +1320,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     /**
      * Return content URL (for netmout volume driver)
      * If file.url == 1 requests from JavaScript client with XHR.
-     * 
+     *
      * @param string $hash    file hash
      * @param array  $options options array
      *
@@ -1299,6 +1341,21 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         }
 
         return false;
+    }
+
+    /**
+     * Return debug info for client.
+     *
+     * @return array
+     **/
+    public function debug()
+    {
+        $res = parent::debug();
+        if ($this->options['access_token'] && isset($this->options['access_token']['refresh_token'])) {
+            $res['refresh_token'] = $this->options['access_token']['refresh_token'];
+        }
+
+        return $res;
     }
 
     /*********************** paths/urls *************************/
@@ -1667,7 +1724,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $files = new \Google_Service_Drive_DriveFile();
             $files->setName($name);
 
-            //Set the Parent id         
+            //Set the Parent id
             $targetDir == '/' ? $parentId = 'root' : $parentId = basename($targetDir);
             $files->setParents([$parentId]);
 
@@ -1702,7 +1759,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $files = new \Google_Service_Drive_DriveFile();
             $files->setName($name);
 
-            //Set new Parent and remove old parent          
+            //Set new Parent and remove old parent
             $targetDir == '/' || $targetDir == 'root' ? $addParents = 'root' : $addParents = basename($targetDir);
             basename(dirname($source)) == '/' || basename(dirname($source)) == '' ? $removeParents = 'root' : $removeParents = basename(dirname($source));
 
@@ -1807,7 +1864,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 ]);
             }
 
-            if (! $mime) {
+            if (!$mime) {
                 $mime = self::mimetypeInternalDetect($name);
             }
             if ($mime === 'unknown') {
@@ -1820,7 +1877,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 $size = $stat['size'];
             } else {
                 $fstat = fstat($fp);
-                if (! empty($fstat['size'])) {
+                if (!empty($fstat['size'])) {
                     $size = $fstat['size'];
                 }
             }
@@ -2029,4 +2086,3 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         die('Not yet implemented. (_archive)');
     }
 } // END class
-
