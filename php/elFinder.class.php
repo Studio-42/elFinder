@@ -3138,5 +3138,34 @@ class elFinder {
 			set_time_limit($time);
 		}
 	}
+	
+	/**
+	 * Return bytes from php.ini value
+	 * 
+	 * @param string $iniName
+	 * @param string $val
+	 * @return number
+	 */
+	public static function getIniBytes($iniName = '', $val = '') {
+		if ($iniName !== '') {
+			$val = ini_get($iniName);
+			if ($val === false) {
+				return 0;
+			}
+		}
+		$val = trim($val, "bB \t\n\r\0\x0B");
+		$last = strtolower($val[strlen($val) - 1]);
+		switch($last) {
+			case 't':
+				$val *= 1024;
+			case 'g':
+				$val *= 1024;
+			case 'm':
+				$val *= 1024;
+			case 'k':
+				$val *= 1024;
+		}
+		return (int)$val;
+	}
 
 } // END class
