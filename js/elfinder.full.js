@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 9c1070e) (2016-10-26)
+ * Version 2.1.16 (2.1-src Nightly: a19e212) (2016-10-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6174,7 +6174,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 9c1070e)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: a19e212)';
 
 
 
@@ -10265,7 +10265,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @param  Object  file hash -> thumbnail map
 			 * @return void
 			 */
-			attachThumbnails = function(image) {
+			attachThumbnails = function(image, reload) {
 				var url  = fm.option('tmbUrl'),
 					done = [],
 					chk  = function(hash, tmb) {
@@ -10280,11 +10280,15 @@ $.fn.elfindercwd = function(fm, options) {
 										file.tmb = tmb;
 									}
 									(function(node, tmb) {
+										var url = tmb.url;
+										if (reload) {
+											url += ((url.indexOf('?') === -1)? '?' : '&') + '_t=' + new Date();
+										}
 										$('<img/>')
 											.on('load', function() {
-												node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')");
+												node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+url+"')");
 											})
-											.attr('src', tmb.url);
+											.attr('src', url);
 									})(node, fm.tmb(file));
 								} else {
 									bufferExt.getTmbs.push(hash);
@@ -11418,6 +11422,19 @@ $.fn.elfindercwd = function(fm, options) {
 			})
 			.bind('resMixinMake', function() {
 				setColwidth();
+			})
+			.bind('tmbreload', function(e) {
+				var imgs = {},
+					files = (e.data && e.data.files)? e.data.files : null;
+				
+				$.each(files, function(i, f) {
+					if (f.tmb && f.tmb != '1') {
+						imgs[f.hash] = f.tmb;
+					}
+				});
+				if (Object.keys(imgs).length) {
+					attachThumbnails(imgs, true);
+				}
 			})
 			.add(function(e) {
 				var phash = fm.cwd().hash,
@@ -19801,7 +19818,35 @@ elFinder.prototype.commands.resize = function() {
 		var fm   = this.fm,
 			file = file || fm.file(data.target),
 			src  = file? fm.openUrl(file.hash) : null,
-			enabled = fm.isCommandEnabled('resize', data.target);
+			tmb  = file? file.tmb : null,
+			enabled = fm.isCommandEnabled('resize', data.target),
+			reload = function(url) {
+				var dfd = $.Deferred(),
+					ifm;
+				try {
+					ifm = $('<iframe width="1" height="1" scrolling="no" frameborder="no" style="position:absolute; top:-1px; left:-1px" crossorigin="use-credentials">')
+						.attr('src', url)
+						.one('load', function() {
+							if (this.contentDocument) {
+								this.contentDocument.location.reload(true);
+								ifm.one('load', function() {
+									ifm.remove();
+									dfd.resolve();
+								});
+							} else {
+								ifm.attr('src', '').attr('src', url).one('load', function() {
+									ifm.remove();
+									dfd.resolve();
+								});
+							}
+						})
+						.appendTo('body');
+				} catch(e) {
+					ifm && ifm.remove();
+					dfd.reject();
+				}
+				return dfd;
+			};
 		
 		if (enabled && (! file || (file && file.read && file.write && file.mime.indexOf('image/') !== -1 ))) {
 			return fm.request({
@@ -19810,19 +19855,21 @@ elFinder.prototype.commands.resize = function() {
 				}),
 				notify : {type : 'resize', cnt : 1},
 				prepare : function(data) {
+					var newfile;
 					if (data) {
-						if (data.changed && data.changed.length && data.changed[0].tmb) {
-							data.changed[0].tmb = 1;
-							if (! file) {
-								file = data.changed[0];
-								src  = fm.openUrl(file.hash);
-							}
-						}
 						if (data.added && data.added.length && data.added[0].tmb) {
-							data.added[0].tmb = 1;
-							if (! file) {
-								file = data.added[0];
-								src  = fm.openUrl(file.hash);
+							newfile = data.added[0];
+						} else if (data.changed && data.changed.length && data.changed[0].tmb) {
+							newfile = data.changed[0];
+						}
+						if (newfile) {
+							file = newfile;
+							src = fm.openUrl(file.hash);
+							if (file.tmb && file.tmb != '1' && (file.tmb === tmb)) {
+								file.tmb = '';
+								reload(fm.tmb(file).url).done(function() {
+									fm.trigger('tmbreload', {files: [ {hash: file.hash, tmb: tmb} ]});
+								});
 							}
 						}
 					}
@@ -19834,30 +19881,10 @@ elFinder.prototype.commands.resize = function() {
 				}
 			})
 			.done(function() {
-				var reload = function(url) {
-					var ifm;
-					try {
-						ifm = $('<iframe width="1" height="1" scrolling="no" frameborder="no" style="position:absolute; top:-1px; left:-1px">')
-							.attr('src', url)
-							.one('load', function() {
-								if (this.contentDocument) {
-									this.contentDocument.location.reload(true);
-									ifm.one('load', function() {
-										ifm.remove();
-									});
-								} else {
-									ifm.remove();
-								}
-							})
-							.appendTo('body');
-					} catch(e) {
-						ifm && ifm.remove();
-					}
-				},
-				url = fm.url(file.hash);
+				var url = (file.url != '1')? fm.url(file.hash) : '';
 				
 				reload(src);
-				if (url !== src) {
+				if (url && url !== src) {
 					reload(url);
 				}
 				
