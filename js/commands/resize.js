@@ -43,12 +43,11 @@ elFinder.prototype.commands.resize = function() {
 							src = fm.openUrl(file.hash);
 							if (file.tmb && file.tmb != '1' && (file.tmb === tmb)) {
 								file.tmb = '';
-								fm.reloadContents(fm.tmb(file).url).done(function() {
-									fm.trigger('tmbreload', {files: [ {hash: file.hash, tmb: tmb} ]});
-								});
+								return;
 							}
 						}
 					}
+					tmb = '';
 				}
 			})
 			.fail(function(error) {
@@ -58,6 +57,15 @@ elFinder.prototype.commands.resize = function() {
 			})
 			.done(function() {
 				var url = (file.url != '1')? fm.url(file.hash) : '';
+				
+				// need tmb reload
+				if (tmb) {
+					fm.one('resizedone', function() {
+						fm.reloadContents(fm.tmb(file).url).done(function() {
+							fm.trigger('tmbreload', {files: [ {hash: file.hash, tmb: tmb} ]});
+						});
+					});
+				}
 				
 				fm.reloadContents(src);
 				if (url && url !== src) {
