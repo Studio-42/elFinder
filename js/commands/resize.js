@@ -22,34 +22,7 @@ elFinder.prototype.commands.resize = function() {
 			file = file || fm.file(data.target),
 			src  = file? fm.openUrl(file.hash) : null,
 			tmb  = file? file.tmb : null,
-			enabled = fm.isCommandEnabled('resize', data.target),
-			reload = function(url) {
-				var dfd = $.Deferred(),
-					ifm;
-				try {
-					ifm = $('<iframe width="1" height="1" scrolling="no" frameborder="no" style="position:absolute; top:-1px; left:-1px" crossorigin="use-credentials">')
-						.attr('src', url)
-						.one('load', function() {
-							if (this.contentDocument) {
-								this.contentDocument.location.reload(true);
-								ifm.one('load', function() {
-									ifm.remove();
-									dfd.resolve();
-								});
-							} else {
-								ifm.attr('src', '').attr('src', url).one('load', function() {
-									ifm.remove();
-									dfd.resolve();
-								});
-							}
-						})
-						.appendTo('body');
-				} catch(e) {
-					ifm && ifm.remove();
-					dfd.reject();
-				}
-				return dfd;
-			};
+			enabled = fm.isCommandEnabled('resize', data.target);
 		
 		if (enabled && (! file || (file && file.read && file.write && file.mime.indexOf('image/') !== -1 ))) {
 			return fm.request({
@@ -70,7 +43,7 @@ elFinder.prototype.commands.resize = function() {
 							src = fm.openUrl(file.hash);
 							if (file.tmb && file.tmb != '1' && (file.tmb === tmb)) {
 								file.tmb = '';
-								reload(fm.tmb(file).url).done(function() {
+								fm.reloadContents(fm.tmb(file).url).done(function() {
 									fm.trigger('tmbreload', {files: [ {hash: file.hash, tmb: tmb} ]});
 								});
 							}
@@ -86,9 +59,9 @@ elFinder.prototype.commands.resize = function() {
 			.done(function() {
 				var url = (file.url != '1')? fm.url(file.hash) : '';
 				
-				reload(src);
+				fm.reloadContents(src);
 				if (url && url !== src) {
-					reload(url);
+					fm.reloadContents(url);
 				}
 				
 				dfrd && dfrd.resolve();

@@ -6061,6 +6061,40 @@ elFinder.prototype = {
 		}
 	},
 	
+	/**
+	 * Reload contents of target URL for clear browser cache
+	 * 
+	 * @param  String  url target URL
+	 * @return Object  jQuery.Deferred
+	 */
+	reloadContents : function(url) {
+		var dfd = $.Deferred(),
+			ifm;
+		try {
+			ifm = $('<iframe width="1" height="1" scrolling="no" frameborder="no" style="position:absolute; top:-1px; left:-1px" crossorigin="use-credentials">')
+				.attr('src', url)
+				.one('load', function() {
+					if (this.contentDocument) {
+						this.contentDocument.location.reload(true);
+						ifm.one('load', function() {
+							ifm.remove();
+							dfd.resolve();
+						});
+					} else {
+						ifm.attr('src', '').attr('src', url).one('load', function() {
+							ifm.remove();
+							dfd.resolve();
+						});
+					}
+				})
+				.appendTo('body');
+		} catch(e) {
+			ifm && ifm.remove();
+			dfd.reject();
+		}
+		return dfd;
+	},
+	
 	navHash2Id : function(hash) {
 		return this.navPrefix + hash;
 	},
