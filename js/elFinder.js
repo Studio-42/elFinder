@@ -6074,13 +6074,14 @@ elFinder.prototype = {
 			ifm = $('<iframe width="1" height="1" scrolling="no" frameborder="no" style="position:absolute; top:-1px; left:-1px" crossorigin="use-credentials">')
 				.attr('src', url)
 				.one('load', function() {
-					if (this.contentDocument) {
+					var ifm = $(this);
+					try {
 						this.contentDocument.location.reload(true);
 						ifm.one('load', function() {
 							ifm.remove();
 							dfd.resolve();
 						});
-					} else {
+					} catch(e) {
 						ifm.attr('src', '').attr('src', url).one('load', function() {
 							ifm.remove();
 							dfd.resolve();

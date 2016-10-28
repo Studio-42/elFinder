@@ -1144,7 +1144,7 @@ $.fn.elfindercwd = function(fm, options) {
 							fm.unbind('resize', attachThumbnails).bind('resize', attachThumbnails);
 						}
 						$.extend(bufferExt.attachTmbs, atmb);
-						attachThumbnails(atmb, (mode === 'change')? true : false);
+						attachThumbnails(atmb, (mode === 'change' && fm.currentReqCmd === 'resize')? true : false);
 					}
 				}
 			},
