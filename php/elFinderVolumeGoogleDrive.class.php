@@ -229,15 +229,21 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $stat['height'] = $size['height'];
         }
 
+        $published = $this->_gd_isPublished($raw);
+
         if ($this->options['useGoogleTmb']) {
             if (isset($raw['thumbnailLink'])) {
-                $stat['tmb'] = substr($raw['thumbnailLink'], 8); // remove "https://"
+                if ($published) {
+                    $stat['tmb'] = 'drive.google.com/thumbnail?authuser=0&sz=s'.$this->options['tmbSize'].'&id='.$raw['id'];
+                } else {
+                    $stat['tmb'] = substr($raw['thumbnailLink'], 8); // remove "https://"
+                }
             } else {
                 $stat['tmb'] = '';
             }
         }
 
-        $stat['url'] = $this->_gd_isPublished($raw) ? $this->_gd_getLink($raw) : '1';
+        $stat['url'] = $published ? $this->_gd_getLink($raw) : '1';
 
         return $stat;
     }
@@ -902,8 +908,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $aTokenFile = '';
             if ($this->options['refresh_token']) {
                 // permanent mount
-            	$aToken = $this->options['refresh_token'];
-            	$this->options['access_token'] = '';
+                $aToken = $this->options['refresh_token'];
+                $this->options['access_token'] = '';
                 $tmp = elFinder::getStaticVar('commonTempPath');
                 if (!$tmp) {
                     $tmp = $this->getTempPath();
@@ -950,7 +956,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                     if ($aTokenFile) {
                         file_put_contents($aTokenFile, json_encode($access_token));
                     } else {
-                    	$access_token['refresh_token'] = $this->options['access_token']['refresh_token'];
+                        $access_token['refresh_token'] = $this->options['access_token']['refresh_token'];
                     }
                     if (!empty($this->options['netkey'])) {
                         elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'access_token', $access_token);
