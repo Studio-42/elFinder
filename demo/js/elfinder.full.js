@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: a19e212) (2016-10-28)
+ * Version 2.1.16 (2.1-src Nightly: 48d71d7) (2016-10-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6075,6 +6075,40 @@ elFinder.prototype = {
 		}
 	},
 	
+	/**
+	 * Reload contents of target URL for clear browser cache
+	 * 
+	 * @param  String  url target URL
+	 * @return Object  jQuery.Deferred
+	 */
+	reloadContents : function(url) {
+		var dfd = $.Deferred(),
+			ifm;
+		try {
+			ifm = $('<iframe width="1" height="1" scrolling="no" frameborder="no" style="position:absolute; top:-1px; left:-1px" crossorigin="use-credentials">')
+				.attr('src', url)
+				.one('load', function() {
+					if (this.contentDocument) {
+						this.contentDocument.location.reload(true);
+						ifm.one('load', function() {
+							ifm.remove();
+							dfd.resolve();
+						});
+					} else {
+						ifm.attr('src', '').attr('src', url).one('load', function() {
+							ifm.remove();
+							dfd.resolve();
+						});
+					}
+				})
+				.appendTo('body');
+		} catch(e) {
+			ifm && ifm.remove();
+			dfd.reject();
+		}
+		return dfd;
+	},
+	
 	navHash2Id : function(hash) {
 		return this.navPrefix + hash;
 	},
@@ -6174,7 +6208,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: a19e212)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 48d71d7)';
 
 
 
@@ -10263,14 +10297,22 @@ $.fn.elfindercwd = function(fm, options) {
 			 * required for old api to stop loading thumbnails.
 			 *
 			 * @param  Object  file hash -> thumbnail map
+			 * @param  Bool    reload
 			 * @return void
 			 */
 			attachThumbnails = function(image, reload) {
 				var url  = fm.option('tmbUrl'),
 					done = [],
+					attach = function(node, tmb) {
+						$('<img/>')
+							.on('load', function() {
+								node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')");
+							})
+							.attr('src', tmb.url);
+					},
 					chk  = function(hash, tmb) {
 						var node = $('#'+fm.cwdHash2Id(hash)),
-							file;
+							file, tmbObj, reloads = [];
 	
 						if (node.length) {
 							if (fm.isInWindow(node, true)) {
@@ -10279,19 +10321,20 @@ $.fn.elfindercwd = function(fm, options) {
 									if (file.tmb !== tmb) {
 										file.tmb = tmb;
 									}
-									(function(node, tmb) {
-										var url = tmb.url;
-										if (reload) {
-											url += ((url.indexOf('?') === -1)? '?' : '&') + '_t=' + new Date();
-										}
-										$('<img/>')
-											.on('load', function() {
-												node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+url+"')");
-											})
-											.attr('src', url);
-									})(node, fm.tmb(file));
+									tmbObj = fm.tmb(file);
+									if (reload) {
+										fm.reloadContents(tmbObj.url).done(function() {
+											node.find('.elfinder-cwd-icon').addClass(tmbObj.className).css('background-image', "url('"+tmbObj.url+"')");
+										});
+									} else {
+										attach(node, tmbObj);
+									}
 								} else {
-									bufferExt.getTmbs.push(hash);
+									if (reload) {
+										reloads.push(hash);
+									} else {
+										bufferExt.getTmbs.push(hash);
+									}
 								}
 								done.push(hash);
 							}
@@ -10300,7 +10343,9 @@ $.fn.elfindercwd = function(fm, options) {
 						$.each(done, function(i, h) {
 							delete bufferExt.attachTmbs[h];
 						});
-						if (bufferExt.getTmbs.length) {
+						if (reload) {
+							loadThumbnails(reloads);
+						} else if (bufferExt.getTmbs.length) {
 							loadThumbnails();
 						}
 						if (Object.keys(bufferExt.attachTmbs).length < 1 && bufferExt.getTmbs.length < 1) {
@@ -10323,18 +10368,21 @@ $.fn.elfindercwd = function(fm, options) {
 			/**
 			 * Load thumbnails from backend.
 			 *
-			 * @param  Array|Boolean  files hashes list for new api | true for old api
+			 * @param  Array|void reloads  hashes list for reload thumbnail items
 			 * @return void
 			 */
-			loadThumbnails = function() {
-				var tmbs = [];
+			loadThumbnails = function(reloads) {
+				var tmbs = [],
+					reload = false;
 				
 				// do not parallel request
-				if (bufferExt.gettingTmb) {
+				if (bufferExt.gettingTmb && ! reloads) {
 					return;
 				}
 				
-				bufferExt.gettingTmb = true;
+				if (! reloads) {
+					bufferExt.gettingTmb = true;
+				}
 				
 				if (fm.oldAPI) {
 					fm.request({
@@ -10356,9 +10404,14 @@ $.fn.elfindercwd = function(fm, options) {
 					return;
 				} 
 
-				tmbs = bufferExt.getTmbs.splice(0, tmbNum);
+				if (reloads) {
+					reload = true;
+					tmbs = reloads.splice(0, tmbNum);
+				} else {
+					tmbs = bufferExt.getTmbs.splice(0, tmbNum);
+				}
 				if (tmbs.length) {
-					if (fm.isInWindow($('#'+fm.cwdHash2Id(tmbs[0])), true) || fm.isInWindow($('#'+fm.cwdHash2Id(tmbs[tmbs.length-1])), true)) {
+					if (reload || fm.isInWindow($('#'+fm.cwdHash2Id(tmbs[0])), true) || fm.isInWindow($('#'+fm.cwdHash2Id(tmbs[tmbs.length-1])), true)) {
 						fm.request({
 							data : {cmd : 'tmb', targets : tmbs},
 							preventFail : true
@@ -10366,10 +10419,16 @@ $.fn.elfindercwd = function(fm, options) {
 						.done(function(data) {
 							bufferExt.gettingTmb = false;
 							if (data.images && Object.keys(data.images).length) {
-								attachThumbnails(data.images);
+								attachThumbnails(data.images, reload);
 							}
-							if (bufferExt.getTmbs.length) {
-								loadThumbnails();
+							if (reload) {
+								if (reloads.length) {
+									loadThumbnails(reloads);
+								}
+							} else {
+								if (bufferExt.getTmbs.length) {
+									loadThumbnails();
+								}
 							}
 						})
 						.fail(function() {
@@ -10392,7 +10451,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @param  Array  new files
 			 * @return void
 			 */
-			add = function(files) {
+			add = function(files, mode) {
 				var place    = list ? cwd.find('tbody') : cwd,
 					l        = files.length, 
 					atmb     = {},
@@ -10471,7 +10530,7 @@ $.fn.elfindercwd = function(fm, options) {
 							fm.unbind('resize', attachThumbnails).bind('resize', attachThumbnails);
 						}
 						$.extend(bufferExt.attachTmbs, atmb);
-						attachThumbnails();
+						attachThumbnails(atmb, (mode === 'change')? true : false);
 					}
 				}
 			},
@@ -11456,14 +11515,14 @@ $.fn.elfindercwd = function(fm, options) {
 					$.each(e.data.changed || [], function(i, file) {
 						remove([file.hash]);
 						if (file.name.indexOf(query) !== -1) {
-							add([file]);
+							add([file], 'change');
 							$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
 						}
 					});
 				} else {
 					$.each($.map(e.data.changed || [], function(f) { return f.phash == phash ? f : null; }), function(i, file) {
 						remove([file.hash]);
-						add([file]);
+						add([file], 'change');
 						$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
 					});
 				}
@@ -19819,34 +19878,7 @@ elFinder.prototype.commands.resize = function() {
 			file = file || fm.file(data.target),
 			src  = file? fm.openUrl(file.hash) : null,
 			tmb  = file? file.tmb : null,
-			enabled = fm.isCommandEnabled('resize', data.target),
-			reload = function(url) {
-				var dfd = $.Deferred(),
-					ifm;
-				try {
-					ifm = $('<iframe width="1" height="1" scrolling="no" frameborder="no" style="position:absolute; top:-1px; left:-1px" crossorigin="use-credentials">')
-						.attr('src', url)
-						.one('load', function() {
-							if (this.contentDocument) {
-								this.contentDocument.location.reload(true);
-								ifm.one('load', function() {
-									ifm.remove();
-									dfd.resolve();
-								});
-							} else {
-								ifm.attr('src', '').attr('src', url).one('load', function() {
-									ifm.remove();
-									dfd.resolve();
-								});
-							}
-						})
-						.appendTo('body');
-				} catch(e) {
-					ifm && ifm.remove();
-					dfd.reject();
-				}
-				return dfd;
-			};
+			enabled = fm.isCommandEnabled('resize', data.target);
 		
 		if (enabled && (! file || (file && file.read && file.write && file.mime.indexOf('image/') !== -1 ))) {
 			return fm.request({
@@ -19867,7 +19899,7 @@ elFinder.prototype.commands.resize = function() {
 							src = fm.openUrl(file.hash);
 							if (file.tmb && file.tmb != '1' && (file.tmb === tmb)) {
 								file.tmb = '';
-								reload(fm.tmb(file).url).done(function() {
+								fm.reloadContents(fm.tmb(file).url).done(function() {
 									fm.trigger('tmbreload', {files: [ {hash: file.hash, tmb: tmb} ]});
 								});
 							}
@@ -19883,9 +19915,9 @@ elFinder.prototype.commands.resize = function() {
 			.done(function() {
 				var url = (file.url != '1')? fm.url(file.hash) : '';
 				
-				reload(src);
+				fm.reloadContents(src);
 				if (url && url !== src) {
-					reload(url);
+					fm.reloadContents(url);
 				}
 				
 				dfrd && dfrd.resolve();
