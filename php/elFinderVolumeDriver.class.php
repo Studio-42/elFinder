@@ -2486,8 +2486,9 @@ abstract class elFinderVolumeDriver {
 		
 		$ret = false;
 		if ($result) {
+			$this->rmTmb($file);
+			$this->clearstatcache();
 			$stat = $this->stat($path);
-			clearstatcache();
 			$fstat = stat($work_path);
 			$stat['size'] = $fstat['size'];
 			$stat['ts'] = $fstat['mtime'];
@@ -2505,7 +2506,6 @@ abstract class elFinderVolumeDriver {
 				$ret = true;
 			}
 			if ($ret) {
-				$this->rmTmb($file);
 				$this->clearcache();
 				$ret = $this->stat($path);
 				$ret['width'] = $stat['width'];

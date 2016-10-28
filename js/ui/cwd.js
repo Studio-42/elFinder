@@ -913,7 +913,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @param  Object  file hash -> thumbnail map
 			 * @return void
 			 */
-			attachThumbnails = function(image) {
+			attachThumbnails = function(image, reload) {
 				var url  = fm.option('tmbUrl'),
 					done = [],
 					chk  = function(hash, tmb) {
@@ -928,11 +928,15 @@ $.fn.elfindercwd = function(fm, options) {
 										file.tmb = tmb;
 									}
 									(function(node, tmb) {
+										var url = tmb.url;
+										if (reload) {
+											url += ((url.indexOf('?') === -1)? '?' : '&') + '_t=' + new Date();
+										}
 										$('<img/>')
 											.on('load', function() {
-												node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')");
+												node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+url+"')");
 											})
-											.attr('src', tmb.url);
+											.attr('src', url);
 									})(node, fm.tmb(file));
 								} else {
 									bufferExt.getTmbs.push(hash);
@@ -2066,6 +2070,19 @@ $.fn.elfindercwd = function(fm, options) {
 			})
 			.bind('resMixinMake', function() {
 				setColwidth();
+			})
+			.bind('tmbreload', function(e) {
+				var imgs = {},
+					files = (e.data && e.data.files)? e.data.files : null;
+				
+				$.each(files, function(i, f) {
+					if (f.tmb && f.tmb != '1') {
+						imgs[f.hash] = f.tmb;
+					}
+				});
+				if (Object.keys(imgs).length) {
+					attachThumbnails(imgs, true);
+				}
 			})
 			.add(function(e) {
 				var phash = fm.cwd().hash,
