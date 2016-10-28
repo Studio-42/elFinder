@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 48d71d7) (2016-10-28)
+ * Version 2.1.16 (2.1-src Nightly: 027d729) (2016-10-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6088,13 +6088,14 @@ elFinder.prototype = {
 			ifm = $('<iframe width="1" height="1" scrolling="no" frameborder="no" style="position:absolute; top:-1px; left:-1px" crossorigin="use-credentials">')
 				.attr('src', url)
 				.one('load', function() {
-					if (this.contentDocument) {
+					var ifm = $(this);
+					try {
 						this.contentDocument.location.reload(true);
 						ifm.one('load', function() {
 							ifm.remove();
 							dfd.resolve();
 						});
-					} else {
+					} catch(e) {
 						ifm.attr('src', '').attr('src', url).one('load', function() {
 							ifm.remove();
 							dfd.resolve();
@@ -6208,7 +6209,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 48d71d7)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 027d729)';
 
 
 
@@ -10530,7 +10531,7 @@ $.fn.elfindercwd = function(fm, options) {
 							fm.unbind('resize', attachThumbnails).bind('resize', attachThumbnails);
 						}
 						$.extend(bufferExt.attachTmbs, atmb);
-						attachThumbnails(atmb, (mode === 'change')? true : false);
+						attachThumbnails(atmb, (mode === 'change' && fm.currentReqCmd === 'resize')? true : false);
 					}
 				}
 			},
@@ -19899,12 +19900,11 @@ elFinder.prototype.commands.resize = function() {
 							src = fm.openUrl(file.hash);
 							if (file.tmb && file.tmb != '1' && (file.tmb === tmb)) {
 								file.tmb = '';
-								fm.reloadContents(fm.tmb(file).url).done(function() {
-									fm.trigger('tmbreload', {files: [ {hash: file.hash, tmb: tmb} ]});
-								});
+								return;
 							}
 						}
 					}
+					tmb = '';
 				}
 			})
 			.fail(function(error) {
@@ -19914,6 +19914,15 @@ elFinder.prototype.commands.resize = function() {
 			})
 			.done(function() {
 				var url = (file.url != '1')? fm.url(file.hash) : '';
+				
+				// need tmb reload
+				if (tmb) {
+					fm.one('resizedone', function() {
+						fm.reloadContents(fm.tmb(file).url).done(function() {
+							fm.trigger('tmbreload', {files: [ {hash: file.hash, tmb: tmb} ]});
+						});
+					});
+				}
 				
 				fm.reloadContents(src);
 				if (url && url !== src) {
