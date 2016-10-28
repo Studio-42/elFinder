@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 027d729) (2016-10-28)
+ * Version 2.1.16 (2.1-src Nightly: 3e55234) (2016-10-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -3516,6 +3516,13 @@ window.elFinder = function(node, opts) {
 		})();
 	}
 	
+	// elFinder to enable by mouse over
+	if (this.options.enableByMouseOver) {
+		node.on('mouseenter', function(e) {
+			! self.enabled() && self.enable();
+		});
+	}
+	
 	// self.timeEnd('load'); 
 
 }
@@ -6209,7 +6216,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 027d729)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 3e55234)';
 
 
 
@@ -7420,6 +7427,14 @@ elFinder.prototype._options = {
 	 * @default  false
 	 */
 	enableAlways : false,
+	
+	/**
+	 * elFinder node enable by mouse over
+	 * 
+	 * @type     Bool
+	 * @default  true
+	 */
+	enableByMouseOver : true,
 
 	/**
 	 * Show window close confirm dialog
