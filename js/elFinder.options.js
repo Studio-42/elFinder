@@ -903,6 +903,14 @@ elFinder.prototype._options = {
 	 * @default  false
 	 */
 	enableAlways : false,
+	
+	/**
+	 * elFinder node enable by mouse over
+	 * 
+	 * @type     Bool
+	 * @default  true
+	 */
+	enableByMouseOver : true,
 
 	/**
 	 * Show window close confirm dialog

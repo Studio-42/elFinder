@@ -3502,6 +3502,13 @@ window.elFinder = function(node, opts) {
 		})();
 	}
 	
+	// elFinder to enable by mouse over
+	if (this.options.enableByMouseOver) {
+		node.on('mouseenter', function(e) {
+			! self.enabled() && self.enable();
+		});
+	}
+	
 	// self.timeEnd('load'); 
 
 }
