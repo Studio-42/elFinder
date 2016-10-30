@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 3e55234) (2016-10-29)
+ * Version 2.1.16 (2.1-src Nightly: ab3f31b) (2016-10-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -100,7 +100,7 @@ window.elFinder = function(node, opts) {
 		 *
 		 * @type Array
 		 **/
-		events = ['enable', 'disable', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles', 'dragstart', 'dragstop'],
+		events = ['enable', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles', 'selectfiles', 'unselectfiles', 'dragstart', 'dragstop', 'search', 'searchend', 'viewchange'],
 		
 		/**
 		 * Rules to validate data from backend
@@ -501,7 +501,6 @@ window.elFinder = function(node, opts) {
 	if (! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
 		this.options.enableAlways = true;
 	}
-
 	
 	/**
 	 * Is elFinder over CORS
@@ -2233,6 +2232,10 @@ window.elFinder = function(node, opts) {
 	};
 	
 	this.hide = function() {
+		if (this.options.enableAlways) {
+			prevEnabled = enabled;
+			enabled = false;
+		}
 		this.disable().trigger('hide');
 		node.hide();
 	};
@@ -2769,7 +2772,12 @@ window.elFinder = function(node, opts) {
 	};
 	
 	// create bind/trigger aliases for build-in events
-	$.each(['enable', 'disable', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles', 'selectfiles', 'unselectfiles', 'dragstart', 'dragstop', 'search', 'searchend', 'viewchange'], function(i, name) {
+	if (! this.options.enableAlways) {
+		events.push('disable');
+	} else {
+		self.disable = function() { return self; };
+	}
+	$.each(events, function(i, name) {
 		self[name] = function() {
 			var arg = arguments[0];
 			return arguments.length == 1 && typeof(arg) == 'function'
@@ -6216,7 +6224,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 3e55234)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: ab3f31b)';
 
 
 
@@ -14488,13 +14496,15 @@ $.fn.elfindertree = function(fm, opts) {
 								current.addClass(expanded).next('.'+subtree).slideDown();
 							}
 						}
-						subs = current.parentsUntil('.'+root).filter('.'+subtree);
-						subsLen = subs.length;
-						cnt = 1;
-						subs.show().prev(selNavdir).addClass(expanded, function(){
-							!noCwd && subsLen == cnt++ && autoScroll();
-						});
-						!subsLen && !noCwd && autoScroll();
+						if (inOpen || !noCwd) {
+							subs = current.parentsUntil('.'+root).filter('.'+subtree);
+							subsLen = subs.length;
+							cnt = 1;
+							subs.show().prev(selNavdir).addClass(expanded, function(){
+								!noCwd && subsLen == cnt++ && autoScroll();
+							});
+							!subsLen && !noCwd && autoScroll();
+						}
 						return;
 					}
 					if (fm.newAPI) {
@@ -14801,7 +14811,10 @@ $.fn.elfindertree = function(fm, opts) {
 			// move tree into navbar
 			navbar = fm.getUI('navbar').append(tree).show(),
 			
-			prevSortTreeview = fm.sortAlsoTreeview;
+			prevSortTreeview = fm.sortAlsoTreeview,
+			
+			// is in open event procedure
+			inOpen = false;
 
 		fm.open(function(e) {
 			var data = e.data,
@@ -14814,6 +14827,7 @@ $.fn.elfindertree = function(fm, opts) {
 				navbar.removeClass('overflow-scrolling-touch').addClass('overflow-scrolling-touch');
 			}
 
+			inOpen = true;
 			if (dirs.length) {
 				fm.lazy(function() {
 					if (!contextmenu.data('cmdMaps')) {
@@ -14830,9 +14844,11 @@ $.fn.elfindertree = function(fm, opts) {
 						}
 					});
 					sync(false, dirs, data.init);
+					inOpen = false;
 				});
 			} else {
 				sync(false, dirs, data.init);
+				inOpen = false;
 			}
 		})
 		// add new dirs
