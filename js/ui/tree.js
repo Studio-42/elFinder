@@ -527,13 +527,15 @@ $.fn.elfindertree = function(fm, opts) {
 								current.addClass(expanded).next('.'+subtree).slideDown();
 							}
 						}
-						subs = current.parentsUntil('.'+root).filter('.'+subtree);
-						subsLen = subs.length;
-						cnt = 1;
-						subs.show().prev(selNavdir).addClass(expanded, function(){
-							!noCwd && subsLen == cnt++ && autoScroll();
-						});
-						!subsLen && !noCwd && autoScroll();
+						if (inOpen || !noCwd) {
+							subs = current.parentsUntil('.'+root).filter('.'+subtree);
+							subsLen = subs.length;
+							cnt = 1;
+							subs.show().prev(selNavdir).addClass(expanded, function(){
+								!noCwd && subsLen == cnt++ && autoScroll();
+							});
+							!subsLen && !noCwd && autoScroll();
+						}
 						return;
 					}
 					if (fm.newAPI) {
@@ -840,7 +842,10 @@ $.fn.elfindertree = function(fm, opts) {
 			// move tree into navbar
 			navbar = fm.getUI('navbar').append(tree).show(),
 			
-			prevSortTreeview = fm.sortAlsoTreeview;
+			prevSortTreeview = fm.sortAlsoTreeview,
+			
+			// is in open event procedure
+			inOpen = false;
 
 		fm.open(function(e) {
 			var data = e.data,
@@ -853,6 +858,7 @@ $.fn.elfindertree = function(fm, opts) {
 				navbar.removeClass('overflow-scrolling-touch').addClass('overflow-scrolling-touch');
 			}
 
+			inOpen = true;
 			if (dirs.length) {
 				fm.lazy(function() {
 					if (!contextmenu.data('cmdMaps')) {
@@ -869,9 +875,11 @@ $.fn.elfindertree = function(fm, opts) {
 						}
 					});
 					sync(false, dirs, data.init);
+					inOpen = false;
 				});
 			} else {
 				sync(false, dirs, data.init);
+				inOpen = false;
 			}
 		})
 		// add new dirs
