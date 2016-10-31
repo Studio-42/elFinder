@@ -86,7 +86,7 @@ window.elFinder = function(node, opts) {
 		 *
 		 * @type Array
 		 **/
-		events = ['enable', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles', 'selectfiles', 'unselectfiles', 'dragstart', 'dragstop', 'search', 'searchend', 'viewchange'],
+		events = ['enable', 'disable', 'load', 'open', 'reload', 'select',  'add', 'remove', 'change', 'dblclick', 'getfile', 'lockfiles', 'unlockfiles', 'selectfiles', 'unselectfiles', 'dragstart', 'dragstop', 'search', 'searchend', 'viewchange'],
 		
 		/**
 		 * Rules to validate data from backend
@@ -419,7 +419,25 @@ window.elFinder = function(node, opts) {
 		},
 		date = new Date(),
 		utc,
-		i18n
+		i18n,
+		inFrame = (window.parent !== window),
+		parentIframe = (function() {
+			var pifm, ifms;
+			if (inFrame) {
+				try {
+					ifms = $('iframe', window.parent.document);
+					if (ifms.length) {
+						$.each(ifms, function(i, ifm) {
+							if (ifm.contentWindow === window) {
+								pifm = $(ifm);
+								return false;
+							}
+						});
+					}
+				} catch(e) {}
+			}
+			return pifm;
+		})();
 		;
 
 
@@ -484,7 +502,7 @@ window.elFinder = function(node, opts) {
 		this.options.uiOptions.cwd.listView.columnsCustomName = opts.uiOptions.cwd.listView.columnsCustomName;
 	}
 
-	if (! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
+	if (! inFrame && ! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
 		this.options.enableAlways = true;
 	}
 	
@@ -2431,18 +2449,10 @@ window.elFinder = function(node, opts) {
 	// Closure for togglefullscreen
 	(function() {
 		// check is in iframe
-		if (self.UA.Fullscreen && window !== window.parent) {
-			var ifms = $('iframe', window.parent.document);
+		if (inFrame && self.UA.Fullscreen) {
 			self.UA.Fullscreen = false;
-			if (ifms.length) {
-				$.each(ifms, function(i, ifm) {
-					if (ifm.contentWindow === window) {
-						if (typeof $(ifm).attr('allowfullscreen') !== 'undefined') {
-							self.UA.Fullscreen = true;
-						}
-						return false;
-					}
-				});
+			if (parentIframe && typeof parentIframe.attr('allowfullscreen') !== 'undefined') {
+				self.UA.Fullscreen = true;
 			}
 		}
 
@@ -2758,11 +2768,6 @@ window.elFinder = function(node, opts) {
 	};
 	
 	// create bind/trigger aliases for build-in events
-	if (! this.options.enableAlways) {
-		events.push('disable');
-	} else {
-		self.disable = function() { return self; };
-	}
 	$.each(events, function(i, name) {
 		self[name] = function() {
 			var arg = arguments[0];
@@ -3123,7 +3128,7 @@ window.elFinder = function(node, opts) {
 	// attach events to document
 	$(document)
 		// disable elfinder on click outside elfinder
-		.on('click.'+namespace, function(e) { enabled && !$(e.target).closest(node).length && self.disable(); })
+		.on('click.'+namespace, function(e) { enabled && ! self.options.enableAlways && !$(e.target).closest(node).length && self.disable(); })
 		// exec shortcuts
 		.on(keydown+' '+keypress, execShortcut);
 	
@@ -3171,6 +3176,10 @@ window.elFinder = function(node, opts) {
 			self.load().debug('api', self.api);
 			open(data);
 			self.trigger('open', data);
+			
+			if (inFrame && self.options.enableAlways) {
+				$(window).focus();
+			}
 		});
 	
 	// update ui's size after init
@@ -3245,6 +3254,19 @@ window.elFinder = function(node, opts) {
 	if (self.options.enableAlways) {
 		$(window).on('focus.' + namespace, function(e){
 			(e.target === this) && self.enable();
+		});
+		if (inFrame) {
+			$(window.top).on('focus.' + namespace, function() {
+				if (self.enable() && (! parentIframe || parentIframe.is(':visible'))) {
+					setTimeout(function() {
+						$(window).focus();
+					}, 10);
+				}
+			});
+		}
+	} else if (inFrame) {
+		$(window).on('blur.' + namespace, function(e){
+			enabled && e.target === this && self.disable();
 		});
 	}
 
@@ -3510,9 +3532,17 @@ window.elFinder = function(node, opts) {
 		})();
 	}
 	
+	// return focus to the window on click (elFInder in the frame)
+	if (inFrame) {
+		node.on('click', function(e) {
+			$(window).focus();
+		});
+	}
+	
 	// elFinder to enable by mouse over
 	if (this.options.enableByMouseOver) {
 		node.on('mouseenter', function(e) {
+			(inFrame) && $(window).focus();
 			! self.enabled() && self.enable();
 		});
 	}
