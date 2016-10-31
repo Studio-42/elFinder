@@ -232,6 +232,7 @@
 	font-size: 8pt;
 	text-align: center;
 	width: 100%;
+	overflow: hidden;
 }
 
 .elfinder .elfinder-button-search .elfinder-button-menu div {
