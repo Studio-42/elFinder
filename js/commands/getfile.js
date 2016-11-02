@@ -90,46 +90,50 @@
 			} else {
 				file.url = fm.url(file.hash);
 			}
-			file.path = fm.path(file.hash);
-			if (file.path === '' && file.phash) {
-				// get parents
-				(function() {
-					var dfd  = $.Deferred();
-					req.push(dfd);
-					fm.path(file.hash, false, {})
-						.done(function(path) {
-							file.path = path;
+			if (! opts.onlyURL) {
+				if (opts.getPath) {
+					file.path = fm.path(file.hash);
+					if (file.path === '' && file.phash) {
+						// get parents
+						(function() {
+							var dfd  = $.Deferred();
+							req.push(dfd);
+							fm.path(file.hash, false, {})
+								.done(function(path) {
+									file.path = path;
+								})
+								.fail(function() {
+									file.path = '';
+								})
+								.always(function() {
+									dfd.resolve();
+								});
+						})();
+					}
+				}
+				if (file.tmb && file.tmb != 1) {
+					file.tmb = tmb + file.tmb;
+				}
+				if (!file.width && !file.height) {
+					if (file.dim) {
+						dim = file.dim.split('x');
+						file.width = dim[0];
+						file.height = dim[1];
+					} else if (opts.getImgSize && file.mime.indexOf('image') !== -1) {
+						req.push(fm.request({
+							data : {cmd : 'dim', target : file.hash},
+							notify : {type : 'dim', cnt : 1, hideCnt : true},
+							preventDefault : true
 						})
-						.fail(function() {
-							file.path = '';
-						})
-						.always(function() {
-							dfd.resolve();
-						});
-				})();
-			}
-			if (file.tmb && file.tmb != 1) {
-				file.tmb = tmb + file.tmb;
-			}
-			if (!file.width && !file.height) {
-				if (file.dim) {
-					dim = file.dim.split('x');
-					file.width = dim[0];
-					file.height = dim[1];
-				} else if (opts.getImgSize && file.mime.indexOf('image') !== -1) {
-					req.push(fm.request({
-						data : {cmd : 'dim', target : file.hash},
-						notify : {type : 'dim', cnt : 1, hideCnt : true},
-						preventDefault : true
-					})
-					.done(function(data) {
-						if (data.dim) {
-							var dim = data.dim.split('x');
-							var rfile = fm.file(this.hash);
-							rfile.width = this.width = dim[0];
-							rfile.height = this.height = dim[1];
-						}
-					}.bind(file)));
+						.done(function(data) {
+							if (data.dim) {
+								var dim = data.dim.split('x');
+								var rfile = fm.file(this.hash);
+								rfile.width = this.width = dim[0];
+								rfile.height = this.height = dim[1];
+							}
+						}.bind(file)));
+					}
 				}
 			}
 		}
