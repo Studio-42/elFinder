@@ -179,15 +179,16 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfresize'   : 'リサイズしています',
 			'ntfsmth'     : '処理をしています',
 			'ntfloadimg'  : 'イメージを読み込んでいます',
-			'ntfnetmount' : 'ネットワークボリュームをマウントしています', // added 18.04.2012
-			'ntfnetunmount': 'ネットワークボリュームをアンマウントしています', // from v2.1 added 30.04.2012
+			'ntfnetmount' : 'ネットボリュームをマウント中', // added 18.04.2012
+			'ntfnetunmount': 'ネットボリュームをアンマウント中', // from v2.1 added 30.04.2012
 			'ntfdim'      : '画像サイズを取得しています', // added 20.05.2013
 			'ntfreaddir'  : 'ホルダ情報を読み取っています', // from v2.1 added 01.07.2013
 			'ntfurl'      : 'リンクURLを取得しています', // from v2.1 added 11.03.2014
 			'ntfchmod'    : 'ファイル属性を変更しています', // from v2.1 added 20.6.2015
-			'ntfpreupload': 'アップロードファイル名を検証しています', // from v2.1 added 31.11.2015
-			'ntfzipdl'    : 'ダウンロード用ファイルを作成しています', // from v2.1.7 added 23.1.2016
+			'ntfpreupload': 'アップロードファイル名を検証中', // from v2.1 added 31.11.2015
+			'ntfzipdl'    : 'ダウンロード用ファイルを作成中', // from v2.1.7 added 23.1.2016
 			'ntfparents'  : 'パス情報を取得しています', // from v2.1.17 added 2.11.2016
+			'ntfchunkmerge': 'アップロード済みファイルを処理中', // from v2.1.17 added 2.11.2016
 
 			/************************************ dates **********************************/
 			'dateUnknown' : '不明',
