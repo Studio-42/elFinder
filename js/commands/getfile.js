@@ -90,7 +90,24 @@
 			} else {
 				file.url = fm.url(file.hash);
 			}
-			file.path    = fm.path(file.hash);
+			file.path = fm.path(file.hash);
+			if (file.path === '' && file.phash) {
+				// get parents
+				(function() {
+					var dfd  = $.Deferred();
+					req.push(dfd);
+					fm.path(file.hash, false, {})
+						.done(function(path) {
+							file.path = path;
+						})
+						.fail(function() {
+							file.path = '';
+						})
+						.always(function() {
+							dfd.resolve();
+						});
+				})();
+			}
 			if (file.tmb && file.tmb != 1) {
 				file.tmb = tmb + file.tmb;
 			}
