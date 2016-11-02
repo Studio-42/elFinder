@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 3276175) (2016-10-31)
+ * Version 2.1.16 (2.1-src Nightly: 57cfcbf) (2016-11-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1148,24 +1148,87 @@ window.elFinder = function(node, opts) {
 		var file, 
 			path = [];
 			
-		while (hash && (file = files[hash]) && file.hash) {
-			path.unshift(i18 && file.i18 ? file.i18 : file.name);
-			hash = file.isroot? null : file.phash;
+		while (hash) {
+			if ((file = files[hash]) && file.hash) {
+				path.unshift(i18 && file.i18 ? file.i18 : file.name);
+				hash = file.isroot? null : file.phash;
+			} else {
+				path = [];
+				break;
+			}
 		}
 			
 		return path;
 	};
 	
 	/**
-	 * Return file path
+	 * Return file path or Get path async with jQuery.Deferred
 	 * 
 	 * @param  Object  file
-	 * @return String
+	 * @param  Boolean i18
+	 * @param  Object  asyncOpt
+	 * @return String|jQuery.Deferred
 	 */
-	this.path = function(hash, i18) { 
-		return files[hash] && files[hash].path
+	this.path = function(hash, i18, asyncOpt) { 
+		var path = files[hash] && files[hash].path
 			? files[hash].path
 			: this.path2array(hash, i18).join(cwdOptions.separator);
+		if (! asyncOpt || ! files[hash]) {
+			return path;
+		} else {
+			asyncOpt = $.extend({notify: {type : 'parents', cnt : 1, hideCnt : true}}, asyncOpt);
+			
+			var dfd    = $.Deferred(),
+				notify = asyncOpt.notify,
+				noreq  = false,
+				req    = function() {
+					self.request({
+						data : {cmd : 'parents', target : files[hash].phash},
+						notify : notify,
+						preventFail : true
+					})
+					.done(done)
+					.fail(function() {
+						dfd.reject();
+					});
+				},
+				done   = function() {
+					self.one('parentsdone', function() {
+						path = self.path(hash, i18);
+						if (path === '' && noreq) {
+							//retry with request
+							noreq = false;
+							req();
+						} else {
+							if (notify) {
+								clearTimeout(ntftm);
+								notify.cnt = -(parseInt(notify.cnt || 0));
+								self.notify(notify);
+							}
+							dfd.resolve(path);
+						}
+					});
+				},
+				ntftm;
+		
+			if (path) {
+				return dfd.resolve(path);
+			} else {
+				if (self.ui['tree']) {
+					// try as no request
+					if (notify) {
+						ntftm = setTimeout(function() {
+							self.notify(notify);
+						}, self.notifyDelay);
+					}
+					noreq = true;
+					done(true);
+				} else {
+					req();
+				}
+				return dfd;
+			}
+		}
 	};
 	
 	/**
@@ -6254,7 +6317,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 3276175)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 57cfcbf)';
 
 
 
@@ -8287,7 +8350,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-10-13
+ * @version 2016-11-02
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -8472,6 +8535,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfchmod'    : 'Changing file mode', // from v2.1 added 20.6.2015
 			'ntfpreupload': 'Verifying upload file name', // from v2.1 added 31.11.2015
 			'ntfzipdl'    : 'Creating a file for download', // from v2.1.7 added 23.1.2016
+			'ntfparents'  : 'Getting path infomation', // from v2.1.17 added 2.11.2016
+			'ntfchunkmerge': 'Processing the uploaded file', // from v2.1.17 added 2.11.2016
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unknown',
@@ -16749,7 +16814,24 @@ elFinder.prototype.commands.fullscreen = function() {
 			} else {
 				file.url = fm.url(file.hash);
 			}
-			file.path    = fm.path(file.hash);
+			file.path = fm.path(file.hash);
+			if (file.path === '' && file.phash) {
+				// get parents
+				(function() {
+					var dfd  = $.Deferred();
+					req.push(dfd);
+					fm.path(file.hash, false, {})
+						.done(function(path) {
+							file.path = path;
+						})
+						.fail(function() {
+							file.path = '';
+						})
+						.always(function() {
+							dfd.resolve();
+						});
+				})();
+			}
 			if (file.tmb && file.tmb != 1) {
 				file.tmb = tmb + file.tmb;
 			}
@@ -17253,7 +17335,7 @@ elFinder.prototype.commands.fullscreen = function() {
 					fm.autoSync();
 				});
 			},
-			size, tmb, file, title, dcnt, rdcnt;
+			size, tmb, file, title, dcnt, rdcnt, path;
 			
 		if (!cnt) {
 			return $.Deferred().reject();
@@ -17284,7 +17366,18 @@ elFinder.prototype.commands.fullscreen = function() {
 			
 			content.push(row.replace(l, msg.size).replace(v, size));
 			file.alias && content.push(row.replace(l, msg.aliasfor).replace(v, file.alias));
-			content.push(row.replace(l, msg.path).replace(v, fm.escape(fm.path(file.hash, true))));
+			if (path = fm.path(file.hash, true)) {
+				content.push(row.replace(l, msg.path).replace(v, fm.escape(path)));
+			} else {
+				content.push(row.replace(l, msg.path).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'path')));
+				reqs.push(fm.path(file.hash, true, {notify: null})
+				.fail(function() {
+					replSpinner(msg.unknown, 'path');
+				})
+				.done(function(path) {
+					replSpinner(path, 'path');
+				}));
+			}
 			if (file.read) {
 				var href,
 				name_esc = fm.escape(file.name);

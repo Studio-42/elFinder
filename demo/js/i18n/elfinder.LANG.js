@@ -192,6 +192,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfchmod'    : 'Changing file mode', // from v2.1 added 20.6.2015
 			'ntfpreupload': 'Verifying upload file name', // from v2.1 added 31.11.2015
 			'ntfzipdl'    : 'Creating a file for download', // from v2.1.7 added 23.1.2016
+			'ntfparents'  : 'Getting path infomation', // from v2.1.17 added 2.11.2016
+			'ntfchunkmerge': 'Processing the uploaded file', // from v2.1.17 added 2.11.2016
 			
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unknown',
