@@ -1,3 +1,28 @@
+2016-11-xx  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.16):
+
+		- [cmd:upload] Fixed #1695 disabled check doesn't work in other than CWD volume
+		- [js:core] Fixed #1698 abort the file upload at network error occurs
+		- [ui:toolbar] Fixed #1699 add an option `displayTextLabel` (default: `false`)
+		- [css:toolbar] Fixed #1700 correction of button label for touch devices
+		- [ui:toolbar] add contextmenu to show/hide the text label
+		- [ui:workzone] Fixed #1702 cwd size fits to the workzone at resize
+		- [VD:abstract] Fixed #1703 problem of make the video thumbnail
+		- [core] Fixed #1706 configurable to limit max number of selectable items
+			- Added an option `maxTargets` of connector main option.
+		- [ui:cwd] Fixed #1701 No thumbnails after added the item (v 2.1.16)
+		- [cmd:download] Fixed #1707 allow zip download in multi volume searching
+		- Added native driver for GoogleDrive (Special thanks to Raja Sharma)
+		- [cmd:netmount] Fixed #1713 OAuth of procedure is not completed on MS Edge
+		- [css:quicklook] Fixed #1717 preview html file won't scroll on IOS
+		- [cmd:upload] Fixed #1718 File upload on paste does not work
+		- [js:core] Fixed #1724 add client option `enableByMouseOver`
+		- [js:core] Fixed #1724 disable event `disable` with option `enableAlways=true`
+		- [js:core] Fixed #1724 optimize switching enable/disable for elf in iframe
+		- [cmd:getfile] Fixed #1727 wrong path when the tree is not loaded
+
+
 2016-10-11  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.16):
