@@ -22,7 +22,6 @@
   "homepage": "https://github.com/Studio-42/elFinder",
   "ignore": [
     "**/.*",
-    "jquery",
-    "php"
+    "jquery"
   ]
 }
