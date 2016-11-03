@@ -3168,4 +3168,22 @@ class elFinder {
 		return (int)$val;
 	}
 
+	/**
+	 * Get script url.
+	 * 
+	 * @return string full URL
+	 * 
+	 * @author Naoki Sawada
+	 */
+	public static function getConnectorUrl() {
+		$https = (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off');
+		$url = ($https ? 'https://' : 'http://')
+			.$_SERVER['SERVER_NAME']                                              // host
+			.(((! $https && $_SERVER['SERVER_PORT'] == 80) || ($https && $_SERVER['SERVER_PORT'] == 443)) ? '' : (':' . $_SERVER['SERVER_PORT']))  // port
+			.$_SERVER['REQUEST_URI'];                                             // path & query
+		list($url) = explode('?', $url);
+		
+		return $url;
+	}
+
 } // END class

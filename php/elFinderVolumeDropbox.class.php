@@ -189,7 +189,7 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 						}
 					}
 					if (strpos($options['url'], 'http') !== 0 ) {
-						$options['url'] = $this->getConnectorUrl();
+						$options['url'] = elFinder::getConnectorUrl();
 					}
 					$callback  = $options['url']
 					           . '?cmd=netmount&protocol=dropbox&host=dropbox.com&user=init&pass=return&node='.$options['id'].$cdata;
@@ -257,21 +257,6 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 			}
 		}
 		return true;
-	}
-	
-	/**
-	 * Get script url
-	 * 
-	 * @return string full URL
-	 * @author Naoki Sawada
-	 */
-	private function getConnectorUrl() {
-		$url  = ((isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off')? 'https://' : 'http://')
-		       . $_SERVER['SERVER_NAME']                                              // host
-		      . ($_SERVER['SERVER_PORT'] == 80 ? '' : ':' . $_SERVER['SERVER_PORT'])  // port
-		       . $_SERVER['REQUEST_URI'];                                             // path & query
-		list($url) = explode('?', $url);
-		return $url;
 	}
 	
 	/*********************************************************************/
