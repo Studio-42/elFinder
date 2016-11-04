@@ -338,6 +338,27 @@ class elFinder {
 		// set error handler of WARNING, NOTICE
 		set_error_handler('elFinder::phpErrorHandler', E_WARNING | E_NOTICE | E_USER_WARNING | E_USER_NOTICE);
 		
+		// convert PATH_INFO to GET query
+		if (! empty($_SERVER['PATH_INFO'])) {
+			$_ps = explode('/', trim($_SERVER['PATH_INFO'], '/'));
+			if (! isset($_GET['cmd'])) {
+				$_cmd = $_ps[0];
+				if (isset($this->commands[$_cmd])) {
+					$_GET['cmd'] = $_cmd;
+					$_i = 1;
+					foreach(array_keys($this->commands[$_cmd]) as $_k) {
+						if (isset($_ps[$_i])) {
+							if (! isset($_GET[$_k])) {
+								$_GET[$_k] = $_ps[$_i];
+							}
+						} else {
+							break;
+						}
+					}
+				}
+			}
+		}
+		
 		// set elFinder instance
 		elFinder::$instance = $this;
 		
