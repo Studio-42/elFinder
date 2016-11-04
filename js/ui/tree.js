@@ -462,12 +462,13 @@ $.fn.elfindertree = function(fm, opts) {
 			 * @param {Boolean} do not expand cwd
 			 * @return void
 			 */
-			sync = function(noCwd, dirs, init) {
+			sync = function(noCwd, dirs, init, open) {
 				var cwd     = fm.cwd(),
 					cwdhash = cwd.hash,
 					current = $('#'+fm.navHash2Id(cwdhash)), 
 					noCwd   = noCwd || false,
 					dirs    = dirs || [],
+					open    = open || inOpen,
 					reqCmd  = 'parents',
 					reqs    = [],
 					getCmd  = function(target) {
@@ -527,7 +528,7 @@ $.fn.elfindertree = function(fm, opts) {
 								current.addClass(expanded).next('.'+subtree).slideDown();
 							}
 						}
-						if (inOpen || !noCwd) {
+						if (open || !noCwd) {
 							subs = current.parentsUntil('.'+root).filter('.'+subtree);
 							subsLen = subs.length;
 							cnt = 1;
@@ -545,7 +546,7 @@ $.fn.elfindertree = function(fm, opts) {
 							if (link.length && link.hasClass(loaded)) {
 								fm.lazy(function() {
 									updateTree([dir]);
-									sync(noCwd);
+									sync(noCwd, [], false, open);
 								});
 								return;
 							}
@@ -605,10 +606,10 @@ $.fn.elfindertree = function(fm, opts) {
 							
 							// leaf root sync
 							if (!noCwd && cwd.isroot && $('#'+fm.navHash2Id(cwd.hash).length)) {
-								sync(true, [], init);
+								sync(true, [], init, open);
 							}
 							
-							cwdhash == cwd.hash && fm.visible() && sync(noCwd);
+							cwdhash == cwd.hash && fm.visible() && sync(noCwd, [], false, open);
 						})
 						.always(function(data) {
 							if (link) {
