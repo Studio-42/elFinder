@@ -127,7 +127,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					});
 			},
 			base, cwd,
-			nodes, selected, subnodes, subselected,
+			nodes, selected, subnodes, subselected, autoSyncStop,
 
 			autoToggle = function() {
 				var evTouchStart = 'touchstart.contextmenuAutoToggle';
@@ -249,6 +249,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					}),
 					evts;
 
+				autoSyncStop = true;
 				fm.autoSync('stop');
 				fm.toFront(menu);
 				base.width(bwidth);
@@ -298,7 +299,8 @@ $.fn.elfindercontextmenu = function(fm) {
 					}
 				}
 				
-				fm.searchStatus.state < 1 && ! fm.searchStatus.ininc && fm.autoSync();
+				autoSyncStop && fm.searchStatus.state < 1 && ! fm.searchStatus.ininc && fm.autoSync();
+				autoSyncStop = false;
 			},
 			
 			create = function(type, targets) {
