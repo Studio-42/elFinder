@@ -72,8 +72,8 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     protected $HasdirsCache = array();
 
     /**
-     * Query options of API call
-     * 
+     * Query options of API call.
+     *
      * @var array
      */
     protected $queryOptions = array();
@@ -436,7 +436,9 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 $stat['dirs'] = 0;
             }
         } else {
-            $stat['mime'] = isset($raw->file->mimeType) ? $raw->file->mimeType : self::mimetypeInternalDetect($raw->name);
+            if (isset($raw->file->mimeType)) {
+                $stat['mime'] = $raw->file->mimeType;
+            }
             $stat['size'] = (int) $raw->size;
             $stat['url'] = '1';
             if (isset($raw->image) && $img = $raw->image) {
@@ -1086,6 +1088,10 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      **/
     protected function _joinPath($dir, $name)
     {
+        if ($dir === 'root') {
+            $dir = '';
+        }
+
         return $this->_normpath($dir.'/'.$name);
     }
 
@@ -1287,34 +1293,15 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      **/
     protected function _fopen($path, $mode = 'rb')
     {
-        if (($mode == 'rb' || $mode == 'r')) {
-            try {
-                list(, $itemId) = $this->_od_splitPath($path);
-                $url = self::API_URL.$itemId.'/content';
+        $contents = $this->_getContents($path);
 
-                $contents = $this->_od_createCurl($url, $contents = true);
-
-                $fp = tmpfile();
-                fputs($fp, $contents);
-                rewind($fp);
-
-                return $fp;
-            } catch (Exception $e) {
-                return false;
-            }
+        if ($contents === false) {
+            return false;
         }
 
-        if ($this->tmp) {
-            $contents = $this->_getContents($path);
-
-            if ($contents === false) {
-                return false;
-            }
-
-            if ($local = $this->getTempFile($path)) {
-                if (file_put_contents($local, $contents, LOCK_EX) !== false) {
-                    return @fopen($local, $mode);
-                }
+        if ($local = $this->getTempFile($path)) {
+            if (file_put_contents($local, $contents, LOCK_EX) !== false) {
+                return fopen($local, $mode);
             }
         }
 
@@ -1610,8 +1597,13 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         if ($name === '') {
             list($parentId, $itemId, $parent) = $this->_od_splitPath($path);
         } else {
-            if ($stat && isset($stat['name'])) {
-                $name = $stat['name'];
+            if ($stat) {
+                if (isset($stat['name'])) {
+                    $name = $stat['name'];
+                }
+                if (isset($stat['rev']) && strpos($stat['hash'], $this->id) === 0) {
+                    $itemId = $stat['rev'];
+                }
             }
             list(, $parentId) = $this->_od_splitPath($path);
             $parent = $path;
@@ -1619,30 +1611,6 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
         try {
             //Create or Update a file
-            if (is_resource($fp)) {
-                $stream = $fp;
-            } else {
-                $options = array(
-                    'stream_back_end' => 'php://temp',
-                );
-
-                $stream = fopen($options['stream_back_end'], 'rw+b');
-
-                if (false === $stream) {
-                    throw new \Exception('fopen() failed');
-                }
-
-                if (false === fwrite($stream, $fp)) {
-                    fclose($stream);
-                    throw new \Exception('fwrite() failed');
-                }
-
-                if (!rewind($stream)) {
-                    fclose($stream);
-                    throw new \Exception('rewind() failed');
-                }
-            }
-
             $params = array('overwrite' => 'true');
             $query = http_build_query($params);
 
@@ -1652,7 +1620,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 $url = self::API_URL.$itemId.'/content?'.$query;
             }
             $curl = $this->_od_prepareCurl();
-            $stats = fstat($stream);
+            $stats = fstat($fp);
 
             $headers = array(
                 'Content-Type: application/json',
@@ -1663,7 +1631,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 CURLOPT_URL => $url,
                 CURLOPT_HTTPHEADER => $headers,
                 CURLOPT_PUT => true,
-                CURLOPT_INFILE => $stream,
+                CURLOPT_INFILE => $fp,
             );
             // Size
             if ($stats[7]) {
@@ -1676,15 +1644,10 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             $file = json_decode(curl_exec($curl));
             curl_close($curl);
 
-            if (!is_resource($fp)) {
-                fclose($stream);
-            }
+            return $this->_joinPath($parent, $file->id);
         } catch (Exception $e) {
             return $this->setError('OneDrive error: '.$e->getMessage());
         }
-        $path = $this->_joinPath($parent, $file->id);
-
-        return $path;
     }
 
     /**
