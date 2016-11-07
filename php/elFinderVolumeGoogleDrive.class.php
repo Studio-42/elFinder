@@ -878,6 +878,27 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         return true;
     }
 
+    /**
+     * Return fileinfo based on filename
+     * For item ID based path file system
+     * Please override if needed on each drivers.
+     *
+     * @param string $path file cache
+     *
+     * @return array
+     */
+    protected function isNameExists($path)
+    {
+        list($parentId, $name) = $this->_gd_splitPath($path);
+        $opts = [
+                'q' => sprintf('trashed=false and "%s" in parents and name="%s"', $parentId, $name),
+                'fields' => self::FETCHFIELDS_LIST,
+            ];
+        $srcFile = $this->_gd_query($opts);
+
+        return empty($srcFile) ? false : $this->_gd_parseRaw($srcFile[0]);
+    }
+
     /*********************************************************************/
     /*                        INIT AND CONFIGURE                         */
     /*********************************************************************/
@@ -1867,6 +1888,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         if (!$stat || empty($stat['iid'])) {
             $opts = [
                 'q' => sprintf('trashed=false and "%s" in parents and name="%s"', $parentId, $name),
+                'fields' => self::FETCHFIELDS_LIST,
             ];
             $srcFile = $this->_gd_query($opts);
             $srcFile = empty($srcFile) ? null : $srcFile[0];
