@@ -1804,7 +1804,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$dst  = $this->joinPathCE($path, $name);
-		$stat = $this->stat($dst); 
+		$stat = $this->isNameExists($dst); 
 		if (!empty($stat)) { 
 			return $this->setError(elFinder::ERROR_EXISTS, $name);
 		}
@@ -1844,7 +1844,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
-		if ($this->stat($this->joinPathCE($path, $name))) {
+		if ($this->isNameExists($this->joinPathCE($path, $name))) {
 			return $this->setError(elFinder::ERROR_EXISTS, $name);
 		}
 		
@@ -1888,7 +1888,7 @@ abstract class elFinderVolumeDriver {
 		
 		$path = $this->decode($hash);
 		$dir  = $this->dirnameCE($path);
-		$stat = $this->stat($this->joinPathCE($dir, $name));
+		$stat = $this->isNameExists($this->joinPathCE($dir, $name));
 		if ($stat) {
 			return $this->setError(elFinder::ERROR_EXISTS, $name);
 		}
@@ -1988,11 +1988,12 @@ abstract class elFinderVolumeDriver {
 		$dstpath = $this->decode($dst);
 		if (isset($hashes[$name])) {
 			$test = $this->decode($hashes[$name]);
+			$file = $this->stat($test);
 		} else {
 			$test = $this->joinPathCE($dstpath, $name);
+			$file = $this->isNameExists($test);
 		}
 		
-		$file = $this->stat($test);
 		$this->clearcache();
 		
 		if ($file && $file['name'] === $name) { // file exists and check filename for item ID based filesystem
@@ -2079,10 +2080,11 @@ abstract class elFinderVolumeDriver {
 
 		if (isset($hashes[$name])) {
 			$test = $this->decode($hashes[$name]);
+			$stat = $this->stat($test);
 		} else {
 			$test = $this->joinPathCE($destination, $name);
+			$stat = $this->isNameExists($test);
 		}
-		$stat = $this->stat($test);
 		$this->clearcache();
 		$dstDirExists = false;
 		if ($stat && $stat['name'] === $name) { // file exists and check filename for item ID based filesystem
@@ -3107,7 +3109,7 @@ abstract class elFinderVolumeDriver {
 		while ($i <= $max) {
 			$n = $name.($i > 0 ? sprintf($this->options['uniqueNumFormat'], $i) : '').$ext;
 
-			if (!$this->stat($this->joinPathCE($dir, $n))) {
+			if (!$this->isNameExists($this->joinPathCE($dir, $n))) {
 				$this->clearcache();
 				return $n;
 			}
@@ -3523,6 +3525,18 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return fileinfo based on filename
+	 * For item ID based path file system
+	 * Please override if needed on each drivers
+	 *
+	 * @param  string  $path  file cache
+	 * @return array
+	 */
+	protected function isNameExists($path) {
+		return $this->stat($path);
+	}
+	
+	/**
 	 * Put file stat in cache and return it
 	 *
 	 * @param  string  $path   file path
@@ -3697,7 +3711,8 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function clearcache() {
-		$this->cache = $this->dirsCache = $this->subdirsCache = array();
+		//$this->cache = $this->dirsCache = $this->subdirsCache = array();
+		$this->cache = $this->dirsCache = array();
 	}
 
 	/**
@@ -3820,7 +3835,7 @@ abstract class elFinderVolumeDriver {
 		$result = 0;
 		foreach ($this->getScandir($path) as $stat) {
 			$size = $stat['mime'] == 'directory' && $stat['read'] 
-				? $this->countSize($this->joinPathCE($path, $stat['name'])) 
+				? $this->countSize($this->decode($stat['hash'])) 
 				: (isset($stat['size']) ? intval($stat['size']) : 0);
 			if ($size > 0) {
 				$result += $size;
@@ -4065,7 +4080,7 @@ abstract class elFinderVolumeDriver {
 		} 
 		
 		if ($srcStat['mime'] === 'directory') {
-			$testStat = $this->stat($this->joinPathCE($dst, $name));
+			$testStat = $this->isNameExists($this->joinPathCE($dst, $name));
 			$this->clearcache();
 			
 			if (($testStat && $testStat['mime'] != 'directory') || (! $testStat && ! $testStat = $this->mkdir($this->encode($dst), $name))) {
@@ -4092,7 +4107,7 @@ abstract class elFinderVolumeDriver {
 
 		if ($this->options['copyJoin']) {
 			$test = $this->joinPathCE($dst, $name);
-			if ($testStat = $this->stat($test)) {
+			if ($testStat = $this->isNameExists($test)) {
 				$this->remove($test);
 			}
 		} else {
@@ -4162,14 +4177,14 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if ($source['mime'] == 'directory') {
-			$test = $this->stat($this->joinPathCE($destination, $name));
+			$test = $this->isNameExists($this->joinPathCE($destination, $name));
 			$this->clearcache();
 
 			if (($test && $test['mime'] != 'directory') || (! $test && ! $test = $this->mkdir($this->encode($destination), $name))) {
 				return $this->setError(elFinder::ERROR_COPY, $errpath);
 			}
 			
-			$path = $this->joinPathCE($destination, $name);
+			//$path = $this->joinPathCE($destination, $name);
 			$path = $this->decode($test['hash']);
 			
 			foreach ($volume->scandir($src) as $entr) {
