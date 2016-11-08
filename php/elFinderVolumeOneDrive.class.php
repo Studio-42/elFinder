@@ -385,11 +385,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         }
 
         if (isset($options['query'])) {
-            $parts = array();
-            foreach ($options['query'] as $key => $val) {
-                $parts[] = rawurlencode($key).'='.rawurlencode($val);
-            }
-            $path .= '?'.implode('&', $parts);
+            $path .= '?'.http_build_query($options['query']);
         }
 
         $url = self::API_URL.$path;
@@ -445,12 +441,11 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 isset($img->width) ? $stat['width'] = $img->width : $stat['width'] = 0;
                 isset($img->height) ? $stat['height'] = $img->height : $stat['height'] = 0;
             }
-            if (!empty($raw->thumbnails)) {
+            if (! empty($raw->thumbnails)) {
                 if ($raw->thumbnails[0]->small->url) {
                     $stat['tmb'] = substr($raw->thumbnails[0]->small->url, 8); // remove "https://"
                 }
             }
-            $stat['url'] = '1';
         }
 
         return $stat;
@@ -1622,14 +1617,8 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             $curl = $this->_od_prepareCurl();
             $stats = fstat($fp);
 
-            $headers = array(
-                'Content-Type: application/json',
-                'Authorization: Bearer '.$this->onedrive->token->data->access_token,
-            );
-
             $options = array(
                 CURLOPT_URL => $url,
-                CURLOPT_HTTPHEADER => $headers,
                 CURLOPT_PUT => true,
                 CURLOPT_INFILE => $fp,
             );
