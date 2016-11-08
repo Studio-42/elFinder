@@ -137,8 +137,8 @@ Downloads
 Demo sites
 ------------
 **2.1.x Nightly**
- + http://studio-42.github.io/elFinder/ (with CORS)
- + http://hypweb.net/elFinder-nightly/demo/2.1/
+ + https://studio-42.github.io/elFinder/ (with CORS)
+ + https://hypweb.net/elFinder-nightly/demo/2.1/
 
 FAQs
 ------------

@@ -225,7 +225,23 @@
 	background-position:0 0;
 	background-size: contain;
 }
-.elfinder-cwd .elfinder-navbar-root-googledrive.elfinder-droppable-active .elfinder-cwd-icon {
+.elfinder-navbar-root-onedrive .elfinder-cwd-icon,
+.elfinder-cwd .elfinder-navbar-root-onedrive.elfinder-droppable-active .elfinder-cwd-icon,
+.elfinder-cwd-view-list .elfinder-navbar-root-onedrive td .elfinder-cwd-icon  {
+	background-image:url("../img/volume_icon_onedrive.png");
+	background-position:0 0;
+	background-size: contain;
+}
+.elfinder-navbar-root-box .elfinder-cwd-icon,
+.elfinder-cwd .elfinder-navbar-root-box.elfinder-droppable-active .elfinder-cwd-icon,
+.elfinder-cwd-view-list .elfinder-navbar-root-box td .elfinder-cwd-icon  {
+	background-image:url("../img/volume_icon_box.png");
+	background-position:0 0;
+	background-size: contain;
+}
+.elfinder-cwd .elfinder-navbar-root-googledrive.elfinder-droppable-active .elfinder-cwd-icon,
+.elfinder-cwd .elfinder-navbar-root-onedrive.elfinder-droppable-active .elfinder-cwd-icon,
+.elfinder-cwd .elfinder-navbar-root-box.elfinder-droppable-active .elfinder-cwd-icon {
 	background-position:1px -1px;
 }
 .elfinder-navbar-root-network .elfinder-cwd-icon,
