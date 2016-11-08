@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: f1b6f33) (2016-11-03)
+ * Version 2.1.16 (2.1-src Nightly: e6d6af2) (2016-11-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -228,6 +228,7 @@ window.elFinder = function(node, opts) {
 		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
 		syncInterval,
+		autoSyncStop = 0,
 		
 		uiCmdMapPrev = '',
 		
@@ -2380,7 +2381,7 @@ window.elFinder = function(node, opts) {
 	this.destroy = function() {
 		if (node && node[0].elfinder) {
 			this.options.syncStart = false;
-			this.autoSync('stop');
+			this.autoSync('forcestop');
 			this.trigger('destroy').disable();
 			clipboard = [];
 			selected = [];
@@ -2404,7 +2405,7 @@ window.elFinder = function(node, opts) {
 	 * @param  String|Bool  stop
 	 * @return void
 	 */
-	this.autoSync = function(stop) {
+	this.autoSync = function(mode) {
 		var sync;
 		if (self.options.sync >= 1000) {
 			if (syncInterval) {
@@ -2412,9 +2413,17 @@ window.elFinder = function(node, opts) {
 				syncInterval = null;
 				self.trigger('autosync', {action : 'stop'});
 			}
-			if (stop || !self.options.syncStart) {
-				return;
+			
+			if (mode === 'stop') {
+				++autoSyncStop;
+			} else {
+				autoSyncStop = Math.max(0, --autoSyncStop);
 			}
+			
+			if (autoSyncStop || mode === 'forcestop' || ! self.options.syncStart) {
+				return;
+			} 
+			
 			// run interval sync
 			sync = function(start){
 				var timeout;
@@ -6218,6 +6227,100 @@ elFinder.prototype = {
 		return dfd;
 	},
 	
+	/**
+	 * Make netmount option for OAuth2
+	 * 
+	 * @param  String   protocol
+	 * @param  String   name
+	 * @param  String   host
+	 * @param  Boolean  noOffline
+	 * 
+	 * @return Object
+	 */
+	makeNetmountOptionOauth : function(protocol, name, host, noOffline) {
+		return {
+			name : name,
+			inputs: {
+				offline  : $('<input type="checkbox"/>').on('change', function() {
+					$(this).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
+				}),
+				host     : $('<span><span class="elfinder-info-spinner"/></span><input type="hidden"/>'),
+				path     : $('<input type="text" value="root"/>'),
+				user     : $('<input type="hidden"/>'),
+				pass     : $('<input type="hidden"/>')
+			},
+			select: function(fm, ev, data){
+				var f = this.inputs, oline = f.offline, f0 = $(f.host[0]),
+					data = data || null;
+				if (! f0.data('inrequest')
+						&& (f0.find('span.elfinder-info-spinner').length
+							|| data === 'reset'
+							|| (data === 'winfocus' && ! f0.siblings('span.elfinder-button-icon-reload').length))
+							)
+				{
+					if (oline.parent().children().length === 1) {
+						f.path.parent().prev().html(fm.i18n('folderId'));
+						oline.attr('title', fm.i18n('offlineAccess'));
+						oline.uniqueId().after($('<label/>').attr('for', oline.attr('id')).html(' '+fm.i18n('offlineAccess')));
+					}
+					f0.data('inrequest', true).empty().addClass('elfinder-info-spinner')
+						.parent().find('span.elfinder-button-icon').remove();
+					fm.request({
+						data : {cmd : 'netmount', protocol: protocol, host: host, user: 'init', options: {id: fm.id, offline: oline.prop('checked')? 1:0, pass: f.host[1].value}},
+						preventDefault : true
+					}).done(function(data){
+						f0.removeClass("elfinder-info-spinner").html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1, host);}));
+					});
+					noOffline && oline.closest('tr').hide();
+				} else {
+					oline.closest('tr')[(noOffline || f.user.val())? 'hide':'show']();
+				}
+			},
+			done: function(fm, data){
+				var f = this.inputs, p = this.protocol, f0 = $(f.host[0]), f1 = $(f.host[1]);
+				noOffline && f.offline.closest('tr').hide();
+				if (data.mode == 'makebtn') {
+					f0.removeClass('elfinder-info-spinner');
+					f.host.find('input').hover(function(){$(this).toggleClass('ui-state-hover');});
+					f1.val('');
+					f.path.val('root').next().remove();
+					f.user.val('');
+					f.pass.val('');
+					! noOffline && f.offline.closest('tr').show();
+				} else {
+					f0.html(host + '&nbsp;').removeClass('elfinder-info-spinner');
+					if (data.reset) {
+						p.trigger('change', 'reset');
+						return;
+					}
+					f0.parent().append($('<span class="elfinder-button-icon elfinder-button-icon-reload" title="'+fm.i18n('reAuth')+'">')
+						.on('click', function() {
+							f1.val('reauth');
+							p.trigger('change', 'reset');
+						}));
+					f1.val(protocol);
+					if (data.folders) {
+						f.path.next().remove().end().after(
+							$('<div/>').append(
+								$('<select class="ui-corner-all" style="max-width:200px;">').append(
+									$($.map(data.folders, function(n,i){return '<option value="'+(i+'').trim()+'">'+fm.escape(n)+'</option>'}).join(''))
+								).on('change', function(){f.path.val($(this).val());})
+							)
+						);
+					}
+					f.user.val('done');
+					f.pass.val('done');
+					f.offline.closest('tr').hide();
+				}
+				f0.removeData('inrequest');
+			},
+			fail: function(fm, err){
+				this.protocol.trigger('change', 'reset');
+				f0.removeData('inrequest');
+			}
+		};
+	},
+	
 	navHash2Id : function(hash) {
 		return this.navPrefix + hash;
 	},
@@ -6317,7 +6420,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: f1b6f33)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: e6d6af2)';
 
 
 
@@ -7488,85 +7591,9 @@ elFinder.prototype._options.commandsOptions.netmount = {
 			}
 		}
 	},
-	googledrive: {
-		name : 'GoogleDrive',
-		inputs: {
-			offline  : $('<input type="checkbox"/>').on('change', function() {
-				$(this).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
-			}),
-			host     : $('<span><span class="elfinder-info-spinner"/></span><input type="hidden"/>'),
-			path     : $('<input type="text" value="root"/>'),
-			user     : $('<input type="hidden"/>'),
-			pass     : $('<input type="hidden"/>')
-		},
-		select: function(fm, ev, data){
-			var f = this.inputs, oline = f.offline, f0 = $(f.host[0]),
-				data = data || null;
-			if (! f0.data('inrequest')
-					&& (f0.find('span.elfinder-info-spinner').length
-						|| data === 'reset'
-						|| (data === 'winfocus' && ! f0.siblings('span.elfinder-button-icon-reload').length))
-						)
-			{
-				if (oline.parent().children().length === 1) {
-					f.path.parent().prev().html(fm.i18n('folderId'));
-					oline.attr('title', fm.i18n('offlineAccess'));
-					oline.uniqueId().after($('<label/>').attr('for', oline.attr('id')).html(' '+fm.i18n('offlineAccess')));
-				}
-				f0.data('inrequest', true).empty().addClass('elfinder-info-spinner')
-					.parent().find('span.elfinder-button-icon').remove();
-				fm.request({
-					data : {cmd : 'netmount', protocol: 'googledrive', host: 'google.com', user: 'init', options: {id: fm.id, offline: oline.prop('checked')? 1:0, pass: f.host[1].value}},
-					preventDefault : true
-				}).done(function(data){
-					f0.removeClass("elfinder-info-spinner").html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1,'Google.com');}));
-				});
-			} else {
-				oline.parent().parent()[f.user.val()? 'hide':'show']();
-			}
-		},
-		done: function(fm, data){
-			var f = this.inputs, p = this.protocol, f0 = $(f.host[0]), f1 = $(f.host[1]);
-			if (data.mode == 'makebtn') {
-				f0.removeClass('elfinder-info-spinner');
-				f.host.find('input').hover(function(){$(this).toggleClass('ui-state-hover');});
-				f1.val('');
-				f.path.val('root').next().remove();
-				f.user.val('');
-				f.pass.val('');
-				f.offline.parent().parent().show();
-			} else {
-				f0.html('Google.com&nbsp;').removeClass('elfinder-info-spinner');
-				if (data.reset) {
-					p.trigger('change', 'reset');
-					return;
-				}
-				f0.parent().append($('<span class="elfinder-button-icon elfinder-button-icon-reload" title="'+fm.i18n('reAuth')+'">')
-					.on('click', function() {
-						f1.val('reauth');
-						p.trigger('change', 'reset');
-					}));
-				f1.val('googledrive');
-				if (data.folders) {
-					f.path.next().remove().end().after(
-						$('<div/>').append(
-							$('<select class="ui-corner-all" style="max-width:200px;">').append(
-								$($.map(data.folders, function(n,i){return '<option value="'+i+'">'+fm.escape(n)+'</option>'}).join(''))
-							).on('change', function(){f.path.val($(this).val());})
-						)
-					);
-				}
-				f.user.val('done');
-				f.pass.val('done');
-				f.offline.parent().parent().hide();
-			}
-			f0.removeData('inrequest');
-		},
-		fail: function(fm, err){
-			this.protocol.trigger('change', 'reset');
-			f0.removeData('inrequest');
-		}
-	}
+	googledrive: elFinder.prototype.makeNetmountOptionOauth('googledrive', 'Google Drive', 'Google.com'),
+	onedrive: elFinder.prototype.makeNetmountOptionOauth('onedrive', 'One Drive', 'OneDrive.com'),
+	box: elFinder.prototype.makeNetmountOptionOauth('box', 'Box', 'Box.com', true)
 };
 
 
@@ -9038,7 +9065,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					});
 			},
 			base, cwd,
-			nodes, selected, subnodes, subselected,
+			nodes, selected, subnodes, subselected, autoSyncStop,
 
 			autoToggle = function() {
 				var evTouchStart = 'touchstart.contextmenuAutoToggle';
@@ -9160,6 +9187,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					}),
 					evts;
 
+				autoSyncStop = true;
 				fm.autoSync('stop');
 				fm.toFront(menu);
 				base.width(bwidth);
@@ -9209,7 +9237,8 @@ $.fn.elfindercontextmenu = function(fm) {
 					}
 				}
 				
-				fm.searchStatus.state < 1 && ! fm.searchStatus.ininc && fm.autoSync();
+				autoSyncStop && fm.searchStatus.state < 1 && ! fm.searchStatus.ininc && fm.autoSync();
+				autoSyncStop = false;
 			},
 			
 			create = function(type, targets) {
@@ -10587,6 +10616,7 @@ $.fn.elfindercwd = function(fm, options) {
 				var place    = list ? cwd.find('tbody') : cwd,
 					l        = files.length, 
 					atmb     = {},
+					ltmb     = {},
 					findNode = function(file) {
 						var pointer = cwd.find('[id]:first'), file2;
 
@@ -10649,20 +10679,25 @@ $.fn.elfindercwd = function(fm, options) {
 						
 						if ($('#'+fm.cwdHash2Id(hash)).length) {
 							if (file.mime !== 'directory' && file.tmb) {
-								atmb[hash] = file.tmb;
+								if (file.tmb == 1) {
+									ltmb[hash] = file.tmb;
+								} else {
+									atmb[hash] = file.tmb;
+								}
 							}
 						}
 					}
 	
 					setColwidth();
 					bottomMarkerShow(place);
-					if (Object.keys(atmb).length) {
+					if (Object.keys(atmb).length || Object.keys(ltmb).length) {
 						if (Object.keys(bufferExt.attachTmbs).length < 1) {
 							wrapper.off(scrollEvent, attachThumbnails).on(scrollEvent, attachThumbnails);
 							fm.unbind('resize', attachThumbnails).bind('resize', attachThumbnails);
 						}
-						$.extend(bufferExt.attachTmbs, atmb);
-						attachThumbnails(atmb, (mode === 'change' && fm.currentReqCmd === 'resize')? true : false);
+						$.extend(bufferExt.attachTmbs, atmb, ltmb);
+						Object.keys(atmb).length && attachThumbnails(atmb, (mode === 'change' && fm.currentReqCmd === 'resize')? true : false);
+						Object.keys(ltmb).length && attachThumbnails(ltmb);
 					}
 				}
 			},
@@ -14539,12 +14574,13 @@ $.fn.elfindertree = function(fm, opts) {
 			 * @param {Boolean} do not expand cwd
 			 * @return void
 			 */
-			sync = function(noCwd, dirs, init) {
+			sync = function(noCwd, dirs, init, open) {
 				var cwd     = fm.cwd(),
 					cwdhash = cwd.hash,
 					current = $('#'+fm.navHash2Id(cwdhash)), 
 					noCwd   = noCwd || false,
 					dirs    = dirs || [],
+					open    = open || inOpen,
 					reqCmd  = 'parents',
 					reqs    = [],
 					getCmd  = function(target) {
@@ -14604,7 +14640,7 @@ $.fn.elfindertree = function(fm, opts) {
 								current.addClass(expanded).next('.'+subtree).slideDown();
 							}
 						}
-						if (inOpen || !noCwd) {
+						if (open || !noCwd) {
 							subs = current.parentsUntil('.'+root).filter('.'+subtree);
 							subsLen = subs.length;
 							cnt = 1;
@@ -14622,7 +14658,7 @@ $.fn.elfindertree = function(fm, opts) {
 							if (link.length && link.hasClass(loaded)) {
 								fm.lazy(function() {
 									updateTree([dir]);
-									sync(noCwd);
+									sync(noCwd, [], false, open);
 								});
 								return;
 							}
@@ -14682,10 +14718,10 @@ $.fn.elfindertree = function(fm, opts) {
 							
 							// leaf root sync
 							if (!noCwd && cwd.isroot && $('#'+fm.navHash2Id(cwd.hash).length)) {
-								sync(true, [], init);
+								sync(true, [], init, open);
 							}
 							
-							cwdhash == cwd.hash && fm.visible() && sync(noCwd);
+							cwdhash == cwd.hash && fm.visible() && sync(noCwd, [], false, open);
 						})
 						.always(function(data) {
 							if (link) {
@@ -17695,18 +17731,20 @@ elFinder.prototype.commands.netmount = function() {
 					.append($('<tr/>').append($('<td>'+fm.i18n('protocol')+'</td>')).append($('<td/>').append(inputs.protocol)));
 
 				$.each(self.drivers, function(i, protocol) {
-					inputs.protocol.append('<option value="'+protocol+'">'+fm.i18n(o[protocol].name || protocol)+'</option>');
-					$.each(o[protocol].inputs, function(name, input) {
-						input.attr('name', name);
-						if (input.attr('type') != 'hidden') {
-							input.addClass('ui-corner-all elfinder-netmount-inputs-'+protocol);
-							content.append($('<tr/>').addClass('elfinder-netmount-tr elfinder-netmount-tr-'+protocol).append($('<td>'+fm.i18n(name)+'</td>')).append($('<td/>').append(input)));
-						} else {
-							input.addClass('elfinder-netmount-inputs-'+protocol);
-							hidden.append(input);
-						}
-					});
-					o[protocol].protocol = inputs.protocol;
+					if (o[protocol]) {
+						inputs.protocol.append('<option value="'+protocol+'">'+fm.i18n(o[protocol].name || protocol)+'</option>');
+						$.each(o[protocol].inputs, function(name, input) {
+							input.attr('name', name);
+							if (input.attr('type') != 'hidden') {
+								input.addClass('ui-corner-all elfinder-netmount-inputs-'+protocol);
+								content.append($('<tr/>').addClass('elfinder-netmount-tr elfinder-netmount-tr-'+protocol).append($('<td>'+fm.i18n(name)+'</td>')).append($('<td/>').append(input)));
+							} else {
+								input.addClass('elfinder-netmount-inputs-'+protocol);
+								hidden.append(input);
+							}
+						});
+						o[protocol].protocol = inputs.protocol;
+					}
 				});
 				
 				content.append(hidden);
