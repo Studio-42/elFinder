@@ -441,7 +441,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 isset($img->width) ? $stat['width'] = $img->width : $stat['width'] = 0;
                 isset($img->height) ? $stat['height'] = $img->height : $stat['height'] = 0;
             }
-            if (! empty($raw->thumbnails)) {
+            if (!empty($raw->thumbnails)) {
                 if ($raw->thumbnails[0]->small->url) {
                     $stat['tmb'] = substr($raw->thumbnails[0]->small->url, 8); // remove "https://"
                 }
@@ -815,26 +815,29 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     protected function cacheDir($path)
     {
         $this->dirsCache[$path] = array();
-        $this->subdirsCache[$path] = false;
+        $hasDir = false;
 
         list(, $itemId) = $this->_od_splitPath($path);
 
         $res = $this->_od_query($itemId, false, false, $this->queryOptions);
 
-        $path == '/' ? $mountPath = '/' : $mountPath = $this->_normpath($path.'/');
-
         if ($res) {
             foreach ($res as $raw) {
                 if ($stat = $this->_od_parseRaw($raw)) {
-                    $stat = $this->updateCache($mountPath.$raw->id, $stat);
-                    if (empty($stat['hidden']) && $path !== $mountPath.$raw->id) {
-                        if ($stat['mime'] === 'directory') {
-                            $this->subdirsCache[$path] = true;
+                    $itemPath = $this->_joinPath($path, $raw->id);
+                    $stat = $this->updateCache($itemPath, $stat);
+                    if (empty($stat['hidden'])) {
+                        if (!$hasDir && $stat['mime'] === 'directory') {
+                            $hasDir = true;
                         }
-                        $this->dirsCache[$path][] = $mountPath.$raw->id;
+                        $this->dirsCache[$path][] = $itemPath;
                     }
                 }
             }
+        }
+
+        if (isset($this->sessionCache['subdirs'])) {
+            $this->sessionCache['subdirs'][$path] = $hasDir;
         }
 
         return $this->dirsCache[$path];
@@ -1068,7 +1071,9 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      **/
     protected function _basename($path)
     {
-        return basename($path);
+        list(, $basename) = $this->_od_splitPath($path);
+
+        return $basename;
     }
 
     /**
@@ -1564,13 +1569,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      **/
     protected function _rmdir($path)
     {
-        if ($this->_unlink($path)) {
-            list(, $id) = $this->_od_splitPath($path);
-
-            return true;
-        }
-
-        return false;
+        return $this->_unlink($path);
     }
 
     /**

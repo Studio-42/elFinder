@@ -1088,6 +1088,9 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function cacheDir($path)
     {
+        $this->dirsCache[$path] = [];
+        $hasDir = false;
+
         list(, $pid) = $this->_gd_splitPath($path);
 
         $opts = [
@@ -1095,7 +1098,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             'q' => sprintf('trashed=false and "%s" in parents', $pid),
         ];
 
-        $this->dirsCache[$path] = [];
         $res = $this->_gd_query($opts);
 
         $mountPath = $this->_normpath($path.'/');
@@ -1105,10 +1107,17 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 if ($stat = $this->_gd_parseRaw($raw)) {
                     $stat = $this->updateCache($mountPath.$raw->id, $stat);
                     if (empty($stat['hidden']) && $path !== $mountPath.$raw->id) {
+                        if (!$hasDir && $stat['mime'] === 'directory') {
+                            $hasDir = true;
+                        }
                         $this->dirsCache[$path][] = $mountPath.$raw->id;
                     }
                 }
             }
+        }
+
+        if (isset($this->sessionCache['subdirs'])) {
+            $this->sessionCache['subdirs'][$path] = $hasDir;
         }
 
         return $this->dirsCache[$path];

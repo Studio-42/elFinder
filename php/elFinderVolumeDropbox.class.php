@@ -649,6 +649,8 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 	 **/
 	protected function cacheDir($path) {
 		$this->dirsCache[$path] = array();
+		$hasDir = false;
+		
 		$res = $this->query('select dat from '.$this->DB_TableName.' where path='.$this->DB->quote(strtolower($path)));
 		
 		if ($res) {
@@ -657,11 +659,19 @@ class elFinderVolumeDropbox extends elFinderVolumeDriver {
 				if ($stat = $this->parseRaw($raw)) {
 					$stat = $this->updateCache($raw['path'], $stat);
 					if (empty($stat['hidden']) && $path !== $raw['path']) {
+						if (! $hasDir && $stat['mime'] === 'directory') {
+							$hasDir = true;
+						}
 						$this->dirsCache[$path][] = $raw['path'];
 					}
 				}
 			}
 		}
+		
+		if (isset($this->sessionCache['subdirs'])) {
+			$this->sessionCache['subdirs'][$path] = $hasDir;
+		}
+		
 		return $this->dirsCache[$path];
 	}
 

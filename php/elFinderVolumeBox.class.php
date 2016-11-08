@@ -508,6 +508,42 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         }
     }
 
+    /**
+     * Remove item.
+     *
+     * @param string $path file path
+     *
+     * @return bool
+     **/
+    protected function _bd_unlink($path, $type = null)
+    {
+        try {
+            list(, $itemId) = $this->_bd_splitPath($path);
+
+            if ($type == 'folders') {
+                $url = self::API_URL.'/'.$type.'/'.$itemId.'?recursive=true'
+                        .'&access_token='.urlencode($this->box->token->data->access_token);
+            } else {
+                $url = self::API_URL.'/'.$type.'/'.$itemId
+                .'?access_token='.urlencode($this->box->token->data->access_token);
+            }
+
+            $curl = $this->_bd_prepareCurl();
+            curl_setopt_array($curl, array(
+                    CURLOPT_URL => $url,
+                    CURLOPT_CUSTOMREQUEST => 'DELETE',
+            ));
+
+            //unlink or delete File or Folder in the Parent
+            $result = curl_exec($curl);
+            curl_close($curl);
+        } catch (Exception $e) {
+            return $this->setError('Box error: '.$e->getMessage());
+        }
+
+        return true;
+    }
+
     /*********************************************************************/
     /*                        OVERRIDE FUNCTIONS                         */
     /*********************************************************************/
@@ -818,6 +854,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      **/
     protected function cacheDir($path)
     {
+        $this->dirsCache[$path] = array();
+        $hasDir = false;
+
         if ($path == '/') {
             $items = $this->_bd_query('0', $fetch_self = true);   // get root directory with folder & files
             $itemId = $items->id;
@@ -825,20 +864,25 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             list(, $itemId) = $this->_bd_splitPath($path);
         }
 
-        $this->dirsCache[$path] = array();
         $res = $this->_bd_query($itemId);
 
         if ($res) {
             foreach ($res as $raw) {
                 if ($stat = $this->_bd_parseRaw($raw)) {
                     $itemPath = $this->_joinPath($path, $raw->id);
-                    debug([$path, $raw->id], $itemPath);
                     $stat = $this->updateCache($itemPath, $stat);
-                    if (empty($stat['hidden']) && $path !== $itemPath) {
+                    if (empty($stat['hidden'])) {
+                        if (!$hasDir && $stat['mime'] === 'directory') {
+                            $hasDir = true;
+                        }
                         $this->dirsCache[$path][] = $itemPath;
                     }
                 }
             }
+        }
+
+        if (isset($this->sessionCache['subdirs'])) {
+            $this->sessionCache['subdirs'][$path] = $hasDir;
         }
 
         return $this->dirsCache[$path];
@@ -877,7 +921,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      * @author Dmitry (dio) Levashov
      * @author Naoki Sawada
      **/
-    protected function remove($path, $force = false, $recursive = false)
+    protected function remove($path, $force = false)
     {
         $stat = $this->stat($path);
         $stat['realpath'] = $path;
@@ -893,11 +937,11 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         }
 
         if ($stat['mime'] == 'directory') {
-            if (!$recursive && !$this->_rmdir($path)) {
+            if (!$this->_rmdir($path)) {
                 return $this->setError(elFinder::ERROR_RM, $this->_path($path));
             }
         } else {
-            if (!$recursive && !$this->_unlink($path, 'files')) {
+            if (!$this->_unlink($path)) {
                 return $this->setError(elFinder::ERROR_RM, $this->_path($path));
             }
         }
@@ -1532,33 +1576,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      *
      * @author Dmitry (dio) Levashov
      **/
-    protected function _unlink($path, $type = null)
+    protected function _unlink($path)
     {
-        try {
-            list(, $itemId) = $this->_bd_splitPath($path);
-
-            if ($type == 'folders') {
-                $url = self::API_URL.'/'.$type.'/'.$itemId.'?recursive=true'
-                    .'&access_token='.urlencode($this->box->token->data->access_token);
-            } else {
-                $url = self::API_URL.'/'.$type.'/'.$itemId
-                    .'?access_token='.urlencode($this->box->token->data->access_token);
-            }
-
-            $curl = $this->_bd_prepareCurl();
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => $url,
-                CURLOPT_CUSTOMREQUEST => 'DELETE',
-            ));
-
-            //unlink or delete File or Folder in the Parent
-            $result = curl_exec($curl);
-            curl_close($curl);
-        } catch (Exception $e) {
-            return $this->setError('Box error: '.$e->getMessage());
-        }
-
-        return true;
+        return $this->_bd_unlink($path, 'files');
     }
 
     /**
@@ -1572,7 +1592,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      **/
     protected function _rmdir($path)
     {
-        return $this->_unlink($path, 'folders');
+        return $this->_bd_unlink($path, 'folders');
     }
 
     /**
@@ -1609,9 +1629,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         try {
             //Create or Update a file
             $metaDatas = stream_get_meta_data($fp);
-            $tmpFilePath = $metaDatas['uri'];
+            $tmpFilePath = isset($metaDatas['uri']) ? $metaDatas['uri'] : '';
             // remote contents
-            if (!$tmpFilePath) {
+            if (!$tmpFilePath || empty($metaDatas['seekable'])) {
                 $tmpHandle = tmpfile();
                 stream_copy_to_stream($fp, $tmpHandle);
                 $metaDatas = stream_get_meta_data($tmpHandle);
