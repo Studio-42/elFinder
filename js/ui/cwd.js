@@ -1069,6 +1069,7 @@ $.fn.elfindercwd = function(fm, options) {
 				var place    = list ? cwd.find('tbody') : cwd,
 					l        = files.length, 
 					atmb     = {},
+					ltmb     = {},
 					findNode = function(file) {
 						var pointer = cwd.find('[id]:first'), file2;
 
@@ -1131,20 +1132,25 @@ $.fn.elfindercwd = function(fm, options) {
 						
 						if ($('#'+fm.cwdHash2Id(hash)).length) {
 							if (file.mime !== 'directory' && file.tmb) {
-								atmb[hash] = file.tmb;
+								if (file.tmb == 1) {
+									ltmb[hash] = file.tmb;
+								} else {
+									atmb[hash] = file.tmb;
+								}
 							}
 						}
 					}
 	
 					setColwidth();
 					bottomMarkerShow(place);
-					if (Object.keys(atmb).length) {
+					if (Object.keys(atmb).length || Object.keys(ltmb).length) {
 						if (Object.keys(bufferExt.attachTmbs).length < 1) {
 							wrapper.off(scrollEvent, attachThumbnails).on(scrollEvent, attachThumbnails);
 							fm.unbind('resize', attachThumbnails).bind('resize', attachThumbnails);
 						}
-						$.extend(bufferExt.attachTmbs, atmb);
-						attachThumbnails(atmb, (mode === 'change' && fm.currentReqCmd === 'resize')? true : false);
+						$.extend(bufferExt.attachTmbs, atmb, ltmb);
+						Object.keys(atmb).length && attachThumbnails(atmb, (mode === 'change' && fm.currentReqCmd === 'resize')? true : false);
+						Object.keys(ltmb).length && attachThumbnails(ltmb);
 					}
 				}
 			},
