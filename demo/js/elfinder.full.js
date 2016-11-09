@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 5db5ae0) (2016-11-09)
+ * Version 2.1.16 (2.1-src Nightly: 9b48f63) (2016-11-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6420,7 +6420,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 5db5ae0)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 9b48f63)';
 
 
 
@@ -7489,7 +7489,7 @@ elFinder.prototype._options = {
 	 */
 	contextmenu : {
 		// navbarfolder menu
-		navbar : ['open', 'download', '|', 'upload', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'rename', '|', 'archive', '|', 'places', 'info', 'chmod', 'netunmount'],
+		navbar : ['open', 'download', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'rename', '|', 'archive', '|', 'places', 'info', 'chmod', 'netunmount'],
 		// current directory menu
 		cwd    : ['reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'view', 'sort', 'colwidth', '|', 'info', '|', 'fullscreen'],
 		// current directory file menu
@@ -8085,8 +8085,11 @@ elFinder.prototype.resources = {
 			var fm   = this.fm,
 				cmd  = this.name,
 				wz   = fm.getUI('workzone'),
-				cwd  = fm.getUI('cwd'),
-				tarea= (fm.storage('view') != 'list'),
+				org  = (this.origin && this.origin === 'navbar')? 'tree' : 'cwd',
+				ui   = fm.getUI(org),
+				tree = (org === 'tree'),
+				find = tree? 'navHash2Id' : 'cwdHash2Id',
+				tarea= (! tree && fm.storage('view') != 'list'),
 				sel  = fm.selected(),
 				move = this.move || false,
 				empty= wz.hasClass('elfinder-cwd-wrapper-empty'),
@@ -8116,17 +8119,17 @@ elFinder.prototype.resources = {
 					})
 					.always(function() {
 						rest();
-						input.remove();
-						node.remove();
+						cleanup();
 						fm.enable();
 						fm.trigger('resMixinMake');
 					}),
 				id    = 'tmp_'+parseInt(Math.random()*100000),
-				phash = fm.cwd().hash,
+				phash = tree? fm.file(sel[0]).hash : fm.cwd().hash,
 				date = new Date(),
 				file   = {
 					hash  : id,
-					name  : fm.uniqueName(this.prefix),
+					phash : phash,
+					name  : fm.uniqueName(this.prefix, phash),
 					mime  : this.mime,
 					read  : true,
 					write : true,
@@ -8134,7 +8137,7 @@ elFinder.prototype.resources = {
 					move  : move
 				},
 				data = this.data || {},
-				node = cwd.trigger('create.'+fm.namespace, file).find('#'+fm.cwdHash2Id(id))
+				node = ui.trigger('create.'+fm.namespace, file).find('#'+fm[find](id))
 					.on('unselect.'+fm.namespace, function() {
 						setTimeout(function() {
 							input && input.blur();
@@ -8142,10 +8145,17 @@ elFinder.prototype.resources = {
 					}),
 				nnode, pnode,
 				overlay = fm.getUI('overlay'),
+				cleanup = function() {
+					fm.unbind('resize', resize);
+					input.remove();
+					if (tree) {
+						node.closest('.elfinder-navbar-wrapper').remove();
+					}
+					node.remove();
+				},
 				cancel = function(e) { 
 					if (! inError) {
-						input.remove();
-						node.remove();
+						cleanup();
 						e.stopPropagation();
 						dfrd.reject();
 					}
@@ -8204,7 +8214,7 @@ elFinder.prototype.resources = {
 							$.when(cut)
 							.done(function() {
 								rest();
-								parent.html(fm.escape(name));
+								input.hide().before($('<span>').text(name));
 
 								fm.lockfiles({files : [id]});
 
@@ -8215,13 +8225,15 @@ elFinder.prototype.resources = {
 										syncOnFail  : true
 									})
 									.fail(function(error) {
-										dfrd.reject(error);
+										inError = true;
+										input.show().prev().remove();
+										fm.error(error, {modal: true, close: select});
 									})
 									.done(function(data) {
 										dfrd.resolve(data);
 										if (data.added && data.added[0]) {
 											var dirhash = data.added[0].hash,
-												newItem = cwd.find('#'+fm.cwdHash2Id(dirhash));
+												newItem = ui.find('#'+fm[find](dirhash));
 											if (sel && move) {
 												fm.one(cmd+'done', function() {
 													fm.exec('paste', dirhash);
@@ -8229,7 +8241,7 @@ elFinder.prototype.resources = {
 											}
 											if (data && data.added && data.added[0]) {
 												fm.one(cmd+'done', function() {
-													newItem = fm.getUI('cwd').find('#'+fm.cwdHash2Id(data.added[0].hash));
+													newItem = ui.find('#'+fm[find](data.added[0].hash));
 													if (newItem.length) {
 														newItem.trigger('scrolltoview');
 													} else {
@@ -8256,24 +8268,49 @@ elFinder.prototype.resources = {
 					input.select().focus();
 					input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
 				},
+				resize = function() {
+					node.trigger('scrolltoview');
+				},
 				inError = false;
 
-			if (this.disabled() || !node.length) {
+			if ((! tree && this.disabled()) || !node.length) {
 				return dfrd.reject();
 			}
 
-			empty && wz.removeClass('elfinder-cwd-wrapper-empty');
-			nnode = node.find('.elfinder-cwd-filename');
-			pnode = nnode.parent();
-			node.css('position', 'relative').addClass('ui-front');
-			if (tarea) {
-				nnode.css('max-height', 'none');
+			if (tree) {
+				var dst = $('#'+fm[find](phash)),
+					c = 'class',
+					collapsed = fm.res(c, 'navcollapse'),
+					expanded  = fm.res(c, 'navexpand'),
+					arrow = fm.res(c, 'navarrow'),
+					subtree = fm.res(c, 'navsubtree');
+				
+				if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
+					dst.children('.'+arrow).click().data('dfrd').done(function() {
+						if (input.val() === file.name) {
+							input.val(fm.uniqueName(this.prefix, phash)).select().focus();
+						}
+					}.bind(this));
+				}
+				nnode = node.contents().filter(function(){ return this.nodeType==3 && $(this).parent().attr('id') === fm.navHash2Id(file.hash); });
+				nnode.replaceWith(input.val(file.name));
+				node.closest('.'+subtree).show();
 			} else {
-				colwidth = pnode.width();
-				pnode.width(colwidth - 15)
-					.parent('td').css('overflow', 'visible');
+				empty && wz.removeClass('elfinder-cwd-wrapper-empty');
+				nnode = node.find('.elfinder-cwd-filename');
+				pnode = nnode.parent();
+				node.css('position', 'relative').addClass('ui-front');
+				if (tarea) {
+					nnode.css('max-height', 'none');
+				} else {
+					colwidth = pnode.width();
+					pnode.width(colwidth - 15)
+						.parent('td').css('overflow', 'visible');
+				}
+				nnode.empty('').append(input.val(file.name));
 			}
-			nnode.empty('').append(input.val(file.name));
+			
+			fm.bind('resize', resize);
 			
 			input.trigger('keyup');
 			select();
@@ -9263,7 +9300,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					}
 				}
 				if (type === 'navbar') {
-					fm.select({selected: targets});
+					fm.select({selected: targets, origin: 'navbar'});
 				}
 
 				selcnt = fm.selected().length;
@@ -14858,13 +14895,13 @@ $.fn.elfindertree = function(fm, opts) {
 					
 					if (hash != fm.cwd().hash && !link.hasClass(disabled)) {
 						fm.exec('open', hash).done(function() {
-							fm.select({selected: [hash]});
+							fm.select({selected: [hash], origin: 'tree'});
 						});
 					} else {
 						if (link.hasClass(collapsed)) {
 							link.children('.'+arrow).click();
 						}
-						fm.select({selected: [hash]});
+						fm.select({selected: [hash], origin: 'tree'});
 					}
 				})
 				// for touch device
@@ -14898,6 +14935,7 @@ $.fn.elfindertree = function(fm, opts) {
 					var arrow = $(this),
 						link  = arrow.parent(selNavdir),
 						stree = link.next('.'+subtree),
+						dfrd  = $.Deferred(),
 						slideTH = 30, cnt;
 
 					e.stopPropagation();
@@ -14914,6 +14952,8 @@ $.fn.elfindertree = function(fm, opts) {
 									fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
 								});
 							}
+						}).always(function() {
+							dfrd.resolve();
 						});
 					} else {
 						spinner.insertBefore(arrow);
@@ -14939,8 +14979,12 @@ $.fn.elfindertree = function(fm, opts) {
 							.always(function(data) {
 								spinner.remove();
 								link.addClass(loaded);
+								fm.one('treedone', function() {
+									dfrd.resolve();
+								});
 							});
 					}
+					arrow.data('dfrd', dfrd);
 				})
 				.on('contextmenu', selNavdir, function(e) {
 					var self = $(this);
@@ -14965,6 +15009,16 @@ $.fn.elfindertree = function(fm, opts) {
 				})
 				.on('scrolltoview', selNavdir, function() {
 					autoScroll($(this).attr('id'));
+				})
+				// prepend fake dir
+				.on('create.'+fm.namespace, function(e, item) {
+					var pdir = findSubtree(item.phash),
+						lock = item.move || false,
+						dir  = $(itemhtml(item)).addClass('elfinder-navbar-wrapper-tmp'),
+						selected = fm.selected();
+						
+					lock && selected.length && fm.trigger('lockfiles', {files: selected});
+					pdir.prepend(dir);
 				}),
 			// move tree into navbar
 			navbar = fm.getUI('navbar').append(tree).show(),
@@ -17606,7 +17660,8 @@ elFinder.prototype.commands.fullscreen = function() {
  **/
 elFinder.prototype.commands.mkdir = function() {
 	var fm   = this.fm,
-		self = this;
+		self = this,
+		curOrg;
 	
 	this.value           = '';
 	this.disableOnSearch = true;
@@ -17614,10 +17669,11 @@ elFinder.prototype.commands.mkdir = function() {
 	this.mime            = 'directory';
 	this.prefix          = 'untitled folder';
 	this.exec            = function(contextSel) {
+		this.origin = curOrg? curOrg : 'cwd';
 		if (! contextSel && ! this.options.intoNewFolderToolbtn) {
 			fm.getUI('cwd').trigger('unselectall');
 		}
-		this.move = fm.selected().length? true : false;
+		this.move = (this.origin !== 'navbar' && fm.selected().length)? true : false;
 		return $.proxy(fm.res('mixin', 'make'), self)();
 	}
 	
@@ -17633,16 +17689,22 @@ elFinder.prototype.commands.mkdir = function() {
 	
 	fm.bind('select', function(e) {
 		var sel = (e.data && e.data.selected)? e.data.selected : [];
-		self.title = sel.length? fm.i18n('cmdmkdirin') : fm.i18n('cmdmkdir');
+			
+		curOrg = sel.length? (e.data.origin || '') : '';
+		self.title = (sel.length && (curOrg !== 'navbar'))? fm.i18n('cmdmkdirin') : fm.i18n('cmdmkdir');
 		self.update(void(0), self.title);
 	});
 	
 	this.getstate = function(sel) {
 		var cwd = fm.cwd(),
-			sel = (sel && sel[0] != cwd.hash)? this.files(sel) : [],
+			sel = (curOrg === 'navbar' || (sel && sel[0] != cwd.hash))? this.files(sel || fm.selected()) : [],
 			cnt = sel.length;
 
-		return !this._disabled && cwd.write && (!cnt || $.map(sel, function(f) { return f.read && ! f.locked && ! fm.isRoot(f)? f : null  }).length == cnt)? 0 : -1;
+		if (curOrg === 'navbar') {
+			return !this._disabled && cnt && sel[0].write && sel[0].read? 0 : -1;  
+		} else {
+			return !this._disabled && cwd.write && (!cnt || $.map(sel, function(f) { return f.read && ! f.locked? f : null  }).length == cnt)? 0 : -1;
+		}
 	}
 
 };
