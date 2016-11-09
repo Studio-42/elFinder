@@ -7,7 +7,8 @@
  **/
 elFinder.prototype.commands.mkdir = function() {
 	var fm   = this.fm,
-		self = this;
+		self = this,
+		curOrg;
 	
 	this.value           = '';
 	this.disableOnSearch = true;
@@ -15,10 +16,11 @@ elFinder.prototype.commands.mkdir = function() {
 	this.mime            = 'directory';
 	this.prefix          = 'untitled folder';
 	this.exec            = function(contextSel) {
+		this.origin = curOrg? curOrg : 'cwd';
 		if (! contextSel && ! this.options.intoNewFolderToolbtn) {
 			fm.getUI('cwd').trigger('unselectall');
 		}
-		this.move = fm.selected().length? true : false;
+		this.move = (this.origin !== 'navbar' && fm.selected().length)? true : false;
 		return $.proxy(fm.res('mixin', 'make'), self)();
 	}
 	
@@ -34,16 +36,22 @@ elFinder.prototype.commands.mkdir = function() {
 	
 	fm.bind('select', function(e) {
 		var sel = (e.data && e.data.selected)? e.data.selected : [];
-		self.title = sel.length? fm.i18n('cmdmkdirin') : fm.i18n('cmdmkdir');
+			
+		curOrg = sel.length? (e.data.origin || '') : '';
+		self.title = (sel.length && (curOrg !== 'navbar'))? fm.i18n('cmdmkdirin') : fm.i18n('cmdmkdir');
 		self.update(void(0), self.title);
 	});
 	
 	this.getstate = function(sel) {
 		var cwd = fm.cwd(),
-			sel = (sel && sel[0] != cwd.hash)? this.files(sel) : [],
+			sel = (curOrg === 'navbar' || (sel && sel[0] != cwd.hash))? this.files(sel || fm.selected()) : [],
 			cnt = sel.length;
 
-		return !this._disabled && cwd.write && (!cnt || $.map(sel, function(f) { return f.read && ! f.locked && ! fm.isRoot(f)? f : null  }).length == cnt)? 0 : -1;
+		if (curOrg === 'navbar') {
+			return !this._disabled && cnt && sel[0].write && sel[0].read? 0 : -1;  
+		} else {
+			return !this._disabled && cwd.write && (!cnt || $.map(sel, function(f) { return f.read && ! f.locked? f : null  }).length == cnt)? 0 : -1;
+		}
 	}
 
 };

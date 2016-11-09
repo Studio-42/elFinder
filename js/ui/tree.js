@@ -732,13 +732,13 @@ $.fn.elfindertree = function(fm, opts) {
 					
 					if (hash != fm.cwd().hash && !link.hasClass(disabled)) {
 						fm.exec('open', hash).done(function() {
-							fm.select({selected: [hash]});
+							fm.select({selected: [hash], origin: 'tree'});
 						});
 					} else {
 						if (link.hasClass(collapsed)) {
 							link.children('.'+arrow).click();
 						}
-						fm.select({selected: [hash]});
+						fm.select({selected: [hash], origin: 'tree'});
 					}
 				})
 				// for touch device
@@ -772,6 +772,7 @@ $.fn.elfindertree = function(fm, opts) {
 					var arrow = $(this),
 						link  = arrow.parent(selNavdir),
 						stree = link.next('.'+subtree),
+						dfrd  = $.Deferred(),
 						slideTH = 30, cnt;
 
 					e.stopPropagation();
@@ -788,6 +789,8 @@ $.fn.elfindertree = function(fm, opts) {
 									fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
 								});
 							}
+						}).always(function() {
+							dfrd.resolve();
 						});
 					} else {
 						spinner.insertBefore(arrow);
@@ -813,8 +816,12 @@ $.fn.elfindertree = function(fm, opts) {
 							.always(function(data) {
 								spinner.remove();
 								link.addClass(loaded);
+								fm.one('treedone', function() {
+									dfrd.resolve();
+								});
 							});
 					}
+					arrow.data('dfrd', dfrd);
 				})
 				.on('contextmenu', selNavdir, function(e) {
 					var self = $(this);
@@ -839,6 +846,16 @@ $.fn.elfindertree = function(fm, opts) {
 				})
 				.on('scrolltoview', selNavdir, function() {
 					autoScroll($(this).attr('id'));
+				})
+				// prepend fake dir
+				.on('create.'+fm.namespace, function(e, item) {
+					var pdir = findSubtree(item.phash),
+						lock = item.move || false,
+						dir  = $(itemhtml(item)).addClass('elfinder-navbar-wrapper-tmp'),
+						selected = fm.selected();
+						
+					lock && selected.length && fm.trigger('lockfiles', {files: selected});
+					pdir.prepend(dir);
 				}),
 			// move tree into navbar
 			navbar = fm.getUI('navbar').append(tree).show(),
