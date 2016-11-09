@@ -287,6 +287,13 @@ $.fn.elfindercwd = function(fm, options) {
 			},
 			
 			/**
+			 * jQueery node that will be selected next
+			 * 
+			 * @type Object jQuery node
+			 */
+			selectedNext = $(),
+			
+			/**
 			 * Flag. Required for msie to avoid unselect files on dragstart
 			 *
 			 * @type Boolean
@@ -355,8 +362,12 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 					// !append && unselectAll();
 				} else {
-					// there are no selected file - select first/last one
-					n = cwd.find('[id]:not(.'+clDisabled+'):not(.elfinder-cwd-parent):'+(prev ? 'last' : 'first'));
+					if (selectedNext.length) {
+						n = prev? selectedNext.prev() : selectedNext;
+					} else {
+						// there are no selected file - select first/last one
+						n = cwd.find('[id]:not(.'+clDisabled+'):not(.elfinder-cwd-parent):'+(prev ? 'last' : 'first'));
+					}
 				}
 				
 				if (n && n.length && !n.hasClass('elfinder-cwd-parent')) {
@@ -1299,6 +1310,7 @@ $.fn.elfindercwd = function(fm, options) {
 					wz.addClass('elfinder-search-result' + (fm.searchStatus.ininc? ' elfinder-incsearch-result' : ''));
 				}
 				
+				selectedNext = $();
 				try {
 					// to avoid problem with draggable
 					cwd.empty();
@@ -1688,6 +1700,8 @@ $.fn.elfindercwd = function(fm, options) {
 						if ($.inArray(id, selectedFiles) === -1) {
 							selectedFiles.push(id);
 						}
+						// will be selected next
+						selectedNext = cwd.find('[id].'+clSelected+':last').next();
 					}
 				})
 				// remove hover class from unselected file
