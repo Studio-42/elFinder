@@ -1465,6 +1465,10 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             }
 
             if ($res && isset($res->id)) {
+                if (isset($res->folder) && isset($this->sessionCache['subdirs'])) {
+                    $this->sessionCache['subdirs'][$targetDir] = true;
+                }
+
                 return $this->_joinPath($targetDir, $res->id);
             }
 
@@ -1494,7 +1498,6 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             list(, $targetParentId) = $this->_od_splitPath($targetDir);
             list($sourceParentId, $itemId, $srcParent) = $this->_od_splitPath($source);
 
-            $srcFile = $this->stat($source);
             $properties = array(
                     'name' => (string) $name,
                 );
