@@ -4199,6 +4199,9 @@ abstract class elFinderVolumeDriver {
 		
 		if ($res = $this->convEncOut($this->_move($this->convEncIn($src), $this->convEncIn($dst), $this->convEncIn($name)))) {
 			$this->removed[] = $stat;
+			if (isset($this->sessionCache['subdirs']) && $stat['mime'] === 'directory') {
+				$this->sessionCache['subdirs'][$dst] = true;
+			}
 			return is_string($res)? $res : $this->joinPathCE($dst, $name);
 		}
 
