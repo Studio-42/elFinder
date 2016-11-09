@@ -325,7 +325,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					}
 				}
 				if (type === 'navbar') {
-					fm.select({selected: targets});
+					fm.select({selected: targets, origin: 'navbar'});
 				}
 
 				selcnt = fm.selected().length;
