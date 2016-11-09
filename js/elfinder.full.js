@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 493461a) (2016-11-09)
+ * Version 2.1.16 (2.1-src Nightly: 5db5ae0) (2016-11-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6420,7 +6420,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 493461a)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 5db5ae0)';
 
 
 
@@ -9834,6 +9834,13 @@ $.fn.elfindercwd = function(fm, options) {
 			},
 			
 			/**
+			 * jQueery node that will be selected next
+			 * 
+			 * @type Object jQuery node
+			 */
+			selectedNext = $(),
+			
+			/**
 			 * Flag. Required for msie to avoid unselect files on dragstart
 			 *
 			 * @type Boolean
@@ -9902,8 +9909,12 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 					// !append && unselectAll();
 				} else {
-					// there are no selected file - select first/last one
-					n = cwd.find('[id]:not(.'+clDisabled+'):not(.elfinder-cwd-parent):'+(prev ? 'last' : 'first'));
+					if (selectedNext.length) {
+						n = prev? selectedNext.prev() : selectedNext;
+					} else {
+						// there are no selected file - select first/last one
+						n = cwd.find('[id]:not(.'+clDisabled+'):not(.elfinder-cwd-parent):'+(prev ? 'last' : 'first'));
+					}
 				}
 				
 				if (n && n.length && !n.hasClass('elfinder-cwd-parent')) {
@@ -10846,6 +10857,7 @@ $.fn.elfindercwd = function(fm, options) {
 					wz.addClass('elfinder-search-result' + (fm.searchStatus.ininc? ' elfinder-incsearch-result' : ''));
 				}
 				
+				selectedNext = $();
 				try {
 					// to avoid problem with draggable
 					cwd.empty();
@@ -11235,6 +11247,8 @@ $.fn.elfindercwd = function(fm, options) {
 						if ($.inArray(id, selectedFiles) === -1) {
 							selectedFiles.push(id);
 						}
+						// will be selected next
+						selectedNext = cwd.find('[id].'+clSelected+':last').next();
 					}
 				})
 				// remove hover class from unselected file
@@ -18676,6 +18690,8 @@ elFinder.prototype.commands.places = function() {
 		navdrag = false,
 		navmove = false,
 		navtm   = null,
+		leftKey = $.ui.keyCode.LEFT,
+		rightKey = $.ui.keyCode.RIGHT,
 		coverEv = 'mousemove touchstart ' + ('onwheel' in document? 'wheel' : 'onmousewheel' in document? 'mousewheel' : 'DOMMouseScroll'),
 		title   = $('<div class="elfinder-quicklook-title"/>'),
 		icon    = $('<div/>'),
@@ -18797,8 +18813,8 @@ elFinder.prototype.commands.places = function() {
 			cover.hide();
 		},
 			
-		prev = $('<div class="'+navicon+' '+navicon+'-prev"/>').on('click touchstart', function(e) { ! navmove && navtrigger(37); return false; }),
-		next = $('<div class="'+navicon+' '+navicon+'-next"/>').on('click touchstart', function(e) { ! navmove && navtrigger(39); return false; }),
+		prev = $('<div class="'+navicon+' '+navicon+'-prev"/>').on('click touchstart', function(e) { ! navmove && navtrigger(leftKey); return false; }),
+		next = $('<div class="'+navicon+' '+navicon+'-next"/>').on('click touchstart', function(e) { ! navmove && navtrigger(rightKey); return false; }),
 		navbar  = $('<div class="elfinder-quicklook-navbar"/>')
 			.append(prev)
 			.append(fsicon)
@@ -19040,7 +19056,7 @@ elFinder.prototype.commands.places = function() {
 			
 			self.change(function() {
 				if (self.opened()) {
-					self.value ? preview.trigger($.Event('update', {file : self.value})) : win.trigger('close');
+					self.value ? preview.trigger($.Event('update', {file : self.value})) : navtrigger(rightKey);
 				}
 			});
 			
