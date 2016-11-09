@@ -136,6 +136,8 @@
 		navdrag = false,
 		navmove = false,
 		navtm   = null,
+		leftKey = $.ui.keyCode.LEFT,
+		rightKey = $.ui.keyCode.RIGHT,
 		coverEv = 'mousemove touchstart ' + ('onwheel' in document? 'wheel' : 'onmousewheel' in document? 'mousewheel' : 'DOMMouseScroll'),
 		title   = $('<div class="elfinder-quicklook-title"/>'),
 		icon    = $('<div/>'),
@@ -257,8 +259,8 @@
 			cover.hide();
 		},
 			
-		prev = $('<div class="'+navicon+' '+navicon+'-prev"/>').on('click touchstart', function(e) { ! navmove && navtrigger(37); return false; }),
-		next = $('<div class="'+navicon+' '+navicon+'-next"/>').on('click touchstart', function(e) { ! navmove && navtrigger(39); return false; }),
+		prev = $('<div class="'+navicon+' '+navicon+'-prev"/>').on('click touchstart', function(e) { ! navmove && navtrigger(leftKey); return false; }),
+		next = $('<div class="'+navicon+' '+navicon+'-next"/>').on('click touchstart', function(e) { ! navmove && navtrigger(rightKey); return false; }),
 		navbar  = $('<div class="elfinder-quicklook-navbar"/>')
 			.append(prev)
 			.append(fsicon)
@@ -500,7 +502,7 @@
 			
 			self.change(function() {
 				if (self.opened()) {
-					self.value ? preview.trigger($.Event('update', {file : self.value})) : win.trigger('close');
+					self.value ? preview.trigger($.Event('update', {file : self.value})) : navtrigger(rightKey);
 				}
 			});
 			
