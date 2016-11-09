@@ -1501,6 +1501,10 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             curl_close($curl);
 
             if ($result && isset($result->id)) {
+                if ($type === 'folders' && isset($this->sessionCache['subdirs'])) {
+                    $this->sessionCache['subdirs'][$targetDir] = true;
+                }
+
                 return $this->_joinPath($targetDir, $result->id);
             }
 
