@@ -241,34 +241,37 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
         $stat['iid'] = isset($raw['id']) ? $raw['id'] : 'root';
         $stat['name'] = isset($raw['name']) ? $raw['name'] : '';
-        $stat['mime'] = $raw['mimeType'] == self::DIRMIME ? 'directory' :
-        ($raw['mimeType'] == 'image/bmp' ? 'image/x-ms-bmp' : $raw['mimeType']);
-        $stat['size'] = $raw['mimeType'] == self::DIRMIME ? 0 : (int) $raw['size'];
-        $stat['ts'] = isset($raw['modifiedTime']) ? strtotime($raw['modifiedTime']) : $_SERVER['REQUEST_TIME'];
-        $stat['locked'] = false;
+        if (isset($raw['modifiedTime'])) {
+        	$stat['ts'] = strtotime($raw['modifiedTime']);
+        }
 
         if ($raw['mimeType'] === self::DIRMIME) {
-            $stat['dirs'] = (int) $this->_subdirs($stat['iid']);
-        } elseif ($size = $raw->getImageMediaMetadata()) {
-            $stat['width'] = $size['width'];
-            $stat['height'] = $size['height'];
-        }
-
-        $published = $this->_gd_isPublished($raw);
-
-        if ($this->options['useGoogleTmb']) {
-            if (isset($raw['thumbnailLink'])) {
-                if ($published) {
-                    $stat['tmb'] = 'drive.google.com/thumbnail?authuser=0&sz=s'.$this->options['tmbSize'].'&id='.$raw['id'];
-                } else {
-                    $stat['tmb'] = substr($raw['thumbnailLink'], 8); // remove "https://"
-                }
-            } else {
-                $stat['tmb'] = '';
-            }
-        }
-
-        $stat['url'] = $published ? $this->_gd_getLink($raw) : '1';
+        	$stat['mime'] = 'directory';
+        	$stat['size'] = 0;
+        } else {
+        	$stat['mime'] = $raw['mimeType'] == 'image/bmp' ? 'image/x-ms-bmp' : $raw['mimeType'];
+        	$stat['size'] = (int) $raw['size'];
+        	if ($size = $raw->getImageMediaMetadata()) {
+	            $stat['width'] = $size['width'];
+	            $stat['height'] = $size['height'];
+	        }
+	        
+	        $published = $this->_gd_isPublished($raw);
+	
+	        if ($this->options['useGoogleTmb']) {
+	            if (isset($raw['thumbnailLink'])) {
+	                if ($published) {
+	                    $stat['tmb'] = 'drive.google.com/thumbnail?authuser=0&sz=s'.$this->options['tmbSize'].'&id='.$raw['id'];
+	                } else {
+	                    $stat['tmb'] = substr($raw['thumbnailLink'], 8); // remove "https://"
+	                }
+	            } else {
+	                $stat['tmb'] = '';
+	            }
+	        }
+	
+	        $stat['url'] = $published ? $this->_gd_getLink($raw) : '1';
+	    }
 
         return $stat;
     }

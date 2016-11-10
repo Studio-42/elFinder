@@ -86,6 +86,7 @@ elFinder.prototype.resources = {
 				}, colwidth,
 				dfrd = $.Deferred()
 					.fail(function(error) {
+						dstCls && dst.attr('class', dstCls);
 						empty && wz.addClass('elfinder-cwd-wrapper-empty');
 						if (sel) {
 							move && fm.trigger('unlockfiles', {files: sel});
@@ -270,20 +271,26 @@ elFinder.prototype.resources = {
 				resize = function() {
 					node.trigger('scrolltoview');
 				},
-				inError = false;
+				inError = false,
+				// for tree
+				dst, dstCls, collapsed, expanded, arrow, subtree;
 
 			if ((! tree && this.disabled()) || !node.length) {
 				return dfrd.reject();
 			}
 
 			if (tree) {
-				var dst = $('#'+fm[find](phash)),
-					c = 'class',
-					collapsed = fm.res(c, 'navcollapse'),
-					expanded  = fm.res(c, 'navexpand'),
-					arrow = fm.res(c, 'navarrow'),
-					subtree = fm.res(c, 'navsubtree');
+				dst = $('#'+fm[find](phash));
+				collapsed = fm.res('class', 'navcollapse');
+				expanded  = fm.res('class', 'navexpand');
+				arrow = fm.res('class', 'navarrow');
+				subtree = fm.res('class', 'navsubtree');
 				
+				if (! dst.hasClass(collapsed)) {
+					node.closest('.'+subtree).show();
+					dstCls = dst.attr('class');
+					dst.addClass(collapsed+' '+expanded+' elfinder-subtree-loaded');
+				}
 				if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
 					dst.children('.'+arrow).click().data('dfrd').done(function() {
 						if (input.val() === file.name) {
@@ -293,7 +300,6 @@ elFinder.prototype.resources = {
 				}
 				nnode = node.contents().filter(function(){ return this.nodeType==3 && $(this).parent().attr('id') === fm.navHash2Id(file.hash); });
 				nnode.replaceWith(input.val(file.name));
-				node.closest('.'+subtree).show();
 			} else {
 				empty && wz.removeClass('elfinder-cwd-wrapper-empty');
 				nnode = node.find('.elfinder-cwd-filename');

@@ -244,6 +244,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				if ($row['mime'] == 'directory') {
 					unset($row['width']);
 					unset($row['height']);
+					$row['size'] = 0;
 				} else {
 					unset($row['dirs']);
 				}
@@ -539,6 +540,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			if ($stat['mime'] == 'directory') {
 				unset($stat['width']);
 				unset($stat['height']);
+				$stat['size'] = 0;
 			} else {
 				unset($stat['dirs']);
 			}
