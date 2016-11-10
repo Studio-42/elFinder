@@ -436,7 +436,8 @@ $.fn.elfindertree = function(fm, opts) {
 			 * @return void
 			 */
 			autoScroll = function(target) {
-				var self = $(this);
+				var self = $(this),
+					dfrd = $.Deferred();
 				self.data('autoScrTm') && clearTimeout(self.data('autoScrTm'));
 				self.data('autoScrTm', setTimeout(function() {
 					var current = $('#'+(target || fm.navHash2Id(fm.cwd().hash)));
@@ -449,10 +450,20 @@ $.fn.elfindertree = function(fm, opts) {
 						tgtTop = current.offset().top;
 						
 						if (tgtTop < top || tgtTop > bottom) {
-							parent.animate({ scrollTop : parent.scrollTop() + tgtTop - top - treeH / 3 }, { duration : 'fast' });
+							parent.animate({
+								scrollTop : parent.scrollTop() + tgtTop - top - treeH / 3
+							}, {
+								duration : 'fast',
+								complete : function() {	dfrd.resolve(); }
+							});
+						} else {
+							dfrd.resolve();
 						}
+					} else {
+						dfrd.reject();
 					}
 				}, 100));
+				return dfrd;
 			},
 			
 			/**
@@ -845,7 +856,10 @@ $.fn.elfindertree = function(fm, opts) {
 					});
 				})
 				.on('scrolltoview', selNavdir, function() {
-					autoScroll($(this).attr('id'));
+					var self = $(this);
+					autoScroll(self.attr('id')).done(function() {
+						fm.resources.blink(self, 'lookme');
+					});
 				})
 				// prepend fake dir
 				.on('create.'+fm.namespace, function(e, item) {
