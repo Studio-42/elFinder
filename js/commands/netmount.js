@@ -37,6 +37,7 @@ elFinder.prototype.commands.netmount = function() {
 							var protocol = this.value;
 							content.find('.elfinder-netmount-tr').hide();
 							content.find('.elfinder-netmount-tr-'+protocol).show();
+							dialogNode.children('.ui-dialog-buttonpane:first').find('button').show();
 							if (typeof o[protocol].select == 'function') {
 								o[protocol].select(fm, e, data);
 							}
@@ -149,14 +150,15 @@ elFinder.prototype.commands.netmount = function() {
 					dialog.elfinderdialog('posInit');
 				});
 				return dialog;
-			}
-			;
+			},
+			dialogNode;
 		
 		if (!self.dialog) {
 			self.dialog = create();
 		} else {
 			self.dialog.elfinderdialog('open');
 		}
+		dialogNode = self.dialog.closest('.ui-dialog');
 
 		return dfrd.promise();
 	}
