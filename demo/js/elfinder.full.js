@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: da60cbe) (2016-11-10)
+ * Version 2.1.16 (2.1-src Nightly: 0b3fc2e) (2016-11-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6420,7 +6420,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: da60cbe)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 0b3fc2e)';
 
 
 
@@ -8242,12 +8242,34 @@ elFinder.prototype.resources = {
 											}
 											if (data && data.added && data.added[0]) {
 												fm.one(cmd+'done', function() {
-													newItem = ui.find('#'+fm[find](data.added[0].hash));
+													var item = data.added[0],
+														acts = {
+															'directory' : { cmd: 'open', msg: 'cmdopendir' },
+															'text/plain': { cmd: 'edit', msg: 'cmdedit' },
+															'default'   : { cmd: 'open', msg: 'cmdopen' }
+														},
+														act, extNode;
+													newItem = ui.find('#'+fm[find](item.hash));
+													if (data.added.length === 1) {
+														act = acts[item.mime] || acts.default;
+														extNode = $('<div/>').append(
+															$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"><span class="ui-button-text">'
+																+fm.i18n(act.msg)
+																+'</span></button>')
+															.on('mouseenter mouseleave', function(e) { 
+																$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
+															})
+															.on('click', function() {
+																fm.exec(act.cmd, item.hash);
+															})
+														);
+													}
 													if (newItem.length) {
 														newItem.trigger('scrolltoview');
+														extNode && fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), extNode: extNode});
 													} else {
 														fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
-														fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)])});
+														fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), extNode: extNode});
 													}
 												});
 											}
