@@ -481,6 +481,7 @@ $.fn.elfindercwd = function(fm, options) {
 					wrapper.scrollTop(ftop);
 				}
 				list && wrapper.scrollLeft(0);
+				fm.resources.blink(o, 'lookme');
 			},
 			
 			/**

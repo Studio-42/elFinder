@@ -209,47 +209,45 @@ elFinder.prototype.resources = {
 									})
 									.done(function(data) {
 										dfrd.resolve(data);
-										if (data.added && data.added[0]) {
-											var dirhash = data.added[0].hash,
+										if (data && data.added && data.added[0]) {
+											var item    = data.added[0],
+												dirhash = item.hash,
 												newItem = ui.find('#'+fm[find](dirhash));
 											if (sel && move) {
 												fm.one(cmd+'done', function() {
 													fm.exec('paste', dirhash);
 												});
 											}
-											if (data && data.added && data.added[0]) {
-												fm.one(cmd+'done', function() {
-													var item = data.added[0],
-														acts = {
-															'directory' : { cmd: 'open', msg: 'cmdopendir' },
-															'text/plain': { cmd: 'edit', msg: 'cmdedit' },
-															'default'   : { cmd: 'open', msg: 'cmdopen' }
-														},
-														act, extNode;
-													newItem = ui.find('#'+fm[find](item.hash));
-													if (data.added.length === 1) {
-														act = acts[item.mime] || acts.default;
-														extNode = $('<div/>').append(
-															$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"><span class="ui-button-text">'
-																+fm.i18n(act.msg)
-																+'</span></button>')
-															.on('mouseenter mouseleave', function(e) { 
-																$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
-															})
-															.on('click', function() {
-																fm.exec(act.cmd, item.hash);
-															})
-														);
-													}
-													if (newItem.length) {
-														newItem.trigger('scrolltoview');
-														extNode && fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), extNode: extNode});
-													} else {
-														fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
-														fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), extNode: extNode});
-													}
-												});
-											}
+											fm.one(cmd+'done', function() {
+												var acts = {
+														'directory' : { cmd: 'open', msg: 'cmdopendir' },
+														'text/plain': { cmd: 'edit', msg: 'cmdedit' },
+														'default'   : { cmd: 'open', msg: 'cmdopen' }
+													},
+													act, extNode;
+												newItem = ui.find('#'+fm[find](item.hash));
+												if (data.added.length === 1) {
+													act = acts[item.mime] || acts.default;
+													extNode = $('<div/>').append(
+														$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"><span class="ui-button-text">'
+															+fm.i18n(act.msg)
+															+'</span></button>')
+														.on('mouseenter mouseleave', function(e) { 
+															$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
+														})
+														.on('click', function() {
+															fm.exec(act.cmd, item.hash);
+														})
+													);
+												}
+												if (newItem.length) {
+													newItem.trigger('scrolltoview');
+													! move && extNode && fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), extNode: extNode});
+												} else {
+													fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
+													! move && fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), extNode: extNode});
+												}
+											});
 										}
 									});
 							})
@@ -286,8 +284,8 @@ elFinder.prototype.resources = {
 				arrow = fm.res('class', 'navarrow');
 				subtree = fm.res('class', 'navsubtree');
 				
+				node.closest('.'+subtree).show();
 				if (! dst.hasClass(collapsed)) {
-					node.closest('.'+subtree).show();
 					dstCls = dst.attr('class');
 					dst.addClass(collapsed+' '+expanded+' elfinder-subtree-loaded');
 				}
@@ -325,9 +323,15 @@ elFinder.prototype.resources = {
 		}
 	},
 	blink: function(elm, mode) {
+		var acts = {
+			slowonce : function(){elm.hide().delay(250).fadeIn(750).delay(500).fadeOut(3500);},
+			lookme   : function(){elm.show().fadeOut(500).fadeIn(750);}
+		}, func;
 		mode = mode || 'slowonce';
-		if (mode === 'slowonce') {
-			elm.stop(true, true).delay(250).fadeIn(750).delay(500).fadeOut(3500);
-		}
+		
+		func = acts[mode] || acts['lookme'];
+		
+		elm.stop(true, true);
+		func();
 	}
 };

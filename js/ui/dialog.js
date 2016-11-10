@@ -68,6 +68,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 			buttonpane = $('<div class=" ui-helper-clearfix ui-dialog-buttonpane ui-widget-content"/>')
 				.append(buttonset),
 			btnWidth   = 0,
+			btnCnt     = 0,
 			tabstops   = $(),
 			tabstopsInit = function() {
 				tabstops = dialog.find('.'+cltabstop);
@@ -400,7 +401,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 		makeHeaderBtn();
 		
 		$.each(opts.buttons, function(name, cb) {
-			var button = $('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only '+cltabstop+'"><span class="ui-button-text">'+name+'</span></button>')
+			var button = $('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only '
+					+'elfinder-btncnt-'+(btnCnt++)+' '
+					+cltabstop
+					+'"><span class="ui-button-text">'+name+'</span></button>')
 				.on('click', $.proxy(cb, self[0]));
 			if (platformWin) {
 				buttonset.append(button);

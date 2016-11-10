@@ -6225,6 +6225,7 @@ elFinder.prototype = {
 	 */
 	makeNetmountOptionOauth : function(protocol, name, host, noOffline) {
 		return {
+			vars : {},
 			name : name,
 			inputs: {
 				offline  : $('<input type="checkbox"/>').on('change', function() {
@@ -6236,8 +6237,11 @@ elFinder.prototype = {
 				pass     : $('<input type="hidden"/>')
 			},
 			select: function(fm, ev, data){
-				var f = this.inputs, oline = f.offline, f0 = $(f.host[0]),
+				var f = this.inputs,
+					oline = f.offline,
+					f0 = $(f.host[0]),
 					data = data || null;
+				this.vars.mbtn = f.host.closest('.ui-dialog').children('.ui-dialog-buttonpane:first').find('button.elfinder-btncnt-0');
 				if (! f0.data('inrequest')
 						&& (f0.find('span.elfinder-info-spinner').length
 							|| data === 'reset'
@@ -6261,6 +6265,7 @@ elFinder.prototype = {
 				} else {
 					oline.closest('tr')[(noOffline || f.user.val())? 'hide':'show']();
 				}
+				this.vars.mbtn[$(f.host[1]).val()? 'show':'hide']();
 			},
 			done: function(fm, data){
 				var f = this.inputs, p = this.protocol, f0 = $(f.host[0]), f1 = $(f.host[1]);
@@ -6273,6 +6278,7 @@ elFinder.prototype = {
 					f.user.val('');
 					f.pass.val('');
 					! noOffline && f.offline.closest('tr').show();
+					this.vars.mbtn.hide();
 				} else {
 					f0.html(host + '&nbsp;').removeClass('elfinder-info-spinner');
 					if (data.reset) {
@@ -6285,6 +6291,7 @@ elFinder.prototype = {
 							p.trigger('change', 'reset');
 						}));
 					f1.val(protocol);
+					this.vars.mbtn.show();
 					if (data.folders) {
 						f.path.next().remove().end().after(
 							$('<div/>').append(
