@@ -502,7 +502,14 @@
 			
 			self.change(function() {
 				if (self.opened()) {
-					self.value ? preview.trigger($.Event('update', {file : self.value})) : navtrigger(rightKey);
+					if (self.value) {
+						preview.trigger($.Event('update', {file : self.value}))
+					} else {
+						navtrigger(rightKey);
+						setTimeout(function() {
+							! self.value && win.trigger('close')
+						}, 100);
+					}
 				}
 			});
 			
@@ -515,16 +522,13 @@
 						self.dispInlineRegex = /.*/;
 					}
 				}
+				self.info.show();
 			});
 
 			$.each(fm.commands.quicklook.plugins || [], function(i, plugin) {
 				if (typeof(plugin) == 'function') {
 					new plugin(self)
 				}
-			});
-			
-			preview.on('update', function() {
-				self.info.show();
 			});
 		});
 		
