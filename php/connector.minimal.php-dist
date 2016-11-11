@@ -55,6 +55,27 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // define('ELFINDER_GOOGLEDRIVE_CLIENTSECRET', '');
 // ===============================================
 
+// // Required for One Drive network mount
+// //  * cURL PHP extension required
+// //  * HTTP server PATH_INFO supports required
+// // Enable network mount
+// elFinder::$netDrivers['onedrive'] = 'OneDrive';
+// // GoogleDrive Netmount driver need next two settings. You can get at https://dev.onedrive.com
+// // AND reuire regist redirect url to "YOUR_CONNECTOR_URL/netmount/onedrive/1"
+// define('ELFINDER_ONEDRIVE_CLIENTID',     '');
+// define('ELFINDER_ONEDRIVE_CLIENTSECRET', '');
+// ===============================================
+
+// // Required for Box network mount
+// //  * cURL PHP extension required
+// // Enable network mount
+// elFinder::$netDrivers['box'] = 'Box';
+// // Box Netmount driver need next two settings. You can get at https://developer.box.com
+// // AND reuire regist redirect url to "YOUR_CONNECTOR_URL"
+// define('ELFINDER_BOX_CLIENTID',     '');
+// define('ELFINDER_BOX_CLIENTSECRET', '');
+// ===============================================
+
 /**
  * Simple function to demonstrate how to control file access using "accessControl" callback.
  * This method will disable accessing files/folders starting from '.' (dot)
