@@ -260,8 +260,8 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                         'data' => $decoded,
                 );
 
-                $this->session->set('OneDriveAuthTokens', $onedrive);
-                $this->options['accessToken'] = json_encode($this->session->get('OneDriveAuthTokens'));
+                $this->session->set('OneDriveTokens', $onedrive);
+                $this->options['accessToken'] = json_encode($this->session->get('OneDriveTokens'));
                 $this->onedrive = json_decode($this->options['accessToken']);
             }
         } catch (Exception $e) {
@@ -518,7 +518,13 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             $options['user'] = 'init';
             $options['pass'] = '';
             $this->session->remove('OneDriveTokens');
-            $this->session->remove('OneDriveAuthTokens');
+        }
+
+        if (isset($options['id'])) {
+            $this->session->set('nodeId', $options['id']);
+        } elseif ($_id = $this->session->get('nodeId')) {
+            $options['id'] = $_id;
+            $this->session->set('nodeId', $_id);
         }
 
         try {
@@ -554,11 +560,11 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
                     // Persist the OneDrive client' state for next API requests
 
-                    $this->session->set('OneDriveAuthTokens',
+                    $this->session->set('OneDriveTokens',
                                         $this->_od_obtainAccessToken($options['client_id'], $options['client_secret'], $_GET['code']));
 
                     $out = array(
-                            'node' => 'elfinder',
+                            'node' => $options['id'],
                             'json' => '{"protocol": "onedrive", "mode": "done", "reset": 1}',
                             'bind' => 'netmount',
 
@@ -566,12 +572,24 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
                     return array('exit' => 'callback', 'out' => $out);
                 } catch (Exception $e) {
-                    return $e->getMessage();
+                    $out = array(
+                            'node' => $options['id'],
+                            'json' => json_encode(array('error' => elFinder::ERROR_ACCESS_DENIED.' '.$e->getMessage())),
+                    );
+
+                    return array('exit' => 'callback', 'out' => $out);
                 }
+            } elseif (!empty($_GET['error'])) {
+                $out = array(
+                        'node' => $options['id'],
+                        'json' => json_encode(array('error' => elFinder::ERROR_ACCESS_DENIED)),
+                );
+
+                return array('exit' => 'callback', 'out' => $out);
             }
 
             if ($options['user'] === 'init') {
-                if (empty($_GET['code']) && empty($_GET['pass']) && empty($this->session->get('OneDriveAuthTokens'))) {
+                if (empty($_GET['code']) && empty($_GET['pass']) && empty($this->session->get('OneDriveTokens'))) {
                     $cdata = '';
                     $innerKeys = array('cmd', 'host', 'options', 'pass', 'protocol', 'user');
                     $this->ARGS = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
@@ -595,13 +613,13 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                         $offline = '';
                         // Gets a log in URL with sufficient privileges from the OneDrive API
                         if (!empty($options['offline'])) {
-                            $offline = 'wl.offline_access';
+                            $offline = ' wl.offline_access';
                         }
 
                         $redirect_uri = $options['url'].'/netmount/onedrive/1';
                         $url = self::AUTH_URL
                             .'?client_id='.urlencode($options['client_id'])
-                            .'&scope='.urlencode('wl.signin '.$offline.' wl.skydrive_update')
+                            .'&scope='.urlencode('wl.skydrive_update'.$offline)
                             .'&response_type=code'
                             .'&redirect_uri='.urlencode($redirect_uri);
 
@@ -623,7 +641,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
                     return array('exit' => true, 'body' => $html);
                 } else {
-                    $this->onedrive = $this->session->get('OneDriveAuthTokens');
+                    $this->onedrive = $this->session->get('OneDriveTokens');
                     $result = $this->_od_query('root', false, false, array(
                         'query' => array(
                             'select' => 'id,name',
@@ -653,10 +671,12 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             return array('exit' => true, 'body' => '{msg:errNetMountNoDriver}');
         }
 
-        if ($this->session->get('OneDriveAuthTokens')) {
-            $options['accessToken'] = json_encode($this->session->get('OneDriveAuthTokens'));
+        if ($_aToken = $this->session->get('OneDriveTokens')) {
+            $options['accessToken'] = json_encode($_aToken);
         }
-        unset($options['user'], $options['pass']);
+
+        $this->session->remove('nodeId');
+        unset($options['user'], $options['pass'], $options['id']);
 
         return $options;
     }
