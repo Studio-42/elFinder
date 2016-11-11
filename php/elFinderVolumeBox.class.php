@@ -296,8 +296,8 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                     'data' => $decoded,
                 );
 
-                $this->session->set('elFinderBoxAuthTokens', $box);
-                $this->options['accessToken'] = json_encode($this->session->get('elFinderBoxAuthTokens'));
+                $this->session->set('boxokens', $box);
+                $this->options['accessToken'] = json_encode($this->session->get('BoxTokens'));
                 $this->box = json_decode($this->options['accessToken']);
             }
         } catch (Exception $e) {
@@ -569,8 +569,14 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         if ($options['pass'] === 'reauth') {
             $options['user'] = 'init';
             $options['pass'] = '';
-            $this->session->remove('elFinderBoxTokens');
-            $this->session->remove('elFinderBoxAuthTokens');
+            $this->session->remove('BoxTokens');
+        }
+
+        if (isset($options['id'])) {
+            $this->session->set('nodeId', $options['id']);
+        } elseif ($_id = $this->session->get('nodeId')) {
+            $options['id'] = $_id;
+            $this->session->set('nodeId', $_id);
         }
 
         try {
@@ -581,11 +587,11 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             if (isset($_GET['code'])) {
                 try {
                     // Obtain the token using the code received by the Box.com API
-                    $this->session->set('elFinderBoxAuthTokens',
+                    $this->session->set('BoxTokens',
                                         $this->_bd_obtainAccessToken($options['client_id'], $options['client_secret'], $_GET['code']));
 
                     $out = array(
-                            'node' => 'elfinder',
+                            'node' => $options['id'],
                             'json' => '{"protocol": "box", "mode": "done", "reset": 1}',
                             'bind' => 'netmount',
 
@@ -593,12 +599,24 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
                     return array('exit' => 'callback', 'out' => $out);
                 } catch (Exception $e) {
-                    return $e->getMessage();
+                    $out = array(
+                            'node' => $options['id'],
+                            'json' => json_encode(array('error' => $e->getMessage())),
+                    );
+
+                    return array('exit' => 'callback', 'out' => $out);
                 }
+            } elseif (!empty($_GET['error'])) {
+                $out = array(
+                        'node' => $options['id'],
+                        'json' => json_encode(array('error' => elFinder::ERROR_ACCESS_DENIED)),
+                );
+
+                return array('exit' => 'callback', 'out' => $out);
             }
 
             if ($options['user'] === 'init') {
-                if (empty($_GET['code']) && empty($_GET['pass']) && empty($this->session->get('elFinderBoxAuthTokens'))) {
+                if (empty($_GET['code']) && empty($_GET['pass']) && empty($this->session->get('BoxTokens'))) {
                     $cdata = '';
                     $innerKeys = array('cmd', 'host', 'options', 'pass', 'protocol', 'user');
                     $this->ARGS = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
@@ -614,13 +632,13 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                         .'?cmd=netmount&protocol=box&host=box.com&user=init&pass=return&node='.$options['id'].$cdata;
 
                     try {
-                        $this->session->set('elFinderBoxTokens',
+                        $this->session->set('BoxTokens',
                                 (object) array(
                                 'redirect_uri' => elFinder::getConnectorUrl().'?cmd=netmount&protocol=box&host=1',
                                 'token' => null,
                         ));
 
-                        $url = self::AUTH_URL.'?'.http_build_query(array('response_type' => 'code', 'client_id' => $options['client_id'], 'redirect_uri' => $this->session->get('elFinderBoxTokens')->redirect_uri));
+                        $url = self::AUTH_URL.'?'.http_build_query(array('response_type' => 'code', 'client_id' => $options['client_id'], 'redirect_uri' => $this->session->get('BoxTokens')->redirect_uri));
 
                         $url .= '&oauth_callback='.rawurlencode($callback);
                     } catch (Exception $e) {
@@ -634,7 +652,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
                     return array('exit' => true, 'body' => $html);
                 } else {
-                    $this->box = $this->session->get('elFinderBoxAuthTokens');
+                    $this->box = $this->session->get('BoxTokens');
 
                     $result = $this->_bd_query('0', $fetch_self = false, $recursive = false);
                     $folders = [];
@@ -662,11 +680,12 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             return array('exit' => true, 'body' => '{msg:errNetMountNoDriver}');
         }
 
-        if ($this->session->get('elFinderBoxAuthTokens')) {
-            $options['accessToken'] = json_encode($this->session->get('elFinderBoxAuthTokens'));
+        if ($_aToken = $this->session->get('BoxTokens')) {
+            $options['accessToken'] = json_encode($_aToken);
         }
 
-        unset($options['user'], $options['pass']);
+        $this->session->remove('nodeId');
+        unset($options['user'], $options['pass'], $options['id']);
 
         return $options;
     }
@@ -714,7 +733,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
         if (!$this->box) {
             try {
-                $this->options['accessToken'] = json_encode($this->session->get('elFinderBoxAuthTokens'));
+                $this->options['accessToken'] = json_encode($this->session->get('BoxTokens'));
                 $this->box = json_decode($this->options['accessToken']);
                 if (true !== ($res = $this->_bd_refreshToken($this->box))) {
                     return $this->setError($res);
