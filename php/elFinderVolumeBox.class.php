@@ -615,7 +615,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                     try {
                         $this->_bd_refreshToken($this->token);
                     } catch (Exception $e) {
-                        $this->error($e->getMessage());
+                        $this->setError($e->getMessage());
                         $this->token = null;
                         $this->session->remove('BoxTokens');
                     }
@@ -683,7 +683,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         if ($_aToken = $this->session->get('BoxTokens')) {
             $options['accessToken'] = json_encode($_aToken);
         } else {
-            return array('exit' => true, 'error' => $this->error(self::ERROR_NETMOUNT, $options['host'], implode(' ', $this->error())));
+            return array('exit' => true, 'error' => $this->setError(self::ERROR_NETMOUNT, $options['host'], implode(' ', $this->error())));
         }
 
         $this->session->remove('nodeId');
@@ -735,7 +735,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 $this->token = json_decode($this->options['accessToken']);
                 $this->_bd_refreshToken($this->token);
             } catch (Exception $e) {
-                $this->error($e->getMessage());
+                $this->setError($e->getMessage());
 
                 return $this->setError($e->getMessage());
             }
