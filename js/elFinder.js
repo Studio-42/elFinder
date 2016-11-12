@@ -6308,8 +6308,8 @@ elFinder.prototype = {
 				f0.removeData('inrequest');
 			},
 			fail: function(fm, err){
+				$(this.inputs.host[0]).removeData('inrequest');
 				this.protocol.trigger('change', 'reset');
-				f0.removeData('inrequest');
 			}
 		};
 	},
