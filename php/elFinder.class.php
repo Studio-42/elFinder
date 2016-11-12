@@ -3208,4 +3208,84 @@ class elFinder {
 		return $url;
 	}
 
+	/**
+	 * Get stream resource pointer by URL
+	 * 
+	 * @param array  $data  array('target'=>'URL', 'headers' => array())
+	 * @param number $redirectLimit
+	 * @return resource|boolean
+	 * 
+	 * @author Naoki Sawada
+	 */
+	public static function getStreamByUrl($data, $redirectLimit = 5) {
+		if (isset($data['target'])) {
+			$data = array(
+				'cnt' => 0,
+				'url' => $data['target'],
+				'headers' => isset($data['headers'])? $data['headers'] : array(),
+				'cookies' => array(),
+			);
+		}
+		if ($data['cnt'] > $redirectLimit) {
+			return false;
+		}
+		$dlurl = $data['url'];
+		$data['url'] = '';
+		$headers = $data['headers'];
+	
+		if ($dlurl) {
+			$url = parse_url($dlurl);
+			$cookies = [];
+			if ($data['cookies']) {
+				foreach ($data['cookies'] as $d => $c) {
+					if (strpos($url['host'], $d) !== false) {
+						$cookies[] = $c;
+					}
+				}
+			}
+
+			$query = isset($url['query']) ? '?'.$url['query'] : '';
+			$stream = stream_socket_client('ssl://'.$url['host'].':443');
+			stream_set_timeout($stream, 300);
+			fputs($stream, "GET {$url['path']}{$query} HTTP/1.1\r\n");
+			fputs($stream, "Host: {$url['host']}\r\n");
+			foreach($headers as $header) {
+				fputs($stream, trim($header, "\r\n")."\r\n");
+			}
+			fputs($stream, "Connection: Close\r\n");
+			if ($cookies) {
+				fputs($stream, 'Cookie: '.implode('; ', $cookies)."\r\n");
+			}
+			fputs($stream, "\r\n");
+			while (($res = trim(fgets($stream))) !== '') {
+				// find redirect
+				if (preg_match('/^Location: (.+)$/', $res, $m)) {
+					$data['url'] = $m[1];
+				}
+				// fetch cookie
+				if (strpos($res, 'Set-Cookie:') === 0) {
+					$domain = $url['host'];
+					if (preg_match('/^Set-Cookie:(.+)(?:domain=\s*([^ ;]+))?/i', $res, $c1)) {
+						if (!empty($c1[2])) {
+							$domain = trim($c1[2]);
+						}
+						if (preg_match('/([^ ]+=[^;]+)/', $c1[1], $c2)) {
+							$data['cookies'][$domain] = $c2[1];
+						}
+					}
+				}
+			}
+			if ($data['url']) {
+				++$data['cnt'];
+				fclose($stream);
+
+				return self::getStreamByUrl($data, $redirectLimit);
+			}
+
+			return $stream;
+		}
+	
+		return false;
+	}
+	
 } // END class

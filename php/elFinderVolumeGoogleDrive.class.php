@@ -242,36 +242,36 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         $stat['iid'] = isset($raw['id']) ? $raw['id'] : 'root';
         $stat['name'] = isset($raw['name']) ? $raw['name'] : '';
         if (isset($raw['modifiedTime'])) {
-        	$stat['ts'] = strtotime($raw['modifiedTime']);
+            $stat['ts'] = strtotime($raw['modifiedTime']);
         }
 
         if ($raw['mimeType'] === self::DIRMIME) {
-        	$stat['mime'] = 'directory';
-        	$stat['size'] = 0;
+            $stat['mime'] = 'directory';
+            $stat['size'] = 0;
         } else {
-        	$stat['mime'] = $raw['mimeType'] == 'image/bmp' ? 'image/x-ms-bmp' : $raw['mimeType'];
-        	$stat['size'] = (int) $raw['size'];
-        	if ($size = $raw->getImageMediaMetadata()) {
-	            $stat['width'] = $size['width'];
-	            $stat['height'] = $size['height'];
-	        }
-	        
-	        $published = $this->_gd_isPublished($raw);
-	
-	        if ($this->options['useGoogleTmb']) {
-	            if (isset($raw['thumbnailLink'])) {
-	                if ($published) {
-	                    $stat['tmb'] = 'drive.google.com/thumbnail?authuser=0&sz=s'.$this->options['tmbSize'].'&id='.$raw['id'];
-	                } else {
-	                    $stat['tmb'] = substr($raw['thumbnailLink'], 8); // remove "https://"
-	                }
-	            } else {
-	                $stat['tmb'] = '';
-	            }
-	        }
-	
-	        $stat['url'] = $published ? $this->_gd_getLink($raw) : '1';
-	    }
+            $stat['mime'] = $raw['mimeType'] == 'image/bmp' ? 'image/x-ms-bmp' : $raw['mimeType'];
+            $stat['size'] = (int) $raw['size'];
+            if ($size = $raw->getImageMediaMetadata()) {
+                $stat['width'] = $size['width'];
+                $stat['height'] = $size['height'];
+            }
+
+            $published = $this->_gd_isPublished($raw);
+
+            if ($this->options['useGoogleTmb']) {
+                if (isset($raw['thumbnailLink'])) {
+                    if ($published) {
+                        $stat['tmb'] = 'drive.google.com/thumbnail?authuser=0&sz=s'.$this->options['tmbSize'].'&id='.$raw['id'];
+                    } else {
+                        $stat['tmb'] = substr($raw['thumbnailLink'], 8); // remove "https://"
+                    }
+                } else {
+                    $stat['tmb'] = '';
+                }
+            }
+
+            $stat['url'] = $published ? $this->_gd_getLink($raw) : '1';
+        }
 
         return $stat;
     }
@@ -472,103 +472,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $mime = rawurlencode($mime);
 
             return 'https://www.googleapis.com/drive/v3/files/'.$file->getId().'/export?mimeType='.$mime;
-        }
-
-        return false;
-    }
-
-    /**
-     * Return stream file pointer for read file.
-     *
-     * @param object $file
-     * @param array  $redirect
-     *
-     * @return resource|false
-     */
-    protected function _gd_getReadStream($file, $redirect = [])
-    {
-        if (!$redirect) {
-            $redirect = [
-                    'cnt' => 0,
-                    'url' => '',
-                    'token' => '',
-                    'cookies' => [],
-            ];
-            if ($dlurl = $this->_gd_getDownloadUrl($file)) {
-                $token = $this->client->getAccessToken();
-                $access_token = '';
-                if (is_array($token)) {
-                    $access_token = $token['access_token'];
-                } else {
-                    if ($token = @json_decode($client->getAccessToken())) {
-                        $access_token = $token->access_token;
-                    }
-                }
-                $redirect = [
-                        'cnt' => 0,
-                        'url' => '',
-                        'token' => $access_token,
-                        'cookies' => [],
-                ];
-            }
-        } else {
-            if ($redirect['cnt'] > 5) {
-                return false;
-            }
-            $dlurl = $redirect['url'];
-            $redirect['url'] = '';
-            $access_token = $redirect['token'];
-        }
-
-        if ($dlurl) {
-            $url = parse_url($dlurl);
-            $cookies = [];
-            if ($redirect['cookies']) {
-                foreach ($redirect['cookies'] as $d => $c) {
-                    if (strpos($url['host'], $d) !== false) {
-                        $cookies[] = $c;
-                    }
-                }
-            }
-            if ($access_token) {
-                $query = isset($url['query']) ? '?'.$url['query'] : '';
-                $stream = stream_socket_client('ssl://'.$url['host'].':443');
-                stream_set_timeout($stream, 300);
-                fputs($stream, "GET {$url['path']}{$query} HTTP/1.1\r\n");
-                fputs($stream, "Host: {$url['host']}\r\n");
-                fputs($stream, "Authorization: Bearer {$access_token}\r\n");
-                fputs($stream, "Connection: Close\r\n");
-                if ($cookies) {
-                    fputs($stream, 'Cookie: '.implode('; ', $cookies)."\r\n");
-                }
-                fputs($stream, "\r\n");
-                while (($res = trim(fgets($stream))) !== '') {
-                    // find redirect
-                    if (preg_match('/^Location: (.+)$/', $res, $m)) {
-                        $redirect['url'] = $m[1];
-                    }
-                    // fetch cookie
-                    if (strpos($res, 'Set-Cookie:') === 0) {
-                        $domain = $url['host'];
-                        if (preg_match('/^Set-Cookie:(.+)(?:domain=\s*([^ ;]+))?/i', $res, $c1)) {
-                            if (!empty($c1[2])) {
-                                $domain = trim($c1[2]);
-                            }
-                            if (preg_match('/([^ ]+=[^;]+)/', $c1[1], $c2)) {
-                                $redirect['cookies'][$domain] = $c2[1];
-                            }
-                        }
-                    }
-                }
-                if ($redirect['url']) {
-                    ++$redirect['cnt'];
-                    fclose($stream);
-
-                    return $this->_gd_getReadStream($file, $redirect);
-                }
-
-                return $stream;
-            }
         }
 
         return false;
@@ -810,7 +713,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                     natcasesort($folders);
                     $folders = ['root' => $rootObj->getName()] + $folders;
                     $folders = json_encode($folders);
-                    $json = '{"protocol": "googledrive", "mode": "done", "folders": '.$folders.'}';
+                    $expires = empty($aToken['refresh_token'])? $aToken['created'] + $aToken['expires_in'] - 30 : 0;
+                    $json = '{"protocol": "googledrive", "mode": "done", "folders": '.$folders.', "expires": '.$expires.'}';
                     $options['pass'] = 'return';
                     $html = 'Google.com';
                     $html .= '<script>
@@ -1651,24 +1555,26 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function _fopen($path, $mode = 'rb')
     {
-        if (($mode == 'rb' || $mode == 'r')) {
+        if ($mode === 'rb' || $mode === 'r') {
             if ($file = $this->_gd_getFile($path)) {
-                return $this->_gd_getReadStream($file);
-            } else {
-                return false;
-            }
-        }
+                if ($dlurl = $this->_gd_getDownloadUrl($file)) {
+                    $token = $this->client->getAccessToken();
+                    $access_token = '';
+                    if (is_array($token)) {
+                        $access_token = $token['access_token'];
+                    } else {
+                        if ($token = json_decode($client->getAccessToken())) {
+                            $access_token = $token->access_token;
+                        }
+                    }
+                    if ($access_token) {
+                        $data = array(
+                                'target' => $dlurl,
+                                'headers' => array('Authorization: Bearer '.$access_token),
+                        );
 
-        if ($this->tmp) {
-            $contents = $this->_getContents($path);
-
-            if ($contents === false) {
-                return false;
-            }
-
-            if ($local = $this->getTempFile($path)) {
-                if (file_put_contents($local, $contents, LOCK_EX) !== false) {
-                    return @fopen($local, $mode);
+                        return elFinder::getStreamByUrl($data);
+                    }
                 }
             }
         }
