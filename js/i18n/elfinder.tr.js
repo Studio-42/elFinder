@@ -1,8 +1,8 @@
 /**
- * Turkish translation
+ * Türkçe translation
  * @author I.Taskinoglu & A.Kaya <alikaya@armsyazilim.com>
  * @author Abdullah ELEN <abdullahelen@msn.com>
- * @version 2015-11-17
+ * @version 2016-11-12
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.tr = {
@@ -12,7 +12,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		dateFormat : 'd.m.Y H:i', // Mar 13, 2012 05:27 PM
 		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
 		messages   : {
-			
+
 			/********************************** errors **********************************/
 			'error'                : 'Hata',
 			'errUnknown'           : 'Bilinmeyen hata.',
@@ -74,7 +74,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNoArchive'         : 'Dosya arşiv değil veya desteklenmeyen arşiv türü.',
 			'errCmdNoSupport'      : 'Sunucu bu komutu desteklemiyor.',
 			'errReplByChild'       : '“$1” klasörü içerdiği bir öğe tarafından değiştirilemez.',
-			'errArcSymlinks'       : 'Sembolik bağlantıları içeren arşivlerin açılması güvenlik nedeniyle reddedildi.',
+			'errArcSymlinks'       : 'Sembolik bağlantıları içeren arşivlerin açılması güvenlik nedeniyle reddedildi.', // edited 24.06.2012
 			'errArcMaxSize'        : 'Arşiv dosyaları izin verilen maksimum boyutu aştı.',
 			'errResize'            : '"$1" yeniden boyutlandırılamıyor.',
 			'errResizeDegree'      : 'Geçersiz döndürme derecesi.',  // added 7.3.2013
@@ -82,13 +82,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errResizeSize'        : 'Geçersiz resim boyutu.',  // added 7.3.2013
 			'errResizeNoChange'    : 'Resim boyutu değiştirilemez.',  // added 7.3.2013
 			'errUsupportType'      : 'Desteklenmeyen dosya türü.',
-			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',  // added 9.11.2011
-			'errNetMount'          : 'Unable to mount "$1".', // added 17.04.2012
-			'errNetMountNoDriver'  : 'Unsupported protocol.',     // added 17.04.2012
-			'errNetMountFailed'    : 'Mount failed.',         // added 17.04.2012
-			'errNetMountHostReq'   : 'Host required.', // added 18.04.2012
-			'errSessionExpires'    : 'Your session has expired due to inactivity.',
-			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
+			'errNotUTF8Content'    : 'Dosya "$1" UTF-8 olmadığından düzenlenemez.',  // added 9.11.2011
+			'errNetMount'          : '"$1" bağlanamadı.', // added 17.04.2012
+			'errNetMountNoDriver'  : 'Desteklenmeyen protokol.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Bağlama hatası.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'Sunucu gerekli.', // added 18.04.2012
+			'errSessionExpires'    : 'Uzun süre işlem yapılmadığından oturumunuz sonlandı.',
+			'errCreatingTempDir'   : 'Geçici dizin oluşturulamıyor: "$1"',
 			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
 			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
 			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
@@ -97,7 +97,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errNetUnMount'        : 'Unable to unmount', // from v2.1 added 30.04.2012
 			'errConvUTF8'          : 'Not convertible to UTF-8', // from v2.1 added 08.04.2014
 			'errFolderUpload'      : 'Try Google Chrome, If you\'d like to upload the folder.', // from v2.1 added 26.6.2015
-			
+			'errSearchTimeout'     : 'Timed out while searching "$1". Search result is partial.', // from v2.1 added 12.1.2016
+			'errReauthRequire'     : 'Re-authorization is required.', // from v2.1.10 added 24.3.2016
+			'errMaxTargets'        : 'Max number of selectable items is $1.', // from v2.1.17 added 17.10.2016
+
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Arşiv oluştur',
 			'cmdback'      : 'Geri',
@@ -113,6 +116,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdhome'      : 'Anasayfa',
 			'cmdinfo'      : 'Bilgi göster',
 			'cmdmkdir'     : 'Yeni Klasör',
+			'cmdmkdirin'   : 'Into new folder', // from v2.1.7 added 19.2.2016
 			'cmdmkfile'    : 'Yeni metin dosyası',
 			'cmdopen'      : 'Aç',
 			'cmdpaste'     : 'Yapıştır',
@@ -130,8 +134,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdnetunmount': 'Devredışı bırak', // from v2.1 added 30.04.2012
 			'cmdplaces'    : 'Yerlere', // added 28.12.2014
 			'cmdchmod'     : 'Mod değiştir', // from v2.1 added 20.6.2015
-			
-			/*********************************** buttons ***********************************/ 
+			'cmdopendir'   : 'Open a folder', // from v2.1 added 13.1.2016
+			'cmdcolwidth'  : 'Reset column width', // from v2.1.13 added 12.06.2016
+			'cmdmove'      : 'Move', // from v2.1.15 added 21.08.2016
+
+			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Kapat',
 			'btnSave'   : 'Kaydet',
 			'btnRm'     : 'Kaldır',
@@ -149,7 +156,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnMime'   : 'MIME Türü', // from v2.1 added 22.5.2015
 			'btnFileName':'Dosya adı',  // from v2.1 added 22.5.2015
 			'btnSaveClose': 'Kaydet & Kapat', // from v2.1 added 12.6.2015
-			
+			'btnBackup' : 'Yedekle', // fromv2.1 added 28.11.2015
+
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Klasör Aç',
 			'ntffile'     : 'Dosya Aç',
@@ -176,7 +184,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfreaddir'  : 'Klasör bilgisi okunuyor', // from v2.1 added 01.07.2013
 			'ntfurl'      : 'Bağlantının URL\'si alınıyor', // from v2.1 added 11.03.2014
 			'ntfchmod'    : 'Dosya modu değiştiriliyor', // from v2.1 added 20.6.2015
-			
+			'ntfpreupload': 'Verifying upload file name', // from v2.1 added 31.11.2015
+			'ntfzipdl'    : 'Creating a file for download', // from v2.1.7 added 23.1.2016
+			'ntfparents'  : 'Getting path infomation', // from v2.1.17 added 2.11.2016
+			'ntfchunkmerge': 'Processing the uploaded file', // from v2.1.17 added 2.11.2016
+
 			/************************************ dates **********************************/
 			'dateUnknown' : 'Bilinmiyor',
 			'Today'       : 'Bugün',
@@ -219,19 +231,24 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Thu'         : 'Per',
 			'Fri'         : 'Cum',
 			'Sat'         : 'Cmt',
-			
+
 			/******************************** sort variants ********************************/
 			'sortname'          : 'Ada göre',
 			'sortkind'          : 'Türe göre',
 			'sortsize'          : 'Boyuta göre',
 			'sortdate'          : 'Tarihe göre',
 			'sortFoldersFirst'  : 'Önce klasörler',
-			
+			'sortperm'          : 'by permission', // from v2.1.13 added 13.06.2016
+			'sortmode'          : 'by mode',       // from v2.1.13 added 13.06.2016
+			'sortowner'         : 'by owner',      // from v2.1.13 added 13.06.2016
+			'sortgroup'         : 'by group',      // from v2.1.13 added 13.06.2016
+			'sortAlsoTreeview'  : 'Also Treeview',  // from v2.1.15 added 01.08.2016
+
 			/********************************** new items **********************************/
 			'untitled file.txt' : 'YeniDosya.txt', // added 10.11.2015
 			'untitled folder'   : 'YeniKlasor',   // added 10.11.2015
 			'Archive'           : 'YeniArsiv',  // from v2.1 added 10.11.2015
-			
+
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Onay gerekli',
 			'confirmRm'       : 'Dosyaları kaldırmak istediğinden emin misin?<br/>Bu işlem geri alınamaz!',
@@ -255,8 +272,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectlfile'     : 'Son dosyayı seç',
 			'viewlist'        : 'Liste görünümü',
 			'viewicons'       : 'Simge görünümü',
-			'places'          : 'Places',
-			'calc'            : 'Hesapla', 
+			'places'          : 'Yerler',
+			'calc'            : 'Hesapla',
 			'path'            : 'Yol',
 			'aliasfor'        : 'Takma adı:',
 			'locked'          : 'Kilitli',
@@ -267,7 +284,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'yes'             : 'evet',
 			'no'              : 'hayır',
 			'link'            : 'Bağlantı',
-			'searcresult'     : 'Arama sonuçları',  
+			'searcresult'     : 'Arama sonuçları',
 			'selected'        : 'Seçili öğeler',
 			'about'           : 'Hakkında',
 			'shortcuts'       : 'Kısayollar',
@@ -324,9 +341,42 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'execute'         : 'Çalıştır', // from v2.1 added 20.6.2015
 			'perm'            : 'Yetki', // from v2.1 added 20.6.2015
 			'mode'            : 'Mod', // from v2.1 added 20.6.2015
-			
+			'emptyFolder'     : 'Klasör boş', // from v2.1.6 added 30.12.2015
+			'emptyFolderDrop' : 'Klasör boş\\A Eklemek için sürükleyin', // from v2.1.6 added 30.12.2015
+			'emptyFolderLTap' : 'Klasör boş\\A Eklemek için basılı tutun', // from v2.1.6 added 30.12.2015
+			'quality'         : 'Kalite', // from v2.1.6 added 5.1.2016
+			'autoSync'        : 'Auto sync',  // from v2.1.6 added 10.1.2016
+			'moveUp'          : 'Move up',  // from v2.1.6 added 18.1.2016
+			'getLink'         : 'Get URL link', // from v2.1.7 added 9.2.2016
+			'selectedItems'   : 'Selected items ($1)', // from v2.1.7 added 2.19.2016
+			'folderId'        : 'Folder ID', // from v2.1.10 added 3.25.2016
+			'offlineAccess'   : 'Allow offline access', // from v2.1.10 added 3.25.2016
+			'reAuth'          : 'To re-authenticate', // from v2.1.10 added 3.25.2016
+			'nowLoading'      : 'Now loading...', // from v2.1.12 added 4.26.2016
+			'openMulti'       : 'Open multiple files', // from v2.1.12 added 5.14.2016
+			'openMultiConfirm': 'You are trying to open the $1 files. Are you sure you want to open in browser?', // from v2.1.12 added 5.14.2016
+			'emptySearch'     : 'No match results in search targets', // from v2.1.12 added 5.16.2016
+			'editingFile'     : 'You are editing a file.', // from v2.1.13 added 6.3.2016
+			'hasSelected'     : 'You have selected $1 items.', // from v2.1.13 added 6.3.2016
+			'hasClipboard'    : 'You have $1 items in the clipboard.', // from v2.1.13 added 6.3.2016
+			'incSearchOnly'   : 'Incremental search is only from the current view.', // from v2.1.13 added 6.30.2016
+			'reinstate'       : 'Reinstate', // from v2.1.15 added 3.8.2016
+			'complete'        : '$1 complete', // from v2.1.15 added 21.8.2016
+			'contextmenu'     : 'Context menu', // from v2.1.15 added 9.9.2016
+			'pageTurning'     : 'Page turning', // from v2.1.15 added 10.9.2016
+			'volumeRoots'     : 'Volume roots', // from v2.1.16 added 16.9.2016
+			'reset'           : 'Reset', // from v2.1.16 added 1.10.2016
+			'bgcolor'         : 'Arkaplan rengi', // from v2.1.16 added 1.10.2016
+			'colorPicker'     : 'Renk seçici', // from v2.1.16 added 1.10.2016
+			'8pxgrid'         : '8px tablo', // from v2.1.16 added 4.10.2016
+			'enabled'         : 'Enabled', // from v2.1.16 added 4.10.2016
+			'disabled'        : 'Disabled', // from v2.1.16 added 4.10.2016
+			'emptyIncSearch'  : 'No match results in current view', // from v2.1.16 added 5.10.2016
+			'textLabel'       : 'Text lable', // from v2.1.17 added 13.10.2016
+
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Bilinmiyor',
+			'kindRoot'        : 'Sürücü Kök dizini', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'Klasör',
 			'kindAlias'       : 'Alias (Takma ad)',
 			'kindAliasBroken' : 'Bozuk alias',
@@ -349,8 +399,8 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindZIP'         : 'ZIP arşivi',
 			'kindRAR'         : 'RAR arşivi',
 			'kindJAR'         : 'Java JAR dosyası',
-			'kindTTF'         : 'True Type font',
-			'kindOTF'         : 'Open Type font',
+			'kindTTF'         : 'True Type fontu',
+			'kindOTF'         : 'Open Type fontu',
 			'kindRPM'         : 'RPM paketi',
 			// texts
 			'kindText'        : 'Metin dosyası',
@@ -364,11 +414,11 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindCHeader'     : 'C başlık kodu',
 			'kindCPP'         : 'C++ kodu',
 			'kindCPPHeader'   : 'C++ başlık kodu',
-			'kindShell'       : 'Unix shell script',
+			'kindShell'       : 'Unix shell scripti',
 			'kindPython'      : 'Python kodu',
 			'kindJava'        : 'Java kodu',
 			'kindRuby'        : 'Ruby kodu',
-			'kindPerl'        : 'Perl script',
+			'kindPerl'        : 'Perl scripti',
 			'kindSQL'         : 'SQL kodu',
 			'kindXML'         : 'XML dosyası',
 			'kindAWK'         : 'AWK kodu',
@@ -388,12 +438,12 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindPXM'         : 'Pixelmator dosyası',
 			// media
 			'kindAudio'       : 'Ses ortamı',
-			'kindAudioMPEG'   : 'MPEG audio',
-			'kindAudioMPEG4'  : 'MPEG-4 audio',
-			'kindAudioMIDI'   : 'MIDI audio',
-			'kindAudioOGG'    : 'Ogg Vorbis audio',
-			'kindAudioWAV'    : 'WAV audio',
-			'AudioPlaylist'   : 'MP3 playlist',
+			'kindAudioMPEG'   : 'MPEG ses',
+			'kindAudioMPEG4'  : 'MPEG-4 ses',
+			'kindAudioMIDI'   : 'MIDI ses',
+			'kindAudioOGG'    : 'Ogg Vorbis ses',
+			'kindAudioWAV'    : 'WAV ses',
+			'AudioPlaylist'   : 'MP3 listesi',
 			'kindVideo'       : 'Video ortamı',
 			'kindVideoDV'     : 'DV video',
 			'kindVideoMPEG'   : 'MPEG video',
@@ -407,3 +457,4 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		}
 	};
 }
+
