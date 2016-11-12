@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: ca13448) (2016-11-12)
+ * Version 2.1.16 (2.1-src Nightly: 0230546) (2016-11-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6282,7 +6282,12 @@ elFinder.prototype = {
 				this.vars.mbtn[$(f.host[1]).val()? 'show':'hide']();
 			},
 			done: function(fm, data){
-				var f = this.inputs, p = this.protocol, f0 = $(f.host[0]), f1 = $(f.host[1]);
+				var f = this.inputs,
+					p = this.protocol,
+					f0 = $(f.host[0]),
+					f1 = $(f.host[1]),
+					expires = '&nbsp;';
+				
 				noOffline && f.offline.closest('tr').hide();
 				if (data.mode == 'makebtn') {
 					f0.removeClass('elfinder-info-spinner');
@@ -6294,7 +6299,10 @@ elFinder.prototype = {
 					! noOffline && f.offline.closest('tr').show();
 					this.vars.mbtn.hide();
 				} else {
-					f0.html(host + '&nbsp;').removeClass('elfinder-info-spinner');
+					if (data.expires) {
+						expires = '('+fm.formatDate({}, data.expires)+')';
+					}
+					f0.html(host + expires).removeClass('elfinder-info-spinner');
 					if (data.reset) {
 						p.trigger('change', 'reset');
 						return;
@@ -6322,8 +6330,8 @@ elFinder.prototype = {
 				f0.removeData('inrequest');
 			},
 			fail: function(fm, err){
+				$(this.inputs.host[0]).removeData('inrequest');
 				this.protocol.trigger('change', 'reset');
-				f0.removeData('inrequest');
 			}
 		};
 	},
@@ -6427,7 +6435,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: ca13448)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 0230546)';
 
 
 
@@ -7599,9 +7607,9 @@ elFinder.prototype._options.commandsOptions.netmount = {
 			}
 		}
 	},
-	googledrive: elFinder.prototype.makeNetmountOptionOauth('googledrive', 'Google Drive', 'Google.com'),
-	onedrive: elFinder.prototype.makeNetmountOptionOauth('onedrive', 'One Drive', 'OneDrive.com'),
-	box: elFinder.prototype.makeNetmountOptionOauth('box', 'Box', 'Box.com', true)
+	googledrive: elFinder.prototype.makeNetmountOptionOauth('googledrive', 'Google Drive', 'Google'),
+	onedrive: elFinder.prototype.makeNetmountOptionOauth('onedrive', 'One Drive', 'OneDrive'),
+	box: elFinder.prototype.makeNetmountOptionOauth('box', 'Box', 'Box', true)
 };
 
 
@@ -19146,7 +19154,7 @@ elFinder.prototype.commands.places = function() {
 		var o       = this.options, 
 			win     = this.window,
 			preview = this.preview,
-			i, p;
+			i, p, curCwd;
 		
 		width  = o.width  > 0 ? parseInt(o.width)  : 450;	
 		height = o.height > 0 ? parseInt(o.height) : 300;
@@ -19186,7 +19194,7 @@ elFinder.prototype.commands.places = function() {
 					} else {
 						navtrigger(rightKey);
 						setTimeout(function() {
-							! self.value && win.trigger('close')
+							! self.value && win.trigger('close');
 						}, 100);
 					}
 				}
@@ -19212,6 +19220,14 @@ elFinder.prototype.commands.places = function() {
 		});
 		
 		fm.bind('open',function() {
+			var prevCwd = curCwd;
+			
+			// change cwd
+			curCwd = fm.cwd().hash;
+			if (self.opened() && prevCwd !== curCwd) {
+				win.trigger('close');
+			}
+			
 			// set current volume dispInlineRegex
 			try {
 				self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex'));
