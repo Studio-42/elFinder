@@ -467,7 +467,7 @@
 		var o       = this.options, 
 			win     = this.window,
 			preview = this.preview,
-			i, p;
+			i, p, curCwd;
 		
 		width  = o.width  > 0 ? parseInt(o.width)  : 450;	
 		height = o.height > 0 ? parseInt(o.height) : 300;
@@ -507,7 +507,7 @@
 					} else {
 						navtrigger(rightKey);
 						setTimeout(function() {
-							! self.value && win.trigger('close')
+							! self.value && win.trigger('close');
 						}, 100);
 					}
 				}
@@ -533,6 +533,14 @@
 		});
 		
 		fm.bind('open',function() {
+			var prevCwd = curCwd;
+			
+			// change cwd
+			curCwd = fm.cwd().hash;
+			if (self.opened() && prevCwd !== curCwd) {
+				win.trigger('close');
+			}
+			
 			// set current volume dispInlineRegex
 			try {
 				self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex'));
