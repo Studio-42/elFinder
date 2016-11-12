@@ -184,7 +184,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         }
 
         return (object) array(
-        		'expires' => time() + $decoded->expires_in - 30,
+                'expires' => time() + $decoded->expires_in - 30,
                 'data' => $decoded,
         );
     }
@@ -200,8 +200,8 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     {
         if ($token->expires < time()) {
             if (null === $this->token->data->refresh_token) {
-            	$this->session->remove('OneDriveTokens');
-            	throw new \Exception(elFinder::ERROR_REAUTH_REQUIRE);
+                $this->session->remove('OneDriveTokens');
+                throw new \Exception(elFinder::ERROR_REAUTH_REQUIRE);
             }
 
             if (null === $this->options['client_id']) {
@@ -251,7 +251,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             }
 
             $token = (object) array(
-            		    'expires' => time() + $decoded->expires_in - 30,
+                        'expires' => time() + $decoded->expires_in - 30,
                         'data' => $decoded,
                 );
 
@@ -555,19 +555,19 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             }
 
             if ($options['user'] === 'init') {
-            	$this->token = $this->session->get('OneDriveTokens');
-            	
-            	if ($this->token) {
-            		try {
-            			$this->_od_refreshToken($this->token);
-            		} catch (Exception $e) {
-            			$this->error($e->getMessage());
-            			$this->token = null;
-           				$this->session->remove('OneDriveTokens');
-            		}
-            	}
+                $this->token = $this->session->get('OneDriveTokens');
 
-            	if (empty($this->token)) {
+                if ($this->token) {
+                    try {
+                        $this->_od_refreshToken($this->token);
+                    } catch (Exception $e) {
+                        $this->error($e->getMessage());
+                        $this->token = null;
+                        $this->session->remove('OneDriveTokens');
+                    }
+                }
+
+                if (empty($this->token)) {
                     $cdata = '';
                     $innerKeys = array('cmd', 'host', 'options', 'pass', 'protocol', 'user');
                     $this->ARGS = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
@@ -626,7 +626,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                     $folders = ['root' => 'My OneDrive'] + $folders;
                     $folders = json_encode($folders);
 
-                    $expires = empty($this->token->data->refresh_token)? (int) $this->token->expires : 0;
+                    $expires = empty($this->token->data->refresh_token) ? (int) $this->token->expires : 0;
                     $json = '{"protocol": "onedrive", "mode": "done", "folders": '.$folders.', "expires": '.$expires.'}';
                     $html = 'OneDrive.com';
                     $html .= '<script>
@@ -643,7 +643,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         if ($_aToken = $this->session->get('OneDriveTokens')) {
             $options['accessToken'] = json_encode($_aToken);
         } else {
-        	return array('exit' => true, 'error' => $this->error(self::ERROR_NETMOUNT, $options['host'], implode(' ', $this->error())));
+            return array('exit' => true, 'error' => $this->error(self::ERROR_NETMOUNT, $options['host'], implode(' ', $this->error())));
         }
 
         $this->session->remove('nodeId');
@@ -695,8 +695,9 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 $this->token = json_decode($this->options['accessToken']);
                 $this->_od_refreshToken($this->token);
             } catch (Exception $e) {
-            	$this->error($e->getMessage());
-            	return $this->setError($e->getMessage());
+                $this->error($e->getMessage());
+
+                return $this->setError($e->getMessage());
             }
         }
 

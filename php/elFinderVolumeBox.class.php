@@ -235,9 +235,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
     protected function _bd_refreshToken($token)
     {
         if ($token->expires < time()) {
-            if (! isset($token->data->refresh_token) || $token->data->refresh_token === null) {
-            	$this->session->remove('BoxTokens');
-            	throw new \Exception(elFinder::ERROR_REAUTH_REQUIRE);
+            if (!isset($token->data->refresh_token) || $token->data->refresh_token === null) {
+                $this->session->remove('BoxTokens');
+                throw new \Exception(elFinder::ERROR_REAUTH_REQUIRE);
             }
 
             if (null === $this->options['client_id']) {
@@ -609,19 +609,19 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             }
 
             if ($options['user'] === 'init') {
-            	$this->token = $this->session->get('BoxTokens');
-            	
-            	if ($this->token) {
-            		try {
-            			$this->_bd_refreshToken($this->token);
-            		} catch (Exception $e) {
-            			$this->error($e->getMessage());
-            			$this->token = null;
-            			$this->session->remove('BoxTokens');
-            		}
-            	}
-            	
-            	if (empty($this->token)) {
+                $this->token = $this->session->get('BoxTokens');
+
+                if ($this->token) {
+                    try {
+                        $this->_bd_refreshToken($this->token);
+                    } catch (Exception $e) {
+                        $this->error($e->getMessage());
+                        $this->token = null;
+                        $this->session->remove('BoxTokens');
+                    }
+                }
+
+                if (empty($this->token)) {
                     $cdata = '';
                     $innerKeys = array('cmd', 'host', 'options', 'pass', 'protocol', 'user');
                     $this->ARGS = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
@@ -640,7 +640,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                         $this->session->set('BoxTokens', (object) array('token' => null));
 
                         $url = self::AUTH_URL.'?'.http_build_query(array('response_type' => 'code', 'client_id' => $options['client_id'], 'redirect_uri' => elFinder::getConnectorUrl().'?cmd=netmount&protocol=box&host=1'));
-                        
+
                         $url .= '&oauth_callback='.rawurlencode($callback);
                     } catch (Exception $e) {
                         return array('exit' => true, 'body' => '{msg:errAccess}');
@@ -666,7 +666,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                     $folders = ['root' => 'My Box'] + $folders;
                     $folders = json_encode($folders);
 
-                    $expires = empty($this->token->data->refresh_token)? (int) $this->token->expires : 0;
+                    $expires = empty($this->token->data->refresh_token) ? (int) $this->token->expires : 0;
                     $json = '{"protocol": "box", "mode": "done", "folders": '.$folders.', "expires": '.$expires.'}';
                     $html = 'Box.com';
                     $html .= '<script>
@@ -683,7 +683,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         if ($_aToken = $this->session->get('BoxTokens')) {
             $options['accessToken'] = json_encode($_aToken);
         } else {
-        	return array('exit' => true, 'error' => $this->error(self::ERROR_NETMOUNT, $options['host'], implode(' ', $this->error())));
+            return array('exit' => true, 'error' => $this->error(self::ERROR_NETMOUNT, $options['host'], implode(' ', $this->error())));
         }
 
         $this->session->remove('nodeId');
@@ -735,8 +735,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 $this->token = json_decode($this->options['accessToken']);
                 $this->_bd_refreshToken($this->token);
             } catch (Exception $e) {
-            	$this->error($e->getMessage());
-            	return $this->setError($e->getMessage());
+                $this->error($e->getMessage());
+
+                return $this->setError($e->getMessage());
             }
         }
 
