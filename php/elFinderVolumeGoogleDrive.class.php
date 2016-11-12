@@ -713,7 +713,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                     natcasesort($folders);
                     $folders = ['root' => $rootObj->getName()] + $folders;
                     $folders = json_encode($folders);
-                    $expires = empty($aToken['refresh_token'])? $aToken['created'] + $aToken['expires_in'] - 30 : 0;
+                    $expires = empty($aToken['refresh_token']) ? $aToken['created'] + $aToken['expires_in'] - 30 : 0;
                     $json = '{"protocol": "googledrive", "mode": "done", "folders": '.$folders.', "expires": '.$expires.'}';
                     $options['pass'] = 'return';
                     $html = 'Google.com';
