@@ -6268,7 +6268,12 @@ elFinder.prototype = {
 				this.vars.mbtn[$(f.host[1]).val()? 'show':'hide']();
 			},
 			done: function(fm, data){
-				var f = this.inputs, p = this.protocol, f0 = $(f.host[0]), f1 = $(f.host[1]);
+				var f = this.inputs,
+					p = this.protocol,
+					f0 = $(f.host[0]),
+					f1 = $(f.host[1]),
+					expires = '&nbsp;';
+				
 				noOffline && f.offline.closest('tr').hide();
 				if (data.mode == 'makebtn') {
 					f0.removeClass('elfinder-info-spinner');
@@ -6280,7 +6285,10 @@ elFinder.prototype = {
 					! noOffline && f.offline.closest('tr').show();
 					this.vars.mbtn.hide();
 				} else {
-					f0.html(host + '&nbsp;').removeClass('elfinder-info-spinner');
+					if (data.expires) {
+						expires = '('+fm.formatDate({}, data.expires)+')';
+					}
+					f0.html(host + expires).removeClass('elfinder-info-spinner');
 					if (data.reset) {
 						p.trigger('change', 'reset');
 						return;

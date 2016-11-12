@@ -52,7 +52,7 @@ elFinder.prototype._options.commandsOptions.netmount = {
 			}
 		}
 	},
-	googledrive: elFinder.prototype.makeNetmountOptionOauth('googledrive', 'Google Drive', 'Google.com'),
-	onedrive: elFinder.prototype.makeNetmountOptionOauth('onedrive', 'One Drive', 'OneDrive.com'),
-	box: elFinder.prototype.makeNetmountOptionOauth('box', 'Box', 'Box.com', true)
+	googledrive: elFinder.prototype.makeNetmountOptionOauth('googledrive', 'Google Drive', 'Google'),
+	onedrive: elFinder.prototype.makeNetmountOptionOauth('onedrive', 'One Drive', 'OneDrive'),
+	box: elFinder.prototype.makeNetmountOptionOauth('box', 'Box', 'Box', true)
 };
