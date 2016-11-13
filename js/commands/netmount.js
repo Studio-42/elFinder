@@ -54,6 +54,7 @@ elFinder.prototype.commands.netmount = function() {
 						destroyOnClose : true,
 						open           : function() {
 							$(window).on('focus.'+fm.namespace, winFocus);
+							inputs.protocol.change();
 						},
 						close          : function() { 
 							//delete self.dialog; 
