@@ -683,7 +683,8 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         if ($_aToken = $this->session->get('BoxTokens')) {
             $options['accessToken'] = json_encode($_aToken);
         } else {
-            return array('exit' => true, 'error' => $this->setError(self::ERROR_NETMOUNT, $options['host'], implode(' ', $this->error())));
+            $this->setError(elFinder::ERROR_NETMOUNT, $options['host'], implode(' ', $this->error()));
+            return array('exit' => true, 'error' => $this->error());
         }
 
         $this->session->remove('nodeId');
