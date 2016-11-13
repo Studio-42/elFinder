@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: b00c7c4) (2016-11-13)
+ * Version 2.1.16 (2.1-src Nightly: 8685d13) (2016-11-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6278,6 +6278,7 @@ elFinder.prototype = {
 					noOffline && oline.closest('tr').hide();
 				} else {
 					oline.closest('tr')[(noOffline || f.user.val())? 'hide':'show']();
+					f0.data('funcexpup') && f0.data('funcexpup')();
 				}
 				this.vars.mbtn[$(f.host[1]).val()? 'show':'hide']();
 			},
@@ -6290,7 +6291,7 @@ elFinder.prototype = {
 				
 				noOffline && f.offline.closest('tr').hide();
 				if (data.mode == 'makebtn') {
-					f0.removeClass('elfinder-info-spinner');
+					f0.removeClass('elfinder-info-spinner').removeData('expires').removeData('funcexpup');
 					f.host.find('input').hover(function(){$(this).toggleClass('ui-state-hover');});
 					f1.val('');
 					f.path.val('root').next().remove();
@@ -6300,9 +6301,26 @@ elFinder.prototype = {
 					this.vars.mbtn.hide();
 				} else {
 					if (data.expires) {
-						expires = '('+fm.formatDate({}, data.expires)+')';
+						expires = '()';
+						f0.data('expires', data.expires);
 					}
 					f0.html(host + expires).removeClass('elfinder-info-spinner');
+					if (data.expires) {
+						f0.data('funcexpup', function() {
+							var rem = Math.floor((f0.data('expires') - (+new Date()) / 1000) / 60);
+							if (rem < 3) {
+								f0.parent().children('.elfinder-button-icon-reload').click();
+							} else {
+								f0.text(f0.text().replace(/\(.*\)/, '('+fm.i18n(['minsLeft', rem])+')'));
+								setTimeout(function() {
+									if (f0.is(':visible')) {
+										f0.data('funcexpup')();
+									}
+								}, 60000);
+							}
+						});
+						f0.data('funcexpup')();
+					}
 					if (data.reset) {
 						p.trigger('change', 'reset');
 						return;
@@ -6435,7 +6453,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: b00c7c4)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 8685d13)';
 
 
 
@@ -8475,7 +8493,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-11-02
+ * @version 2016-11-13
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.en = {
@@ -8847,6 +8865,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'disabled'        : 'Disabled', // from v2.1.16 added 4.10.2016
 			'emptyIncSearch'  : 'Search results is empty in current view.\\APress [Enter] to expand search target.', // from v2.1.16 added 5.10.2016
 			'textLabel'       : 'Text lable', // from v2.1.17 added 13.10.2016
+			'minsLeft'        : '$1 mins left', // from v2.1.17 added 13.11.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -17862,6 +17881,7 @@ elFinder.prototype.commands.netmount = function() {
 						destroyOnClose : true,
 						open           : function() {
 							$(window).on('focus.'+fm.namespace, winFocus);
+							inputs.protocol.change();
 						},
 						close          : function() { 
 							//delete self.dialog; 
