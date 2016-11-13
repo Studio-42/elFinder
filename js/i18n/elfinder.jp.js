@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2016-11-02
+ * @version 2016-11-13
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.jp = {
@@ -374,6 +374,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'disabled'        : '無効', // from v2.1.16 added 4.10.2016
 			'emptyIncSearch'  : '現在のビュー内に該当するアイテムはありません。\\A[Enter]キーで検索対象を拡げます。', // from v2.1.16 added 5.10.2016
 			'textLabel'       : 'テキストラベル', // from v2.1.17 added 13.10.2016
+			'minsLeft'        : '残り$1分', // from v2.1.17 added 13.11.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',

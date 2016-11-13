@@ -6264,6 +6264,7 @@ elFinder.prototype = {
 					noOffline && oline.closest('tr').hide();
 				} else {
 					oline.closest('tr')[(noOffline || f.user.val())? 'hide':'show']();
+					f0.data('funcexpup') && f0.data('funcexpup')();
 				}
 				this.vars.mbtn[$(f.host[1]).val()? 'show':'hide']();
 			},
@@ -6276,7 +6277,7 @@ elFinder.prototype = {
 				
 				noOffline && f.offline.closest('tr').hide();
 				if (data.mode == 'makebtn') {
-					f0.removeClass('elfinder-info-spinner');
+					f0.removeClass('elfinder-info-spinner').removeData('expires').removeData('funcexpup');
 					f.host.find('input').hover(function(){$(this).toggleClass('ui-state-hover');});
 					f1.val('');
 					f.path.val('root').next().remove();
@@ -6286,9 +6287,26 @@ elFinder.prototype = {
 					this.vars.mbtn.hide();
 				} else {
 					if (data.expires) {
-						expires = '('+fm.formatDate({}, data.expires)+')';
+						expires = '()';
+						f0.data('expires', data.expires);
 					}
 					f0.html(host + expires).removeClass('elfinder-info-spinner');
+					if (data.expires) {
+						f0.data('funcexpup', function() {
+							var rem = Math.floor((f0.data('expires') - (+new Date()) / 1000) / 60);
+							if (rem < 3) {
+								f0.parent().children('.elfinder-button-icon-reload').click();
+							} else {
+								f0.text(f0.text().replace(/\(.*\)/, '('+fm.i18n(['minsLeft', rem])+')'));
+								setTimeout(function() {
+									if (f0.is(':visible')) {
+										f0.data('funcexpup')();
+									}
+								}, 60000);
+							}
+						});
+						f0.data('funcexpup')();
+					}
 					if (data.reset) {
 						p.trigger('change', 'reset');
 						return;
