@@ -199,7 +199,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     protected function _od_refreshToken($token)
     {
         if ($token->expires < time()) {
-            if (null === $this->token->data->refresh_token) {
+            if (empty($this->token->data->refresh_token)) {
                 $this->session->remove('OneDriveTokens');
                 throw new \Exception(elFinder::ERROR_REAUTH_REQUIRE);
             }

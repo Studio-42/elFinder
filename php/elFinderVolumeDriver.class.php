@@ -4090,6 +4090,8 @@ abstract class elFinderVolumeDriver {
 					$path = str_replace($this->separator, '/', substr($p, strlen($this->root) + 1));
 					if ($this->encoding) {
 						$path = str_replace('%2F', '/', rawurlencode($this->convEncIn($path, true)));
+					} else {
+						$path = str_replace('%2F', '/', rawurlencode($path));
 					}
 					$stat['url'] = $this->URL . $path;
 				}
