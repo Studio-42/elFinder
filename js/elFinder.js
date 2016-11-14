@@ -1907,7 +1907,7 @@ window.elFinder = function(node, opts) {
 		}
 		$.when.apply($, opts)
 		.fail(function(error, xhr) {
-			if (! polling) {
+			if (! polling || $.inArray('errOpen', error) !== -1) {
 				dfrd.reject(error);
 				error && self.request({
 					data   : {cmd : 'open', target : (self.lastDir('') || self.root()), tree : 1, init : 1},
@@ -2448,6 +2448,12 @@ window.elFinder = function(node, opts) {
 							.fail(function(error, xhr){
 								if (error && xhr.status != 0) {
 									self.error(error);
+									if ($.inArray('errOpen', error) !== -1) {
+										self.request({
+											data   : {cmd : 'open', target : (self.lastDir('') || self.root()), tree : 1, init : 1},
+											notify : {type : 'open', cnt : 1, hideCnt : true}
+										});
+									}
 								} else {
 									syncInterval = setTimeout(function() {
 										sync();

@@ -235,7 +235,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
     protected function _bd_refreshToken($token)
     {
         if ($token->expires < time()) {
-            if (!isset($token->data->refresh_token) || $token->data->refresh_token === null) {
+            if (empty($token->data->refresh_token)) {
                 $this->session->remove('BoxTokens');
                 throw new \Exception(elFinder::ERROR_REAUTH_REQUIRE);
             }
@@ -1664,8 +1664,8 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                         .'?access_token='.urlencode($this->token->data->access_token);
             }
 
-            $cfile = new CURLFile($tmpFilePath, $mimeType);
             $mimeType = self::mimetypeInternalDetect($name);
+            $cfile = new CURLFile($tmpFilePath, $mimeType);
             $params = array('attributes' => json_encode($properties), 'file' => $cfile);
             $curl = $this->_bd_prepareCurl();
             $options = array(
