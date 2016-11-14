@@ -1245,7 +1245,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 					$stat['path'] = $this->path($stat['hash']);
 					if ($this->URL && !isset($stat['url'])) {
 						$_path = str_replace(DIRECTORY_SEPARATOR, '/', substr($p, strlen($this->root) + 1));
-						$stat['url'] = $this->URL . $_path;
+						$stat['url'] = $this->URL . str_replace('%2F', '/', rawurlencode($_path));
 					}
 		
 					$result[] = $stat;
