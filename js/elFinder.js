@@ -4359,6 +4359,14 @@ elFinder.prototype = {
 			xhr.addEventListener('load', function(e) {
 				var status = xhr.status, res, curr = 0, error = '';
 				
+				if (! status && ! chunkMerge && retry++ <= 3) {
+					// do retry
+					filesize = 0;
+					xhr.open('POST', self.uploadURL, true);
+					xhr.send(formData);
+					return;
+				}
+				
 				if (status >= 400) {
 					if (status > 500) {
 						error = 'errResponse';
@@ -4375,17 +4383,9 @@ elFinder.prototype = {
 				}
 				
 				if (error) {
-					if (chunkMerge || retry++ > 3) {
-						node.trigger('uploadabort');
-						var file = isDataType? files[0][0] : files[0];
-						return dfrd.reject(file._cid? null : error);
-					} else {
-						// do retry
-						filesize = 0;
-						xhr.open('POST', self.uploadURL, true);
-						xhr.send(formData);
-						return;
-					}
+					node.trigger('uploadabort');
+					var file = isDataType? files[0][0] : files[0];
+					return dfrd.reject(file._cid? null : error);
 				}
 				
 				loaded = filesize;
