@@ -30,6 +30,7 @@ elFinder.prototype.commands.search = function() {
 	this.exec = function(q, target, mime) {
 		var fm = this.fm,
 			reqDef = [],
+			onlyMimes = fm.options.onlyMimes,
 			phash;
 		
 		if (typeof q == 'string' && q) {
@@ -38,44 +39,58 @@ elFinder.prototype.commands.search = function() {
 				target = target.target || '';
 			}
 			target = target? target : '';
-			mime = mime? $.trim(mime).replace(',', ' ').split(' ') : [];
-			$.each(mime, function(){ return $.trim(this); });
+			if (mime) {
+				mime = $.trim(mime).replace(',', ' ').split(' ');
+				mime = $.map(mime, function(m){ 
+					m = $.trim(m);
+					return m && ($.inArray(m, onlyMimes) !== -1
+								|| $.map(onlyMimes, function(om) { return m.indexOf(om) === 0? true : null }).length
+								)? m : null 
+				});
+			} else {
+				mime = [].concat(onlyMimes);
+			}
+
 			fm.trigger('searchstart', {query : q, target : target, mimes : mime});
 			
-			if (target === '' && fm.api >= 2.1) {
-				$.each(fm.roots, function(id, hash) {
+			if (! onlyMimes.length || mime.length) {
+				if (target === '' && fm.api >= 2.1) {
+					$.each(fm.roots, function(id, hash) {
+						reqDef.push(fm.request({
+							data   : {cmd : 'search', q : q, target : hash, mimes : mime},
+							notify : {type : 'search', cnt : 1, hideCnt : (reqDef.length? false : true)},
+							cancel : true,
+							preventDone : true
+						}));
+					});
+				} else {
 					reqDef.push(fm.request({
-						data   : {cmd : 'search', q : q, target : hash, mimes : mime},
-						notify : {type : 'search', cnt : 1, hideCnt : (reqDef.length? false : true)},
+						data   : {cmd : 'search', q : q, target : target, mimes : mime},
+						notify : {type : 'search', cnt : 1, hideCnt : true},
 						cancel : true,
 						preventDone : true
 					}));
-				});
-			} else {
-				reqDef.push(fm.request({
-					data   : {cmd : 'search', q : q, target : target, mimes : mime},
-					notify : {type : 'search', cnt : 1, hideCnt : true},
-					cancel : true,
-					preventDone : true
-				}));
-				if (target !== '' && fm.api >= 2.1 && Object.keys(fm.leafRoots).length) {
-					$.each(fm.leafRoots, function(hash, roots) {
-						phash = hash;
-						while(phash) {
-							if (target === phash) {
-								$.each(roots, function() {
-									reqDef.push(fm.request({
-										data   : {cmd : 'search', q : q, target : this, mimes : mime},
-										notify : {type : 'search', cnt : 1, hideCnt : false},
-										cancel : true,
-										preventDone : true
-									}));
-								});
+					if (target !== '' && fm.api >= 2.1 && Object.keys(fm.leafRoots).length) {
+						$.each(fm.leafRoots, function(hash, roots) {
+							phash = hash;
+							while(phash) {
+								if (target === phash) {
+									$.each(roots, function() {
+										reqDef.push(fm.request({
+											data   : {cmd : 'search', q : q, target : this, mimes : mime},
+											notify : {type : 'search', cnt : 1, hideCnt : false},
+											cancel : true,
+											preventDone : true
+										}));
+									});
+								}
+								phash = (fm.file(phash) || {}).phash;
 							}
-							phash = (fm.file(phash) || {}).phash;
-						}
-					});
+						});
+					}
 				}
+			} else {
+				reqDef = [$.Deferred().resolve({files: []})];
 			}
 			
 			fm.searchStatus.mixed = (reqDef.length > 1);
