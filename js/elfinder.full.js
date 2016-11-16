@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: c9906e0) (2016-11-16)
+ * Version 2.1.16 (2.1-src Nightly: 7e0362c) (2016-11-17)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1290,6 +1290,9 @@ window.elFinder = function(node, opts) {
 	this.convAbsUrl = function(url) {
 		if (url.match(/^http/i)) {
 			return url;
+		}
+		if (url.substr(0,2) === '//') {
+			return window.location.protocol + url;
 		}
 		var root = window.location.protocol + '//' + window.location.host,
 			reg  = /[^\/]+\/\.\.\//,
@@ -2844,6 +2847,56 @@ window.elFinder = function(node, opts) {
 	} else {
 		this.transport.upload = $.proxy(this.uploads.iframe, this);
 	}
+
+	/**
+	 * Decoding 'raw' string converted to unicode
+	 * 
+	 * @param  String str
+	 * @return String
+	 */
+	this.decodeRawString = $.isFunction(this.options.rawStringDecoder)? this.options.rawStringDecoder : function(str) {
+		var charCodes = function(str) {
+			var i, len, arr;
+			for (i=0,len=str.length,arr=[]; i<len; i++) {
+				arr.push(str.charCodeAt(i));
+			}
+			return arr;
+		},
+		scalarValues = function(arr) {
+			var scalars = [], i, len, c;
+			if (typeof arr === 'string') {arr = charCodes(arr);}
+			for (i=0,len=arr.length; c=arr[i],i<len; i++) {
+				if (c >= 0xd800 && c <= 0xdbff) {
+					scalars.push((c & 1023) + 64 << 10 | arr[++i] & 1023);
+				} else {
+					scalars.push(c);
+				}
+			}
+			return scalars;
+		},
+		decodeUTF8 = function(arr) {
+			var i, len, c, str, char = String.fromCharCode;
+			for (i=0,len=arr.length,str=""; c=arr[i],i<len; i++) {
+				if (c <= 0x7f) {
+					str += char(c);
+				} else if (c <= 0xdf && c >= 0xc2) {
+					str += char((c&31)<<6 | arr[++i]&63);
+				} else if (c <= 0xef && c >= 0xe0) {
+					str += char((c&15)<<12 | (arr[++i]&63)<<6 | arr[++i]&63);
+				} else if (c <= 0xf7 && c >= 0xf0) {
+					str += char(
+						0xd800 | ((c&7)<<8 | (arr[++i]&63)<<2 | arr[++i]>>>4&3) - 64,
+						0xdc00 | (arr[i++]&15)<<6 | arr[i]&63
+					);
+				} else {
+					str += char(0xfffd);
+				}
+			}
+			return str;
+		};
+		
+		return decodeUTF8(scalarValues(str));
+	};
 
 	/**
 	 * Alias for this.trigger('error', {error : 'message'})
@@ -6464,7 +6517,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: c9906e0)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 7e0362c)';
 
 
 
@@ -7567,6 +7620,19 @@ elFinder.prototype._options = {
 	 * @default  ['hasNotifyDialog', 'editingFile']
 	 */
 	windowCloseConfirm : ['hasNotifyDialog', 'editingFile'],
+
+	/**
+	 * Function decoding 'raw' string converted to unicode
+	 * It is used instead of fm.decodeRawString(str)
+	 * 
+	 * @type Null|Function
+	 */
+	rawStringDecoder : typeof Encoding === 'object' && $.isFunction(Encoding.convert)? function(str) {
+		return Encoding.convert(str, {
+			to: 'UNICODE',
+			type: 'string'
+		});
+	} : null,
 
 	/**
 	 * Debug config
@@ -19763,12 +19829,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 								}
 								if (filenames && filenames.length) {
 									filenames = $.map(filenames, function(str) {
-										try {
-											str = decodeURIComponent(escape(str));
-										} catch(e) {
-											str = escape(str);
-										}
-										return str;
+										return fm.decodeRawString(str);
 									});
 									filenames.sort();
 									loading.remove();
@@ -19860,7 +19921,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							loading.remove();
 							$(this).css('background-color', '#fff').show();
 						})
-						.attr('src', 'http://docs.google.com/gview?embedded=true&url=' + encodeURIComponent(fm.convAbsUrl(fm.url(file.hash))));
+						.attr('src', '//docs.google.com/gview?embedded=true&url=' + encodeURIComponent(fm.convAbsUrl(fm.url(file.hash))));
 				}
 			}
 			
