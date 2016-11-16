@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 3ea7d35) (2016-11-14)
+ * Version 2.1.16 (2.1-src Nightly: c9906e0) (2016-11-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4261,6 +4261,9 @@ elFinder.prototype = {
 				target      = (data.target || self.cwd().hash),
 				chunkEnable = (self.option('uploadMaxConn', target) != -1),
 				multiMax    = Math.min(5, Math.max(1, self.option('uploadMaxConn', target))),
+				timeout     = 30000, // 30 sec
+				retryWait   = 10000, // 10 sec
+				retryMax    = 18, // 10 sec * 18 = 180 sec (Max 3 mins)
 				retry       = 0,
 				dfrd   = $.Deferred()
 					.fail(function(error) {
@@ -4362,8 +4365,35 @@ elFinder.prototype = {
 			}
 			
 			xhr.addEventListener('error', function() {
-				node.trigger('uploadabort');
-				dfrd.reject('errConnect');
+				if (xhr.status == 0) {
+					if (abort) {
+						dfrd.reject();
+					} else {
+						// ff bug while send zero sized file
+						// for safari - send directory
+						if (!isDataType && data.files && $.map(data.files, function(f){return f.size === (self.UA.Safari? 1802 : 0)? f : null;}).length) {
+							errors.push('errFolderUpload');
+							dfrd.reject(['errAbort', 'errFolderUpload']);
+						} else {
+							if (retry++ <= retryMax) {
+								setTimeout(function() {
+									if (! abort) {
+										filesize = 0;
+										xhr.open('POST', self.uploadURL, true);
+										xhr.timeout = timeout;
+										xhr.send(formData);
+									}
+								}, retryWait);
+							} else {
+								node.trigger('uploadabort');
+								dfrd.reject(['errAbort']);
+							}
+						}
+					}
+				} else {
+					node.trigger('uploadabort');
+					dfrd.reject('errConnect');
+				}
 			}, false);
 			
 			xhr.addEventListener('abort', function() {
@@ -4389,17 +4419,9 @@ elFinder.prototype = {
 				}
 				
 				if (error) {
-					if (chunkMerge || retry++ > 3) {
-						node.trigger('uploadabort');
-						var file = isDataType? files[0][0] : files[0];
-						return dfrd.reject(file._cid? null : error);
-					} else {
-						// do retry
-						filesize = 0;
-						xhr.open('POST', self.uploadURL, true);
-						xhr.send(formData);
-						return;
-					}
+					node.trigger('uploadabort');
+					var file = isDataType? files[0][0] : files[0];
+					return dfrd.reject(file._cid? null : error);
 				}
 				
 				loaded = filesize;
@@ -4739,6 +4761,7 @@ elFinder.prototype = {
 				}
 				
 				xhr.open('POST', self.uploadURL, true);
+				xhr.timeout = timeout;
 				
 				// set request headers
 				if (fm.customHeaders) {
@@ -4805,24 +4828,6 @@ elFinder.prototype = {
 						formData.append('upload_path[]', path);
 					});
 				}
-				
-				
-				xhr.onreadystatechange = function() {
-					if (xhr.readyState == 4 && xhr.status == 0) {
-						if (abort) {
-							dfrd.reject();
-						} else {
-							node.trigger('uploadabort');
-							var errors = ['errAbort'];
-							// ff bug while send zero sized file
-							// for safari - send directory
-							if (!isDataType && data.files && $.map(data.files, function(f){return f.size === (self.UA.Safari? 1802 : 0)? f : null;}).length) {
-								errors.push('errFolderUpload');
-							}
-							dfrd.reject(errors);
-						}
-					}
-				};
 				
 				xhr.send(formData);
 				
@@ -6459,7 +6464,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 3ea7d35)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: c9906e0)';
 
 
 
@@ -6963,7 +6968,7 @@ elFinder.prototype._options = {
 		},
 		// "upload" command options.
 		upload : {
-			// Open system OS upload dialog: 'button' OR Open elFinder upload dialog: 'uploadbutton'
+			// Open elFinder upload dialog: 'button' OR Open system OS upload dialog: 'uploadbutton'
 			ui : 'button'
 		},
 		// "download" command options.
@@ -21686,6 +21691,7 @@ elFinder.prototype.commands.search = function() {
 	this.exec = function(q, target, mime) {
 		var fm = this.fm,
 			reqDef = [],
+			onlyMimes = fm.options.onlyMimes,
 			phash;
 		
 		if (typeof q == 'string' && q) {
@@ -21694,44 +21700,58 @@ elFinder.prototype.commands.search = function() {
 				target = target.target || '';
 			}
 			target = target? target : '';
-			mime = mime? $.trim(mime).replace(',', ' ').split(' ') : [];
-			$.each(mime, function(){ return $.trim(this); });
+			if (mime) {
+				mime = $.trim(mime).replace(',', ' ').split(' ');
+				mime = $.map(mime, function(m){ 
+					m = $.trim(m);
+					return m && ($.inArray(m, onlyMimes) !== -1
+								|| $.map(onlyMimes, function(om) { return m.indexOf(om) === 0? true : null }).length
+								)? m : null 
+				});
+			} else {
+				mime = [].concat(onlyMimes);
+			}
+
 			fm.trigger('searchstart', {query : q, target : target, mimes : mime});
 			
-			if (target === '' && fm.api >= 2.1) {
-				$.each(fm.roots, function(id, hash) {
+			if (! onlyMimes.length || mime.length) {
+				if (target === '' && fm.api >= 2.1) {
+					$.each(fm.roots, function(id, hash) {
+						reqDef.push(fm.request({
+							data   : {cmd : 'search', q : q, target : hash, mimes : mime},
+							notify : {type : 'search', cnt : 1, hideCnt : (reqDef.length? false : true)},
+							cancel : true,
+							preventDone : true
+						}));
+					});
+				} else {
 					reqDef.push(fm.request({
-						data   : {cmd : 'search', q : q, target : hash, mimes : mime},
-						notify : {type : 'search', cnt : 1, hideCnt : (reqDef.length? false : true)},
+						data   : {cmd : 'search', q : q, target : target, mimes : mime},
+						notify : {type : 'search', cnt : 1, hideCnt : true},
 						cancel : true,
 						preventDone : true
 					}));
-				});
-			} else {
-				reqDef.push(fm.request({
-					data   : {cmd : 'search', q : q, target : target, mimes : mime},
-					notify : {type : 'search', cnt : 1, hideCnt : true},
-					cancel : true,
-					preventDone : true
-				}));
-				if (target !== '' && fm.api >= 2.1 && Object.keys(fm.leafRoots).length) {
-					$.each(fm.leafRoots, function(hash, roots) {
-						phash = hash;
-						while(phash) {
-							if (target === phash) {
-								$.each(roots, function() {
-									reqDef.push(fm.request({
-										data   : {cmd : 'search', q : q, target : this, mimes : mime},
-										notify : {type : 'search', cnt : 1, hideCnt : false},
-										cancel : true,
-										preventDone : true
-									}));
-								});
+					if (target !== '' && fm.api >= 2.1 && Object.keys(fm.leafRoots).length) {
+						$.each(fm.leafRoots, function(hash, roots) {
+							phash = hash;
+							while(phash) {
+								if (target === phash) {
+									$.each(roots, function() {
+										reqDef.push(fm.request({
+											data   : {cmd : 'search', q : q, target : this, mimes : mime},
+											notify : {type : 'search', cnt : 1, hideCnt : false},
+											cancel : true,
+											preventDone : true
+										}));
+									});
+								}
+								phash = (fm.file(phash) || {}).phash;
 							}
-							phash = (fm.file(phash) || {}).phash;
-						}
-					});
+						});
+					}
 				}
+			} else {
+				reqDef = [$.Deferred().resolve({files: []})];
 			}
 			
 			fm.searchStatus.mixed = (reqDef.length > 1);
