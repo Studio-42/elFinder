@@ -797,6 +797,19 @@ elFinder.prototype._options = {
 	windowCloseConfirm : ['hasNotifyDialog', 'editingFile'],
 
 	/**
+	 * Function decoding 'raw' string converted to unicode
+	 * It is used instead of fm.decodeRawString(str)
+	 * 
+	 * @type Null|Function
+	 */
+	rawStringDecoder : typeof Encoding === 'object' && $.isFunction(Encoding.convert)? function(str) {
+		return Encoding.convert(str, {
+			to: 'UNICODE',
+			type: 'string'
+		});
+	} : null,
+
+	/**
 	 * Debug config
 	 *
 	 * @type Array|Boolean

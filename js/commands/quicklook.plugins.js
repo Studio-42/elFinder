@@ -468,12 +468,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 								}
 								if (filenames && filenames.length) {
 									filenames = $.map(filenames, function(str) {
-										try {
-											str = decodeURIComponent(escape(str));
-										} catch(e) {
-											str = escape(str);
-										}
-										return str;
+										return fm.decodeRawString(str);
 									});
 									filenames.sort();
 									loading.remove();
@@ -565,7 +560,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							loading.remove();
 							$(this).css('background-color', '#fff').show();
 						})
-						.attr('src', 'http://docs.google.com/gview?embedded=true&url=' + encodeURIComponent(fm.convAbsUrl(fm.url(file.hash))));
+						.attr('src', '//docs.google.com/gview?embedded=true&url=' + encodeURIComponent(fm.convAbsUrl(fm.url(file.hash))));
 				}
 			}
 			
