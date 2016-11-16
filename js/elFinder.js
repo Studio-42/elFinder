@@ -4247,6 +4247,9 @@ elFinder.prototype = {
 				target      = (data.target || self.cwd().hash),
 				chunkEnable = (self.option('uploadMaxConn', target) != -1),
 				multiMax    = Math.min(5, Math.max(1, self.option('uploadMaxConn', target))),
+				timeout     = 30000, // 30 sec
+				retryWait   = 10000, // 10 sec
+				retryMax    = 18, // 10 sec * 18 = 180 sec (Max 3 mins)
 				retry       = 0,
 				dfrd   = $.Deferred()
 					.fail(function(error) {
@@ -4348,8 +4351,35 @@ elFinder.prototype = {
 			}
 			
 			xhr.addEventListener('error', function() {
-				node.trigger('uploadabort');
-				dfrd.reject('errConnect');
+				if (xhr.status == 0) {
+					if (abort) {
+						dfrd.reject();
+					} else {
+						// ff bug while send zero sized file
+						// for safari - send directory
+						if (!isDataType && data.files && $.map(data.files, function(f){return f.size === (self.UA.Safari? 1802 : 0)? f : null;}).length) {
+							errors.push('errFolderUpload');
+							dfrd.reject(['errAbort', 'errFolderUpload']);
+						} else {
+							if (retry++ <= retryMax) {
+								setTimeout(function() {
+									if (! abort) {
+										filesize = 0;
+										xhr.open('POST', self.uploadURL, true);
+										xhr.timeout = timeout;
+										xhr.send(formData);
+									}
+								}, retryWait);
+							} else {
+								node.trigger('uploadabort');
+								dfrd.reject(['errAbort']);
+							}
+						}
+					}
+				} else {
+					node.trigger('uploadabort');
+					dfrd.reject('errConnect');
+				}
 			}, false);
 			
 			xhr.addEventListener('abort', function() {
@@ -4358,14 +4388,6 @@ elFinder.prototype = {
 			
 			xhr.addEventListener('load', function(e) {
 				var status = xhr.status, res, curr = 0, error = '';
-				
-				if (! status && ! chunkMerge && retry++ <= 3) {
-					// do retry
-					filesize = 0;
-					xhr.open('POST', self.uploadURL, true);
-					xhr.send(formData);
-					return;
-				}
 				
 				if (status >= 400) {
 					if (status > 500) {
@@ -4725,6 +4747,7 @@ elFinder.prototype = {
 				}
 				
 				xhr.open('POST', self.uploadURL, true);
+				xhr.timeout = timeout;
 				
 				// set request headers
 				if (fm.customHeaders) {
@@ -4791,24 +4814,6 @@ elFinder.prototype = {
 						formData.append('upload_path[]', path);
 					});
 				}
-				
-				
-				xhr.onreadystatechange = function() {
-					if (xhr.readyState == 4 && xhr.status == 0) {
-						if (abort) {
-							dfrd.reject();
-						} else {
-							node.trigger('uploadabort');
-							var errors = ['errAbort'];
-							// ff bug while send zero sized file
-							// for safari - send directory
-							if (!isDataType && data.files && $.map(data.files, function(f){return f.size === (self.UA.Safari? 1802 : 0)? f : null;}).length) {
-								errors.push('errFolderUpload');
-							}
-							dfrd.reject(errors);
-						}
-					}
-				};
 				
 				xhr.send(formData);
 				

@@ -4574,34 +4574,37 @@ abstract class elFinderVolumeDriver {
 
 		$result = false;
 		
-		list($size_w, $size_h) = array($width, $height);
-	
 		if (!$jpgQuality) {
 			$jpgQuality = $this->options['jpgQuality'];
 		}
 		
-		if ($keepProportions == true) {
+		list($orig_w, $orig_h) = array($s[0], $s[1]);
+		list($size_w, $size_h) = array($width, $height);
 		
-			list($orig_w, $orig_h) = array($s[0], $s[1]);
-		
-			/* Resizing by biggest side */
-			if ($resizeByBiggerSide) {
-				if ($orig_w > $orig_h) {
-					$size_h = round($orig_h * $width / $orig_w);
-					$size_w = $width;
+		if (empty($options['unenlarge']) || $orig_w > $size_w || $orig_h > $size_h) {
+			if ($keepProportions == true) {
+				/* Resizing by biggest side */
+				if ($resizeByBiggerSide) {
+					if ($orig_w > $orig_h) {
+						$size_h = round($orig_h * $width / $orig_w);
+						$size_w = $width;
+					} else {
+						$size_w = round($orig_w * $height / $orig_h);
+						$size_h = $height;
+					}
 				} else {
-					$size_w = round($orig_w * $height / $orig_h);
-					$size_h = $height;
-				}
-			} else {
-				if ($orig_w > $orig_h) {
-					$size_w = round($orig_w * $height / $orig_h);
-					$size_h = $height;
-				} else {
-					$size_h = round($orig_h * $width / $orig_w);
-					$size_w = $width;
+					if ($orig_w > $orig_h) {
+						$size_w = round($orig_w * $height / $orig_h);
+						$size_h = $height;
+					} else {
+						$size_h = round($orig_h * $width / $orig_w);
+						$size_w = $width;
+					}
 				}
 			}
+		} else {
+			$size_w = $orig_w;
+			$size_h = $orig_h;
 		}
 
 		elFinder::extendTimeLimit(300);
