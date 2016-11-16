@@ -1277,6 +1277,9 @@ window.elFinder = function(node, opts) {
 		if (url.match(/^http/i)) {
 			return url;
 		}
+		if (url.substr(0,2) === '//') {
+			return window.location.protocol + url;
+		}
 		var root = window.location.protocol + '//' + window.location.host,
 			reg  = /[^\/]+\/\.\.\//,
 			ret;
