@@ -76,7 +76,7 @@ Features
      * [Normalizer](https://github.com/Studio-42/elFinder/blob/2.1-src/php/plugins/Normalizer/plugin.php) : UTF-8 Normalizer of file-name and file-path etc.
      * [Sanitizer](https://github.com/Studio-42/elFinder/blob/2.1-src/php/plugins/Sanitizer/plugin.php) : Sanitizer of file-name and file-path etc.
      * [Watermark](https://github.com/Studio-42/elFinder/blob/2.1-src/php/plugins/Watermark/plugin.php) : Print watermark on file upload.
- * Folder upload with Chrome
+ * Folder upload with Chrome, Firefox and Edge
  * Chunked file upload
  * Upload directly to the folder
  * Upload form URL (or list)
