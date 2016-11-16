@@ -2832,6 +2832,56 @@ window.elFinder = function(node, opts) {
 	}
 
 	/**
+	 * Decoding 'raw' string converted to unicode
+	 * 
+	 * @param  String str
+	 * @return String
+	 */
+	this.decodeRawString = $.isFunction(this.options.rawStringDecoder)? this.options.rawStringDecoder : function(str) {
+		var charCodes = function(str) {
+			var i, len, arr;
+			for (i=0,len=str.length,arr=[]; i<len; i++) {
+				arr.push(str.charCodeAt(i));
+			}
+			return arr;
+		},
+		scalarValues = function(arr) {
+			var scalars = [], i, len, c;
+			if (typeof arr === 'string') {arr = charCodes(arr);}
+			for (i=0,len=arr.length; c=arr[i],i<len; i++) {
+				if (c >= 0xd800 && c <= 0xdbff) {
+					scalars.push((c & 1023) + 64 << 10 | arr[++i] & 1023);
+				} else {
+					scalars.push(c);
+				}
+			}
+			return scalars;
+		},
+		decodeUTF8 = function(arr) {
+			var i, len, c, str, char = String.fromCharCode;
+			for (i=0,len=arr.length,str=""; c=arr[i],i<len; i++) {
+				if (c <= 0x7f) {
+					str += char(c);
+				} else if (c <= 0xdf && c >= 0xc2) {
+					str += char((c&31)<<6 | arr[++i]&63);
+				} else if (c <= 0xef && c >= 0xe0) {
+					str += char((c&15)<<12 | (arr[++i]&63)<<6 | arr[++i]&63);
+				} else if (c <= 0xf7 && c >= 0xf0) {
+					str += char(
+						0xd800 | ((c&7)<<8 | (arr[++i]&63)<<2 | arr[++i]>>>4&3) - 64,
+						0xdc00 | (arr[i++]&15)<<6 | arr[i]&63
+					);
+				} else {
+					str += char(0xfffd);
+				}
+			}
+			return str;
+		};
+		
+		return decodeUTF8(scalarValues(str));
+	};
+
+	/**
 	 * Alias for this.trigger('error', {error : 'message'})
 	 *
 	 * @param  String  error message
