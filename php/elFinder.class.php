@@ -771,14 +771,22 @@ class elFinder {
 		}
 		
 		foreach ($this->volumes as $volume) {
-			if (isset($result['removed'])) {
-				$result['removed'] = array_merge($result['removed'], $volume->removed());
+			$removed = $volume->removed();
+			if (! empty($removed)) {
+				if (! isset($result['removed'])) {
+					$result['removed'] = array();
+				}
+				$result['removed'] = array_merge($result['removed'], $removed);
 				if (! $changeDst && $dst && $dstVolume && $volume === $dstVolume) {
 					$changeDst = true;
 				}
 			}
-			if (isset($result['added'])) {
-				$result['added'] = array_merge($result['added'], $volume->added());
+			$added = $volume->added();
+			if (! empty($added)) {
+				if (! isset($result['added'])) {
+					$result['added'] = array();
+				}
+				$result['added'] = array_merge($result['added'], $added);
 				if (! $changeDst && $dst && $dstVolume && $volume === $dstVolume) {
 					$changeDst = true;
 				}
