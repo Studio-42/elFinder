@@ -502,14 +502,16 @@
 			
 			self.change(function() {
 				if (self.opened()) {
-					if (self.value) {
-						preview.trigger($.Event('update', {file : self.value}))
-					} else {
-						navtrigger(rightKey);
-						setTimeout(function() {
-							! self.value && win.trigger('close');
-						}, 100);
-					}
+					setTimeout(function() {
+						if (self.value) {
+							preview.trigger($.Event('update', {file : self.value}))
+						} else {
+							navtrigger(rightKey);
+							setTimeout(function() {
+								! self.value && win.trigger('close');
+							}, 10);
+						}
+					}, 10);
 				}
 			});
 			
