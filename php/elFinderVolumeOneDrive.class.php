@@ -258,6 +258,10 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             $this->session->set('OneDriveTokens', $token);
             $this->options['accessToken'] = json_encode($token);
             $this->token = $token;
+
+            if ($this->options['netkey']) {
+                elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'accessToken', $this->options['accessToken']);
+            }
         }
 
         return true;
@@ -644,6 +648,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             $options['accessToken'] = json_encode($_aToken);
         } else {
             $this->setError(elFinder::ERROR_NETMOUNT, $options['host'], implode(' ', $this->error()));
+
             return array('exit' => true, 'error' => $this->error());
         }
 
@@ -702,8 +707,13 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             }
         }
 
-        // make net mount key
-        $this->netMountKey = md5(implode('-', array('onedrive', $this->options['path'], $this->token->data->access_token)));
+        if (empty($options['netkey'])) {
+            // make net mount key
+            $_tokenKey = isset($this->token->data->refresh_token) ? $this->token->data->refresh_token : $this->token->data->access_token;
+            $this->netMountKey = md5(implode('-', array('box', $this->options['path'], $_tokenKey)));
+        } else {
+            $this->netMountKey = $options['netkey'];
+        }
 
         // normalize root path
         if ($this->options['path'] == 'root') {
