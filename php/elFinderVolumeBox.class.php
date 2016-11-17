@@ -287,6 +287,10 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 throw new \Exception('json_decode() failed');
             }
 
+            if (empty($decoded->access_token)) {
+                throw new \Exception(elFinder::ERROR_REAUTH_REQUIRE);
+            }
+
             $token = (object) array(
                     'expires' => time() + $decoded->expires_in - 30,
                     'data' => $decoded,
@@ -296,7 +300,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             $this->options['accessToken'] = json_encode($token);
             $this->token = $token;
 
-            if ($this->options['netkey']) {
+            if (!empty($this->options['netkey'])) {
                 elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'accessToken', $this->options['accessToken']);
             }
         }
@@ -626,6 +630,12 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 }
 
                 if (empty($this->token)) {
+                    $result = null;
+                } else {
+                    $result = $this->_bd_query('0', $fetch_self = false, $recursive = false);
+                }
+
+                if (!$result) {
                     $cdata = '';
                     $innerKeys = array('cmd', 'host', 'options', 'pass', 'protocol', 'user');
                     $this->ARGS = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
@@ -657,7 +667,6 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
                     return array('exit' => true, 'body' => $html);
                 } else {
-                    $result = $this->_bd_query('0', $fetch_self = false, $recursive = false);
                     $folders = [];
 
                     foreach ($result as $res) {
