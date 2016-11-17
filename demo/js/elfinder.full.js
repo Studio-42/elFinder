@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.16 (2.1-src Nightly: 7e0362c) (2016-11-17)
+ * Version 2.1.16 (2.1-src Nightly: b1ed2ff) (2016-11-17)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6517,7 +6517,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.16 (2.1-src Nightly: 7e0362c)';
+elFinder.prototype.version = '2.1.16 (2.1-src Nightly: b1ed2ff)';
 
 
 
@@ -19286,14 +19286,16 @@ elFinder.prototype.commands.places = function() {
 			
 			self.change(function() {
 				if (self.opened()) {
-					if (self.value) {
-						preview.trigger($.Event('update', {file : self.value}))
-					} else {
-						navtrigger(rightKey);
-						setTimeout(function() {
-							! self.value && win.trigger('close');
-						}, 100);
-					}
+					setTimeout(function() {
+						if (self.value) {
+							preview.trigger($.Event('update', {file : self.value}))
+						} else {
+							navtrigger(rightKey);
+							setTimeout(function() {
+								! self.value && win.trigger('close');
+							}, 10);
+						}
+					}, 10);
 				}
 			});
 			
@@ -22075,7 +22077,7 @@ elFinder.prototype.commands.upload = function() {
 						var cwd = fm.getUI('cwd'),
 							node;
 						dfrd.resolve(data);
-						if (data && data.added && data.added[0]) {
+						if (data && data.added && data.added[0] && ! fm.ui.notify.children('.elfinder-notify-upload').length) {
 							var newItem = cwd.find('#'+fm.cwdHash2Id(data.added[0].hash));
 							if (newItem.length) {
 								newItem.trigger('scrolltoview');
