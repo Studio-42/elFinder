@@ -58,6 +58,7 @@ var dirmode = 0755,
 			[
 				path.join(src, 'js', 'proxy', 'elFinderSupportVer1.js'),
 				path.join(src, 'Changelog'),
+				path.join(src, 'LICENSE.md'),
 				path.join(src, 'README.md'),
 				path.join(src, 'composer.json'),
 				path.join(src, 'elfinder.html')
