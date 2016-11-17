@@ -295,6 +295,10 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             $this->session->set('BoxTokens', $token);
             $this->options['accessToken'] = json_encode($token);
             $this->token = $token;
+
+            if ($this->options['netkey']) {
+                elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'accessToken', $this->options['accessToken']);
+            }
         }
 
         return true;
@@ -684,6 +688,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             $options['accessToken'] = json_encode($_aToken);
         } else {
             $this->setError(elFinder::ERROR_NETMOUNT, $options['host'], implode(' ', $this->error()));
+
             return array('exit' => true, 'error' => $this->error());
         }
 
@@ -742,8 +747,13 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             }
         }
 
-        // make net mount key
-        $this->netMountKey = md5(implode('-', array('box', $this->options['path'], $this->token->data->access_token)));
+        if (empty($options['netkey'])) {
+            // make net mount key
+            $_tokenKey = isset($this->token->data->refresh_token) ? $this->token->data->refresh_token : $this->token->data->access_token;
+            $this->netMountKey = md5(implode('-', array('box', $this->options['path'], $_tokenKey)));
+        } else {
+            $this->netMountKey = $options['netkey'];
+        }
 
         // normalize root path
         if ($this->options['path'] == 'root') {
