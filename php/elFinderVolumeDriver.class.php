@@ -1615,7 +1615,7 @@ abstract class elFinderVolumeDriver {
 		
 		$file = $this->stat($path);
 		
-		if ($isRoot) {
+		if ($isRoot && $file) {
 			$file = array_merge($file, $this->getRootStatExtra());
 		}
 		
