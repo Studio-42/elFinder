@@ -61,7 +61,7 @@ elFinder.prototype.commands.upload = function() {
 							node;
 						dfrd.resolve(data);
 						if (data && data.added && data.added[0] && ! fm.ui.notify.children('.elfinder-notify-upload').length) {
-							var newItem = cwd.find('#'+fm.cwdHash2Id(data.added[0].hash));
+							var newItem = fm.findCwdNodes(data.added);
 							if (newItem.length) {
 								newItem.trigger('scrolltoview');
 							} else {

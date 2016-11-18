@@ -47,7 +47,7 @@ elFinder.prototype.commands.duplicate = function() {
 			var newItem;
 			if (data && data.added && data.added[0]) {
 				fm.one('duplicatedone', function() {
-					newItem = fm.getUI('cwd').find('#'+fm.cwdHash2Id(data.added[0].hash));
+					newItem = fm.findCwdNodes(data.added);
 					if (newItem.length) {
 						newItem.trigger('scrolltoview');
 					} else {
