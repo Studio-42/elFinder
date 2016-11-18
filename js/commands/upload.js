@@ -276,23 +276,6 @@ elFinder.prototype.commands.upload = function() {
 		dialog = $('<div class="elfinder-upload-dialog-wrapper"/>')
 			.append(button);
 		
-		pastebox = $('<div class="ui-corner-all elfinder-upload-dropbox" contenteditable="true">'+fm.i18n('dropFilesBrowser')+'</div>')
-			.on('paste drop', function(e){
-				paste(e);
-			})
-			.on('mousedown click', function(){
-				$(this).focus();
-			})
-			.on('focus', function(){
-				this.innerHTML = '';
-			})
-			.on('dragenter mouseover', function(){
-				pastebox.addClass(hover);
-			})
-			.on('dragleave mouseout', function(){
-				pastebox.removeClass(hover);
-			});
-		
 		if (targetDir.dirs) {
 			if (targetDir.hash === cwdHash || $('#'+fm.navHash2Id(targetDir.hash)).hasClass('elfinder-subtree-loaded')) {
 				getSelector().appendTo(dialog);
@@ -330,36 +313,47 @@ elFinder.prototype.commands.upload = function() {
 				.on('mouseout', function(){
 					$(this).removeClass(hover);
 				})
+				.on('dragenter', function(e) {
+					e.stopPropagation();
+				  	e.preventDefault();
+				  	$(this).addClass(hover);
+				})
+				.on('dragleave', function(e) {
+					e.stopPropagation();
+				  	e.preventDefault();
+				  	$(this).removeClass(hover);
+				})
+				.on('dragover', function(e) {
+					e.stopPropagation();
+				  	e.preventDefault();
+					e.originalEvent.dataTransfer.dropEffect = 'copy';
+					$(this).addClass(hover);
+				})
+				.on('drop', function(e) {
+					dialog.elfinderdialog('close');
+					targets && (e.originalEvent._target = targets[0]);
+					dropUpload(e.originalEvent);
+				})
 				.prependTo(dialog)
 				.after('<div class="elfinder-upload-dialog-or">'+fm.i18n('or')+'</div>')[0];
 			
-			dropbox.addEventListener('dragenter', function(e) {
-				e.stopPropagation();
-			  	e.preventDefault();
-				$(dropbox).addClass(hover);
-			}, false);
-
-			dropbox.addEventListener('dragleave', function(e) {
-				e.stopPropagation();
-			  	e.preventDefault();
-				$(dropbox).removeClass(hover);
-			}, false);
-
-			dropbox.addEventListener('dragover', function(e) {
-				e.stopPropagation();
-			  	e.preventDefault();
-				e.dataTransfer.dropEffect = 'copy';
-			  	$(dropbox).addClass(hover);
-			}, false);
-
-			dropbox.addEventListener('drop', function(e) {
-				dialog.elfinderdialog('close');
-				targets && (e._target = targets[0]);
-				dropUpload(e);
-			}, false);
-			
 		} else {
-			pastebox
+			pastebox = $('<div class="ui-corner-all elfinder-upload-dropbox" contenteditable="true">'+fm.i18n('dropFilesBrowser')+'</div>')
+				.on('paste drop', function(e){
+					paste(e);
+				})
+				.on('mousedown click', function(){
+					$(this).focus();
+				})
+				.on('focus', function(){
+					this.innerHTML = '';
+				})
+				.on('dragenter mouseover', function(){
+					$(this).addClass(hover);
+				})
+				.on('dragleave mouseout', function(){
+					$(this).removeClass(hover);
+				})
 				.prependTo(dialog)
 				.after('<div class="elfinder-upload-dialog-or">'+fm.i18n('or')+'</div>')[0];
 			
