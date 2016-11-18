@@ -3551,11 +3551,15 @@ abstract class elFinderVolumeDriver {
 			? $this->cache[$path]
 			: $this->updateCache($path, $this->convEncOut($this->_stat($this->convEncIn($path))));
 		if ($is_root && $this->sessionCaching['rootstat']) {
-			$this->rootModified = false;
-			$this->sessionCache['rootstat'][$rootKey] = $ret;
-			if (isset($this->options['phash'])) {
-				$ret['isroot'] = 1;
-				$ret['phash'] = $this->options['phash'];
+			if ($ret) {
+				$this->rootModified = false;
+				$this->sessionCache['rootstat'][$rootKey] = $ret;
+				if (isset($this->options['phash'])) {
+					$ret['isroot'] = 1;
+					$ret['phash'] = $this->options['phash'];
+				}
+			} else {
+				unset($this->sessionCache['rootstat'][$rootKey]);
 			}
 		}
 		return $ret;
