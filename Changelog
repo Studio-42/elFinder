@@ -1,6 +1,6 @@
 2016-11-xx  Naoki Sawada  <hypweb@gmail.com>
 
-	* elFinder (2.1.16):
+	* elFinder (2.1.17):
 
 		- [cmd:upload] Fixed #1695 disabled check doesn't work in other than CWD volume
 		- [js:core] Fixed #1698 abort the file upload at network error occurs
@@ -13,7 +13,7 @@
 			- Added an option `maxTargets` of connector main option.
 		- [ui:cwd] Fixed #1701 No thumbnails after added the item (v 2.1.16)
 		- [cmd:download] Fixed #1707 allow zip download in multi volume searching
-		- Added native driver for GoogleDrive (Special thanks to Raja Sharma)
+		- Added native driver for GoogleDrive, OneDrive and Box (Special thanks to Raja Sharma)
 		- [cmd:netmount] Fixed #1713 OAuth of procedure is not completed on MS Edge
 		- [css:quicklook] Fixed #1717 preview html file won't scroll on IOS
 		- [cmd:upload] Fixed #1718 File upload on paste does not work
@@ -21,6 +21,15 @@
 		- [js:core] Fixed #1724 disable event `disable` with option `enableAlways=true`
 		- [js:core] Fixed #1724 optimize switching enable/disable for elf in iframe
 		- [cmd:getfile] Fixed #1727 wrong path when the tree is not loaded
+		- [cmd:quicklook] Fixed #1737 select next item after an item deleted
+		- [cmd:mkdir] Fixed #1739 Add 'new folder' action to tree context menu
+		- [VD:abstract,LocalFileSystem] Fixed #1744 results `url` must be urlencoded
+		- [js:core] Fixed #1738 retry uploading only on connection aborted
+		- [cmd:search] Fixed #1745 "onlyMimes" option invalid in search results
+		- [js:core] Fixed #1738 bug in the retry function on chunked uploading
+		- [php:plugin:AutoResize] Fixed #1746 add an option `forceEffect` (default:false)
+		- [js:core,cmd:quicklook] Fixed #1748 add client option `rawStringDecoder`
+		- And some minor bug fixes
 
 
 2016-10-11  Naoki Sawada  <hypweb@gmail.com>

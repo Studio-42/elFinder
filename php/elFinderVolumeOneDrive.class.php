@@ -192,23 +192,24 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     /**
      * Get token and auto refresh.
      *
-     * @param object $client OneDrive API client
-     *
      * @return true|Exception
      */
-    protected function _od_refreshToken($token)
+    protected function _od_refreshToken()
     {
-        if ($token->expires < time()) {
-            if (empty($this->token->data->refresh_token)) {
+        if ($this->token->expires < time()) {
+            if (!$token = $this->session->get('OneDriveTokens')) {
+                $token = $this->token;
+            }
+            if (empty($token->data->refresh_token)) {
                 $this->session->remove('OneDriveTokens');
                 throw new \Exception(elFinder::ERROR_REAUTH_REQUIRE);
             }
 
-            if (null === $this->options['client_id']) {
+            if (!$this->options['client_id']) {
                 $this->options['client_id'] = ELFINDER_ONEDRIVE_CLIENTID;
             }
 
-            if (null === $this->options['client_secret']) {
+            if (!$this->options['client_secret']) {
                 $this->options['client_secret'] = ELFINDER_ONEDRIVE_CLIENTSECRET;
             }
 
@@ -235,7 +236,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
             $result = curl_exec($curl);
 
-            if (false === $result) {
+            if (!$result) {
                 if (curl_errno($curl)) {
                     throw new \Exception('curl_setopt_array() failed: '.curl_error($curl));
                 } else {
@@ -246,7 +247,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
             $decoded = json_decode($result);
 
-            if (null === $decoded) {
+            if (!$decoded) {
                 throw new \Exception('json_decode() failed');
             }
 
@@ -567,7 +568,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
                 if ($this->token) {
                     try {
-                        $this->_od_refreshToken($this->token);
+                        $this->_od_refreshToken();
                     } catch (Exception $e) {
                         $this->setError($e->getMessage());
                         $this->token = null;
@@ -705,15 +706,14 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             return $this->setError('Required option `accessToken` is undefined.');
         }
 
-        if (!$this->token) {
-            try {
-                $this->token = json_decode($this->options['accessToken']);
-                $this->_od_refreshToken($this->token);
-            } catch (Exception $e) {
-                $this->setError($e->getMessage());
+        try {
+            $this->token = json_decode($this->options['accessToken']);
+            $this->_od_refreshToken();
+        } catch (Exception $e) {
+            $this->token = null;
+            $this->session->remove('OneDriveTokens');
 
-                return $this->setError($e->getMessage());
-            }
+            return $this->setError($e->getMessage());
         }
 
         if (empty($options['netkey'])) {
