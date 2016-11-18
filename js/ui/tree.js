@@ -487,7 +487,15 @@ $.fn.elfindertree = function(fm, opts) {
 						return (pnode && (pnode.isroot || ! pnode.phash))? 'tree' : 'parents';
 					},
 					reqPush = function(cmd, target) {
+						var link, spinner;
 						if (! registed[cmd + target]) {
+							if (cmd === 'tree' && target !== cwdhash) {
+								link = $('#'+fm.navHash2Id(target));
+								if (link.length) {
+									spinner = $(fm.res('tpl', 'navspinner')).insertBefore(link.children('.'+arrow));
+									link.removeClass(collapsed);
+								}
+							}
 							registed[cmd + target] = true;
 							reqs.push(fm.request({
 								data : {
@@ -497,6 +505,11 @@ $.fn.elfindertree = function(fm, opts) {
 								preventFail : true
 							}).done(function() {
 								$('#'+fm.navHash2Id(cmd === 'tree'? target : fm.root(target))).addClass(loaded);
+							}).always(function() {
+								if (spinner) {
+									spinner.remove();
+									link.addClass(collapsed+' '+expanded).next('.'+subtree).show();
+								}
 							}));
 						}
 					},
@@ -622,7 +635,7 @@ $.fn.elfindertree = function(fm, opts) {
 							
 							cwdhash == cwd.hash && fm.visible() && sync(noCwd, [], false, open);
 						})
-						.always(function(data) {
+						.always(function() {
 							if (link) {
 								spinner.remove();
 								link.addClass(collapsed+' '+loaded);
