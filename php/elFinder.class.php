@@ -365,7 +365,7 @@ class elFinder {
 		// setup debug mode
 		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
 		if ($this->debug) {
-			error_reporting(-1);
+			error_reporting(defined('ELFINDER_DEBUG_ERRORLEVEL')? ELFINDER_DEBUG_ERRORLEVEL : -1);
 			ini_set('diaplay_errors', '1');
 		}
 
