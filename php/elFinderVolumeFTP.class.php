@@ -718,6 +718,16 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				}
 				return $res;
 			}
+			// stat of system root
+			if ($path === $this->separator) {
+				$res = array(
+					'name' => $this->separator,
+					'mime' => 'directory',
+					'dirs' => 1
+				);
+				$this->cache[$outPath] = $res;
+				return $res;
+			}
 			$parentSubdirs = null;
 			$outParent = $this->convEncOut($this->_dirname($path));
 			if (isset($this->sessionCache['subdirs']) && isset($this->sessionCache['subdirs'][$outParent])) {
