@@ -146,6 +146,7 @@ elFinder.prototype.commands.netmount = function() {
 				content.find('select,input').addClass('elfinder-tabstop');
 				
 				dialog = fm.dialog(content, opts);
+				dialogNode = dialog.closest('.ui-dialog');
 				dialog.ready(function(){
 					inputs.protocol.change();
 					dialog.elfinderdialog('posInit');
@@ -159,7 +160,6 @@ elFinder.prototype.commands.netmount = function() {
 		} else {
 			self.dialog.elfinderdialog('open');
 		}
-		dialogNode = self.dialog.closest('.ui-dialog');
 
 		return dfrd.promise();
 	}
