@@ -606,6 +606,10 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         if (empty($options['client_secret']) && defined('ELFINDER_GOOGLEDRIVE_CLIENTSECRET')) {
             $options['client_secret'] = ELFINDER_GOOGLEDRIVE_CLIENTSECRET;
         }
+        if (empty($options['googleApiClient']) && defined('ELFINDER_GOOGLEDRIVE_GOOGLEAPICLIENT')) {
+            $options['googleApiClient'] = ELFINDER_GOOGLEDRIVE_GOOGLEAPICLIENT;
+            include_once $options['googleApiClient'];
+        }
 
         if (!isset($options['pass'])) {
             $options['pass'] = '';
