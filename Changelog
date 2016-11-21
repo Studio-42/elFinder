@@ -1,3 +1,13 @@
+2016-11-21  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.18):
+
+		- [VD:FTP] Fixed #1757 cause infinite loop with getting stat of second level items from system root
+		- [js:core] Fixed #1761 problem of chunk merge request on 2.1.17 
+		- [php:core] Fixed #1762 broken backward compatibility of PHP < 5.4 on 2.1.17
+		- And some minor bug fixes
+
+
 2016-11-19  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.17):
