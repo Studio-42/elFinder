@@ -3247,7 +3247,7 @@ class elFinder {
 	
 		if ($dlurl) {
 			$url = parse_url($dlurl);
-			$cookies = [];
+			$cookies = array();
 			if ($data['cookies']) {
 				foreach ($data['cookies'] as $d => $c) {
 					if (strpos($url['host'], $d) !== false) {
