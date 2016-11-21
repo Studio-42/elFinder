@@ -203,6 +203,7 @@ elFinder.prototype.resources = {
 										syncOnFail  : true
 									})
 									.fail(function(error) {
+										fm.unlockfiles({files : [id]});
 										inError = true;
 										input.show().prev().remove();
 										fm.error(error, {modal: true, close: select});
