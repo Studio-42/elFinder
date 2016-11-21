@@ -189,35 +189,10 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             CURLOPT_AUTOREFERER => true,
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $fields,
-
-            CURLOPT_HTTPHEADER => array(
-                'Content-Length: '.strlen($fields),
-            ),
-
-            // SSL options.
-            CURLOPT_SSL_VERIFYHOST => 2,
-            CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_URL => $url,
         ));
 
-        $result = curl_exec($curl);
-
-        if (false === $result) {
-            if (curl_errno($curl)) {
-                throw new \Exception('curl_setopt_array() failed: '
-                    .curl_error($curl));
-            } else {
-                throw new \Exception('curl_setopt_array(): empty response');
-            }
-        }
-
-        curl_close($curl);
-
-        $decoded = json_decode($result);
-
-        if (null === $decoded) {
-            throw new \Exception('json_decode() failed');
-        }
+        $decoded = $this->_bd_curlExec($curl, true, array('Content-Length: '.strlen($fields)));
 
         return (object) array(
                 'expires' => time() + $decoded->expires_in - 30,
@@ -264,29 +239,10 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                         .'&grant_type=refresh_token'
                         .'&refresh_token='.urlencode($token->data->refresh_token),
 
-                    // SSL options.
-                    CURLOPT_SSL_VERIFYHOST => 2,
-                    CURLOPT_SSL_VERIFYPEER => true,
                     CURLOPT_URL => $url,
                 ));
 
-            $result = curl_exec($curl);
-
-            if (!$result) {
-                if (curl_errno($curl)) {
-                    throw new \Exception('curl_setopt_array() failed: '.curl_error($curl));
-                } else {
-                    throw new \Exception('curl_setopt_array(): empty response');
-                }
-            }
-
-            curl_close($curl);
-
-            $decoded = json_decode($result);
-
-            if (!$decoded) {
-                throw new \Exception('json_decode() failed');
-            }
+            $decoded = $this->_bd_curlExec($curl);
 
             if (empty($decoded->access_token)) {
                 throw new \Exception(elFinder::ERROR_REAUTH_REQUIRE);
@@ -312,9 +268,11 @@ class elFinderVolumeBox extends elFinderVolumeDriver
     /**
      * Creates a base cURL object which is compatible with the Box.com API.
      *
+     * @param array $options cURL options
+     *
      * @return resource A compatible cURL object
      */
-    protected function _bd_prepareCurl()
+    protected function _bd_prepareCurl($options = array())
     {
         $curl = curl_init();
 
@@ -323,11 +281,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_AUTOREFERER => true,
-            CURLOPT_SSL_VERIFYHOST => 2,
-            CURLOPT_SSL_VERIFYPEER => true,
         );
 
-        curl_setopt_array($curl, $defaultOptions);
+        curl_setopt_array($curl, $options + $defaultOptions);
 
         return $curl;
     }
@@ -339,24 +295,16 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      *
      * @return resource A compatible cURL object
      */
-    protected function _bd_createCurl($url, $contents = false)
+    protected function _bd_fetch($url, $contents = false)
     {
         $curl = curl_init($url);
-        curl_setopt($curl, CURLOPT_FAILONERROR, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-        //curl_setopt($curl, CURLOPT_HTTPHEADER, array('Authorization: Bearer '.$this->token->data->access_token));
 
         if ($contents) {
-            $result = curl_exec($curl);
-            curl_close($curl);
-
-            return $result;
+            return $this->_bd_curlExec($curl, false);
         } else {
-            $result = json_decode(curl_exec($curl));
-            curl_close($curl);
+            $result = $this->_bd_curlExec($curl);
 
             if (isset($result->entries)) {
                 $res = $result->entries;
@@ -371,7 +319,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                     } else {
                         $url = preg_replace('/^(.+?offset=)\d+(.*)$/', '${1}'.$offset.'$2', $url);
                     }
-                    $more = $this->_bd_createCurl($url);
+                    $more = $this->_bd_fetch($url);
                     if (is_array($more)) {
                         $res = array_merge($res, $more);
                     }
@@ -379,9 +327,79 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
                 return $res;
             } else {
-                return $result;
+                if (isset($result->type) && $result->type === 'error') {
+                    return false;
+                } else {
+                    return $result;
+                }
             }
         }
+    }
+
+    /**
+     * Call curl_exec().
+     *
+     * @param resource    $curl
+     * @param bool|string $decodeOrParent
+     * @param array       $headers
+     *
+     * @throws \Exception
+     *
+     * @return mixed
+     */
+    protected function _bd_curlExec($curl, $decodeOrParent = true, $headers = array())
+    {
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array_merge(array(
+            'Authorization: Bearer '.$this->token->data->access_token,
+        ), $headers));
+
+        $result = curl_exec($curl);
+
+        if ($result === false) {
+            if (curl_errno($curl)) {
+                throw new \Exception('curl_exec() failed: '.curl_error($curl));
+            } else {
+                throw new \Exception('curl_exec(): empty response');
+            }
+        }
+
+        curl_close($curl);
+
+        if (!$decodeOrParent) {
+            return $result;
+        }
+
+        $decoded = json_decode($result);
+
+        if (!empty($decoded->error_code)) {
+            $errmsg = $decoded->error_code;
+            if (!empty($decoded->message)) {
+                $errmsg .= ': '.$decoded->message;
+            }
+            throw new \Exception($errmsg);
+        }
+
+        // make catch
+        if ($decodeOrParent && $decodeOrParent !== true) {
+            $raws = null;
+            list(, $parentId) = $this->_bd_splitPath($decodeOrParent);
+            if (isset($decoded->entries)) {
+                $raws = $decoded->entries;
+            } elseif (isset($decoded->id)) {
+                $raws = array($decoded);
+            }
+            if ($raws) {
+                foreach ($raws as $raw) {
+                    if (isset($raw->id)) {
+                        $stat = $this->_bd_parseRaw($raw);
+                        $itemPath = $this->_joinPath($decodeOrParent, $raw->id);
+                        $this->updateCache($itemPath, $stat);
+                    }
+                }
+            }
+        }
+
+        return $decoded;
     }
 
     /**
@@ -399,30 +417,30 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             $itemId = '0';
         }
 
-        if ($fetch_self == true) {
+        if ($fetch_self) {
             $path = '/folders/'.$itemId.'?fields='.self::FETCHFIELDS;
         } else {
             $path = '/folders/'.$itemId.'/items?limit=1000&fields='.self::FETCHFIELDS;
         }
 
-        if (!$this->_bd_createCurl(self::API_URL.$path.'&access_token='.urlencode($this->token->data->access_token))) {
-            $path = '/files/'.$itemId.'?fields='.self::FETCHFIELDS;
-        }
-
-        $url = self::API_URL.$path
-                    .'&access_token='.urlencode($this->token->data->access_token);
+        $url = self::API_URL.$path;
 
         if ($recursive) {
-            foreach ($this->_bd_createCurl($url) as $file) {
+            foreach ($this->_bd_fetch($url) as $file) {
                 if ($file->type == 'folder') {
                     $result[] = $file;
                     $result = array_merge($result, $this->_bd_query($file->id, $fetch_self = false, $recursive = true));
-                } else {
+                } elseif ($file->type == 'file') {
                     $result[] = $file;
                 }
             }
         } else {
-            $result = $this->_bd_createCurl($url);
+            $result = $this->_bd_fetch($url);
+            if ($fetch_self && !$result) {
+                $path = '/files/'.$itemId.'?fields='.self::FETCHFIELDS;
+                $url = self::API_URL.$path;
+                $result = $this->_bd_fetch($url);
+            }
         }
 
         return $result;
@@ -499,10 +517,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         list(, $itemId) = $this->_bd_splitPath($path);
 
         try {
-            $url = self::API_URL.'/files/'.$itemId.'/content'
-            .'?access_token='.urlencode($this->token->data->access_token);
+            $url = self::API_URL.'/files/'.$itemId.'/content';
 
-            $contents = $this->_bd_createCurl($url, true);
+            $contents = $this->_bd_fetch($url, true);
 
             return $contents;
         } catch (Exception $e) {
@@ -523,22 +540,18 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             list(, $itemId) = $this->_bd_splitPath($path);
 
             if ($type == 'folders') {
-                $url = self::API_URL.'/'.$type.'/'.$itemId.'?recursive=true'
-                        .'&access_token='.urlencode($this->token->data->access_token);
+                $url = self::API_URL.'/'.$type.'/'.$itemId.'?recursive=true';
             } else {
-                $url = self::API_URL.'/'.$type.'/'.$itemId
-                .'?access_token='.urlencode($this->token->data->access_token);
+                $url = self::API_URL.'/'.$type.'/'.$itemId;
             }
 
-            $curl = $this->_bd_prepareCurl();
-            curl_setopt_array($curl, array(
+            $curl = $this->_bd_prepareCurl(array(
                     CURLOPT_URL => $url,
                     CURLOPT_CUSTOMREQUEST => 'DELETE',
             ));
 
             //unlink or delete File or Folder in the Parent
-            $result = curl_exec($curl);
-            curl_close($curl);
+            $this->_bd_curlExec($curl);
         } catch (Exception $e) {
             return $this->setError('Box error: '.$e->getMessage());
         }
@@ -851,10 +864,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         /***
         $url = self::API_URL.'/search?limit=1&offset=0&content_types=name&ancestor_folder_ids='.rawurlencode($pid)
         .'&query='.rawurlencode('"'.$name.'"')
-        .'fields='.self::FETCHFIELDS
-        .'&access_token='.urlencode($this->token->data->access_token);
+        .'fields='.self::FETCHFIELDS;
 
-        $raw = $this->_bd_createCurl($url);
+        $raw = $this->_bd_fetch($url);
 
         if (is_array($raw) && count($raw)) {
             return $this->_bd_parseRaw($raw);
@@ -1121,15 +1133,17 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             list(, $itemId) = $this->_bd_splitPath($path);
             $params['shared_link']['access'] = 'open'; //open|company|collaborators
 
-            $url = self::API_URL.'/files/'.$itemId
-                    .'?access_token='.urlencode($this->token->data->access_token);
+            $url = self::API_URL.'/files/'.$itemId;
 
-            $curl = $this->_bd_prepareCurl();
-            curl_setopt($curl, CURLOPT_URL, $url);
-            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PUT');
-            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($params));
-            $res = json_decode(curl_exec($curl));
-            curl_close($curl);
+            $curl = $this->_bd_prepareCurl(array(
+                CURLOPT_URL => $url,
+                CURLOPT_CUSTOMREQUEST => 'PUT',
+                CURLOPT_POSTFIELDS => json_encode($params),
+            ));
+            $res = $this->_bd_curlExec($curl, true, array(
+                    // The data is sent as JSON as per Box documentation.
+                    'Content-Type: application/json',
+                ));
 
             if ($url = $this->getSharedWebContentLink($res)) {
                 return $url;
@@ -1314,10 +1328,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
         $path = '/folders/'.$itemId.'/items?limit=1&offset=0&fields='.self::FETCHFIELDS;
 
-        $url = self::API_URL.$path
-                    .'&access_token='.urlencode($this->token->data->access_token);
+        $url = self::API_URL.$path;
 
-        if ($res = $this->_bd_createCurl($url)) {
+        if ($res = $this->_bd_fetch($url)) {
             if ($res[0]->type == 'folder') {
                 return true;
             }
@@ -1435,26 +1448,18 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             list(, $parentId) = $this->_bd_splitPath($path);
             $params = array('name' => $name, 'parent' => array('id' => $parentId));
 
-            $url = self::API_URL.'/folders'
-                    .'?access_token='.urlencode($this->token->data->access_token);
+            $url = self::API_URL.'/folders';
 
-            $curl = $this->_bd_prepareCurl();
-
-            curl_setopt_array($curl, array(
+            $curl = $this->_bd_prepareCurl(array(
                 CURLOPT_URL => $url,
                 CURLOPT_POST => true,
                 CURLOPT_POSTFIELDS => json_encode($params),
             ));
 
             //create the Folder in the Parent
-            $result = curl_exec($curl);
-            curl_close($curl);
+            $folder = $this->_bd_curlExec($curl, $path);
 
-            $folder = json_decode($result);
-
-            $path = $this->_joinPath($path, $folder->id);
-
-            return $path;
+            return $this->_joinPath($path, $folder->id);
         } catch (Exception $e) {
             return $this->setError('Box error: '.$e->getMessage());
         }
@@ -1514,22 +1519,18 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             $data = (object) $properties;
 
             $type = ($srcItem->type === 'folder') ? 'folders' : 'files';
-            $url = self::API_URL.'/'.$type.'/'.$srcId.'/copy'
-                        .'?access_token='.urlencode($this->token->data->access_token);
+            $url = self::API_URL.'/'.$type.'/'.$srcId.'/copy';
 
-            $curl = $this->_bd_prepareCurl();
-
-            curl_setopt_array($curl, array(
+            $curl = $this->_bd_prepareCurl(array(
                 CURLOPT_URL => $url,
                 CURLOPT_POST => true,
                 CURLOPT_POSTFIELDS => json_encode($data),
             ));
 
             //copy File in the Parent
-            $result = json_decode(curl_exec($curl));
-            curl_close($curl);
+            $result = $this->_bd_curlExec($curl, $targetDir);
 
-            if ($result && isset($result->id)) {
+            if (isset($result->id)) {
                 if ($type === 'folders' && isset($this->sessionCache['subdirs'])) {
                     $this->sessionCache['subdirs'][$targetDir] = true;
                 }
@@ -1572,23 +1573,16 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             $url = self::API_URL.'/'.$type.'/'.$itemId;
             $data = (object) $properties;
 
-            $curl = $this->_bd_prepareCurl();
-
-            curl_setopt_array($curl, array(
+            $curl = $this->_bd_prepareCurl(array(
                 CURLOPT_URL => $url,
                 CURLOPT_CUSTOMREQUEST => 'PUT',
-
-                CURLOPT_HTTPHEADER => array(
-                    // The data is sent as JSON as per Box documentation.
-                    'Content-Type: application/json',
-                    'Authorization: Bearer '.$this->token->data->access_token,
-                ),
-
                 CURLOPT_POSTFIELDS => json_encode($data),
             ));
 
-            $result = json_decode(curl_exec($curl));
-            curl_close($curl);
+            $result = $this->_bd_curlExec($curl, $targetDir, array(
+                    // The data is sent as JSON as per Box documentation.
+                    'Content-Type: application/json',
+                ));
 
             if ($result && isset($result->id)) {
                 return $this->_joinPath($targetDir, $result->id);
@@ -1674,28 +1668,26 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             if ($itemId === '') {
                 //upload or create new file in destination target
                 $properties = array('name' => $name, 'parent' => array('id' => $parentId));
-                $url = self::UPLOAD_URL.'/files/content'
-                        .'?access_token='.urlencode($this->token->data->access_token);
+                $url = self::UPLOAD_URL.'/files/content';
             } else {
                 //update existing file in destination target
                 $properties = array('name' => $name);
-                $url = self::UPLOAD_URL.'/files/'.$itemId.'/content'
-                        .'?access_token='.urlencode($this->token->data->access_token);
+                $url = self::UPLOAD_URL.'/files/'.$itemId.'/content';
             }
 
-            $mimeType = self::mimetypeInternalDetect($name);
-            $cfile = new CURLFile($tmpFilePath, $mimeType);
+            if (class_exists('CURLFile')) {
+                $cfile = new CURLFile($tmpFilePath);
+            } else {
+                $cfile = '@'.$tmpFilePath;
+            }
             $params = array('attributes' => json_encode($properties), 'file' => $cfile);
-            $curl = $this->_bd_prepareCurl();
-            $options = array(
+            $curl = $this->_bd_prepareCurl(array(
                     CURLOPT_URL => $url,
                     CURLOPT_POST => true,
                     CURLOPT_POSTFIELDS => $params,
-                );
-            curl_setopt_array($curl, $options);
+                ));
 
-            $file = json_decode(curl_exec($curl));
-            curl_close($curl);
+            $file = $this->_bd_curlExec($curl, $parent);
 
             return $this->_joinPath($parent, $file->entries[0]->id);
         } catch (Exception $e) {
@@ -1718,10 +1710,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
         try {
             list(, $itemId) = $this->_bd_splitPath($path);
-            $url = self::API_URL.'/files/'.$itemId.'/content'
-                            .'?access_token='.urlencode($this->token->data->access_token);
+            $url = self::API_URL.'/files/'.$itemId.'/content';
 
-            $contents = $this->_bd_createCurl($url, true);
+            $contents = $this->_bd_fetch($url, true);
         } catch (Exception $e) {
             return $this->setError('Box error: '.$e->getMessage());
         }

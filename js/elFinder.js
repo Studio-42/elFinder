@@ -4843,6 +4843,7 @@ elFinder.prototype = {
 						formData.append('chunk', file._chunkmerged);
 						formData.append('upload[]', file._name);
 						formData.append('mtime[]', file._mtime);
+						xhr.timeout = 0;
 					} else {
 						if (file._chunkfail) {
 							formData.append('upload[]', 'chunkfail');
