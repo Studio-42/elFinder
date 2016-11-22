@@ -31,27 +31,31 @@
       (function($){
         var rootPath = './demo',
           start = function(lng) {
-            $().ready(function() {
-              // Documentation for client options:
-              // https://github.com/Studio-42/elFinder/wiki/Client-configuration-options
-              // elFinder init
-              $('#elfinder').elfinder({
-                url : '//hypweb.net/elFinder-nightly/demo/2.1/php/connector.minimal.php',
-                soundPath: './demo/sounds',
-                sync: 5000,
-                ui  : ['toolbar', 'places', 'tree', 'path', 'stat'],
-                commandsOptions : {
-                  quicklook : {
-                    googleDocsMimes : ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
-                  }
-                },
-                handlers : {
-                  init : function(e, fm) {
-                    $.extend(fm.messages, i18nFolderMsgs.en, i18nFolderMsgs[fm.lang] || {});
-                  }
-                },
-                lang: lng
-              });
+            // for encoding-japanese
+            if (window.Encoding && Encoding.convert) {
+              elFinder.prototype._options.rawStringDecoder = function(s) {
+                return Encoding.convert(s, {to:'UNICODE', type:'string'});
+              }
+            }
+            // Documentation for client options:
+            // https://github.com/Studio-42/elFinder/wiki/Client-configuration-options
+            // elFinder init
+            $('#elfinder').elfinder({
+              url : '//hypweb.net/elFinder-nightly/demo/2.1/php/connector.minimal.php',
+              soundPath: './demo/sounds',
+              sync: 5000,
+              ui  : ['toolbar', 'places', 'tree', 'path', 'stat'],
+              commandsOptions : {
+                quicklook : {
+                  googleDocsMimes : ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+                }
+              },
+              handlers : {
+                init : function(e, fm) {
+                  $.extend(fm.messages, i18nFolderMsgs.en, i18nFolderMsgs[fm.lang] || {});
+                }
+              },
+              lang: lng
             });
           },
           loct = window.location.search,
@@ -91,6 +95,12 @@
             cache : true,
             dataType : 'script'
           }),
+          (lng === 'jp')?
+            $.ajax({
+              url : rootPath+'js/extras/encoding-japanese.min.js',
+              cache : true,
+              dataType : 'script'
+            }) : null,
           xdr?
             $.ajax({
               url : xdr,
