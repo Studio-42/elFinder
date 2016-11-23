@@ -114,7 +114,7 @@
         if (typeof document.uniqueID != 'undefined') {
           var xhr = new XMLHttpRequest();
           if (!('withCredentials' in xhr)) {
-              xdr = rootPath+'/xdr/jquery.xdr.js';
+            xdr = 'jquery.xdr';
           }
           xhr = null;
         }
@@ -126,7 +126,13 @@
             'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(ie8? '1.12.4' : '3.1.1')+'/jquery.min',
             'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min',
             'elfinder' : 'elfinder.min',
-            'i18nfmsg' : '../../i18nFolderMsgs'
+            'i18nfmsg' : '../../i18nFolderMsgs',
+            'jquery.xdr': rootPath+'/xdr/jquery.xdr'
+          },
+          shim : {
+            'jquery.xdr': {
+              deps: ['jquery']
+            }
           },
           waitSeconds : 10 // optional
         });
