@@ -88,6 +88,7 @@
                 , (lang !== 'en')? 'i18n/elfinder.'+lang : null    // load detected language
                 , 'extras/quicklook.googledocs'                    // optional GoogleDocs preview
                 , (lang === 'jp')? 'extras/encoding-japanese.min' : null // optional Japanese decoder for archive preview
+                , 'elfinderBasicAuth'
                 , xdr
               ],
               function(elFinder, i18nfmsg) {
