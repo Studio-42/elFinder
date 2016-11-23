@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 /**
  * elFinder resources registry.
  * Store shared data

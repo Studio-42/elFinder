@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 /**
  * @class  elFinder command "archive"
  * Archive selected files

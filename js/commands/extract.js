@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 /**
  * @class  elFinder command "extract"
  * Extract files from archive
