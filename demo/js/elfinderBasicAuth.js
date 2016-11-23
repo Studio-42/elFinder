@@ -1,4 +1,12 @@
-try {
+(function(root, factory) {
+	if (typeof define === 'function' && define.amd) {
+		define(['jquery', 'elfinder'], factory);
+	} else if (typeof exports !== 'undefined') {
+		module.exports = factory(require('jquery'), require('elfinder'));
+	} else {
+		factory(root.jQuery, root.elFinder);
+	}
+}(this, function($, elFinder) {
 
 (function(){
 	var style = document.createElement('style'),
@@ -64,9 +72,8 @@ elFinder.prototype.commands.login = function() {
 		});
 	};
 }
-
 elFinder.prototype._options.commands.push('login');
 elFinder.prototype._options.uiOptions.toolbar.push(['login']);
 elFinder.prototype.i18.en.messages.logout = '$1: logout';
 
-} catch(e) {}
+}));
