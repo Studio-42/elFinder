@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 /**
  * @class  elFinder toolbar button widget.
  * If command has variants - create menu

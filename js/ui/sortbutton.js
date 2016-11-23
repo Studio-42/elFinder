@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 /**
  * @class  elFinder toolbar button menu with sort variants.
  *
