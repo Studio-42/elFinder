@@ -7,41 +7,100 @@
 
 		<!-- Section CSS -->
 		<!-- jQuery UI (REQUIRED) -->
-		<link rel="stylesheet" type="text/css" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+		<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
 
 		<!-- elFinder CSS (REQUIRED) -->
 		<link rel="stylesheet" type="text/css" href="css/elfinder.min.css">
 		<link rel="stylesheet" type="text/css" href="css/theme.css">
 
 		<!-- Section JavaScript -->
-		<!-- jQuery and jQuery UI (REQUIRED) -->
-		<!--[if lt IE 9]>
-		<script src="//code.jquery.com/jquery-1.12.4.min.js"></script>
-		<![endif]-->
-		<!--[if gte IE 9]><!-->
-		<script src="//code.jquery.com/jquery-3.1.1.min.js"></script>
-		<!--<![endif]-->
-		<script src="//code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+		<!-- Require JS (REQUIRED) -->
+		<script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.3.2/require.min.js"></script>
 
-		<!-- elFinder JS (REQUIRED) -->
-		<script src="js/elfinder.min.js"></script>
-
-		<!-- GoogleDocs Quicklook plugin for GoogleDrive Volume (OPTIONAL) -->
-		<!--<script src="js/extras/quicklook.googledocs.js"></script>-->
-
-		<!-- elFinder translation (OPTIONAL) -->
-		<!--<script src="js/i18n/elfinder.ru.js"></script>-->
-
-		<!-- elFinder initialization (REQUIRED) -->
+		<!-- elFinder initialization -->
 		<script type="text/javascript" charset="utf-8">
-			// Documentation for client options:
-			// https://github.com/Studio-42/elFinder/wiki/Client-configuration-options
-			$(document).ready(function() {
-				$('#elfinder').elfinder({
-					url : 'php/connector.minimal.php'  // connector URL (REQUIRED)
-					// , lang: 'ru'                    // language (OPTIONAL)
-				});
+		(function(){
+			var // Detect language (optional)
+				lang = (function() {
+					var locq = window.location.search,
+						fullLang, locm, lang;
+					if (locq && (locm = locq.match(/lang=([a-zA-Z_-]+)/))) {
+						// detection by url query (?lang=xx)
+						fullLang = locm[1];
+					} else {
+						// detection by browser language
+						fullLang = (navigator.browserLanguage || navigator.language || navigator.userLanguage);
+					}
+					lang = fullLang.substr(0,2);
+					if (lang === 'ja') lang = 'jp';
+					else if (lang === 'pt') lang = 'pt_BR';
+					else if (lang === 'ug') lang = 'ug_CN';
+					else if (lang === 'zh') lang = (fullLang.substr(0,5) === 'zh-tw')? 'zh_TW' : 'zh_CN';
+					return lang;
+				})(),
+				
+				// elFinder options (REQUIRED)
+				// Documentation for client options:
+				// https://github.com/Studio-42/elFinder/wiki/Client-configuration-options
+				opts = {
+					url : 'php/connector.minimal.php', // connector URL (REQUIRED)
+					lang: lang                         // auto detected language (optional)
+				},
+				
+				// Start elFinder (REQUIRED)
+				start = function(elFinder, lang) {
+					// Optional for Japanese decoder "extras/encoding-japanese.min"
+					if (window.Encoding && Encoding.convert) {
+						elFinder.prototype._options.rawStringDecoder = function(s) {
+							return Encoding.convert(s,{to:'UNICODE',type:'string'});
+						};
+					}
+					// Make elFinder (REQUIRED)
+					$('#elfinder').elfinder(opts);
+				},
+				
+				// JavaScript loader (REQUIRED)
+				load = function() {
+					require(
+						[
+							'elfinder'
+							, (lang !== 'en')? 'i18n/elfinder.'+lang : null    // load detected language
+						//	, 'extras/quicklook.googledocs'                    // optional GoogleDocs preview
+						//	, (lang === 'jp')? 'extras/encoding-japanese.min' : null // optional Japanese decoder for archive preview
+						],
+						function(elFinder) {
+							$(function(){ start(elFinder, lang); });
+						},
+						function(error) {
+							if (lang !== 'en') {
+								// fallback to use lang = en
+								lang = 'en';
+								load();
+							} else {
+								alert(error.message);
+							}
+						}
+					);
+				},
+				
+				// is IE8? for determine the jQuery version to use (optional)
+				ie8 = (typeof window.addEventListener === 'undefined' && typeof document.getElementsByClassName === 'undefined');
+
+			// config of RequireJS (REQUIRED)
+			require.config({
+				baseUrl : 'js',
+				paths : {
+					'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(ie8? '1.12.4' : '3.1.1')+'/jquery.min',
+					'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min',
+					'elfinder' : 'elfinder.min'
+				},
+				waitSeconds : 10 // optional
 			});
+
+			// load JavaScripts (REQUIRED)
+			load();
+
+		})();
 		</script>
 	</head>
 	<body>

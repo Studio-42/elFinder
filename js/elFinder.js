@@ -4,7 +4,7 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-window.elFinder = function(node, opts) {
+var elFinder = function(node, opts) {
 	//this.time('load');
 	
 	var self = this,
@@ -3680,6 +3680,11 @@ window.elFinder = function(node, opts) {
 	
 	// self.timeEnd('load'); 
 
+};
+
+//register elFinder to global scope
+if (typeof toGlobal === 'undefined' || toGlobal) {
+	window.elFinder = elFinder;
 }
 
 /**
@@ -6478,7 +6483,7 @@ elFinder.prototype = {
 	timeEnd : function(l) { window.console && window.console.timeEnd && window.console.timeEnd(l); }
 	
 
-}
+};
 
 /**
  * for conpat ex. ie8...
