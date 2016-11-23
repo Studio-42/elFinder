@@ -5,7 +5,15 @@
  * @author Fernando H. Bandeira <fernando.bandeira94@gmail.com>
  * @version 2016-04-28
  */
-if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
+(function(root, factory) {
+	if (typeof define === 'function' && define.amd) {
+		define(['elfinder'], factory);
+	} else if (typeof exports !== 'undefined') {
+		module.exports = factory(require('elfinder'));
+	} else {
+		factory(root.elFinder);
+	}
+}(this, function(elFinder) {
 	elFinder.prototype.i18.pt_BR = {
 		translator : 'Leandro Carvalho &lt;contato@leandrowebdev.net&gt;, Wesley Osorio&lt;wesleyfosorio@hotmail.com&gt;, Fernando H. Bandeira &lt;fernando.bandeira94@gmail.com&gt;',
 		language   : 'Português',
@@ -426,5 +434,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoOGG'    : 'Video Ogg'
 		}
 	};
-}
+}));
 

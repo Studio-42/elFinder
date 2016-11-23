@@ -2,7 +2,15 @@
  * hr translation
  * @version 2016-04-18
  */
-if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
+(function(root, factory) {
+	if (typeof define === 'function' && define.amd) {
+		define(['elfinder'], factory);
+	} else if (typeof exports !== 'undefined') {
+		module.exports = factory(require('elfinder'));
+	} else {
+		factory(root.elFinder);
+	}
+}(this, function(elFinder) {
 	elFinder.prototype.i18.hr = {
 		translator : '',
 		language   : 'Croatian',
@@ -422,5 +430,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoOGG'    : 'Ogg video'
 		}
 	};
-}
+}));
 
