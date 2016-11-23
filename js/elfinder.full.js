@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: 47cb7bd) (2016-11-23)
+ * Version 2.1.18 (2.1-src Nightly: 23f6a46) (2016-11-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6566,7 +6566,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 47cb7bd)';
+elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 23f6a46)';
 
 
 
@@ -8620,7 +8620,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-11-13
+ * @version 2016-11-23
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -8999,7 +8999,7 @@ $.fn.dialogelfinder = function(opts) {
 			'enabled'         : 'Enabled', // from v2.1.16 added 4.10.2016
 			'disabled'        : 'Disabled', // from v2.1.16 added 4.10.2016
 			'emptyIncSearch'  : 'Search results is empty in current view.\\APress [Enter] to expand search target.', // from v2.1.16 added 5.10.2016
-			'textLabel'       : 'Text lable', // from v2.1.17 added 13.10.2016
+			'textLabel'       : 'Text label', // from v2.1.17 added 13.10.2016
 			'minsLeft'        : '$1 mins left', // from v2.1.17 added 13.11.2016
 
 			/********************************** mimetypes **********************************/
