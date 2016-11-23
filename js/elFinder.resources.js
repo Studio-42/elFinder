@@ -228,7 +228,7 @@ elFinder.prototype.resources = {
 													act, extNode;
 												newItem = ui.find('#'+fm[find](item.hash));
 												if (data.added.length === 1) {
-													act = acts[item.mime] || acts.default;
+													act = acts[item.mime] || acts['default'];
 													extNode = $('<div/>').append(
 														$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"><span class="ui-button-text">'
 															+fm.i18n(act.msg)
