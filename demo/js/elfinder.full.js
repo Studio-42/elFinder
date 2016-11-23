@@ -1,12 +1,29 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: a83b802) (2016-11-22)
+ * Version 2.1.18 (2.1-src Nightly: 47cb7bd) (2016-11-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
  * Licensed under a 3-clauses BSD license
  */
-(function($) {
+(function(root, factory) {
+	if (typeof define === 'function' && define.amd) {
+		// AMD
+		define(['jquery','jquery-ui'], factory);
+	} else if (typeof exports !== 'undefined') {
+		// CommonJS
+		var $, ui;
+		try {
+			$ = require('jquery');
+			ui = require('jquery-ui');
+		} catch (e) {}
+		module.exports = factory($, ui);
+	} else {
+		// Browser globals (Note: root is window)
+		factory(root.jQuery, root.jQuery.ui, true);
+	}
+}(this, function($, _ui, toGlobal) {
+toGlobal = toGlobal || false;
 
 
 /*
@@ -18,7 +35,7 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-window.elFinder = function(node, opts) {
+var elFinder = function(node, opts) {
 	//this.time('load');
 	
 	var self = this,
@@ -3694,6 +3711,11 @@ window.elFinder = function(node, opts) {
 	
 	// self.timeEnd('load'); 
 
+};
+
+//register elFinder to global scope
+if (typeof toGlobal === 'undefined' || toGlobal) {
+	window.elFinder = elFinder;
 }
 
 /**
@@ -6492,7 +6514,7 @@ elFinder.prototype = {
 	timeEnd : function(l) { window.console && window.console.timeEnd && window.console.timeEnd(l); }
 	
 
-}
+};
 
 /**
  * for conpat ex. ie8...
@@ -6544,7 +6566,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: a83b802)';
+elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 47cb7bd)';
 
 
 
@@ -8389,7 +8411,7 @@ elFinder.prototype.resources = {
 													act, extNode;
 												newItem = ui.find('#'+fm[find](item.hash));
 												if (data.added.length === 1) {
-													act = acts[item.mime] || acts.default;
+													act = acts[item.mime] || acts['default'];
 													extNode = $('<div/>').append(
 														$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"><span class="ui-button-text">'
 															+fm.i18n(act.msg)
@@ -8600,7 +8622,15 @@ $.fn.dialogelfinder = function(opts) {
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @version 2016-11-13
  */
-if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
+(function(root, factory) {
+	if (typeof define === 'function' && define.amd) {
+		define(['elfinder'], factory);
+	} else if (typeof exports !== 'undefined') {
+		module.exports = factory(require('elfinder'));
+	} else {
+		factory(root.elFinder);
+	}
+}(this, function(elFinder) {
 	elFinder.prototype.i18.en = {
 		translator : 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;',
 		language   : 'English',
@@ -9054,7 +9084,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoOGG'    : 'Ogg movie'
 		}
 	};
-}
+}));
 
 
 
@@ -22476,4 +22506,5 @@ elFinder.prototype.commands.view = function() {
 
 };
 
-})(jQuery);
+return elFinder;
+}));
