@@ -4805,7 +4805,6 @@ elFinder.prototype = {
 				}
 				
 				xhr.open('POST', self.uploadURL, true);
-				xhr.timeout = timeout;
 				
 				// set request headers
 				if (fm.customHeaders) {
@@ -4848,7 +4847,6 @@ elFinder.prototype = {
 						formData.append('chunk', file._chunkmerged);
 						formData.append('upload[]', file._name);
 						formData.append('mtime[]', file._mtime);
-						xhr.timeout = 0;
 					} else {
 						if (file._chunkfail) {
 							formData.append('upload[]', 'chunkfail');
@@ -4860,6 +4858,7 @@ elFinder.prototype = {
 							formData.append('chunk', file._chunk);
 							formData.append('cid'  , file._cid);
 							formData.append('range', file._range);
+							xhr.timeout = timeout;
 						}
 						formData.append('mtime[]', file.lastModified? Math.round(file.lastModified/1000) : 0);
 					}
