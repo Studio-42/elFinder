@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: 393f002) (2016-11-23)
+ * Version 2.1.18 (2.1-src Nightly: 10cd3d5) (2016-11-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4836,7 +4836,6 @@ elFinder.prototype = {
 				}
 				
 				xhr.open('POST', self.uploadURL, true);
-				xhr.timeout = timeout;
 				
 				// set request headers
 				if (fm.customHeaders) {
@@ -4879,7 +4878,6 @@ elFinder.prototype = {
 						formData.append('chunk', file._chunkmerged);
 						formData.append('upload[]', file._name);
 						formData.append('mtime[]', file._mtime);
-						xhr.timeout = 0;
 					} else {
 						if (file._chunkfail) {
 							formData.append('upload[]', 'chunkfail');
@@ -4891,6 +4889,7 @@ elFinder.prototype = {
 							formData.append('chunk', file._chunk);
 							formData.append('cid'  , file._cid);
 							formData.append('range', file._range);
+							xhr.timeout = timeout;
 						}
 						formData.append('mtime[]', file.lastModified? Math.round(file.lastModified/1000) : 0);
 					}
@@ -6566,7 +6565,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 393f002)';
+elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 10cd3d5)';
 
 
 
