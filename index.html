@@ -6,8 +6,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2" />
 		<meta name="description" content="elFinder - file manager from Web" />
 		<script type="text/javascript" charset="utf-8">
-			if (location.href.match(/^http:/)) {
-				location.href = 'https' + location.href.substr(4);
+			if (location.protocol !== 'https:') {
+				location.href = 'https' + location.href.substring(location.protocol.length);
 			}
 		</script>
 		<title>elFinder 2.1.x - file manager for web</title>
