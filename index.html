@@ -75,28 +75,6 @@
 						$('#elfinder').elfinder(opts);
 					},
 					
-					// JavaScript loader (REQUIRED)
-					load = function() {
-						require(
-							[
-								'elfinder'
-								, 'i18nfmsg'
-								, (lang !== 'en')? 'elfinder.lang' : null    // load detected language
-								, 'extras/quicklook.googledocs'                    // optional GoogleDocs preview
-								, (lang === 'jp')? 'extras/encoding-japanese.min' : null // optional Japanese decoder for archive preview
-								, 'elfinderBasicAuth'
-								, xdr
-							],
-							function(elFinder, i18nfmsg) {
-								i18nFolderMsgs = i18nfmsg;
-								$(function(){ start(elFinder, lang); });
-							},
-							function(error) {
-								alert(error.message);
-							}
-						);
-					},
-					
 					// is IE8? for determine the jQuery version to use (optional)
 					ie8 = (typeof window.addEventListener === 'undefined' && typeof document.getElementsByClassName === 'undefined'),
 					xhr, xdr = null;
@@ -132,8 +110,25 @@
 					waitSeconds : 10 // optional
 				});
 
-				// load JavaScripts (REQUIRED)
-				load();
+				// load JavaScripts then start (REQUIRED)
+				require(
+					[
+						'elfinder'
+						, 'i18nfmsg'
+						, (lang !== 'en')? 'elfinder.lang' : null    // load detected language
+						, 'extras/quicklook.googledocs'              // optional GoogleDocs preview
+						, (lang === 'jp')? 'extras/encoding-japanese.min' : null // optional Japanese decoder for archive preview
+						, 'elfinderBasicAuth'
+						, xdr
+					],
+					function(elFinder, i18nfmsg) {
+						i18nFolderMsgs = i18nfmsg;
+						$(function(){ start(elFinder, lang); });
+					},
+					function(error) {
+						alert(error.message);
+					}
+				);
 
 			})();
 
