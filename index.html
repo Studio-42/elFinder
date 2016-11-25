@@ -81,7 +81,7 @@
 							[
 								'elfinder'
 								, 'i18nfmsg'
-								, (lang !== 'en')? 'i18n/elfinder.'+lang : null    // load detected language
+								, (lang !== 'en')? 'elfinder.lang' : null    // load detected language
 								, 'extras/quicklook.googledocs'                    // optional GoogleDocs preview
 								, (lang === 'jp')? 'extras/encoding-japanese.min' : null // optional Japanese decoder for archive preview
 								, 'elfinderBasicAuth'
@@ -92,13 +92,7 @@
 								$(function(){ start(elFinder, lang); });
 							},
 							function(error) {
-								if (lang !== 'en') {
-									// fallback to use lang = en
-									lang = 'en';
-									load();
-								} else {
-									alert(error.message);
-								}
+								alert(error.message);
 							}
 						);
 					},
@@ -123,6 +117,10 @@
 						'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(ie8? '1.12.4' : '3.1.1')+'/jquery.min',
 						'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min',
 						'elfinder' : 'elfinder.min',
+						'elfinder.lang': [
+							'i18n/elfinder.'+lang,
+							'i18n/elfinder.en'
+						]
 						'i18nfmsg' : '../../i18nFolderMsgs',
 						'jquery.xdr': '../xdr/jquery.xdr'
 					},
