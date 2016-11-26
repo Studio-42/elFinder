@@ -724,7 +724,6 @@ class elFinder {
 		// call pre handlers for this command
 		$args['sessionCloseEarlier'] = isset($this->sessionUseCmds[$cmd])? false : $this->sessionCloseEarlier;
 		if (!empty($this->listeners[$cmd.'.pre'])) {
-			$_break = false;
 			foreach ($this->listeners[$cmd.'.pre'] as $handler) {
 				$_res = call_user_func_array($handler, array($cmd, &$args, $this, $dstVolume));
 				if (is_array($_res)) {
