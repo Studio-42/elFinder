@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: cdfdf1f) (2016-11-26)
+ * Version 2.1.18 (2.1-src Nightly: 0fef0d7) (2016-11-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6565,7 +6565,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: cdfdf1f)';
+elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 0fef0d7)';
 
 
 
@@ -8621,15 +8621,8 @@ $.fn.dialogelfinder = function(opts) {
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @version 2016-11-23
  */
-(function(root, factory) {
-	if (typeof define === 'function' && define.amd) {
-		define(['elfinder'], factory);
-	} else if (typeof exports !== 'undefined') {
-		module.exports = factory(require('elfinder'));
-	} else {
-		factory(root.elFinder);
-	}
-}(this, function(elFinder) {
+// elfinder.en.js is integrated into elfinder.(full|min).js by jake build
+if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 	elFinder.prototype.i18.en = {
 		translator : 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;',
 		language   : 'English',
@@ -9083,7 +9076,7 @@ $.fn.dialogelfinder = function(opts) {
 			'kindVideoOGG'    : 'Ogg movie'
 		}
 	};
-}));
+}
 
 
 
