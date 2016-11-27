@@ -150,8 +150,6 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         curl_setopt_array($curl, array(
                 // General options.
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_AUTOREFERER => true,
                 CURLOPT_POST => true,
                 CURLOPT_POSTFIELDS => $fields,
 
@@ -159,9 +157,6 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                         'Content-Length: '.strlen($fields),
                 ),
 
-                // SSL options.
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_URL => $url,
         ));
 
@@ -220,17 +215,12 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             curl_setopt_array($curl, array(
                         // General options.
                         CURLOPT_RETURNTRANSFER => true,
-                        CURLOPT_FOLLOWLOCATION => true,
-                        CURLOPT_AUTOREFERER => true,
                         CURLOPT_POST => true, // i am sending post data
                         CURLOPT_POSTFIELDS => 'client_id='.urlencode($this->options['client_id'])
                         .'&client_secret='.urlencode($this->options['client_secret'])
                         .'&grant_type=refresh_token'
                         .'&refresh_token='.urlencode($token->data->refresh_token),
 
-                        // SSL options.
-                        CURLOPT_SSL_VERIFYHOST => 2,
-                        CURLOPT_SSL_VERIFYPEER => true,
                         CURLOPT_URL => $url,
                 ));
 
@@ -313,10 +303,6 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         $defaultOptions = array(
                 // General options.
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_AUTOREFERER => true,
-                CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_HTTPHEADER => array(
                         'Content-Type: application/json',
                         'Authorization: Bearer '.$this->token->data->access_token,
@@ -341,8 +327,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         $curl = $this->_od_prepareCurl($path);
 
         if ($contents) {
-            $res = curl_exec($curl);
-            curl_close($curl);
+            $res = elFinder::curlExec($curl);
         } else {
             $result = json_decode(curl_exec($curl));
             curl_close($curl);
