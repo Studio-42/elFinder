@@ -3,15 +3,8 @@
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @version 2016-11-23
  */
-(function(root, factory) {
-	if (typeof define === 'function' && define.amd) {
-		define(['elfinder'], factory);
-	} else if (typeof exports !== 'undefined') {
-		module.exports = factory(require('elfinder'));
-	} else {
-		factory(root.elFinder);
-	}
-}(this, function(elFinder) {
+// elfinder.en.js is integrated into elfinder.(full|min).js by jake build
+if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 	elFinder.prototype.i18.en = {
 		translator : 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;',
 		language   : 'English',
@@ -465,5 +458,5 @@
 			'kindVideoOGG'    : 'Ogg movie'
 		}
 	};
-}));
+}
 
