@@ -3299,4 +3299,51 @@ class elFinder {
 		return false;
 	}
 	
+	/**
+	 * Call curl_exec() with supported redirect on `safe_mode` or `open_basedir`
+	 *
+	 * @param resource    $curl
+	 * @param array       $options
+	 * @param array       $headers
+	 *
+	 * @throws \Exception
+	 *
+	 * @return mixed
+	 * 
+	 * @author Naoki Sawada
+	 */
+	public static function curlExec($curl, $options = array(), $headers = array()) {
+		if ($followLocation = (!ini_get('safe_mode') && !ini_get('open_basedir'))) {
+			curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+		}
+		
+		if ($options) {
+			curl_setopt_array($curl, $options);
+		}
+		
+		if ($headers) {
+			curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+		}
+		
+		$result = curl_exec($curl);
+		
+		if (! $followLocation && $redirect = curl_getinfo($curl, CURLINFO_REDIRECT_URL)) {
+			if ($stream = self::getStreamByUrl(array('target' => $redirect, 'headers' => $headers))) {
+				$result = stream_get_contents($stream);
+			}
+		}
+		
+		if ($result === false) {
+			if (curl_errno($curl)) {
+				throw new \Exception('curl_exec() failed: '.curl_error($curl));
+			} else {
+				throw new \Exception('curl_exec(): empty response');
+			}
+		}
+		
+		curl_close($curl);
+		
+		return $result;
+	}
+	
 } // END class
