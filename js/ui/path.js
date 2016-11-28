@@ -41,7 +41,6 @@ $.fn.elfinderpath = function(fm) {
 						raw.push({
 							label    : fm.escape(f.i18 || f.name),
 							icon     : 'home',
-							remain   : true,
 							callback : function() { fm.exec('open', f.hash); },
 							options  : {
 								iconClass : f.csscls || '',
