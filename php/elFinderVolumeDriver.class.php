@@ -2308,7 +2308,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
-		return $this->convEncOut($this->_getContents($this->convEncIn($this->decode($hash))));
+		return $this->_getContents($this->convEncIn($this->decode($hash), true));
 	}
 	
 	/**

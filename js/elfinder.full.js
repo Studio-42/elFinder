@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: 68830f0) (2016-11-28)
+ * Version 2.1.18 (2.1-src Nightly: 16192e1) (2016-11-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6565,7 +6565,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 68830f0)';
+elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 16192e1)';
 
 
 
@@ -8873,6 +8873,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'confirmRm'       : 'Are you sure you want to remove files?<br/>This cannot be undone!',
 			'confirmRepl'     : 'Replace old file with new one?',
 			'confirmConvUTF8' : 'Not in UTF-8<br/>Convert to UTF-8?<br/>Contents become UTF-8 by saving after conversion.', // from v2.1 added 08.04.2014
+			'confirmNonUTF8'  : 'The character encoding of this file seems $1. Would you like to convert to UTF-8?<br/>When saved it will be converted back to the original character encoding.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'It has been modified.<br/>Losing work if you do not save changes.', // from v2.1 added 15.7.2015
 			'apllyAll'        : 'Apply to all',
 			'name'            : 'Name',
@@ -16706,7 +16707,7 @@ elFinder.prototype.commands.edit = function() {
 				if (data.doconv) {
 					fm.confirm({
 						title  : self.title,
-						text   : 'confirmConvUTF8',
+						text   : data.doconv === true? 'confirmConvUTF8' : ['confirmNonUTF8', data.doconv],
 						accept : {
 							label    : 'btnConv',
 							callback : function() {  
@@ -16727,6 +16728,7 @@ elFinder.prototype.commands.edit = function() {
 								data : {
 									cmd     : 'put',
 									target  : hash,
+									encording : data.encording,
 									content : ta.getContent()
 								},
 								notify : {type : 'save', cnt : 1},
