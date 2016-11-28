@@ -73,10 +73,14 @@ h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
   .footer a { font-style: italic; text-decoration: none; color: #222; }
   .footer a:hover { text-decoration: underline; }
 
-/* elFinder wide icons */
-#elfinder .elfinder-cwd-view-icons .elfinder-cwd-file {
-  width: 120px;
-  height: 95px;
+/* elFinder initial style */
+#elfinder {
+  height: 400px;
+  width: 300px;
+  background-image: url("../demo/img/progress.gif");
+  background-repeat: repeat-x;
+  background-position: center center;
+  margin: auto;
 }
 
 /* message styles */
