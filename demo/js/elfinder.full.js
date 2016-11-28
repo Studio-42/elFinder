@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: 7d316cc) (2016-11-27)
+ * Version 2.1.18 (2.1-src Nightly: 68830f0) (2016-11-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6565,7 +6565,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 7d316cc)';
+elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 68830f0)';
 
 
 
@@ -20713,7 +20713,7 @@ elFinder.prototype.commands.resize = function() {
 					rwidth  = 0,
 					rheight = 0,
 					rdegree = 0,
-					grid8   = true,
+					grid8   = isJpeg? true : false,
 					constr  = $('<button>').html(fm.i18n('aspectRatio'))
 						.on('click', function() {
 							cratio = ! cratio;
