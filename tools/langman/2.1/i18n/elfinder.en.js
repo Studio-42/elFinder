@@ -255,6 +255,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'confirmRm'       : 'Are you sure you want to remove files?<br/>This cannot be undone!',
 			'confirmRepl'     : 'Replace old file with new one?',
 			'confirmConvUTF8' : 'Not in UTF-8<br/>Convert to UTF-8?<br/>Contents become UTF-8 by saving after conversion.', // from v2.1 added 08.04.2014
+			'confirmNonUTF8'  : 'The character encoding of this file seems $1. Would you like to convert to UTF-8?<br/>When saved it will be converted back to the original character encoding.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'It has been modified.<br/>Losing work if you do not save changes.', // from v2.1 added 15.7.2015
 			'apllyAll'        : 'Apply to all',
 			'name'            : 'Name',
