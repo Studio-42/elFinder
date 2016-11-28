@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2016-11-13
+ * @version 2016-11-28
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
