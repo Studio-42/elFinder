@@ -260,7 +260,7 @@ elFinder.prototype.commands.edit = function() {
 				if (data.doconv) {
 					fm.confirm({
 						title  : self.title,
-						text   : 'confirmConvUTF8',
+						text   : data.doconv === true? 'confirmConvUTF8' : ['confirmNonUTF8', data.doconv],
 						accept : {
 							label    : 'btnConv',
 							callback : function() {  
@@ -281,6 +281,7 @@ elFinder.prototype.commands.edit = function() {
 								data : {
 									cmd     : 'put',
 									target  : hash,
+									encording : data.encording,
 									content : ta.getContent()
 								},
 								notify : {type : 'save', cnt : 1},

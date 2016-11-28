@@ -145,7 +145,7 @@ class elFinder {
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false, 'renames' => false, 'hashes' => false, 'suffix' => false),
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'hashes' => false, 'suffix' => false, 'mtime' => false),
 		'get'       => array('target' => true, 'conv' => false),
-		'put'       => array('target' => true, 'content' => '', 'mimes' => false),
+		'put'       => array('target' => true, 'content' => '', 'mimes' => false, 'encording' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false, 'name' => false),
 		'extract'   => array('target' => true, 'mimes' => false, 'makedir' => false),
 		'search'    => array('q' => true, 'mimes' => false, 'target' => false),
@@ -2491,6 +2491,8 @@ class elFinder {
 	protected function get($args) {
 		$target = $args['target'];
 		$volume = $this->volume($target);
+		$mbfunc = (function_exists('mb_detect_encoding') && function_exists('mb_convert_encoding'));
+		$enc = '';
 		
 		if (!$volume || ($file = $volume->file($target)) == false) {
 			return array('error' => $this->error(self::ERROR_OPEN, '#'.$target, self::ERROR_FILE_NOT_FOUND));
@@ -2500,7 +2502,7 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_OPEN, $volume->path($target), $volume->error()));
 		}
 		
-		if ($args['conv'] && function_exists('mb_detect_encoding') && function_exists('mb_convert_encoding')) {
+		if ($args['conv'] && $mbfunc) {
 			$mime = isset($file['mime'])? $file['mime'] : '';
 			if ($mime && strtolower(substr($mime, 0, 4)) === 'text') {
 				if ($enc = mb_detect_encoding ( $content , mb_detect_order(), true)) {
@@ -2514,14 +2516,19 @@ class elFinder {
 		$json = json_encode($content);
 
 		if ($json === false || strlen($json) < strlen($content)) {
-			if ($args['conv']) {
-				return array('error' => $this->error(self::ERROR_CONV_UTF8,self::ERROR_NOT_UTF8_CONTENT, $volume->path($target)));
-			} else {
-				return array('doconv' => true);
+			if (empty($args['conv'])) {
+				if ($mbfunc) {
+					return array('doconv' => mb_detect_encoding($content , mb_detect_order(), true));
+				}
 			}
+			return array('error' => $this->error(self::ERROR_CONV_UTF8,self::ERROR_NOT_UTF8_CONTENT, $volume->path($target)));
 		}
 		
-		return array('content' => $content);
+		$res = array('content' => $content);
+		if ($enc) {
+			$res['encording'] = $enc;
+		}
+		return $res;
 	}
 
 	/**
@@ -2539,6 +2546,12 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_SAVE, '#'.$target, self::ERROR_FILE_NOT_FOUND));
 		}
 		
+		if (! empty($args['encording']) && function_exists('mb_convert_encoding')) {
+			$content = mb_convert_encoding($args['content'], $args['encording'], 'UTF-8');
+			if ($content !== false) {
+				$args['content'] = $content;
+			}
+		}
 		if (($file = $volume->putContents($target, $args['content'])) == false) {
 			return array('error' => $this->error(self::ERROR_SAVE, $volume->path($target), $volume->error()));
 		}
