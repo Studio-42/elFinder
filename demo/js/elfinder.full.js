@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: 16192e1) (2016-11-28)
+ * Version 2.1.18 (2.1-src Nightly: aa0ee97) (2016-11-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6565,7 +6565,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 16192e1)';
+elFinder.prototype.version = '2.1.18 (2.1-src Nightly: aa0ee97)';
 
 
 
@@ -12889,7 +12889,6 @@ $.fn.elfinderpath = function(fm) {
 						raw.push({
 							label    : fm.escape(f.i18 || f.name),
 							icon     : 'home',
-							remain   : true,
 							callback : function() { fm.exec('open', f.hash); },
 							options  : {
 								iconClass : f.csscls || '',
