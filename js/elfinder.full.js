@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: aa0ee97) (2016-11-28)
+ * Version 2.1.18 (2.1-src Nightly: e8dd7a7) (2016-11-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6565,7 +6565,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: aa0ee97)';
+elFinder.prototype.version = '2.1.18 (2.1-src Nightly: e8dd7a7)';
 
 
 
@@ -8619,7 +8619,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-11-23
+ * @version 2016-11-28
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
