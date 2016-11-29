@@ -64,7 +64,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		
 		// correction of options.displayTextLabel
 		textLabel = fm.storage('toolbarTextLabel');
-		if (typeof textLabel === 'undefined') {
+		if (textLabel === null) {
 			textLabel = (options.displayTextLabel && (! options.labelExcludeUA || ! options.labelExcludeUA.length || ! $.map(options.labelExcludeUA, function(v){ return fm.UA[v]? true : null; }).length));
 		} else {
 			textLabel = (textLabel == 1);
