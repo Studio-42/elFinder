@@ -281,7 +281,7 @@ elFinder.prototype.commands.edit = function() {
 								data : {
 									cmd     : 'put',
 									target  : hash,
-									encording : data.encording,
+									encoding : data.encoding,
 									content : ta.getContent()
 								},
 								notify : {type : 'save', cnt : 1},

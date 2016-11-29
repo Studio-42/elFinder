@@ -145,7 +145,7 @@ class elFinder {
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false, 'renames' => false, 'hashes' => false, 'suffix' => false),
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'hashes' => false, 'suffix' => false, 'mtime' => false),
 		'get'       => array('target' => true, 'conv' => false),
-		'put'       => array('target' => true, 'content' => '', 'mimes' => false, 'encording' => false),
+		'put'       => array('target' => true, 'content' => '', 'mimes' => false, 'encoding' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false, 'name' => false),
 		'extract'   => array('target' => true, 'mimes' => false, 'makedir' => false),
 		'search'    => array('q' => true, 'mimes' => false, 'target' => false),
@@ -2505,7 +2505,7 @@ class elFinder {
 		if ($args['conv'] && $mbfunc) {
 			$mime = isset($file['mime'])? $file['mime'] : '';
 			if ($mime && strtolower(substr($mime, 0, 4)) === 'text') {
-				if ($enc = mb_detect_encoding ( $content , mb_detect_order(), true)) {
+				if ($enc = mb_detect_encoding($content , mb_detect_order(), true)) {
 					if (strtolower($enc) !== 'utf-8') {
 						$content = mb_convert_encoding($content, 'UTF-8', $enc);
 					}
@@ -2518,7 +2518,9 @@ class elFinder {
 		if ($json === false || strlen($json) < strlen($content)) {
 			if (empty($args['conv'])) {
 				if ($mbfunc) {
-					return array('doconv' => mb_detect_encoding($content , mb_detect_order(), true));
+					if ($enc = mb_detect_encoding($content , mb_detect_order(), true)) {
+						return array('doconv' => $enc);
+					}
 				}
 			}
 			return array('error' => $this->error(self::ERROR_CONV_UTF8,self::ERROR_NOT_UTF8_CONTENT, $volume->path($target)));
@@ -2526,7 +2528,7 @@ class elFinder {
 		
 		$res = array('content' => $content);
 		if ($enc) {
-			$res['encording'] = $enc;
+			$res['encoding'] = $enc;
 		}
 		return $res;
 	}
@@ -2546,8 +2548,8 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_SAVE, '#'.$target, self::ERROR_FILE_NOT_FOUND));
 		}
 		
-		if (! empty($args['encording']) && function_exists('mb_convert_encoding')) {
-			$content = mb_convert_encoding($args['content'], $args['encording'], 'UTF-8');
+		if (! empty($args['encoding']) && function_exists('mb_convert_encoding')) {
+			$content = mb_convert_encoding($args['content'], $args['encoding'], 'UTF-8');
 			if ($content !== false) {
 				$args['content'] = $content;
 			}
