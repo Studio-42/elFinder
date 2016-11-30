@@ -263,7 +263,7 @@
 			'confirmRm'       : '本当にファイルを削除しますか?<br/>この操作は取り消せません！',
 			'confirmRepl'     : '古いファイルを新しいファイルで上書きしますか？',
 			'confirmConvUTF8' : 'UTF-8 以外の文字が含まれています。<br/>UTF-8  に変換しますか？<br/>変換後の保存でコンテンツは UTF-8 になります。', // from v2.1 added 08.04.2014
-			'confirmNonUTF8'  : 'ファイルの文字エンコーディングが $1 のようです。一旦 UTF-8 に変換しますか？<br/>保存時は元の文字エンコーディングに再変換されます。', // from v2.1.19 added 28.11.2016
+			'confirmNonUTF8'  : 'ファイルの文字エンコーディングが $1 のようです。編集するには一時的に UTF-8 に変換する必要があります。<br/>このファイルの文字エンコーディングを指定してください。', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : '変更されています。<br/>保存せずに閉じると編集内容が失われます。', // from v2.1 added 15.7.2015
 			'apllyAll'        : '全てに適用します',
 			'name'            : '名前',
@@ -341,7 +341,7 @@
 			'confirmUnmount'      : '$1をアンマウントしますか?',  // from v2.1 added 30.04.2012
 			'dropFilesBrowser': 'ブラウザからファイルをドロップまたは貼り付け', // from v2.1 added 30.05.2012
 			'dropPasteFiles'  : 'ここにファイルをドロップ または URLリスト, 画像(クリップボード) を貼り付け', // from v2.1 added 07.04.2014
-			'encoding'        : '文字コード', // from v2.1 added 19.12.2014
+			'encoding'        : '文字エンコーディング', // from v2.1 added 19.12.2014
 			'locale'          : 'ロケール',   // from v2.1 added 19.12.2014
 			'searchTarget'    : '検索範囲: $1',                // from v2.1 added 22.5.2015
 			'searchMime'      : '指定した MIME タイプで検索', // from v2.1 added 22.5.2015

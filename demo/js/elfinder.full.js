@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: 628ab35) (2016-11-29)
+ * Version 2.1.18 (2.1-src Nightly: 7c8a23f) (2016-11-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -5821,6 +5821,10 @@ elFinder.prototype = {
 			}
 		}
 		
+		if (opts.optionsCallback && $.isFunction(opts.optionsCallback)) {
+			opts.optionsCallback(options);
+		}
+		
 		return this.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-confirm"/>' + this.i18n(opts.text), options);
 	},
 	
@@ -6565,7 +6569,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 628ab35)';
+elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 7c8a23f)';
 
 
 
@@ -7136,7 +7140,13 @@ elFinder.prototype._options = {
 				// 	focus : function(textarea, instance) {}
 				// 
 				// }
-			]
+			],
+			// Character encodings of select box
+			encodings : ['Big5', 'Big5-HKSCS', 'Cp437', 'Cp737', 'Cp775', 'Cp850', 'Cp852', 'Cp855', 'Cp857', 'Cp858', 
+				'Cp862', 'Cp866', 'Cp874', 'EUC-CN', 'EUC-JP', 'EUC-KR', 'ISO-2022-CN', 'ISO-2022-JP', 'ISO-2022-KR', 
+				'ISO-8859-1', 'ISO-8859-2', 'ISO-8859-3', 'ISO-8859-4', 'ISO-8859-5', 'ISO-8859-6', 'ISO-8859-7', 
+				'ISO-8859-8', 'ISO-8859-9', 'ISO-8859-13', 'ISO-8859-15', 'KOI8-R', 'KOI8-U', 'Shift-JIS', 
+				'Windows-1250', 'Windows-1251', 'Windows-1252', 'Windows-1253', 'Windows-1254', 'Windows-1257']
 		},
 		search : {
 			// Incremental search from the current view
@@ -8873,7 +8883,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'confirmRm'       : 'Are you sure you want to remove files?<br/>This cannot be undone!',
 			'confirmRepl'     : 'Replace old file with new one?',
 			'confirmConvUTF8' : 'Not in UTF-8<br/>Convert to UTF-8?<br/>Contents become UTF-8 by saving after conversion.', // from v2.1 added 08.04.2014
-			'confirmNonUTF8'  : 'The character encoding of this file seems $1. Would you like to convert to UTF-8?<br/>When saved it will be converted back to the original character encoding.', // from v2.1.19 added 28.11.2016
+			'confirmNonUTF8'  : 'The character encoding of this file seems $1. It need to temporarily convert to UTF-8 for editting.<br/>Please select character encoding of this file.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'It has been modified.<br/>Losing work if you do not save changes.', // from v2.1 added 15.7.2015
 			'apllyAll'        : 'Apply to all',
 			'name'            : 'Name',
@@ -16458,6 +16468,20 @@ elFinder.prototype.commands.edit = function() {
 		rtrim = function(str){
 			return str.replace(/\s+$/, '');
 		},
+		getEncSelect = function(heads) {
+			var sel = $('<select class="ui-corner-all"/>'),
+				hval;
+			if (heads) {
+				$.each(heads, function(i, head) {
+					hval = fm.escape(head.value);
+					sel.append('<option value="'+hval+'">'+(head.caption? fm.escape(head.caption) : hval)+'</option>');
+				});
+			}
+			$.each(self.options.encodings, function(i, v) {
+				sel.append('<option value="'+v+'">'+v+'</option>');
+			});
+			return sel;
+		},
 	
 		/**
 		 * Return files acceptable to edit
@@ -16482,7 +16506,7 @@ elFinder.prototype.commands.edit = function() {
 		 * @param  String  content  file content
 		 * @return $.Deferred
 		 **/
-		dialog = function(id, file, content) {
+		dialog = function(id, file, content, encoding) {
 
 			var dfrd = $.Deferred(),
 				ta   = $('<textarea class="elfinder-file-edit '+fm.res('class', 'editing')+'" rows="20" id="'+id+'-ta">'+fm.escape(content)+'</textarea>'),
@@ -16490,7 +16514,7 @@ elFinder.prototype.commands.edit = function() {
 				save = function() {
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
 					old = ta.val();
-					dfrd.notifyWith(ta);
+					dfrd.notifyWith(ta, [selEncoding? selEncoding.val():void(0)]);
 				},
 				cancel = function() {
 					var close = function(){
@@ -16558,7 +16582,18 @@ elFinder.prototype.commands.edit = function() {
 							close();
 						}
 					},
-					open    : function() { 
+					open    : function() {
+						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [];
+						if (content === '' || ! encoding || encoding !== 'UTF-8') {
+							heads.push({value: 'UTF-8'});
+						}
+						selEncoding = getEncSelect(heads).on('touchstart', function(e) {
+							// for touch punch event handler
+							e.stopPropagation();
+						});
+						ta.parent().prev().find('.elfinder-titlebar-button:last')
+							.after($('<span class="elfinder-titlebar-button-right"/>').append(selEncoding));
+						
 						fm.disable();
 						ta.focus(); 
 						ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
@@ -16596,7 +16631,8 @@ elFinder.prototype.commands.edit = function() {
 						}
 					}
 					return false;
-				};
+				},
+				selEncoding;
 				
 				ta.getContent = function() {
 					return ta.val();
@@ -16675,14 +16711,14 @@ elFinder.prototype.commands.edit = function() {
 		 * @param  String  file hash
 		 * @return jQuery.Deferred
 		 **/
-		edit = function(file, doconv) {
+		edit = function(file, conv) {
 			var hash   = file.hash,
 				opts   = fm.options,
 				dfrd   = $.Deferred(), 
 				data   = {cmd : 'file', target : hash},
-				id    = 'edit-'+fm.namespace+'-'+file.hash,
-				d = fm.getUI().find('#'+id),
-				conv   = !doconv? 0 : 1,
+				id     = 'edit-'+fm.namespace+'-'+file.hash,
+				d      = fm.getUI().find('#'+id),
+				conv   = !conv? 0 : conv,
 				error;
 			
 			
@@ -16699,35 +16735,49 @@ elFinder.prototype.commands.edit = function() {
 			
 			fm.request({
 				data   : {cmd : 'get', target  : hash, conv : conv},
-				notify : {type : 'file', cnt : 1},
-				syncOnFail : true
+				notify : {type : 'file', cnt : 1}
 			})
 			.done(function(data) {
+				var selEncoding;
 				if (data.doconv) {
 					fm.confirm({
 						title  : self.title,
-						text   : data.doconv === true? 'confirmConvUTF8' : ['confirmNonUTF8', data.doconv],
+						text   : data.doconv === true? 'confirmConvUTF8' : ['confirmNonUTF8', fm.i18n(data.doconv)],
 						accept : {
 							label    : 'btnConv',
 							callback : function() {  
-								dfrd = edit(file, 1);
+								dfrd = edit(file, selEncoding.val());
 							}
 						},
 						cancel : {
 							label    : 'btnCancel',
 							callback : function() { dfrd.reject(); }
+						},
+						optionsCallback : function(options) {
+							options.create = function() {
+								var base = $('<div class="elfinder-dialog-confirm-encoding"/>'),
+									head = {value: data.doconv},
+									detected;
+								
+								if (data.doconv === 'unknown') {
+									head.caption = '-';
+								}
+								selEncoding = getEncSelect([head]);
+								$(this).next().find('.ui-dialog-buttonset')
+									.prepend(base.append($('<label>'+fm.i18n('encoding')+' </label>').append(selEncoding)));
+							}
 						}
 					});
 				} else {
-					dialog(id, file, data.content)
-						.progress(function() {
+					dialog(id, file, data.content, data.encoding)
+						.progress(function(encoding) {
 							var ta = this;
 							fm.request({
 								options : {type : 'post'},
 								data : {
 									cmd     : 'put',
 									target  : hash,
-									encording : data.encording,
+									encoding : encoding || data.encoding,
 									content : ta.getContent()
 								},
 								notify : {type : 'save', cnt : 1},
@@ -16748,7 +16798,10 @@ elFinder.prototype.commands.edit = function() {
 				}
 			})
 			.fail(function(error) {
+				var err = $.isArray(error)? error[0] : error;
+				(err !== 'errConvUTF8') && fm.sync();
 				dfrd.reject(error);
+				
 			});
 
 			return dfrd.promise();
