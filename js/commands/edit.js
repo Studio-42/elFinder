@@ -12,6 +12,20 @@ elFinder.prototype.commands.edit = function() {
 		rtrim = function(str){
 			return str.replace(/\s+$/, '');
 		},
+		getEncSelect = function(heads) {
+			var sel = $('<select class="ui-corner-all"/>'),
+				hval;
+			if (heads) {
+				$.each(heads, function(i, head) {
+					hval = fm.escape(head.value);
+					sel.append('<option value="'+hval+'">'+(head.caption? fm.escape(head.caption) : hval)+'</option>');
+				});
+			}
+			$.each(self.options.encodings, function(i, v) {
+				sel.append('<option value="'+v+'">'+v+'</option>');
+			});
+			return sel;
+		},
 	
 		/**
 		 * Return files acceptable to edit
@@ -36,7 +50,7 @@ elFinder.prototype.commands.edit = function() {
 		 * @param  String  content  file content
 		 * @return $.Deferred
 		 **/
-		dialog = function(id, file, content) {
+		dialog = function(id, file, content, encoding) {
 
 			var dfrd = $.Deferred(),
 				ta   = $('<textarea class="elfinder-file-edit '+fm.res('class', 'editing')+'" rows="20" id="'+id+'-ta">'+fm.escape(content)+'</textarea>'),
@@ -44,7 +58,7 @@ elFinder.prototype.commands.edit = function() {
 				save = function() {
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
 					old = ta.val();
-					dfrd.notifyWith(ta);
+					dfrd.notifyWith(ta, [selEncoding? selEncoding.val():void(0)]);
 				},
 				cancel = function() {
 					var close = function(){
@@ -112,7 +126,18 @@ elFinder.prototype.commands.edit = function() {
 							close();
 						}
 					},
-					open    : function() { 
+					open    : function() {
+						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [];
+						if (content === '' || ! encoding || encoding !== 'UTF-8') {
+							heads.push({value: 'UTF-8'});
+						}
+						selEncoding = getEncSelect(heads).on('touchstart', function(e) {
+							// for touch punch event handler
+							e.stopPropagation();
+						});
+						ta.parent().prev().find('.elfinder-titlebar-button:last')
+							.after($('<span class="elfinder-titlebar-button-right"/>').append(selEncoding));
+						
 						fm.disable();
 						ta.focus(); 
 						ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
@@ -150,7 +175,8 @@ elFinder.prototype.commands.edit = function() {
 						}
 					}
 					return false;
-				};
+				},
+				selEncoding;
 				
 				ta.getContent = function() {
 					return ta.val();
@@ -229,14 +255,14 @@ elFinder.prototype.commands.edit = function() {
 		 * @param  String  file hash
 		 * @return jQuery.Deferred
 		 **/
-		edit = function(file, doconv) {
+		edit = function(file, conv) {
 			var hash   = file.hash,
 				opts   = fm.options,
 				dfrd   = $.Deferred(), 
 				data   = {cmd : 'file', target : hash},
-				id    = 'edit-'+fm.namespace+'-'+file.hash,
-				d = fm.getUI().find('#'+id),
-				conv   = !doconv? 0 : 1,
+				id     = 'edit-'+fm.namespace+'-'+file.hash,
+				d      = fm.getUI().find('#'+id),
+				conv   = !conv? 0 : conv,
 				error;
 			
 			
@@ -253,35 +279,49 @@ elFinder.prototype.commands.edit = function() {
 			
 			fm.request({
 				data   : {cmd : 'get', target  : hash, conv : conv},
-				notify : {type : 'file', cnt : 1},
-				syncOnFail : true
+				notify : {type : 'file', cnt : 1}
 			})
 			.done(function(data) {
+				var selEncoding;
 				if (data.doconv) {
 					fm.confirm({
 						title  : self.title,
-						text   : data.doconv === true? 'confirmConvUTF8' : ['confirmNonUTF8', data.doconv],
+						text   : data.doconv === true? 'confirmConvUTF8' : ['confirmNonUTF8', fm.i18n(data.doconv)],
 						accept : {
 							label    : 'btnConv',
 							callback : function() {  
-								dfrd = edit(file, 1);
+								dfrd = edit(file, selEncoding.val());
 							}
 						},
 						cancel : {
 							label    : 'btnCancel',
 							callback : function() { dfrd.reject(); }
+						},
+						optionsCallback : function(options) {
+							options.create = function() {
+								var base = $('<div class="elfinder-dialog-confirm-encoding"/>'),
+									head = {value: data.doconv},
+									detected;
+								
+								if (data.doconv === 'unknown') {
+									head.caption = '-';
+								}
+								selEncoding = getEncSelect([head]);
+								$(this).next().find('.ui-dialog-buttonset')
+									.prepend(base.append($('<label>'+fm.i18n('encoding')+' </label>').append(selEncoding)));
+							}
 						}
 					});
 				} else {
-					dialog(id, file, data.content)
-						.progress(function() {
+					dialog(id, file, data.content, data.encoding)
+						.progress(function(encoding) {
 							var ta = this;
 							fm.request({
 								options : {type : 'post'},
 								data : {
 									cmd     : 'put',
 									target  : hash,
-									encoding : data.encoding,
+									encoding : encoding || data.encoding,
 									content : ta.getContent()
 								},
 								notify : {type : 'save', cnt : 1},
@@ -302,7 +342,10 @@ elFinder.prototype.commands.edit = function() {
 				}
 			})
 			.fail(function(error) {
+				var err = $.isArray(error)? error[0] : error;
+				(err !== 'errConvUTF8') && fm.sync();
 				dfrd.reject(error);
+				
 			});
 
 			return dfrd.promise();

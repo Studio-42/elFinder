@@ -270,6 +270,8 @@
 	padding-bottom: 20em;
 	margin-bottom: -20em;
 }
+.std42-dialog .ui-dialog-titlebar select { font-size: 12px; }
+.std42-dialog .ui-dialog-buttonpane .elfinder-dialog-confirm-encoding { font-size: 12px; }
 
 
 /********************** COMMAND "SORT" ****************************/
