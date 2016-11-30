@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: 628ab35) (2016-11-29)
+ * Version 2.1.18 (2.1-src Nightly: 7c8a23f) (2016-11-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -280,6 +280,8 @@
 	padding-bottom: 20em;
 	margin-bottom: -20em;
 }
+.std42-dialog .ui-dialog-titlebar select { font-size: 12px; }
+.std42-dialog .ui-dialog-buttonpane .elfinder-dialog-confirm-encoding { font-size: 12px; }
 
 
 /********************** COMMAND "SORT" ****************************/
@@ -1600,8 +1602,10 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 	margin-left: 5px;
 	margin-right: 5px;
 }
-.std42-dialog .ui-dialog-titlebar .elfinder-titlebar-button.elfinder-titlebar-button-right {
+.std42-dialog .ui-dialog-titlebar .elfinder-titlebar-button-right {
 	float: right;
+}
+.std42-dialog .ui-dialog-titlebar .elfinder-titlebar-button.elfinder-titlebar-button-right {
 	left: 10px;
 	right: -10px;
 }
@@ -1619,6 +1623,9 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 .std42-dialog.elfinder-dialog-minimized .ui-dialog-titlebar .elfinder-titlebar-button .ui-icon {
 	opacity: 1;
 	filter:Alpha(Opacity=100);	
+}
+.std42-dialog.elfinder-dialog-minimized .ui-dialog-titlebar select {
+	display: none;
 }
 .std42-dialog .ui-dialog-titlebar .ui-dialog-titlebar-close:hover .ui-icon,
 .elfinder-mobile .std42-dialog .ui-dialog-titlebar .ui-dialog-titlebar-close .ui-icon {
@@ -1679,6 +1686,8 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 .elfinder-dialog .ui-resizable-s { width:0; height:0;}
 
 .std42-dialog .ui-button input { cursor: pointer;}
+
+.std42-dialog select { border: 1px solid #ccc; }
 
 /* error/notify/confirm dialogs icon */
 .elfinder-dialog-icon {
@@ -1776,12 +1785,15 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 
 /*********************** CONFIRM DIALOG **************************/
 
-.elfinder-dialog-confirm-applyall {
+.elfinder-dialog-confirm-applyall,
+.elfinder-dialog-confirm-encoding {
 	padding: 0 1em;
 	margin: 0;
 }
-.elfinder-ltr .elfinder-dialog-confirm-applyall { text-align: left; }
-.elfinder-rtl .elfinder-dialog-confirm-applyall { text-align: right; }
+.elfinder-ltr .elfinder-dialog-confirm-applyall,
+.elfinder-ltr .elfinder-dialog-confirm-encoding { text-align: left; }
+.elfinder-rtl .elfinder-dialog-confirm-applyall,
+.elfinder-rtl .elfinder-dialog-confirm-encoding { text-align: right; }
 
 .elfinder-dialog-confirm .elfinder-dialog-icon { background-position:0 -32px; }
 
