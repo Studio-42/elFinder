@@ -41,12 +41,14 @@ elFinder.prototype.commands.search = function() {
 			target = target? target : '';
 			if (mime) {
 				mime = $.trim(mime).replace(',', ' ').split(' ');
-				mime = $.map(mime, function(m){ 
-					m = $.trim(m);
-					return m && ($.inArray(m, onlyMimes) !== -1
-								|| $.map(onlyMimes, function(om) { return m.indexOf(om) === 0? true : null }).length
-								)? m : null 
-				});
+				if (onlyMimes.length) {
+					mime = $.map(mime, function(m){ 
+						m = $.trim(m);
+						return m && ($.inArray(m, onlyMimes) !== -1
+									|| $.map(onlyMimes, function(om) { return m.indexOf(om) === 0? true : null }).length
+									)? m : null 
+					});
+				}
 			} else {
 				mime = [].concat(onlyMimes);
 			}
