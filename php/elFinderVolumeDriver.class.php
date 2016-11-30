@@ -2864,7 +2864,7 @@ abstract class elFinderVolumeDriver {
 	/***************** server encoding support *******************/
 	
 	/**
-	 * Return parent directory path (with convert encording)
+	 * Return parent directory path (with convert encoding)
 	 *
 	 * @param  string  $path  file path
 	 * @return string
@@ -2875,7 +2875,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return file name (with convert encording)
+	 * Return file name (with convert encoding)
 	 *
 	 * @param  string  $path  file path
 	 * @return string
@@ -2886,7 +2886,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Join dir name and file name and return full path. (with convert encording)
+	 * Join dir name and file name and return full path. (with convert encoding)
 	 * Some drivers (db) use int as path - so we give to concat path to driver itself
 	 *
 	 * @param  string  $dir   dir path
@@ -2899,7 +2899,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return normalized path (with convert encording)
+	 * Return normalized path (with convert encoding)
 	 *
 	 * @param  string  $path  file path
 	 * @return string
@@ -2910,7 +2910,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return file path related to root dir (with convert encording)
+	 * Return file path related to root dir (with convert encoding)
 	 *
 	 * @param  string  $path  file path
 	 * @return string
@@ -2921,7 +2921,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Convert path related to root dir into real path (with convert encording)
+	 * Convert path related to root dir into real path (with convert encoding)
 	 *
 	 * @param  string  $path  rel file path
 	 * @return string
@@ -2932,7 +2932,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return true if $path is children of $parent (with convert encording)
+	 * Return true if $path is children of $parent (with convert encoding)
 	 *
 	 * @param  string  $path    path to check
 	 * @param  string  $parent  parent path
@@ -2944,7 +2944,7 @@ abstract class elFinderVolumeDriver {
 	}
 
 	/**
-	 * Open file and return file pointer (with convert encording)
+	 * Open file and return file pointer (with convert encoding)
 	 *
 	 * @param  string $path file path
 	 * @param string $mode
@@ -2957,7 +2957,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Close opened file (with convert encording)
+	 * Close opened file (with convert encoding)
 	 * 
 	 * @param  resource  $fp    file pointer
 	 * @param  string    $path  file path
@@ -2969,7 +2969,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Create new file and write into it from file pointer. (with convert encording)
+	 * Create new file and write into it from file pointer. (with convert encoding)
 	 * Return new file path or false on error.
 	 *
 	 * @param  resource  $fp   file pointer
@@ -2984,7 +2984,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return true if path is dir and has at least one childs directory (with convert encording)
+	 * Return true if path is dir and has at least one childs directory (with convert encoding)
 	 *
 	 * @param  string  $path  dir path
 	 * @return bool
@@ -3006,7 +3006,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Return files list in directory (with convert encording)
+	 * Return files list in directory (with convert encoding)
 	 *
 	 * @param  string  $path  dir path
 	 * @return array
@@ -3017,7 +3017,7 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
-	 * Create symlink (with convert encording)
+	 * Create symlink (with convert encoding)
 	 *
 	 * @param  string  $source     file to link to
 	 * @param  string  $targetDir  folder to create link in
