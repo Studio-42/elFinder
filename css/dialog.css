@@ -435,3 +435,9 @@ button.elfinder-info-button {
 .elfinder-rm-title+br {
 	display: none;
 }
+
+/*********************** EDIT DIALOG **************************/
+
+.ui-dialog-titlebar select.elfinder-edit-changed {
+	border-bottom: 1px solid #13ae10;
+}
