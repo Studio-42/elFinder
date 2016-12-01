@@ -2539,11 +2539,14 @@ class elFinder {
 								$enc = 'unknown';
 							}
 						}
+						if ($enc !== 'unknown') {
+							$content = $utf8;
+						}
 					}
 					if ($enc) {
 						if ($args['conv'] == '1') {
 							$args['conv'] = $enc === 'unknown'? '' : $enc;
-						} else {
+						} else if ($enc === 'unknown') {
 							return array('doconv' => $enc);
 						}
 					}
