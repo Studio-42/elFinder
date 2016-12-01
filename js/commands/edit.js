@@ -53,7 +53,17 @@ elFinder.prototype.commands.edit = function() {
 		dialog = function(id, file, content, encoding) {
 
 			var dfrd = $.Deferred(),
-				ta   = $('<textarea class="elfinder-file-edit '+fm.res('class', 'editing')+'" rows="20" id="'+id+'-ta">'+fm.escape(content)+'</textarea>'),
+				stateChange = function() {
+					if (selEncoding) {
+						if (changed()) {
+							selEncoding.attr('title', fm.i18n('saveAsEncoding')).addClass('elfinder-edit-changed');
+						} else {
+							selEncoding.attr('title', fm.i18n('openAsEncoding')).removeClass('elfinder-edit-changed');
+						}
+					}
+				},
+				ta   = $('<textarea class="elfinder-file-edit '+fm.res('class', 'editing')+'" rows="20" id="'+id+'-ta">'+fm.escape(content)+'</textarea>')
+					.on('input propertychange', stateChange),
 				old  = ta.val(),
 				save = function() {
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
@@ -66,8 +76,7 @@ elFinder.prototype.commands.edit = function() {
 						ta.elfinderdialog('close');
 					};
 					fm.toggleMaximize($(this).closest('.ui-dialog'), false);
-					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
-					if (rtrim(old) !== rtrim(ta.val())) {
+					if (changed()) {
 						old = ta.val();
 						fm.confirm({
 							title  : self.title,
@@ -91,6 +100,10 @@ elFinder.prototype.commands.edit = function() {
 				savecl = function() {
 					save();
 					cancel();
+				},
+				changed = function() {
+					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
+					return  (rtrim(old) !== rtrim(ta.val()));
 				},
 				opts = {
 					title   : fm.escape(file.name),
@@ -134,7 +147,13 @@ elFinder.prototype.commands.edit = function() {
 						selEncoding = getEncSelect(heads).on('touchstart', function(e) {
 							// for touch punch event handler
 							e.stopPropagation();
-						});
+						}).on('change', function() {
+							// reload to change encoding if not edited
+							if (! changed() && rtrim(ta.val()) !== '') {
+								cancel();
+								edit(file, $(this).val());
+							}
+						}).on('mouseover', stateChange);
 						ta.parent().prev().find('.elfinder-titlebar-button:last')
 							.after($('<span class="elfinder-titlebar-button-right"/>').append(selEncoding));
 						
@@ -286,7 +305,7 @@ elFinder.prototype.commands.edit = function() {
 				if (data.doconv) {
 					fm.confirm({
 						title  : self.title,
-						text   : data.doconv === true? 'confirmConvUTF8' : ['confirmNonUTF8', fm.i18n(data.doconv)],
+						text   : data.doconv === 'unknown'? 'confirmNonUTF8' : 'confirmConvUTF8',
 						accept : {
 							label    : 'btnConv',
 							callback : function() {  
