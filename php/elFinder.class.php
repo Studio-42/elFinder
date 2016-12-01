@@ -2491,9 +2491,7 @@ class elFinder {
 	protected function get($args) {
 		$target = $args['target'];
 		$volume = $this->volume($target);
-		$mbfunc = (function_exists('mb_detect_encoding') && function_exists('mb_convert_encoding'));
-		$enc = '';
-		$json = false;
+		$enc = false;
 		
 		if (!$volume || ($file = $volume->file($target)) == false) {
 			return array('error' => $this->error(self::ERROR_OPEN, '#'.$target, self::ERROR_FILE_NOT_FOUND));
@@ -2503,48 +2501,75 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_OPEN, $volume->path($target), $volume->error()));
 		}
 		
-		if ($args['conv']) {
-			$mime = isset($file['mime'])? $file['mime'] : '';
-			if ($mime && strtolower(substr($mime, 0, 4)) === 'text') {
-				$enc = is_string($args['conv'])? $args['conv'] : mb_detect_encoding($content , mb_detect_order(), true);
+		$mime = isset($file['mime'])? $file['mime'] : '';
+		if ($mime && strtolower(substr($mime, 0, 4)) === 'text') {
+			$enc = '';
+			if (! $args['conv'] || $args['conv'] == '1') {
+				// detect encoding
+				if ($content === '') {
+					$enc = '';
+				} else {
+					if (function_exists('mb_detect_encoding')) {
+						if ($enc = mb_detect_encoding($content , mb_detect_order(), true)) {
+							$encu = strtoupper($enc);
+							if ($encu === 'UTF-8' || $encu === 'ASCII') {
+								$enc = '';
+							}
+						} else {
+							$enc = 'unknown';
+						}
+					} else if (! preg_match('//u', $content)) {
+						$enc = 'unknown';
+					}
+					if ($enc === 'unknown') {
+						$enc = $volume->getOption('encoding');
+						if (! $enc || strtoupper($enc) === 'UTF-8') {
+							$enc = 'unknown';
+						}
+					}
+					if ($enc && $enc !== 'unknown') {
+						$utf8 = iconv($enc, 'UTF-8', $content);
+						if ($utf8 === false && function_exists('mb_convert_encoding')) {
+							$utf8 = mb_convert_encoding($content, 'UTF-8', $enc);
+							if (mb_convert_encoding($utf8, $enc, 'UTF-8') !== $content) {
+								$enc = 'unknown';
+							}
+						} else {
+							if ($utf8 === false || iconv('UTF-8', $enc, $utf8) !== $content) {
+								$enc = 'unknown';
+							}
+						}
+					}
+					if ($enc) {
+						if ($args['conv'] == '1') {
+							$args['conv'] = $enc === 'unknown'? '' : $enc;
+						} else {
+							return array('doconv' => $enc);
+						}
+					}
+				}
+			} 
+			if ($args['conv']) {
+				$enc = $args['conv'];
 				if (strtoupper($enc) !== 'UTF-8') {
 					$_content = $content;
 					$content = iconv($enc, 'UTF-8', $content);
 					if ($content === false && function_exists('mb_convert_encoding')) {
 						$content = mb_convert_encoding($_content, 'UTF-8', $enc);
 					}
-				}
-			}
-		} else if ($content !== '') {
-			if (function_exists('mb_detect_encoding') && ($enc = mb_detect_encoding($content , mb_detect_order(), true))) {
-				$enc = strtoupper($enc);
-				if ($enc !== 'UTF-8' && $enc !== 'ASCII') {
-					$content = false;
 				} else {
 					$enc = '';
 				}
-			} else if (! preg_match('//u', $content)) {
-				$content = false;
 			}
 		}
 		
-		if ($content !== false) {
-			$json = json_encode($content);
-		}
-
-		if ($json === false || strlen($json) < strlen($content)) {
-			if (! $args['conv'] && $args['conv'] !== 'unknown') {
-				if (! $enc) {
-					$enc = $volume->getOption('encoding');
-					if ($enc && strtolower($enc) !== 'utf-8') {
-						if (iconv($enc, $enc, $content) !== $content) {
-							$enc = false;
-						}
-					}
-				}
-				return array('doconv' => $enc? $enc : 'unknown');
+		if ($enc !== false) {
+			if ($content !== false) {
+				$json = json_encode($content);
 			}
-			return array('error' => $this->error(self::ERROR_CONV_UTF8,self::ERROR_NOT_UTF8_CONTENT, $volume->path($target)));
+			if ($content === false || $json === false || strlen($json) < strlen($content)) {
+				return array('error' => $this->error(self::ERROR_CONV_UTF8, self::ERROR_NOT_UTF8_CONTENT, $volume->path($target)));
+			}
 		}
 		
 		$res = array('content' => $content);
@@ -2569,7 +2594,7 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_SAVE, '#'.$target, self::ERROR_FILE_NOT_FOUND));
 		}
 		
-		if (! empty($args['encoding']) && function_exists('mb_convert_encoding')) {
+		if (! empty($args['encoding'])) {
 			$content = iconv('UTF-8', $args['encoding'], $args['content']);
 			if ($content === false && function_exists('mb_detect_encoding')) {
 				$content = mb_convert_encoding($args['content'], $args['encoding'], 'UTF-8');
