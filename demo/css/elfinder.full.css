@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: f3ec2c3) (2016-12-01)
+ * Version 2.1.18 (2.1-src Nightly: e7946cc) (2016-12-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1944,6 +1944,13 @@ button.elfinder-info-button {
 .elfinder-rm-title+br {
 	display: none;
 }
+
+/*********************** EDIT DIALOG **************************/
+
+.ui-dialog-titlebar select.elfinder-edit-changed {
+	border-bottom: 1px solid #13ae10;
+}
+
 /* File: /css/fonts.css */
 .elfinder-contextmenu .elfinder-contextmenu-item span { font-size:.72em; }
 

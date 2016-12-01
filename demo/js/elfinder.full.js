@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: f3ec2c3) (2016-12-01)
+ * Version 2.1.18 (2.1-src Nightly: e7946cc) (2016-12-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6569,7 +6569,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: f3ec2c3)';
+elFinder.prototype.version = '2.1.18 (2.1-src Nightly: e7946cc)';
 
 
 
@@ -8629,7 +8629,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-11-28
+ * @version 2016-12-02
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -8883,7 +8883,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'confirmRm'       : 'Are you sure you want to remove files?<br/>This cannot be undone!',
 			'confirmRepl'     : 'Replace old file with new one?',
 			'confirmConvUTF8' : 'Not in UTF-8<br/>Convert to UTF-8?<br/>Contents become UTF-8 by saving after conversion.', // from v2.1 added 08.04.2014
-			'confirmNonUTF8'  : 'The character encoding of this file seems $1. It need to temporarily convert to UTF-8 for editting.<br/>Please select character encoding of this file.', // from v2.1.19 added 28.11.2016
+			'confirmNonUTF8'  : 'Character encoding of this file couldn\'t be detected. It need to temporarily convert to UTF-8 for editting.<br/>Please select character encoding of this file.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'It has been modified.<br/>Losing work if you do not save changes.', // from v2.1 added 15.7.2015
 			'apllyAll'        : 'Apply to all',
 			'name'            : 'Name',
@@ -9004,6 +9004,8 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'emptyIncSearch'  : 'Search results is empty in current view.\\APress [Enter] to expand search target.', // from v2.1.16 added 5.10.2016
 			'textLabel'       : 'Text label', // from v2.1.17 added 13.10.2016
 			'minsLeft'        : '$1 mins left', // from v2.1.17 added 13.11.2016
+			'openAsEncoding'  : 'Reopen with selected encoding', // from v2.1.19 added 2.12.2016
+			'saveAsEncoding'  : 'Save with the selected encoding', // from v2.1.19 added 2.12.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -16509,7 +16511,17 @@ elFinder.prototype.commands.edit = function() {
 		dialog = function(id, file, content, encoding) {
 
 			var dfrd = $.Deferred(),
-				ta   = $('<textarea class="elfinder-file-edit '+fm.res('class', 'editing')+'" rows="20" id="'+id+'-ta">'+fm.escape(content)+'</textarea>'),
+				stateChange = function() {
+					if (selEncoding) {
+						if (changed()) {
+							selEncoding.attr('title', fm.i18n('saveAsEncoding')).addClass('elfinder-edit-changed');
+						} else {
+							selEncoding.attr('title', fm.i18n('openAsEncoding')).removeClass('elfinder-edit-changed');
+						}
+					}
+				},
+				ta   = $('<textarea class="elfinder-file-edit '+fm.res('class', 'editing')+'" rows="20" id="'+id+'-ta">'+fm.escape(content)+'</textarea>')
+					.on('input propertychange', stateChange),
 				old  = ta.val(),
 				save = function() {
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
@@ -16522,8 +16534,7 @@ elFinder.prototype.commands.edit = function() {
 						ta.elfinderdialog('close');
 					};
 					fm.toggleMaximize($(this).closest('.ui-dialog'), false);
-					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
-					if (rtrim(old) !== rtrim(ta.val())) {
+					if (changed()) {
 						old = ta.val();
 						fm.confirm({
 							title  : self.title,
@@ -16547,6 +16558,10 @@ elFinder.prototype.commands.edit = function() {
 				savecl = function() {
 					save();
 					cancel();
+				},
+				changed = function() {
+					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
+					return  (rtrim(old) !== rtrim(ta.val()));
 				},
 				opts = {
 					title   : fm.escape(file.name),
@@ -16590,7 +16605,13 @@ elFinder.prototype.commands.edit = function() {
 						selEncoding = getEncSelect(heads).on('touchstart', function(e) {
 							// for touch punch event handler
 							e.stopPropagation();
-						});
+						}).on('change', function() {
+							// reload to change encoding if not edited
+							if (! changed() && rtrim(ta.val()) !== '') {
+								cancel();
+								edit(file, $(this).val());
+							}
+						}).on('mouseover', stateChange);
 						ta.parent().prev().find('.elfinder-titlebar-button:last')
 							.after($('<span class="elfinder-titlebar-button-right"/>').append(selEncoding));
 						
@@ -16742,7 +16763,7 @@ elFinder.prototype.commands.edit = function() {
 				if (data.doconv) {
 					fm.confirm({
 						title  : self.title,
-						text   : data.doconv === true? 'confirmConvUTF8' : ['confirmNonUTF8', fm.i18n(data.doconv)],
+						text   : data.doconv === 'unknown'? 'confirmNonUTF8' : 'confirmConvUTF8',
 						accept : {
 							label    : 'btnConv',
 							callback : function() {  
