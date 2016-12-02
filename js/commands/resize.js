@@ -1056,7 +1056,7 @@ elFinder.prototype.commands.resize = function() {
 						$(this).elfinderdialog('destroy');
 					},
 					resize         : function(e, data) {
-						if (data && data.minimize === false) {
+						if (data && data.minimize === 'off') {
 							dinit();
 						}
 					}

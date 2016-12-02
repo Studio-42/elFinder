@@ -184,14 +184,18 @@ $.fn.elfinderdialog = function(opts, fm) {
 									$this.removeData('style').show();
 									titlebar.children('.elfinder-titlebar-full').show();
 									dialog.children('.ui-widget-content').slideDown('fast', function() {
+										var eData;
 										if (this === dialog.children('.ui-widget-content:first').get(0)) {
+											eData = { minimize: 'off' };
 											if (! dialog.hasClass('elfinder-maximized')) {
 												try {
 													dialog.hasClass('ui-draggable') && dialog.draggable('enable');
 													dialog.hasClass('ui-resizable') && dialog.resizable('enable');
 												} catch(e) {}
+											} else {
+												eData.maximize = 'on';
 											}
-											dialog.trigger('resize', { minimize: false });
+											dialog.trigger('resize', eData);
 										}
 									});
 								} else {
@@ -204,13 +208,13 @@ $.fn.elfinderdialog = function(opts, fm) {
 									w = dialog.width();
 									dialog.children('.ui-widget-content').slideUp('fast', function() {
 										if (this === dialog.children('.ui-widget-content:first').get(0)) {
+											dialog.trigger('resize', { minimize: 'on' });
 											dialog.attr('style', '').css({ maxWidth: w})
 												.addClass('elfinder-dialog-minimized')
 												.one('mousedown.minimize', function(e) {
 													$this.trigger('mousedown');
 												})
 												.appendTo(fm.getUI('bottomtray'));
-											dialog.trigger('resize', { minimize: true });
 										}
 									});
 								}

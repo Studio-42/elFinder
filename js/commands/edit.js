@@ -140,7 +140,8 @@ elFinder.prototype.commands.edit = function() {
 						}
 					},
 					open    : function() {
-						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [];
+						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [],
+							loadRes;
 						if (content === '' || ! encoding || encoding !== 'UTF-8') {
 							heads.push({value: 'UTF-8'});
 						}
@@ -161,11 +162,21 @@ elFinder.prototype.commands.edit = function() {
 						ta.focus(); 
 						ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
 						if (ta.editor) {
-							ta.editor.instance = ta.editor.load(ta[0]) || null;
-							ta.editor.focus(ta[0], ta.editor.instance);
+							loadRes = ta.editor.load(ta[0]) || null;
+							if (loadRes && loadRes.done) {
+								loadRes.done(function(instance) {
+									ta.editor.instance = instance;
+									ta.editor.focus(ta[0], ta.editor.instance);
+								});
+							} else {
+								ta.editor.instance = loadRes;
+								ta.editor.focus(ta[0], ta.editor.instance);
+							}
 						}
+					},
+					resize : function(e, data) {
+						ta.editor && ta.editor.resize(ta[0], ta.editor.instance, e, data);
 					}
-					
 				},
 				mimeMatch = function(fileMime, editorMimes){
 					editorMimes = editorMimes || mimes.concat('text/');
@@ -211,6 +222,7 @@ elFinder.prototype.commands.edit = function() {
 							save     : editor.save,
 							close    : typeof editor.close == 'function' ? editor.close : function() {},
 							focus    : typeof editor.focus == 'function' ? editor.focus : function() {},
+							resize   : typeof editor.resize == 'function' ? editor.resize : function() {},
 							instance : null,
 							doSave   : save,
 							doCancel : cancel,
