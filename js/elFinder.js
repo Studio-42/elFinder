@@ -2725,9 +2725,10 @@ var elFinder = function(node, opts) {
 		resizeTm,
 		resize = function(e) {
 			if (e.target === window && e.data && e.data.elm) {
+				var elm = e.data.elm;
 				resizeTm && clearTimeout(resizeTm);
 				resizeTm = setTimeout(function() {
-					e.data.elm.trigger('resize', {maximize: 'on'});
+					elm.trigger('resize', {maximize: 'on'});
 				}, 100);
 			}
 		},

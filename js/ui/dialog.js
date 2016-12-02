@@ -184,14 +184,18 @@ $.fn.elfinderdialog = function(opts, fm) {
 									$this.removeData('style').show();
 									titlebar.children('.elfinder-titlebar-full').show();
 									dialog.children('.ui-widget-content').slideDown('fast', function() {
+										var eData;
 										if (this === dialog.children('.ui-widget-content:first').get(0)) {
+											eData = { minimize: 'off' };
 											if (! dialog.hasClass('elfinder-maximized')) {
 												try {
 													dialog.hasClass('ui-draggable') && dialog.draggable('enable');
 													dialog.hasClass('ui-resizable') && dialog.resizable('enable');
 												} catch(e) {}
+											} else {
+												eData.maximize = 'on';
 											}
-											dialog.trigger('resize', { minimize: 'off' });
+											dialog.trigger('resize', eData);
 										}
 									});
 								} else {
