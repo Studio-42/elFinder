@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: e7946cc) (2016-12-02)
+ * Version 2.1.18 (2.1-src Nightly: 01239d9) (2016-12-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -2756,9 +2756,10 @@ var elFinder = function(node, opts) {
 		resizeTm,
 		resize = function(e) {
 			if (e.target === window && e.data && e.data.elm) {
+				var elm = e.data.elm;
 				resizeTm && clearTimeout(resizeTm);
 				resizeTm = setTimeout(function() {
-					e.data.elm.trigger('resize', {maximize: 'on'});
+					elm.trigger('resize', {maximize: 'on'});
 				}, 100);
 			}
 		},
@@ -6569,7 +6570,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: e7946cc)';
+elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 01239d9)';
 
 
 
@@ -7108,7 +7109,7 @@ elFinder.prototype._options = {
 				// 	 * Can return wysisyg instance
 				// 	 *
 				// 	 * @param  DOMElement  textarea node
-				// 	 * @return Object
+				// 	 * @return Object      editor instance|jQuery.Deferred(return instance on resolve())
 				// 	 */
 				// 	load : function(textarea) { },
 				// 	/**
@@ -7138,6 +7139,16 @@ elFinder.prototype._options = {
 				// 	 * @return void
 				// 	 */
 				// 	focus : function(textarea, instance) {}
+				// 	/**
+				// 	 * Called after dialog resized..
+				// 	 *
+				// 	 * @param  DOMElement  textarea node
+				// 	 * @param  Object      wysisyg instance (if was returned by "load" callback)
+				// 	 * @param  Object      resize event object
+				// 	 * @param  Object      data object
+				// 	 * @return void
+				// 	 */
+				// 	resize : function(textarea, instance, event, data) {}
 				// 
 				// }
 			],
@@ -12305,14 +12316,18 @@ $.fn.elfinderdialog = function(opts, fm) {
 									$this.removeData('style').show();
 									titlebar.children('.elfinder-titlebar-full').show();
 									dialog.children('.ui-widget-content').slideDown('fast', function() {
+										var eData;
 										if (this === dialog.children('.ui-widget-content:first').get(0)) {
+											eData = { minimize: 'off' };
 											if (! dialog.hasClass('elfinder-maximized')) {
 												try {
 													dialog.hasClass('ui-draggable') && dialog.draggable('enable');
 													dialog.hasClass('ui-resizable') && dialog.resizable('enable');
 												} catch(e) {}
+											} else {
+												eData.maximize = 'on';
 											}
-											dialog.trigger('resize', { minimize: false });
+											dialog.trigger('resize', eData);
 										}
 									});
 								} else {
@@ -12325,13 +12340,13 @@ $.fn.elfinderdialog = function(opts, fm) {
 									w = dialog.width();
 									dialog.children('.ui-widget-content').slideUp('fast', function() {
 										if (this === dialog.children('.ui-widget-content:first').get(0)) {
+											dialog.trigger('resize', { minimize: 'on' });
 											dialog.attr('style', '').css({ maxWidth: w})
 												.addClass('elfinder-dialog-minimized')
 												.one('mousedown.minimize', function(e) {
 													$this.trigger('mousedown');
 												})
 												.appendTo(fm.getUI('bottomtray'));
-											dialog.trigger('resize', { minimize: true });
 										}
 									});
 								}
@@ -16598,7 +16613,8 @@ elFinder.prototype.commands.edit = function() {
 						}
 					},
 					open    : function() {
-						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [];
+						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [],
+							loadRes;
 						if (content === '' || ! encoding || encoding !== 'UTF-8') {
 							heads.push({value: 'UTF-8'});
 						}
@@ -16619,11 +16635,21 @@ elFinder.prototype.commands.edit = function() {
 						ta.focus(); 
 						ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
 						if (ta.editor) {
-							ta.editor.instance = ta.editor.load(ta[0]) || null;
-							ta.editor.focus(ta[0], ta.editor.instance);
+							loadRes = ta.editor.load(ta[0]) || null;
+							if (loadRes && loadRes.done) {
+								loadRes.done(function(instance) {
+									ta.editor.instance = instance;
+									ta.editor.focus(ta[0], ta.editor.instance);
+								});
+							} else {
+								ta.editor.instance = loadRes;
+								ta.editor.focus(ta[0], ta.editor.instance);
+							}
 						}
+					},
+					resize : function(e, data) {
+						ta.editor && ta.editor.resize(ta[0], ta.editor.instance, e, data);
 					}
-					
 				},
 				mimeMatch = function(fileMime, editorMimes){
 					editorMimes = editorMimes || mimes.concat('text/');
@@ -16669,6 +16695,7 @@ elFinder.prototype.commands.edit = function() {
 							save     : editor.save,
 							close    : typeof editor.close == 'function' ? editor.close : function() {},
 							focus    : typeof editor.focus == 'function' ? editor.focus : function() {},
+							resize   : typeof editor.resize == 'function' ? editor.resize : function() {},
 							instance : null,
 							doSave   : save,
 							doCancel : cancel,
@@ -21527,7 +21554,7 @@ elFinder.prototype.commands.resize = function() {
 						$(this).elfinderdialog('destroy');
 					},
 					resize         : function(e, data) {
-						if (data && data.minimize === false) {
+						if (data && data.minimize === 'off') {
 							dinit();
 						}
 					}
