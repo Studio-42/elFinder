@@ -231,7 +231,7 @@ elFinder.prototype._options = {
 				// 	 * Can return wysisyg instance
 				// 	 *
 				// 	 * @param  DOMElement  textarea node
-				// 	 * @return Object
+				// 	 * @return Object      editor instance|jQuery.Deferred(return instance on resolve())
 				// 	 */
 				// 	load : function(textarea) { },
 				// 	/**
@@ -261,6 +261,16 @@ elFinder.prototype._options = {
 				// 	 * @return void
 				// 	 */
 				// 	focus : function(textarea, instance) {}
+				// 	/**
+				// 	 * Called after dialog resized..
+				// 	 *
+				// 	 * @param  DOMElement  textarea node
+				// 	 * @param  Object      wysisyg instance (if was returned by "load" callback)
+				// 	 * @param  Object      resize event object
+				// 	 * @param  Object      data object
+				// 	 * @return void
+				// 	 */
+				// 	resize : function(textarea, instance, event, data) {}
 				// 
 				// }
 			],
