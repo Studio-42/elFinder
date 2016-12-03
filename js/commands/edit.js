@@ -175,7 +175,7 @@ elFinder.prototype.commands.edit = function() {
 						}
 					},
 					resize : function(e, data) {
-						ta.editor && ta.editor.resize(ta[0], ta.editor.instance, e, data);
+						ta.editor && ta.editor.resize(ta[0], ta.editor.instance, e, data || {});
 					}
 				},
 				mimeMatch = function(fileMime, editorMimes){
