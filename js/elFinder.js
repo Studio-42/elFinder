@@ -2912,7 +2912,7 @@ var elFinder = function(node, opts) {
 	// bind core event handlers
 	this
 		.enable(function() {
-			if (!enabled && self.visible() && self.ui.overlay.is(':hidden')) {
+			if (!enabled && self.visible() && self.ui.overlay.is(':hidden') && ! node.children('.elfinder-dialog').find('.'+fm.res('class', 'editing')).length) {
 				enabled = true;
 				document.activeElement && document.activeElement.blur();
 				node.removeClass('elfinder-disabled');
