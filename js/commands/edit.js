@@ -71,31 +71,7 @@ elFinder.prototype.commands.edit = function() {
 					dfrd.notifyWith(ta, [selEncoding? selEncoding.val():void(0)]);
 				},
 				cancel = function() {
-					var close = function(){
-						dfrd.reject();
-						ta.elfinderdialog('close');
-					};
-					fm.toggleMaximize($(this).closest('.ui-dialog'), false);
-					if (changed()) {
-						old = ta.val();
-						fm.confirm({
-							title  : self.title,
-							text   : 'confirmNotSave',
-							accept : {
-								label    : 'btnSaveClose',
-								callback : function() {
-									save();
-									close();
-								}
-							},
-							cancel : {
-								label    : 'btnClose',
-								callback : close
-							}
-						});
-					} else {
-						close();
-					}
+					ta.elfinderdialog('close');
 				},
 				savecl = function() {
 					save();
@@ -112,14 +88,14 @@ elFinder.prototype.commands.edit = function() {
 					allowMaximize : true,
 					btnHoverFocus : false,
 					closeOnEscape : false,
-					close   : function() { 
-						var $this = $(this),
-						close = function(){
+					close   : function() {
+						var close = function(){
+							dfrd.reject();
 							ta.editor && ta.editor.close(ta[0], ta.editor.instance);
-							$this.elfinderdialog('destroy');
+							ta.elfinderdialog('destroy');
 						};
-						ta.editor && ta.editor.save(ta[0], ta.editor.instance);
-						if (rtrim(old) !== rtrim(ta.val())) {
+						fm.toggleMaximize($(this).closest('.ui-dialog'), false);
+						if (changed()) {
 							fm.confirm({
 								title  : self.title,
 								text   : 'confirmNotSave',
