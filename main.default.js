@@ -53,7 +53,7 @@
 				[
 					'elfinder'
 					, (lang !== 'en')? 'elfinder.lang' : null    // load detected language
-				//	, 'extras/quicklook.googledocs'                    // optional GoogleDocs preview
+				//	, 'extras/quicklook.googledocs'              // optional preview for GoogleApps contents on the GoogleDrive volume
 				//	, (lang === 'jp')? 'extras/encoding-japanese.min' : null // optional Japanese decoder for archive preview
 				],
 				start,
