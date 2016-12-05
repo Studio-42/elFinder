@@ -506,11 +506,9 @@ var elFinder = function(node, opts) {
 					}
 				}, 10);
 			} else {
-				fm.trigger('cssloaded');
+				fm.options.cssAutoLoad = false;
 			}
 		})(this);
-	} else {
-		fm.trigger('cssloaded');
 	}
 	
 	/**
@@ -3283,45 +3281,6 @@ var elFinder = function(node, opts) {
 			});
 		});
 	
-	// send initial request and start to pray >_<
-	this.trigger('init')
-		.request({
-			data        : {cmd : 'open', target : self.startDir(), init : 1, tree : this.ui.tree ? 1 : 0}, 
-			preventDone : true,
-			notify      : {type : 'open', cnt : 1, hideCnt : true},
-			freeze      : true
-		})
-		.fail(function() {
-			self.trigger('fail').disable().lastDir('');
-			listeners = {};
-			shortcuts = {};
-			$(document).add(node).off('.'+namespace);
-			self.trigger = function() { };
-		})
-		.done(function(data) {
-			// detect elFinder node z-index
-			var ni = node.css('z-index');
-			if (ni && ni !== 'auto' && ni !== 'inherit') {
-				self.zIndex = ni;
-			} else {
-				node.parents().each(function(i, n) {
-					var z = $(n).css('z-index');
-					if (z !== 'auto' && z !== 'inherit' && (z = parseInt(z))) {
-						self.zIndex = z;
-						return false;
-					}
-				});
-			}
-			
-			self.load().debug('api', self.api);
-			open(data);
-			self.trigger('open', data);
-			
-			if (inFrame && self.options.enableAlways) {
-				$(window).focus();
-			}
-		});
-	
 	// update ui's size after init
 	this.one('load', function() {
 		node.trigger('resize');
@@ -3686,6 +3645,50 @@ var elFinder = function(node, opts) {
 			! self.enabled() && self.enable();
 		});
 	}
+	
+	// trigger event cssloaded if cddAutoLoad disabled
+	if (! this.options.cssAutoLoad) {
+		this.trigger('cssloaded');
+	}
+	
+	// send initial request and start to pray >_<
+	this.trigger('init')
+		.request({
+			data        : {cmd : 'open', target : self.startDir(), init : 1, tree : this.ui.tree ? 1 : 0}, 
+			preventDone : true,
+			notify      : {type : 'open', cnt : 1, hideCnt : true},
+			freeze      : true
+		})
+		.fail(function() {
+			self.trigger('fail').disable().lastDir('');
+			listeners = {};
+			shortcuts = {};
+			$(document).add(node).off('.'+namespace);
+			self.trigger = function() { };
+		})
+		.done(function(data) {
+			// detect elFinder node z-index
+			var ni = node.css('z-index');
+			if (ni && ni !== 'auto' && ni !== 'inherit') {
+				self.zIndex = ni;
+			} else {
+				node.parents().each(function(i, n) {
+					var z = $(n).css('z-index');
+					if (z !== 'auto' && z !== 'inherit' && (z = parseInt(z))) {
+						self.zIndex = z;
+						return false;
+					}
+				});
+			}
+			
+			self.load().debug('api', self.api);
+			open(data);
+			self.trigger('open', data);
+			
+			if (inFrame && self.options.enableAlways) {
+				$(window).focus();
+			}
+		});
 	
 	// self.timeEnd('load'); 
 
