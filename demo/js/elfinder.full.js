@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: c2180b8) (2016-12-05)
+ * Version 2.1.18 (2.1-src Nightly: 7efba90) (2016-12-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6653,7 +6653,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: c2180b8)';
+elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 7efba90)';
 
 
 
@@ -21238,18 +21238,30 @@ elFinder.prototype.commands.resize = function() {
 							offsetY.val(round((rhandlec.data('h')||rhandlec.height())/prop, oheight - pointY.val()));
 						},
 						updateView : function(change) {
+							var r, x, y, w, h;
+							
+							pointX.val(Math.min(pointX.val(), owidth - 1));
+							pointY.val(Math.min(pointY.val(), oheight - 1));
+							offsetX.val(Math.min(offsetX.val(), owidth - pointX.val()));
+							offsetY.val(Math.min(offsetY.val(), oheight - pointY.val()));
+							
 							if (cratioc) {
-								var r = coverc.width() / coverc.height();
+								r = coverc.width() / coverc.height();
 								if (change === 'w') {
 									offsetY.val(Math.round(parseInt(offsetX.val()) / r));
 								} else if (change === 'h') {
 									offsetX.val(Math.round(parseInt(offsetY.val()) * r));
 								}
 							}
-							var x = Math.round(parseInt(pointX.val()) * prop);
-							var y = Math.round(parseInt(pointY.val()) * prop);
-							var w = Math.round(parseInt(offsetX.val()) * prop);
-							var h = Math.round(parseInt(offsetY.val()) * prop);
+							x = Math.round(parseInt(pointX.val()) * prop);
+							y = Math.round(parseInt(pointY.val()) * prop);
+							if (change !== 'xy') {
+								w = Math.round(parseInt(offsetX.val()) * prop);
+								h = Math.round(parseInt(offsetY.val()) * prop);
+							} else {
+								w = rhandlec.data('w');
+								h = rhandlec.data('h');
+							}
 							rhandlec.data({x: x, y: y, w: w, h: h})
 								.width(w)
 								.height(h)
@@ -21401,7 +21413,7 @@ elFinder.prototype.commands.resize = function() {
 										handle      : coverc,
 										containment : imgc,
 										drag        : crop.drag_update,
-										stop        : crop.updateView
+										stop        : function() { crop.updateView('xy'); }
 									});
 								
 								dinit();
