@@ -35,7 +35,9 @@ $.fn.elfinderworkzone = function(fm) {
 			};
 			
 		parent.add(window).on('resize.' + fm.namespace, fitsize);
-		fm.bind('uiresize', fitsize);
+		fm.one('cssloaded', function() {
+			wdelta = wz.outerHeight(true) - wz.height();
+		}).bind('uiresize', fitsize);
 	});
 	return this;
 };
