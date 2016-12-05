@@ -499,8 +499,10 @@ var elFinder = function(node, opts) {
 				fi = setInterval(function() {
 					if ($(node).css('display') !== 'none') {
 						clearInterval(fi);
-						hide.remove();
-						fm.trigger('cssloaded');
+						setTimeout(function() {
+							hide.remove();
+							fm.trigger('cssloaded');
+						}, 10);
 					}
 				}, 10);
 			} else {
