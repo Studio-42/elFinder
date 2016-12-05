@@ -20,11 +20,15 @@ $.fn.elfindernavbar = function(fm, opts) {
 				wz.data('rectangle', $.extend(wzRect, { cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width() }));
 			};
 
-		fm.one('cssloaded', function() {
-			delta  = nav.outerHeight() - nav.height();
-		}).bind('wzresize', function() {
-			nav.height(wz.height() - delta);
-		});
+			fm.one('cssloaded', function() {
+				var old = delta;
+				delta = nav.outerHeight() - nav.height();
+				if (old !== delta) {
+					fm.trigger('wzresize');
+				}
+			}).bind('wzresize', function() {
+				nav.height(wz.height() - delta);
+			});
 		
 		if (fm.UA.Touch) {
 			autoHide = fm.storage('autoHide') || {};

@@ -12,6 +12,7 @@
 	padding: 0;
 	position:relative;
 	display:block;
+	visibility: visible;
 	font-size: 18px;
 	font-family: Verdana,Arial,Helvetica,sans-serif;
 }

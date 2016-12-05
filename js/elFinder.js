@@ -481,14 +481,14 @@ var elFinder = function(node, opts) {
 	if (this.options.cssAutoLoad) {
 		(function(fm) {
 			var myTag = $('head > script[src$="js/elfinder.min.js"],script[src$="js/elfinder.full.js"]:first'),
-				baseUrl, hide, fi;
+				baseUrl, hide, fi, cnt;
 			if (myTag.length) {
 				// hide elFinder node while css loading
 				hide = $('<style>.elfinder{visibility:hidden;overflow:hidden}</style>');
 				
 				$('head').append(hide);
 				baseUrl = myTag.attr('src').replace(/js\/[^\/]+$/, '');
-				fm.loadCss([baseUrl+'css/elfinder.min.css', baseUrl+'css/theme.css']);
+				fm.loadCss([baseUrl+'css/elfinder.full.css', baseUrl+'css/theme.css']);
 				
 				// additional CSS files
 				if ($.isArray(fm.options.cssAutoLoad)) {
@@ -496,14 +496,12 @@ var elFinder = function(node, opts) {
 				}
 				
 				// check css loaded and remove hide
+				cnt = 1000; // timeout 10 secs
 				fi = setInterval(function() {
-					if ($(node).css('display') !== 'none') {
+					if (--cnt > 0 && node.css('visibility') !== 'hidden') {
 						clearInterval(fi);
-						setTimeout(function() {
-							hide.remove();
-							fm.trigger('cssloaded');
-							node.trigger('resize');
-						}, 10);
+						hide.remove();
+						fm.trigger('cssloaded');
 					}
 				}, 10);
 			} else {
