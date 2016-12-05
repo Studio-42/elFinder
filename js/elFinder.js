@@ -7,35 +7,6 @@
 var elFinder = function(node, opts) {
 	//this.time('load');
 	
-	// auto load required CSS
-	if (opts.cssAutoLoad) {
-		(function(fm) {
-			var myTag = $('head > script[src$="js/elfinder.min.js"],script[src$="js/elfinder.full.js"]:first'),
-				baseUrl, hide, fi;
-			if (myTag.length) {
-				// hide elFinder node while css loading
-				hide = $('<style>.elfinder{display:none}</style>');
-				
-				$('head').append(hide);
-				baseUrl = myTag.attr('src').replace(/js\/[^\/]+$/, '');
-				fm.loadCss([baseUrl+'css/elfinder.min.css', baseUrl+'css/theme.css']);
-				
-				// additional CSS files
-				if ($.isArray(opts.cssAutoLoad)) {
-					fm.loadCss(opts.cssAutoLoad);
-				}
-				
-				// check css loaded and remove hide
-				fi = setInterval(function() {
-					if ($(node).css('display') !== 'none') {
-						clearInterval(fi);
-						hide.remove();
-					}
-				}, 10);
-			}
-		})(this);
-	}
-	
 	var self = this,
 		
 		/**
@@ -505,6 +476,35 @@ var elFinder = function(node, opts) {
 	 * @type Object
 	 **/
 	this.options = $.extend(true, {}, this._options, opts||{});
+	
+	// auto load required CSS
+	if (this.options.cssAutoLoad) {
+		(function(fm) {
+			var myTag = $('head > script[src$="js/elfinder.min.js"],script[src$="js/elfinder.full.js"]:first'),
+				baseUrl, hide, fi;
+			if (myTag.length) {
+				// hide elFinder node while css loading
+				hide = $('<style>.elfinder{display:none}</style>');
+				
+				$('head').append(hide);
+				baseUrl = myTag.attr('src').replace(/js\/[^\/]+$/, '');
+				fm.loadCss([baseUrl+'css/elfinder.min.css', baseUrl+'css/theme.css']);
+				
+				// additional CSS files
+				if ($.isArray(fm.options.cssAutoLoad)) {
+					fm.loadCss(fm.options.cssAutoLoad);
+				}
+				
+				// check css loaded and remove hide
+				fi = setInterval(function() {
+					if ($(node).css('display') !== 'none') {
+						clearInterval(fi);
+						hide.remove();
+					}
+				}, 10);
+			}
+		})(this);
+	}
 	
 	/**
 	 * Volume option to set the properties of the root Stat
