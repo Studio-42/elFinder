@@ -7,6 +7,7 @@
 		factory(root.jQuery, root.elFinder);
 	}
 }(this, function($, elFinder) {
+try {
 
 (function(){
 	var style = document.createElement('style'),
@@ -76,4 +77,5 @@ elFinder.prototype._options.commands.push('login');
 elFinder.prototype._options.uiOptions.toolbar.push(['login']);
 elFinder.prototype.i18.en.messages.logout = '$1: logout';
 
+} catch(e) {}
 }));
