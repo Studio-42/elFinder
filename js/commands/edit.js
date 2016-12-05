@@ -203,7 +203,8 @@ elFinder.prototype.commands.edit = function() {
 							doSave   : save,
 							doCancel : cancel,
 							doClose  : savecl,
-							file     : file
+							file     : file,
+							fm       : fm
 						};
 						
 						return false;
