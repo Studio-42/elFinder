@@ -484,7 +484,7 @@ var elFinder = function(node, opts) {
 				baseUrl, hide, fi;
 			if (myTag.length) {
 				// hide elFinder node while css loading
-				hide = $('<style>.elfinder{visibility:hidden}</style>');
+				hide = $('<style>.elfinder{visibility:hidden;overflow:hidden}</style>');
 				
 				$('head').append(hide);
 				baseUrl = myTag.attr('src').replace(/js\/[^\/]+$/, '');
