@@ -639,11 +639,13 @@ elFinder.prototype.commands.resize = function() {
 						}
 					},
 					crop = {
-						update : function() {
+						update : function(change) {
 							pointX.val(round(((rhandlec.data('x')||rhandlec.position().left))/prop, owidth));
 							pointY.val(round(((rhandlec.data('y')||rhandlec.position().top))/prop, oheight));
-							offsetX.val(round((rhandlec.data('w')||rhandlec.width())/prop, owidth - pointX.val()));
-							offsetY.val(round((rhandlec.data('h')||rhandlec.height())/prop, oheight - pointY.val()));
+							if (change !== 'xy') {
+								offsetX.val(round((rhandlec.data('w')||rhandlec.width())/prop, owidth - pointX.val()));
+								offsetY.val(round((rhandlec.data('h')||rhandlec.height())/prop, oheight - pointY.val()));
+							}
 						},
 						updateView : function(change) {
 							var r, x, y, w, h;
@@ -684,7 +686,7 @@ elFinder.prototype.commands.resize = function() {
 						},
 						drag_update : function(e, ui) {
 							rhandlec.data({x: ui.position.left, y: ui.position.top});
-							crop.update();
+							crop.update('xy');
 						}
 					},
 					rotate = {
