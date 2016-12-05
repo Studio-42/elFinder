@@ -103,7 +103,7 @@
 		paths : {
 			'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(ie8? '1.12.4' : jqver)+'/jquery.min',
 			'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/jquery-ui.min',
-			'elfinder' : 'elfinder.min',
+			'elfinder' : 'elfinder.full',
 			'elfinder.lang': [
 				'i18n/elfinder.'+lang,
 				'i18n/elfinder.fallback'
