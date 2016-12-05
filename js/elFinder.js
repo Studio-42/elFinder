@@ -502,6 +502,7 @@ var elFinder = function(node, opts) {
 						setTimeout(function() {
 							hide.remove();
 							fm.trigger('cssloaded');
+							node.trigger('resize');
 						}, 10);
 					}
 				}, 10);
@@ -3281,11 +3282,6 @@ var elFinder = function(node, opts) {
 			});
 		});
 	
-	// update ui's size after init
-	this.one('load', function() {
-		node.trigger('resize');
-	});
-
 	(function(){
 		var tm;
 		$(window).on('resize.' + namespace, function(e){
@@ -3682,6 +3678,9 @@ var elFinder = function(node, opts) {
 			}
 			
 			self.load().debug('api', self.api);
+			// update ui's size after init
+			node.trigger('resize');
+			// initial open
 			open(data);
 			self.trigger('open', data);
 			
