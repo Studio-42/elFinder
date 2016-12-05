@@ -2,6 +2,9 @@
 (function(){
 	var i18nFolderMsgs = {},
 		rootPath = './demo',
+		// jQuery and jQueryUI version
+		jqver = '3.1.1',
+		uiver = '1.12.1',
 		// Detect language (optional)
 		lang = (function() {
 			var locq = window.location.search,
@@ -44,6 +47,9 @@
 		
 		// Start elFinder (REQUIRED)
 		start = function(elFinder, lang) {
+			// load jQueryUI CSS
+			elFinder.prototype.loadCss('//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/themes/smoothness/jquery-ui.css');
+			
 			$(function() {
 				// Optional for Japanese decoder "extras/encoding-japanese.min"
 				if (window.Encoding && Encoding.convert) {
@@ -95,8 +101,8 @@
 	require.config({
 		baseUrl : rootPath+'/js',
 		paths : {
-			'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(ie8? '1.12.4' : '3.1.1')+'/jquery.min',
-			'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min',
+			'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(ie8? '1.12.4' : jqver)+'/jquery.min',
+			'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/jquery-ui.min',
 			'elfinder' : 'elfinder.min',
 			'elfinder.lang': [
 				'i18n/elfinder.'+lang,
