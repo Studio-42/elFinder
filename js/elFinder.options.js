@@ -128,6 +128,16 @@ elFinder.prototype._options = {
 	lang : 'en',
 
 	/**
+	 * Auto load required CSS
+	 * `false` to disable this function or
+	 * CSS URL Array to load additional CSS files
+	 * 
+	 * @type Boolean|Array
+	 * @default true
+	 */
+	cssAutoLoad : true,
+	
+	/**
 	 * Additional css class for filemanager node.
 	 *
 	 * @type String

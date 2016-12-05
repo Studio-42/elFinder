@@ -7,6 +7,35 @@
 var elFinder = function(node, opts) {
 	//this.time('load');
 	
+	// auto load required CSS
+	if (opts.cssAutoLoad) {
+		(function(fm) {
+			var myTag = $('head > script[src$="js/elfinder.min.js"],script[src$="js/elfinder.full.js"]:first'),
+				baseUrl, hide, fi;
+			if (myTag.length) {
+				// hide elFinder node while css loading
+				hide = $('<style>.elfinder{display:none}</style>');
+				
+				$('head').append(hide);
+				baseUrl = myTag.attr('src').replace(/js\/[^\/]+$/, '');
+				fm.loadCss([baseUrl+'css/elfinder.min.css', baseUrl+'css/theme.css']);
+				
+				// additional CSS files
+				if ($.isArray(opts.cssAutoLoad)) {
+					fm.loadCss(opts.cssAutoLoad);
+				}
+				
+				// check css loaded and remove hide
+				fi = setInterval(function() {
+					if ($(node).css('display') !== 'none') {
+						clearInterval(fi);
+						hide.remove();
+					}
+				}, 10);
+			}
+		})(this);
+	}
+	
 	var self = this,
 		
 		/**
@@ -1265,34 +1294,6 @@ var elFinder = function(node, opts) {
 			params.current = file.phash;
 		}
 		return this.options.url + (this.options.url.indexOf('?') === -1 ? '?' : '&') + $.param(params, true);
-	};
-	
-	/**
-	 * Convert from relative URL to abstract URL based on current URL
-	 * 
-	 * @param  String  URL
-	 * @return String
-	 */
-	this.convAbsUrl = function(url) {
-		if (url.match(/^http/i)) {
-			return url;
-		}
-		if (url.substr(0,2) === '//') {
-			return window.location.protocol + url;
-		}
-		var root = window.location.protocol + '//' + window.location.host,
-			reg  = /[^\/]+\/\.\.\//,
-			ret;
-		if (url.substr(0, 1) === '/') {
-			ret = root + url;
-		} else {
-			ret = root + window.location.pathname.replace(/\/[^\/]+$/, '/') + url;
-		}
-		ret = ret.replace('/./', '/');
-		while(reg.test(ret)) {
-			ret = ret.replace(reg, '');
-		}
-		return ret;
 	};
 	
 	/**
@@ -6440,6 +6441,34 @@ elFinder.prototype = {
 		return newItem;
 	},
 	
+	/**
+	 * Convert from relative URL to abstract URL based on current URL
+	 * 
+	 * @param  String  URL
+	 * @return String
+	 */
+	convAbsUrl : function(url) {
+		if (url.match(/^http/i)) {
+			return url;
+		}
+		if (url.substr(0,2) === '//') {
+			return window.location.protocol + url;
+		}
+		var root = window.location.protocol + '//' + window.location.host,
+			reg  = /[^\/]+\/\.\.\//,
+			ret;
+		if (url.substr(0, 1) === '/') {
+			ret = root + url;
+		} else {
+			ret = root + window.location.pathname.replace(/\/[^\/]+$/, '/') + url;
+		}
+		ret = ret.replace('/./', '/');
+		while(reg.test(ret)) {
+			ret = ret.replace(reg, '');
+		}
+		return ret;
+	},
+	
 	navHash2Id : function(hash) {
 		return this.navPrefix + hash;
 	},
@@ -6466,6 +6495,53 @@ elFinder.prototype = {
 		}
 		rect = elm.getBoundingClientRect();
 		return document.elementFromPoint(rect.left, rect.top)? true : false;
+	},
+	
+	/**
+	 * Load JavaScript files
+	 * 
+	 * @param  Array    to load JavaScript file URLs
+	 * @param  Function call back function on script loaded
+	 * @param  Object   Additional options to $.ajax
+	 * @return elFinder
+	 */
+	loadScript : function(urls, callback, opts) {
+		var defOpts = {
+				dataType : 'script',
+				cache    : true
+			},
+			success = null;
+		if ($.isFunction(callback)) {
+			success = function() { callback.apply(callback.caller || window); };
+		}
+		opts = $.isPlainObject(opts)? $.extend(defOpts, opts) : defOpts;
+		(function appendScript() {
+			$.ajax($.extend(opts, {
+				url: urls.shift(),
+				success: urls.length? appendScript : success
+			}));
+		})();
+		return this;
+	},
+	
+	/**
+	 * Load CSS files
+	 * 
+	 * @param  Array    to load CSS file URLs
+	 * @return elFinder
+	 */
+	loadCss : function(urls) {
+		var self = this;
+		if (typeof urls === 'string') {
+			urls = [ urls ];
+		}
+		$.each(urls, function(i, url) {
+			url = self.convAbsUrl(url).replace(/^https?:/i, '');
+			if (! $("head > link[href='+url+']").length) {
+				$('head').append('<link rel="stylesheet" type="text/css" href="' + url + '" />');
+			}
+		});
+		return this;
 	},
 	
 	log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
