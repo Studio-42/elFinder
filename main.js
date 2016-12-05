@@ -48,7 +48,7 @@
 		// Start elFinder (REQUIRED)
 		start = function(elFinder, lang) {
 			// load jQueryUI CSS
-			elFinder.prototype.loadCss('//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/themes/smoothness/jquery-ui.css');
+			//elFinder.prototype.loadCss('//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/themes/smoothness/jquery-ui.css');
 			
 			$(function() {
 				// Optional for Japanese decoder "extras/encoding-japanese.min"
