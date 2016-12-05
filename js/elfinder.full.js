@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: 39245c3) (2016-12-05)
+ * Version 2.1.18 (2.1-src Nightly: 0b49398) (2016-12-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -515,7 +515,7 @@ var elFinder = function(node, opts) {
 				baseUrl, hide, fi;
 			if (myTag.length) {
 				// hide elFinder node while css loading
-				hide = $('<style>.elfinder{display:none}</style>');
+				hide = $('<style>.elfinder{visibility:hidden;overflow:hidden}</style>');
 				
 				$('head').append(hide);
 				baseUrl = myTag.attr('src').replace(/js\/[^\/]+$/, '');
@@ -531,10 +531,15 @@ var elFinder = function(node, opts) {
 					if ($(node).css('display') !== 'none') {
 						clearInterval(fi);
 						hide.remove();
+						fm.trigger('cssloaded');
 					}
 				}, 10);
+			} else {
+				fm.trigger('cssloaded');
 			}
 		})(this);
+	} else {
+		fm.trigger('cssloaded');
 	}
 	
 	/**
@@ -6646,7 +6651,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 39245c3)';
+elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 0b49398)';
 
 
 
@@ -12785,7 +12790,9 @@ $.fn.elfindernavbar = function(fm, opts) {
 				wz.data('rectangle', $.extend(wzRect, { cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width() }));
 			};
 
-		fm.bind('wzresize', function() {
+		fm.one('cssloaded', function() {
+			delta  = nav.outerHeight() - nav.height();
+		}).bind('wzresize', function() {
 			nav.height(wz.height() - delta);
 		});
 		
@@ -15626,7 +15633,9 @@ $.fn.elfinderworkzone = function(fm) {
 			};
 			
 		parent.add(window).on('resize.' + fm.namespace, fitsize);
-		fm.bind('uiresize', fitsize);
+		fm.one('cssloaded', function() {
+			wdelta = wz.outerHeight(true) - wz.height();
+		}).bind('uiresize', fitsize);
 	});
 	return this;
 };
