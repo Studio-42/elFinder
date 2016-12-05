@@ -20,7 +20,9 @@ $.fn.elfindernavbar = function(fm, opts) {
 				wz.data('rectangle', $.extend(wzRect, { cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width() }));
 			};
 
-		fm.bind('wzresize', function() {
+		fm.one('cssloaded', function() {
+			delta  = nav.outerHeight() - nav.height();
+		}).bind('wzresize', function() {
 			nav.height(wz.height() - delta);
 		});
 		
