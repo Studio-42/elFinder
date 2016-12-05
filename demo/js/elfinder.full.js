@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: 911f545) (2016-12-05)
+ * Version 2.1.18 (2.1-src Nightly: f185493) (2016-12-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -512,14 +512,14 @@ var elFinder = function(node, opts) {
 	if (this.options.cssAutoLoad) {
 		(function(fm) {
 			var myTag = $('head > script[src$="js/elfinder.min.js"],script[src$="js/elfinder.full.js"]:first'),
-				baseUrl, hide, fi;
+				baseUrl, hide, fi, cnt;
 			if (myTag.length) {
 				// hide elFinder node while css loading
 				hide = $('<style>.elfinder{visibility:hidden;overflow:hidden}</style>');
 				
 				$('head').append(hide);
 				baseUrl = myTag.attr('src').replace(/js\/[^\/]+$/, '');
-				fm.loadCss([baseUrl+'css/elfinder.min.css', baseUrl+'css/theme.css']);
+				fm.loadCss([baseUrl+'css/elfinder.full.css', baseUrl+'css/theme.css']);
 				
 				// additional CSS files
 				if ($.isArray(fm.options.cssAutoLoad)) {
@@ -527,14 +527,12 @@ var elFinder = function(node, opts) {
 				}
 				
 				// check css loaded and remove hide
+				cnt = 1000; // timeout 10 secs
 				fi = setInterval(function() {
-					if ($(node).css('display') !== 'none') {
+					if (--cnt > 0 && node.css('visibility') !== 'hidden') {
 						clearInterval(fi);
-						setTimeout(function() {
-							hide.remove();
-							fm.trigger('cssloaded');
-							node.trigger('resize');
-						}, 10);
+						hide.remove();
+						fm.trigger('cssloaded');
 					}
 				}, 10);
 			} else {
@@ -6655,7 +6653,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 911f545)';
+elFinder.prototype.version = '2.1.18 (2.1-src Nightly: f185493)';
 
 
 
@@ -12794,11 +12792,15 @@ $.fn.elfindernavbar = function(fm, opts) {
 				wz.data('rectangle', $.extend(wzRect, { cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width() }));
 			};
 
-		fm.one('cssloaded', function() {
-			delta  = nav.outerHeight() - nav.height();
-		}).bind('wzresize', function() {
-			nav.height(wz.height() - delta);
-		});
+			fm.one('cssloaded', function() {
+				var old = delta;
+				delta = nav.outerHeight() - nav.height();
+				if (old !== delta) {
+					fm.trigger('wzresize');
+				}
+			}).bind('wzresize', function() {
+				nav.height(wz.height() - delta);
+			});
 		
 		if (fm.UA.Touch) {
 			autoHide = fm.storage('autoHide') || {};
@@ -15638,7 +15640,11 @@ $.fn.elfinderworkzone = function(fm) {
 			
 		parent.add(window).on('resize.' + fm.namespace, fitsize);
 		fm.one('cssloaded', function() {
+			var old = wdelta;
 			wdelta = wz.outerHeight(true) - wz.height();
+			if (old !== wdelta) {
+				fm.trigger('uiresize');
+			}
 		}).bind('uiresize', fitsize);
 	});
 	return this;
