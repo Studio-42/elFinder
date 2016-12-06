@@ -47,15 +47,12 @@
 									cdn  = '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5',
 									init = function() {
 										if (typeof ace === 'undefined') {
-											var scripts = [
+											this.fm.loadScript([
 												cdn+'/ace.js',
 												cdn+'/ext-modelist.js',
 												cdn+'/ext-settings_menu.js',
 												cdn+'/ext-language_tools.js'
-											];
-											(function appendScript() {
-												$.getScript(scripts.shift(), function(){ scripts.length? appendScript() : start(); });
-											})();
+											], start);
 										} else {
 											start();
 										}
@@ -154,6 +151,7 @@
 										// Ace editor configure
 										ta.data('ace', true);
 										editor = ace.edit(id);
+										ace.require('ace/ext/language_tools');
 										ace.require('ace/ext/settings_menu').init(editor);
 										editor.$blockScrolling = Infinity;
 										editor.setOptions({
