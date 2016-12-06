@@ -47,7 +47,7 @@
 									cdn  = '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5',
 									init = function() {
 										if (typeof ace === 'undefined') {
-											this.fm.loadScript([
+											self.fm.loadScript([
 												cdn+'/ace.js',
 												cdn+'/ext-modelist.js',
 												cdn+'/ext-settings_menu.js',
