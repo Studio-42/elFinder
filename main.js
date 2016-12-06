@@ -45,18 +45,6 @@
 								var self = this,
 									dfrd = $.Deferred(),
 									cdn  = '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5',
-									init = function() {
-										if (typeof ace === 'undefined') {
-											self.fm.loadScript([
-												cdn+'/ace.js',
-												cdn+'/ext-modelist.js',
-												cdn+'/ext-settings_menu.js',
-												cdn+'/ext-language_tools.js'
-											], start);
-										} else {
-											start();
-										}
-									},
 									start = function() {
 										var editor, editorBase, mode,
 										ta = $(textarea),
@@ -93,22 +81,77 @@
 											'application/xml'		  : 'xml'
 										};
 
-										// set basePath of ace
-										ace.config.set('basePath', cdn);
-
 										// set base height
 										taBase.height(taBase.height());
 
-										// detect mode
-										mode = ace.require('ace/ext/modelist').getModeForPath('/' + self.file.name).name;
-										if (mode === 'text') {
-											if (mimeMode[self.file.mime]) {
-												mode = mimeMode[self.file.mime];
-											}
-										}
+										// set basePath of ace
+										ace.config.set('basePath', cdn);
 
-										// show MIME:mode in title bar
-										taBase.prev().children('.elfinder-dialog-title').append(' (' + self.file.mime + ' : ' + mode.split(/[\/\\]/).pop() + ')');
+										// Base node of Ace editor
+										editorBase = $('<div id="'+id+'" style="width:100%; height:100%;"/>').text(ta.val()).insertBefore(ta.hide());
+
+										// Editor flag
+										ta.data('ace', true);
+
+										// Aceeditor instance
+										editor = ace.edit(id);
+
+										// Ace editor configure
+										editor.$blockScrolling = Infinity;
+										editor.setOptions({
+											theme: 'ace/theme/monokai',
+											fontSize: '14px',
+											wrap: true,
+										});
+										ace.config.loadModule('ace/ext/modelist', function() {
+											// detect mode
+											mode = ace.require('ace/ext/modelist').getModeForPath('/' + self.file.name).name;
+											if (mode === 'text') {
+												if (mimeMode[self.file.mime]) {
+													mode = mimeMode[self.file.mime];
+												}
+											}
+											// show MIME:mode in title bar
+											taBase.prev().children('.elfinder-dialog-title').append(' (' + self.file.mime + ' : ' + mode.split(/[\/\\]/).pop() + ')');
+											editor.setOptions({
+												mode: 'ace/mode/' + mode
+											});
+										});
+										ace.config.loadModule('ace/ext/language_tools', function() {
+											ace.require('ace/ext/language_tools');
+											editor.setOptions({
+												enableBasicAutocompletion: true,
+												enableSnippets: true,
+												enableLiveAutocompletion: false
+											});
+										});
+										ace.config.loadModule('ace/ext/settings_menu', function() {
+											ace.require('ace/ext/settings_menu').init(editor);
+										});
+										
+										// Short cuts
+										editor.commands.addCommand({
+											name : "saveFile",
+											bindKey: {
+												win : 'Ctrl-s',
+												mac : 'Command-s'
+											},
+											exec: function(editor) {
+												self.doSave();
+											}
+										});
+										editor.commands.addCommand({
+											name : "closeEditor",
+											bindKey: {
+												win : 'Ctrl-w|Ctrl-q',
+												mac : 'Command-w|Command-q'
+											},
+											exec: function(editor) {
+												self.doCancel();
+											}
+										});
+
+										editor.resize();
 
 										// TextArea button and Setting button
 										$('<div class="ui-dialog-buttonset"/>').css('float', 'left')
@@ -145,52 +188,16 @@
 										)
 										.prependTo(taBase.next());
 
-										// Base node of Ace editor
-										editorBase = $('<div id="'+id+'" style="width:100%; height:100%;"/>').text(ta.val()).insertBefore(ta.hide());
-
-										// Ace editor configure
-										ta.data('ace', true);
-										editor = ace.edit(id);
-										ace.require('ace/ext/language_tools');
-										ace.require('ace/ext/settings_menu').init(editor);
-										editor.$blockScrolling = Infinity;
-										editor.setOptions({
-											theme: 'ace/theme/monokai',
-											mode: 'ace/mode/' + mode,
-											fontSize: '14px',
-											wrap: true,
-											enableBasicAutocompletion: true,
-											enableSnippets: true,
-											enableLiveAutocompletion: false
-										});
-										editor.commands.addCommand({
-											name : "saveFile",
-											bindKey: {
-												win : 'Ctrl-s',
-												mac : 'Command-s'
-											},
-											exec: function(editor) {
-												self.doSave();
-											}
-										});
-										editor.commands.addCommand({
-											name : "closeEditor",
-											bindKey: {
-												win : 'Ctrl-w|Ctrl-q',
-												mac : 'Command-w|Command-q'
-											},
-											exec: function(editor) {
-												self.doCancel();
-											}
-										});
-
-										editor.resize();
-
 										dfrd.resolve(editor);
 									};
 
-								// init & start
-								init();
+								// check ace & start
+								if (typeof ace === 'undefined') {
+									self.fm.loadScript([ cdn+'/ace.js' ], start, void 0, {obj: window, name: 'ace'});
+								} else {
+									start();
+								}
+
 
 								return dfrd;
 							},
