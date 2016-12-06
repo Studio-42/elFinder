@@ -24,7 +24,7 @@ $.fn.elfinderworkzone = function(fm) {
 							height -= ch.outerHeight(true);
 						}
 					});
-				parent.attr('style', style);
+				parent.attr('style', style || '');
 				
 				height = Math.max(0, Math.round(height));
 				if (prevH !== height || curH !== height) {
