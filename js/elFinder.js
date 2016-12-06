@@ -3183,6 +3183,7 @@ var elFinder = function(node, opts) {
 		notify : this.dialog('', {
 			cssClass      : 'elfinder-dialog-notify',
 			position      : this.options.notifyDialog.position,
+			absolute      : true,
 			resizable     : false,
 			autoOpen      : false,
 			closeOnEscape : false,

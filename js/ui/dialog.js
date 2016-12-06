@@ -340,6 +340,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 							left : Math.max(0, parseInt((elfNode.width() - dialog.outerWidth())/2))+'px'
 						};
 					}
+					if (opts.absolute) {
+						css.position = 'absolute';
+					}
 					css && dialog.css(css);
 				})
 				.on('resize', function(e, data) {
@@ -485,6 +488,7 @@ $.fn.elfinderdialog.defaults = {
 	buttons   : {},
 	btnHoverFocus : true,
 	position  : null,
+	absolute  : false,
 	width     : 320,
 	height    : 'auto',
 	minWidth  : 200,
