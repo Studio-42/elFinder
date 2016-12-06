@@ -44,13 +44,14 @@
 							load : function(textarea) {
 								var self = this,
 									dfrd = $.Deferred(),
+									cdn  = '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5',
 									init = function() {
 										if (typeof ace === 'undefined') {
 											var scripts = [
-												'//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ace.js',
-												'//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ext-modelist.js',
-												'//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ext-settings_menu.js',
-												'//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5/ext-language_tools.js'
+												cdn+'/ace.js',
+												cdn+'/ext-modelist.js',
+												cdn+'/ext-settings_menu.js',
+												cdn+'/ext-language_tools.js'
 											];
 											(function appendScript() {
 												$.getScript(scripts.shift(), function(){ scripts.length? appendScript() : start(); });
@@ -94,6 +95,9 @@
 											'application/docbook+xml' : 'xml',
 											'application/xml'		  : 'xml'
 										};
+
+										// set basePath of ace
+										ace.config.set('basePath', cdn);
 
 										// set base height
 										taBase.height(taBase.height());
