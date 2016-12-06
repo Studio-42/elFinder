@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: 5da3792) (2016-12-06)
+ * Version 2.1.18 (2.1-src Nightly: 1c6f439) (2016-12-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6539,19 +6539,36 @@ elFinder.prototype = {
 	/**
 	 * Load JavaScript files
 	 * 
-	 * @param  Array    to load JavaScript file URLs
-	 * @param  Function call back function on script loaded
-	 * @param  Object   Additional options to $.ajax
+	 * @param  Array    urls      to load JavaScript file URLs
+	 * @param  Function callback  call back function on script loaded
+	 * @param  Object   opts      Additional options to $.ajax
+	 * @param  Object   check     { obj: (Object)ParentObject, name: (String)"Attribute name", timeout: (Integer)milliseconds }
 	 * @return elFinder
 	 */
-	loadScript : function(urls, callback, opts) {
+	loadScript : function(urls, callback, opts, check) {
 		var defOpts = {
 				dataType : 'script',
 				cache    : true
 			},
 			success = null;
 		if ($.isFunction(callback)) {
-			success = function() { callback.apply(callback.caller || window); };
+			success = function() {
+				if (check) {
+					if (typeof check.obj[check.name] === 'undefined') {
+						var cnt = check.timeout? (check.timeout / 10) : 1000; // timeout 10 secs
+						var fi = setInterval(function() {
+							if (--cnt > 0 && typeof check.obj[check.name] !== 'undefined') {
+								clearInterval(fi);
+								callback();
+							}
+						}, 10);
+					} else {
+						callback();
+					}
+				} else {
+					callback();
+				}
+			}
 		}
 		opts = $.isPlainObject(opts)? $.extend(defOpts, opts) : defOpts;
 		(function appendScript() {
@@ -6654,7 +6671,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 5da3792)';
+elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 1c6f439)';
 
 
 
