@@ -587,7 +587,7 @@ elFinder.prototype.commands.resize = function() {
 						v = grid8? Math.round(v/8)*8 : Math.round(v);
 						v = Math.max(0, v);
 						if (max && v > max) {
-							v = grid8? v - 8 : max;
+							v = grid8? Math.floor(max/8)*8 : max;
 						}
 						return v;
 					},
@@ -650,17 +650,17 @@ elFinder.prototype.commands.resize = function() {
 						updateView : function(change) {
 							var r, x, y, w, h;
 							
-							pointX.val(Math.min(pointX.val(), owidth - 1));
-							pointY.val(Math.min(pointY.val(), oheight - 1));
-							offsetX.val(Math.min(offsetX.val(), owidth - pointX.val()));
-							offsetY.val(Math.min(offsetY.val(), oheight - pointY.val()));
+							pointX.val(round(pointX.val(), owidth - (grid8? 8 : 1)));
+							pointY.val(round(pointY.val(), oheight - (grid8? 8 : 1)));
+							offsetX.val(round(offsetX.val(), owidth - pointX.val()));
+							offsetY.val(round(offsetY.val(), oheight - pointY.val()));
 							
 							if (cratioc) {
 								r = coverc.width() / coverc.height();
 								if (change === 'w') {
-									offsetY.val(Math.round(parseInt(offsetX.val()) / r));
+									offsetY.val(round(parseInt(offsetX.val()) / r));
 								} else if (change === 'h') {
-									offsetX.val(Math.round(parseInt(offsetY.val()) * r));
+									offsetX.val(round(parseInt(offsetY.val()) * r));
 								}
 							}
 							x = Math.round(parseInt(pointX.val()) * prop);
