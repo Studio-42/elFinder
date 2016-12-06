@@ -488,7 +488,7 @@ var elFinder = function(node, opts) {
 				
 				$('head').append(hide);
 				baseUrl = myTag.attr('src').replace(/js\/[^\/]+$/, '');
-				fm.loadCss([baseUrl+'css/elfinder.full.css', baseUrl+'css/theme.css']);
+				fm.loadCss([baseUrl+'css/elfinder.min.css', baseUrl+'css/theme.css']);
 				
 				// additional CSS files
 				if ($.isArray(fm.options.cssAutoLoad)) {
