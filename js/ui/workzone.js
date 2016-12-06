@@ -13,7 +13,7 @@ $.fn.elfinderworkzone = function(fm) {
 			parent = wz.parent(),
 			fitsize = function() {
 				var height = parent.height() - wdelta,
-					ovf    = parent.css('overflow'),
+					style  = parent.attr('style'),
 					curH   = Math.round(wz.height());
 	
 				parent.css('overflow', 'hidden')
@@ -24,7 +24,7 @@ $.fn.elfinderworkzone = function(fm) {
 							height -= ch.outerHeight(true);
 						}
 					});
-				parent.css('overflow', ovf);
+				parent.attr('style', style);
 				
 				height = Math.max(0, Math.round(height));
 				if (prevH !== height || curH !== height) {
