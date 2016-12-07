@@ -4315,9 +4315,8 @@ elFinder.prototype = {
 				target      = (data.target || self.cwd().hash),
 				chunkEnable = (self.option('uploadMaxConn', target) != -1),
 				multiMax    = Math.min(5, Math.max(1, self.option('uploadMaxConn', target))),
-				timeout     = 30000, // 30 sec
 				retryWait   = 10000, // 10 sec
-				retryMax    = 18, // 10 sec * 18 = 180 sec (Max 3 mins)
+				retryMax    = 30, // 10 sec * 30 = 300 secs (Max 5 mins)
 				retry       = 0,
 				dfrd   = $.Deferred()
 					.fail(function(error) {
@@ -4365,7 +4364,8 @@ elFinder.prototype = {
 				formData    = new FormData(),
 				files       = data.input ? data.input.files : self.uploads.checkFile(data, self, target), 
 				cnt         = data.checked? (isDataType? files[0].length : files.length) : files.length,
-				loaded      = 0, prev,
+				loaded      = 0,
+				prev        = 0,
 				filesize    = 0,
 				notify      = false,
 				notifyElm   = self.ui.notify,
@@ -4394,6 +4394,7 @@ elFinder.prototype = {
 						self.notify({type : 'upload', cnt : cnt, progress : loaded - prev, size : size,
 							cancel: function() {
 								node.trigger('uploadabort');
+								dfrd.resolve();
 							}
 						});
 						prev = loaded;
@@ -4403,6 +4404,25 @@ elFinder.prototype = {
 							cancelToggle(cancelBtn && loaded < size);
 						}
 					}, self.options.notifyDelay);
+				},
+				doRetry = function() {
+					if (retry++ <= retryMax) {
+						if (checkNotify() && prev) {
+							self.notify({type : 'upload', cnt : 0, progress : 0, size : prev});
+						}
+						xhr.quiet = true;
+						xhr.abort();
+						prev = loaded = 0;
+						setTimeout(function() {
+							if (! abort) {
+								xhr.open('POST', self.uploadURL, true);
+								xhr.send(formData);
+							}
+						}, retryWait);
+					} else {
+						node.trigger('uploadabort');
+						dfrd.reject(['errAbort', 'errTimeout']);
+					}
 				},
 				renames = (data.renames || null),
 				hashes = (data.hashes || null),
@@ -4429,29 +4449,13 @@ elFinder.prototype = {
 							errors.push('errFolderUpload');
 							dfrd.reject(['errAbort', 'errFolderUpload']);
 						} else {
-							if (retry++ <= retryMax) {
-								setTimeout(function() {
-									if (! abort) {
-										filesize = 0;
-										xhr.open('POST', self.uploadURL, true);
-										xhr.timeout = timeout;
-										xhr.send(formData);
-									}
-								}, retryWait);
-							} else {
-								node.trigger('uploadabort');
-								dfrd.reject(['errAbort']);
-							}
+							doRetry();
 						}
 					}
 				} else {
 					node.trigger('uploadabort');
 					dfrd.reject('errConnect');
 				}
-			}, false);
-			
-			xhr.addEventListener('abort', function() {
-				dfrd.reject(['errConnect', 'errAbort']);
 			}, false);
 			
 			xhr.addEventListener('load', function(e) {
@@ -4464,9 +4468,6 @@ elFinder.prototype = {
 						error = 'errConnect';
 					}
 				} else {
-					if (xhr.readyState != 4) {
-						error = ['errConnect', 'errTimeout']; // am i right?
-					}
 					if (!xhr.responseText) {
 						error = ['errResponse', 'errDataEmpty'];
 					}
@@ -4539,7 +4540,7 @@ elFinder.prototype = {
 			xhr.upload.addEventListener('progress', function(e) {
 				var curr;
 
-				if (e.lengthComputable && !chunkMerge) {
+				if (e.lengthComputable && !chunkMerge && xhr.readyState < 2) {
 					
 					loaded = e.loaded;
 
@@ -4554,7 +4555,6 @@ elFinder.prototype = {
 					}
 					
 					if (!filesize) {
-						retry && (loaded = 0);
 						filesize = e.total;
 						if (!loaded) {
 							loaded = parseInt(filesize * 0.05);
@@ -4868,7 +4868,6 @@ elFinder.prototype = {
 							formData.append('chunk', file._chunk);
 							formData.append('cid'  , file._cid);
 							formData.append('range', file._range);
-							xhr.timeout = timeout;
 						}
 						formData.append('mtime[]', file.lastModified? Math.round(file.lastModified/1000) : 0);
 					}
