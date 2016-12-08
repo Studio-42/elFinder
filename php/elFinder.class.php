@@ -2545,7 +2545,10 @@ class elFinder {
 					}
 					if ($enc) {
 						if ($args['conv'] == '1') {
-							$args['conv'] = $enc === 'unknown'? '' : $enc;
+							$args['conv'] = '';
+							if ($enc === 'unknown') {
+								$content = false;
+							}
 						} else if ($enc === 'unknown') {
 							return array('doconv' => $enc);
 						}
