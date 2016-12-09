@@ -184,6 +184,10 @@
 											})
 											.on('click', function(){
 												editor.showSettingsMenu();
+												$('#ace_settingsmenu')
+													.css('font-size', '80%')
+													.find('div[contains="setOptions"]').hide().end()
+													.parent().parent().appendTo($('#elfinder'));
 											})
 										)
 										.prependTo(taBase.next());
