@@ -3341,10 +3341,11 @@ abstract class elFinderVolumeDriver {
 	 * 
 	 * @param  array  $hashes  target hashes
 	 * @param  string $dir     destination directory (for recurcive)
+	 * @param  string $canLink it can use link() (for recurcive)
 	 * @return string|false    saved path name
 	 * @author Naoki Sawada
 	 */
-	protected function getItemsInHand($hashes, $dir = null) {
+	protected function getItemsInHand($hashes, $dir = null, $canLink = null) {
 		static $totalSize = 0;
 		if (is_null($dir)) {
 			$totalSize = 0;
@@ -3356,6 +3357,9 @@ abstract class elFinderVolumeDriver {
 				return false;
 			}
 			register_shutdown_function(array($this, 'rmdirRecursive'), $dir);
+		}
+		if (is_null($canLink)) {
+			$canLink = ($this instanceof elFinderVolumeLocalFileSystem);
 		}
 		elFinder::extendTimeLimit();
 		$res = true;
@@ -3386,7 +3390,7 @@ abstract class elFinderVolumeDriver {
 					}
 				}
 				if (($res = mkdir($target, 0700, true)) && $chashes) {
-					$res = $this->getItemsInHand($chashes, $target);
+					$res = $this->getItemsInHand($chashes, $target, $canLink);
 				}
 				if (!$res) {
 					break;
@@ -3394,13 +3398,17 @@ abstract class elFinderVolumeDriver {
 				!empty($file['ts']) && touch($target, $file['ts']);
 			} else {
 				$path = $this->decode($hash);
-				if ($fp = $this->fopenCE($path)) {
-					if ($tfp = fopen($target, 'wb')) {
-						$totalSize += stream_copy_to_stream($fp, $tfp);
-						fclose($tfp);
+				if (! $canLink || ! ($canLink = link($path, $target))) {
+					if ($fp = $this->fopenCE($path)) {
+						if ($tfp = fopen($target, 'wb')) {
+							$totalSize += stream_copy_to_stream($fp, $tfp);
+							fclose($tfp);
+						}
+						!empty($file['ts']) && touch($target, $file['ts']);
+						$this->fcloseCE($fp, $path);
 					}
-					!empty($file['ts']) && touch($target, $file['ts']);
-					$this->fcloseCE($fp, $path);
+				} else {
+					$totalSize += filesize($path);
 				}
 				if ($this->options['maxArcFilesSize'] > 0 && $this->options['maxArcFilesSize'] < $totalSize) {
 					$res = $this->setError(elFinder::ERROR_ARC_MAXSIZE);
