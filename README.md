@@ -97,8 +97,8 @@ Requirements
 **However, we recommend newest version.**
 
 ### Client
- * Modern browser. elFinder was tested in Firefox 12, Internet Explorer 8+,
-   Safari 6, Opera 12 and Chrome 19
+ * Modern browser. elFinder was tested in Internet Explorer 8
+   and newest Firefox, Chrome, IE, Edge and Opera
 
 ### Server
  * Any web server
