@@ -979,7 +979,8 @@ $.fn.elfindertree = function(fm, opts) {
 				}
 			}
 
-			sync(true);
+			// fm.cwd() became empty object when cwd removed
+			fm.cwd().hash && sync(true);
 		})
 		// remove dirs
 		.remove(function(e) {
