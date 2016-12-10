@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.18 (2.1-src Nightly: 9d4693d) (2016-12-09)
+ * Version 2.1.19 (2016-12-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6670,7 +6670,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.18 (2.1-src Nightly: 9d4693d)';
+elFinder.prototype.version = '2.1.19';
 
 
 
@@ -15504,7 +15504,8 @@ $.fn.elfindertree = function(fm, opts) {
 				}
 			}
 
-			sync(true);
+			// fm.cwd() became empty object when cwd removed
+			fm.cwd().hash && sync(true);
 		})
 		// remove dirs
 		.remove(function(e) {
