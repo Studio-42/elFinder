@@ -1,3 +1,22 @@
+2016-12-10  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.19):
+		- [js] Fixed #1000 Wrap compiled code in UMD (for commonJs and AMD support)
+		- [VD:OneDrive,Box] Fixed #1774 dose not work when PHP has `open_basedir`
+		- [cmd:edit,php:core] Fixed #1779 save contents with original character encoding
+		- [ui:toolbar] Fixed #1778 displayTextLabel option not works
+		- [cmd:edit] add encoding select box rel. #1779
+		- [cmd:search] Fixed #1782 search by mimetype dose not work (>=2.1.16)
+		- [ui:dialog] Fixed #1785 trigger resize event with `maximize:on` in minimize element
+		- [VD:abstract] Fixed #1783 Illegal duplicate data as bind in duplicate command
+		- [cmd:edit] include elFinder instance as `fm` into `ta.editor` property
+		- [js:core] Fixed #1791 implement JS, CSS loader and auto load of elFinder CSS
+		- [cmd:resize] Fixed #1789 bug that crop image size is change while dragging
+		- [js:core] Fixed #1788 bug that chunked upload timeout processing is invalid
+		- [VD:abstract] Fixed #1799 uses `link()` in exec `zipdl` to more faster
+		- And some minor bug fixes
+
+
 2016-11-21  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.18):
