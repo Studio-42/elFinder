@@ -97,8 +97,8 @@ Requirements
 **However, we recommend newest version.**
 
 ### Client
- * Modern browser. elFinder was tested in Firefox 12, Internet Explorer 8+,
-   Safari 6, Opera 12 and Chrome 19
+ * Modern browser. elFinder was tested in Internet Explorer 8
+   and newest Firefox, Chrome, IE, Edge and Opera
 
 ### Server
  * Any web server
@@ -127,7 +127,7 @@ Installation
 Downloads
 ------------
 **Stable releases** ([Changelog](https://github.com/Studio-42/elFinder/blob/master/Changelog))
- + [elFinder 2.1.18](https://github.com/Studio-42/elFinder/archive/2.1.18.zip)
+ + [elFinder 2.1.19](https://github.com/Studio-42/elFinder/archive/2.1.19.zip)
  + [elFinder 2.0.7](https://github.com/Studio-42/elFinder/archive/2.0.7.zip)
 
 **Nightly builds**
