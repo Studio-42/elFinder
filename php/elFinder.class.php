@@ -853,8 +853,8 @@ class elFinder {
 		}
 		
 		foreach ($this->volumes as $volume) {
+			$volume->saveSessionCache();
 			$volume->umount();
-			$volume->__destruct();
 		}
 		
 		if (!empty($result['callback'])) {

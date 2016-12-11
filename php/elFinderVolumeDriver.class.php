@@ -668,13 +668,6 @@ abstract class elFinderVolumeDriver {
 	 */
 	protected $rootModified = false;
 	
-	/**
-	 * Destracter
-	 */
-	public function __destruct() {
-		$this->session->set($this->id, $this->sessionCache);
-	}
-	
 	/*********************************************************************/
 	/*                            INITIALIZATION                         */
 	/*********************************************************************/
@@ -829,6 +822,16 @@ abstract class elFinderVolumeDriver {
 	 */
 	public function setSession($session) {
 		$this->session = $session;
+	}
+	
+	/**
+	 * Save session cache data
+	 * Calls this function before umount this volume on elFinder::exec()
+	 * 
+	 * @return void
+	 */
+	public function saveSessionCache() {
+		$this->session->set($this->id, $this->sessionCache);
 	}
 	
 	/**
