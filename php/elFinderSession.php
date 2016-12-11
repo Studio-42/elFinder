@@ -42,7 +42,7 @@ class elFinderSession implements elFinderSessionInterface
 			if (session_status() !== PHP_SESSION_ACTIVE) {
 				session_start();
 			}
-		} else {
+		} elseif (session_id() === '') {
 			set_error_handler(array($this, 'session_start_error'),  E_NOTICE);
 			session_start();
 			restore_error_handler();
