@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.19 (2.1-src Nightly: eb8271d) (2016-12-11)
+ * Version 2.1.19 (2.1-src Nightly: b56aaf0) (2016-12-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -6540,7 +6540,7 @@ elFinder.prototype = {
 	 * 
 	 * @param  Array    urls      to load JavaScript file URLs
 	 * @param  Function callback  call back function on script loaded
-	 * @param  Object   opts      Additional options to $.ajax
+	 * @param  Object   opts      Additional options to $.ajax OR {loadType: 'tag'} to load by script tag
 	 * @param  Object   check     { obj: (Object)ParentObject, name: (String)"Attribute name", timeout: (Integer)milliseconds }
 	 * @return elFinder
 	 */
@@ -6569,13 +6569,20 @@ elFinder.prototype = {
 				}
 			}
 		}
-		opts = $.isPlainObject(opts)? $.extend(defOpts, opts) : defOpts;
-		(function appendScript() {
-			$.ajax($.extend(opts, {
-				url: urls.shift(),
-				success: urls.length? appendScript : success
-			}));
-		})();
+		if (opts && opts.loadType === 'tag') {
+			$.each(urls, function(i, url) {
+				$('head').append($('<script defer="defer">').attr('src', url));
+			});
+			success();
+		} else {
+			opts = $.isPlainObject(opts)? $.extend(defOpts, opts) : defOpts;
+			(function appendScript() {
+				$.ajax($.extend(opts, {
+					url: urls.shift(),
+					success: urls.length? appendScript : success
+				}));
+			})();
+		}
 		return this;
 	},
 	
@@ -6670,7 +6677,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.19 (2.1-src Nightly: eb8271d)';
+elFinder.prototype.version = '2.1.19 (2.1-src Nightly: b56aaf0)';
 
 
 
