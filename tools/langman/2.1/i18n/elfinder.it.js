@@ -1,8 +1,8 @@
 /**
  * Italiano translation
  * @author Alberto Tocci (alberto.tocci@gmail.com)
- * @author Claudio Nicora (nicorac@yahoo.com)
- * @version 2016-07-11
+ * @author Claudio Nicora (coolsoft.ita@gmail.com)
+ * @version 2016-12-12
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -14,7 +14,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.it = {
-		translator : 'Alberto Tocci (alberto.tocci@gmail.com), Claudio Nicora (nicorac@yahoo.com)',
+		translator : 'Alberto Tocci (alberto.tocci@gmail.com), Claudio Nicora (coolsoft.ita@gmail.com)',
 		language   : 'Italiano',
 		direction  : 'ltr',
 		dateFormat : 'd/m/Y H:i',
@@ -130,7 +130,7 @@
 			'cmdquicklook' : 'Anteprima',
 			'cmdreload'    : 'Ricarica',
 			'cmdrename'    : 'Rinomina',
-			'cmdrm'        : 'Cancella',
+			'cmdrm'        : 'Elimina',
 			'cmdsearch'    : 'Ricerca file',
 			'cmdup'        : 'Vai alla directory padre',
 			'cmdupload'    : 'Carica File',
@@ -147,9 +147,9 @@
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Chiudi',
 			'btnSave'   : 'Salva',
-			'btnRm'     : 'Rimuovi',
+			'btnRm'     : 'Elimina',
 			'btnApply'  : 'Applica',
-			'btnCancel' : 'Cancella',
+			'btnCancel' : 'Annulla',
 			'btnNo'     : 'No',
 			'btnYes'    : 'Si',
 			'btnMount'  : 'Monta',  // added 18.04.2012
@@ -170,10 +170,10 @@
 			'ntfreload'   : 'Ricarica il contenuto della cartella',
 			'ntfmkdir'    : 'Creazione delle directory in corso',
 			'ntfmkfile'   : 'Creazione dei files in corso',
-			'ntfrm'       : 'Cancellazione files in corso',
+			'ntfrm'       : 'Eliminazione dei files in corso',
 			'ntfcopy'     : 'Copia file in corso',
 			'ntfmove'     : 'Spostamento file in corso',
-			'ntfprepare'  : 'Inizializzando la copia dei file.',
+			'ntfprepare'  : 'Preparazione della copia dei file.',
 			'ntfrename'   : 'Sto rinominando i file',
 			'ntfupload'   : 'Caricamento file in corso',
 			'ntfdownload' : 'Downloading file in corso',
@@ -254,7 +254,7 @@
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Conferma richiesta',
-			'confirmRm'       : 'Sei sicuro di voler rimuovere i file?<br />L\'operazione non è reversibile!',
+			'confirmRm'       : 'Sei sicuro di voler eliminare i file?<br />L\'operazione non è reversibile!',
 			'confirmRepl'     : 'Sostituire i file ?',
 			'confirmConvUTF8' : 'Non in formato UTF-8<br/>Convertire in UTF-8?<br/>Il contenuto diventerà UTF-8 salvando dopo la conversione.', // from v2.1 added 08.04.2014
 			'confirmNotSave'  : 'Il contenuto è stato modificato.<br/>Le modifiche andranno perse se non si salveranno.', // from v2.1 added 15.7.2015
