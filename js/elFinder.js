@@ -6509,7 +6509,7 @@ elFinder.prototype = {
 	 * 
 	 * @param  Array    urls      to load JavaScript file URLs
 	 * @param  Function callback  call back function on script loaded
-	 * @param  Object   opts      Additional options to $.ajax
+	 * @param  Object   opts      Additional options to $.ajax OR {loadType: 'tag'} to load by script tag
 	 * @param  Object   check     { obj: (Object)ParentObject, name: (String)"Attribute name", timeout: (Integer)milliseconds }
 	 * @return elFinder
 	 */
@@ -6538,13 +6538,20 @@ elFinder.prototype = {
 				}
 			}
 		}
-		opts = $.isPlainObject(opts)? $.extend(defOpts, opts) : defOpts;
-		(function appendScript() {
-			$.ajax($.extend(opts, {
-				url: urls.shift(),
-				success: urls.length? appendScript : success
-			}));
-		})();
+		if (opts && opts.loadType === 'tag') {
+			$.each(urls, function(i, url) {
+				$('head').append($('<script defer="defer">').attr('src', url));
+			});
+			success();
+		} else {
+			opts = $.isPlainObject(opts)? $.extend(defOpts, opts) : defOpts;
+			(function appendScript() {
+				$.ajax($.extend(opts, {
+					url: urls.shift(),
+					success: urls.length? appendScript : success
+				}));
+			})();
+		}
 		return this;
 	},
 	
