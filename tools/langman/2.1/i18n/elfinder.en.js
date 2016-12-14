@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2016-12-02
+ * @version 2016-12-13
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -96,7 +96,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'errExtractExec'       : 'Error while extracting files: "$1"',
 			'errNetUnMount'        : 'Unable to unmount', // from v2.1 added 30.04.2012
 			'errConvUTF8'          : 'Not convertible to UTF-8', // from v2.1 added 08.04.2014
-			'errFolderUpload'      : 'Try Google Chrome, If you\'d like to upload the folder.', // from v2.1 added 26.6.2015
+			'errFolderUpload'      : 'Try the modern browser, If you\'d like to upload the folder.', // from v2.1 added 26.6.2015
 			'errSearchTimeout'     : 'Timed out while searching "$1". Search result is partial.', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : 'Re-authorization is required.', // from v2.1.10 added 24.3.2016
 			'errMaxTargets'        : 'Max number of selectable items is $1.', // from v2.1.17 added 17.10.2016
@@ -310,7 +310,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'shortcutsof'     : 'Shortcuts disabled',
 			'dropFiles'       : 'Drop files here',
 			'or'              : 'or',
-			'selectForUpload' : 'Select files to upload',
+			'selectForUpload' : 'Select files',
 			'moveFiles'       : 'Move files',
 			'copyFiles'       : 'Copy files',
 			'rmFromPlaces'    : 'Remove from places',
@@ -378,6 +378,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'minsLeft'        : '$1 mins left', // from v2.1.17 added 13.11.2016
 			'openAsEncoding'  : 'Reopen with selected encoding', // from v2.1.19 added 2.12.2016
 			'saveAsEncoding'  : 'Save with the selected encoding', // from v2.1.19 added 2.12.2016
+			'selectFolder'    : 'Select folder', // from v2.1.20 added 13.12.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
