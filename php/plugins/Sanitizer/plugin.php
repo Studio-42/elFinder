@@ -46,9 +46,8 @@
  * @author Naoki Sawada
  * @license New BSD
  */
-class elFinderPluginSanitizer
+class elFinderPluginSanitizer extends elFinderPlugin
 {
-	private $opts = array();
 	private $replaced = array();
 	private $keyMap = array(
 		'ls' => 'intersect',
@@ -66,7 +65,7 @@ class elFinderPluginSanitizer
 	}
 	
 	public function cmdPreprocess($cmd, &$args, $elfinder, $volume) {
-		$opts = $this->getOpts($volume);
+		$opts = $this->getCurrentOpts($volume);
 		if (! $opts['enable']) {
 			return false;
 		}
@@ -103,7 +102,7 @@ class elFinderPluginSanitizer
 	}
 	
 	public function onUpLoadPreSave(&$path, &$name, $src, $elfinder, $volume) {
-		$opts = $this->getOpts($volume);
+		$opts = $this->getCurrentOpts($volume);
 		if (! $opts['enable']) {
 			return false;
 		}
@@ -113,17 +112,6 @@ class elFinderPluginSanitizer
 		}
 		$name = $this->sanitizeFileName($name, $opts);
 		return true;
-	}
-	
-	private function getOpts($volume) {
-		$opts = $this->opts;
-		if (is_object($volume)) {
-			$volOpts = $volume->getOptionsPlugin('Sanitizer');
-			if (is_array($volOpts)) {
-				$opts = array_merge($this->opts, $volOpts);
-			}
-		}
-		return $opts;
 	}
 	
 	private function sanitizeFileName($filename, $opts, $allows = array()) {
