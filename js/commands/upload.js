@@ -214,7 +214,7 @@ elFinder.prototype.commands.upload = function() {
 				}
 			}
 			if (file) {
-				fmUpload({files : file, type : type, target : target});
+				fmUpload({files : file, type : type, target : target, dropEvt : e});
 			} else {
 				errors = ['errUploadNoFiles'];
 				if (kind === 'file') {
