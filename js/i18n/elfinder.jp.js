@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2016-12-02
+ * @version 2016-12-13
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -104,7 +104,7 @@
 			'errExtractExec'       : 'ファイルの抽出中にエラーが発生しました："$1"',
 			'errNetUnMount'        : 'アンマウントできません', // from v2.1 added 30.04.2012
 			'errConvUTF8'          : 'UTF-8 に変換できませんでした', // from v2.1 added 08.04.2014
-			'errFolderUpload'      : 'フォルダをアップロードしたいのであれば、Google Chrome を使用してください', // from v2.1 added 26.6.2015
+			'errFolderUpload'      : 'フォルダをアップロードしたいのであれば、モダンブラウザを試してください', // from v2.1 added 26.6.2015
 			'errSearchTimeout'     : '"$1"を検索中にタイムアウトしました。検索結果は部分的です。', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : '再認可が必要です', // from v2.1.10 added 24.3.2016
 			'errMaxTargets'        : '選択可能な最大アイテム数は $1 個です', // from v2.1.17 added 17.10.2016
@@ -318,7 +318,7 @@
 			'shortcutsof'     : 'ショートカットは利用できません',
 			'dropFiles'       : 'ここにファイルをドロップ',
 			'or'              : 'または',
-			'selectForUpload' : 'アップロードするファイルを選択',
+			'selectForUpload' : 'ファイルを選択',
 			'moveFiles'       : 'ファイルを移動',
 			'copyFiles'       : 'ファイルをコピー',
 			'rmFromPlaces'    : 'ここから削除',
@@ -386,6 +386,7 @@
 			'minsLeft'        : '残り$1分', // from v2.1.17 added 13.11.2016
 			'openAsEncoding'  : '選択したエンコーディングで開き直す', // from v2.1.19 added 2.12.2016
 			'saveAsEncoding'  : '選択したエンコーディングで保存', // from v2.1.19 added 2.12.2016
+			'selectFolder'    : 'フォルダーを選択', // from v2.1.20 added 13.12.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',

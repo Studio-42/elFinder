@@ -80,6 +80,17 @@ elFinder.prototype._options = {
 	uploadMaxChunkSize : 10485760,
 	
 	/**
+	 * Regular expression of file name to exclude when uploading folder
+	 * 
+	 * @type Object
+	 * @default { win: /^(?:desktop\.ini|thumbs\.db)$/i, mac: /^\.ds_store$/i }
+	 */
+	folderUploadExclude : {
+		win: /^(?:desktop\.ini|thumbs\.db)$/i,
+		mac: /^\.ds_store$/i
+	},
+	
+	/**
 	 * Timeout for upload using iframe
 	 *
 	 * @type Number
