@@ -4312,6 +4312,7 @@ elFinder.prototype = {
 				dataChecked = data.checked,
 				isDataType  = (data.isDataType || data.type == 'data'),
 				target      = (data.target || self.cwd().hash),
+				dropEvt     = (data.dropEvt || null),
 				chunkEnable = (self.option('uploadMaxConn', target) != -1),
 				multiMax    = Math.min(5, Math.max(1, self.option('uploadMaxConn', target))),
 				retryWait   = 10000, // 10 sec
@@ -4612,6 +4613,7 @@ elFinder.prototype = {
 									files: sfiles[i],
 									checked: true,
 									target: target,
+									dropEvt: dropEvt,
 									renames: renames,
 									hashes: hashes,
 									multiupload: true}, void 0, target)
@@ -4887,6 +4889,15 @@ elFinder.prototype = {
 					$.each(paths, function(i, path) {
 						formData.append('upload_path[]', path);
 					});
+				}
+				
+				// send int value that which meta key was pressed when dropped  as `dropWith`
+				if (dropEvt) {
+					formData.append('dropWith', parseInt(
+						(dropEvt.altKey  ? '1' : '0')+
+						(dropEvt.ctrlKey ? '1' : '0')+
+						(dropEvt.metaKey ? '1' : '0')+
+						(dropEvt.shiftKey? '1' : '0'), 2));
 				}
 				
 				xhr.send(formData);
