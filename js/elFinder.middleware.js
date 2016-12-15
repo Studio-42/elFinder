@@ -46,7 +46,10 @@ elFinder.prototype.middleware = function (fm) {
 
     this.executeCallbacks = function (context, stack, params) {
         var index = 0;
-
+        if(stack.lenght == 0)
+        {
+          return false;
+        }
         function next(err) {
             var action = stack[index++];
             if (!action) {
