@@ -852,5 +852,16 @@ elFinder.prototype._options = {
 	 * @type Array|Boolean
 	 */
 	// debug : true
-	debug : ['error', 'warning', 'event-destroy']
+	debug : ['error', 'warning', 'event-destroy'],
+
+    /**
+     * Middleware callbacks
+     */
+    middleware: {
+        tree: {
+            click     : [],
+            clickArrow: []
+        }
+
+    }
 };

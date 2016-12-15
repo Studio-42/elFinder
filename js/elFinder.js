@@ -3086,6 +3086,12 @@ var elFinder = function(node, opts) {
 	 * @type Object
 	 */
 	this.leafRoots = {};
+
+    /**
+	 * middleware handler
+     * @type {elFinder.middleware}
+     */
+	this.middleware = new this.middleware(this);
 	
 	/**
 	 * Loaded commands
