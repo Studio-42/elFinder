@@ -1779,8 +1779,8 @@ var elFinder = function(node, opts) {
 			},
 			bindData = {opts: opts, result: true};
 		
-		// trigger "exec.cmd" that callback be able to cancel request by substituting "false" for "event.data.result"
-		self.trigger('execpre.' + cmd, bindData, true);
+		// trigger "request.cmd" that callback be able to cancel request by substituting "false" for "event.data.result"
+		self.trigger('request.' + cmd, bindData, true);
 		
 		if (! bindData.result) {
 			self.trigger(cmd + 'done');
