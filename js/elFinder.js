@@ -1577,6 +1577,7 @@ var elFinder = function(node, opts) {
 						} 
 				}
 				
+				self.trigger(cmd + 'done');
 				dfrd.reject(error, xhr, status);
 			},
 			/**
@@ -1663,6 +1664,7 @@ var elFinder = function(node, opts) {
 			},
 			xhr, _xhr,
 			abort = function(e){
+				self.trigger(cmd + 'done');
 				if (e.type == 'autosync') {
 					if (e.data.action != 'stop') return;
 				} else if (e.type != 'unload' && e.type != 'destroy' && e.type != 'openxhrabort') {
@@ -1677,103 +1679,124 @@ var elFinder = function(node, opts) {
 						self.autoSync();
 					}
 				}
-			};
-
-		dfrd.fail(function(error, xhr, response) {
-			self.trigger(cmd + 'fail', response);
-			if (error) {
-				deffail ? self.error(error) : self.debug('error', self.i18n(error));
-			}
-			syncOnFail && self.sync();
-		})
-
-		if (!cmd) {
-			syncOnFail = false;
-			return dfrd.reject('errCmdReq');
-		}
-		
-		if (self.maxTargets && data.targets && data.targets.length > self.maxTargets) {
-			syncOnFail = false;
-			return dfrd.reject(['errMaxTargets', self.maxTargets]);
-		}
-
-		defdone && dfrd.done(done);
-		if (notify.type && notify.cnt) {
-			if (cancel) {
-				notify.cancel = dfrd;
-			}
-			timeout = setTimeout(function() {
-				self.notify(notify);
-				dfrd.always(function() {
-					notify.cnt = -(parseInt(notify.cnt)||0);
-					self.notify(notify);
+			},
+			request = function() {
+				dfrd.fail(function(error, xhr, response) {
+					self.trigger(cmd + 'fail', response);
+					if (error) {
+						deffail ? self.error(error) : self.debug('error', self.i18n(error));
+					}
+					syncOnFail && self.sync();
 				})
-			}, self.notifyDelay)
-			
-			dfrd.always(function() {
-				clearTimeout(timeout);
-			});
-		}
-		
-		// quiet abort not completed "open" requests
-		if (isOpen) {
-			while ((_xhr = queue.pop())) {
-				if (_xhr.state() == 'pending') {
-					_xhr.quiet = true;
-					_xhr.abort();
+
+				if (!cmd) {
+					syncOnFail = false;
+					return dfrd.reject('errCmdReq');
 				}
-			}
-			if (cwd !== data.target) {
-				while ((_xhr = cwdQueue.pop())) {
-					if (_xhr.state() == 'pending') {
-						_xhr.quiet = true;
-						_xhr.abort();
+				
+				if (self.maxTargets && data.targets && data.targets.length > self.maxTargets) {
+					syncOnFail = false;
+					return dfrd.reject(['errMaxTargets', self.maxTargets]);
+				}
+
+				defdone && dfrd.done(done);
+				if (notify.type && notify.cnt) {
+					if (cancel) {
+						notify.cancel = dfrd;
+					}
+					timeout = setTimeout(function() {
+						self.notify(notify);
+						dfrd.always(function() {
+							notify.cnt = -(parseInt(notify.cnt)||0);
+							self.notify(notify);
+						})
+					}, self.notifyDelay)
+					
+					dfrd.always(function() {
+						clearTimeout(timeout);
+					});
+				}
+				
+				// quiet abort not completed "open" requests
+				if (isOpen) {
+					while ((_xhr = queue.pop())) {
+						if (_xhr.state() == 'pending') {
+							_xhr.quiet = true;
+							_xhr.abort();
+						}
+					}
+					if (cwd !== data.target) {
+						while ((_xhr = cwdQueue.pop())) {
+							if (_xhr.state() == 'pending') {
+								_xhr.quiet = true;
+								_xhr.abort();
+							}
+						}
 					}
 				}
-			}
-		}
 
-		// trigger abort autoSync for commands to add the item
-		if ($.inArray(cmd, (self.cmdsToAdd + ' autosync').split(' ')) !== -1) {
-			if (cmd !== 'autosync') {
-				self.autoSync('stop');
+				// trigger abort autoSync for commands to add the item
+				if ($.inArray(cmd, (self.cmdsToAdd + ' autosync').split(' ')) !== -1) {
+					if (cmd !== 'autosync') {
+						self.autoSync('stop');
+						dfrd.always(function() {
+							self.autoSync();
+						});
+					}
+					self.trigger('openxhrabort');
+				}
+
+				delete options.preventFail
+
+				dfrd.xhr = xhr = self.transport.send(options).fail(error).done(success);
+				
+				if (isOpen || (data.compare && cmd === 'info')) {
+					// add autoSync xhr into queue
+					queue.unshift(xhr);
+					// bind abort()
+					data.compare && self.bind(self.cmdsToAdd + ' autosync openxhrabort', abort);
+					dfrd.always(function() {
+						var ndx = $.inArray(xhr, queue);
+						data.compare && self.unbind(self.cmdsToAdd + ' autosync openxhrabort', abort);
+						ndx !== -1 && queue.splice(ndx, 1);
+					});
+				} else if ($.inArray(cmd, self.abortCmdsOnOpen) !== -1) {
+					// add "open" xhr, only cwd xhr into queue
+					cwdQueue.unshift(xhr);
+					dfrd.always(function() {
+						var ndx = $.inArray(xhr, cwdQueue);
+						ndx !== -1 && cwdQueue.splice(ndx, 1);
+					});
+				}
+				
+				// abort pending xhr on window unload or elFinder destroy
+				self.bind('unload destroy', abort);
 				dfrd.always(function() {
-					self.autoSync();
+					self.unbind('unload destroy', abort);
 				});
-			}
-			self.trigger('openxhrabort');
-		}
-
-		delete options.preventFail
-
-		dfrd.xhr = xhr = this.transport.send(options).fail(error).done(success);
+				
+				return dfrd;
+			},
+			bindData = {opts: opts, result: true};
 		
-		if (isOpen || (data.compare && cmd === 'info')) {
-			// add autoSync xhr into queue
-			queue.unshift(xhr);
-			// bind abort()
-			data.compare && self.bind(self.cmdsToAdd + ' autosync openxhrabort', abort);
-			dfrd.always(function() {
-				var ndx = $.inArray(xhr, queue);
-				data.compare && self.unbind(self.cmdsToAdd + ' autosync openxhrabort', abort);
-				ndx !== -1 && queue.splice(ndx, 1);
-			});
-		} else if ($.inArray(cmd, this.abortCmdsOnOpen) !== -1) {
-			// add "open" xhr, only cwd xhr into queue
-			cwdQueue.unshift(xhr);
-			dfrd.always(function() {
-				var ndx = $.inArray(xhr, cwdQueue);
-				ndx !== -1 && cwdQueue.splice(ndx, 1);
-			});
+		// trigger "exec.cmd" that callback be able to cancel request by substituting "false" for "event.data.result"
+		self.trigger('execpre.' + cmd, bindData, true);
+		
+		if (! bindData.result) {
+			self.trigger(cmd + 'done');
+			return dfrd.reject();
+		} else if (typeof bindData.result === 'object' && bindData.result.promise) {
+			bindData.result
+				.done(request)
+				.fail(function() {
+					self.trigger(cmd + 'done');
+					dfrd.reject();
+				});
+			return dfrd;
 		}
 		
-		// abort pending xhr on window unload or elFinder destroy
-		self.bind('unload destroy', abort);
-		dfrd.always(function() {
-			self.unbind('unload destroy', abort);
-		});
-		
-		return dfrd;
+		// do request
+		return request();
 	};
 	
 	/**
