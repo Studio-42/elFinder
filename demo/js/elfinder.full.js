@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.19 (2.1-src Nightly: d337fe9) (2016-12-21)
+ * Version 2.1.19 (2.1-src Nightly: 778deca) (2016-12-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1810,8 +1810,8 @@ var elFinder = function(node, opts) {
 			},
 			bindData = {opts: opts, result: true};
 		
-		// trigger "exec.cmd" that callback be able to cancel request by substituting "false" for "event.data.result"
-		self.trigger('execpre.' + cmd, bindData, true);
+		// trigger "request.cmd" that callback be able to cancel request by substituting "false" for "event.data.result"
+		self.trigger('request.' + cmd, bindData, true);
 		
 		if (! bindData.result) {
 			self.trigger(cmd + 'done');
@@ -6836,7 +6836,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.19 (2.1-src Nightly: d337fe9)';
+elFinder.prototype.version = '2.1.19 (2.1-src Nightly: 778deca)';
 
 
 
