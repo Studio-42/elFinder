@@ -108,19 +108,20 @@ var elFinder = function(node, opts) {
 		 * @type Object
 		 **/
 		cwdOptions = {
-			path          : '',
-			url           : '',
-			tmbUrl        : '',
-			disabled      : [],
-			separator     : '/',
-			archives      : [],
-			extract       : [],
-			copyOverwrite : true,
+			path            : '',
+			url             : '',
+			tmbUrl          : '',
+			disabled        : [],
+			disabledInside  : [],
+			separator       : '/',
+			archives        : [],
+			extract         : [],
+			copyOverwrite   : true,
 			uploadOverwrite : true,
-			uploadMaxSize : 0,
-			jpgQuality    : 100,
-			tmbCrop       : false,
-			tmb           : false // old API
+			uploadMaxSize   : 0,
+			jpgQuality      : 100,
+			tmbCrop         : false,
+			tmb             : false // old API
 		},
 		
 		/**
@@ -1634,10 +1635,14 @@ var elFinder = function(node, opts) {
 						self.newAPI = self.api >= 2;
 						self.oldAPI = !self.newAPI;
 					}
-					
-					if (response.options) {
-						cwdOptions = $.extend({}, cwdOptions, response.options);
-					}
+
+                    // If there are no disabled options in response, we should reset those - we don't want this to be lept
+                    if (!response.options) {
+                        response.options = {};
+                    }
+                    if (!response.options.disabledInside) {
+                        response.options.disabledInside = [];
+                    }
 
 					if (response.netDrivers) {
 						self.netDrivers = response.netDrivers;
