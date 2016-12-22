@@ -3058,10 +3058,10 @@ var elFinder = function(node, opts) {
 	// We listen and emit a sound on delete according to option
 	if (true === this.options.sound) {
 		this.bind('rm', function(e) {
-            var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"');
+			var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"');
 
-            play && play != '' && play != 'no' && $(beeper).html('<source src="' + soundPath + 'rm.wav" type="audio/wav">')[0].play()
-        });
+			play && play != '' && play != 'no' && $(beeper).html('<source src="' + soundPath + 'rm.wav" type="audio/wav">')[0].play()
+		});
 	}
 
 	// bind external event handlers

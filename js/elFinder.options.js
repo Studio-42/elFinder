@@ -409,14 +409,14 @@ elFinder.prototype._options = {
 	 */
 	startPathHash : '',
 
-    /**
-     * Emit a sound when a file is deleted
+	/**
+	 * Emit a sound when a file is deleted
 	 * Sounds are in sounds/ folder
-     *
-     * @type Boolean
-     * @default true
-     */
-	sound: true,
+	 * 
+	 * @type Boolean
+	 * @default true
+	 */
+	sound : true,
 	
 	/**
 	 * UI plugins to load.
