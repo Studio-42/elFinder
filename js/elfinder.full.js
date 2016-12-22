@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.19 (2.1-src Nightly: 778deca) (2016-12-21)
+ * Version 2.1.19 (2.1-src Nightly: a267abb) (2016-12-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -4642,7 +4642,7 @@ elFinder.prototype = {
 				chunkID = new Date().getTime().toString().substr(-9), // for take care of the 32bit backend system
 				BYTES_PER_CHUNK = Math.min((fm.uplMaxSize? fm.uplMaxSize : 2097152) - 8190, fm.options.uploadMaxChunkSize), // uplMaxSize margin 8kb or options.uploadMaxChunkSize
 				blobSlice = chunkEnable? false : '',
-				blobSize, i, start, end, chunks, blob, chunk, added, done, last, failChunk,
+				blobSize, blobMtime, i, start, end, chunks, blob, chunk, added, done, last, failChunk,
 				multi = function(files, num){
 					var sfiles = [], cid, sfilesLen = 0, cancelChk;
 					if (!abort) {
@@ -4770,6 +4770,7 @@ elFinder.prototype = {
 							end = BYTES_PER_CHUNK;
 							chunks = -1;
 							total = Math.floor(blobSize / BYTES_PER_CHUNK);
+							blobMtime = blob.lastModified? Math.round(blob.lastModified/1000) : 0;
 
 							totalSize += blobSize;
 							chunked[chunkID] = 0;
@@ -4778,6 +4779,7 @@ elFinder.prototype = {
 								chunk._chunk = blob.name + '.' + (++chunks) + '_' + total + '.part';
 								chunk._cid   = chunkID;
 								chunk._range = start + ',' + chunk.size + ',' + blobSize;
+								chunk._mtime = blobMtime;
 								chunked[chunkID]++;
 								
 								if (size) {
@@ -4931,8 +4933,10 @@ elFinder.prototype = {
 							formData.append('chunk', file._chunk);
 							formData.append('cid'  , file._cid);
 							formData.append('range', file._range);
+							formData.append('mtime[]', file._mtime);
+						} else {
+							formData.append('mtime[]', file.lastModified? Math.round(file.lastModified/1000) : 0);
 						}
-						formData.append('mtime[]', file.lastModified? Math.round(file.lastModified/1000) : 0);
 					}
 					if (fm.UA.iOS) {
 						formData.append('overwrite', 0);
@@ -6836,7 +6840,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.19 (2.1-src Nightly: 778deca)';
+elFinder.prototype.version = '2.1.19 (2.1-src Nightly: a267abb)';
 
 
 
