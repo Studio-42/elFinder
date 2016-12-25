@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.19 (2.1-src Nightly: 9e7f074) (2016-12-22)
+ * Version 2.1.19 (2.1-src Nightly: 25fb08d) (2016-12-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1145,8 +1145,13 @@ var elFinder = function(node, opts) {
 	 * @return mixed
 	 */
 	this.option = function(name, target) {
-		if (target && cwd !== target) {
-			var res = '';
+		var res;
+		target = target || cwd;
+		if (self.folderOptions[target] && typeof self.folderOptions[target][name] !== 'undefined') {
+			return self.folderOptions[target][name];
+		}
+		if (cwd !== target) {
+			res = '';
 			$.each(self.volOptions, function(id, opt) {
 				if (target.indexOf(id) === 0) {
 					res = opt[name] || '';
@@ -1158,6 +1163,30 @@ var elFinder = function(node, opts) {
 			return cwdOptions[name] || '';
 		}
 	};
+	
+	/**
+	 * Return disabled commands by each folder
+	 * 
+	 * @param  Array  target hashes
+	 * @return Array
+	 */
+	this.getDisabledCmds = function(targets) {
+		var disabled = [];
+		if (! $.isArray(targets)) {
+			targtes = [ targets ];
+		}
+		$.each(targets, function(i, h) {
+			var disCmds = self.option('disabled', h);
+			if (disCmds) {
+				$.each(disCmds, function(i, cmd) {
+					if ($.inArray(cmd, disabled) === -1) {
+						disabled.push(cmd);
+					}
+				});
+			}
+		});
+		return disabled;
+	}
 	
 	/**
 	 * Return file data from current dir or tree by it's hash
@@ -3211,6 +3240,15 @@ var elFinder = function(node, opts) {
 	 * @type Object
 	 */
 	this.volOptions = {};
+	
+	/**
+	 * cwd options of each folder
+	 * key: volumeid
+	 * val: options object
+	 * 
+	 * @type Object
+	 */
+	this.folderOptions = {};
 	
 	// prepare node
 	node.addClass(this.cssClass)
@@ -5507,6 +5545,10 @@ elFinder.prototype = {
 									}
 								});
 								self.roots[vid] = file.hash;
+							} else {
+								if (file.options) {
+									self.folderOptions[file.hash] = file.options;
+								}
 							}
 							
 							if (prevId !== vid) {
@@ -5578,6 +5620,12 @@ elFinder.prototype = {
 		if (data.api) {
 			data.init = true;
 		}
+
+		// merge options that apply only to cwd
+		if (data.cwd && data.cwd.options && data.options) {
+			$.extend(data.options, data.cwd.options);
+		}
+		
 		return data;
 	},
 	
@@ -6844,7 +6892,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.19 (2.1-src Nightly: 9e7f074)';
+elFinder.prototype.version = '2.1.19 (2.1-src Nightly: 25fb08d)';
 
 
 
@@ -9804,7 +9852,9 @@ $.fn.elfindercontextmenu = function(fm) {
 			create = function(type, targets) {
 				var sep    = false,
 					insSep = false,
-					cmdMap = {}, disabled = [], isCwd = (targets[0].indexOf(fm.cwd().volumeid, 0) === 0),
+					cmdMap = {},
+					disabled = [],
+					isCwd = type === 'cwd',
 					selcnt = 0;
 
 				currentType = type;
@@ -9817,11 +9867,9 @@ $.fn.elfindercontextmenu = function(fm) {
 					});
 				}
 				if (!isCwd) {
-					disabled = fm.option('disabled', targets[0]);
-					if (! disabled) {
-						disabled = [];
-					}
+					disabled = fm.getDisabledCmds(targets);
 				}
+				
 				if (type === 'navbar') {
 					fm.select({selected: targets, origin: 'navbar'});
 				}
@@ -14608,10 +14656,17 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		
 		render();
 		
-		fm.bind('open sync', function(){
+		fm.bind('open sync select', function(e) {
 			var disabled = fm.option('disabled'),
-				doRender;
-
+				doRender, sel;
+			
+			if (e.type === 'select') {
+				sel = fm.selected();
+				if (sel.length) {
+					disabled = fm.getDisabledCmds(sel);
+				}
+			}
+			
 			if (!dispre || dispre.toString() !== disabled.sort().toString()) {
 				render(disabled && disabled.length? disabled : null);
 				doRender = true;
