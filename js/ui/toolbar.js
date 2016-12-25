@@ -127,10 +127,17 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		
 		render();
 		
-		fm.bind('open sync', function(){
+		fm.bind('open sync select', function(e) {
 			var disabled = fm.option('disabled'),
-				doRender;
-
+				doRender, sel;
+			
+			if (e.type === 'select') {
+				sel = fm.selected();
+				if (sel.length) {
+					disabled = fm.getDisabledCmds(sel);
+				}
+			}
+			
 			if (!dispre || dispre.toString() !== disabled.sort().toString()) {
 				render(disabled && disabled.length? disabled : null);
 				doRender = true;
