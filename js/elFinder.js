@@ -1114,8 +1114,13 @@ var elFinder = function(node, opts) {
 	 * @return mixed
 	 */
 	this.option = function(name, target) {
-		if (target && cwd !== target) {
-			var res = '';
+		var res;
+		target = target || cwd;
+		if (self.folderOptions[target] && typeof self.folderOptions[target][name] !== 'undefined') {
+			return self.folderOptions[target][name];
+		}
+		if (cwd !== target) {
+			res = '';
 			$.each(self.volOptions, function(id, opt) {
 				if (target.indexOf(id) === 0) {
 					res = opt[name] || '';
@@ -1127,6 +1132,30 @@ var elFinder = function(node, opts) {
 			return cwdOptions[name] || '';
 		}
 	};
+	
+	/**
+	 * Return disabled commands by each folder
+	 * 
+	 * @param  Array  target hashes
+	 * @return Array
+	 */
+	this.getDisabledCmds = function(targets) {
+		var disabled = [];
+		if (! $.isArray(targets)) {
+			targtes = [ targets ];
+		}
+		$.each(targets, function(i, h) {
+			var disCmds = self.option('disabled', h);
+			if (disCmds) {
+				$.each(disCmds, function(i, cmd) {
+					if ($.inArray(cmd, disabled) === -1) {
+						disabled.push(cmd);
+					}
+				});
+			}
+		});
+		return disabled;
+	}
 	
 	/**
 	 * Return file data from current dir or tree by it's hash
@@ -3180,6 +3209,15 @@ var elFinder = function(node, opts) {
 	 * @type Object
 	 */
 	this.volOptions = {};
+	
+	/**
+	 * cwd options of each folder
+	 * key: volumeid
+	 * val: options object
+	 * 
+	 * @type Object
+	 */
+	this.folderOptions = {};
 	
 	// prepare node
 	node.addClass(this.cssClass)
@@ -5476,6 +5514,10 @@ elFinder.prototype = {
 									}
 								});
 								self.roots[vid] = file.hash;
+							} else {
+								if (file.options) {
+									self.folderOptions[file.hash] = file.options;
+								}
 							}
 							
 							if (prevId !== vid) {
@@ -5547,6 +5589,12 @@ elFinder.prototype = {
 		if (data.api) {
 			data.init = true;
 		}
+
+		// merge options that apply only to cwd
+		if (data.cwd && data.cwd.options && data.options) {
+			$.extend(data.options, data.cwd.options);
+		}
+		
 		return data;
 	},
 	
