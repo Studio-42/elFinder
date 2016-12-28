@@ -25,7 +25,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 				});
 			} else if (opts == 'close' || opts == 'destroy') {
 				dialog.stop(true);
-				dialog.is(':visible') && dialog.hide().trigger('close');
+				(dialog.is(':visible') || elfNode.is(':hidden')) && dialog.hide().trigger('close');
 				opts == 'destroy' && dialog.remove();
 			} else if (opts == 'toTop') {
 				dialog.trigger('totop');
