@@ -1142,7 +1142,7 @@ var elFinder = function(node, opts) {
 	this.getDisabledCmds = function(targets) {
 		var disabled = [];
 		if (! $.isArray(targets)) {
-			targtes = [ targets ];
+			targets = [ targets ];
 		}
 		$.each(targets, function(i, h) {
 			var disCmds = self.option('disabled', h);
