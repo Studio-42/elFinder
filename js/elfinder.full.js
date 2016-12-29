@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.19 (2.1-src Nightly: eeeedf5) (2016-12-28)
+ * Version 2.1.19 (2.1-src Nightly: 0b85d2c) (2016-12-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2016, Studio 42
@@ -1173,7 +1173,7 @@ var elFinder = function(node, opts) {
 	this.getDisabledCmds = function(targets) {
 		var disabled = [];
 		if (! $.isArray(targets)) {
-			targtes = [ targets ];
+			targets = [ targets ];
 		}
 		$.each(targets, function(i, h) {
 			var disCmds = self.option('disabled', h);
@@ -6892,7 +6892,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.19 (2.1-src Nightly: eeeedf5)';
+elFinder.prototype.version = '2.1.19 (2.1-src Nightly: 0b85d2c)';
 
 
 
