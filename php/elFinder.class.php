@@ -2817,8 +2817,10 @@ class elFinder {
 		$target = $args['target'];
 		$options = isset($args['options'])? $args['options'] : array();
 		if (($volume = $this->volume($target)) != false) {
-			$url = $volume->getContentUrl($target, $options);
-			return $url ? array('url' => $url) : array();
+			if (! $volume->commandDisabled('url')) {
+				$url = $volume->getContentUrl($target, $options);
+				return $url ? array('url' => $url) : array();
+			}
 		}
 		return array();
 	}

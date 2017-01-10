@@ -423,7 +423,9 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 $stat['mime'] = $raw->file->mimeType;
             }
             $stat['size'] = (int) $raw->size;
-            $stat['url'] = '1';
+            if (! $this->disabledGetUrl) {
+            	$stat['url'] = '1';
+            }
             if (isset($raw->image) && $img = $raw->image) {
                 isset($img->width) ? $stat['width'] = $img->width : $stat['width'] = 0;
                 isset($img->height) ? $stat['height'] = $img->height : $stat['height'] = 0;
