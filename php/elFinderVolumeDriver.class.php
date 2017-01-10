@@ -668,6 +668,13 @@ abstract class elFinderVolumeDriver {
 	 */
 	protected $rootModified = false;
 	
+	/**
+	 * Is disable of command `url`
+	 * 
+	 * @var string
+	 */
+	protected $disabledGetUrl = false;
+	
 	/*********************************************************************/
 	/*                            INITIALIZATION                         */
 	/*********************************************************************/
@@ -780,6 +787,11 @@ abstract class elFinderVolumeDriver {
 		// check 'mimeMap'
 		if (!is_array($this->options['mimeMap'])) {
 			$this->options['mimeMap'] = array();
+		}
+		
+		// check 'url' in disabled commands
+		if (in_array('url', $this->disabled)) {
+			$this->disabledGetUrl = true;
 		}
 	}
 	
