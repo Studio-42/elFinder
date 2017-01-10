@@ -1,9 +1,9 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.19 (2.1-src Nightly: 0b85d2c) (2016-12-29)
+ * Version 2.1.19 (2.1-src Nightly: a0012b5) (2017-01-10)
  * http://elfinder.org
  * 
- * Copyright 2009-2016, Studio 42
+ * Copyright 2009-2017, Studio 42
  * Licensed under a 3-clauses BSD license
  */
 (function(root, factory) {
@@ -1147,8 +1147,8 @@ var elFinder = function(node, opts) {
 	this.option = function(name, target) {
 		var res;
 		target = target || cwd;
-		if (self.folderOptions[target] && typeof self.folderOptions[target][name] !== 'undefined') {
-			return self.folderOptions[target][name];
+		if (self.optionsByHashes[target] && typeof self.optionsByHashes[target][name] !== 'undefined') {
+			return self.optionsByHashes[target][name];
 		}
 		if (cwd !== target) {
 			res = '';
@@ -3240,15 +3240,15 @@ var elFinder = function(node, opts) {
 	 * @type Object
 	 */
 	this.volOptions = {};
-	
+
 	/**
-	 * cwd options of each folder
-	 * key: volumeid
+	 * cwd options of each folder/file
+	 * key: hash
 	 * val: options object
-	 * 
+	 *
 	 * @type Object
 	 */
-	this.folderOptions = {};
+	this.optionsByHashes = {};
 	
 	// prepare node
 	node.addClass(this.cssClass)
@@ -5512,6 +5512,10 @@ elFinder.prototype = {
 					if (file.mime == 'application/x-empty') {
 						file.mime = 'text/plain';
 					}
+
+					if (file.options) {
+						self.optionsByHashes[file.hash] = file.options;
+					}
 					
 					if (! file.phash || file.mime === 'directory') {
 						// set options, tmbUrls for each volume
@@ -5545,10 +5549,6 @@ elFinder.prototype = {
 									}
 								});
 								self.roots[vid] = file.hash;
-							} else {
-								if (file.options) {
-									self.folderOptions[file.hash] = file.options;
-								}
 							}
 							
 							if (prevId !== vid) {
@@ -6892,7 +6892,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.19 (2.1-src Nightly: 0b85d2c)';
+elFinder.prototype.version = '2.1.19 (2.1-src Nightly: a0012b5)';
 
 
 
@@ -7572,6 +7572,10 @@ elFinder.prototype._options = {
 		mkdir: {
 			// Enable automatic switching function ["New Folder" / "Into New Folder"] of toolbar buttton
 			intoNewFolderToolbtn: false,
+		},
+		resize: {
+			// defalt status of snap to 8px grid of the jpeg image ("enable" or "disable")
+			grid8px : 'enable'
 		},
 		help : {view : ['about', 'shortcuts', 'help', 'debug']}
 	},
@@ -20980,6 +20984,7 @@ elFinder.prototype.commands.resize = function() {
 			dialogWidth = 650,
 			fmnode = fm.getUI(),
 			ctrgrup = $().controlgroup? 'controlgroup' : 'buttonset',
+			grid8Def = typeof this.options.grid8px === 'undefind' || this.options.grid8px !== 'disable'? true : false,
 			
 			open = function(file, id) {
 				var isJpeg   = (file.mime === 'image/jpeg'),
@@ -21192,7 +21197,7 @@ elFinder.prototype.commands.resize = function() {
 					rwidth  = 0,
 					rheight = 0,
 					rdegree = 0,
-					grid8   = isJpeg? true : false,
+					grid8   = isJpeg? grid8Def : false,
 					constr  = $('<button>').html(fm.i18n('aspectRatio'))
 						.on('click', function() {
 							cratio = ! cratio;
