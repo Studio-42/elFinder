@@ -1116,8 +1116,8 @@ var elFinder = function(node, opts) {
 	this.option = function(name, target) {
 		var res;
 		target = target || cwd;
-		if (self.folderOptions[target] && typeof self.folderOptions[target][name] !== 'undefined') {
-			return self.folderOptions[target][name];
+		if (self.optionsByHashes[target] && typeof self.optionsByHashes[target][name] !== 'undefined') {
+			return self.optionsByHashes[target][name];
 		}
 		if (cwd !== target) {
 			res = '';
@@ -3209,15 +3209,15 @@ var elFinder = function(node, opts) {
 	 * @type Object
 	 */
 	this.volOptions = {};
-	
+
 	/**
-	 * cwd options of each folder
-	 * key: volumeid
+	 * cwd options of each folder/file
+	 * key: hash
 	 * val: options object
-	 * 
+	 *
 	 * @type Object
 	 */
-	this.folderOptions = {};
+	this.optionsByHashes = {};
 	
 	// prepare node
 	node.addClass(this.cssClass)
@@ -5481,6 +5481,10 @@ elFinder.prototype = {
 					if (file.mime == 'application/x-empty') {
 						file.mime = 'text/plain';
 					}
+
+					if (file.options) {
+						self.optionsByHashes[file.hash] = file.options;
+					}
 					
 					if (! file.phash || file.mime === 'directory') {
 						// set options, tmbUrls for each volume
@@ -5514,10 +5518,6 @@ elFinder.prototype = {
 									}
 								});
 								self.roots[vid] = file.hash;
-							} else {
-								if (file.options) {
-									self.folderOptions[file.hash] = file.options;
-								}
 							}
 							
 							if (prevId !== vid) {
