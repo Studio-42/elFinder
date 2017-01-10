@@ -105,6 +105,7 @@ elFinder.prototype.commands.resize = function() {
 			dialogWidth = 650,
 			fmnode = fm.getUI(),
 			ctrgrup = $().controlgroup? 'controlgroup' : 'buttonset',
+			grid8Def = typeof this.options.grid8px === 'undefind' || this.options.grid8px !== 'disable'? true : false,
 			
 			open = function(file, id) {
 				var isJpeg   = (file.mime === 'image/jpeg'),
@@ -317,7 +318,7 @@ elFinder.prototype.commands.resize = function() {
 					rwidth  = 0,
 					rheight = 0,
 					rdegree = 0,
-					grid8   = isJpeg? true : false,
+					grid8   = isJpeg? grid8Def : false,
 					constr  = $('<button>').html(fm.i18n('aspectRatio'))
 						.on('click', function() {
 							cratio = ! cratio;
