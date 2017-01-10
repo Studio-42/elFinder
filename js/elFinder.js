@@ -1572,7 +1572,7 @@ var elFinder = function(node, opts) {
 			 * @return void
 			 **/
 			error = function(xhr, status) {
-				var error;
+				var error, data;
 				
 				switch (status) {
 					case 'abort':
@@ -1591,19 +1591,30 @@ var elFinder = function(node, opts) {
 						}
 						break;
 					default:
-						if (xhr.status == 403) {
-							error = ['errConnect', 'errAccess', 'HTTP error ' + xhr.status];
-						} else if (xhr.status == 404) {
-							error = ['errConnect', 'errNotFound', 'HTTP error ' + xhr.status];
-						} else {
-							if (xhr.status == 414 && options.type === 'get') {
-								// retry by POST method
-								options.type = 'post';
-								dfrd.xhr = xhr = self.transport.send(options).fail(error).done(success);
-								return;
-							}
-							error = xhr.quiet ? '' : ['errConnect', 'HTTP error ' + xhr.status];
-						} 
+						if (xhr.responseText) {
+							// check responseText, Is that JSON?
+							try {
+								data = JSON.parse(xhr.responseText);
+								if (data && data.error) {
+									error = data.error;
+								}
+							} catch(e) {}
+						}
+						if (! error) {
+							if (xhr.status == 403) {
+								error = ['errConnect', 'errAccess', 'HTTP error ' + xhr.status];
+							} else if (xhr.status == 404) {
+								error = ['errConnect', 'errNotFound', 'HTTP error ' + xhr.status];
+							} else {
+								if (xhr.status == 414 && options.type === 'get') {
+									// retry by POST method
+									options.type = 'post';
+									dfrd.xhr = xhr = self.transport.send(options).fail(error).done(success);
+									return;
+								}
+								error = xhr.quiet ? '' : ['errConnect', 'HTTP error ' + xhr.status];
+							} 
+						}
 				}
 				
 				self.trigger(cmd + 'done');
