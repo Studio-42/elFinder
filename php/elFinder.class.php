@@ -415,7 +415,10 @@ class elFinder {
 		$this->maxTargets = (isset($opts['maxTargets']) ? intval($opts['maxTargets']) : $this->maxTargets);
 		elFinder::$commonTempPath = (isset($opts['commonTempPath']) ? $opts['commonTempPath'] : './.tmp');
 		if (!is_writable(elFinder::$commonTempPath)) {
-			elFinder::$commonTempPath = '';
+			elFinder::$commonTempPath = sys_get_temp_dir();
+			if (!is_writable(elFinder::$commonTempPath)) {
+				elFinder::$commonTempPath = '';
+			}
 		}
 		$this->maxArcFilesSize = isset($opts['maxArcFilesSize'])? intval($opts['maxArcFilesSize']) : 0;
 		$this->optionsNetVolumes = (isset($opts['optionsNetVolumes']) && is_array($opts['optionsNetVolumes']))? $opts['optionsNetVolumes'] : array();
@@ -1535,10 +1538,14 @@ class elFinder {
 		$name   = $args['name'];
 		
 		if (($volume = $this->volume($target)) == false
-		||  ($rm  = $volume->file($target)) == false) {
+		||  ($rm = $volume->file($target)) == false) {
 			return array('error' => $this->error(self::ERROR_RENAME, '#'.$target, self::ERROR_FILE_NOT_FOUND));
 		}
 		$rm['realpath'] = $volume->realpath($target);
+		
+		if ($this->itemLocked($target)) {
+			return array('error' => $this->error(self::ERROR_LOCKED, $rm['name']));
+		}
 		
 		return ($file = $volume->rename($target, $name)) == false
 			? array('error' => $this->error(self::ERROR_RENAME, $rm['name'], $volume->error()))
@@ -1556,6 +1563,8 @@ class elFinder {
 		$targets = is_array($args['targets']) ? $args['targets'] : array();
 		$result  = array('added' => array());
 		$suffix  = empty($args['suffix']) ? 'copy' : $args['suffix'];
+		
+		$this->itemLock($targets);
 		
 		foreach ($targets as $target) {
 			elFinder::extendTimeLimit();
@@ -1593,11 +1602,18 @@ class elFinder {
 			
 			if (($volume = $this->volume($target)) == false) {
 				$result['warning'] = $this->error(self::ERROR_RM, '#'.$target, self::ERROR_FILE_NOT_FOUND);
-				return $result;
+				break;
 			}
+			
+			if ($this->itemLocked($target)) {
+				$rm = $volume->file($target);
+				$result['warning'] = $this->error(self::ERROR_LOCKED, $rm['name']);
+				break;
+			}
+			
 			if (!$volume->rm($target)) {
 				$result['warning'] = $this->error($volume->error());
-				return $result;
+				break;
 			}
 		}
 
@@ -1950,6 +1966,8 @@ class elFinder {
 			return $result;
 		}
 
+		$this->itemLock($targets);
+		
 		$files = array();
 		$errors = array();
 		foreach($targets as $target) {
@@ -2144,6 +2162,8 @@ class elFinder {
 		if (!$volume) {
 			return array_merge(array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_TRGDIR_NOT_FOUND, '#'.$target)), $header);
 		}
+		
+		$this->itemLock($target);
 		
 		// regist Shutdown function
 		$GLOBALS['elFinderTempFiles'] = array();
@@ -2424,6 +2444,8 @@ class elFinder {
 			return array('error' => $this->error($error, '#'.$targets[0], self::ERROR_TRGDIR_NOT_FOUND, '#'.$dst));
 		}
 		
+		$this->itemLock($dst);
+		
 		$hashes = $renames = array();
 		$suffix = '~';
 		if (!empty($args['renames'])) {
@@ -2460,6 +2482,12 @@ class elFinder {
 						break;
 					}
 				}
+			}
+			
+			if ($cut && $this->itemLocked($target)) {
+				$rm = $srcVolume->file($target);
+				$result['warning'] = $this->error(self::ERROR_LOCKED, $rm['name']);
+				break;
 			}
 			
 			if (($file = $dstVolume->paste($srcVolume, $target, $dst, $cut, $hashes)) == false) {
@@ -2600,6 +2628,8 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_SAVE, '#'.$target, self::ERROR_FILE_NOT_FOUND));
 		}
 		
+		$this->itemLock($target);
+		
 		if (! empty($args['encoding'])) {
 			$content = iconv('UTF-8', $args['encoding'], $args['content']);
 			if ($content === false && function_exists('mb_detect_encoding')) {
@@ -2656,7 +2686,11 @@ class elFinder {
 		if (($volume = $this->volume($targets[0])) == false) {
 			return $this->error(self::ERROR_ARCHIVE, self::ERROR_TRGDIR_NOT_FOUND);
 		}
-	
+		
+		foreach($targets as $target) {
+			$this->itemLock($target);
+		}
+		
 		return ($file = $volume->archive($targets, $args['type'], $name))
 			? array('added' => array($file))
 			: array('error' => $this->error(self::ERROR_ARCHIVE, $volume->error()));
@@ -2800,7 +2834,6 @@ class elFinder {
 		if ($mode !== 'rotate' && ($width < 1 || $height < 1)) {
 			return array('error' => $this->error(self::ERROR_RESIZESIZE));
 		}
-
 		return ($file = $volume->resize($target, $width, $height, $x, $y, $mode, $bg, $degree, $quality))
 			? array('changed' => array($file))
 			: array('error' => $this->error(self::ERROR_RESIZE, $volume->path($target), $volume->error()));
@@ -3043,6 +3076,48 @@ class elFinder {
 			}
 		}
 		return $id;
+	}
+	
+	protected function itemLocked($hash) {
+		if (! elFinder::$commonTempPath) {
+			return false;
+		}
+		return file_exists(elFinder::$commonTempPath . DIRECTORY_SEPARATOR . $hash . '.lock');
+	}
+	
+	protected function itemLock($hashes, $autoUnlock = true) {
+		if (! elFinder::$commonTempPath) {
+			return false;
+		}
+		if (! is_array($hashes)) {
+			$hashes = array($hashes);
+		}
+		foreach($hashes as $hash) {
+			$lock = elFinder::$commonTempPath . DIRECTORY_SEPARATOR . $hash . '.lock';
+			if ($this->itemLocked($hash)) {
+				$cnt = file_get_contents($lock) + 1;
+			} else {
+				$cnt = 1;
+			}
+			if (file_put_contents($lock, $cnt, LOCK_EX)) {
+				if ($autoUnlock) {
+					register_shutdown_function(array($this, 'itemUnlock'), $hash);
+				}
+			}
+		}
+	}
+	
+	public function itemUnlock($hash) {
+		if (! $this->itemLocked($hash)) {
+			return true;
+		}
+		$lock = elFinder::$commonTempPath . DIRECTORY_SEPARATOR . $hash . '.lock';
+		$cnt = file_get_contents($lock);
+		if (--$cnt < 1) {
+			unlink($lock);
+		} else {
+			file_put_contents($lock, $cnt, LOCK_EX);
+		}
 	}
 	
 	/**
