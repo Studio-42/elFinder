@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.19 (2.1-src Nightly: ed84dd8) (2017-01-10)
+ * Version 2.1.19 (2.1-src Nightly: a2cc5cb) (2017-01-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -6903,7 +6903,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.19 (2.1-src Nightly: ed84dd8)';
+elFinder.prototype.version = '2.1.19 (2.1-src Nightly: a2cc5cb)';
 
 
 
@@ -8389,7 +8389,7 @@ elFinder.prototype.command = function(fm) {
 	 */
 	this.setup = function(name, opts) {
 		var self = this,
-			fm   = this.fm, i, s, sc;
+			fm   = this.fm, i, s, sc, cb;
 
 		this.name      = name;
 		this.title     = fm.messages['cmd'+name] ? fm.i18n('cmd'+name)
@@ -8416,7 +8416,12 @@ elFinder.prototype.command = function(fm) {
 
 		for (i = 0; i < this.shortcuts.length; i++) {
 			s = this.shortcuts[i];
-			s.callback = $.proxy(s.callback || function() { this.exec() }, this);
+			cb = s.callback || self.exec;
+			s.callback = function() {
+				if (fm.isCommandEnabled(self.name)) {
+					cb.call(self);
+				}
+			};
 			!s.description && (s.description = this.title);
 			fm.shortcut(s);
 		}
