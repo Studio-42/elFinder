@@ -271,9 +271,9 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             }
 
             if ($published) {
-            	$stat['url'] = $this->_gd_getLink($raw);
-            } else if (! $this->disabledGetUrl) {
-            	$stat['url'] = '1';
+                $stat['url'] = $this->_gd_getLink($raw);
+            } elseif (!$this->disabledGetUrl) {
+                $stat['url'] = '1';
             }
         }
 
