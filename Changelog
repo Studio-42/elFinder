@@ -1,3 +1,21 @@
+2017-01-11  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.20):
+		- [php:core] Fixed #1800 session write before umount of the volume
+		- [cmd:upload] Fixed #1804 add folder upload button into upload dialog
+		- [php:plugin] Fixed #1807 enable/disable plugin by pressing meta key on DnD upload
+		- [cmd:rename] Fixed #1814 trigger event blur of input on item unselect
+		- [js:core] Fixed #1817 add "execpre.[cmd]" event and make cmd exec cancelable
+		- [js:core] Fixed #1818 mtime not defined for chunk upload
+		- [js:core] Fixed #1826 allow command invalidation by each item(folder/file)
+		- [ui:dialog] Fixed #1824 empty dialog on elfinder load
+		- [cmd:resize] Fixed #1834 configurable default state of `8px Grid`
+		- [VD] Fixed #1841 published files security issues
+		- [js:core] Fixed #1832 allow to set error message on HTTP status code 4/5xx
+		- [js:cmd] Fixed #1842 disable shortcut that specified to `disabled`
+		- [php:core] Fixed #1843 security vulnerability fix
+
+
 2016-12-10  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.19):
