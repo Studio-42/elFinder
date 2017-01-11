@@ -3078,6 +3078,12 @@ class elFinder {
 		return $id;
 	}
 	
+	/**
+	 * Is item locked?
+	 * 
+	 * @param string $hash
+	 * @return boolean
+	 */
 	protected function itemLocked($hash) {
 		if (! elFinder::$commonTempPath) {
 			return false;
@@ -3085,6 +3091,13 @@ class elFinder {
 		return file_exists(elFinder::$commonTempPath . DIRECTORY_SEPARATOR . $hash . '.lock');
 	}
 	
+	/**
+	 * Do lock target item
+	 * 
+	 * @param array|string $hashes
+	 * @param boolean $autoUnlock
+	 * @return boolean
+	 */
 	protected function itemLock($hashes, $autoUnlock = true) {
 		if (! elFinder::$commonTempPath) {
 			return false;
@@ -3107,6 +3120,12 @@ class elFinder {
 		}
 	}
 	
+	/**
+	 * Do unlock target item
+	 * 
+	 * @param string $hash
+	 * @return boolean
+	 */
 	public function itemUnlock($hash) {
 		if (! $this->itemLocked($hash)) {
 			return true;
