@@ -2147,6 +2147,11 @@ class elFinder {
 		$cid    = $args['cid']? (int)$args['cid'] : '';
 		$mtimes = $args['mtime']? $args['mtime'] : array();
 		
+		// check $chunk
+		if (strpos($chunk, '/') !== false || strpos($chunk, '\\') !== false) {
+			return array('error' => $this->error(self::ERROR_UPLOAD));
+		}
+		
 		$renames = $hashes = array();
 		$suffix = '~';
 		if ($args['renames'] && is_array($args['renames'])) {
@@ -2218,7 +2223,7 @@ class elFinder {
 				$names = array();
 				foreach($args['upload'] as $i => $url) {
 					// check chunked file upload commit
-					if ($args['chunk']) {
+					if ($chunk) {
 						if ($url === 'chunkfail' && $args['mimes'] === 'chunkfail') {
 							$this->checkChunkedFile(null, $chunk, $cid, $tempDir);
 							if (preg_match('/^(.+)(\.\d+_(\d+))\.part$/s', $chunk, $m)) {
@@ -2226,7 +2231,7 @@ class elFinder {
 							}
 							return $result;
 						} else {
-							$tmpfname = $tempDir . '/' . $args['chunk'];
+							$tmpfname = $tempDir . '/' . $chunk;
 							$files['tmp_name'][$i] = $tmpfname;
 							$files['name'][$i] = $url;
 							$files['error'][$i] = 0;
