@@ -479,7 +479,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 if ($url = $this->getSharedWebContentLink($raw)) {
                     $stat['url'] = $url;
                 }
-            } else if (! $this->disabledGetUrl) {
+            } elseif (!$this->disabledGetUrl) {
                 $stat['url'] = '1';
             }
         }
