@@ -262,6 +262,21 @@ class elFinder {
 	 */
 	protected $callbackWindowURL = '';
 	
+	/**
+	 * hash of items to unlock on command completion
+	 * 
+	 * @var array hashes
+	 */
+	protected $autoUnlocks = array();
+	
+	/**
+	 * Item locking expiration (seconds)
+	 * Default: 3600 secs
+	 * 
+	 * @var integer
+	 */
+	protected $itemLockExpire = 3600;
+	
 	// Errors messages
 	const ERROR_UNKNOWN           = 'errUnknown';
 	const ERROR_UNKNOWN_CMD       = 'errUnknownCmd';
@@ -422,6 +437,9 @@ class elFinder {
 		}
 		$this->maxArcFilesSize = isset($opts['maxArcFilesSize'])? intval($opts['maxArcFilesSize']) : 0;
 		$this->optionsNetVolumes = (isset($opts['optionsNetVolumes']) && is_array($opts['optionsNetVolumes']))? $opts['optionsNetVolumes'] : array();
+		if (isset($opts['itemLockExpire'])) {
+			$this->itemLockExpire = intval($opts['itemLockExpire']);
+		}
 		
 		// deprecated settings
 		$this->netVolumesSessionKey = !empty($opts['netVolumesSessionKey'])? $opts['netVolumesSessionKey'] : 'elFinderNetVolumes';
@@ -707,6 +725,9 @@ class elFinder {
 			}
 		}
 		
+		// regist shutdown function as fallback
+		register_shutdown_function(array($this, 'itemAutoUnlock'));
+		
 		// detect destination dirHash and volume
 		$dstVolume = false;
 		$dst = ! empty($args['target'])? $args['target'] : (! empty($args['dst'])? $args['dst'] : '');
@@ -859,6 +880,9 @@ class elFinder {
 			$volume->saveSessionCache();
 			$volume->umount();
 		}
+		
+		// unlock locked items
+		$this->itemAutoUnlock();
 		
 		if (!empty($result['callback'])) {
 			$result['callback']['json'] = json_encode($result);
@@ -3093,7 +3117,16 @@ class elFinder {
 		if (! elFinder::$commonTempPath) {
 			return false;
 		}
-		return file_exists(elFinder::$commonTempPath . DIRECTORY_SEPARATOR . $hash . '.lock');
+		$lock = elFinder::$commonTempPath . DIRECTORY_SEPARATOR . $hash . '.lock';
+		if (file_exists($lock)) {
+			if (filemtime($lock) + $this->itemLockExpire < time()) {
+				unlink($lock);
+				return false;
+			}
+			return true;
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -3119,7 +3152,7 @@ class elFinder {
 			}
 			if (file_put_contents($lock, $cnt, LOCK_EX)) {
 				if ($autoUnlock) {
-					register_shutdown_function(array($this, 'itemUnlock'), $hash);
+					$this->autoUnlocks[] = $hash;
 				}
 			}
 		}
@@ -3131,7 +3164,7 @@ class elFinder {
 	 * @param string $hash
 	 * @return boolean
 	 */
-	public function itemUnlock($hash) {
+	protected function itemUnlock($hash) {
 		if (! $this->itemLocked($hash)) {
 			return true;
 		}
@@ -3141,6 +3174,20 @@ class elFinder {
 			unlink($lock);
 		} else {
 			file_put_contents($lock, $cnt, LOCK_EX);
+		}
+	}
+	
+	/**
+	 * unlock locked items on command completion
+	 * 
+	 * @return void
+	 */
+	public function itemAutoUnlock() {
+		if ($this->autoUnlocks) {
+			foreach($this->autoUnlocks as $hash) {
+				$this->itemUnlock($hash);
+			}
+			$this->autoUnlocks = array();
 		}
 	}
 	
