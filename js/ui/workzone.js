@@ -36,11 +36,8 @@ $.fn.elfinderworkzone = function(fm) {
 			
 		parent.add(window).on('resize.' + fm.namespace, fitsize);
 		fm.one('cssloaded', function() {
-			var old = wdelta;
 			wdelta = wz.outerHeight(true) - wz.height();
-			if (old !== wdelta) {
-				fm.trigger('uiresize');
-			}
+			fitsize();
 		}).bind('uiresize', fitsize);
 	});
 	return this;
