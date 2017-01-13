@@ -21,11 +21,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 			};
 
 			fm.one('cssloaded', function() {
-				var old = delta;
 				delta = nav.outerHeight() - nav.height();
-				if (old !== delta) {
-					fm.trigger('wzresize');
-				}
 			}).bind('wzresize', function() {
 				nav.height(wz.height() - delta);
 			});
