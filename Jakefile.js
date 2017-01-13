@@ -49,7 +49,8 @@ var dirmode = 0755,
 				path.join(src, 'php', 'MySQLStorage.sql'),
 				path.join(src, 'php', 'elFinderPlugin.php'),
 				path.join(src, 'php', 'elFinderSession.php'),
-				path.join(src, 'php', 'elFinderSessionInterface.php')
+				path.join(src, 'php', 'elFinderSessionInterface.php'),
+				path.join(src, 'php', '.tmp', '.htaccess')
 			]
 			.concat(grep(path.join(src, 'php'), '\\.class\\.php$'))
 			.concat(grep(path.join(src, 'php'), 'Netmount\\.php$'))
@@ -147,7 +148,11 @@ desc('pre build task');
 task('prebuild', function(){
 	console.log('build dir:  ' + path.resolve());
 	console.log('src dir:    ' + src);
-	var dir = ['css', 'js', 'img', 'sounds', path.join('js', 'i18n'), path.join('js', 'extras'), path.join('js', 'proxy'), 'php', path.join('php', 'libs'), path.join('php', 'resources'), 'files'];
+	var dir = ['css', 'js', 'img', 'sounds',
+			path.join('js', 'i18n'), path.join('js', 'extras'), path.join('js', 'proxy'),
+			'php',
+			path.join('php', '.tmp'), path.join('php', 'libs'), path.join('php', 'resources'),
+			'files'];
 	if (plugins.length) {
 		dir.push(path.join('php', 'plugins'));
 		for (var i in plugins) {
@@ -282,9 +287,10 @@ task('clean', function(){
 			.concat(grep('sounds', '\\.wav'))
 			.concat(grep(path.join('js', 'i18n')))
 			.concat(grep(path.join('js', 'extras')))
-			.concat([path.join('js', 'proxy', 'elFinderSupportVer1.js'), 'Changelog', 'README.md', 'elfinder.html', 'composer.json', path.join('files', 'readme.txt')])
+			.concat([path.join('js', 'proxy', 'elFinderSupportVer1.js'), 'Changelog', 'README.md', 'elfinder.html', 'composer.json', 'LICENSE.md', 'main.default.js', path.join('files', 'readme.txt')])
 			.concat(grep('php', '\\.php|\\.sql'))
 			.concat(path.join('php', 'mime.types'))
+			.concat(grep(path.join('php', '.tmp')))
 			.concat(grep(path.join('php', 'libs')))
 			.concat(grep(path.join('php', 'resources')));
 		uf = [].concat.apply(uf, grep(path.join('php', 'plugins')).map(function(dir) { return grep(dir); }));
@@ -303,7 +309,7 @@ task('clean', function(){
 		var ud = [
 			'css', 'img', 'sounds', 'files',
 			path.join('js', 'proxy'), path.join('js', 'i18n'), path.join('js', 'extras'), 'js',
-			path.join('php', 'libs'), path.join('php', 'resources')]
+			path.join('php', '.tmp'), path.join('php', 'libs'), path.join('php', 'resources')]
 			.concat(grep(path.join('php', 'plugins')))
 			.concat([path.join('php', 'plugins'), 'php']);
 		for (d in ud) {
