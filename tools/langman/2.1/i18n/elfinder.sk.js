@@ -2,7 +2,7 @@
  * Slovak translation
  * @author Jakub Ďuraš <jkblmr@gmail.com>
  * @author RobiNN <admin@robonetwork.cf>
- * @version 2016-11-21
+ * @version 2017-1-16
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -263,6 +263,7 @@
 			'confirmRm'       : 'Určite chcete vymazať súbory?<br/>Nebude sa to dať vrátiť späť!',
 			'confirmRepl'     : 'Nahradiť starý súbor novým?',
 			'confirmConvUTF8' : 'Nie je v UTF-8<br/>Previesť na UTF-8?<br/>Obsah sa stane UTF-8 uložením po konverzii.', // from v2.1 added 08.04.2014
+			'confirmNonUTF8'  : 'Kódovanie tohto súboru nemoholo byť detekované. Pre editáciu dočasne potrebujete previesť na UTF-8 .<br/>Prosím, vyberte kódovanie znakov tohto súboru.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'Bol upravený.<br/>Ak zmeny neuložíte, stratíte vykonanú prácu.', // from v2.1 added 15.7.2015
 			'apllyAll'        : 'Použiť na všetky',
 			'name'            : 'Meno',
@@ -383,6 +384,9 @@
 			'emptyIncSearch'  : 'Výsledky vyhľadávania sú prázdne v aktuálnom zobrazení.\\Stlačením tlačidla [Enter] rozšírite vyhľadávanie cieľa.', // from v2.1.16 added 5.10.2016
 			'textLabel'       : 'Nápis textu', // from v2.1.17 added 13.10.2016
 			'minsLeft'        : '$1 minút ostáva', // from v2.1.17 added 13.11.2016
+			'openAsEncoding'  : 'Otvoriť s vybratým kódovaním', // from v2.1.19 added 2.12.2016
+			'saveAsEncoding'  : 'Uložiť s vybratým kódovaním', // from v2.1.19 added 2.12.2016
+			'selectFolder'    : 'Vyberte priečinok', // from v2.1.20 added 13.12.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
