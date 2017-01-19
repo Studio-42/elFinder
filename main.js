@@ -245,7 +245,10 @@
 					};
 				}
 				// Make elFinder (REQUIRED)
-				$('#elfinder').elfinder(opts);
+				$('#elfinder').elfinder(opts).elfinder('instance')
+					.one('cssloaded', function(e, fm) {
+						fm.getUI().css('background-image', 'none');
+					});;
 			});
 		},
 		
