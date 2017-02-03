@@ -1964,7 +1964,7 @@ var elFinder = function(node, opts) {
 				return parents;
 			};
 		
-		if (! onlydir) {
+		if (! onlydir && self.api >= 2) {
 			(cwd !== this.root()) && opts.push(this.request({
 				data           : {cmd : 'parents', target : cwd},
 				preventDefault : true
@@ -2011,7 +2011,10 @@ var elFinder = function(node, opts) {
 			}
 			
 			if (self.api < 2.1) {
-				pdata.tree = (pdata.tree || []).push(odata.cwd);
+				if (! pdata.tree) {
+					pdata.tree = [];
+				}
+				pdata.tree.push(odata.cwd);
 			}
 			
 			// data normalize
