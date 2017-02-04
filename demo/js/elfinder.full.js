@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.20 (2.1-src Nightly: bdade88) (2017-02-03)
+ * Version 2.1.20 (2.1-src Nightly: b5332ed) (2017-02-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -6906,7 +6906,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.20 (2.1-src Nightly: bdade88)';
+elFinder.prototype.version = '2.1.20 (2.1-src Nightly: b5332ed)';
 
 
 
@@ -22668,7 +22668,7 @@ elFinder.prototype.commands.upload = function() {
 				return tgts;
 			},
 			targets = getTargets(),
-			check = !targets && data && data.target? data.target : targets[0],
+			check = targets? targets[0] : (data && data.target? data.target : null),
 			targetDir = check? fm.file(check) : fm.cwd(),
 			fmUpload = function(data) {
 				fm.upload(data)
