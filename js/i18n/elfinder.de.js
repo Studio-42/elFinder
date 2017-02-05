@@ -16,7 +16,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.de = {
-		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt;, tora60 from pragmaMx.org, Timo-Linde $lt;info@timo-linde.de&gt;, osworx.net',
+		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt;, tora60 from pragmaMx.org, Timo-Linde &lt;info@timo-linde.de&gt;, osworx.net',
 		language   : 'Deutsch',
 		direction  : 'ltr',
 		dateFormat : 'd. M Y H:i', // Mar 13, 2012 05:27 PM
