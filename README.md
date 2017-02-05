@@ -169,6 +169,7 @@ You can create or modify the language file to use translation tool. Please refer
  * [Ruby/Rails](https://github.com/phallstrom/el_finder)
  * [Django](https://github.com/mikery/django-elfinder)
  * [Laravel](https://github.com/barryvdh/laravel-elfinder)
+ * [JavaScript/Efw](https://github.com/efwGrp/efw3.X/blob/master/help/api_efw_tag.md#elfinder-tag)
 
 3rd party Volume Drivers
 --------------------
