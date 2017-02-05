@@ -2,20 +2,9 @@
  * Deutsch translation
  * @author JPG & Mace <dev@flying-datacenter.de>
  * @author tora60 from pragmaMx.org
+ * @author Timo-Linde <info@timo-linde.de>
  * @author osworx.net
  * @version 2017-02-05
- */
-/**
- * elFinder translation template
- * use this file to create new translation
- * submit new translation via https://github.com/Studio-42/elFinder/issues
- * or make a pull request
- */
-
-/**
- * Deutsch translation
- * @author Translator Name <translator@email.tld>
- * @version 201x-xx-xx
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -27,7 +16,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.de = {
-		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt;, tora60 from pragmaMx.org, osworx.net',
+		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt;, tora60 from pragmaMx.org, Timo-Linde $lt;info@timo-linde.de&gt;, osworx.net',
 		language   : 'Deutsch',
 		direction  : 'ltr',
 		dateFormat : 'd. M Y H:i', // Mar 13, 2012 05:27 PM
