@@ -1,9 +1,10 @@
 /**
- * German translation
+ * Deutsch translation
  * @author JPG & Mace <dev@flying-datacenter.de>
  * @author tora60 from pragmaMx.org
  * @author Timo-Linde <info@timo-linde.de>
- * @version 2015-11-16
+ * @author osworx.net
+ * @version 2017-02-05
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -15,13 +16,13 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.de = {
-		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt;, tora60 from pragmaMx.org, osworx.net',
+		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt;, tora60 from pragmaMx.org, Timo-Linde &lt;info@timo-linde.de&gt;, osworx.net',
 		language   : 'Deutsch',
 		direction  : 'ltr',
-		dateFormat : 'd. M Y H:i', // 13. Mai 2012 15:27
-		fancyDateFormat : '$1 H:i', // will produce smth like: Heute 13:25
+		dateFormat : 'd. M Y H:i', // Mar 13, 2012 05:27 PM
+		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
 		messages   : {
-			
+
 			/********************************** errors **********************************/
 			'error'                : 'Fehler',
 			'errUnknown'           : 'Unbekannter Fehler.',
@@ -60,16 +61,16 @@
 			'errRename'            : 'Kann "$1" nicht umbenennen.',
 			'errCopyFrom'          : 'Kopieren von Dateien von "$1" nicht erlaubt.',
 			'errCopyTo'            : 'Kopieren von Dateien nach "$1" nicht erlaubt.',
-                        'errMkOutLink'         : 'Der Link kann nicht außerhalb der Partition führen.',
-			'errUpload'            : 'Upload-Fehler.',
-			'errUploadFile'        : 'Kann "$1" nicht hochladen.',
+			'errMkOutLink'         : 'Der Link kann nicht außerhalb der Partition führen.', // from v2.1 added 03.10.2015
+			'errUpload'            : 'Upload-Fehler.',  // old name - errUploadCommon
+			'errUploadFile'        : 'Kann "$1" nicht hochladen.', // old name - errUpload
 			'errUploadNoFiles'     : 'Keine Dateien zum Hochladen gefunden.',
-			'errUploadTotalSize'   : 'Daten überschreiten die Maximalgröße.',
-			'errUploadFileSize'    : 'Die Datei überschreitet die Maximalgröße.',
+			'errUploadTotalSize'   : 'Daten überschreiten die Maximalgröße.', // old name - errMaxSize
+			'errUploadFileSize'    : 'Die Datei überschreitet die Maximalgröße.', //  old name - errFileMaxSize
 			'errUploadMime'        : 'Dateityp nicht zulässig.',
 			'errUploadTransfer'    : '"$1" Transfer-Fehler.',
-                        'errUploadTemp'        : 'Kann temporäre Datei nicht erstellen.',
-			'errNotReplace'        : 'Das Objekt "$1" existiert bereits an dieser Stelle und kann nicht durch ein Objekt eines anderen Typs ersetzt werden.',
+			'errUploadTemp'        : 'Kann temporäre Datei nicht erstellen.', // from v2.1 added 26.09.2015
+			'errNotReplace'        : 'Das Objekt "$1" existiert bereits an dieser Stelle und kann nicht durch ein Objekt eines anderen Typs ersetzt werden.', // new
 			'errReplace'           : 'Kann "$1" nicht ersetzen.',
 			'errSave'              : 'Kann "$1" nicht speichern.',
 			'errCopy'              : 'Kann "$1" nicht kopieren.',
@@ -83,19 +84,19 @@
 			'errNoArchive'         : 'Bei der Datei handelt es sich nicht um ein Archiv, oder der Archivtyp wird nicht unterstützt.',
 			'errCmdNoSupport'      : 'Das Backend unterstützt diesen Befehl nicht.',
 			'errReplByChild'       : 'Der Ordner "$1" kann nicht durch etwas ersetzt werden, das ihn selbst enthält.',
-			'errArcSymlinks'       : 'Aus Sicherheitsgründen ist es verboten, ein Archiv mit symbolischen Links zu extrahieren.',
+			'errArcSymlinks'       : 'Aus Sicherheitsgründen ist es verboten, ein Archiv mit symbolischen Links zu extrahieren.', // edited 24.06.2012
 			'errArcMaxSize'        : 'Die Archivdateien übersteigen die maximal erlaubte Größe.',
 			'errResize'            : 'Größe von "$1" kann nicht geändert werden.',
-			'errResizeDegree'      : 'Ungültiger Rotationswert.',
-			'errResizeRotate'      : 'Bild konnte nicht gedreht werden.',
-			'errResizeSize'        : 'Ungültige Bildgröße.',
-			'errResizeNoChange'    : 'Bildmaße nicht geändert.',
+			'errResizeDegree'      : 'Ungültiger Rotationswert.',  // added 7.3.2013
+			'errResizeRotate'      : 'Bild konnte nicht gedreht werden.',  // added 7.3.2013
+			'errResizeSize'        : 'Ungültige Bildgröße.',  // added 7.3.2013
+			'errResizeNoChange'    : 'Bildmaße nicht geändert.',  // added 7.3.2013
 			'errUsupportType'      : 'Nicht unterstützter Dateityp.',
-			'errNotUTF8Content'    : 'Die Datei "$1" ist nicht im UTF-8-Format und kann nicht editiert werden.',
-			'errNetMount'          : 'Verbindung mit "$1" nicht möglich.',
-			'errNetMountNoDriver'  : 'Nicht unterstütztes Protokoll.',
-			'errNetMountFailed'    : 'Verbindung fehlgeschlagen.',
-			'errNetMountHostReq'   : 'Host benötigt.',
+			'errNotUTF8Content'    : 'Die Datei "$1" ist nicht im UTF-8-Format und kann nicht editiert werden.',  // added 9.11.2011
+			'errNetMount'          : 'Verbindung mit "$1" nicht möglich.', // added 17.04.2012
+			'errNetMountNoDriver'  : 'Nicht unterstütztes Protokoll.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Verbindung fehlgeschlagen.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'Host benötigt.', // added 18.04.2012
 			'errSessionExpires'    : 'Diese Sitzung ist aufgrund von Inaktivität abgelaufen.',
 			'errCreatingTempDir'   : 'Erstellung des temporären Ordners nicht möglich: "$1"',
 			'errFtpDownloadFile'   : 'Download der Datei über FTP nicht möglich: "$1"',
@@ -103,11 +104,13 @@
 			'errFtpMkdir'          : 'Erstellung des Remote-Ordners auf FTP nicht möglich: "$1"',
 			'errArchiveExec'       : 'Fehler beim Archivieren der Dateien: "$1"',
 			'errExtractExec'       : 'Fehler beim Extrahieren der Dateien: "$1"',
-                        'errNetUnMount'        : 'Kann nicht ausgeworfen werden.',
-			'errConvUTF8'          : 'Kann nicht zu UTF-8 konvertiert werden.',
-			'errFolderUpload'      : 'Versuchen Sie es mit Google Chrome, wenn Sie einen Ordner hochladen möchten.',
-			'errSearchTimeout'     : 'Zeitüberschreitung während der Suche nach "$1". Suchergebnis ist unvollständig.',
-			'errReauthRequire'     : 'Erneutes Anmelden ist erforderlich.',
+			'errNetUnMount'        : 'Kann nicht ausgeworfen werden.', // from v2.1 added 30.04.2012
+			'errConvUTF8'          : 'Kann nicht zu UTF-8 konvertiert werden.', // from v2.1 added 08.04.2014
+			'errFolderUpload'      : 'Versuchen Sie es mit Google Chrome, wenn Sie einen Ordner hochladen möchten.', // from v2.1 added 26.6.2015
+			'errSearchTimeout'     : 'Zeitüberschreitung während der Suche nach "$1". Suchergebnis ist unvollständig.', // from v2.1 added 12.1.2016
+			'errReauthRequire'     : 'Erneutes Anmelden ist erforderlich.', // from v2.1.10 added 24.3.2016
+			'errMaxTargets'        : 'Max number of selectable items is $1.', // from v2.1.17 added 17.10.2016
+
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Archiv erstellen',
 			'cmdback'      : 'Zurück',
@@ -123,7 +126,7 @@
 			'cmdhome'      : 'Startordner',
 			'cmdinfo'      : 'Informationen',
 			'cmdmkdir'     : 'Neuer Ordner',
-			'cmdmkdirin'   : 'In neuen Ordner',
+			'cmdmkdirin'   : 'In neuen Ordner', // from v2.1.7 added 19.2.2016
 			'cmdmkfile'    : 'Neue Textdatei',
 			'cmdopen'      : 'Öffnen',
 			'cmdpaste'     : 'Einfügen',
@@ -137,17 +140,16 @@
 			'cmdview'      : 'Ansehen',
 			'cmdresize'    : 'Größe ändern & drehen',
 			'cmdsort'      : 'Sortieren',
-			'cmdnetmount'  : 'Verbinde mit Netzwerkspeicher',
-                        'cmdnetunmount': 'Auswerfen', 
-			'cmdplaces'    : 'Orte',
-			'cmdchmod'     : 'Berechtigung ändern',
-			'cmdopendir'   : 'Einen Ordner öffnen',
-			'cmdcolwidth'  : 'Spaltenbreite zurücksetzen',
-			'cmdfullscreen': 'Vollbild',
-			'cmdmove'      : 'Verschieben',
-			
-			
-			/*********************************** buttons ***********************************/ 
+			'cmdnetmount'  : 'Verbinde mit Netzwerkspeicher', // added 18.04.2012
+			'cmdnetunmount': 'Auswerfen', // from v2.1 added 30.04.2012
+			'cmdplaces'    : 'Orte', // added 28.12.2014
+			'cmdchmod'     : 'Berechtigung ändern', // from v2.1 added 20.6.2015
+			'cmdopendir'   : 'Einen Ordner öffnen', // from v2.1 added 13.1.2016
+			'cmdcolwidth'  : 'Spaltenbreite zurücksetzen', // from v2.1.13 added 12.06.2016
+			'cmdfullscreen': 'Vollbild', // from v2.1.15 added 03.08.2016
+			'cmdmove'      : 'Verschieben', // from v2.1.15 added 21.08.2016
+
+			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Schließen',
 			'btnSave'   : 'Speichern',
 			'btnRm'     : 'Entfernen',
@@ -155,18 +157,18 @@
 			'btnCancel' : 'Abbrechen',
 			'btnNo'     : 'Nein',
 			'btnYes'    : 'Ja',
-			'btnMount'  : 'Verbinden',
-                        'btnApprove': 'Goto $1 & approve', 
-			'btnUnmount': 'Auswerfen',
-			'btnConv'   : 'Konvertieren',
-			'btnCwd'    : 'Arbeitspfad',
-			'btnVolume' : 'Partition',
-			'btnAll'    : 'Alle',
-			'btnMime'   : 'MIME-Typ',
-			'btnFileName': 'Dateiname',
-			'btnSaveClose': 'Speichern & Schließen',
-			'btnBackup' : 'Backup',
-			
+			'btnMount'  : 'Verbinden',  // added 18.04.2012
+			'btnApprove': 'Goto $1 & approve', // from v2.1 added 26.04.2012
+			'btnUnmount': 'Auswerfen', // from v2.1 added 30.04.2012
+			'btnConv'   : 'Konvertieren', // from v2.1 added 08.04.2014
+			'btnCwd'    : 'Arbeitspfad',      // from v2.1 added 22.5.2015
+			'btnVolume' : 'Partition',    // from v2.1 added 22.5.2015
+			'btnAll'    : 'Alle',       // from v2.1 added 22.5.2015
+			'btnMime'   : 'MIME-Typ', // from v2.1 added 22.5.2015
+			'btnFileName':'Dateiname',  // from v2.1 added 22.5.2015
+			'btnSaveClose': 'Speichern & Schließen', // from v2.1 added 12.6.2015
+			'btnBackup' : 'Backup', // fromv2.1 added 28.11.2015
+
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Öffne Ordner',
 			'ntffile'     : 'Öffne Datei',
@@ -187,15 +189,17 @@
 			'ntfresize'   : 'Bildgrößen ändern',
 			'ntfsmth'     : 'Bin beschäftigt',
 			'ntfloadimg'  : 'Bild laden',
-			'ntfnetmount' : 'Mit Netzwerkspeicher verbinden',
-                        'ntfnetunmount': 'Netzwerkspeicher auswerfen',
-			'ntfdim'      : 'Bildgröße erfassen',
-			'ntfreaddir'  : 'Lese Ordner Informationen',
-			'ntfurl'      : 'Hole URL von Link',
-			'ntfchmod'    : 'Ändere Dateiberechtigungen',
-			'ntfpreupload': 'Upload-Dateinamen überprüfen',
-			'ntfzipdl'    : 'Erstelle Datei zum Download',
-			
+			'ntfnetmount' : 'Mit Netzwerkspeicher verbinden', // added 18.04.2012
+			'ntfnetunmount': 'Netzwerkspeicher auswerfen', // from v2.1 added 30.04.2012
+			'ntfdim'      : 'Bildgröße erfassen', // added 20.05.2013
+			'ntfreaddir'  : 'Lese Ordner Informationen', // from v2.1 added 01.07.2013
+			'ntfurl'      : 'Hole URL von Link', // from v2.1 added 11.03.2014
+			'ntfchmod'    : 'Ändere Dateiberechtigungen', // from v2.1 added 20.6.2015
+			'ntfpreupload': 'Upload-Dateinamen überprüfen', // from v2.1 added 31.11.2015
+			'ntfzipdl'    : 'Erstelle Datei zum Download', // from v2.1.7 added 23.1.2016
+			'ntfparents'  : 'Beziehe Pfad Informationen', // from v2.1.17 added 2.11.2016
+			'ntfchunkmerge': 'Upload läuft', // from v2.1.17 added 2.11.2016
+
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unbekannt',
 			'Today'       : 'Heute',
@@ -231,37 +235,38 @@
 			'Thursday'    : 'Donnerstag',
 			'Friday'      : 'Freitag',
 			'Saturday'    : 'Samstag',
-			'Sun'         : 'So', 
-			'Mon'         : 'Mo', 
-			'Tue'         : 'Di', 
-			'Wed'         : 'Mi', 
-			'Thu'         : 'Do', 
-			'Fri'         : 'Fr', 
+			'Sun'         : 'So',
+			'Mon'         : 'Mo',
+			'Tue'         : 'Di',
+			'Wed'         : 'Mi',
+			'Thu'         : 'Do',
+			'Fri'         : 'Fr',
 			'Sat'         : 'Sa',
 
 			/******************************** sort variants ********************************/
-			'sortname'         : 'nach Name',
-			'sortkind'         : 'nach Art',
-			'sortsize'         : 'nach Größe',
-			'sortdate'         : 'nach Datum',
-			'sortFoldersFirst' : 'Ordner zuerst',
-			'sortperm'         : 'nach Berechtigung',
-			'sortmode'         : 'nach Modus',
-			'sortowner'        : 'nach Besitzer',
-			'sortgroup'        : 'nach Gruppe',
-			'sortAlsoTreeview' : 'auch Baumansicht',
-                        
-                        /********************************** new items **********************************/
-			'untitled file.txt' : 'Neues Textdokument.txt', 
-			'untitled folder'   : 'Neuer Ordner',
-			'Archive'           : 'Neues Archiv',
+			'sortname'          : 'nach Name',
+			'sortkind'          : 'nach Art',
+			'sortsize'          : 'nach Größe',
+			'sortdate'          : 'nach Datum',
+			'sortFoldersFirst'  : 'Ordner zuerst',
+			'sortperm'          : 'nach Berechtigung', // from v2.1.13 added 13.06.2016
+			'sortmode'          : 'nach Modus',       // from v2.1.13 added 13.06.2016
+			'sortowner'         : 'nach Besitzer',      // from v2.1.13 added 13.06.2016
+			'sortgroup'         : 'nach Gruppe',      // from v2.1.13 added 13.06.2016
+			'sortAlsoTreeview'  : 'auch Baumansicht',  // from v2.1.15 added 01.08.2016
+
+			/********************************** new items **********************************/
+			'untitled file.txt' : 'Neues Textdokument.txt', // added 10.11.2015
+			'untitled folder'   : 'Neuer Ordner',   // added 10.11.2015
+			'Archive'           : 'Neues Archiv',  // from v2.1 added 10.11.2015
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Bestätigung benötigt',
 			'confirmRm'       : 'Sollen die Dateien gelöscht werden?<br/>Dies kann nicht rückgängig gemacht werden!',
-                        'confirmConvUTF8' : 'Nicht in UTF-8<br/>Zu UTF-8 konvertieren?<br/>Inhalte werden zu UTF-8 konvertiert, wenn Sie speichern.',
-			'confirmNotSave'  : 'Die Datei wurde geändert.<br/>Sie werden die Änderungen verlieren, wenn Sie nicht speichern.',
 			'confirmRepl'     : 'Datei ersetzen?',
+			'confirmConvUTF8' : 'Nicht in UTF-8<br/>Zu UTF-8 konvertieren?<br/>Inhalte werden zu UTF-8 konvertiert, wenn Sie speichern.', // from v2.1 added 08.04.2014
+			'confirmNonUTF8'  : 'Die Zeichencodierung dieser Datei konnte nicht erkannt werden. Es muss vorübergehend in UTF-8 zur Bearbeitung konvertiert werden. <br/> Bitte wähle eine Zeichenkodierung dieser Datei aus.', // from v2.1.19 added 28.11.2016
+			'confirmNotSave'  : 'Die Datei wurde geändert.<br/>Sie werden die Änderungen verlieren, wenn Sie nicht speichern.', // from v2.1 added 15.7.2015
 			'apllyAll'        : 'Alles bestätigen',
 			'name'            : 'Name',
 			'size'            : 'Größe',
@@ -329,52 +334,65 @@
 			'rotate-cw'       : 'Drehe 90° im Uhrzeigersinn',
 			'rotate-ccw'      : 'Drehe 90° gegen Uhrzeigersinn',
 			'degree'          : '°',
-			'netMountDialogTitle' : 'verbinde Netzwerkspeicher',
-			'protocol'            : 'Protokoll',
-			'host'                : 'Host',
-			'port'                : 'Port',
-			'user'                : 'Benutzer',
-			'pass'                : 'Passwort',
-                        'confirmUnmount'      : 'Möchten Sie "$1" auswerfen?',
-			'dropFilesBrowser': 'Sie können Dateien in den Browser ziehen', 
-			'dropPasteFiles'  : 'Lassen Sie die Dateien hier los',
-			'encoding'        : 'Codierung', 
-			'locale'          : 'Locale', 
-			'searchTarget'    : 'Ziel: $1',
-			'searchMime'      : 'Suche nach MIME-Typ',
-			'owner'           : 'Besitzer',
-			'group'           : 'Gruppe',
-			'other'           : 'Andere',
-			'execute'         : 'Ausführen',
-			'perm'            : 'Berechtigung',
-			'mode'            : 'Modus',
-			'emptyFolder'     : 'Der Ordner ist leer',
-			'emptyFolderDrop' : 'Der Ordner ist leer\\A Fügen Sie Elemente durch Ziehen hinzu',
-			'emptyFolderLTap' : 'Der Ordner ist leer\\A Fügen Sie Elemente durch langes Tippen hinzu',
-			'quality'         : 'Qualität',
-			'autoSync'        : 'Auto sync',
-			'moveUp'          : 'Nach oben bewegen',
-			'getLink'         : 'URL-Link holen',
-			'selectedItems'   : 'Ausgewählte Objekte ($1)',
-			'folderId'        : 'Ordner-ID',
-			'offlineAccess'   : 'Offline-Zugriff erlauben',
-			'reAuth'          : 'Erneut anmelden',
-			'nowLoading'      : 'Wird geladen...',
-			'openMulti'       : 'mehrere Dateien öffnen',
-			'openMultiConfirm': 'Sie versuchen, die $1 Dateien zu öffnen. Sind Sie sicher, dass sie im Browser öffnen wollen ?',
-			'emptySearch'     : 'Suchergebnisse sind leer',
-			'editingFile'     : 'Datei wird bearbeitet.',
-			'hasSelected'     : 'Sie haben $1 Objekte ausgewählt.',
-			'hasClipboard'    : 'Sie haben $1 Objekte im Clipboard.',
-			'incSearchOnly'   : 'Inkrementelle Suche bezieht sich nur auf die aktuelle Ansicht.',
-			'reinstate'       : 'Wiederherstellen',
-			'complete'        : '$1 abgeschlossen',
-			'contextmenu'     : 'Kontextmenü',
-			'pageTurning'     : 'Seite umblättern',
-			'volumeRoots'     : 'Volume-Rootverzeichnisse',
+			'netMountDialogTitle' : 'verbinde Netzwerkspeicher', // added 18.04.2012
+			'protocol'            : 'Protokoll', // added 18.04.2012
+			'host'                : 'Host', // added 18.04.2012
+			'port'                : 'Port', // added 18.04.2012
+			'user'                : 'Benutzer', // added 18.04.2012
+			'pass'                : 'Passwort', // added 18.04.2012
+			'confirmUnmount'      : 'Möchten Sie "$1" auswerfen?',  // from v2.1 added 30.04.2012
+			'dropFilesBrowser': 'Sie können Dateien in den Browser ziehen', // from v2.1 added 30.05.2012
+			'dropPasteFiles'  : 'Lassen Sie die Dateien hier los', // from v2.1 added 07.04.2014
+			'encoding'        : 'Codierung', // from v2.1 added 19.12.2014
+			'locale'          : 'Lokal',   // from v2.1 added 19.12.2014
+			'searchTarget'    : 'Ziel: $1',                // from v2.1 added 22.5.2015
+			'searchMime'      : 'Suche nach MIME-Typ', // from v2.1 added 22.5.2015
+			'owner'           : 'Besitzer', // from v2.1 added 20.6.2015
+			'group'           : 'Gruppe', // from v2.1 added 20.6.2015
+			'other'           : 'Andere', // from v2.1 added 20.6.2015
+			'execute'         : 'Ausführen', // from v2.1 added 20.6.2015
+			'perm'            : 'Berechtigung', // from v2.1 added 20.6.2015
+			'mode'            : 'Modus', // from v2.1 added 20.6.2015
+			'emptyFolder'     : 'Der Ordner ist leer', // from v2.1.6 added 30.12.2015
+			'emptyFolderDrop' : 'Der Ordner ist leer\\A Fügen Sie Elemente durch Ziehen hinzu', // from v2.1.6 added 30.12.2015
+			'emptyFolderLTap' : 'Der Ordner ist leer\\A Fügen Sie Elemente durch langes Tippen hinzu', // from v2.1.6 added 30.12.2015
+			'quality'         : 'Qualität', // from v2.1.6 added 5.1.2016
+			'autoSync'        : 'Auto sync',  // from v2.1.6 added 10.1.2016
+			'moveUp'          : 'Nach oben bewegen',  // from v2.1.6 added 18.1.2016
+			'getLink'         : 'URL-Link holen', // from v2.1.7 added 9.2.2016
+			'selectedItems'   : 'Ausgewählte Objekte ($1)', // from v2.1.7 added 2.19.2016
+			'folderId'        : 'Ordner-ID', // from v2.1.10 added 3.25.2016
+			'offlineAccess'   : 'Offline-Zugriff erlauben', // from v2.1.10 added 3.25.2016
+			'reAuth'          : 'Erneut anmelden', // from v2.1.10 added 3.25.2016
+			'nowLoading'      : 'Wird geladen...', // from v2.1.12 added 4.26.2016
+			'openMulti'       : 'mehrere Dateien öffnen', // from v2.1.12 added 5.14.2016
+			'openMultiConfirm': 'Sie versuchen, die $1 Dateien zu öffnen. Sind Sie sicher, dass sie im Browser öffnen wollen ?', // from v2.1.12 added 5.14.2016
+			'emptySearch'     : 'Suchergebnisse sind leer', // from v2.1.12 added 5.16.2016
+			'editingFile'     : 'Datei wird bearbeitet.', // from v2.1.13 added 6.3.2016
+			'hasSelected'     : 'Sie haben $1 Objekte ausgewählt.', // from v2.1.13 added 6.3.2016
+			'hasClipboard'    : 'Sie haben $1 Objekte im Clipboard.', // from v2.1.13 added 6.3.2016
+			'incSearchOnly'   : 'Inkrementelle Suche bezieht sich nur auf die aktuelle Ansicht.', // from v2.1.13 added 6.30.2016
+			'reinstate'       : 'Wiederherstellen', // from v2.1.15 added 3.8.2016
+			'complete'        : '$1 abgeschlossen', // from v2.1.15 added 21.8.2016
+			'contextmenu'     : 'Kontextmenü', // from v2.1.15 added 9.9.2016
+			'pageTurning'     : 'Seite umblättern', // from v2.1.15 added 10.9.2016
+			'volumeRoots'     : 'Volume-Rootverzeichnisse', // from v2.1.16 added 16.9.2016
+			'reset'           : 'Neustart', // from v2.1.16 added 1.10.2016
+			'bgcolor'         : 'Hintergrund Farbe', // from v2.1.16 added 1.10.2016
+			'colorPicker'     : 'Farbauswahl', // from v2.1.16 added 1.10.2016
+			'8pxgrid'         : '8px Grid', // from v2.1.16 added 4.10.2016
+			'enabled'         : 'Ein', // from v2.1.16 added 4.10.2016
+			'disabled'        : 'Aus', // from v2.1.16 added 4.10.2016
+			'emptyIncSearch'  : 'Keine Ergebnisse in der aktuellen Anzeige', // from v2.1.16 added 5.10.2016
+			'textLabel'       : 'Text label', // from v2.1.17 added 13.10.2016
+			'minsLeft'        : '$1 min linke´s', // from v2.1.17 added 13.11.2016
+			'openAsEncoding'  : 'Reopen with selected encoding', // from v2.1.19 added 2.12.2016
+			'saveAsEncoding'  : 'Save with the selected encoding', // from v2.1.19 added 2.12.2016
+			'selectFolder'    : 'Verzeichnis auswählen', // from v2.1.20 added 13.12.2016
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unbekannt',
+			'kindRoot'        : 'Volume Root', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'Ordner',
 			'kindAlias'       : 'Verknüpfung',
 			'kindAliasBroken' : 'Defekte Verknüpfung',
@@ -422,7 +440,7 @@
 			'kindAWK'         : 'AWK-Quelltext',
 			'kindCSV'         : 'Komma-separierte Daten',
 			'kindDOCBOOK'     : 'Docbook XML-Dokument',
-                        'kindMarkdown'    : 'Markdown-Text',
+			'kindMarkdown'    : 'Markdown-Text', // added 20.7.2015
 			// images
 			'kindImage'       : 'Bild',
 			'kindBMP'         : 'Bitmap-Bild',
@@ -455,3 +473,4 @@
 		}
 	};
 }));
+
