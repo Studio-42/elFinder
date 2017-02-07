@@ -1942,7 +1942,6 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$mimeByName = $this->mimetype($name, true);
-		debug($mimeByName);
 		if ($mimeByName && !$this->allowPutMime($mimeByName)) {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $name);
 		}
