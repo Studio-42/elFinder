@@ -369,7 +369,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		
 		$perm = $this->parsePermissions($info[0], $owner);
 		$stat['name']  = $name;
-		$stat['mime']  = substr(strtolower($info[0]), 0, 1) == 'd' ? 'directory' : $this->mimetype($stat['name']);
+		$stat['mime']  = substr(strtolower($info[0]), 0, 1) == 'd' ? 'directory' : $this->mimetype($stat['name'], true);
 		$stat['size']  = $stat['mime'] == 'directory' ? 0 : $info[4];
 		$stat['read']  = $perm['read'];
 		$stat['write'] = $perm['write'];

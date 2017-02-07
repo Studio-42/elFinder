@@ -238,7 +238,18 @@ abstract class elFinderVolumeDriver {
 				'csv:text/plain'               => 'text/csv',
 				'm4a:video/mp4'                => 'audio/mp4',
 				'oga:application/ogg'          => 'audio/ogg',
-				'ogv:application/ogg'          => 'video/ogg'
+				'ogv:application/ogg'          => 'video/ogg',
+				'zip:application/x-zip'        => 'application/zip',
+				'php:unknown'                  => 'text/x-php',
+				'php:text/plain'               => 'text/x-php',
+				'php3:unknown'                 => 'text/x-php',
+				'php3:text/plain'              => 'text/x-php',
+				'php4:unknown'                 => 'text/x-php',
+				'php4:text/plain'              => 'text/x-php',
+				'php5:unknown'                 => 'text/x-php',
+				'php5:text/plain'              => 'text/x-php',
+				'cgi:unknown'                  => 'application/x-httpd-cgi',
+				'cgi:text/plain'               => 'application/x-httpd-cgi'
 		 	),
 		// MIME regex of send HTTP header "Content-Disposition: inline"
 		// '.' is allow inline of all of MIME types
@@ -1278,8 +1289,8 @@ abstract class elFinderVolumeDriver {
 	 * @return bool
 	 * @author Naoki Sawada
 	 **/
-	public function isUploadableByName($name, $allowUnknown = true) {
-		$mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name);
+	public function isUploadableByName($name, $allowUnknown = false) {
+		$mimeByName = $this->mimetype($name, true);
 		return (($allowUnknown && $mimeByName === 'unknown') || $this->allowPutMime($mimeByName));
 	}
 	
@@ -1890,8 +1901,8 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_INVALID_NAME);
 		}
 		
-		$mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name);
-		if ($mimeByName && $mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName)) {
+		$mimeByName = $this->mimetype($name, true);
+		if ($mimeByName && !$this->allowPutMime($mimeByName)) {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $name);
 		}
 		
@@ -1930,8 +1941,9 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_INVALID_NAME, $name);
 		}
 		
-		$mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name);
-		if ($mimeByName && $mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName)) {
+		$mimeByName = $this->mimetype($name, true);
+		debug($mimeByName);
+		if ($mimeByName && !$this->allowPutMime($mimeByName)) {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $name);
 		}
 		
@@ -2028,16 +2040,18 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_INVALID_NAME);
 		}
 		
-		$mime = $this->mimetype($this->mimeDetect == 'internal' ? $name : $tmpname, $name);
 		$mimeByName = '';
-		if ($this->mimeDetect !== 'internal') {
-			$mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name);
-			if ($mime == 'unknown') {
+		if ($this->mimeDetect === 'internal') {
+			$mime = $this->mimetype($name, true);
+		} else {
+			$mime = $this->mimetype($tmpname, $name);
+			$mimeByName = $this->mimetype($name, true);
+			if ($mime === 'unknown') {
 				$mime = $mimeByName;
 			}
 		}
 
-		if (!$this->allowPutMime($mime) || ($mimeByName && $mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName))) {
+		if (!$this->allowPutMime($mime) || ($mimeByName && !$this->allowPutMime($mimeByName))) {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME);
 		}
 
@@ -2254,7 +2268,7 @@ abstract class elFinderVolumeDriver {
 		if (!$cmd) {
 			$cmd = $archivers[0];
 			$ext = $cmd['ext'];
-			$mime = elFinderVolumeDriver::mimetypeInternalDetect('file.'.$ext);
+			$mime = $this->mimetype('file.'.$ext, true);
 		}
 		$res = false;
 		$mixed = false;
@@ -2352,7 +2366,7 @@ abstract class elFinderVolumeDriver {
 		// check MIME
 		$name = $this->basenameCE($path);
 		$mime = '';
-		$mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name);
+		$mimeByName = $this->mimetype($name, true);
 		if ($this->mimeDetect !== 'internal') {
 			if ($tp = tmpfile()) {
 				fwrite($tp, $content);
@@ -2362,7 +2376,7 @@ abstract class elFinderVolumeDriver {
 				fclose($tp);
 			}
 		}
-		if (!$this->allowPutMime($mimeByName) || ($mime && $mime !== 'unknown' && !$this->allowPutMime($mime))) {
+		if (!$this->allowPutMime($mimeByName) || ($mime && !$this->allowPutMime($mime))) {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME);
 		}
 		
@@ -3659,7 +3673,7 @@ abstract class elFinderVolumeDriver {
 		
 		
 		if (empty($stat['mime'])) {
-			$stat['mime'] = $this->mimetype($stat['name']);
+			$stat['mime'] = $this->mimetype($stat['name'], true);
 		}
 		
 		// @todo move dateformat to client
@@ -3803,19 +3817,23 @@ abstract class elFinderVolumeDriver {
 	/**
 	 * Return file mimetype
 	 *
-	 * @param  string $path file path
-	 * @param string $name
+	 * @param  string      $path file path
+	 * @param  string|bool $name
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function mimetype($path, $name = '') {
 		$type = '';
+		$nameCheck = false;
 		
 		if ($name === '') {
 			$name = $path;
+		} else if ($name === true) {
+			$name = $path;
+			$nameCheck = true;
 		}
 		$ext = (false === $pos = strrpos($name, '.')) ? '' : substr($name, $pos + 1);
-		if (is_readable($path)) {
+		if (! $nameCheck && is_readable($path)) {
 			if ($this->mimeDetect == 'finfo') {
 				if ($type = finfo_file($this->finfo, $path)) {
 					if ($ext && preg_match('~^application/(?:octet-stream|(?:x-)?zip)~', $type)) {
@@ -3834,15 +3852,16 @@ abstract class elFinderVolumeDriver {
 			$type = elFinderVolumeDriver::mimetypeInternalDetect($path);
 		}
 		
+		if ($type === 'unknown' && $this->mimeDetect != 'internal') {
+			$type = elFinderVolumeDriver::mimetypeInternalDetect($path);
+		}
+		
 		$type = explode(';', $type);
 		$type = trim($type[0]);
-
+		
 		if (in_array($type, array('application/x-empty', 'inode/x-empty'))) {
 			// finfo return this mime for empty files
 			$type = 'text/plain';
-		} elseif ($type == 'application/x-zip') {
-			// http://elrte.org/redmine/issues/163
-			$type = 'application/zip';
 		}
 		
 		// mime type normalization
@@ -3851,10 +3870,7 @@ abstract class elFinderVolumeDriver {
 			$type = $this->options['mimeMap'][$_checkKey];
 		}
 		
-		return $type == 'unknown' && $this->mimeDetect != 'internal'
-			? elFinderVolumeDriver::mimetypeInternalDetect($path)
-			: $type;
-		
+		return $type;
 	}
 	
 	/**
@@ -4305,11 +4321,11 @@ abstract class elFinderVolumeDriver {
 			
 			// MIME check
 			$stat = $this->stat($path);
-			$mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($stat['name']);
+			$mimeByName = $this->mimetype($stat['name'], true);
 			if ($stat['mime'] === $mimeByName) {
 				$mimeByName = '';
 			}
-			if (!$this->allowPutMime($stat['mime']) || ($mimeByName && $mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName))) {
+			if (!$this->allowPutMime($stat['mime']) || ($mimeByName && !$this->allowPutMime($mimeByName))) {
 				$this->remove($path, true);
 				return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $errpath);
 			}
