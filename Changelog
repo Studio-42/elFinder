@@ -1,3 +1,16 @@
+2017-02-07  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.21):
+		- [cmd:open] Fixed #1844 make configurable to open into tab(s)
+		- [php:core] Fixed #1846 target folder may be stay locked by adding items
+		- [cmd:download] Fixed #1868 fixed up timeouts for bad connection download
+		- [proxy:v1] Fixed #1880 error on command `paste`
+		- [v1 support] Fixed #1884 error on command `reload`
+		- [cmd:upload] Fixed #1885 Error on upload.ui = 'uploadbutton'
+		- [VD:security] Fixed #1891 MIME-type check of unknown item is not execute
+		- And some minor bug fixes
+
+
 2017-01-11  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.20):
