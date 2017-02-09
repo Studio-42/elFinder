@@ -1,3 +1,9 @@
+2017-02-09  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.0.8):
+		- [VD:security] Fixed #1891 MIME-type check of unknown item is not execute
+
+
 2016-07-11  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.0.7):
