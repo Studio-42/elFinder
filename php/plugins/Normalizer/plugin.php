@@ -12,12 +12,18 @@
  * ex. binding, configure on connector options
  *	$opts = array(
  *		'bind' => array(
+<<<<<<< HEAD
  *			'upload.pre mkdir.pre mkfile.pre rename.pre archive.pre ls.pre' => array(
  *				'Plugin.Normalizer.cmdPreprocess'
  *			),
  *			'ls' => array(
  *				'Plugin.Normalizer.cmdPostprocess'
  *			),
+=======
+ *			'mkdir.pre mkfile.pre rename.pre' => array(
+ *				'Plugin.Normalizer.cmdPreprocess'
+ *			),
+>>>>>>> 614883b34d44fe190801f899858026094918c2b6
  *			'upload.presave' => array(
  *				'Plugin.Normalizer.onUpLoadPreSave'
  *			)
@@ -25,11 +31,17 @@
  *		// global configure (optional)
  *		'plugin' => array(
  *			'Normalizer' => array(
+<<<<<<< HEAD
  *				'enable'    => true,
  *				'nfc'       => true,
  *				'nfkc'      => true,
  *				'lowercase' => false,
  * 				'convmap'   => array()
+=======
+ *				'enable' => true,
+ *				'nfc'    => true,
+ *				'nfkc'   => true
+>>>>>>> 614883b34d44fe190801f899858026094918c2b6
  *			)
  *		),
  *		// each volume configure (optional)
@@ -40,11 +52,17 @@
  *				'URL'    => 'http://localhost/to/files/'
  *				'plugin' => array(
  *					'Normalizer' => array(
+<<<<<<< HEAD
  *						'enable'    => true,
  *						'nfc'       => true,
  *						'nfkc'      => true,
  * 						'lowercase' => false,
  * 						'convmap'   => array()
+=======
+ *						'enable' => true,
+ *						'nfc'    => true,
+ *						'nfkc'   => true
+>>>>>>> 614883b34d44fe190801f899858026094918c2b6
  *					)
  *				)
  *			)
@@ -58,6 +76,7 @@
 class elFinderPluginNormalizer
 {
 	private $opts = array();
+<<<<<<< HEAD
 	private $replaced = array();
 	private $keyMap = array(
 		'ls' => 'intersect',
@@ -71,6 +90,14 @@ class elFinderPluginNormalizer
 			'nfkc'      => true,  // Compatibility Decomposition followed by Canonical
 			'lowercase' => false, // Make chars lowercase
 			'convmap'   => array()// Convert map ('FROM' => 'TO') array
+=======
+	
+	public function __construct($opts) {
+		$defaults = array(
+			'enable' => true, // For control by volume driver
+			'nfc'    => true, // Canonical Decomposition followed by Canonical Composition
+			'nfkc'   => true  // Compatibility Decomposition followed by Canonical
+>>>>>>> 614883b34d44fe190801f899858026094918c2b6
 		);
 	
 		$this->opts = array_merge($defaults, $opts);
@@ -81,6 +108,7 @@ class elFinderPluginNormalizer
 		if (! $opts['enable']) {
 			return false;
 		}
+<<<<<<< HEAD
 		$this->replaced[$cmd] = array();
 		$key = (isset($this->keyMap[$cmd]))? $this->keyMap[$cmd] : 'name';
 		
@@ -93,10 +121,16 @@ class elFinderPluginNormalizer
 				$name = $args[$key];
 				$this->replaced[$cmd][$name] = $args[$key] = $this->normalize($name, $opts);
 			}
+=======
+		
+		if (isset($args['name'])) {
+			$args['name'] = $this->normalize($args['name'], $opts);
+>>>>>>> 614883b34d44fe190801f899858026094918c2b6
 		}
 		return true;
 	}
 	
+<<<<<<< HEAD
 	public function cmdPostprocess($cmd, &$result, $args, $elfinder) {
 		if ($cmd === 'ls') {
 			if (! empty($result['list']) && ! empty($this->replaced['ls'])) {
@@ -113,6 +147,8 @@ class elFinderPluginNormalizer
 		}
 	}
 	
+=======
+>>>>>>> 614883b34d44fe190801f899858026094918c2b6
 	public function onUpLoadPreSave(&$path, &$name, $src, $elfinder, $volume) {
 		$opts = $this->getOpts($volume);
 		if (! $opts['enable']) {
@@ -138,6 +174,7 @@ class elFinderPluginNormalizer
 	}
 	
 	private function normalize($str, $opts) {
+<<<<<<< HEAD
 		if ($opts['nfc'] || $opts['nfkc']) {
 			if (class_exists('Normalizer', false)) {
 				if ($opts['nfc'] && ! Normalizer::isNormalized($str, Normalizer::FORM_C))
@@ -165,6 +202,23 @@ class elFinderPluginNormalizer
 				$str = mb_strtolower($str, 'UTF-8');
 			} else {
 				$str = strtolower($str);
+=======
+		if (class_exists('Normalizer')) {
+			if ($opts['nfc'] && ! Normalizer::isNormalized($str, Normalizer::FORM_C))
+				$str = Normalizer::normalize($str, Normalizer::FORM_C);
+			if ($opts['nfkc'] && ! Normalizer::isNormalized($str, Normalizer::FORM_KC))
+				$str = Normalizer::normalize($str, Normalizer::FORM_KC);
+		} else {
+			if (! class_exists('I18N_UnicodeNormalizer')) {
+				@ include_once 'I18N/UnicodeNormalizer.php';
+			}
+			if (class_exists('I18N_UnicodeNormalizer')) {
+				$normalizer = new I18N_UnicodeNormalizer();
+				if ($opts['nfc'])
+					$str = $normalizer->normalize($str, 'NFC');
+				if ($opts['nfkc'])
+					$str = $normalizer->normalize($str, 'NFKC');
+>>>>>>> 614883b34d44fe190801f899858026094918c2b6
 			}
 		}
 		return $str;

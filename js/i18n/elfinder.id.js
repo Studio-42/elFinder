@@ -3,15 +3,7 @@
  * @author Suyadi <1441177004009@student.unsika.ac.id>
  * @version 2015-07-27
  */
-(function(root, factory) {
-	if (typeof define === 'function' && define.amd) {
-		define(['elfinder'], factory);
-	} else if (typeof exports !== 'undefined') {
-		module.exports = factory(require('elfinder'));
-	} else {
-		factory(root.elFinder);
-	}
-}(this, function(elFinder) {
+if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
     elFinder.prototype.i18.id = {
         translator : 'Suyadi &lt;1441177004009@student.unsika.ac.id&gt;',
         language   : 'Bahasa Indonesia',
@@ -370,4 +362,4 @@
             'kindVideoOGG'    : 'Berkas video Ogg'
         }
     };
-}));
+}

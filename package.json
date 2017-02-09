@@ -1,6 +1,10 @@
 {
 	"name": "elfinder",
+<<<<<<< HEAD
 	"version": "2.1.18",
+=======
+	"version": "2.0.7",
+>>>>>>> 614883b34d44fe190801f899858026094918c2b6
 	"description": "Open-source file manager for web, written in JavaScript using jQuery and jQuery UI.",
 	"author": "Studio-42 (https://github.com/Studio-42/elFinder)",
 	"license": "3-clauses BSD",

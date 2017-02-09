@@ -7,12 +7,18 @@
  * ex. binding, configure on connector options
  *	$opts = array(
  *		'bind' => array(
+<<<<<<< HEAD
  *			'upload.pre mkdir.pre mkfile.pre rename.pre archive.pre ls.pre' => array(
  *				'Plugin.Sanitizer.cmdPreprocess'
  *			),
  *			'ls' => array(
  *				'Plugin.Sanitizer.cmdPostprocess'
  *			),
+=======
+ *			'mkdir.pre mkfile.pre rename.pre' => array(
+ *				'Plugin.Sanitizer.cmdPreprocess'
+ *			),
+>>>>>>> 614883b34d44fe190801f899858026094918c2b6
  *			'upload.presave' => array(
  *				'Plugin.Sanitizer.onUpLoadPreSave'
  *			)
@@ -49,12 +55,16 @@
 class elFinderPluginSanitizer
 {
 	private $opts = array();
+<<<<<<< HEAD
 	private $replaced = array();
 	private $keyMap = array(
 		'ls' => 'intersect',
 		'upload' => 'renames'
 	);
 
+=======
+	
+>>>>>>> 614883b34d44fe190801f899858026094918c2b6
 	public function __construct($opts) {
 		$defaults = array(
 			'enable'   => true,  // For control by volume driver
@@ -70,6 +80,7 @@ class elFinderPluginSanitizer
 		if (! $opts['enable']) {
 			return false;
 		}
+<<<<<<< HEAD
 		$this->replaced[$cmd] = array();
 		$key = (isset($this->keyMap[$cmd]))? $this->keyMap[$cmd] : 'name';
 		
@@ -102,6 +113,15 @@ class elFinderPluginSanitizer
 		}
 	}
 	
+=======
+	
+		if (isset($args['name'])) {
+			$args['name'] = $this->sanitizeFileName($args['name'], $opts);
+		}
+		return true;
+	}
+
+>>>>>>> 614883b34d44fe190801f899858026094918c2b6
 	public function onUpLoadPreSave(&$path, &$name, $src, $elfinder, $volume) {
 		$opts = $this->getOpts($volume);
 		if (! $opts['enable']) {

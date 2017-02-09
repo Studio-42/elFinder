@@ -3,15 +3,7 @@
  * @author Gabriel Satzger <gabriel.satzger@sbg.se>
  * @version 2014-12-19
  */
-(function(root, factory) {
-	if (typeof define === 'function' && define.amd) {
-		define(['elfinder'], factory);
-	} else if (typeof exports !== 'undefined') {
-		module.exports = factory(require('elfinder'));
-	} else {
-		factory(root.elFinder);
-	}
-}(this, function(elFinder) {
+if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.sv = {
 		translator : 'Gabriel Satzger &lt;gabriel.satzger@sbg.se&gt;',
 		language   : 'Svenska',
@@ -371,5 +363,5 @@
 			'kindVideoOGG'    : 'Ogg movie'
 		}
 	};
-}));
+}
 
