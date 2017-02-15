@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.21 (2.1-src Nightly: 2d1a65d) (2017-02-15)
+ * Version 2.1.21 (2.1-src Nightly: 971ce96) (2017-02-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -6906,7 +6906,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.21 (2.1-src Nightly: 2d1a65d)';
+elFinder.prototype.version = '2.1.21 (2.1-src Nightly: 971ce96)';
 
 
 
@@ -17805,7 +17805,9 @@ elFinder.prototype.commands.fullscreen = function() {
 			html.push('</div>');
 			// end help
 		},
+		useDebug = false,
 		debug = function() {
+			useDebug = true;
 			// debug tab
 			html.push('<div id="'+fm.namespace+'-help-debug" class="ui-tabs-panel ui-widget-content ui-corner-bottom">');
 			html.push('<div class="ui-widget-content elfinder-help-debug"><ul></ul></div>');
@@ -17871,7 +17873,14 @@ elFinder.prototype.commands.fullscreen = function() {
 	
 	fm.one('load', function() {
 		var parts = self.options.view || ['about', 'shortcuts', 'help', 'debug'],
-			tabDebug;
+			tabDebug, i;
+		
+		// debug tab require jQueryUI Tabs Widget
+		if (! $.fn.tabs) {
+			if ((i = $.inArray(parts, 'debug')) !== false) {
+				parts.splice(i, 1);
+			}
+		}
 		
 		$.each(parts, function(i, title) {
 			html.push(tab[r](/\{id\}/g, title)[r](/\{title\}/, fm.i18n(title)));
@@ -17907,22 +17916,24 @@ elFinder.prototype.commands.fullscreen = function() {
 			.filter(':first').click();
 		
 		// debug
-		tabDebug = content.find('.elfinder-help-tab-debug').hide();
-		debugDIV = content.find('#'+fm.namespace+'-help-debug').children('div:first').tabs();
-		debugUL = debugDIV.children('ul:first');
+		if (useDebug) {
+			tabDebug = content.find('.elfinder-help-tab-debug').hide();
+			debugDIV = content.find('#'+fm.namespace+'-help-debug').children('div:first').tabs();
+			debugUL = debugDIV.children('ul:first');
 
-		self.debug = {};
-
-		fm.bind('backenddebug', function(e) {
-			// CAUTION: DO NOT TOUCH `e.data`
-			if (e.data && e.data.debug) {
-				tabDebug.show();
-				self.debug = { options : e.data.options, debug : $.extend({ cmd : fm.currentReqCmd }, e.data.debug) };
-				if (self.dialog/* && self.dialog.is(':visible')*/) {
-					debugRender();
+			self.debug = {};
+	
+			fm.bind('backenddebug', function(e) {
+				// CAUTION: DO NOT TOUCH `e.data`
+				if (e.data && e.data.debug) {
+					tabDebug.show();
+					self.debug = { options : e.data.options, debug : $.extend({ cmd : fm.currentReqCmd }, e.data.debug) };
+					if (self.dialog/* && self.dialog.is(':visible')*/) {
+						debugRender();
+					}
 				}
-			}
-		});
+			});
+		}
 
 		content.find('#'+fm.namespace+'-help-about').find('.apiver').text(fm.api);
 		self.dialog = fm.dialog(content, {title : self.title, width : 530, autoOpen : false, destroyOnClose : false});
