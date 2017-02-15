@@ -1,5 +1,8 @@
 elFinder
 ========
+
+**WARNING: IF YOU HAVE OLDER VERSIONS OF ELFINDER ON PUBLIC SERVERS, IT MAY CAUSE SERIOUS DAMAGE TO YOUR SERVER AND VISITED USER. YOU SHOULD UPDATE TO THE LATEST VERSION OR REMOVE IT FROM THE SERVER.**
+
 <pre>
       _ ______ _           _           
      | |  ____(_)         | |          
