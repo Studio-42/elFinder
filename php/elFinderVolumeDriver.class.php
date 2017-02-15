@@ -5640,30 +5640,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 */
 	public function rmdirRecursive($dir) {
-		if (!is_link($dir) && is_dir($dir)) {
-			chmod($dir, 0777);
-			if ($handle = opendir($dir)) {
-				while (false !== ($file = readdir($handle))) {
-					if ($file === '.' || $file === '..') {
-						continue;
-					}
-					elFinder::extendTimeLimit(30);
-					$path = $dir . DIRECTORY_SEPARATOR . $file;
-					if (!is_link($dir) && is_dir($path)) {
-						$this->rmdirRecursive($path);
-					} else {
-						chmod($path, 0666);
-						unlink($path);
-					}
-				}
-				closedir($handle);
-			}
-			return rmdir($dir);
-		} elseif (is_file($dir) || is_link($dir)) {
-			chmod($dir, 0666);
-			return unlink($dir);
-		}
-		return false;
+		return self::localRmdirRecursive($dir);
 	}
 
 	/**
@@ -5753,6 +5730,74 @@ abstract class elFinderVolumeDriver {
 			throw new Exception('Can not open local directory.');
 		}
 		return $files;
+	}
+	
+	/**
+	 * Remove directory recursive on local file system
+	 *
+	 * @param string $dir Target dirctory path
+	 * @return boolean
+	 * @author Naoki Sawada
+	 */
+	protected static function localRmdirRecursive($dir) {
+		if (!is_link($dir) && is_dir($dir)) {
+			chmod($dir, 0777);
+			if ($handle = opendir($dir)) {
+				while (false !== ($file = readdir($handle))) {
+					if ($file === '.' || $file === '..') {
+						continue;
+					}
+					elFinder::extendTimeLimit(30);
+					$path = $dir . DIRECTORY_SEPARATOR . $file;
+					if (!is_link($dir) && is_dir($path)) {
+						self::localRmdirRecursive($path);
+					} else {
+						chmod($path, 0666);
+						unlink($path);
+					}
+				}
+				closedir($handle);
+			}
+			return rmdir($dir);
+		} elseif (is_file($dir) || is_link($dir)) {
+			chmod($dir, 0666);
+			return unlink($dir);
+		}
+		return false;
+	}
+	
+	/**
+	 * Move item recursive on local file system
+	 * 
+	 * @param string $src
+	 * @param string $target
+	 * @param string $overWrite
+	 * @param string $copyJoin
+	 * @return boolean
+	 * @author Naoki Sawada
+	 */
+	protected static function localMoveRecursive($src, $target, $overWrite = true, $copyJoin = true) {
+		$res = false;
+		if (! file_exists($target)) {
+			return rename($src, $target);
+		}
+		if (! $copyJoin || ! is_dir($target)) {
+			if ($overWrite) {
+				if (is_dir($target)) {
+					$del = self::localRmdirRecursive($target);
+				} else {
+					$del = unlink($target);
+				}
+				if ($del) {
+					return rename($src, $target);
+				}
+			}
+		} else {
+			foreach(self::localScandir($src) as $item) {
+				$res |= self::localMoveRecursive($src.DIRECTORY_SEPARATOR.$item, $target.DIRECTORY_SEPARATOR.$item, $overWrite, $copyJoin);
+			}
+		}
+		return (bool)$res;
 	}
 	
 	/**

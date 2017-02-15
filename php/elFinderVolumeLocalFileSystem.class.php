@@ -1102,14 +1102,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				}
 			} else {
 				$dstDir = dirname($path);
-				$res = false;
 				$result = array();
 				foreach($ls as $name) {
 					$target = $dstDir.DIRECTORY_SEPARATOR.$name;
-					if (is_dir($target)) {
-						$this->delTree($target);
-					}
-					if (rename($dir.DIRECTORY_SEPARATOR.$name, $target)) {
+					if (self::localMoveRecursive($dir.DIRECTORY_SEPARATOR.$name, $target, true, $this->options['copyJoin'])) {
 						$result[] = $target;
 					}
 				}
