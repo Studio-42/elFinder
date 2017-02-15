@@ -104,7 +104,7 @@
 /* file container */
 .elfinder-cwd-view-icons .elfinder-cwd-file {
 	width:120px;
-	height:80px;
+	height:90px;
 	padding-bottom:2px;
 	cursor:default;
 	border:none;
@@ -123,7 +123,7 @@
 }*/
 
 /* ltr/rtl enviroment */
-.elfinder-ltr .elfinder-cwd-view-icons .elfinder-cwd-file { float:left;  margin:0 3px 12px 0; }
+.elfinder-ltr .elfinder-cwd-view-icons .elfinder-cwd-file { float:left;  margin:0 3px 2px 0; }
 .elfinder-rtl .elfinder-cwd-view-icons .elfinder-cwd-file { float:right; margin:0 0 5px 3px; }
 
 /* remove ui hover class border */
