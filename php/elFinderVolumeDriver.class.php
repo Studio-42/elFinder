@@ -230,29 +230,30 @@ abstract class elFinderVolumeDriver {
 		'mimefile'        => '',
 		// mime type normalize map : Array '[ext]:[detected mime type]' => '[normalized mime]'
 		'mimeMap'         => array(
-				'md:application/x-genesis-rom' => 'text/x-markdown',
-				'md:text/plain'                => 'text/x-markdown',
-				'markdown:text/plain'          => 'text/x-markdown',
-				'css:text/x-asm'               => 'text/css',
-				'ico:image/vnd.microsoft.icon' => 'image/x-icon',
-				'csv:text/plain'               => 'text/csv',
-				'm4a:video/mp4'                => 'audio/mp4',
-				'oga:application/ogg'          => 'audio/ogg',
-				'ogv:application/ogg'          => 'video/ogg',
-				'zip:application/x-zip'        => 'application/zip',
-				'php:unknown'                  => 'text/x-php',
-				'php:text/plain'               => 'text/x-php',
-				'php3:unknown'                 => 'text/x-php',
-				'php3:text/plain'              => 'text/x-php',
-				'php4:unknown'                 => 'text/x-php',
-				'php4:text/plain'              => 'text/x-php',
-				'php5:unknown'                 => 'text/x-php',
-				'php5:text/plain'              => 'text/x-php',
-				'phtml:unknown'                => 'text/x-php',
-				'phtml:text/plain'             => 'text/x-php',
-				'cgi:unknown'                  => 'application/x-httpd-cgi',
-				'cgi:text/plain'               => 'application/x-httpd-cgi'
-		 	),
+			'md:application/x-genesis-rom' => 'text/x-markdown',
+			'md:text/plain'                => 'text/x-markdown',
+			'markdown:text/plain'          => 'text/x-markdown',
+			'css:text/x-asm'               => 'text/css',
+			'ico:image/vnd.microsoft.icon' => 'image/x-icon',
+			'csv:text/plain'               => 'text/csv',
+			'm4a:video/mp4'                => 'audio/mp4',
+			'oga:application/ogg'          => 'audio/ogg',
+			'ogv:application/ogg'          => 'video/ogg',
+			'zip:application/x-zip'        => 'application/zip',
+			// Fix extension/MIME of general server side scripts to security issues
+			'php:*'                        => 'text/x-php',
+			'php3:*'                       => 'text/x-php',
+			'php4:*'                       => 'text/x-php',
+			'php5:*'                       => 'text/x-php',
+			'phtml:*'                      => 'text/x-php',
+			'cgi:*'                        => 'text/x-httpd-cgi',
+			'pl:*'                         => 'text/x-perl',
+			'asp:*'                        => 'text/x-asap',
+			'aspx:*'                       => 'text/x-asap',
+			'py:*'                         => 'text/x-python',
+			'rb:*'                         => 'text/x-ruby',
+			'jsp:*'                        => 'text/x-jsp'
+		),
 		// An option to add MimeMap to the `mimeMap` option
 		// Array '[ext]:[detected mime type]' => '[normalized mime]'
 		'additionalMimeMap' => array(),
@@ -1329,7 +1330,7 @@ abstract class elFinderVolumeDriver {
 			$extTable = array_flip(array_unique($this->getMimeTable()));
 			foreach(array_keys($this->options['mimeMap']) as $pair) {
 				list($ext, $_mime) = explode(':', $pair);
-				if (! isset($extTable[$_mime])) {
+				if ($_mime !== '*' && ! isset($extTable[$_mime])) {
 					$extTable[$_mime] = $ext;
 				}
 			}
@@ -3875,6 +3876,11 @@ abstract class elFinderVolumeDriver {
 		$_checkKey = strtolower($ext.':'.$type);
 		if (isset($this->options['mimeMap'][$_checkKey])) {
 			$type = $this->options['mimeMap'][$_checkKey];
+		} else {
+			$_checkKey = strtolower($ext.':*');
+			if (isset($this->options['mimeMap'][$_checkKey])) {
+				$type = $this->options['mimeMap'][$_checkKey];
+			}
 		}
 		
 		return $type;
