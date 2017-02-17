@@ -248,9 +248,14 @@ abstract class elFinderVolumeDriver {
 				'php4:text/plain'              => 'text/x-php',
 				'php5:unknown'                 => 'text/x-php',
 				'php5:text/plain'              => 'text/x-php',
+				'phtml:unknown'                => 'text/x-php',
+				'phtml:text/plain'             => 'text/x-php',
 				'cgi:unknown'                  => 'application/x-httpd-cgi',
 				'cgi:text/plain'               => 'application/x-httpd-cgi'
 		 	),
+		// An option to add MimeMap to the `mimeMap` option
+		// Array '[ext]:[detected mime type]' => '[normalized mime]'
+		'additionalMimeMap' => array(),
 		// MIME regex of send HTTP header "Content-Disposition: inline"
 		// '.' is allow inline of all of MIME types
 		// '$^' is not allow inline of all of MIME types
@@ -798,6 +803,9 @@ abstract class elFinderVolumeDriver {
 		// check 'mimeMap'
 		if (!is_array($this->options['mimeMap'])) {
 			$this->options['mimeMap'] = array();
+		}
+		if (is_array($this->options['additionalMimeMap']) && $this->options['additionalMimeMap']) {
+			$this->options['mimeMap'] = array_merge($this->options['mimeMap'], $this->options['additionalMimeMap']);
 		}
 		
 		// check 'url' in disabled commands
