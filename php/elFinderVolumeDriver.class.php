@@ -5030,10 +5030,13 @@ abstract class elFinderVolumeDriver {
 				3 => '270'
 			);
 			$quotedPath = escapeshellarg($path);
-			$cmds = array(
-				'exiftran -i '.$exiftran[$count].' '.$path,
-				'jpegtran -rotate '.$jpegtran[$count].' -copy all -outfile '.$quotedPath.' '.$quotedPath
-			);
+			$cmds = array();
+			if ($this->procExec('exiftran -h') === 0) {
+				$cmds[] = 'exiftran -i '.$exiftran[$count].' '.$path;
+			}
+			if ($this->procExec('jpegtran -version') === 0) {
+				$cmds[] = 'jpegtran -rotate '.$jpegtran[$count].' -copy all -outfile '.$quotedPath.' '.$quotedPath;
+			}
 			foreach($cmds as $cmd) {
 				if ($this->procExec($cmd) === 0) {
 					$result = true;
