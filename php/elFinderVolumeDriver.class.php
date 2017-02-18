@@ -228,19 +228,8 @@ abstract class elFinderVolumeDriver {
 		'mimeDetect'      => 'auto',
 		// mime.types file path (for mimeDetect==internal)
 		'mimefile'        => '',
-		// mime type normalize map : Array '[ext]:[detected mime type]' => '[normalized mime]'
-		'mimeMap'         => array(
-			'md:application/x-genesis-rom' => 'text/x-markdown',
-			'md:text/plain'                => 'text/x-markdown',
-			'markdown:text/plain'          => 'text/x-markdown',
-			'css:text/x-asm'               => 'text/css',
-			'ico:image/vnd.microsoft.icon' => 'image/x-icon',
-			'csv:text/plain'               => 'text/csv',
-			'm4a:video/mp4'                => 'audio/mp4',
-			'oga:application/ogg'          => 'audio/ogg',
-			'ogv:application/ogg'          => 'video/ogg',
-			'zip:application/x-zip'        => 'application/zip',
-			// Fix extension/MIME of general server side scripts to security issues
+		// Static extension/MIME of general server side scripts to security issues
+		'staticMineMap'   => array(
 			'php:*'                        => 'text/x-php',
 			'php3:*'                       => 'text/x-php',
 			'php4:*'                       => 'text/x-php',
@@ -253,6 +242,19 @@ abstract class elFinderVolumeDriver {
 			'py:*'                         => 'text/x-python',
 			'rb:*'                         => 'text/x-ruby',
 			'jsp:*'                        => 'text/x-jsp'
+		),
+		// mime type normalize map : Array '[ext]:[detected mime type]' => '[normalized mime]'
+		'mimeMap'         => array(
+			'md:application/x-genesis-rom' => 'text/x-markdown',
+			'md:text/plain'                => 'text/x-markdown',
+			'markdown:text/plain'          => 'text/x-markdown',
+			'css:text/x-asm'               => 'text/css',
+			'ico:image/vnd.microsoft.icon' => 'image/x-icon',
+			'csv:text/plain'               => 'text/csv',
+			'm4a:video/mp4'                => 'audio/mp4',
+			'oga:application/ogg'          => 'audio/ogg',
+			'ogv:application/ogg'          => 'video/ogg',
+			'zip:application/x-zip'        => 'application/zip'
 		),
 		// An option to add MimeMap to the `mimeMap` option
 		// Array '[ext]:[detected mime type]' => '[normalized mime]'
@@ -804,6 +806,9 @@ abstract class elFinderVolumeDriver {
 		// check 'mimeMap'
 		if (!is_array($this->options['mimeMap'])) {
 			$this->options['mimeMap'] = array();
+		}
+		if (is_array($this->options['staticMineMap']) && $this->options['staticMineMap']) {
+			$this->options['mimeMap'] = array_merge($this->options['mimeMap'], $this->options['staticMineMap']);
 		}
 		if (is_array($this->options['additionalMimeMap']) && $this->options['additionalMimeMap']) {
 			$this->options['mimeMap'] = array_merge($this->options['mimeMap'], $this->options['additionalMimeMap']);
