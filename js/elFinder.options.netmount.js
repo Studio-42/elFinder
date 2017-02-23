@@ -12,7 +12,7 @@ elFinder.prototype._options.commandsOptions.netmount = {
 			port     : $('<input type="text" placeholder="21"/>'),
 			path     : $('<input type="text" value="/"/>'),
 			user     : $('<input type="text"/>'),
-			pass     : $('<input type="password"/>'),
+			pass     : $('<input type="password" autocomplete="new-password"/>'),
 			encoding : $('<input type="text" placeholder="Optional"/>'),
 			locale   : $('<input type="text" placeholder="Optional"/>')
 		}

@@ -63,6 +63,7 @@ elFinder.prototype.commands.netmount = function() {
 						},
 						buttons        : {}
 					},
+					form = $('<form autocomplete="off"/>'),
 					hidden  = $('<div/>'),
 					dialog;
 
@@ -145,7 +146,7 @@ elFinder.prototype.commands.netmount = function() {
 				
 				content.find('select,input').addClass('elfinder-tabstop');
 				
-				dialog = fm.dialog(content, opts);
+				dialog = fm.dialog(form.append(content), opts);
 				dialogNode = dialog.closest('.ui-dialog');
 				dialog.ready(function(){
 					inputs.protocol.change();
