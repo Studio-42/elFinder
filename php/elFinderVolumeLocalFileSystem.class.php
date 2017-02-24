@@ -95,7 +95,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 		$this->root = $this->getFullPath($this->root, $cwd);
 		if (!empty($this->options['startPath'])) {
-			$this->options['startPath'] = $this->getFullPath($this->options['startPath'], $cwd);
+			$this->options['startPath'] = $this->getFullPath($this->options['startPath'], $this->root);
 		}
 		
 		if (is_null($this->options['syncChkAsTs'])) {
@@ -442,11 +442,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$stat = array();
 
 		if (!file_exists($path) && !is_link($path)) {
+			debug($path);
 			return $stat;
 		}
 
 		//Verifies the given path is the root or is inside the root. Prevents directory traveral.
 		if (!$this->_inpath($path, $this->root)) {
+			debug($path, $this->root);
 			return $stat;
 		}
 

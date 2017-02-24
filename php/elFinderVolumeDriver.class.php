@@ -717,8 +717,6 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function configure() {
-		// set ARGS
-		$this->ARGS = $_SERVER['REQUEST_METHOD'] === 'POST'? $_POST : $_GET;
 		// set thumbnails path
 		$path = $this->options['tmbPath'];
 		if ($path) {
@@ -1007,6 +1005,9 @@ abstract class elFinderVolumeDriver {
 			$this->encoding = null;
 		}
 		
+		// set ARGS
+		$this->ARGS = $_SERVER['REQUEST_METHOD'] === 'POST'? $_POST : $_GET;
+		
 		$argInit = !empty($this->ARGS['init']);
 		
 		// session cache
@@ -1175,18 +1176,20 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if ($root['read']) {
-			// check startPath - path to open by default instead of root
-			$startPath = $this->options['startPath']? $this->normpathCE($this->options['startPath']) : '';
-			if ($startPath) {
-				$start = $this->stat($startPath);
-				if (!empty($start)
-				&& $start['mime'] == 'directory'
-				&& $start['read']
-				&& empty($start['hidden'])
-				&& $this->inpathCE($startPath, $this->root)) {
-					$this->startPath = $startPath;
-					if (substr($this->startPath, -1, 1) == $this->options['separator']) {
-						$this->startPath = substr($this->startPath, 0, -1);
+			if ($argInit) {
+				// check startPath - path to open by default instead of root
+				$startPath = $this->options['startPath']? $this->normpathCE($this->options['startPath']) : '';
+				if ($startPath) {
+					$start = $this->stat($startPath);
+					if (!empty($start)
+					&& $start['mime'] == 'directory'
+					&& $start['read']
+					&& empty($start['hidden'])
+					&& $this->inpathCE($startPath, $this->root)) {
+						$this->startPath = $startPath;
+						if (substr($this->startPath, -1, 1) == $this->options['separator']) {
+							$this->startPath = substr($this->startPath, 0, -1);
+						}
 					}
 				}
 			}
