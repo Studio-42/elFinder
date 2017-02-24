@@ -1,3 +1,26 @@
+2017-02-25  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.22):
+		- [VD:LocalFileSystem] Fixed #1882 option `copyJoin` does not work on extract
+		- [cmd:help] Fixed #1898 error ".tabs is not a function" without JqUI tabs widget
+		- [VD:abstract] Fixed #1899 rotating image breaks itself without exiftran and jpegtran
+		- [VD:LocalFileSystem] Fixed #1910 `startPath` dose not work currently 
+		- [VD:abstract] Fixed #1911 unable to rename folder
+		- And some minor bug fixes
+
+
+2017-02-25  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.0.9):
+		- [VD:abstract] Fixed #1911 unable to rename folder
+
+
+2017-02-09  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.0.8):
+		- [VD:security] Fixed #1891 MIME-type check of unknown item is not execute
+
+
 2017-02-07  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.21):
