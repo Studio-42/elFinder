@@ -1958,11 +1958,6 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_INVALID_NAME, $name);
 		}
 		
-		$mimeByName = $this->mimetype($name, true);
-		if ($mimeByName && !$this->allowPutMime($mimeByName)) {
-			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $name);
-		}
-		
 		if (!($file = $this->file($hash))) {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
@@ -1973,6 +1968,13 @@ abstract class elFinderVolumeDriver {
 		
 		if (!empty($file['locked'])) {
 			return $this->setError(elFinder::ERROR_LOCKED, $file['name']);
+		}
+		
+		if ($file['mime'] !== 'directory') {
+			$mimeByName = $this->mimetype($name, true);
+			if ($mimeByName && !$this->allowPutMime($mimeByName)) {
+				return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $name);
+			}
 		}
 		
 		$path = $this->decode($hash);
