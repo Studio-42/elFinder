@@ -1,3 +1,9 @@
+2017-02-25  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.0.9):
+		- [VD:abstract] Fixed #1911 unable to rename folder 
+
+
 2017-02-09  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.0.8):
