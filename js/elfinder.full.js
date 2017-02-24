@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.21 (2.1-src Nightly: 443b156) (2017-02-18)
+ * Version 2.1.21 (2.1-src Nightly: 4310d83) (2017-02-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -6906,7 +6906,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.21 (2.1-src Nightly: 443b156)';
+elFinder.prototype.version = '2.1.21 (2.1-src Nightly: 4310d83)';
 
 
 
@@ -8104,7 +8104,7 @@ elFinder.prototype._options.commandsOptions.netmount = {
 			port     : $('<input type="text" placeholder="21"/>'),
 			path     : $('<input type="text" value="/"/>'),
 			user     : $('<input type="text"/>'),
-			pass     : $('<input type="password"/>'),
+			pass     : $('<input type="password" autocomplete="new-password"/>'),
 			encoding : $('<input type="text" placeholder="Optional"/>'),
 			locale   : $('<input type="text" placeholder="Optional"/>')
 		}
@@ -18530,6 +18530,7 @@ elFinder.prototype.commands.netmount = function() {
 						},
 						buttons        : {}
 					},
+					form = $('<form autocomplete="off"/>'),
 					hidden  = $('<div/>'),
 					dialog;
 
@@ -18612,7 +18613,7 @@ elFinder.prototype.commands.netmount = function() {
 				
 				content.find('select,input').addClass('elfinder-tabstop');
 				
-				dialog = fm.dialog(content, opts);
+				dialog = fm.dialog(form.append(content), opts);
 				dialogNode = dialog.closest('.ui-dialog');
 				dialog.ready(function(){
 					inputs.protocol.change();
