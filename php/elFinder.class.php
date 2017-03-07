@@ -958,6 +958,7 @@ class elFinder {
 		$res = true;
 		if (is_object($volume) && method_exists($volume, 'netunmount')) {
 			$res = $volume->netunmount($netVolumes, $key);
+			$volume->clearSessionCache();
 		}
 		if ($res) {
 			if (is_string($key) && isset($netVolumes[$key])) {
