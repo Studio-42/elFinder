@@ -1313,7 +1313,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     public function debug()
     {
         $res = parent::debug();
-        if ($this->options['access_token'] && isset($this->options['access_token']['refresh_token'])) {
+        if (empty($this->options['refresh_token']) && $this->options['access_token'] && isset($this->options['access_token']['refresh_token'])) {
             $res['refresh_token'] = $this->options['access_token']['refresh_token'];
         }
 
