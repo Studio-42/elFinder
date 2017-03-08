@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: 0dfb9c9) (2017-02-25)
+ * Version 2.1.22 (2.1-src Nightly: e6a5eae) (2017-03-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -6906,7 +6906,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 0dfb9c9)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: e6a5eae)';
 
 
 
@@ -8144,6 +8144,7 @@ elFinder.prototype._options.commandsOptions.netmount = {
 			}
 		}
 	},
+	dropbox2: elFinder.prototype.makeNetmountOptionOauth('dropbox2', 'Dropbox', 'Dropbox', true),
 	googledrive: elFinder.prototype.makeNetmountOptionOauth('googledrive', 'Google Drive', 'Google'),
 	onedrive: elFinder.prototype.makeNetmountOptionOauth('onedrive', 'One Drive', 'OneDrive'),
 	box: elFinder.prototype.makeNetmountOptionOauth('box', 'Box', 'Box', true)
@@ -11152,8 +11153,6 @@ $.fn.elfindercwd = function(fm, options) {
 						});
 						if (reload) {
 							loadThumbnails(reloads);
-						} else if (bufferExt.getTmbs.length) {
-							loadThumbnails();
 						}
 						if (Object.keys(bufferExt.attachTmbs).length < 1 && bufferExt.getTmbs.length < 1) {
 							wrapper.off(scrollEvent, attachThumbnails);
@@ -11164,10 +11163,16 @@ $.fn.elfindercwd = function(fm, options) {
 				if ($.isPlainObject(image) && Object.keys(image).length) {
 					$.extend(bufferExt.attachTmbs, image);
 					$.each(image, chk);
+					if (! reload && bufferExt.getTmbs.length) {
+						loadThumbnails();
+					}
 				} else {
 					bufferExt.attachThumbTm && clearTimeout(bufferExt.attachThumbTm);
 					bufferExt.attachThumbTm = setTimeout(function() {
 						$.each(bufferExt.attachTmbs, chk);
+						if (! reload && bufferExt.getTmbs.length) {
+							loadThumbnails();
+						}
 					}, 0);
 				}
 			},
