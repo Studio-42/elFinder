@@ -971,8 +971,6 @@ $.fn.elfindercwd = function(fm, options) {
 						});
 						if (reload) {
 							loadThumbnails(reloads);
-						} else if (bufferExt.getTmbs.length) {
-							loadThumbnails();
 						}
 						if (Object.keys(bufferExt.attachTmbs).length < 1 && bufferExt.getTmbs.length < 1) {
 							wrapper.off(scrollEvent, attachThumbnails);
@@ -983,10 +981,16 @@ $.fn.elfindercwd = function(fm, options) {
 				if ($.isPlainObject(image) && Object.keys(image).length) {
 					$.extend(bufferExt.attachTmbs, image);
 					$.each(image, chk);
+					if (! reload && bufferExt.getTmbs.length) {
+						loadThumbnails();
+					}
 				} else {
 					bufferExt.attachThumbTm && clearTimeout(bufferExt.attachThumbTm);
 					bufferExt.attachThumbTm = setTimeout(function() {
 						$.each(bufferExt.attachTmbs, chk);
+						if (! reload && bufferExt.getTmbs.length) {
+							loadThumbnails();
+						}
 					}, 0);
 				}
 			},

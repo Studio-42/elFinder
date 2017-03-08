@@ -52,6 +52,7 @@ elFinder.prototype._options.commandsOptions.netmount = {
 			}
 		}
 	},
+	dropbox2: elFinder.prototype.makeNetmountOptionOauth('dropbox2', 'Dropbox', 'Dropbox', true),
 	googledrive: elFinder.prototype.makeNetmountOptionOauth('googledrive', 'Google Drive', 'Google'),
 	onedrive: elFinder.prototype.makeNetmountOptionOauth('onedrive', 'One Drive', 'OneDrive'),
 	box: elFinder.prototype.makeNetmountOptionOauth('box', 'Box', 'Box', true)

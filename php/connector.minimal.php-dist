@@ -13,24 +13,15 @@ require './autoload.php';
 elFinder::$netDrivers['ftp'] = 'FTP';
 // ===============================================
 
-/**
- * # Dropbox volume driver need `composer require dropbox-php/dropbox-php:dev-master@dev`
- *  OR "dropbox-php's Dropbox" and "PHP OAuth extension" or "PEAR's HTTP_OAUTH package"
- * * dropbox-php: http://www.dropbox-php.com/
- * * PHP OAuth extension: http://pecl.php.net/package/oauth
- * * PEAR's HTTP_OAUTH package: http://pear.php.net/package/http_oauth
- *  * HTTP_OAUTH package require HTTP_Request2 and Net_URL2
- */
-// // Required for Dropbox.com connector support
-// // On composer
-// elFinder::$netDrivers['dropbox'] = 'Dropbox';
-// // OR on pear
-// include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderVolumeDropbox.class.php';
-
-// // Dropbox driver need next two settings. You can get at https://www.dropbox.com/developers
-// define('ELFINDER_DROPBOX_CONSUMERKEY',    '');
-// define('ELFINDER_DROPBOX_CONSUMERSECRET', '');
-// define('ELFINDER_DROPBOX_META_CACHE_PATH',''); // optional for `options['metaCachePath']`
+// // Required for Dropbox network mount
+// // Installation by composer
+// // `composer require kunalvarma05/dropbox-php-sdk`
+// // Enable network mount
+// elFinder::$netDrivers['dropbox2'] = 'Dropbox2';
+// // Dropbox2 Netmount driver need next two settings. You can get at https://www.dropbox.com/developers/apps
+// // AND reuire regist redirect url to "YOUR_CONNECTOR_URL?cmd=netmount&protocol=dropbox2&host=1"
+// define('ELFINDER_DROPBOX_APPKEY',    '');
+// define('ELFINDER_DROPBOX_APPSECRET', '');
 // ===============================================
 
 // // Required for Google Drive network mount
