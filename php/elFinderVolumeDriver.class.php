@@ -1289,6 +1289,14 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Remove session cache of this volume
+	 * 
+	 */
+	public function clearSessionCache() {
+		$this->sessionCache = array();
+	}
+	
+	/**
 	 * Return error message from last failed action
 	 *
 	 * @return array
@@ -4191,7 +4199,6 @@ abstract class elFinderVolumeDriver {
 		elFinder::extendTimeLimit();
 		
 		$srcStat = $this->stat($src);
-		$this->clearcache();
 		
 		if (!empty($srcStat['thash'])) {
 			$target = $this->decode($srcStat['thash']);
@@ -4209,7 +4216,7 @@ abstract class elFinderVolumeDriver {
 			$testStat = $this->isNameExists($this->joinPathCE($dst, $name));
 			$this->clearcache();
 			
-			if (($testStat && $testStat['mime'] != 'directory') || (! $testStat && ! $testStat = $this->mkdir($this->encode($dst), $name))) {
+			if (($testStat && $testStat['mime'] !== 'directory') || (! $testStat && ! $testStat = $this->mkdir($this->encode($dst), $name))) {
 				return $this->setError(elFinder::ERROR_COPY, $this->path($srcStat['hash']));
 			}
 			

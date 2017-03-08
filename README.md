@@ -167,6 +167,7 @@ You can create or modify the language file to use translation tool. Please refer
 3rd party connectors
 --------------------
  * [ASP.NET](https://github.com/leniel/elFinder.Net)
+ * [ASP.NET Core](https://github.com/gordon-matt/elFinder.NetCore)
  * [Java Servlet](https://github.com/trustsystems/elfinder-java-connector)
  * [Python](https://github.com/Studio-42/elfinder-python)
  * [Ruby/Rails](https://github.com/phallstrom/el_finder)
