@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: 1cb9d7b) (2017-03-09)
+ * Version 2.1.22 (2.1-src Nightly: 32ab857) (2017-03-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -640,9 +640,9 @@ var elFinder = function(node, opts) {
 	 * these commands aborts before `open` request
 	 *
 	 * @type Array
-	 * @default ['tmb', 'parents', 'tree']
+	 * @default ['tmb', 'parents']
 	 */
-	this.abortCmdsOnOpen = this.options.abortCmdsOnOpen || ['tmb', 'parents', 'tree'];
+	this.abortCmdsOnOpen = this.options.abortCmdsOnOpen || ['tmb', 'parents'];
 
 	/**
 	 * ID. Required to create unique cookie name
@@ -6906,7 +6906,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 1cb9d7b)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 32ab857)';
 
 
 
