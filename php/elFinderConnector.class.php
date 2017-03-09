@@ -163,6 +163,11 @@ class elFinderConnector {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function output(array $data) {
+		// unlock session data for multiple access
+		$this->elFinder->getSession()->close();
+		// client disconnect should abort
+		ignore_user_abort(false);
+		
 		if ($this->header) {
 			self::sendHeader($this->header);
 		}
@@ -224,11 +229,6 @@ class elFinderConnector {
 					}
 				}
 			}
-
-			// unlock session data for multiple access
-			$this->elFinder->getSession()->close();
-			// client disconnect should abort
-			ignore_user_abort(false);
 
 			if ($reqMethod !== 'HEAD') {
 				if ($toEnd) {
