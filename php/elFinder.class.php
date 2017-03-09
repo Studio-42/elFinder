@@ -3465,6 +3465,22 @@ class elFinder {
 	
 		if ($dlurl) {
 			$url = parse_url($dlurl);
+			debug($url);
+			$ports = array(
+				'http'  => '80',
+				'ssl'   => '443',
+				'ftp'   => '21'
+			);
+			$url['scheme'] = strtolower($url['scheme']);
+			if ($url['scheme'] === 'https') {
+				$url['scheme'] = 'ssl';
+			}
+			if (! isset($url['port']) && isset($ports[$url['scheme']])) {
+				$url['port'] = $ports[$url['scheme']];
+			}
+			if (! isset($url['port'])) {
+				return false;
+			}
 			$cookies = array();
 			if ($data['cookies']) {
 				foreach ($data['cookies'] as $d => $c) {
@@ -3475,7 +3491,7 @@ class elFinder {
 			}
 
 			$query = isset($url['query']) ? '?'.$url['query'] : '';
-			$stream = stream_socket_client('ssl://'.$url['host'].':443');
+			$stream = stream_socket_client($url['scheme'].'://'.$url['host'].':'.$url['port']);
 			stream_set_timeout($stream, 300);
 			fputs($stream, "GET {$url['path']}{$query} HTTP/1.1\r\n");
 			fputs($stream, "Host: {$url['host']}\r\n");
