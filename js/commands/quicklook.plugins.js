@@ -346,8 +346,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 			}
 		}).on('change', function() {
 			if (node && node.parent().length) {
+				var elm = node[0];
 				win.off('viewchange.video');
-				node[0].pause();
+				elm.pause();
+				elm.src = '';
+				elm.load();
 				node.remove();
 				node= null;
 			}
