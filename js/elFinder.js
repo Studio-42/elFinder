@@ -609,9 +609,9 @@ var elFinder = function(node, opts) {
 	 * these commands aborts before `open` request
 	 *
 	 * @type Array
-	 * @default ['tmb', 'parents', 'tree']
+	 * @default ['tmb', 'parents']
 	 */
-	this.abortCmdsOnOpen = this.options.abortCmdsOnOpen || ['tmb', 'parents', 'tree'];
+	this.abortCmdsOnOpen = this.options.abortCmdsOnOpen || ['tmb', 'parents'];
 
 	/**
 	 * ID. Required to create unique cookie name
