@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: db69bd9) (2017-03-08)
+ * Version 2.1.22 (2.1-src Nightly: 1cb9d7b) (2017-03-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -640,9 +640,9 @@ var elFinder = function(node, opts) {
 	 * these commands aborts before `open` request
 	 *
 	 * @type Array
-	 * @default ['tmb']
+	 * @default ['tmb', 'parents', 'tree']
 	 */
-	this.abortCmdsOnOpen = this.options.abortCmdsOnOpen || ['tmb'];
+	this.abortCmdsOnOpen = this.options.abortCmdsOnOpen || ['tmb', 'parents', 'tree'];
 
 	/**
 	 * ID. Required to create unique cookie name
@@ -6906,7 +6906,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: db69bd9)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 1cb9d7b)';
 
 
 
@@ -20290,8 +20290,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 			}
 		}).on('change', function() {
 			if (node && node.parent().length) {
+				var elm = node[0];
 				win.off('viewchange.video');
-				node[0].pause();
+				elm.pause();
+				elm.src = '';
+				elm.load();
 				node.remove();
 				node= null;
 			}
