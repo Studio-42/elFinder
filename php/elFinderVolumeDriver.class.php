@@ -1265,6 +1265,12 @@ abstract class elFinderVolumeDriver {
 				unset($this->sessionCache[$_key]);
 			}
 		}
+		if ($this->sessionCaching['subdirs']) {
+			if (! isset($this->sessionCache['subdirs'])) {
+				$this->sessionCache['subdirs'] = array();
+			}
+		}
+		
 
 		$this->configure();
 		
@@ -2713,6 +2719,17 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Return has subdirs
+	 *
+	 * @param  string  $hash  file hash
+	 * @return bool
+	 * @author Naoki Sawada
+	 **/
+	public function subdirs($hash) {
+		return (bool) $this->subdirsCE($this->decode($hash));
+	}
+	
+	/**
 	 * Return content URL (for netmout volume driver)
 	 * If file.url == 1 requests from JavaScript client with XHR
 	 * 
@@ -3047,9 +3064,7 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function subdirsCE($path) {
 		if ($this->sessionCaching['subdirs']) {
-			if (! isset($this->sessionCache['subdirs'])) {
-				$this->sessionCache['subdirs'] = array();
-			} else if (isset($this->sessionCache['subdirs'][$path]) && ! $this->isMyReload()) {
+			if (isset($this->sessionCache['subdirs'][$path]) && ! $this->isMyReload()) {
 				return $this->sessionCache['subdirs'][$path];
 			}
 		}
@@ -3759,7 +3774,11 @@ abstract class elFinderVolumeDriver {
 				if ($this->options['checkSubfolders']) {
 					if (isset($stat['dirs'])) {
 						if ($stat['dirs']) {
-							$stat['dirs'] = 1;
+							if ($stat['dirs'] === -1) {
+								$stat['dirs'] = (isset($this->sessionCache['subdirs']) && isset($this->sessionCache['subdirs'][$path]))? (int)$this->sessionCache['subdirs'][$path] : -1;
+							} else {
+								$stat['dirs'] = 1;
+							}
 						} else {
 							unset($stat['dirs']);
 						}

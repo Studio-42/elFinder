@@ -155,7 +155,8 @@ class elFinder {
 		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => false, 'pass' => false, 'alias' => false, 'options' => false),
 		'url'       => array('target' => true, 'options' => false),
 		'callback'  => array('node' => true, 'json' => false, 'bind' => false, 'done' => false),
-		'chmod'     => array('targets' => true, 'mode' => true)
+		'chmod'     => array('targets' => true, 'mode' => true),
+		'subdirs'   => array('target' => true)
 	);
 	
 	/**
@@ -1642,6 +1643,25 @@ class elFinder {
 			}
 		}
 
+		return $result;
+	}
+
+	/**
+	 * Return has subdirs
+	 *
+	 * @param  array  command arguments
+	 * @return array
+	 * @author Dmitry Naoki Sawada
+	 **/
+	protected function subdirs($args) {
+	
+		$result  = array('subdirs' => 0);
+		$target = $args['target'];
+	
+		if (($volume = $this->volume($target)) != false
+			&& (($subdirs = $volume->subdirs($target)) !== false)) {
+			$result['subdirs'] = $subdirs? 1 : 0;
+		}
 		return $result;
 	}
 
@@ -3465,7 +3485,6 @@ class elFinder {
 	
 		if ($dlurl) {
 			$url = parse_url($dlurl);
-			debug($url);
 			$ports = array(
 				'http'  => '80',
 				'ssl'   => '443',
