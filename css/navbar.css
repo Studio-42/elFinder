@@ -85,6 +85,8 @@
 /* collapsed/expanded arrow view */
 .elfinder-navbar-collapsed .elfinder-navbar-arrow { display:block; }
 
+.elfinder-subtree-chksubdir .elfinder-navbar-arrow { opacity: .5; filter:Alpha(Opacity=50); }
+
 /* arrow ltr/rtl enviroment */
 .elfinder-ltr .elfinder-navbar-collapsed .elfinder-navbar-arrow { background-position: 0 4px;}
 .elfinder-rtl .elfinder-navbar-collapsed .elfinder-navbar-arrow { background-position: 0 -10px; }

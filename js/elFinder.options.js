@@ -476,7 +476,11 @@ elFinder.prototype._options = {
 			// expand current work directory on open
 			openCwdOnOpen  : true,
 			// auto load current dir parents
-			syncTree : true
+			syncTree : true,
+			// Numbar of max connctions of subdirs request
+			subdirsMaxConn : 4,
+			// Number of max simultaneous processing directory of subdirs
+			subdirsAtOnce : 10
 			// ,
 			// /**
 			//  * Add CSS class name to navbar directories (optional)

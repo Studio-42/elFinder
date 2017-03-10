@@ -156,7 +156,7 @@ class elFinder {
 		'url'       => array('target' => true, 'options' => false),
 		'callback'  => array('node' => true, 'json' => false, 'bind' => false, 'done' => false),
 		'chmod'     => array('targets' => true, 'mode' => true),
-		'subdirs'   => array('target' => true)
+		'subdirs'   => array('targets' => true)
 	);
 	
 	/**
@@ -1655,12 +1655,13 @@ class elFinder {
 	 **/
 	protected function subdirs($args) {
 	
-		$result  = array('subdirs' => 0);
-		$target = $args['target'];
+		$result  = array('subdirs' => array());
+		$targets = $args['targets'];
 	
-		if (($volume = $this->volume($target)) != false
-			&& (($subdirs = $volume->subdirs($target)) !== false)) {
-			$result['subdirs'] = $subdirs? 1 : 0;
+		foreach ($targets as $target) {
+			if (($volume = $this->volume($target)) !== false) {
+				$result['subdirs'][$target] = $volume->subdirs($target)? 1 : 0;
+			}
 		}
 		return $result;
 	}

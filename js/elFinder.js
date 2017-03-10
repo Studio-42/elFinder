@@ -6804,6 +6804,71 @@ elFinder.prototype = {
 		return this;
 	},
 	
+	/**
+	 * Abortable async job performer
+	 * 
+	 * @param func Function
+	 * @param arr  Array
+	 * @param opts Object
+	 * 
+	 * @return Object { dfrd: Deferred, about: Function }
+	 */
+	asyncJob : function(func, arr, opts) {
+		var dfrd = $.Deferred(),
+			abortFlg = false,
+			abort = function() {
+				tm && clearTimeout(tm);
+				abortFlg = true;
+				dfrd.reject(resArr);
+			},
+			parms = $.extend({
+				interval : 10,
+				numPerOnce : 1
+			}, opts || {}),
+			resArr = [],
+			res = {
+				dfrd : dfrd,
+				abort : abort
+			},
+			vars =[],
+			curVars = [],
+			exec,
+			tm;
+		
+		if (typeof func === 'function' && $.isArray(arr)) {
+			vars = arr.concat();
+			exec = function() {
+				if (abortFlg) {
+					return;
+				}
+				curVars = vars.splice(0, parms.numPerOnce);
+				$.each(curVars, function(i, v) {
+					if (abortFlg) {
+						return false;
+					}
+					var res = func(v);
+					(res !== null) && resArr.push(res);
+				});
+				if (abortFlg) {
+					return;
+				}
+				if (vars.length) {
+					tm = setTimeout(exec, parms.interval);
+				} else {
+					dfrd.resolve(resArr);
+				}
+			}
+			if (vars.length) {
+				tm = setTimeout(exec, 0);
+			} else {
+				dfrd.resolve(resArr);
+			}
+		} else {
+			dfrd.reject();
+		}
+		return res;
+	},
+	
 	log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
 	
 	debug : function(type, m) {
