@@ -75,6 +75,13 @@ $.fn.elfindertree = function(fm, opts) {
 			loaded    = 'elfinder-subtree-loaded',
 			
 			/**
+			 * Class name to mark need subdirs request
+			 *
+			 * @type String
+			 */
+			chksubdir = 'elfinder-subtree-chksubdir',
+			
+			/**
 			 * Arraw class name
 			 *
 			 * @type String
@@ -144,10 +151,111 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			uploadable = 'elfinder-navbar-wrapper-uploadable',
 			
+			/**
+			 * Is position x inside Navbar
+			 * 
+			 * @param x Numbar
+			 * 
+			 * @return
+			 */
 			insideNavbar = function(x) {
 				var left = navbar.offset().left;
 					
 				return left <= x && x <= left + navbar.width();
+			},
+			
+			/**
+			 * To call subdirs elements queue
+			 * 
+			 * @type Object
+			 */
+			subdirsQue = {},
+			
+			/**
+			 * To exec subdirs elements ids
+			 * 
+			 */
+			subdirsExecQue = [],
+			
+			/**
+			 * Request subdirs to backend
+			 * 
+			 * @param id String
+			 * 
+			 * @return Deferred
+			 */
+			subdirs = function(id) {
+				var elm = $('#'+id);
+				delete subdirsQue[id];
+				return fm.request({
+					data: {
+						cmd: 'subdirs',
+						target: fm.navId2Hash(id),
+						preventDefault : true
+					}
+				}).done(function(res) {
+					if (res) {
+						elm.removeClass(chksubdir);
+						elm[res.subdirs? 'addClass' : 'removeClass'](collapsed);
+					}
+				});
+			},
+			
+			subdirsJobRes = null,
+			
+			/**
+			 * To check target element is in window of subdirs
+			 * 
+			 * @return void
+			 */
+			checkSubdirs = function() {
+				var ids = Object.keys(subdirsQue);
+				if (ids.length) {
+					subdirsJobRes && subdirsJobRes.abort();
+					execSubdirsTm && clearTimeout(execSubdirsTm);
+					subdirsExecQue = [];
+					subdirsJobRes = fm.asyncJob(function(id) {
+						return fm.isInWindow($('#'+id))? id : null;
+					}, ids, { numPerOnce: 5 });
+					subdirsJobRes.dfrd.done(function(arr) {
+						subdirsJobRes = null;
+						if (arr.length) {
+							subdirsExecQue = arr;
+							execSubdirs();
+						}
+					});
+				}
+			},
+			
+			subdirsPending = 0,
+			execSubdirsTm,
+			
+			/**
+			 * Exec subdirs as batch request
+			 * 
+			 * @return void
+			 */
+			execSubdirs = function() {
+				var cnt = opts.subdirsMaxConn - subdirsPending,
+					i;
+				execSubdirsTm && clearTimeout(execSubdirsTm);
+				if (subdirsExecQue.length) {
+					if (cnt > 0) {
+						for (i = 0; i < cnt; i++) {
+							if (subdirsExecQue.length) {
+								subdirsPending++;
+								subdirs(subdirsExecQue.shift()).always(function() {
+									subdirsPending--;
+									execSubdirs();
+								});
+							}
+						}
+					} else {
+						execSubdirsTm = setTimeout(function() {
+							subdirsExecQue.length && execSubdirs();
+						}, 50);
+					}
+				}
 			},
 			
 			drop = fm.droppable.drop,
@@ -259,7 +367,7 @@ $.fn.elfindertree = function(fm, opts) {
 				id          : function(dir) { return fm.navHash2Id(dir.hash) },
 				cssclass    : function(dir) {
 					var cname = (dir.phash && ! dir.isroot ? '' : root)+' '+navdir+' '+fm.perms2class(dir);
-					dir.dirs && !dir.link && (cname += ' ' + collapsed);
+					dir.dirs && !dir.link && (cname += ' ' + collapsed) && dir.dirs == -1 && (cname += ' ' + chksubdir);
 					opts.getClass && (cname += ' ' + opts.getClass(dir));
 					dir.csscls && (cname += ' ' + fm.escape(dir.csscls));
 					return cname;
@@ -395,7 +503,9 @@ $.fn.elfindertree = function(fm, opts) {
 						$.each(dirs, function(i, d){
 							html.push(itemhtml(d));
 						});
-						parent.append(html.join(''));
+						parent.append(html.join('')).find('[id].'+chksubdir).each(function() {
+							subdirsQue[this.id] = $(this);
+						});
 						! mobile && fm.lazy(function() { updateDroppable(null, parent); });
 					});
 				}
@@ -509,6 +619,7 @@ $.fn.elfindertree = function(fm, opts) {
 								if (spinner) {
 									spinner.remove();
 									link.addClass(collapsed+' '+expanded).next('.'+subtree).show();
+									checkSubdirs();
 								}
 							}));
 						}
@@ -531,7 +642,7 @@ $.fn.elfindertree = function(fm, opts) {
 						}
 					},
 					registed = {},
-					rootNode, dir, link, subs, subsLen, cnt;
+					rootNode, dir, link, sub, subs, subsLen, cnt;
 				
 				if (openRoot) {
 					rootNode = $('#'+fm.navHash2Id(fm.root()));
@@ -548,8 +659,10 @@ $.fn.elfindertree = function(fm, opts) {
 					if (current.length && (noCwd || ! init || ! cwd.isroot)) {
 						if (!noCwd || init) {
 							current.addClass(loaded);
-							if (openCwd && current.hasClass(collapsed)) {
-								current.addClass(expanded).next('.'+subtree).slideDown();
+							sub = current.next('.'+subtree);
+							if (openCwd && sub.children().length) {
+								current.addClass(collapsed+' '+expanded);
+								sub.slideDown('normal', checkSubdirs);
 							}
 						}
 						if (open || !noCwd) {
@@ -557,7 +670,11 @@ $.fn.elfindertree = function(fm, opts) {
 							subsLen = subs.length;
 							cnt = 1;
 							subs.show().prev(selNavdir).addClass(expanded, function(){
-								!noCwd && subsLen == cnt++ && autoScroll();
+								if (!noCwd && subsLen == cnt++) {
+									autoScroll().done(checkSubdirs);
+								} else {
+									checkSubdirs();
+								}
 							});
 							!subsLen && !noCwd && autoScroll();
 						}
@@ -808,9 +925,11 @@ $.fn.elfindertree = function(fm, opts) {
 							if (cnt > slideTH) {
 								stree.toggle();
 								fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
+								checkSubdirs();
 							} else {
 								stree.stop(true, true).slideToggle('normal', function(){
 									fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
+									checkSubdirs();
 								});
 							}
 						}).always(function() {
@@ -829,9 +948,11 @@ $.fn.elfindertree = function(fm, opts) {
 									if (stree.children().length > slideTH) {
 										stree.show();
 										fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
+										checkSubdirs();
 									} else {
 										stree.stop(true, true).slideDown('normal', function(){
 											fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
+											checkSubdirs();
 										});
 									}
 								} 
@@ -884,8 +1005,12 @@ $.fn.elfindertree = function(fm, opts) {
 					lock && selected.length && fm.trigger('lockfiles', {files: selected});
 					pdir.prepend(dir);
 				}),
+			navbarScrTm,
 			// move tree into navbar
-			navbar = fm.getUI('navbar').append(tree).show(),
+			navbar = fm.getUI('navbar').append(tree).show().on('scroll', function() {
+				navbarScrTm && clearTimeout(navbarScrTm);
+				navbarScrTm = setTimeout(checkSubdirs, 50);
+			}),
 			
 			prevSortTreeview = fm.sortAlsoTreeview,
 			
@@ -968,7 +1093,7 @@ $.fn.elfindertree = function(fm, opts) {
 					node.replaceWith(tmp.children(selNavdir));
 					! mobile && updateDroppable(null, parent);
 					
-					if (dir.dirs 
+					if (dir.dirs
 					&& (isExpanded || isLoaded) 
 					&& (node = $('#'+fm.navHash2Id(dir.hash))) 
 					&& node.next('.'+subtree).children().length) {
