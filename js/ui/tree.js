@@ -184,21 +184,29 @@ $.fn.elfindertree = function(fm, opts) {
 			 * 
 			 * @return Deferred
 			 */
-			subdirs = function(id) {
-				var elm = $('#'+id);
-				delete subdirsQue[id];
-				return fm.request({
-					data: {
-						cmd: 'subdirs',
-						target: fm.navId2Hash(id),
-						preventDefault : true
-					}
-				}).done(function(res) {
-					if (res) {
-						elm.removeClass(chksubdir);
-						elm[res.subdirs? 'addClass' : 'removeClass'](collapsed);
-					}
+			subdirs = function(ids) {
+				var targets = [];
+				$.each(ids, function(i, id) {
+					subdirsQue[id] && targets.push(fm.navId2Hash(id));
+					delete subdirsQue[id];
 				});
+				if (targets.length) {
+					return fm.request({
+						data: {
+							cmd: 'subdirs',
+							targets: targets,
+							preventDefault : true
+						}
+					}).done(function(res) {
+						if (res && res.subdirs) {
+							$.each(res.subdirs, function(hash, subdirs) {
+								var elm = $('#'+fm.navHash2Id(hash));
+								elm.removeClass(chksubdir);
+								elm[subdirs? 'addClass' : 'removeClass'](collapsed);
+							});
+						}
+					});
+				}
 			},
 			
 			subdirsJobRes = null,
@@ -237,14 +245,14 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			execSubdirs = function() {
 				var cnt = opts.subdirsMaxConn - subdirsPending,
-					i;
+					i, ids;
 				execSubdirsTm && clearTimeout(execSubdirsTm);
 				if (subdirsExecQue.length) {
 					if (cnt > 0) {
 						for (i = 0; i < cnt; i++) {
 							if (subdirsExecQue.length) {
 								subdirsPending++;
-								subdirs(subdirsExecQue.shift()).always(function() {
+								subdirs(subdirsExecQue.splice(0, opts.subdirsAtOnce)).always(function() {
 									subdirsPending--;
 									execSubdirs();
 								});
