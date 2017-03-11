@@ -224,13 +224,15 @@ $.fn.elfindertree = function(fm, opts) {
 					subdirsExecQue = [];
 					subdirsJobRes = fm.asyncJob(function(id) {
 						return fm.isInWindow($('#'+id))? id : null;
-					}, ids, { numPerOnce: 5 });
+					}, ids, { numPerOnce: 200 });
 					subdirsJobRes.dfrd.done(function(arr) {
 						subdirsJobRes = null;
 						if (arr.length) {
 							subdirsExecQue = arr;
 							execSubdirs();
 						}
+					}).fail(function(){
+						subdirsJobRes = null;
 					});
 				}
 			},
@@ -395,7 +397,11 @@ $.fn.elfindertree = function(fm, opts) {
 				dir.name = fm.escape(dir.i18 || dir.name);
 				
 				return tpl.replace(/(?:\{([a-z]+)\})/ig, function(m, key) {
-					return dir[key] || (replace[key] ? replace[key](dir) : '');
+					var res = dir[key] || (replace[key] ? replace[key](dir) : '');
+					if (key === 'id' && dir.dirs == -1) {
+						subdirsQue[res] = res;
+					}
+					return res;
 				});
 			},
 			
@@ -511,9 +517,7 @@ $.fn.elfindertree = function(fm, opts) {
 						$.each(dirs, function(i, d){
 							html.push(itemhtml(d));
 						});
-						parent.append(html.join('')).find('[id].'+chksubdir).each(function() {
-							subdirsQue[this.id] = $(this);
-						});
+						parent.append(html.join(''));
 						! mobile && fm.lazy(function() { updateDroppable(null, parent); });
 					});
 				}

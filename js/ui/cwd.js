@@ -928,7 +928,6 @@ $.fn.elfindercwd = function(fm, options) {
 			 */
 			attachThumbnails = function(image, reload) {
 				var url  = fm.option('tmbUrl'),
-					done = [],
 					attach = function(node, tmb) {
 						$('<img/>')
 							.on('load', function() {
@@ -957,24 +956,13 @@ $.fn.elfindercwd = function(fm, options) {
 									}
 								} else {
 									if (reload) {
-										reloads.push(hash);
+										loadThumbnails([hash]);
 									} else {
 										bufferExt.getTmbs.push(hash);
 									}
 								}
-								done.push(hash);
+								delete bufferExt.attachTmbs[hash];
 							}
-						}
-						
-						$.each(done, function(i, h) {
-							delete bufferExt.attachTmbs[h];
-						});
-						if (reload) {
-							loadThumbnails(reloads);
-						}
-						if (Object.keys(bufferExt.attachTmbs).length < 1 && bufferExt.getTmbs.length < 1) {
-							wrapper.off(scrollEvent, attachThumbnails);
-							fm.unbind('resize', attachThumbnails);
 						}
 					};
 
@@ -984,12 +972,20 @@ $.fn.elfindercwd = function(fm, options) {
 					if (! reload && bufferExt.getTmbs.length) {
 						loadThumbnails();
 					}
+					if (Object.keys(bufferExt.attachTmbs).length < 1 && bufferExt.getTmbs.length < 1) {
+						wrapper.off(scrollEvent, attachThumbnails);
+						fm.unbind('resize', attachThumbnails);
+					}
 				} else {
 					bufferExt.attachThumbTm && clearTimeout(bufferExt.attachThumbTm);
 					bufferExt.attachThumbTm = setTimeout(function() {
 						$.each(bufferExt.attachTmbs, chk);
 						if (! reload && bufferExt.getTmbs.length) {
 							loadThumbnails();
+						}
+						if (Object.keys(bufferExt.attachTmbs).length < 1 && bufferExt.getTmbs.length < 1) {
+							wrapper.off(scrollEvent, attachThumbnails);
+							fm.unbind('resize', attachThumbnails);
 						}
 					}, 0);
 				}

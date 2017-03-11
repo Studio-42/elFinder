@@ -417,6 +417,8 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             $stat['size'] = 0;
             if (empty($folder->childCount)) {
                 $stat['dirs'] = 0;
+            } else {
+            	$stat['dirs'] = -1;
             }
         } else {
             if (isset($raw->file->mimeType)) {

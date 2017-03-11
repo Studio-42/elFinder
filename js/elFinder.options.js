@@ -478,9 +478,9 @@ elFinder.prototype._options = {
 			// auto load current dir parents
 			syncTree : true,
 			// Numbar of max connctions of subdirs request
-			subdirsMaxConn : 4,
+			subdirsMaxConn : 3,
 			// Number of max simultaneous processing directory of subdirs
-			subdirsAtOnce : 10
+			subdirsAtOnce : 5
 			// ,
 			// /**
 			//  * Add CSS class name to navbar directories (optional)

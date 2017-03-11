@@ -473,6 +473,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         if ($raw->type === 'folder') {
             $stat['mime'] = 'directory';
             $stat['size'] = 0;
+            $stat['dirs'] = -1;
         } else {
             $stat['size'] = (int) $raw->size;
             if (!empty($raw->shared_link->url) && $raw->shared_link->access == 'open') {

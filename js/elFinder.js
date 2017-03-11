@@ -6722,11 +6722,11 @@ elFinder.prototype = {
 	},
 	
 	isInWindow : function(elem, nochkHide) {
-		if (! nochkHide && elem.is(':hidden')) {
-			return false;
-		}
 		var elm, rect;
 		if (! (elm = elem.get(0))) {
+			return false;
+		}
+		if (! nochkHide && elm.offsetParent === null) {
 			return false;
 		}
 		rect = elm.getBoundingClientRect();
@@ -6822,7 +6822,7 @@ elFinder.prototype = {
 				dfrd.reject(resArr);
 			},
 			parms = $.extend({
-				interval : 10,
+				interval : 0,
 				numPerOnce : 1
 			}, opts || {}),
 			resArr = [],
