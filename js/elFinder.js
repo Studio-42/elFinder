@@ -6822,7 +6822,7 @@ elFinder.prototype = {
 				dfrd.reject(resArr);
 			},
 			parms = $.extend({
-				interval : 10,
+				interval : 0,
 				numPerOnce : 1
 			}, opts || {}),
 			resArr = [],
