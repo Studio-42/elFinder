@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: d8d78b3) (2017-03-11)
+ * Version 2.1.22 (2.1-src Nightly: b7625fb) (2017-03-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -6753,11 +6753,11 @@ elFinder.prototype = {
 	},
 	
 	isInWindow : function(elem, nochkHide) {
-		if (! nochkHide && elem.is(':hidden')) {
-			return false;
-		}
 		var elm, rect;
 		if (! (elm = elem.get(0))) {
+			return false;
+		}
+		if (! nochkHide && elm.offsetParent === null) {
 			return false;
 		}
 		rect = elm.getBoundingClientRect();
@@ -6853,7 +6853,7 @@ elFinder.prototype = {
 				dfrd.reject(resArr);
 			},
 			parms = $.extend({
-				interval : 10,
+				interval : 0,
 				numPerOnce : 1
 			}, opts || {}),
 			resArr = [],
@@ -6971,7 +6971,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: d8d78b3)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: b7625fb)';
 
 
 
@@ -7757,9 +7757,9 @@ elFinder.prototype._options = {
 			// auto load current dir parents
 			syncTree : true,
 			// Numbar of max connctions of subdirs request
-			subdirsMaxConn : 4,
+			subdirsMaxConn : 3,
 			// Number of max simultaneous processing directory of subdirs
-			subdirsAtOnce : 10
+			subdirsAtOnce : 5
 			// ,
 			// /**
 			//  * Add CSS class name to navbar directories (optional)
@@ -11179,7 +11179,6 @@ $.fn.elfindercwd = function(fm, options) {
 			 */
 			attachThumbnails = function(image, reload) {
 				var url  = fm.option('tmbUrl'),
-					done = [],
 					attach = function(node, tmb) {
 						$('<img/>')
 							.on('load', function() {
@@ -11208,24 +11207,13 @@ $.fn.elfindercwd = function(fm, options) {
 									}
 								} else {
 									if (reload) {
-										reloads.push(hash);
+										loadThumbnails([hash]);
 									} else {
 										bufferExt.getTmbs.push(hash);
 									}
 								}
-								done.push(hash);
+								delete bufferExt.attachTmbs[hash];
 							}
-						}
-						
-						$.each(done, function(i, h) {
-							delete bufferExt.attachTmbs[h];
-						});
-						if (reload) {
-							loadThumbnails(reloads);
-						}
-						if (Object.keys(bufferExt.attachTmbs).length < 1 && bufferExt.getTmbs.length < 1) {
-							wrapper.off(scrollEvent, attachThumbnails);
-							fm.unbind('resize', attachThumbnails);
 						}
 					};
 
@@ -11235,12 +11223,20 @@ $.fn.elfindercwd = function(fm, options) {
 					if (! reload && bufferExt.getTmbs.length) {
 						loadThumbnails();
 					}
+					if (Object.keys(bufferExt.attachTmbs).length < 1 && bufferExt.getTmbs.length < 1) {
+						wrapper.off(scrollEvent, attachThumbnails);
+						fm.unbind('resize', attachThumbnails);
+					}
 				} else {
 					bufferExt.attachThumbTm && clearTimeout(bufferExt.attachThumbTm);
 					bufferExt.attachThumbTm = setTimeout(function() {
 						$.each(bufferExt.attachTmbs, chk);
 						if (! reload && bufferExt.getTmbs.length) {
 							loadThumbnails();
+						}
+						if (Object.keys(bufferExt.attachTmbs).length < 1 && bufferExt.getTmbs.length < 1) {
+							wrapper.off(scrollEvent, attachThumbnails);
+							fm.unbind('resize', attachThumbnails);
 						}
 					}, 0);
 				}
@@ -15095,13 +15091,15 @@ $.fn.elfindertree = function(fm, opts) {
 					subdirsExecQue = [];
 					subdirsJobRes = fm.asyncJob(function(id) {
 						return fm.isInWindow($('#'+id))? id : null;
-					}, ids, { numPerOnce: 5 });
+					}, ids, { numPerOnce: 200 });
 					subdirsJobRes.dfrd.done(function(arr) {
 						subdirsJobRes = null;
 						if (arr.length) {
 							subdirsExecQue = arr;
 							execSubdirs();
 						}
+					}).fail(function(){
+						subdirsJobRes = null;
 					});
 				}
 			},
@@ -15266,7 +15264,11 @@ $.fn.elfindertree = function(fm, opts) {
 				dir.name = fm.escape(dir.i18 || dir.name);
 				
 				return tpl.replace(/(?:\{([a-z]+)\})/ig, function(m, key) {
-					return dir[key] || (replace[key] ? replace[key](dir) : '');
+					var res = dir[key] || (replace[key] ? replace[key](dir) : '');
+					if (key === 'id' && dir.dirs == -1) {
+						subdirsQue[res] = res;
+					}
+					return res;
 				});
 			},
 			
@@ -15382,9 +15384,7 @@ $.fn.elfindertree = function(fm, opts) {
 						$.each(dirs, function(i, d){
 							html.push(itemhtml(d));
 						});
-						parent.append(html.join('')).find('[id].'+chksubdir).each(function() {
-							subdirsQue[this.id] = $(this);
-						});
+						parent.append(html.join(''));
 						! mobile && fm.lazy(function() { updateDroppable(null, parent); });
 					});
 				}
