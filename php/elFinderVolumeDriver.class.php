@@ -4109,7 +4109,6 @@ abstract class elFinderVolumeDriver {
 	 * @returnv void
 	 */
 	protected function updateSubdirsCache($path, $subdirs) {
-		debug($path,$subdirs,$this->cache[$path]);
 		if (isset($this->cache[$path])) {
 			if ($subdirs) {
 				$this->cache[$path]['dirs'] = 1;
