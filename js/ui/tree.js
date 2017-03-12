@@ -1079,7 +1079,7 @@ $.fn.elfindertree = function(fm, opts) {
 				length = dirs.length,
 				l    = length,
 				tgts = $(),
-				dir, node, tmp, realParent, reqParent, realSibling, reqSibling, isExpanded, isLoaded, parent;
+				dir, node, tmp, realParent, reqParent, realSibling, reqSibling, isExpanded, isLoaded, parent, subdirs;
 			
 			while (l--) {
 				dir = dirs[l];
@@ -1113,9 +1113,15 @@ $.fn.elfindertree = function(fm, opts) {
 						isLoaded && node.addClass(loaded);
 					}
 					
+					subdirs |= dir.dirs == -1;
 				}
 			}
-
+			
+			// to check subdirs
+			if (subdirs) {
+				checkSubdirs();
+			}
+			
 			// fm.cwd() became empty object when cwd removed
 			fm.cwd().hash && sync(true);
 		})
