@@ -1714,9 +1714,29 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		
-		return $dir['read']
-			? $this->getScandir($this->decode($hash))
-			: $this->setError(elFinder::ERROR_PERM_DENIED);
+		$path = $this->decode($hash);
+		if ($res = $dir['read']
+			? $this->getScandir($path)
+			: $this->setError(elFinder::ERROR_PERM_DENIED)) {
+			
+			$dirs = null;
+			if ($this->sessionCaching['subdirs']) {
+				$dirs = $this->sessionCache['subdirs'][$path];
+			}
+			if ($dirs !== null || (isset($dir['dirs']) && $dir['dirs'] != 1)) {
+				if ($dirs || $this->subdirs($hash)) {
+					$dir['dirs'] = 1;
+				} else {
+					unset($dir['dirs']);
+				}
+				$this->cache[$path] = $dir;
+				if ($path == $this->root) {
+					$this->stat($path);
+				}
+			}
+		}
+		
+		return $res;
 	}
 
 	/**
@@ -1907,9 +1927,9 @@ abstract class elFinderVolumeDriver {
 		$this->clearcache();
 		
 		$mkpath = $this->convEncOut($this->_mkdir($this->convEncIn($path), $this->convEncIn($name)));
-		if ($mkpath && isset($this->sessionCache['subdirs'])) {
-			$this->sessionCache['subdirs'][$path] = true;
-			$this->sessionCache['subdirs'][$mkpath] = false;
+		if ($mkpath) {
+			$this->updateSubdirsCache($path, true);
+			$this->updateSubdirsCache($mkpath, false);
 		}
 		
 		return $mkpath? $this->stat($mkpath) : false;
@@ -3069,9 +3089,7 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		$hasdir = (bool) ((!$this->encoding)? $this->_subdirs($path) : $this->convEncOut($this->_subdirs($this->convEncIn($path))));
-		if (isset($this->sessionCache['subdirs'])) {
-			$this->sessionCache['subdirs'][$path] = $hasdir;
-		}
+		$this->updateSubdirsCache($path, $hasdir);
 		return $hasdir;
 	}
 	
@@ -3199,6 +3217,15 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Return session rootstat cache key
+	 * 
+	 * @return string
+	 */
+	protected function getRootstatCachekey() {
+		return md5($path.(isset($this->options['alias'])? $this->options['alias'] : ''));
 	}
 
 	/**
@@ -3606,13 +3633,13 @@ abstract class elFinderVolumeDriver {
 		}
 		$is_root = ($path == $this->root);
 		if ($is_root) {
-			$rootKey = md5($path.(isset($this->options['alias'])? $this->options['alias'] : ''));
-			if (!isset($this->sessionCache['rootstat'])) {
+			$rootKey = $this->getRootstatCachekey();
+			if ($this->sessionCaching['rootstat'] && !isset($this->sessionCache['rootstat'])) {
 				$this->sessionCache['rootstat'] = array();
 			}
-			if (! $this->isMyReload()) {
+			if (! isset($this->cache[$path]) && ! $this->isMyReload()) {
 				// need $path as key for netmount/netunmount
-				if (isset($this->sessionCache['rootstat'][$rootKey])) {
+				if ($this->sessionCaching['rootstat'] && isset($this->sessionCache['rootstat'][$rootKey])) {
 					if ($ret = $this->sessionCache['rootstat'][$rootKey]) {
 						if ($this->options['rootRev'] === $ret['rootRev']) {
 							if (isset($this->options['phash'])) {
@@ -3766,16 +3793,14 @@ abstract class elFinderVolumeDriver {
 			if ($isDir) {
 				// caching parent's subdirs
 				if ($parent) {
-					if (isset($this->sessionCache['subdirs'])) {
-						$this->sessionCache['subdirs'][$parent] = true;
-					}
+					$this->updateSubdirsCache($parent, true);
 				}
 				// for dir - check for subdirs
 				if ($this->options['checkSubfolders']) {
 					if (isset($stat['dirs'])) {
 						if ($stat['dirs']) {
-							if ($stat['dirs'] === -1) {
-								$stat['dirs'] = (isset($this->sessionCache['subdirs']) && isset($this->sessionCache['subdirs'][$path]))? (int)$this->sessionCache['subdirs'][$path] : -1;
+							if ($stat['dirs'] == -1) {
+								$stat['dirs'] = ($this->sessionCaching['subdirs'] && isset($this->sessionCache['subdirs'][$path]))? (int)$this->sessionCache['subdirs'][$path] : -1;
 							} else {
 								$stat['dirs'] = 1;
 							}
@@ -3844,9 +3869,7 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		
-		if (isset($this->sessionCache['subdirs'])) {
-			$this->sessionCache['subdirs'][$path] = $hasDir;
-		}
+		$this->updateSubdirsCache($path, $hasDir);
 	}
 	
 	/**
@@ -4077,6 +4100,31 @@ abstract class elFinderVolumeDriver {
 		return false;
 	}
 	
+	/**
+	 * Update subdirs cache data
+	 * 
+	 * @param string $path
+	 * @param bool   $subdirs
+	 * 
+	 * @returnv void
+	 */
+	protected function updateSubdirsCache($path, $subdirs) {
+		debug($path,$subdirs,$this->cache[$path]);
+		if (isset($this->cache[$path])) {
+			if ($subdirs) {
+				$this->cache[$path]['dirs'] = 1;
+			} else {
+				unset($this->cache[$path]['dirs']);
+			}
+		}
+		if ($this->sessionCaching['subdirs']) {
+			$this->sessionCache['subdirs'][$path] = $subdirs;
+		}
+		if ($this->sessionCaching['rootstat'] && $path == $this->root) {
+			unset($this->sessionCache['rootstat'][$this->getRootstatCachekey()]);
+		}
+	}
+	
 	/*****************  get content *******************/
 	
 	/**
@@ -4295,8 +4343,8 @@ abstract class elFinderVolumeDriver {
 		
 		if ($res = $this->convEncOut($this->_move($this->convEncIn($src), $this->convEncIn($dst), $this->convEncIn($name)))) {
 			$this->removed[] = $stat;
-			if (isset($this->sessionCache['subdirs']) && $stat['mime'] === 'directory') {
-				$this->sessionCache['subdirs'][$dst] = true;
+			if ($stat['mime'] === 'directory') {
+				$this->updateSubdirsCache($dst, true);
 			}
 			return is_string($res)? $res : $this->joinPathCE($dst, $name);
 		}

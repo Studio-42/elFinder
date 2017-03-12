@@ -1136,7 +1136,8 @@ class elFinder {
 		// so open default dir
 		if ((!$cwd || !$cwd['read']) && $init) {
 			$volume = $this->default;
-			$cwd    = $volume->dir($volume->defaultPath());
+			$target = $volume->defaultPath();
+			$cwd    = $volume->dir($target);
 		}
 		
 		if (!$cwd) {
@@ -1148,17 +1149,22 @@ class elFinder {
 
 		$files = array();
 
+		// get current working directory files list
+		if (($ls = $volume->scandir($cwd['hash'])) === false) {
+			return array('error' => $this->error(self::ERROR_OPEN, $cwd['name'], $volume->error()));
+		}
+		
+		if (isset($cwd['dirs']) && $cwd['dirs'] != 1) {
+			$cwd = $volume->dir($target);
+		}
+		
 		// get other volume root
 		if ($tree) {
 			foreach ($this->volumes as $id => $v) {
 				$files[] = $v->file($v->root());
 			}
 		}
-
-		// get current working directory files list
-		if (($ls = $volume->scandir($cwd['hash'])) === false) {
-			return array('error' => $this->error(self::ERROR_OPEN, $cwd['name'], $volume->error()));
-		}
+		
 		// long polling mode
 		if ($args['compare']) {
 			$sleep = max(1, (int)$volume->getOption('lsPlSleep'));
