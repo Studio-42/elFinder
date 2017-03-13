@@ -6530,11 +6530,18 @@ elFinder.prototype = {
 	 * @param  String   protocol
 	 * @param  String   name
 	 * @param  String   host
-	 * @param  Boolean  noOffline
+	 * @param  Object   opts  Default {noOffline: false, path: 'root', pathI18n: 'folderId'}
+			}
 	 * 
 	 * @return Object
 	 */
-	makeNetmountOptionOauth : function(protocol, name, host, noOffline) {
+	makeNetmountOptionOauth : function(protocol, name, host, opts) {
+		var noOffline = typeof opts === 'boolean'? opts : null, // for backward compat
+			opts = $.extend({
+				noOffline : false,
+				path      : 'root',
+				pathI18n  : 'folderId'
+			}, (noOffline === null? (opts || {}) : {noOffline : noOffline}));
 		return {
 			vars : {},
 			name : name,
@@ -6543,7 +6550,7 @@ elFinder.prototype = {
 					$(this).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
 				}),
 				host     : $('<span><span class="elfinder-info-spinner"/></span><input type="hidden"/>'),
-				path     : $('<input type="text" value="root"/>'),
+				path     : $('<input type="text" value="'+opts.path+'"/>'),
 				user     : $('<input type="hidden"/>'),
 				pass     : $('<input type="hidden"/>')
 			},
@@ -6560,7 +6567,7 @@ elFinder.prototype = {
 							)
 				{
 					if (oline.parent().children().length === 1) {
-						f.path.parent().prev().html(fm.i18n('folderId'));
+						f.path.parent().prev().html(fm.i18n(opts.pathI18n));
 						oline.attr('title', fm.i18n('offlineAccess'));
 						oline.uniqueId().after($('<label/>').attr('for', oline.attr('id')).html(' '+fm.i18n('offlineAccess')));
 					}
@@ -6572,9 +6579,9 @@ elFinder.prototype = {
 					}).done(function(data){
 						f0.removeClass("elfinder-info-spinner").html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1, host);}));
 					});
-					noOffline && oline.closest('tr').hide();
+					opts.noOffline && oline.closest('tr').hide();
 				} else {
-					oline.closest('tr')[(noOffline || f.user.val())? 'hide':'show']();
+					oline.closest('tr')[(opts.noOffline || f.user.val())? 'hide':'show']();
 					f0.data('funcexpup') && f0.data('funcexpup')();
 				}
 				this.vars.mbtn[$(f.host[1]).val()? 'show':'hide']();
@@ -6586,15 +6593,15 @@ elFinder.prototype = {
 					f1 = $(f.host[1]),
 					expires = '&nbsp;';
 				
-				noOffline && f.offline.closest('tr').hide();
+				opts.noOffline && f.offline.closest('tr').hide();
 				if (data.mode == 'makebtn') {
 					f0.removeClass('elfinder-info-spinner').removeData('expires').removeData('funcexpup');
 					f.host.find('input').hover(function(){$(this).toggleClass('ui-state-hover');});
 					f1.val('');
-					f.path.val('root').next().remove();
+					f.path.val(opts.path).next().remove();
 					f.user.val('');
 					f.pass.val('');
-					! noOffline && f.offline.closest('tr').show();
+					! opts.noOffline && f.offline.closest('tr').show();
 					this.vars.mbtn.hide();
 				} else {
 					if (data.expires) {

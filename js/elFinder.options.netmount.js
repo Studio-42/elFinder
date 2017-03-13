@@ -52,8 +52,8 @@ elFinder.prototype._options.commandsOptions.netmount = {
 			}
 		}
 	},
-	dropbox2: elFinder.prototype.makeNetmountOptionOauth('dropbox2', 'Dropbox', 'Dropbox', true),
+	dropbox2: elFinder.prototype.makeNetmountOptionOauth('dropbox2', 'Dropbox', 'Dropbox', {noOffline : true, path : '/', pathI18n : 'path'}),
 	googledrive: elFinder.prototype.makeNetmountOptionOauth('googledrive', 'Google Drive', 'Google'),
 	onedrive: elFinder.prototype.makeNetmountOptionOauth('onedrive', 'One Drive', 'OneDrive'),
-	box: elFinder.prototype.makeNetmountOptionOauth('box', 'Box', 'Box', true)
+	box: elFinder.prototype.makeNetmountOptionOauth('box', 'Box', 'Box', {noOffline : true})
 };
