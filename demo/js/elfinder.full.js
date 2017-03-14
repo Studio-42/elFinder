@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: 4a64b6f) (2017-03-13)
+ * Version 2.1.22 (2.1-src Nightly: 0708b81) (2017-03-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -6561,7 +6561,7 @@ elFinder.prototype = {
 	 * @param  String   protocol
 	 * @param  String   name
 	 * @param  String   host
-	 * @param  Object   opts  Default {noOffline: false, path: 'root', pathI18n: 'folderId'}
+	 * @param  Object   opts  Default {noOffline: false, root: 'root', pathI18n: 'folderId', folders: true}
 			}
 	 * 
 	 * @return Object
@@ -6570,9 +6570,54 @@ elFinder.prototype = {
 		var noOffline = typeof opts === 'boolean'? opts : null, // for backward compat
 			opts = $.extend({
 				noOffline : false,
-				path      : 'root',
-				pathI18n  : 'folderId'
-			}, (noOffline === null? (opts || {}) : {noOffline : noOffline}));
+				root      : 'root',
+				pathI18n  : 'folderId',
+				folders   : true
+			}, (noOffline === null? (opts || {}) : {noOffline : noOffline})),
+			addFolders = function(bro, folders) {
+				var self = this,
+					cnt  = Object.keys($.isPlainObject(folders)? folders : {}).length,
+					select;
+				
+				bro.next().remove();
+				if (cnt) {
+					select = $('<select class="ui-corner-all elfinder-tabstop" style="max-width:200px;">').append(
+						$($.map(folders, function(n,i){return '<option value="'+fm.escape((i+'').trim())+'">'+fm.escape(n)+'</option>'}).join(''))
+					).on('change click', function(e){
+						var node = $(this),
+							path = node.val(),
+							spn;
+						self.inputs.path.val(path);
+						if (opts.folders && (e.type === 'change' || node.data('current') !== path)) {
+							node.next().remove();
+							node.data('current', path);
+							if (path != opts.root) {
+								spn = spinner();
+								if (xhr && xhr.state() === 'pending') {
+									xhr.quiet = true;
+									xhr.abort();
+								}
+								node.after(spn);
+								xhr = fm.request({
+									data : {cmd : 'netmount', protocol: protocol, host: host, user: 'init', path: path, pass: 'folders'},
+									preventDefault : true
+								}).done(function(data){
+									addFolders.call(self, node, data.folders);
+								}).always(function() {
+									xhr = null;
+									spn.remove();
+								}).xhr;
+							}
+						}
+					});
+					bro.after($('<div/>').append(select));
+					select.focus();
+				}
+			},
+			spinner = function() {
+				return $('<div class="elfinder-netmount-spinner"/>').append('<span class="elfinder-info-spinner"/>');
+			},
+			xhr;
 		return {
 			vars : {},
 			name : name,
@@ -6581,7 +6626,7 @@ elFinder.prototype = {
 					$(this).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
 				}),
 				host     : $('<span><span class="elfinder-info-spinner"/></span><input type="hidden"/>'),
-				path     : $('<input type="text" value="'+opts.path+'"/>'),
+				path     : $('<input type="text" value="'+opts.root+'"/>'),
 				user     : $('<input type="hidden"/>'),
 				pass     : $('<input type="hidden"/>')
 			},
@@ -6629,11 +6674,15 @@ elFinder.prototype = {
 					f0.removeClass('elfinder-info-spinner').removeData('expires').removeData('funcexpup');
 					f.host.find('input').hover(function(){$(this).toggleClass('ui-state-hover');});
 					f1.val('');
-					f.path.val(opts.path).next().remove();
+					f.path.val(opts.root).next().remove();
 					f.user.val('');
 					f.pass.val('');
 					! opts.noOffline && f.offline.closest('tr').show();
 					this.vars.mbtn.hide();
+				} else if (data.mode == 'folders') {
+					if (data.folders) {
+						addFolders.call(this, f.path.nextAll(':last'), data.folders);
+					}
 				} else {
 					if (data.expires) {
 						expires = '()';
@@ -6668,13 +6717,7 @@ elFinder.prototype = {
 					f1.val(protocol);
 					this.vars.mbtn.show();
 					if (data.folders) {
-						f.path.next().remove().end().after(
-							$('<div/>').append(
-								$('<select class="ui-corner-all" style="max-width:200px;">').append(
-									$($.map(data.folders, function(n,i){return '<option value="'+(i+'').trim()+'">'+fm.escape(n)+'</option>'}).join(''))
-								).on('change', function(){f.path.val($(this).val());})
-							)
-						);
+						addFolders.call(this, f.path, data.folders);
 					}
 					f.user.val('done');
 					f.pass.val('done');
@@ -6978,7 +7021,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 4a64b6f)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 0708b81)';
 
 
 
@@ -8220,7 +8263,7 @@ elFinder.prototype._options.commandsOptions.netmount = {
 			}
 		}
 	},
-	dropbox2: elFinder.prototype.makeNetmountOptionOauth('dropbox2', 'Dropbox', 'Dropbox', {noOffline : true, path : '/', pathI18n : 'path'}),
+	dropbox2: elFinder.prototype.makeNetmountOptionOauth('dropbox2', 'Dropbox', 'Dropbox', {noOffline : true, root : '/', pathI18n : 'path'}),
 	googledrive: elFinder.prototype.makeNetmountOptionOauth('googledrive', 'Google Drive', 'Google'),
 	onedrive: elFinder.prototype.makeNetmountOptionOauth('onedrive', 'One Drive', 'OneDrive'),
 	box: elFinder.prototype.makeNetmountOptionOauth('box', 'Box', 'Box', {noOffline : true})
