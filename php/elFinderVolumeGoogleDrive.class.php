@@ -711,14 +711,23 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
                         return ['exit' => 'callback', 'out' => $out];
                     }
+                    $path = $options['path'];
+                    if ($path === '/') {
+                        $path = 'root';
+                    }
                     $folders = [];
                     foreach ($service->files->listFiles([
                         'pageSize' => 1000,
-                        'q' => 'trashed = false and mimeType = "application/vnd.google-apps.folder"',
+                        'q' => sprintf('trashed = false and "%s" in parents and mimeType = "application/vnd.google-apps.folder"', $path),
                     ]) as $f) {
                         $folders[$f->getId()] = $f->getName();
                     }
                     natcasesort($folders);
+
+                    if ($options['pass'] === 'folders') {
+                        return ['exit' => true, 'folders' => $folders];
+                    }
+
                     $folders = ['root' => $rootObj->getName()] + $folders;
                     $folders = json_encode($folders);
                     $expires = empty($aToken['refresh_token']) ? $aToken['created'] + $aToken['expires_in'] - 30 : 0;

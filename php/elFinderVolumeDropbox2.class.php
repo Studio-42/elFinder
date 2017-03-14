@@ -341,20 +341,25 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
 
                         return ['exit' => 'callback', 'out' => $out];
                     }
+                    $path = $options['path'];
                     $folders = [];
-                    $listFolderContents = $dropbox->listFolder('/');
+                    $listFolderContents = $dropbox->listFolder($path);
                     $items = $listFolderContents->getItems();
                     foreach ($items as $item) {
                         $data = $item->getData();
                         if ($data['.tag'] === 'folder') {
-                            $folders[$data['path_lower']] = $data['path_display'];
+                            $folders[$data['path_lower']] = $data['name'];
                         }
                     }
                     natcasesort($folders);
+
+                    if ($options['pass'] === 'folders') {
+                        return ['exit' => true, 'folders' => $folders];
+                    }
+
                     $folders = ['/' => '/'] + $folders;
                     $folders = json_encode($folders);
-                    $expires = 0;
-                    $json = '{"protocol": "dropbox2", "mode": "done", "folders": '.$folders.', "expires": '.$expires.'}';
+                    $json = '{"protocol": "dropbox2", "mode": "done", "folders": '.$folders.'}';
                     $options['pass'] = 'return';
                     $html = 'Dropbox.com';
                     $html .= '<script>

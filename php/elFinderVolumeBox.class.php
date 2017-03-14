@@ -628,12 +628,16 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 }
 
                 if (empty($this->token)) {
-                    $result = null;
+                    $result = false;
                 } else {
-                    $result = $this->_bd_query('0', $fetch_self = false, $recursive = false);
+                    $path = $options['path'];
+                    if ($path === '/' || $path === 'root') {
+                        $path = '0';
+                    }
+                    $result = $this->_bd_query($path, $fetch_self = false, $recursive = false);
                 }
 
-                if (!$result) {
+                if ($result === false) {
                     $cdata = '';
                     $innerKeys = array('cmd', 'host', 'options', 'pass', 'protocol', 'user');
                     $this->ARGS = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
@@ -667,13 +671,19 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 } else {
                     $folders = [];
 
-                    foreach ($result as $res) {
-                        if ($res->type == 'folder') {
-                            $folders[$res->id.' '] = $res->name;
+                    if ($result) {
+                        foreach ($result as $res) {
+                            if ($res->type == 'folder') {
+                                $folders[$res->id.' '] = $res->name;
+                            }
                         }
+                        natcasesort($folders);
                     }
 
-                    natcasesort($folders);
+                    if ($options['pass'] === 'folders') {
+                        return ['exit' => true, 'folders' => $folders];
+                    }
+
                     $folders = ['root' => 'My Box'] + $folders;
                     $folders = json_encode($folders);
 
