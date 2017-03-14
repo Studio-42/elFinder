@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: 0708b81) (2017-03-14)
+ * Version 2.1.22 (2.1-src Nightly: 6fad141) (2017-03-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -6574,7 +6574,7 @@ elFinder.prototype = {
 				pathI18n  : 'folderId',
 				folders   : true
 			}, (noOffline === null? (opts || {}) : {noOffline : noOffline})),
-			addFolders = function(bro, folders) {
+			addFolders = function(fm, bro, folders) {
 				var self = this,
 					cnt  = Object.keys($.isPlainObject(folders)? folders : {}).length,
 					select;
@@ -6602,7 +6602,7 @@ elFinder.prototype = {
 									data : {cmd : 'netmount', protocol: protocol, host: host, user: 'init', path: path, pass: 'folders'},
 									preventDefault : true
 								}).done(function(data){
-									addFolders.call(self, node, data.folders);
+									addFolders.call(self, fm, node, data.folders);
 								}).always(function() {
 									xhr = null;
 									spn.remove();
@@ -6681,7 +6681,7 @@ elFinder.prototype = {
 					this.vars.mbtn.hide();
 				} else if (data.mode == 'folders') {
 					if (data.folders) {
-						addFolders.call(this, f.path.nextAll(':last'), data.folders);
+						addFolders.call(this, fm, f.path.nextAll(':last'), data.folders);
 					}
 				} else {
 					if (data.expires) {
@@ -6717,7 +6717,7 @@ elFinder.prototype = {
 					f1.val(protocol);
 					this.vars.mbtn.show();
 					if (data.folders) {
-						addFolders.call(this, f.path, data.folders);
+						addFolders.call(this, fm, f.path, data.folders);
 					}
 					f.user.val('done');
 					f.pass.val('done');
@@ -7021,7 +7021,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 0708b81)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 6fad141)';
 
 
 
