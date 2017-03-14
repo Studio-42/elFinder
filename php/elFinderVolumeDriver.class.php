@@ -3225,7 +3225,7 @@ abstract class elFinderVolumeDriver {
 	 * @return string
 	 */
 	protected function getRootstatCachekey() {
-		return md5($path.(isset($this->options['alias'])? $this->options['alias'] : ''));
+		return md5($this->root.(isset($this->options['alias'])? $this->options['alias'] : ''));
 	}
 
 	/**
