@@ -1634,20 +1634,22 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         list($parentId, , $parent) = $this->_gd_splitPath($path);
 
         try {
-            $files = new \Google_Service_Drive_DriveFile();
+            $file = new \Google_Service_Drive_DriveFile();
 
-            $files->setName($name);
-            $files->setMimeType(self::DIRMIME);
-            $files->setParents([$parentId]);
+            $file->setName($name);
+            $file->setMimeType(self::DIRMIME);
+            $file->setParents([$parentId]);
 
             //create the Folder in the Parent
-            $createdFile = $this->service->files->create($files);
+            $obj = $this->service->files->create($file);
 
-            $path = $this->_joinPath($parent, $createdFile['id']);
-
-            $this->_gd_getDirectoryData(false);
-
-            return $path;
+            if ($obj instanceof Google_Service_Drive_DriveFile) {
+            	$path = $this->_joinPath($parent, $obj['id']);
+            	$this->_gd_getDirectoryData(false);
+            	return $path;
+            } else {
+            	return false;
+            }
         } catch (Exception $e) {
             return $this->setError('GoogleDrive error: '.$e->getMessage());
         }

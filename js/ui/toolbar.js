@@ -132,6 +132,9 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				doRender, sel;
 			
 			if (e.type === 'select') {
+				if (fm.searchStatus.state < 2) {
+					return;
+				}
 				sel = fm.selected();
 				if (sel.length) {
 					disabled = fm.getDisabledCmds(sel);
