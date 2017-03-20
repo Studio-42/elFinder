@@ -13,7 +13,7 @@ elFinder.prototype.commands.mkfile = function() {
 	this.exec            = $.proxy(this.fm.res('mixin', 'make'), this);
 	
 	this.getstate = function() {
-		return !this._disabled && this.fm.cwd().write ? 0 : -1;
+		return this.fm.cwd().write ? 0 : -1;
 	}
 
 };

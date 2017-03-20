@@ -150,7 +150,30 @@ elFinder.prototype.command = function(fm) {
 			s = this.shortcuts[i];
 			cb = s.callback || self.exec;
 			s.callback = function() {
-				if (fm.isCommandEnabled(self.name)) {
+				var enabled, checks = {};
+				if (fm.searchStatus.state < 2) {
+					enabled = fm.isCommandEnabled(self.name);
+				} else {
+					$.each(fm.selected(), function(i, h) {
+						if (fm.optionsByHashes[h]) {
+							checks[h] = true;
+						} else {
+							$.each(fm.volOptions, function(id) {
+								if (!checks[id] && h.indexOf(id) === 0) {
+									checks[id] = true;
+									return false;
+								}
+							});
+						}
+					});
+					$.each(checks, function(h) {
+						enabled = fm.isCommandEnabled(self.name, h);
+						if (! enabled) {
+							return false;
+						}
+					});
+				}
+				if (enabled) {
 					cb.call(self);
 				}
 			};
@@ -235,7 +258,7 @@ elFinder.prototype.command = function(fm) {
 		var state = this.state,
 			value = this.value;
 
-		if (this._disabled) {
+		if (this._disabled && this.fm.searchStatus === 0) {
 			this.state = -1;
 		} else {
 			this.state = s !== void(0) ? s : this.getstate();

@@ -14,7 +14,7 @@ elFinder.prototype.commands.resize = function() {
 	
 	this.getstate = function() {
 		var sel = this.fm.selectedFiles();
-		return !this._disabled && sel.length == 1 && sel[0].read && sel[0].write && sel[0].mime.indexOf('image/') !== -1 ? 0 : -1;
+		return sel.length == 1 && sel[0].read && sel[0].write && sel[0].mime.indexOf('image/') !== -1 ? 0 : -1;
 	};
 	
 	this.resizeRequest = function(data, file, dfrd) {

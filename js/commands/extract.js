@@ -34,7 +34,7 @@ elFinder.prototype.commands.extract = function() {
 		var sel = this.files(sel),
 			cnt = sel.length;
 		
-		return !this._disabled && cnt && this.fm.cwd().write && filter(sel).length == cnt ? 0 : -1;
+		return cnt && this.fm.cwd().write && filter(sel).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes, extractTo) {
