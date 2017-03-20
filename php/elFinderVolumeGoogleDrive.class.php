@@ -105,6 +105,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             'client_secret' => '',
             'access_token' => [],
             'refresh_token' => '',
+            'serviceAccountConfigFile' => '',
             'root' => 'My Drive',
             'gdAlias' => '%s@GDrive',
             'googleApiClient' => '',
@@ -838,51 +839,60 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function init()
     {
-        if (empty($options['client_id'])) {
-            if (defined('ELFINDER_GOOGLEDRIVE_CLIENTID') && ELFINDER_GOOGLEDRIVE_CLIENTID) {
-                $this->options['client_id'] = ELFINDER_GOOGLEDRIVE_CLIENTID;
-            } else {
-                return $this->setError('Required option "client_id" is undefined.');
+        $serviceAccountConfig = '';
+        if (empty($this->options['serviceAccountConfigFile'])) {
+            if (empty($options['client_id'])) {
+                if (defined('ELFINDER_GOOGLEDRIVE_CLIENTID') && ELFINDER_GOOGLEDRIVE_CLIENTID) {
+                    $this->options['client_id'] = ELFINDER_GOOGLEDRIVE_CLIENTID;
+                } else {
+                    return $this->setError('Required option "client_id" is undefined.');
+                }
             }
-        }
-        if (empty($options['client_secret'])) {
-            if (defined('ELFINDER_GOOGLEDRIVE_CLIENTSECRET') && ELFINDER_GOOGLEDRIVE_CLIENTSECRET) {
-                $this->options['client_secret'] = ELFINDER_GOOGLEDRIVE_CLIENTSECRET;
-            } else {
-                return $this->setError('Required option "client_secret" is undefined.');
+            if (empty($options['client_secret'])) {
+                if (defined('ELFINDER_GOOGLEDRIVE_CLIENTSECRET') && ELFINDER_GOOGLEDRIVE_CLIENTSECRET) {
+                    $this->options['client_secret'] = ELFINDER_GOOGLEDRIVE_CLIENTSECRET;
+                } else {
+                    return $this->setError('Required option "client_secret" is undefined.');
+                }
             }
-        }
-        if (!$this->options['access_token'] && !$this->options['refresh_token']) {
-            return $this->setError('Required option "access_token" or "refresh_token" is undefined.');
+            if (!$this->options['access_token'] && !$this->options['refresh_token']) {
+                return $this->setError('Required option "access_token" or "refresh_token" is undefined.');
+            }
+        } else {
+            if (!is_readable($this->options['serviceAccountConfigFile'])) {
+                return $this->setError('Option "serviceAccountConfigFile" file is not readable.');
+            }
+            $serviceAccountConfig = $this->options['serviceAccountConfigFile'];
         }
 
         try {
-            $aTokenFile = '';
-            if ($this->options['refresh_token']) {
-                // permanent mount
-                $aToken = $this->options['refresh_token'];
-                $this->options['access_token'] = '';
-                $tmp = elFinder::getStaticVar('commonTempPath');
-                if (!$tmp) {
-                    $tmp = $this->getTempPath();
-                }
-                if ($tmp) {
-                    $aTokenFile = $tmp.DIRECTORY_SEPARATOR.md5($this->options['client_id'].$this->options['refresh_token']).'.gtoken';
-                    if (is_file($aTokenFile)) {
-                        $this->options['access_token'] = json_decode(file_get_contents($aTokenFile), true);
+            if (!$serviceAccountConfig) {
+                $aTokenFile = '';
+                if ($this->options['refresh_token']) {
+                    // permanent mount
+                    $aToken = $this->options['refresh_token'];
+                    $this->options['access_token'] = '';
+                    $tmp = elFinder::getStaticVar('commonTempPath');
+                    if (!$tmp) {
+                        $tmp = $this->getTempPath();
+                    }
+                    if ($tmp) {
+                        $aTokenFile = $tmp.DIRECTORY_SEPARATOR.md5($this->options['client_id'].$this->options['refresh_token']).'.gtoken';
+                        if (is_file($aTokenFile)) {
+                            $this->options['access_token'] = json_decode(file_get_contents($aTokenFile), true);
+                        }
+                    }
+                } else {
+                    // make net mount key for network mount
+                    if (is_array($this->options['access_token'])) {
+                        $aToken = !empty($this->options['access_token']['refresh_token'])
+                            ? $this->options['access_token']['refresh_token']
+                            : $this->options['access_token']['access_token'];
+                    } else {
+                        return $this->setError('Required option "access_token" is not Array or empty.');
                     }
                 }
-            } else {
-                // make net mount key for network mount
-                if (is_array($this->options['access_token'])) {
-                    $aToken = !empty($this->options['access_token']['refresh_token'])
-                        ? $this->options['access_token']['refresh_token']
-                        : $this->options['access_token']['access_token'];
-                } else {
-                    return $this->setError('Required option "access_token" is not Array or empty.');
-                }
             }
-            $this->netMountKey = md5($aToken.'-'.$this->options['path']);
 
             $errors = [];
             if (!$this->service) {
@@ -897,26 +907,34 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
                 $client = $this->client;
 
-                if ($this->options['access_token']) {
-                    $client->setAccessToken($this->options['access_token']);
-                }
-                if ($client->isAccessTokenExpired()) {
-                    $client->setClientId($this->options['client_id']);
-                    $client->setClientSecret($this->options['client_secret']);
-                    $access_token = $client->fetchAccessTokenWithRefreshToken($this->options['refresh_token'] ?: null);
-                    $client->setAccessToken($access_token);
-                    if ($aTokenFile) {
-                        file_put_contents($aTokenFile, json_encode($access_token));
-                    } else {
-                        $access_token['refresh_token'] = $this->options['access_token']['refresh_token'];
+                if (!$serviceAccountConfig) {
+                    if ($this->options['access_token']) {
+                        $client->setAccessToken($this->options['access_token']);
                     }
-                    if (!empty($this->options['netkey'])) {
-                        elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'access_token', $access_token);
+                    if ($client->isAccessTokenExpired()) {
+                        $client->setClientId($this->options['client_id']);
+                        $client->setClientSecret($this->options['client_secret']);
+                        $access_token = $client->fetchAccessTokenWithRefreshToken($this->options['refresh_token'] ?: null);
+                        $client->setAccessToken($access_token);
+                        if ($aTokenFile) {
+                            file_put_contents($aTokenFile, json_encode($access_token));
+                        } else {
+                            $access_token['refresh_token'] = $this->options['access_token']['refresh_token'];
+                        }
+                        if (!empty($this->options['netkey'])) {
+                            elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'access_token', $access_token);
+                        }
+                        $this->options['access_token'] = $access_token;
                     }
-                    $this->options['access_token'] = $access_token;
+                } else {
+                    $client->setAuthConfigFile($serviceAccountConfig);
+                    $client->setScopes([Google_Service_Drive::DRIVE]);
+                    $aToken = $client->getClientId();
                 }
                 $this->service = new \Google_Service_Drive($client);
             }
+
+            $this->netMountKey = md5($aToken.'-'.$this->options['path']);
         } catch (InvalidArgumentException $e) {
             $errors[] = $e->getMessage();
         } catch (Google_Service_Exception $e) {
@@ -1576,11 +1594,15 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             if ($file = $this->_gd_getFile($path)) {
                 if ($dlurl = $this->_gd_getDownloadUrl($file)) {
                     $token = $this->client->getAccessToken();
+                    if (!$token && $this->client->isUsingApplicationDefaultCredentials()) {
+                        $this->client->fetchAccessTokenWithAssertion();
+                        $token = $this->client->getAccessToken();
+                    }
                     $access_token = '';
                     if (is_array($token)) {
                         $access_token = $token['access_token'];
                     } else {
-                        if ($token = json_decode($client->getAccessToken())) {
+                        if ($token = json_decode($this->client->getAccessToken())) {
                             $access_token = $token->access_token;
                         }
                     }
@@ -1644,11 +1666,12 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $obj = $this->service->files->create($file);
 
             if ($obj instanceof Google_Service_Drive_DriveFile) {
-            	$path = $this->_joinPath($parent, $obj['id']);
-            	$this->_gd_getDirectoryData(false);
-            	return $path;
+                $path = $this->_joinPath($parent, $obj['id']);
+                $this->_gd_getDirectoryData(false);
+
+                return $path;
             } else {
-            	return false;
+                return false;
             }
         } catch (Exception $e) {
             return $this->setError('GoogleDrive error: '.$e->getMessage());
