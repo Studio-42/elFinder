@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: 12b6b3e) (2017-03-15)
+ * Version 2.1.22 (2.1-src Nightly: 43ddf61) (2017-03-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7021,7 +7021,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 12b6b3e)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 43ddf61)';
 
 
 
@@ -8544,7 +8544,30 @@ elFinder.prototype.command = function(fm) {
 			s = this.shortcuts[i];
 			cb = s.callback || self.exec;
 			s.callback = function() {
-				if (fm.isCommandEnabled(self.name)) {
+				var enabled, checks = {};
+				if (fm.searchStatus.state < 2) {
+					enabled = fm.isCommandEnabled(self.name);
+				} else {
+					$.each(fm.selected(), function(i, h) {
+						if (fm.optionsByHashes[h]) {
+							checks[h] = true;
+						} else {
+							$.each(fm.volOptions, function(id) {
+								if (!checks[id] && h.indexOf(id) === 0) {
+									checks[id] = true;
+									return false;
+								}
+							});
+						}
+					});
+					$.each(checks, function(h) {
+						enabled = fm.isCommandEnabled(self.name, h);
+						if (! enabled) {
+							return false;
+						}
+					});
+				}
+				if (enabled) {
 					cb.call(self);
 				}
 			};
@@ -8629,7 +8652,7 @@ elFinder.prototype.command = function(fm) {
 		var state = this.state,
 			value = this.value;
 
-		if (this._disabled) {
+		if (this._disabled && this.fm.searchStatus === 0) {
 			this.state = -1;
 		} else {
 			this.state = s !== void(0) ? s : this.getstate();
@@ -14803,6 +14826,9 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				doRender, sel;
 			
 			if (e.type === 'select') {
+				if (fm.searchStatus.state < 2) {
+					return;
+				}
 				sel = fm.selected();
 				if (sel.length) {
 					disabled = fm.getDisabledCmds(sel);
@@ -16384,7 +16410,7 @@ elFinder.prototype.commands.chmod = function() {
 		if (sel.length == 0) {
 			sel = [ fm.cwd().hash ];
 		}
-		return !this._disabled && this.checkstate(this.files(sel)) ? 0 : -1;
+		return this.checkstate(this.files(sel)) ? 0 : -1;
 	};
 	
 	this.checkstate = function(sel) {
@@ -16669,7 +16695,7 @@ elFinder.prototype.commands.copy = function() {
 		var sel = this.files(sel),
 			cnt = sel.length;
 
-		return !this._disabled && cnt && $.map(sel, function(f) { return f.read ? f : null  }).length == cnt ? 0 : -1;
+		return cnt && $.map(sel, function(f) { return f.read ? f : null  }).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
@@ -16713,7 +16739,7 @@ elFinder.prototype.commands.cut = function() {
 		var sel = this.files(sel),
 			cnt = sel.length;
 		
-		return !this._disabled && cnt && $.map(sel, function(f) { return f.read && ! f.locked && ! fm.isRoot(f) ? f : null  }).length == cnt ? 0 : -1;
+		return cnt && $.map(sel, function(f) { return f.read && ! f.locked && ! fm.isRoot(f) ? f : null  }).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
@@ -17091,7 +17117,7 @@ elFinder.prototype.commands.duplicate = function() {
 		var sel = this.files(sel),
 			cnt = sel.length;
 
-		return !this._disabled && cnt && fm.cwd().write && $.map(sel, function(f) { return f.read && f.phash === fm.cwd().hash && ! fm.isRoot(f)? f : null  }).length == cnt ? 0 : -1;
+		return cnt && fm.cwd().write && $.map(sel, function(f) { return f.read && f.phash === fm.cwd().hash && ! fm.isRoot(f)? f : null  }).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
@@ -17519,7 +17545,7 @@ elFinder.prototype.commands.edit = function() {
 		var sel = this.files(sel),
 			cnt = sel.length;
 
-		return !this._disabled && cnt && filter(sel).length == cnt ? 0 : -1;
+		return cnt && filter(sel).length == cnt ? 0 : -1;
 	};
 	
 	this.exec = function(hashes) {
@@ -17578,7 +17604,7 @@ elFinder.prototype.commands.extract = function() {
 		var sel = this.files(sel),
 			cnt = sel.length;
 		
-		return !this._disabled && cnt && this.fm.cwd().write && filter(sel).length == cnt ? 0 : -1;
+		return cnt && this.fm.cwd().write && filter(sel).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes, extractTo) {
@@ -18692,9 +18718,9 @@ elFinder.prototype.commands.mkdir = function() {
 			cnt = sel.length;
 
 		if (curOrg === 'navbar') {
-			return !this._disabled && cnt && sel[0].write && sel[0].read? 0 : -1;  
+			return cnt && sel[0].write && sel[0].read? 0 : -1;  
 		} else {
-			return !this._disabled && cwd.write && (!cnt || $.map(sel, function(f) { return f.read && ! f.locked? f : null  }).length == cnt)? 0 : -1;
+			return cwd.write && (!cnt || $.map(sel, function(f) { return f.read && ! f.locked? f : null  }).length == cnt)? 0 : -1;
 		}
 	}
 
@@ -18719,7 +18745,7 @@ elFinder.prototype.commands.mkfile = function() {
 	this.exec            = $.proxy(this.fm.res('mixin', 'make'), this);
 	
 	this.getstate = function() {
-		return !this._disabled && this.fm.cwd().write ? 0 : -1;
+		return this.fm.cwd().write ? 0 : -1;
 	}
 
 };
@@ -20955,7 +20981,7 @@ elFinder.prototype.commands.rename = function() {
 	this.getstate = function(sel) {
 		var sel = this.files(sel);
 
-		return !this._disabled && sel.length == 1 && sel[0].phash && !sel[0].locked  ? 0 : -1;
+		return sel.length == 1 && sel[0].phash && !sel[0].locked  ? 0 : -1;
 	};
 	
 	this.exec = function(hashes, opts) {
@@ -21205,7 +21231,7 @@ elFinder.prototype.commands.resize = function() {
 	
 	this.getstate = function() {
 		var sel = this.fm.selectedFiles();
-		return !this._disabled && sel.length == 1 && sel[0].read && sel[0].write && sel[0].mime.indexOf('image/') !== -1 ? 0 : -1;
+		return sel.length == 1 && sel[0].read && sel[0].write && sel[0].mime.indexOf('image/') !== -1 ? 0 : -1;
 	};
 	
 	this.resizeRequest = function(data, file, dfrd) {
@@ -22481,6 +22507,7 @@ elFinder.prototype.commands.resize = function() {
  **/
 elFinder.prototype.commands.rm = function() {
 	
+	this.updateOnSelect  = false;
 	this.shortcuts = [{
 		pattern     : 'delete ctrl+backspace'
 	}];
@@ -22488,7 +22515,7 @@ elFinder.prototype.commands.rm = function() {
 	this.getstate = function(sel) {
 		var fm = this.fm;
 		sel = sel || fm.selected();
-		return !this._disabled && sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
+		return sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
 			? 0 : -1;
 	}
 	
