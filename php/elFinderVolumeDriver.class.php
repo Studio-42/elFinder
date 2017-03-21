@@ -1282,6 +1282,9 @@ abstract class elFinderVolumeDriver {
 			$this->options['syncMinMs'] = max($this->options[$this->options['syncChkAsTs']? 'tsPlSleep' : 'lsPlSleep'] * 1000, intval($this->options['syncMinMs']));
 		}
 
+		// to update options cache
+		$this->updateCache($this->root, $root);
+
 		return $this->mounted = true;
 	}
 	
@@ -1667,14 +1670,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 */
 	public function file($hash) {
-		$path = $this->decode($hash);
-		$isRoot = ($path == $this->root);
-		
-		$file = $this->stat($path);
-		
-		if ($isRoot && $file) {
-			$file = array_merge($file, $this->getRootStatExtra());
-		}
+		$file = $this->stat($this->decode($hash));
 		
 		return ($file) ? $file : $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 	}
@@ -1724,14 +1720,14 @@ abstract class elFinderVolumeDriver {
 				$dirs = $this->sessionCache['subdirs'][$path];
 			}
 			if ($dirs !== null || (isset($dir['dirs']) && $dir['dirs'] != 1)) {
+				$_dir = $dir;
 				if ($dirs || $this->subdirs($hash)) {
 					$dir['dirs'] = 1;
 				} else {
 					unset($dir['dirs']);
 				}
-				$this->cache[$path] = $dir;
-				if ($path == $this->root) {
-					$this->stat($path);
+				if ($dir !== $_dir) {
+					$this->updateCache($path, $dir);
 				}
 			}
 		}
@@ -2963,7 +2959,9 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function dirnameCE($path) {
-		return (!$this->encoding)? $this->_dirname($path) :	$this->convEncOut($this->_dirname($this->convEncIn($path)));
+		$dirname = (!$this->encoding)? $this->_dirname($path) :	$this->convEncOut($this->_dirname($this->convEncIn($path)));
+		// check to infinite loop prevention
+		return ($dirname != $path)? $dirname : '';
 	}
 	
 	/**
@@ -3846,7 +3844,14 @@ abstract class elFinderVolumeDriver {
 			unset($stat['target']);
 		}
 		
-		return $this->cache[$path] = $stat;
+		$this->cache[$path] = $stat;
+		
+		if ($root && $this->sessionCaching['rootstat']) {
+			// to update session cache
+			$this->stat($path);
+		}
+		
+		return $stat;
 	}
 	
 	/**
