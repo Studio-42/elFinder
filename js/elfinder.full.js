@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: 0625092) (2017-03-20)
+ * Version 2.1.22 (2.1-src Nightly: 985f22d) (2017-03-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7021,7 +7021,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 0625092)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 985f22d)';
 
 
 
@@ -11251,8 +11251,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			attachThumbnails = function(image, reload) {
-				var url  = fm.option('tmbUrl'),
-					attach = function(node, tmb) {
+				var attach = function(node, tmb) {
 						$('<img/>')
 							.on('load', function() {
 								node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')");
