@@ -927,8 +927,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			attachThumbnails = function(image, reload) {
-				var url  = fm.option('tmbUrl'),
-					attach = function(node, tmb) {
+				var attach = function(node, tmb) {
 						$('<img/>')
 							.on('load', function() {
 								node.find('.elfinder-cwd-icon').addClass(tmb.className).css('background-image', "url('"+tmb.url+"')");
