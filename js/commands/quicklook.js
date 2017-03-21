@@ -292,13 +292,14 @@
 				preview = self.preview,
 				file    = e.file,
 				tpl     = '<div class="elfinder-quicklook-info-data">{value}</div>',
-				tmb;
+				tmb, name;
 
 			if (file && (e.forceUpdate || self.window.data('hash') !== file.hash)) {
+				name = fm.escape(file.i18 || file.name);
 				!file.read && e.stopImmediatePropagation();
 				self.window.data('hash', file.hash);
 				self.preview.off('changesize').trigger('change').children().remove();
-				title.html(fm.escape(file.name));
+				title.html(name);
 				
 				prev.css('visibility', '');
 				next.css('visibility', '');
@@ -310,12 +311,16 @@
 				}
 				
 				info.html(
-						tpl.replace(/\{value\}/, fm.escape(file.name))
+						tpl.replace(/\{value\}/, name)
 						+ tpl.replace(/\{value\}/, fm.mime2kind(file))
 						+ (file.mime == 'directory' ? '' : tpl.replace(/\{value\}/, fm.formatSize(file.size)))
 						+ tpl.replace(/\{value\}/, fm.i18n('modify')+': '+ fm.formatDate(file))
 					)
 				icon.addClass('elfinder-cwd-icon ui-corner-all '+fm.mime2class(file.mime));
+				
+				if (file.icon) {
+					icon.css(fm.getIconStyle(file, true));
+				}
 
 				if (file.read && (tmb = fm.tmb(file))) {
 					$('<img/>')

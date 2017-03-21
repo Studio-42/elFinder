@@ -6146,6 +6146,38 @@ elFinder.prototype = {
 	},
 	
 	/**
+	 * Get icon style from file.icon
+	 * 
+	 * @param  Object  elFinder file object
+	 * @return String|Object
+	 */
+	getIconStyle : function(file, asObject) {
+		var self = this,
+			template = {
+				'background' : 'url(\'{url}\') 0 0 no-repeat',
+				'background-size' : 'contain'
+			},
+			style = '',
+			cssObj = {},
+			i = 0;
+		if (file.icon) {
+			style = 'style="';
+			$.each(template, function(k, v) {
+				if (i++ === 0) {
+					v = v.replace('{url}', self.escape(file.icon));
+				}
+				if (asObject) {
+					cssObj[k] = v;
+				} else {
+					style += k+':'+v+';'
+				}
+			});
+			style += '"';
+		}
+		return asObject? cssObj : style;
+	},
+	
+	/**
 	 * Convert mimetype into css classes
 	 * 
 	 * @param  String  file mimetype
