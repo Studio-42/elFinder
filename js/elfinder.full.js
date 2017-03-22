@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: e6e24b8) (2017-03-22)
+ * Version 2.1.22 (2.1-src Nightly: ee052a5) (2017-03-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7053,7 +7053,7 @@ if (!Object.keys) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: e6e24b8)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: ee052a5)';
 
 
 
@@ -13689,7 +13689,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 						.replace(/\{permissions\}/, (dir && (!dir.read || !dir.write || dir.notfound))? ptpl : '')
 						.replace(/\{title\}/, (dir && dir.path)? fm.escape(dir.path) : '')
 						.replace(/\{symlink\}/, '')
-						.replace(/\{style\}/, ''));
+						.replace(/\{style\}/, (dir && dir.icon)? fm.getIconStyle(dir) : ''));
 			},
 			/**
 			 * Add new node into places
@@ -14616,7 +14616,7 @@ $.fn.elfinderstat = function(fm) {
 				if (search) {
 					dirs.push('<a href="#elf_'+file.phash+'" data-hash="'+file.hash+'">'+(file.path? file.path.replace(/\/[^\/]*$/, '') : '..')+'</a>');
 				}
-				dirs.push(fm.escape(file.name));
+				dirs.push(fm.escape(file.i18 || file.name));
 				sel.html(dirs.join('/') + (s > 0 ? ', '+fm.formatSize(s) : ''));
 				
 				return;
