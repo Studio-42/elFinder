@@ -68,7 +68,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 						.replace(/\{permissions\}/, (dir && (!dir.read || !dir.write || dir.notfound))? ptpl : '')
 						.replace(/\{title\}/, (dir && dir.path)? fm.escape(dir.path) : '')
 						.replace(/\{symlink\}/, '')
-						.replace(/\{style\}/, ''));
+						.replace(/\{style\}/, (dir && dir.icon)? fm.getIconStyle(dir) : ''));
 			},
 			/**
 			 * Add new node into places

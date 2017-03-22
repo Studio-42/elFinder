@@ -60,7 +60,7 @@ $.fn.elfinderstat = function(fm) {
 				if (search) {
 					dirs.push('<a href="#elf_'+file.phash+'" data-hash="'+file.hash+'">'+(file.path? file.path.replace(/\/[^\/]*$/, '') : '..')+'</a>');
 				}
-				dirs.push(fm.escape(file.name));
+				dirs.push(fm.escape(file.i18 || file.name));
 				sel.html(dirs.join('/') + (s > 0 ? ', '+fm.formatSize(s) : ''));
 				
 				return;
