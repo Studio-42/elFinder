@@ -311,8 +311,8 @@ abstract class elFinderVolumeDriver {
 		'dateFormat'      => 'j M Y H:i',
 		// files time format
 		'timeFormat'      => 'H:i',
-		// if true - every folder will be check for children folders, otherwise all folders will be marked as having subfolders
-		'checkSubfolders' => true,
+		// if true - every folder will be check for children folders, -1 - every folder will be check asynchronously, false -  all folders will be marked as having subfolders
+		'checkSubfolders' => true, // true, false or -1
 		// allow to copy from this volume to other ones?
 		'copyFrom'        => true,
 		// allow to copy from other volumes to this one?
@@ -3795,6 +3795,9 @@ abstract class elFinderVolumeDriver {
 				}
 				// for dir - check for subdirs
 				if ($this->options['checkSubfolders']) {
+					if (! isset($stat['dirs']) && $this->options['checkSubfolders'] == -1) {
+						$stat['dirs'] = -1;
+					}
 					if (isset($stat['dirs'])) {
 						if ($stat['dirs']) {
 							if ($stat['dirs'] == -1) {
