@@ -382,11 +382,13 @@
 			'enabled'         : '有効', // from v2.1.16 added 4.10.2016
 			'disabled'        : '無効', // from v2.1.16 added 4.10.2016
 			'emptyIncSearch'  : '現在のビュー内に該当するアイテムはありません。\\A[Enter]キーで検索対象を拡げます。', // from v2.1.16 added 5.10.2016
+			'emptyLetSearch'  : '現在のビュー内に指定された文字で始まるアイテムはありません。', // from v2.1.23 added 24.3.2017
 			'textLabel'       : 'テキストラベル', // from v2.1.17 added 13.10.2016
 			'minsLeft'        : '残り$1分', // from v2.1.17 added 13.11.2016
 			'openAsEncoding'  : '選択したエンコーディングで開き直す', // from v2.1.19 added 2.12.2016
 			'saveAsEncoding'  : '選択したエンコーディングで保存', // from v2.1.19 added 2.12.2016
 			'selectFolder'    : 'フォルダーを選択', // from v2.1.20 added 13.12.2016
+			'firstLetterSearch': '一文字目で検索', // from v2.1.23 added 24.3.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
