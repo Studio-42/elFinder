@@ -469,6 +469,9 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			scrollToView = function(o, blink) {
+				if (! o.length) {
+					return;
+				}
 				var ftop    = o.position().top,
 					fheight = o.outerHeight(true),
 					wtop    = wrapper.scrollTop(),
@@ -1305,10 +1308,13 @@ $.fn.elfindercwd = function(fm, options) {
 			content = function() {
 				var phash, emptyMethod, thtr;
 
-				wz.append(selectAllCheckbox).removeClass('elfinder-cwd-wrapper-empty elfinder-search-result elfinder-incsearch-result');
+				wz.append(selectAllCheckbox).removeClass('elfinder-cwd-wrapper-empty elfinder-search-result elfinder-incsearch-result elfinder-letsearch-result');
 				if (fm.searchStatus.state > 1 || fm.searchStatus.ininc) {
-					wz.addClass('elfinder-search-result' + (fm.searchStatus.ininc? ' elfinder-incsearch-result' : ''));
+					wz.addClass('elfinder-search-result' + (fm.searchStatus.ininc? ' elfinder-'+(query.substr(0,1) === '/' ? 'let':'inc')+'search-result' : ''));
 				}
+				
+				// notify cwd init
+				fm.trigger('cwdinit');
 				
 				selectedNext = $();
 				try {
@@ -1954,7 +1960,8 @@ $.fn.elfindercwd = function(fm, options) {
 				sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder'+(mobile? 'LTap' : 'Drop'))+'" }', 1);
 				sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable-disabled .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', 2);
 				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result .elfinder-cwd:after{ content:"'+fm.i18n('emptySearch')+'" }', 3);
-				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-incsearch-result .elfinder-cwd:after{ content:"'+fm.i18n('emptyIncSearch')+'" }', 3);
+				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-incsearch-result .elfinder-cwd:after{ content:"'+fm.i18n('emptyIncSearch')+'" }', 4);
+				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-letsearch-result .elfinder-cwd:after{ content:"'+fm.i18n('emptyLetSearch')+'" }', 5);
 				if (! mobile) {
 					// make files selectable
 					cwd.selectable(selectableOption)
@@ -2016,9 +2023,10 @@ $.fn.elfindercwd = function(fm, options) {
 					query = '';
 					if (incHashes) {
 						fm.trigger('incsearchend', e.data);
-					}
-					if (!e.data || !e.data.noupdate) {
-						content();
+					} else {
+						if (!e.data || !e.data.noupdate) {
+							content();
+						}
 					}
 				}
 				fm.autoSync();
@@ -2032,14 +2040,19 @@ $.fn.elfindercwd = function(fm, options) {
 				selectedFiles = [];
 				fm.lazy(function() {
 					// incremental search
-					query = e.data.query || '';
-					if (query) {
-						var regex = new RegExp(query.replace(/([\\*\;\.\?\[\]\{\}\(\)\^\$\-\|])/g, '\\$1'), 'i');
+					var regex, q, fst = '';
+					q = query = e.data.query || '';
+					if (q) {
+						if (q.substr(0,1) === '/') {
+							q = q.substr(1);
+							fst = '^';
+						}
+						regex = new RegExp(fst + q.replace(/([\\*\;\.\?\[\]\{\}\(\)\^\$\-\|])/g, '\\$1'), 'i');
 						incHashes = $.map(cwdHashes, function(hash) {
 							var file = fm.file(hash);
 							return (file && (file.name.match(regex) || (file.i18 && file.i18.match(regex))))? file.hash : null;
 						});
-						fm.trigger('incsearch', { hashes: incHashes, query: query })
+						fm.trigger('incsearch', { hashes: incHashes, query: q })
 							.searchStatus.ininc = true;
 						content();
 						fm.autoSync('stop');
