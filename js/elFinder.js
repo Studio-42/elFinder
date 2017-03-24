@@ -218,6 +218,8 @@ var elFinder = function(node, opts) {
 		
 		uiCmdMapPrev = '',
 		
+		gcJobRes = null,
+		
 		open = function(data) {
 			// NOTES: Do not touch data object
 		
@@ -256,7 +258,7 @@ var elFinder = function(node, opts) {
 				rmClass = 'elfinder-subtree-loaded ' + self.res('class', 'navexpand');
 				collapsed = self.res('class', 'navcollapse');
 				hashes = Object.keys(files);
-				calc = function(n, i) {
+				calc = function(i) {
 					if (!files[i]) {
 						return true;
 					}
@@ -289,10 +291,11 @@ var elFinder = function(node, opts) {
 				};
 				gc = function() {
 					if (hashes.length) {
-						$.each(hashes.splice(0, 100), calc);
-						if (hashes.length) {
-							setTimeout(gc, 20);
-						}
+						gcJobRes && gcJobRes._abort();
+						gcJobRes = self.asyncJob(calc, hashes, {
+							interval : 20,
+							numPerOnce : 100
+						});
 					}
 				};
 				
@@ -6915,30 +6918,30 @@ elFinder.prototype = {
 	 * @param arr  Array
 	 * @param opts Object
 	 * 
-	 * @return Object { dfrd: Deferred, about: Function }
+	 * @return Object $.Deferred that has an extended method _abort()
 	 */
 	asyncJob : function(func, arr, opts) {
-		var dfrd = $.Deferred(),
+		var dfrd = $.Deferred().always(function() {
+				dfrd = null;
+			}),
 			abortFlg = false,
-			abort = function() {
-				tm && clearTimeout(tm);
-				abortFlg = true;
-				dfrd.reject(resArr);
-			},
 			parms = $.extend({
 				interval : 0,
 				numPerOnce : 1
 			}, opts || {}),
 			resArr = [],
-			res = {
-				dfrd : dfrd,
-				abort : abort
-			},
 			vars =[],
 			curVars = [],
 			exec,
 			tm;
 		
+		dfrd._abort = function() {
+			tm && clearTimeout(tm);
+			if (dfrd && dfrd.state() === 'pending') {
+				abortFlg = true;
+				dfrd.reject(resArr);
+			}
+		};
 		if (typeof func === 'function' && Array.isArray(arr)) {
 			vars = arr.concat();
 			exec = function() {
@@ -6970,7 +6973,7 @@ elFinder.prototype = {
 		} else {
 			dfrd.reject();
 		}
-		return res;
+		return dfrd;
 	},
 	
 	log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
