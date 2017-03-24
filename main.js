@@ -3,7 +3,7 @@
 	var i18nFolderMsgs = {},
 		rootPath = './demo',
 		// jQuery and jQueryUI version
-		jqver = '3.1.1',
+		jqver = '3.2.1',
 		uiver = '1.12.1',
 		// Detect language (optional)
 		lang = (function() {
