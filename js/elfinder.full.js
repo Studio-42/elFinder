@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: 8146bdd) (2017-03-24)
+ * Version 2.1.22 (2.1-src Nightly: c3e836f) (2017-03-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -249,6 +249,8 @@ var elFinder = function(node, opts) {
 		
 		uiCmdMapPrev = '',
 		
+		gcJobRes = null,
+		
 		open = function(data) {
 			// NOTES: Do not touch data object
 		
@@ -287,7 +289,7 @@ var elFinder = function(node, opts) {
 				rmClass = 'elfinder-subtree-loaded ' + self.res('class', 'navexpand');
 				collapsed = self.res('class', 'navcollapse');
 				hashes = Object.keys(files);
-				calc = function(n, i) {
+				calc = function(i) {
 					if (!files[i]) {
 						return true;
 					}
@@ -320,10 +322,11 @@ var elFinder = function(node, opts) {
 				};
 				gc = function() {
 					if (hashes.length) {
-						$.each(hashes.splice(0, 100), calc);
-						if (hashes.length) {
-							setTimeout(gc, 20);
-						}
+						gcJobRes && gcJobRes._abort();
+						gcJobRes = self.asyncJob(calc, hashes, {
+							interval : 20,
+							numPerOnce : 100
+						});
 					}
 				};
 				
@@ -6946,30 +6949,30 @@ elFinder.prototype = {
 	 * @param arr  Array
 	 * @param opts Object
 	 * 
-	 * @return Object { dfrd: Deferred, about: Function }
+	 * @return Object $.Deferred that has an extended method _abort()
 	 */
 	asyncJob : function(func, arr, opts) {
-		var dfrd = $.Deferred(),
+		var dfrd = $.Deferred().always(function() {
+				dfrd = null;
+			}),
 			abortFlg = false,
-			abort = function() {
-				tm && clearTimeout(tm);
-				abortFlg = true;
-				dfrd.reject(resArr);
-			},
 			parms = $.extend({
 				interval : 0,
 				numPerOnce : 1
 			}, opts || {}),
 			resArr = [],
-			res = {
-				dfrd : dfrd,
-				abort : abort
-			},
 			vars =[],
 			curVars = [],
 			exec,
 			tm;
 		
+		dfrd._abort = function() {
+			tm && clearTimeout(tm);
+			if (dfrd && dfrd.state() === 'pending') {
+				abortFlg = true;
+				dfrd.reject(resArr);
+			}
+		};
 		if (typeof func === 'function' && Array.isArray(arr)) {
 			vars = arr.concat();
 			exec = function() {
@@ -7001,7 +7004,7 @@ elFinder.prototype = {
 		} else {
 			dfrd.reject();
 		}
-		return res;
+		return dfrd;
 	},
 	
 	log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
@@ -7081,7 +7084,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 8146bdd)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: c3e836f)';
 
 
 
@@ -15280,20 +15283,17 @@ $.fn.elfindertree = function(fm, opts) {
 			checkSubdirs = function() {
 				var ids = Object.keys(subdirsQue);
 				if (ids.length) {
-					subdirsJobRes && subdirsJobRes.abort();
+					subdirsJobRes && subdirsJobRes._abort();
 					execSubdirsTm && clearTimeout(execSubdirsTm);
 					subdirsExecQue = [];
 					subdirsJobRes = fm.asyncJob(function(id) {
 						return fm.isInWindow($('#'+id))? id : null;
-					}, ids, { numPerOnce: 200 });
-					subdirsJobRes.dfrd.done(function(arr) {
-						subdirsJobRes = null;
+					}, ids, { numPerOnce: 200 })
+					.done(function(arr) {
 						if (arr.length) {
 							subdirsExecQue = arr;
 							execSubdirs();
 						}
-					}).fail(function(){
-						subdirsJobRes = null;
 					});
 				}
 			},
