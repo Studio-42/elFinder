@@ -219,20 +219,17 @@ $.fn.elfindertree = function(fm, opts) {
 			checkSubdirs = function() {
 				var ids = Object.keys(subdirsQue);
 				if (ids.length) {
-					subdirsJobRes && subdirsJobRes.abort();
+					subdirsJobRes && subdirsJobRes._abort();
 					execSubdirsTm && clearTimeout(execSubdirsTm);
 					subdirsExecQue = [];
 					subdirsJobRes = fm.asyncJob(function(id) {
 						return fm.isInWindow($('#'+id))? id : null;
-					}, ids, { numPerOnce: 200 });
-					subdirsJobRes.dfrd.done(function(arr) {
-						subdirsJobRes = null;
+					}, ids, { numPerOnce: 200 })
+					.done(function(arr) {
 						if (arr.length) {
 							subdirsExecQue = arr;
 							execSubdirs();
 						}
-					}).fail(function(){
-						subdirsJobRes = null;
 					});
 				}
 			},
