@@ -3795,7 +3795,7 @@ abstract class elFinderVolumeDriver {
 				}
 				// for dir - check for subdirs
 				if ($this->options['checkSubfolders']) {
-					if (! isset($stat['dirs']) && $this->options['checkSubfolders'] == -1) {
+					if (! isset($stat['dirs']) && intval($this->options['checkSubfolders']) === -1) {
 						$stat['dirs'] = -1;
 					}
 					if (isset($stat['dirs'])) {
