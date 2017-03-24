@@ -493,7 +493,7 @@ var elFinder = function(node, opts) {
 				fm.loadCss([baseUrl+'css/elfinder.min.css', baseUrl+'css/theme.css']);
 				
 				// additional CSS files
-				if ($.isArray(fm.options.cssAutoLoad)) {
+				if (Array.isArray(fm.options.cssAutoLoad)) {
 					fm.loadCss(fm.options.cssAutoLoad);
 				}
 				
@@ -1143,7 +1143,7 @@ var elFinder = function(node, opts) {
 	 */
 	this.getDisabledCmds = function(targets) {
 		var disabled = [];
-		if (! $.isArray(targets)) {
+		if (! Array.isArray(targets)) {
 			targets = [ targets ];
 		}
 		$.each(targets, function(i, h) {
@@ -3186,7 +3186,7 @@ var elFinder = function(node, opts) {
 	 **/
 	this._commands = {};
 	
-	if (!$.isArray(this.options.commands)) {
+	if (!Array.isArray(this.options.commands)) {
 		this.options.commands = [];
 	}
 	
@@ -4008,19 +4008,19 @@ elFinder.prototype = {
 	rules : {
 		defaults : function(data) {
 			if (!data
-			|| (data.added && !$.isArray(data.added))
-			||  (data.removed && !$.isArray(data.removed))
-			||  (data.changed && !$.isArray(data.changed))) {
+			|| (data.added && !Array.isArray(data.added))
+			||  (data.removed && !Array.isArray(data.removed))
+			||  (data.changed && !Array.isArray(data.changed))) {
 				return false;
 			}
 			return true;
 		},
-		open    : function(data) { return data && data.cwd && data.files && $.isPlainObject(data.cwd) && $.isArray(data.files); },
-		tree    : function(data) { return data && data.tree && $.isArray(data.tree); },
-		parents : function(data) { return data && data.tree && $.isArray(data.tree); },
-		tmb     : function(data) { return data && data.images && ($.isPlainObject(data.images) || $.isArray(data.images)); },
-		upload  : function(data) { return data && ($.isPlainObject(data.added) || $.isArray(data.added));},
-		search  : function(data) { return data && data.files && $.isArray(data.files)}
+		open    : function(data) { return data && data.cwd && data.files && $.isPlainObject(data.cwd) && Array.isArray(data.files); },
+		tree    : function(data) { return data && data.tree && Array.isArray(data.tree); },
+		parents : function(data) { return data && data.tree && Array.isArray(data.tree); },
+		tmb     : function(data) { return data && data.images && ($.isPlainObject(data.images) || Array.isArray(data.images)); },
+		upload  : function(data) { return data && ($.isPlainObject(data.added) || Array.isArray(data.added));},
+		search  : function(data) { return data && data.files && Array.isArray(data.files)}
 	},
 	
 	/**
@@ -4166,7 +4166,7 @@ elFinder.prototype = {
 							} else {
 								if (fm.options.overwriteUploadConfirm && ! fm.UA.iOS && fm.option('uploadOverwrite', target)) {
 									if (data.list) {
-										if ($.isArray(data.list)) {
+										if (Array.isArray(data.list)) {
 											existed = data.list || [];
 										} else {
 											existedArr = [];
@@ -6122,7 +6122,7 @@ elFinder.prototype = {
 		for (i = start; i< arguments.length; i++) {
 			m = arguments[i];
 			
-			if ($.isArray(m)) {
+			if (Array.isArray(m)) {
 				for (j = 0; j < m.length; j++) {
 					if (m[j] instanceof jQuery) {
 						// jQuery object is HTML element
@@ -6490,7 +6490,7 @@ elFinder.prototype = {
 				var ret = false;
 				if (typeof checker === 'string' && checker.toLowerCase() === 'all') {
 					ret = true;
-				} else if ($.isArray(checker) && checker.length) {
+				} else if (Array.isArray(checker) && checker.length) {
 					$.each(checker, function(i, v) {
 						v = v.toLowerCase();
 						if (v === 'all' || mime.indexOf(v) === 0) {
@@ -6939,7 +6939,7 @@ elFinder.prototype = {
 			exec,
 			tm;
 		
-		if (typeof func === 'function' && $.isArray(arr)) {
+		if (typeof func === 'function' && Array.isArray(arr)) {
 			vars = arr.concat();
 			exec = function() {
 				if (abortFlg) {
@@ -6978,7 +6978,7 @@ elFinder.prototype = {
 	debug : function(type, m) {
 		var d = this.options.debug;
 
-		if (d == 'all' || d === true || ($.isArray(d) && $.inArray(type, d) != -1)) {
+		if (d == 'all' || d === true || (Array.isArray(d) && $.inArray(type, d) != -1)) {
 			window.console && window.console.log && window.console.log('elfinder debug: ['+type+'] ['+this.id+']', m);
 		} 
 		
@@ -7031,5 +7031,11 @@ if (!Object.keys) {
 			}
 			return result
 		}
-	})()
+	})();
 };
+// Array.isArray
+if (!Array.isArray) {
+	Array.isArray = function(arr) {
+		return jQuery.isArray(arr);
+	};
+}

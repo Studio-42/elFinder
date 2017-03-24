@@ -350,7 +350,7 @@ elFinder.prototype.commands.edit = function() {
 				}
 			})
 			.fail(function(error) {
-				var err = $.isArray(error)? error[0] : error;
+				var err = Array.isArray(error)? error[0] : error;
 				(err !== 'errConvUTF8') && fm.sync();
 				dfrd.reject(error);
 				
