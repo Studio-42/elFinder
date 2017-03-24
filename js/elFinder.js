@@ -218,6 +218,8 @@ var elFinder = function(node, opts) {
 		
 		uiCmdMapPrev = '',
 		
+		gcJobRes = null,
+		
 		open = function(data) {
 			// NOTES: Do not touch data object
 		
@@ -256,7 +258,7 @@ var elFinder = function(node, opts) {
 				rmClass = 'elfinder-subtree-loaded ' + self.res('class', 'navexpand');
 				collapsed = self.res('class', 'navcollapse');
 				hashes = Object.keys(files);
-				calc = function(n, i) {
+				calc = function(i) {
 					if (!files[i]) {
 						return true;
 					}
@@ -289,10 +291,14 @@ var elFinder = function(node, opts) {
 				};
 				gc = function() {
 					if (hashes.length) {
-						$.each(hashes.splice(0, 100), calc);
-						if (hashes.length) {
-							setTimeout(gc, 20);
-						}
+						gcJobRes && gcJobRes.about();
+						gcJobRes = self.asyncJob(calc, hashes, {
+							interval : 20,
+							numPerOnce : 100
+						});
+						gcJobRes.dfrd.always(function() {
+							gcJobRes = null;
+						});
 					}
 				};
 				
