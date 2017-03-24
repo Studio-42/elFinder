@@ -174,6 +174,7 @@ You can create or modify the language file to use translation tool. Please refer
  * [Django](https://github.com/mikery/django-elfinder)
  * [Laravel](https://github.com/barryvdh/laravel-elfinder)
  * [JavaScript/Efw](https://github.com/efwGrp/efw3.X/blob/master/help/api_efw_tag.md#elfinder-tag)
+ * [Symfony](https://github.com/helios-ag/FMElfinderBundle) 
 
 3rd party Volume Drivers
 --------------------
