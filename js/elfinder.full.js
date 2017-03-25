@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: c3e836f) (2017-03-24)
+ * Version 2.1.22 (2.1-src Nightly: dfec75a) (2017-03-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -6953,7 +6953,7 @@ elFinder.prototype = {
 	 */
 	asyncJob : function(func, arr, opts) {
 		var dfrd = $.Deferred().always(function() {
-				dfrd = null;
+				dfrd._abort = function() {};
 			}),
 			abortFlg = false,
 			parms = $.extend({
@@ -7084,7 +7084,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: c3e836f)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: dfec75a)';
 
 
 
@@ -11368,9 +11368,13 @@ $.fn.elfindercwd = function(fm, options) {
 						fm.unbind('resize', attachThumbnails);
 					}
 				} else {
-					bufferExt.attachThumbTm && clearTimeout(bufferExt.attachThumbTm);
-					bufferExt.attachThumbTm = setTimeout(function() {
-						$.each(bufferExt.attachTmbs, chk);
+					bufferExt.attachThumbJob && bufferExt.attachThumbJob._abort();
+					bufferExt.attachThumbJob = fm.asyncJob(function(hash) {
+						chk(hash, bufferExt.attachTmbs[hash]);
+					}, Object.keys(bufferExt.attachTmbs), {
+						interval : 0,
+						numPerOnce : 100
+					}).done(function() {
 						if (! reload && bufferExt.getTmbs.length) {
 							loadThumbnails();
 						}
@@ -11378,7 +11382,7 @@ $.fn.elfindercwd = function(fm, options) {
 							wrapper.off(scrollEvent, attachThumbnails);
 							fm.unbind('resize', attachThumbnails);
 						}
-					}, 0);
+					});
 				}
 			},
 			
