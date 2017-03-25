@@ -6922,7 +6922,7 @@ elFinder.prototype = {
 	 */
 	asyncJob : function(func, arr, opts) {
 		var dfrd = $.Deferred().always(function() {
-				dfrd = null;
+				dfrd._abort = function() {};
 			}),
 			abortFlg = false,
 			parms = $.extend({

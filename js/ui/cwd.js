@@ -979,9 +979,13 @@ $.fn.elfindercwd = function(fm, options) {
 						fm.unbind('resize', attachThumbnails);
 					}
 				} else {
-					bufferExt.attachThumbTm && clearTimeout(bufferExt.attachThumbTm);
-					bufferExt.attachThumbTm = setTimeout(function() {
-						$.each(bufferExt.attachTmbs, chk);
+					bufferExt.attachThumbJob && bufferExt.attachThumbJob._abort();
+					bufferExt.attachThumbJob = fm.asyncJob(function(hash) {
+						chk(hash, bufferExt.attachTmbs[hash]);
+					}, Object.keys(bufferExt.attachTmbs), {
+						interval : 0,
+						numPerOnce : 100
+					}).done(function() {
 						if (! reload && bufferExt.getTmbs.length) {
 							loadThumbnails();
 						}
@@ -989,7 +993,7 @@ $.fn.elfindercwd = function(fm, options) {
 							wrapper.off(scrollEvent, attachThumbnails);
 							fm.unbind('resize', attachThumbnails);
 						}
-					}, 0);
+					});
 				}
 			},
 			
