@@ -1,3 +1,24 @@
+2017-03-xx  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.23):
+		- [VD:Dropbox2] Fixed #1598 add a driver of Dropbox APIv2
+		- [js:core] change option `abortCmdsOnOpen` default value to `['tmb', 'parents']
+		- [php:core,VD:abstract] add a command `subdirs`
+		- [js:core] add new method `asyncJob` 
+		- [quicklook] optimize of HTML5 audio/video player
+		- [php:core,VD:abstract] Fixed problem of caching of subdirs
+		- [ui:tree] trigger `check subdirs()` if necessary of change targets
+		- [cmd:netmount] Fixed #1925 allow selection of multi-level hierarchy
+		- [ui,cmd] Fixed #1931 cmd.disabled is not working in multi-volume search
+		- [VD:GoogleDrive] Fixed #1932 support to auth type "JSON service account credentials"
+		- [VD:GoogleDrive] Fixed #1933 sometimes infinite loop if root path is other than root on GoogleDrive
+		- [js:core,ui:cwd,tree] add core method fm.getIconStyle() and use
+		- [cmd:quicklook,info] Fixed #1926 support i18 name, file.icon
+		- [Vd:abstract] allow -1 as value of option `checkSubfolders` for check asynchronously
+		- [ui:cwd] Fixed #1923 first letter search & navigation in cwd
+		- And some minor bug fixes
+
+
 2017-02-25  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.22):
