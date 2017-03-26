@@ -979,6 +979,12 @@ $.fn.elfindercwd = function(fm, options) {
 						fm.unbind('resize', attachThumbnails);
 					}
 				} else {
+					if (bufferExt.getTmbs.length) {
+						$.each(bufferExt.getTmbs, function(i, h) {
+							bufferExt.attachTmbs[h] = '1';
+						});
+						bufferExt.getTmbs = [];
+					}
 					bufferExt.attachThumbJob && bufferExt.attachThumbJob._abort();
 					bufferExt.attachThumbJob = fm.asyncJob(function(hash) {
 						chk(hash, bufferExt.attachTmbs[hash]);
@@ -1074,6 +1080,8 @@ $.fn.elfindercwd = function(fm, options) {
 						bufferExt.gettingTmb = false;
 						attachThumbnails();
 					}
+				} else {
+					bufferExt.gettingTmb = false;
 				}
 			},
 			
