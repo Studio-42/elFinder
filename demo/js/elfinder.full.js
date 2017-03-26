@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: dfec75a) (2017-03-25)
+ * Version 2.1.22 (2.1-src Nightly: f3ba947) (2017-03-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7084,7 +7084,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: dfec75a)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: f3ba947)';
 
 
 
@@ -11368,6 +11368,12 @@ $.fn.elfindercwd = function(fm, options) {
 						fm.unbind('resize', attachThumbnails);
 					}
 				} else {
+					if (bufferExt.getTmbs.length) {
+						$.each(bufferExt.getTmbs, function(i, h) {
+							bufferExt.attachTmbs[h] = '1';
+						});
+						bufferExt.getTmbs = [];
+					}
 					bufferExt.attachThumbJob && bufferExt.attachThumbJob._abort();
 					bufferExt.attachThumbJob = fm.asyncJob(function(hash) {
 						chk(hash, bufferExt.attachTmbs[hash]);
@@ -11463,6 +11469,8 @@ $.fn.elfindercwd = function(fm, options) {
 						bufferExt.gettingTmb = false;
 						attachThumbnails();
 					}
+				} else {
+					bufferExt.gettingTmb = false;
 				}
 			},
 			
