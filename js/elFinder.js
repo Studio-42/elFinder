@@ -520,7 +520,7 @@ var elFinder = function(node, opts) {
 	 * 
 	 * @type Array
 	 */
-	this.optionProperties = ['icon', 'csscls', 'tmbUrl', 'uiCmdMap', 'netkey'];
+	this.optionProperties = ['icon', 'csscls', 'tmbUrl', 'uiCmdMap', 'netkey', 'disabled'];
 	
 	if (opts.ui) {
 		this.options.ui = opts.ui;
