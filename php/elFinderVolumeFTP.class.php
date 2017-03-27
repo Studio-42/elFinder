@@ -1171,26 +1171,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _findSymlinks($path) {
-		if (is_link($path)) {
-			return true;
-		}
-		if (is_dir($path)) {
-			foreach (self::localScandir($path) as $name) {
-				$p = $path.DIRECTORY_SEPARATOR.$name;
-				if (is_link($p)) {
-					return true;
-				}
-				if (is_dir($p) && $this->_findSymlinks($p)) {
-					return true;
-				} elseif (is_file($p)) {
-					$this->archiveSize += sprintf('%u', filesize($p));
-				}
-			}
-		} else {
-			$this->archiveSize += sprintf('%u', filesize($path));
-		}
-		
-		return false;
+		die('Not yet implemented. (_findSymlinks)');
 	}
 
 	/**
@@ -1220,23 +1201,29 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 
 		$this->unpackArchive($localPath, $arc);
 		
-		$filesToProcess = elFinderVolumeFTP::listFilesInDirectory($dir, true);
-		
-		// no files - extract error ?
-		if (empty($filesToProcess)) {
-			return false;
-		}
-		
 		$this->archiveSize = 0;
 		
-		// find symlinks
-		$symlinks = $this->_findSymlinks($dir);
-		
-		if ($symlinks) {
+		// find symlinks and check extracted items
+		$checkRes = $this->checkExtractItems($dir);
+		if ($checkRes['symlinks']) {
 			$this->rmdirRecursive($dir);
 			return $this->setError(array_merge($this->error, array(elFinder::ERROR_ARC_SYMLINKS)));
 		}
-
+		$this->archiveSize = $checkRes['totalSize'];
+		if ($checkRes['rmNames']) {
+			foreach($checkRes['rmNames'] as $name) {
+				$this->addError(elFinder::ERROR_SAVE, $name);
+			}
+		}
+		
+		$filesToProcess = self::listFilesInDirectory($dir, true);
+		
+		// no files - extract error ?
+		if (empty($filesToProcess)) {
+			$this->rmdirRecursive($dir);
+			return false;
+		}
+		
 		// check max files size
 		if ($this->options['maxArcFilesSize'] > 0 && $this->options['maxArcFilesSize'] < $this->archiveSize) {
 			$this->rmdirRecursive($dir);
@@ -1274,8 +1261,22 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		} else {
 			$dstDir = $this->_dirname($path);
 			$result = array();
-			if (is_dir($src)) {
-				if (!$dstDir = $this->_mkdir($dstDir, $name)) {
+			if (is_dir($src) && $name) {
+				$target = $this->_joinPath($dstDir, $name);
+				$_stat = $this->_stat($target);
+				if ($_stat) {
+					if (! $this->options['copyJoin']) {
+						if ($_stat['mime'] === 'directory') {
+							$this->delTree($target);
+						} else {
+							$this->_unlink($target);
+						}
+						$_stat = false;
+					} else {
+						$dstDir = $target;
+					}
+				}
+				if (! $_stat && (!$dstDir = $this->_mkdir($dstDir, $name))) {
 					$this->rmdirRecursive($dir);
 					return false;
 				}
@@ -1286,8 +1287,23 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				$src = $dir . DIRECTORY_SEPARATOR . $name;
 				if (is_dir($src)) {
 					$p = dirname($name);
+					if ($p === '.') {
+						$p = '';
+					}
 					$name = basename($name);
-					if (! $target = $this->_mkdir($this->_joinPath($dstDir, $p), $name)) {
+					$target = $this->_joinPath($this->_joinPath($dstDir, $p), $name);
+					$_stat = $this->_stat($target);
+					if ($_stat) {
+						if (! $this->options['copyJoin']) {
+							if ($_stat['mime'] === 'directory') {
+								$this->delTree($target);
+							} else {
+								$this->_unlink($target);
+							}
+							$_stat = false;
+						}
+					}
+					if (! $_stat && (!$target = $this->_mkdir($this->_joinPath($dstDir, $p), $name))) {
 						$this->rmdirRecursive($dir);
 						return false;
 					}

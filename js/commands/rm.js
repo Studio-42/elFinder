@@ -97,6 +97,9 @@ elFinder.prototype.commands.rm = function() {
 							dfrd.reject(error);
 						})
 						.done(function(data) {
+							if (data.error || data.warning) {
+								data.sync = true;
+							}
 							dfrd.done(data);
 						})
 						.always(function() {

@@ -16,6 +16,7 @@
 		- [cmd:quicklook,info] Fixed #1926 support i18 name, file.icon
 		- [Vd:abstract] allow -1 as value of option `checkSubfolders` for check asynchronously
 		- [ui:cwd] Fixed #1923 first letter search & navigation in cwd
+		- [VD:LocalFileSystem,FTP] Make success `extract()` by excluding unallowed items
 		- And some minor bug fixes
 
 

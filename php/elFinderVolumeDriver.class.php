@@ -2927,12 +2927,22 @@ abstract class elFinderVolumeDriver {
 	 *
 	 * @param  array  error 
 	 * @return false
+	 * @author Naoki Sawada
+	 **/
+	protected function setError() {
+		$this->error = array();
+		$this->addError(func_get_args());
+		return false;
+	}
+	
+	/**
+	 * Add error message
+	 *
+	 * @param  array  error 
+	 * @return false
 	 * @author Dmitry(dio) Levashov
 	 **/
-	protected function setError($error) {
-		
-		$this->error = array();
-		
+	protected function addError() {
 		foreach (func_get_args() as $err) {
 			if (is_array($err)) {
 				$this->error = array_merge($this->error, $err);
@@ -2940,8 +2950,6 @@ abstract class elFinderVolumeDriver {
 				$this->error[] = $err;
 			}
 		}
-		
-		// $this->error = is_array($error) ? $error : func_get_args();
 		return false;
 	}
 	
@@ -5816,6 +5824,99 @@ abstract class elFinderVolumeDriver {
 	}
 
 	/**
+	 * Check and filter the extracted items
+	 * 
+	 * @param  string $path    target local path
+	 * @param  array  $checks  types to check default: ['symlink', 'name', 'writable', 'mime']
+	 * @return array  ['symlinks' => [], 'names' => [], 'writables' => [], 'mimes' => [], 'rmNames' => [], 'totalSize' => 0]
+	 * @author Naoki Sawada
+	 */
+	protected function checkExtractItems($path, $checks = null) {
+		if (is_null($checks) || ! is_array($checks)) {
+			$checks = array('symlink', 'name', 'writable', 'mime');
+		}
+		$chkSymlink = in_array('symlink', $checks);
+		$chkName = in_array('name', $checks);
+		$chkWritable = in_array('writable', $checks);
+		$chkMime = in_array('mime', $checks);
+		
+		$res = array(
+			'symlinks' => array(),
+			'names' => array(),
+			'writables' => array(),
+			'mimes' => array(),
+			'rmNames' => array(),
+			'totalSize' => 0
+		);
+		
+		if (is_dir($path)) {
+			foreach (self::localScandir($path) as $name) {
+				$p = $path.DIRECTORY_SEPARATOR.$name;
+				if ($chkSymlink && is_link($p)) {
+					self::localRmdirRecursive($p);
+					$res['symlinks'][] = $p;
+					$res['rmNames'][] = $name;
+					continue;
+				}
+				$isDir = is_dir($p);
+				if ($chkName && ! $this->nameAccepted($name)) {
+					self::localRmdirRecursive($p);
+					$res['names'][] = $p;
+					$res['rmNames'][] = $name;
+					continue;
+				}
+				if ($chkWritable && ! $this->attr($p, 'write', null, $isDir)) {
+					self::localRmdirRecursive($p);
+					$res['writables'][] = $p;
+					$res['rmNames'][] = $name;
+					continue;
+				}
+				if ($chkMime && ($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && $mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName)) {
+					self::localRmdirRecursive($p);
+					$res['mimes'][] = $p;
+					$res['rmNames'][] = $name;
+					continue;
+				}
+				if ($isDir) {
+					$cRes = $this->checkExtractItems($p, $checks);
+					foreach($cRes as $k => $v) {
+						if (is_array($v)) {
+							$res[$k] = array_merge($res[$k], $cRes[$k]);
+						} else {
+							$res[$k] += $cRes[$k];
+						}
+					}
+				} else {
+					$res['totalSize'] += sprintf('%u', filesize($p));
+				}
+			}
+			$res['rmNames'] = array_unique($res['rmNames']);
+		} else {
+			if ($chkSymlink && is_link($path)) {
+				unlink($path);
+				$res['symlinks'][] = $path;
+				$res['rmNames'][] = basename($path);
+			} else if ($chkName && ! $this->nameAccepted($name)) {
+				unlink($path);
+				$res['names'][] = $path;
+				$res['rmNames'][] = $name;
+			} else if ($chkWritable && ! $this->attr($path, 'write', null, $isDir)) {
+				unlink($path);
+				$res['writables'][] = $path;
+				$res['rmNames'][] = $name;
+			} else if ($chkMime && ($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && $mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName)) {
+				unlink($path);
+				$res['mimes'][] = $path;
+				$res['rmNames'][] = $name;
+			} else {
+				$res['totalSize'] += sprintf('%u', filesize($path));
+			}
+		}
+		
+		return $res;
+	}
+
+	/**
 	 * Return files of target directory that is dotfiles excludes.
 	 *
 	 * @param  string $dir target directory path
@@ -5975,6 +6076,33 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * Recursive symlinks search
+	 *
+	 * @param  string  $path  file/dir path
+	 * @return bool
+	 * @author Dmitry (dio) Levashov
+	 **/
+	protected static function localFindSymlinks($path) {
+		if (is_link($path)) {
+			return true;
+		}
+		
+		if (is_dir($path)) {
+			foreach (self::localScandir($path) as $name) {
+				$p = $path.DIRECTORY_SEPARATOR.$name;
+				if (is_link($p)) {
+					return true;
+				}
+				if (is_dir($p) && $this->_findSymlinks($p)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 	
 	/**==================================* abstract methods *====================================**/
