@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: aa3c617) (2017-03-28)
+ * Version 2.1.22 (2.1-src Nightly: 79383df) (2017-03-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7084,7 +7084,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: aa3c617)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 79383df)';
 
 
 
@@ -15878,10 +15878,15 @@ $.fn.elfindertree = function(fm, opts) {
 						(node || tree.find('div.'+uploadable)).find(selNavdir+':not(.elfinder-ro,.elfinder-na)').addClass('native-droppable');
 					}
 					if (!node || node.closest('div.'+wrapperRoot).hasClass(pastable)) {
-						//target = (node || tree.find('div.'+pastable)).find(selNavdir+':not(.'+droppable+',.elfinder-ro,.elfinder-na)');
 						target = (node || tree.find('div.'+pastable)).find(selNavdir+':not(.'+droppable+')');
 					} else {
 						target = $();
+					}
+					if (node) {
+						// check leaf roots
+						node.children('div.'+wrapperRoot).each(function() {
+							updateDroppable(null, $(this));
+						});
 					}
 				}
 				
