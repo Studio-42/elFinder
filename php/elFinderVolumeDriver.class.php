@@ -2927,12 +2927,22 @@ abstract class elFinderVolumeDriver {
 	 *
 	 * @param  array  error 
 	 * @return false
+	 * @author Naoki Sawada
+	 **/
+	protected function setError() {
+		$this->error = array();
+		$this->addError(func_get_args());
+		return false;
+	}
+	
+	/**
+	 * Add error message
+	 *
+	 * @param  array  error 
+	 * @return false
 	 * @author Dmitry(dio) Levashov
 	 **/
-	protected function setError($error) {
-		
-		$this->error = array();
-		
+	protected function addError() {
 		foreach (func_get_args() as $err) {
 			if (is_array($err)) {
 				$this->error = array_merge($this->error, $err);
@@ -2940,8 +2950,6 @@ abstract class elFinderVolumeDriver {
 				$this->error[] = $err;
 			}
 		}
-		
-		// $this->error = is_array($error) ? $error : func_get_args();
 		return false;
 	}
 	
