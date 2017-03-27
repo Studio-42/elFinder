@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: 49259c3) (2017-03-27)
+ * Version 2.1.22 (2.1-src Nightly: 469fb81) (2017-03-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7084,7 +7084,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 49259c3)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 469fb81)';
 
 
 
@@ -10117,7 +10117,7 @@ $.fn.elfindercontextmenu = function(fm) {
 				
 				nodes = $();
 				$.each(types[type]||[], function(i, name) {
-					var cmd, node, submenu, hover;
+					var cmd, cmdName, useMap, node, submenu, hover;
 					
 					if (name === '|') {
 						if (sep) {
@@ -10127,13 +10127,16 @@ $.fn.elfindercontextmenu = function(fm) {
 					}
 					
 					if (cmdMap[name]) {
-						name = cmdMap[name];
+						cmdName = cmdMap[name];
+						useMap = true;
+					} else {
+						cmdName = name;
 					}
-					cmd = fm.getCommand(name);
+					cmd = fm.getCommand(cmdName);
 
 					if (cmd && !isCwd && (!fm.searchStatus.state || !cmd.disableOnSearch)) {
 						cmd.__disabled = cmd._disabled;
-						cmd._disabled = !(cmd.alwaysEnabled || (fm._commands[name] ? $.inArray(name, disabled) === -1 : false));
+						cmd._disabled = !(cmd.alwaysEnabled || (fm._commands[cmdName] ? $.inArray(name, disabled) === -1 && (!useMap || $.inArray(cmdName, disabled) === -1) : false));
 						$.each(cmd.linkedCmds, function(i, n) {
 							var c;
 							if (c = fm.getCommand(n)) {
@@ -10143,7 +10146,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						});
 					}
 
-					if (cmd && cmd.getstate(targets) != -1) {
+					if (cmd && !cmd._disabled && cmd.getstate(targets) != -1) {
 						if (cmd.variants) {
 							if (!cmd.variants.length) {
 								return;
