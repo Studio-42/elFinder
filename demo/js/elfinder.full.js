@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: 469fb81) (2017-03-27)
+ * Version 2.1.22 (2.1-src Nightly: aa3c617) (2017-03-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -551,7 +551,7 @@ var elFinder = function(node, opts) {
 	 * 
 	 * @type Array
 	 */
-	this.optionProperties = ['icon', 'csscls', 'tmbUrl', 'uiCmdMap', 'netkey'];
+	this.optionProperties = ['icon', 'csscls', 'tmbUrl', 'uiCmdMap', 'netkey', 'disabled'];
 	
 	if (opts.ui) {
 		this.options.ui = opts.ui;
@@ -7084,7 +7084,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 469fb81)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: aa3c617)';
 
 
 
@@ -8822,7 +8822,7 @@ elFinder.prototype.resources = {
 		symlink    : '<span class="elfinder-symlink"/>',
 		navicon    : '<span class="elfinder-nav-icon"/>',
 		navspinner : '<span class="elfinder-navbar-spinner"/>',
-		navdir     : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon" {style}/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree" style="display:none"/></div>',
+		navdir     : '<div class="elfinder-navbar-wrapper{root}"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon" {style}/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree" style="display:none"/></div>',
 		placedir   : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}" title="{title}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon" {style}/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree" style="display:none"/></div>'
 		
 	},
@@ -11995,7 +11995,11 @@ $.fn.elfindercwd = function(fm, options) {
 					var $this = $(this), helper = null,
 						target = list ? $this : $this.children('div.elfinder-cwd-file-wrapper,div.elfinder-cwd-filename');
 
-					if (!mobile && !$this.hasClass(clTmp) && !target.hasClass(clDraggable) && !target.hasClass(clDisabled)) {
+					if (!mobile && !$this.data('dragRegisted') && !$this.hasClass(clTmp) && !target.hasClass(clDraggable) && !target.hasClass(clDisabled)) {
+						$this.data('dragRegisted', true);
+						if (!fm.isCommandEnabled('copy', fm.searchStatus.state > 1? fm.cwdId2Hash($this.attr('id')) : void 0)) {
+							return;
+						}
 						target.on('mousedown', function(e) {
 							// shiftKey + drag start for HTML5 native drag function
 							if (e.shiftKey && !fm.UA.IE && cwd.data('selectable')) {
@@ -15458,6 +15462,25 @@ $.fn.elfindertree = function(fm, opts) {
 					dir.csscls && (cname += ' ' + fm.escape(dir.csscls));
 					return cname;
 				},
+				root        : function(dir) {
+					var cls = '';
+					if (!dir.phash || dir.isroot) {
+						cls += ' '+wrapperRoot;
+						if (!dir.disabled || dir.disabled.length < 1) {
+							cls += ' '+pastable+' '+uploadable;
+						} else {
+							if ($.inArray('paste', dir.disabled) === -1) {
+								cls += ' '+pastable;
+							}
+							if ($.inArray('upload', dir.disabled) === -1) {
+								cls += ' '+uploadable;
+							}
+						}
+						return cls;
+					} else {
+						return '';
+					}
+				},
 				permissions : function(dir) { return !dir.read || !dir.write ? ptpl : ''; },
 				symlink     : function(dir) { return dir.alias ? stpl : ''; },
 				style       : function(dir) { return dir.icon ? fm.getIconStyle(dir) : ''; }
@@ -15565,17 +15588,7 @@ $.fn.elfindertree = function(fm, opts) {
 							parent[firstVol || dir.phash ? 'append' : 'prepend'](node);
 							firstVol = false;
 							if (!dir.phash || dir.isroot) {
-								base = $('#'+fm.navHash2Id(dir.hash)).parent().addClass(wrapperRoot);
-								if (!dir.disabled || dir.disabled.length < 1) {
-									base.addClass(pastable+' '+uploadable);
-								} else {
-									if ($.inArray('paste', dir.disabled) === -1) {
-										base.addClass(pastable);
-									}
-									if ($.inArray('upload', dir.disabled) === -1) {
-										base.addClass(uploadable);
-									}
-								}
+								base = $('#'+fm.navHash2Id(dir.hash)).parent();
 							}
 							! mobile && updateDroppable(null, base);
 						}
@@ -15924,7 +15937,12 @@ $.fn.elfindertree = function(fm, opts) {
 						enter = e.type == 'mouseenter';
 					
 					if (!link.hasClass(dropover+' '+disabled)) {
-						!mobile && enter && !link.hasClass(root+' '+draggable+' elfinder-na elfinder-wo') && link.draggable(fm.draggable);
+						if (!mobile && enter && !link.data('dragRegisted') && !link.hasClass(root+' '+draggable+' elfinder-na elfinder-wo')) {
+							link.data('dragRegisted', true);
+							if (fm.isCommandEnabled('copy', fm.navId2Hash(link.attr('id')))) {
+								link.draggable(fm.draggable);
+							}
+						}
 						link.toggleClass(hover, enter);
 					}
 				})
