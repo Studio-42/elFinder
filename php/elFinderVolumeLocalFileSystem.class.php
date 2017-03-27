@@ -988,31 +988,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _findSymlinks($path) {
-		if (is_link($path)) {
-			return true;
-		}
-		
-		if (is_dir($path)) {
-			foreach (self::localScandir($path) as $name) {
-				$p = $path.DIRECTORY_SEPARATOR.$name;
-				if (is_link($p) || !$this->nameAccepted($name)
-					||
-				(($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && $mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName))) {
-					$this->setError(elFinder::ERROR_SAVE, $name);
-					return true;
-				}
-				if (is_dir($p) && $this->_findSymlinks($p)) {
-					return true;
-				} elseif (is_file($p)) {
-					$this->archiveSize += sprintf('%u', filesize($p));
-				}
-			}
-		} else {
-			
-			$this->archiveSize += sprintf('%u', filesize($path));
-		}
-		
-		return false;
+		return self::localFindSymlinks($path);
 	}
 
 	/**
@@ -1058,14 +1034,19 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			
 			$this->archiveSize = 0;
 			
-			// find symlinks
-			$symlinks = $this->_findSymlinks($dir);
-			
-			if ($symlinks) {
-				$this->delTree($dir);
+			// find symlinks and check extracted items
+			$checkRes = $this->checkExtractItems($dir);
+			if ($checkRes['symlinks']) {
+				self::localRmdirRecursive($dir);
 				return $this->setError(array_merge($this->error, array(elFinder::ERROR_ARC_SYMLINKS)));
 			}
-
+			$this->archiveSize = $checkRes['totalSize'];
+			if ($checkRes['rmNames']) {
+				foreach($checkRes['rmNames'] as $name) {
+					$this->addError(elFinder::ERROR_SAVE, $name);
+				}
+			}
+			
 			// check max files size
 			if ($this->options['maxArcFilesSize'] > 0 && $this->options['maxArcFilesSize'] < $this->archiveSize) {
 				$this->delTree($dir);

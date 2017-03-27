@@ -2722,9 +2722,16 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_EXTRACT, '#'.$target, self::ERROR_FILE_NOT_FOUND));
 		}  
 
-		return ($file = $volume->extract($target, $makedir))
-			? array('added' => isset($file['read'])? array($file) : $file)
-			: array('error' => $this->error(self::ERROR_EXTRACT, $volume->path($target), $volume->error()));
+		$res = array();
+		if ($file = $volume->extract($target, $makedir)) {
+			$res['added'] = isset($file['read'])? array($file) : $file;
+			if ($err = $volume->error()) {
+				$res['warning'] = $err;
+			}
+		} else {
+			$res['error'] = $this->error(self::ERROR_EXTRACT, $volume->path($target), $volume->error());
+		}
+		return $res;
 	}
 	
 	/**
