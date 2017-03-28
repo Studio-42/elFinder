@@ -1716,7 +1716,7 @@ abstract class elFinderVolumeDriver {
 			: $this->setError(elFinder::ERROR_PERM_DENIED)) {
 			
 			$dirs = null;
-			if ($this->sessionCaching['subdirs']) {
+			if ($this->sessionCaching['subdirs'] && isset($this->sessionCache['subdirs'][$path])) {
 				$dirs = $this->sessionCache['subdirs'][$path];
 			}
 			if ($dirs !== null || (isset($dir['dirs']) && $dir['dirs'] != 1)) {
