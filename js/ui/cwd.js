@@ -525,6 +525,8 @@ $.fn.elfindercwd = function(fm, options) {
 			 **/
 			scrollEvent = 'elfscrstop',
 			
+			scrolling = false,
+			
 			/**
 			 * jQuery UI selectable option
 			 * 
@@ -1600,6 +1602,7 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				// attach draggable
 				.on('mouseenter.'+fm.namespace, fileSelector, function(e) {
+					if (scrolling) { return; }
 					var $this = $(this), helper = null,
 						target = list ? $this : $this.children('div.elfinder-cwd-file-wrapper,div.elfinder-cwd-filename');
 
@@ -1769,6 +1772,8 @@ $.fn.elfindercwd = function(fm, options) {
 					scrollToView($(this), true);
 				})
 				.on('mouseenter.'+fm.namespace+' mouseleave.'+fm.namespace, fileSelector, function(e) {
+					var enter = (e.type === 'mouseenter');
+					if (enter && scrolling) { return; }
 					fm.trigger('hover', {hash : fm.cwdId2Hash($(this).attr('id')), type : e.type});
 					$(this).toggleClass(clHover, (e.type == 'mouseenter'));
 				})
@@ -1846,6 +1851,7 @@ $.fn.elfindercwd = function(fm, options) {
 				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, wrapperContextMenu.touchend)
 				.on('click.'+fm.namespace, wrapperContextMenu.click)
 				.on('scroll.'+fm.namespace, function() {
+					scrolling = true;
 					bufferExt.seltm && clearTimeout(bufferExt.seltm);
 					bufferExt.scrtm && clearTimeout(bufferExt.scrtm);
 					if (bufferExt.scrtm && Math.abs((bufferExt.scrolltop || 0) - (bufferExt.scrolltop = $(this).scrollTop())) < 2) {
@@ -1857,6 +1863,9 @@ $.fn.elfindercwd = function(fm, options) {
 							wrapper.trigger(scrollEvent);
 						}, 100);
 					}
+				})
+				.on(scrollEvent, function() {
+					scrolling = false;
 				}),
 			
 			bottomMarker = $('<div>&nbsp;</div>')
