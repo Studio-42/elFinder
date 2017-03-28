@@ -6937,7 +6937,8 @@ elFinder.prototype = {
 		
 		dfrd._abort = function() {
 			tm && clearTimeout(tm);
-			if (dfrd && dfrd.state() === 'pending') {
+			if (dfrd.state() === 'pending') {
+				vars = [];
 				abortFlg = true;
 				dfrd.reject(resArr);
 			}
