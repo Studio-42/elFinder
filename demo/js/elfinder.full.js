@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: 79383df) (2017-03-28)
+ * Version 2.1.22 (2.1-src Nightly: f86417c) (2017-03-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7084,7 +7084,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: 79383df)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: f86417c)';
 
 
 
@@ -10917,6 +10917,8 @@ $.fn.elfindercwd = function(fm, options) {
 			 **/
 			scrollEvent = 'elfscrstop',
 			
+			scrolling = false,
+			
 			/**
 			 * jQuery UI selectable option
 			 * 
@@ -11992,6 +11994,7 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				// attach draggable
 				.on('mouseenter.'+fm.namespace, fileSelector, function(e) {
+					if (scrolling) { return; }
 					var $this = $(this), helper = null,
 						target = list ? $this : $this.children('div.elfinder-cwd-file-wrapper,div.elfinder-cwd-filename');
 
@@ -12161,6 +12164,8 @@ $.fn.elfindercwd = function(fm, options) {
 					scrollToView($(this), true);
 				})
 				.on('mouseenter.'+fm.namespace+' mouseleave.'+fm.namespace, fileSelector, function(e) {
+					var enter = (e.type === 'mouseenter');
+					if (enter && scrolling) { return; }
 					fm.trigger('hover', {hash : fm.cwdId2Hash($(this).attr('id')), type : e.type});
 					$(this).toggleClass(clHover, (e.type == 'mouseenter'));
 				})
@@ -12238,6 +12243,7 @@ $.fn.elfindercwd = function(fm, options) {
 				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, wrapperContextMenu.touchend)
 				.on('click.'+fm.namespace, wrapperContextMenu.click)
 				.on('scroll.'+fm.namespace, function() {
+					scrolling = true;
 					bufferExt.seltm && clearTimeout(bufferExt.seltm);
 					bufferExt.scrtm && clearTimeout(bufferExt.scrtm);
 					if (bufferExt.scrtm && Math.abs((bufferExt.scrolltop || 0) - (bufferExt.scrolltop = $(this).scrollTop())) < 2) {
@@ -12249,6 +12255,9 @@ $.fn.elfindercwd = function(fm, options) {
 							wrapper.trigger(scrollEvent);
 						}, 100);
 					}
+				})
+				.on(scrollEvent, function() {
+					scrolling = false;
 				}),
 			
 			bottomMarker = $('<div>&nbsp;</div>')
@@ -15890,17 +15899,14 @@ $.fn.elfindertree = function(fm, opts) {
 					}
 				}
 				
-				if (target.length > limit) {
-					next = target.slice(limit);
-					target = target.slice(0, limit);
-				}
-				
-				target.droppable(droppableopts);
-				
-				if (next) {
-					fm.lazy(function() {
-						updateDroppable(next);
-					}, 20);
+				// make droppable on async
+				if (target.length) {
+					fm.asyncJob(function(elm) {
+						$(elm).droppable(droppableopts);
+					}, $.makeArray(target), {
+						interval : 20,
+						numPerOnce : 100
+					});
 				}
 			},
 			
@@ -15938,8 +15944,9 @@ $.fn.elfindertree = function(fm, opts) {
 			tree = $(this).addClass(treeclass)
 				// make dirs draggable and toggle hover class
 				.on('mouseenter mouseleave', selNavdir, function(e) {
-					var link  = $(this), 
-						enter = e.type == 'mouseenter';
+					var enter = (e.type === 'mouseenter');
+					if (enter && scrolling) { return; }
+					var link  = $(this); 
 					
 					if (!link.hasClass(dropover+' '+disabled)) {
 						if (!mobile && enter && !link.data('dragRegisted') && !link.hasClass(root+' '+draggable+' elfinder-na elfinder-wo')) {
@@ -16116,11 +16123,16 @@ $.fn.elfindertree = function(fm, opts) {
 					lock && selected.length && fm.trigger('lockfiles', {files: selected});
 					pdir.prepend(dir);
 				}),
+			scrolling = false,
 			navbarScrTm,
 			// move tree into navbar
 			navbar = fm.getUI('navbar').append(tree).show().on('scroll', function() {
+				scrolling = true;
 				navbarScrTm && clearTimeout(navbarScrTm);
-				navbarScrTm = setTimeout(checkSubdirs, 50);
+				navbarScrTm = setTimeout(function() {
+					scrolling = false;
+					checkSubdirs();
+				}, 50);
 			}),
 			
 			prevSortTreeview = fm.sortAlsoTreeview,
