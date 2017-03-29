@@ -62,7 +62,7 @@
 .elfinder-ltr .elfinder-navbar-arrow {
 	left: 0;
 }
-.elfinder-ltr .elfinder-navbar-arrow {
+.elfinder-rtl .elfinder-navbar-arrow {
 	right:0;
 }
 .elfinder-touch .elfinder-navbar-arrow {
