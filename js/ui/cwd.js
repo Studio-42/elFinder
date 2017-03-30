@@ -1211,10 +1211,8 @@ $.fn.elfindercwd = function(fm, options) {
 						}
 						
 						if ($('#'+fm.cwdHash2Id(hash)).length) {
-							if (file.mime !== 'directory' && file.tmb) {
-								if (file.tmb == 1) {
-									atmb[hash] = file.tmb;
-								}
+							if (file.tmb) {
+								atmb[hash] = file.tmb;
 							}
 						}
 					}
