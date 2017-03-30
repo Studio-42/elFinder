@@ -563,13 +563,11 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			wrapperRepaint = function(init) {
-				bufferExt.repaintJob && bufferExt.repaintJob._abort();
-				
 				var selctable = cwd.data('selectable'),
 					rec = (function() {
 						var wos = wrapper.offset(),
 							w = $(window),
-							l = wos.left - w.scrollLeft() + (fm.direction === 'ltr'? 10 : wrapper.width() - 10),
+							l = wos.left - w.scrollLeft() + (fm.direction === 'ltr'? 30 : wrapper.width() - 30),
 							t = wos.top - w.scrollTop() + 10 + (list? bufferExt.itemH || 24 : 0);
 						return {left: Math.max(0, Math.round(l)), top: Math.max(0, Math.round(t))};
 					})(),
@@ -618,26 +616,29 @@ $.fn.elfindercwd = function(fm, options) {
 				inViewHashes = {};
 				selctable && cwd.selectable('option', 'disabled');
 				
-				if (! tgt.hasClass(clFile)) {
-					tgt = tgt.closest(fileSelector);
-				}
-				if (tgt.attr('id')) {
-					if (init) {
-						for (var i = 0; i < cnt; i++) {
-							chk();
-							if (! tgt.length) {
-								break;
+				if (tgt.length) {
+					if (! tgt.hasClass(clFile)) {
+						tgt = tgt.closest(fileSelector);
+					}
+					if (tgt.attr('id')) {
+						if (init) {
+							for (var i = 0; i < cnt; i++) {
+								chk();
+								if (! tgt.length) {
+									break;
+								}
 							}
+							done();
+						} else {
+							bufferExt.repaintJob && bufferExt.repaintJob._abort();
+							arr = new Array(cnt);
+							bufferExt.repaintJob = fm.asyncJob(function() {
+								chk();
+								if (! tgt.length) {
+									bufferExt.repaintJob._abort(true);
+								}
+							}, arr).done(done);
 						}
-						done();
-					} else {
-						arr = new Array(cnt);
-						bufferExt.repaintJob = fm.asyncJob(function() {
-							chk();
-							if (! tgt.length) {
-								bufferExt.repaintJob._abort(true);
-							}
-						}, arr).done(done);
 					}
 				}
 			},
@@ -1910,12 +1911,11 @@ $.fn.elfindercwd = function(fm, options) {
 					if (bufferExt.scrtm && Math.abs((bufferExt.scrolltop || 0) - (bufferExt.scrolltop = (this.scrollTop || $(this).scrollTop()))) < 5) {
 						bufferExt.scrtm = 0;
 						wrapper.trigger(scrollEvent);
-					} else {
-						bufferExt.scrtm = setTimeout(function() {
-							bufferExt.scrtm = 0;
-							wrapper.trigger(scrollEvent);
-						}, 20);
 					}
+					bufferExt.scrtm = setTimeout(function() {
+						bufferExt.scrtm = 0;
+						wrapper.trigger(scrollEvent);
+					}, 20);
 				})
 				.on(scrollEvent, function() {
 					scrolling = false;
