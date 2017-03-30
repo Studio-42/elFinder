@@ -20,7 +20,7 @@ elFinder.prototype.commands.fullscreen = function() {
 	this.value = false;
 
 	this.options = {
-		ui : 'fullscreenbutton',
+		ui : 'fullscreenbutton'
 	};
 
 	this.getstate = function() {

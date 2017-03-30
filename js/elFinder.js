@@ -6935,12 +6935,12 @@ elFinder.prototype = {
 			exec,
 			tm;
 		
-		dfrd._abort = function() {
+		dfrd._abort = function(resolve) {
 			tm && clearTimeout(tm);
 			vars = [];
 			abortFlg = true;
 			if (dfrd.state() === 'pending') {
-				dfrd.reject(resArr);
+				dfrd[resolve? 'resolve' : 'reject'](resArr);
 			}
 		};
 		if (typeof func === 'function' && Array.isArray(arr)) {
@@ -6968,6 +6968,7 @@ elFinder.prototype = {
 			}
 			if (vars.length) {
 				tm = setTimeout(exec, 0);
+				//exec();
 			} else {
 				dfrd.resolve(resArr);
 			}
