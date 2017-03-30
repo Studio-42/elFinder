@@ -2221,7 +2221,7 @@ $.fn.elfindercwd = function(fm, options) {
 			.change(function(e) {
 				var phash = fm.cwd().hash,
 					sel   = fm.selected(),
-					files;
+					files, added;
 
 				if (query) {
 					$.each(e.data.changed || [], function(i, file) {
@@ -2229,6 +2229,7 @@ $.fn.elfindercwd = function(fm, options) {
 						if (file.name.indexOf(query) !== -1) {
 							add([file], 'change');
 							$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
+							added = true;
 						}
 					});
 				} else {
@@ -2236,7 +2237,13 @@ $.fn.elfindercwd = function(fm, options) {
 						remove([file.hash]);
 						add([file], 'change');
 						$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
+						added = true;
 					});
+				}
+				
+				if (added) {
+					list && resize();
+					wrapper.trigger(scrollEvent);
 				}
 				
 				trigger();
