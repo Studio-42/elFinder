@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.22 (2.1-src Nightly: f3fb554) (2017-03-31)
+ * Version 2.1.22 (2.1-src Nightly: be8483a) (2017-03-31)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7092,7 +7092,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.22 (2.1-src Nightly: f3fb554)';
+elFinder.prototype.version = '2.1.22 (2.1-src Nightly: be8483a)';
 
 
 
@@ -18248,6 +18248,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				'<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">'],
 		stpl    = '<div class="elfinder-help-shortcut"><div class="elfinder-help-shortcut-pattern">{pattern}</div> {descrip}</div>',
 		sep     = '<div class="elfinder-help-separator"/>',
+		selfUrl = $('base').length? document.location.href.replace(/#.*$/, '') : '',
 		
 		
 		about = function() {
@@ -18351,7 +18352,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				}
 				
 				tabId = fm.namespace + '-help-debug-' + (+new Date());
-				targetL = $('<li/>').html('<a id="'+tabId+'-a" href="#'+tabId+'">'+self.debug.debug.cmd+'</a>').prependTo(debugUL);
+				targetL = $('<li/>').html('<a href="'+selfUrl+'#'+tabId+'">'+self.debug.debug.cmd+'</a>').prependTo(debugUL);
 				target = $('<div id="'+tabId+'"/>');
 				
 				if (self.debug.debug) {
