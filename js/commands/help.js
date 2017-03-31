@@ -127,7 +127,7 @@
 				}
 				
 				tabId = fm.namespace + '-help-debug-' + (+new Date());
-				targetL = $('<li/>').html('<a id="'+tabId+'-a" href="#'+tabId+'">'+self.debug.debug.cmd+'</a>').prependTo(debugUL);
+				targetL = $('<li/>').html('<a href="#'+tabId+'">'+self.debug.debug.cmd+'</a>').prependTo(debugUL);
 				target = $('<div id="'+tabId+'"/>');
 				
 				if (self.debug.debug) {
