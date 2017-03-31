@@ -142,7 +142,7 @@
 				debugUL.after(target);
 				
 				debugDIV.tabs('refresh');
-				debugUL.find('a:first').on('click', function(e) {e.stopPropagation();}).click();
+				debugUL.find('a:first').click();
 			}
 		},
 		content = '',
