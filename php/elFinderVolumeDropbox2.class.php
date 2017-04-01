@@ -231,6 +231,40 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
         return rtrim($dir, '/').'/'.$displayName;
     }
 
+    /**
+     * Get OAuth2 access token form OAuth1 tokens.
+     *
+     * @param string $app_key
+     * @param string $app_secret
+     * @param string $oauth1_token
+     * @param string $oauth1_secret
+     *
+     * @return string|false
+     */
+    public static function getTokenFromOauth1($app_key, $app_secret, $oauth1_token, $oauth1_secret)
+    {
+        $data = [
+                'oauth1_token' => $oauth1_token,
+                'oauth1_token_secret' => $oauth1_secret,
+        ];
+        $auth = base64_encode($app_key.':'.$app_secret);
+
+        $ch = curl_init('https://api.dropboxapi.com/2/auth/token/from_oauth1');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Basic '.$auth,
+        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        $result = curl_exec($ch);
+        curl_close($ch);
+
+        $res = $result ? json_decode($result, true) : [];
+
+        return isset($res['oauth2_token']) ? $res['oauth2_token'] : false;
+    }
+
     /*********************************************************************/
     /*                        EXTENDED FUNCTIONS                         */
     /*********************************************************************/
