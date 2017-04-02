@@ -163,9 +163,9 @@ var elFinder = function(node, opts) {
 		 * Prevent from remove its from cache.
 		 * Required for dispaly correct files names in error messages
 		 *
-		 * @type Array
+		 * @type Object
 		 **/
-		remember = [],
+		remember = {},
 		
 		/**
 		 * Queue for 'open' requests
@@ -276,7 +276,7 @@ var elFinder = function(node, opts) {
 							)
 						)
 						&& (isDir || phash !== cwd)
-						&& $.inArray(i, remember) === -1
+						&& ! remember[i]
 					) {
 						if (isDir && !emptyDirs[phash]) {
 							emptyDirs[phash] = true;
@@ -849,7 +849,13 @@ var elFinder = function(node, opts) {
 			scroll     : false,
 			start      : function(e, ui) {
 				var helper   = ui.helper,
-					targets  = $.map(helper.data('files')||[], function(h) { return h || null ;}),
+					targets  = $.map(helper.data('files')||[], function(h) {
+						if (h) {
+							remember[h] = true;
+							return h;
+						}
+						return null;
+					}),
 					locked   = false,
 					cnt, h;
 				
@@ -1714,6 +1720,15 @@ var elFinder = function(node, opts) {
 				lazy? self.lazy(resolve) : resolve();
 			},
 			xhr, _xhr,
+			xhrAbort = function(e) {
+				if (xhr.state() === 'pending') {
+					xhr.quiet = true;
+					xhr.abort();
+					if (e && e.type != 'unload' && e.type != 'destroy') {
+						self.autoSync();
+					}
+				}
+			},
 			abort = function(e){
 				self.trigger(cmd + 'done');
 				if (e.type == 'autosync') {
@@ -1723,16 +1738,11 @@ var elFinder = function(node, opts) {
 						return;
 					}
 				}
-				if (xhr.state() == 'pending') {
-					xhr.quiet = true;
-					xhr.abort();
-					if (e.type != 'unload' && e.type != 'destroy') {
-						self.autoSync();
-					}
-				}
+				xhrAbort(e);
 			},
 			request = function() {
 				dfrd.fail(function(error, xhr, response) {
+					xhrAbort();
 					self.trigger(cmd + 'fail', response);
 					if (error) {
 						deffail ? self.error(error) : self.debug('error', self.i18n(error));
@@ -2236,13 +2246,13 @@ var elFinder = function(node, opts) {
 
 		if (hashes !== void(0)) {
 			clipboard.length && this.trigger('unlockfiles', {files : map()});
-			remember = [];
+			remember = {};
 			
 			clipboard = $.map(hashes||[], function(hash) {
 				var file = files[hash];
 				if (file) {
 					
-					remember.push(hash);
+					remember[hash] = true;
 					
 					return {
 						hash   : hash,
