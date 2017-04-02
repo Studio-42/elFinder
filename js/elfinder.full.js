@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 3a46bf2) (2017-04-01)
+ * Version 2.1.23 (2.1-src Nightly: 2f59037) (2017-04-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -194,9 +194,9 @@ var elFinder = function(node, opts) {
 		 * Prevent from remove its from cache.
 		 * Required for dispaly correct files names in error messages
 		 *
-		 * @type Array
+		 * @type Object
 		 **/
-		remember = [],
+		remember = {},
 		
 		/**
 		 * Queue for 'open' requests
@@ -307,7 +307,7 @@ var elFinder = function(node, opts) {
 							)
 						)
 						&& (isDir || phash !== cwd)
-						&& $.inArray(i, remember) === -1
+						&& ! remember[i]
 					) {
 						if (isDir && !emptyDirs[phash]) {
 							emptyDirs[phash] = true;
@@ -880,7 +880,13 @@ var elFinder = function(node, opts) {
 			scroll     : false,
 			start      : function(e, ui) {
 				var helper   = ui.helper,
-					targets  = $.map(helper.data('files')||[], function(h) { return h || null ;}),
+					targets  = $.map(helper.data('files')||[], function(h) {
+						if (h) {
+							remember[h] = true;
+							return h;
+						}
+						return null;
+					}),
 					locked   = false,
 					cnt, h;
 				
@@ -1745,6 +1751,15 @@ var elFinder = function(node, opts) {
 				lazy? self.lazy(resolve) : resolve();
 			},
 			xhr, _xhr,
+			xhrAbort = function(e) {
+				if (xhr.state() === 'pending') {
+					xhr.quiet = true;
+					xhr.abort();
+					if (e && e.type != 'unload' && e.type != 'destroy') {
+						self.autoSync();
+					}
+				}
+			},
 			abort = function(e){
 				self.trigger(cmd + 'done');
 				if (e.type == 'autosync') {
@@ -1754,16 +1769,11 @@ var elFinder = function(node, opts) {
 						return;
 					}
 				}
-				if (xhr.state() == 'pending') {
-					xhr.quiet = true;
-					xhr.abort();
-					if (e.type != 'unload' && e.type != 'destroy') {
-						self.autoSync();
-					}
-				}
+				xhrAbort(e);
 			},
 			request = function() {
 				dfrd.fail(function(error, xhr, response) {
+					xhrAbort();
 					self.trigger(cmd + 'fail', response);
 					if (error) {
 						deffail ? self.error(error) : self.debug('error', self.i18n(error));
@@ -2267,13 +2277,13 @@ var elFinder = function(node, opts) {
 
 		if (hashes !== void(0)) {
 			clipboard.length && this.trigger('unlockfiles', {files : map()});
-			remember = [];
+			remember = {};
 			
 			clipboard = $.map(hashes||[], function(hash) {
 				var file = files[hash];
 				if (file) {
 					
-					remember.push(hash);
+					remember[hash] = true;
 					
 					return {
 						hash   : hash,
@@ -7092,7 +7102,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 3a46bf2)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 2f59037)';
 
 
 
@@ -10963,7 +10973,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			wrapperRepaint = function(init) {
-				var selctable = cwd.data('selectable'),
+				var selectable = cwd.data('selectable'),
 					rec = (function() {
 						var wos = wrapper.offset(),
 							w = $(window),
@@ -10987,14 +10997,14 @@ $.fn.elfindercwd = function(fm, options) {
 								tmbs[hash] = bufferExt.attachTmbs[hash];
 							}
 							// for selectable
-							selctable && ids.push(id);
+							selectable && ids.push(id);
 						}
 						// next node
 						tgt = tgt.next();
 					},
 					done = function() {
 						var id;
-						if (selctable) {
+						if (cwd.data('selectable')) {
 							if (selectedFiles.length) {
 								ids = ids.concat($.map(selectedFiles, function(h) {
 									id = fm.cwdHash2Id(h);
@@ -11014,7 +11024,7 @@ $.fn.elfindercwd = function(fm, options) {
 					arr;
 				
 				inViewHashes = {};
-				selctable && cwd.selectable('option', 'disabled');
+				selectable && cwd.selectable('option', 'disabled');
 				
 				if (tgt.length) {
 					if (! tgt.hasClass(clFile)) {
@@ -11774,7 +11784,7 @@ $.fn.elfindercwd = function(fm, options) {
 				bufferExt.attachThumbJob && bufferExt.attachThumbJob._abort();
 				
 				// destroy selectable for GC
-				cwd.data('selectable') && cwd.selectable('destroy').data('selectable', false);
+				cwd.data('selectable') && cwd.selectable('disable').selectable('destroy').removeData('selectable');
 				
 				// notify cwd init
 				fm.trigger('cwdinit');
@@ -12066,7 +12076,7 @@ $.fn.elfindercwd = function(fm, options) {
 							var metaKey = e.shiftKey || e.altKey;
 							if (metaKey && !fm.UA.IE && cwd.data('selectable')) {
 								// destroy jQuery-ui selectable while trigger native drag
-								cwd.selectable('destroy').data('selectable', false);
+								cwd.selectable('disable').selectable('destroy').removeData('selectable');
 								setTimeout(function(){
 									cwd.selectable(selectableOption).selectable('option', {disabled: false}).selectable('refresh').data('selectable', true);
 								}, 10);
