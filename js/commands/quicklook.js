@@ -472,7 +472,7 @@
 		var o       = this.options, 
 			win     = this.window,
 			preview = this.preview,
-			i, p, curCwd;
+			i, p, curCwd, cwdDispInlineRegex;
 		
 		width  = o.width  > 0 ? parseInt(o.width)  : 450;	
 		height = o.height > 0 ? parseInt(o.height) : 300;
@@ -521,12 +521,20 @@
 			});
 			
 			preview.on('update', function(data) {
-				if (fm.searchStatus.mixed && fm.searchStatus.state > 1) {
-					// set current volume dispInlineRegex
+				var hash = data.file.hash,
+					serach = (fm.searchStatus.mixed && fm.searchStatus.state > 1);
+				
+				// set current dispInlineRegex
+				self.dispInlineRegex = cwdDispInlineRegex;
+				if (serach || fm.optionsByHashes[hash]) {
 					try {
-						self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', data.file.hash));
+						self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', hash));
 					} catch(e) {
-						self.dispInlineRegex = /.*/;
+						try {
+							self.dispInlineRegex = new RegExp(!fm.isRoot(data.file)? fm.option('dispInlineRegex', data.file.phash) : fm.options.dispInlineRegex);
+						} catch(e) {
+							self.dispInlineRegex = /^$/;
+						}
 					}
 				}
 				self.info.show();
@@ -550,9 +558,9 @@
 			
 			// set current volume dispInlineRegex
 			try {
-				self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex'));
+				cwdDispInlineRegex = new RegExp(fm.option('dispInlineRegex'));
 			} catch(e) {
-				self.dispInlineRegex = /.*/;
+				cwdDispInlineRegex = /^$/;
 			}
 		});
 		
