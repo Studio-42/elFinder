@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 2f59037) (2017-04-02)
+ * Version 2.1.23 (2.1-src Nightly: 0b60b9d) (2017-04-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -134,11 +134,11 @@ var elFinder = function(node, opts) {
 		cwd = '',
 		
 		/**
-		 * Current working directory options
+		 * Current working directory options default
 		 *
 		 * @type Object
 		 **/
-		cwdOptions = {
+		cwdOptionsDefault = {
 			path          : '',
 			url           : '',
 			tmbUrl        : '',
@@ -153,6 +153,13 @@ var elFinder = function(node, opts) {
 			tmbCrop       : false,
 			tmb           : false // old API
 		},
+		
+		/**
+		 * Current working directory options
+		 *
+		 * @type Object
+		 **/
+		cwdOptions = {},
 		
 		/**
 		 * Files/dirs cache
@@ -316,6 +323,7 @@ var elFinder = function(node, opts) {
 							 .next('.elfinder-navbar-subtree').empty();
 						}
 						delete files[i];
+						self.optionsByHashes[i] && delete self.optionsByHashes[i];
 					} else if (isDir) {
 						stayDirs[phash] = true;
 					}
@@ -512,6 +520,9 @@ var elFinder = function(node, opts) {
 	 * @type Object
 	 **/
 	this.options = $.extend(true, {}, this._options, opts||{});
+	
+	// set dispInlineRegex
+	cwdOptionsDefault['dispInlineRegex'] = this.options.dispInlineRegex;
 	
 	// auto load required CSS
 	if (this.options.cssAutoLoad) {
@@ -1724,7 +1735,7 @@ var elFinder = function(node, opts) {
 					}
 					
 					if (response.options) {
-						cwdOptions = $.extend({}, cwdOptions, response.options);
+						cwdOptions = $.extend({}, cwdOptionsDefault, response.options);
 					}
 
 					if (response.netDrivers) {
@@ -5579,7 +5590,10 @@ elFinder.prototype = {
 							
 							if (self.isRoot(file)) {
 								if (! self.volOptions[vid]) {
-									self.volOptions[vid] = {};
+									self.volOptions[vid] = {
+										// set dispInlineRegex
+										dispInlineRegex: self.options.dispInlineRegex
+									};
 								}
 								
 								targetOptions = self.volOptions[vid];
@@ -5646,6 +5660,7 @@ elFinder.prototype = {
 							});
 						}
 					}
+					delete file.options;
 					
 					return file;
 				}
@@ -7102,7 +7117,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 2f59037)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 0b60b9d)';
 
 
 
@@ -7971,6 +7986,18 @@ elFinder.prototype._options = {
 			//}
 		}
 	},
+
+	/**
+	 * MIME regex of send HTTP header "Content-Disposition: inline" or allow preview in quicklook
+	 * This option will overwrite by connector configuration
+	 * 
+	 * @type String
+	 * @default '^(?:(?:image|video|audio)|text/plain|application/pdf$)'
+	 * @example
+	 *  dispInlineRegex : '.',  // is allow inline of all of MIME types
+	 *  dispInlineRegex : '$^', // is not allow inline of all of MIME types
+	 */
+	dispInlineRegex : '^(?:(?:image|video|audio)|(?:text/plain|application/pdf)$)',
 
 	/**
 	 * Display only required files by types
@@ -20358,7 +20385,7 @@ elFinder.prototype.commands.places = function() {
 		var o       = this.options, 
 			win     = this.window,
 			preview = this.preview,
-			i, p, curCwd;
+			i, p, curCwd, cwdDispInlineRegex;
 		
 		width  = o.width  > 0 ? parseInt(o.width)  : 450;	
 		height = o.height > 0 ? parseInt(o.height) : 300;
@@ -20407,12 +20434,20 @@ elFinder.prototype.commands.places = function() {
 			});
 			
 			preview.on('update', function(data) {
-				if (fm.searchStatus.mixed && fm.searchStatus.state > 1) {
-					// set current volume dispInlineRegex
+				var hash = data.file.hash,
+					serach = (fm.searchStatus.mixed && fm.searchStatus.state > 1);
+				
+				// set current dispInlineRegex
+				self.dispInlineRegex = cwdDispInlineRegex;
+				if (serach || fm.optionsByHashes[hash]) {
 					try {
-						self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', data.file.hash));
+						self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', hash));
 					} catch(e) {
-						self.dispInlineRegex = /.*/;
+						try {
+							self.dispInlineRegex = new RegExp(!fm.isRoot(data.file)? fm.option('dispInlineRegex', data.file.phash) : fm.options.dispInlineRegex);
+						} catch(e) {
+							self.dispInlineRegex = /^$/;
+						}
 					}
 				}
 				self.info.show();
@@ -20436,9 +20471,9 @@ elFinder.prototype.commands.places = function() {
 			
 			// set current volume dispInlineRegex
 			try {
-				self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex'));
+				cwdDispInlineRegex = new RegExp(fm.option('dispInlineRegex'));
 			} catch(e) {
-				self.dispInlineRegex = /.*/;
+				cwdDispInlineRegex = /^$/;
 			}
 		});
 		
@@ -20647,7 +20682,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			preview = ql.preview,
 			active  = false;
 			
-		if ((fm.UA.Safari && fm.OS == 'mac') || fm.UA.IE) {
+		if ((fm.UA.Safari && (fm.OS == 'mac' || fm.UA.iOS)) || fm.UA.IE) {
 			active = true;
 		} else {
 			$.each(navigator.plugins, function(i, plugins) {
@@ -20748,7 +20783,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
 				};
 
-			if (ql.support.audio[type]) {
+			if (ql.dispInlineRegex.test(file.mime) && ql.support.audio[type]) {
 				e.stopImmediatePropagation();
 				
 				node = $('<audio class="elfinder-quicklook-preview-audio" controls preload="auto" autobuffer><source src="'+ql.fm.openUrl(file.hash)+'" /></audio>')
@@ -20809,7 +20844,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					}
 				};
 				
-			if (ql.support.video[type]) {
+			if (ql.dispInlineRegex.test(file.mime) && ql.support.video[type]) {
 				e.stopImmediatePropagation();
 
 				ql.hideinfo();
@@ -20860,7 +20895,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
 				};
 			
-			if ($.inArray(file.mime, mimes) !== -1) {
+			if (ql.dispInlineRegex.test(file.mime) && $.inArray(file.mime, mimes) !== -1) {
 				e.stopImmediatePropagation();
 				(video = mime.indexOf('video/') === 0) && ql.hideinfo();
 				node = $('<embed src="'+ql.fm.openUrl(file.hash)+'" type="'+mime+'" class="elfinder-quicklook-preview-'+(video ? 'video' : 'audio')+'"/>')
