@@ -103,11 +103,11 @@ var elFinder = function(node, opts) {
 		cwd = '',
 		
 		/**
-		 * Current working directory options
+		 * Current working directory options default
 		 *
 		 * @type Object
 		 **/
-		cwdOptions = {
+		cwdOptionsDefault = {
 			path          : '',
 			url           : '',
 			tmbUrl        : '',
@@ -122,6 +122,13 @@ var elFinder = function(node, opts) {
 			tmbCrop       : false,
 			tmb           : false // old API
 		},
+		
+		/**
+		 * Current working directory options
+		 *
+		 * @type Object
+		 **/
+		cwdOptions = {},
 		
 		/**
 		 * Files/dirs cache
@@ -285,6 +292,7 @@ var elFinder = function(node, opts) {
 							 .next('.elfinder-navbar-subtree').empty();
 						}
 						delete files[i];
+						self.optionsByHashes[i] && delete self.optionsByHashes[i];
 					} else if (isDir) {
 						stayDirs[phash] = true;
 					}
@@ -481,6 +489,9 @@ var elFinder = function(node, opts) {
 	 * @type Object
 	 **/
 	this.options = $.extend(true, {}, this._options, opts||{});
+	
+	// set dispInlineRegex
+	cwdOptionsDefault['dispInlineRegex'] = this.options.dispInlineRegex;
 	
 	// auto load required CSS
 	if (this.options.cssAutoLoad) {
@@ -1693,7 +1704,7 @@ var elFinder = function(node, opts) {
 					}
 					
 					if (response.options) {
-						cwdOptions = $.extend({}, cwdOptions, response.options);
+						cwdOptions = $.extend({}, cwdOptionsDefault, response.options);
 					}
 
 					if (response.netDrivers) {
@@ -5548,7 +5559,10 @@ elFinder.prototype = {
 							
 							if (self.isRoot(file)) {
 								if (! self.volOptions[vid]) {
-									self.volOptions[vid] = {};
+									self.volOptions[vid] = {
+										// set dispInlineRegex
+										dispInlineRegex: self.options.dispInlineRegex
+									};
 								}
 								
 								targetOptions = self.volOptions[vid];
@@ -5615,6 +5629,7 @@ elFinder.prototype = {
 							});
 						}
 					}
+					delete file.options;
 					
 					return file;
 				}
