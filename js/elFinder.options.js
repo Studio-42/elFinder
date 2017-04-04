@@ -458,17 +458,17 @@ elFinder.prototype._options = {
 			['search'],
 			['view', 'sort'],
 			['help'],
-			['fullscreen'],
-			// extra options
-			{
-				// also displays the text label on the button (true / false)
-				displayTextLabel: false,
-				// Exclude `displayTextLabel` setting UA type
-				labelExcludeUA: ['Mobile'],
-				// auto hide on initial open
-				autoHideUA: ['Mobile']
-			}
+			['fullscreen']
 		],
+		// toolbar extra options
+		toolbarExtra : {
+			// also displays the text label on the button (true / false)
+			displayTextLabel: false,
+			// Exclude `displayTextLabel` setting UA type
+			labelExcludeUA: ['Mobile'],
+			// auto hide on initial open
+			autoHideUA: ['Mobile']
+		},
 		// directories tree options
 		tree : {
 			// expand current root on init

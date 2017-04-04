@@ -547,16 +547,26 @@ var elFinder = function(node, opts) {
 		this.options.commands = opts.commands;
 	}
 	
-	if (opts.uiOptions && opts.uiOptions.toolbar) {
-		this.options.uiOptions.toolbar = opts.uiOptions.toolbar;
+	if (opts.uiOptions) {
+		if (opts.uiOptions.toolbar && Array.isArray(opts.uiOptions.toolbar)) {
+			if ($.isPlainObject(opts.uiOptions.toolbar[opts.uiOptions.toolbar.length - 1])) {
+				$.extend(this.options.uiOptions.toolbarExtra, opts.uiOptions.toolbar.pop());
+			}
+			this.options.uiOptions.toolbar = opts.uiOptions.toolbar;
+		}
+	
+		if (opts.uiOptions.cwd && opts.uiOptions.cwd.listView) {
+			if (opts.uiOptions.cwd.listView.columns) {
+				this.options.uiOptions.cwd.listView.columns = opts.uiOptions.cwd.listView.columns;
+			}
+			if (opts.uiOptions.cwd.listView.columnsCustomName) {
+				this.options.uiOptions.cwd.listView.columnsCustomName = opts.uiOptions.cwd.listView.columnsCustomName;
+			}
+		}
 	}
-
-	if (opts.uiOptions && opts.uiOptions.cwd && opts.uiOptions.cwd.listView && opts.uiOptions.cwd.listView.columns) {
-		this.options.uiOptions.cwd.listView.columns = opts.uiOptions.cwd.listView.columns;
-	}
-	if (opts.uiOptions && opts.uiOptions.cwd && opts.uiOptions.cwd.listView && opts.uiOptions.cwd.listView.columnsCustomName) {
-		this.options.uiOptions.cwd.listView.columnsCustomName = opts.uiOptions.cwd.listView.columnsCustomName;
-	}
+	// join toolbarExtra to toolbar
+	this.options.uiOptions.toolbar.push(this.options.uiOptions.toolbarExtra);
+	delete this.options.uiOptions.toolbarExtra;
 
 	if (! inFrame && ! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
 		this.options.enableAlways = true;
