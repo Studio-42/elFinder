@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 0b60b9d) (2017-04-04)
+ * Version 2.1.23 (2.1-src Nightly: ff7e0d6) (2017-04-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -578,16 +578,26 @@ var elFinder = function(node, opts) {
 		this.options.commands = opts.commands;
 	}
 	
-	if (opts.uiOptions && opts.uiOptions.toolbar) {
-		this.options.uiOptions.toolbar = opts.uiOptions.toolbar;
+	if (opts.uiOptions) {
+		if (opts.uiOptions.toolbar && Array.isArray(opts.uiOptions.toolbar)) {
+			if ($.isPlainObject(opts.uiOptions.toolbar[opts.uiOptions.toolbar.length - 1])) {
+				$.extend(this.options.uiOptions.toolbarExtra, opts.uiOptions.toolbar.pop());
+			}
+			this.options.uiOptions.toolbar = opts.uiOptions.toolbar;
+		}
+	
+		if (opts.uiOptions.cwd && opts.uiOptions.cwd.listView) {
+			if (opts.uiOptions.cwd.listView.columns) {
+				this.options.uiOptions.cwd.listView.columns = opts.uiOptions.cwd.listView.columns;
+			}
+			if (opts.uiOptions.cwd.listView.columnsCustomName) {
+				this.options.uiOptions.cwd.listView.columnsCustomName = opts.uiOptions.cwd.listView.columnsCustomName;
+			}
+		}
 	}
-
-	if (opts.uiOptions && opts.uiOptions.cwd && opts.uiOptions.cwd.listView && opts.uiOptions.cwd.listView.columns) {
-		this.options.uiOptions.cwd.listView.columns = opts.uiOptions.cwd.listView.columns;
-	}
-	if (opts.uiOptions && opts.uiOptions.cwd && opts.uiOptions.cwd.listView && opts.uiOptions.cwd.listView.columnsCustomName) {
-		this.options.uiOptions.cwd.listView.columnsCustomName = opts.uiOptions.cwd.listView.columnsCustomName;
-	}
+	// join toolbarExtra to toolbar
+	this.options.uiOptions.toolbar.push(this.options.uiOptions.toolbarExtra);
+	delete this.options.uiOptions.toolbarExtra;
 
 	if (! inFrame && ! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
 		this.options.enableAlways = true;
@@ -7117,7 +7127,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 0b60b9d)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: ff7e0d6)';
 
 
 
@@ -7883,17 +7893,17 @@ elFinder.prototype._options = {
 			['search'],
 			['view', 'sort'],
 			['help'],
-			['fullscreen'],
-			// extra options
-			{
-				// also displays the text label on the button (true / false)
-				displayTextLabel: false,
-				// Exclude `displayTextLabel` setting UA type
-				labelExcludeUA: ['Mobile'],
-				// auto hide on initial open
-				autoHideUA: ['Mobile']
-			}
+			['fullscreen']
 		],
+		// toolbar extra options
+		toolbarExtra : {
+			// also displays the text label on the button (true / false)
+			displayTextLabel: false,
+			// Exclude `displayTextLabel` setting UA type
+			labelExcludeUA: ['Mobile'],
+			// auto hide on initial open
+			autoHideUA: ['Mobile']
+		},
 		// directories tree options
 		tree : {
 			// expand current root on init
