@@ -554,6 +554,9 @@ var elFinder = function(node, opts) {
 			}
 			this.options.uiOptions.toolbar = opts.uiOptions.toolbar;
 		}
+		if (opts.uiOptions.toolbarExtra && $.isPlainObject(opts.uiOptions.toolbarExtra)) {
+			$.extend(this.options.uiOptions.toolbarExtra, opts.uiOptions.toolbarExtra);
+		}
 	
 		if (opts.uiOptions.cwd && opts.uiOptions.cwd.listView) {
 			if (opts.uiOptions.cwd.listView.columns) {
@@ -567,6 +570,7 @@ var elFinder = function(node, opts) {
 	// join toolbarExtra to toolbar
 	this.options.uiOptions.toolbar.push(this.options.uiOptions.toolbarExtra);
 	delete this.options.uiOptions.toolbarExtra;
+	this.log(this.options.uiOptions.toolbar);
 
 	if (! inFrame && ! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
 		this.options.enableAlways = true;
