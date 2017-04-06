@@ -5018,6 +5018,16 @@ elFinder.prototype = {
 							formData.append('mimes', 'chunkfail');
 						} else {
 							formData.append('upload[]', file);
+							if (data.clipdata) {
+								formData.append('overwrite', 0);
+								formData.append('name[]', 'clip-' + (function() {
+									var d = new Date(),
+										f = function(num) {
+											return ('0' + num).slice(-2);
+										};
+									return f(d.getYear())+f((d.getMonth()+1))+f(d.getDate())/*+'-'+f(d.getHours())+f(d.getMinutes())+f(d.getSeconds())*/;
+								})());
+							}
 						}
 						if (file._chunk) {
 							formData.append('chunk', file._chunk);
@@ -5055,7 +5065,7 @@ elFinder.prototype = {
 			
 			if (! isDataType) {
 				if (files.length > 0) {
-					if (renames == null) {
+					if (! data.clipdata && renames == null) {
 						var mkdirs = [],
 							paths = [],
 							excludes = fm.options.folderUploadExclude[fm.OS] || null;
@@ -5075,7 +5085,6 @@ elFinder.prototype = {
 							}
 							paths.push(relPath);
 						});
-						fm.getUI().find('div.elfinder-upload-dialog-wrapper').elfinderdialog('close');
 						renames = [];
 						hashes = {};
 						if (mkdirs.length) {

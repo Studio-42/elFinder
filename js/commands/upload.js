@@ -87,7 +87,7 @@ elFinder.prototype.commands.upload = function() {
 					});
 			},
 			upload = function(data) {
-				data.type !== 'files' && dialog.elfinderdialog('close');
+				dialog.elfinderdialog('close');
 				if (targets) {
 					data.target = targets[0];
 				}
@@ -252,7 +252,7 @@ elFinder.prototype.commands.upload = function() {
 					files = e.clipboardData.files;
 				}
 				if (files.length) {
-					upload({files : files, type : 'files'});
+					upload({files : files, type : 'files', clipdata : true});
 					return;
 				}
 			}
