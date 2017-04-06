@@ -1885,16 +1885,23 @@ class elFinder {
 	 * 
 	 * @param  string $str
 	 * @param  array  $extTable
+	 * @param  array  $args
 	 * @return array
 	 * @author Naoki Sawada
 	 */
-	protected function parse_data_scheme( $str, $extTable ) {
+	protected function parse_data_scheme( $str, $extTable, $args = null) {
 		$data = $name = '';
 		if ($fp = fopen('data://'.substr($str, 5), 'rb')) {
 			if ($data = stream_get_contents($fp)) {
 				$meta = stream_get_meta_data($fp);
 				$ext = isset($extTable[$meta['mediatype']])? '.' . $extTable[$meta['mediatype']] : '';
-				$name = substr(md5($data), 0, 8) . $ext;
+				// Set name if name eq 'image.png' and $args has 'name' array, e.g. clipboard data
+				if (is_array($args['name']) && isset($args['name'][0]) && isset($_POST['overwrite']) && ! $_POST['overwrite']) {
+					$name = $args['name'][0];
+				} else {
+					$name = substr(md5($data), 0, 8);
+				}
+				$name .= $ext;
 			}
 			fclose($fp);
 		}
@@ -2297,7 +2304,7 @@ class elFinder {
 					$_name = '';
 					// check is data:
 					if (substr($url, 0, 5) === 'data:') {
-						list($data, $args['name'][$i]) = $this->parse_data_scheme($url, $extTable);
+						list($data, $args['name'][$i]) = $this->parse_data_scheme($url, $extTable, $args);
 					} else {
 						$fp = fopen($tmpfname, 'wb');
 						$data = $this->get_remote_contents($url, 30, 5, 'Mozilla/5.0', $fp);
@@ -2367,7 +2374,6 @@ class elFinder {
 			$tmpname = $files['tmp_name'][$i];
 			$path = ($paths && isset($paths[$i]))? $paths[$i] : '';
 			$mtime = isset($mtimes[$i])? $mtimes[$i] : 0;
-			$ext = null;
 			if ($name === 'blob') {
 				if ($chunk) {
 					if ($tempDir = $this->getTempDir($volume->getTempPath())) {
@@ -2390,19 +2396,15 @@ class elFinder {
 					}
 					return $result;
 				} else {
-					// for form clipboard with Google Chrome
-					$type = $files['type'][$i];
-					$ext = isset($extTable[$type])? '.' . $extTable[$type] : '';
-					$name = substr(md5(basename($tmpname)), 0, 8) . $ext;
+					// for form clipboard with Google Chrome or Opera
+					$name = 'image.png';
 				}
 			}
 			
-			// Set name if $args has 'name' array, e.g. clipboard data
-			if (is_array($args['name']) && isset($args['name'][$i]) && isset($_POST['overwrite']) && ! $_POST['overwrite']) {
-				if (is_null($ext)) {
-					$type = $files['type'][$i];
-					$ext = isset($extTable[$type])? '.' . $extTable[$type] : '';
-				}
+			// Set name if name eq 'image.png' and $args has 'name' array, e.g. clipboard data
+			if (strtolower($name) === 'image.png' && is_array($args['name']) && isset($args['name'][$i]) && isset($_POST['overwrite']) && ! $_POST['overwrite']) {
+				$type = $files['type'][$i];
+				$ext = isset($extTable[$type])? '.' . $extTable[$type] : '';
 				$name = $args['name'][$i] . $ext;
 			}
 			
