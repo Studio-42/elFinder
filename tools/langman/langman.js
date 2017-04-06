@@ -121,7 +121,7 @@ elFinder.prototype.i18 = {};
 					});
 					head += ' * @version '+year+'-'+month+'-'+day+'\n';
 					head += ' */\n';
-					made = head + made.replace(/^[\s\S]+(if \(elFinder)/, '$1')
+					made = head + made.replace(/^[\s\S]+?(\(function)/, '$1')
 					.replace(/(elFinder\.prototype\.i18\.)REPLACE_WITH_xx_OR_xx_YY_LANG_CODE( = {)/, '$1'+lng+'$2')
 					.replace(/(\/\*\*\s+\* )XXXXX( translation)/, '$1'+language+'$2');
 					$.each(glbs, function(k, v){
