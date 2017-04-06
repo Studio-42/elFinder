@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 8d26c7a) (2017-04-04)
+ * Version 2.1.23 (2.1-src Nightly: c156e22) (2017-04-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -5049,6 +5049,16 @@ elFinder.prototype = {
 							formData.append('mimes', 'chunkfail');
 						} else {
 							formData.append('upload[]', file);
+							if (data.clipdata) {
+								formData.append('overwrite', 0);
+								formData.append('name[]', 'clip-' + (function() {
+									var d = new Date(),
+										f = function(num) {
+											return ('0' + num).slice(-2);
+										};
+									return f(d.getYear())+f((d.getMonth()+1))+f(d.getDate())/*+'-'+f(d.getHours())+f(d.getMinutes())+f(d.getSeconds())*/;
+								})());
+							}
 						}
 						if (file._chunk) {
 							formData.append('chunk', file._chunk);
@@ -5086,7 +5096,7 @@ elFinder.prototype = {
 			
 			if (! isDataType) {
 				if (files.length > 0) {
-					if (renames == null) {
+					if (! data.clipdata && renames == null) {
 						var mkdirs = [],
 							paths = [],
 							excludes = fm.options.folderUploadExclude[fm.OS] || null;
@@ -5106,7 +5116,6 @@ elFinder.prototype = {
 							}
 							paths.push(relPath);
 						});
-						fm.getUI().find('div.elfinder-upload-dialog-wrapper').elfinderdialog('close');
 						renames = [];
 						hashes = {};
 						if (mkdirs.length) {
@@ -7130,7 +7139,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 8d26c7a)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: c156e22)';
 
 
 
@@ -23311,7 +23320,7 @@ elFinder.prototype.commands.upload = function() {
 					});
 			},
 			upload = function(data) {
-				data.type !== 'files' && dialog.elfinderdialog('close');
+				dialog.elfinderdialog('close');
 				if (targets) {
 					data.target = targets[0];
 				}
@@ -23476,7 +23485,7 @@ elFinder.prototype.commands.upload = function() {
 					files = e.clipboardData.files;
 				}
 				if (files.length) {
-					upload({files : files, type : 'files'});
+					upload({files : files, type : 'files', clipdata : true});
 					return;
 				}
 			}
