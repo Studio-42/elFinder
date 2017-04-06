@@ -4419,6 +4419,10 @@ elFinder.prototype = {
 								$.inArray(url, ret) == -1 && ret.push(url);
 							}
 						}
+						// Probably it's clipboard data
+						if (ret.length === 1 && ret[0].match(/^data:image\/png/)) {
+							data.clipdata = true;
+						}
 					});
 					atag = $('a[href]', tmp);
 					atag.each(function(){
