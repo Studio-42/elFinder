@@ -6,18 +6,6 @@
  * @author Bogusław Zięba <bobi@poczta.fm>
  * @version 2017-04-05
  */
-/**
- * elFinder translation template
- * use this file to create new translation
- * submit new translation via https://github.com/Studio-42/elFinder/issues
- * or make a pull request
- */
-
-/**
- * Polski translation
- * @author Translator Name <translator@email.tld>
- * @version 201x-xx-xx
- */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
 		define(['elfinder'], factory);
