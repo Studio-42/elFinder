@@ -2367,6 +2367,7 @@ class elFinder {
 			$tmpname = $files['tmp_name'][$i];
 			$path = ($paths && isset($paths[$i]))? $paths[$i] : '';
 			$mtime = isset($mtimes[$i])? $mtimes[$i] : 0;
+			$ext = null;
 			if ($name === 'blob') {
 				if ($chunk) {
 					if ($tempDir = $this->getTempDir($volume->getTempPath())) {
@@ -2394,6 +2395,15 @@ class elFinder {
 					$ext = isset($extTable[$type])? '.' . $extTable[$type] : '';
 					$name = substr(md5(basename($tmpname)), 0, 8) . $ext;
 				}
+			}
+			
+			// Set name if $args has 'name' array, e.g. clipboard data
+			if (is_array($args['name']) && isset($args['name'][$i]) && isset($_POST['overwrite']) && ! $_POST['overwrite']) {
+				if (is_null($ext)) {
+					$type = $files['type'][$i];
+					$ext = isset($extTable[$type])? '.' . $extTable[$type] : '';
+				}
+				$name = $args['name'][$i] . $ext;
 			}
 			
 			// do hook function 'upload.presave'
