@@ -3790,6 +3790,9 @@ var elFinder = function(node, opts) {
 		this.trigger('cssloaded');
 	}
 	
+	// calculate elFinder node z-index
+	this.zIndexCalc();
+
 	// send initial request and start to pray >_<
 	this.trigger('init')
 		.request({
@@ -3806,19 +3809,8 @@ var elFinder = function(node, opts) {
 			self.trigger = function() { };
 		})
 		.done(function(data) {
-			// detect elFinder node z-index
-			var ni = node.css('z-index');
-			if (ni && ni !== 'auto' && ni !== 'inherit') {
-				self.zIndex = ni;
-			} else {
-				node.parents().each(function(i, n) {
-					var z = $(n).css('z-index');
-					if (z !== 'auto' && z !== 'inherit' && (z = parseInt(z))) {
-						self.zIndex = z;
-						return false;
-					}
-				});
-			}
+			// re-calculate elFinder node z-index
+			this.zIndexCalc();
 			
 			self.load().debug('api', self.api);
 			// update ui's size after init
@@ -6948,6 +6940,27 @@ elFinder.prototype = {
 		}
 		rect = elm.getBoundingClientRect();
 		return document.elementFromPoint(rect.left, rect.top)? true : false;
+	},
+	
+	/**
+	 * calculate elFinder node z-index
+	 * 
+	 * @return void
+	 */
+	zIndexCalc : function() {
+		var self = this,
+			ni = node.css('z-index');
+		if (ni && ni !== 'auto' && ni !== 'inherit') {
+			self.zIndex = ni;
+		} else {
+			node.parents().each(function(i, n) {
+				var z = $(n).css('z-index');
+				if (z !== 'auto' && z !== 'inherit' && (z = parseInt(z))) {
+					self.zIndex = z;
+					return false;
+				}
+			});
+		}
 	},
 	
 	/**
