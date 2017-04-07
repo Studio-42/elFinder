@@ -1896,8 +1896,11 @@ class elFinder {
 				$meta = stream_get_meta_data($fp);
 				$ext = isset($extTable[$meta['mediatype']])? '.' . $extTable[$meta['mediatype']] : '';
 				// Set name if name eq 'image.png' and $args has 'name' array, e.g. clipboard data
-				if (is_array($args['name']) && isset($args['name'][0]) && isset($_POST['overwrite']) && ! $_POST['overwrite']) {
+				if (is_array($args['name']) && isset($args['name'][0])) {
 					$name = $args['name'][0];
+					if ($ext) {
+						$name = preg_replace('/\.[^.]*$/', '', $name);
+					}
 				} else {
 					$name = substr(md5($data), 0, 8);
 				}
@@ -2250,34 +2253,6 @@ class elFinder {
 		$extTable = array_flip(array_unique($volume->getMimeTable()));
 		
 		if (empty($files)) {
-			
-			//--- This part is unnecessary code from 2.1.7 START ---//
-			if (!$args['upload'] && $args['name'] && is_array($args['name'])) {
-				$error = '';
-				$result['name'] = array();
-				foreach($args['name'] as $_i => $_name) {
-					if (!$volume->isUploadableByName($_name)) {
-						$error = $this->error(self::ERROR_UPLOAD_FILE, $_name, self::ERROR_UPLOAD_FILE_MIME);
-						break;
-					}
-					$result['name'][$_i] = preg_replace($ngReg, '_', $_name);
-				}
-				if ($error) {
-					$result['error'] = $error;
-					return $result;
-				}
-				$result = array_merge_recursive($result, $this->ls($args));
-				if (empty($result['list'])) {
-					$result['name'] = array();
-				} else {
-					// It is using the old(<=2.1.6) JavaScript in the new(>2.1.6) back-end?
-					unset($result['list']['exists'], $result['list']['hashes']);
-					$result['name'] = array_merge(array_intersect($result['name'], $result['list']));
-				}
-				return $result;
-			}
-			//--- This part is unnessesaly code from 2.1.7 END ---//
-			
 			if (isset($args['upload']) && is_array($args['upload']) && ($tempDir = $this->getTempDir($volume->getTempPath()))) {
 				$names = array();
 				foreach($args['upload'] as $i => $url) {
@@ -2402,10 +2377,14 @@ class elFinder {
 			}
 			
 			// Set name if name eq 'image.png' and $args has 'name' array, e.g. clipboard data
-			if (strtolower($name) === 'image.png' && is_array($args['name']) && isset($args['name'][$i]) && isset($_POST['overwrite']) && ! $_POST['overwrite']) {
+			if (strtolower($name) === 'image.png' && is_array($args['name']) && isset($args['name'][$i])) {
 				$type = $files['type'][$i];
+				$name = $args['name'][$i];
 				$ext = isset($extTable[$type])? '.' . $extTable[$type] : '';
-				$name = $args['name'][$i] . $ext;
+				if ($ext) {
+					$name = preg_replace('/\.[^.]*$/', '', $name);
+				}
+				$name .= $ext;
 			}
 			
 			// do hook function 'upload.presave'
