@@ -3810,7 +3810,7 @@ var elFinder = function(node, opts) {
 		})
 		.done(function(data) {
 			// re-calculate elFinder node z-index
-			this.zIndexCalc();
+			self.zIndexCalc();
 			
 			self.load().debug('api', self.api);
 			// update ui's size after init
@@ -6949,6 +6949,7 @@ elFinder.prototype = {
 	 */
 	zIndexCalc : function() {
 		var self = this,
+			node = this.getUI(),
 			ni = node.css('z-index');
 		if (ni && ni !== 'auto' && ni !== 'inherit') {
 			self.zIndex = ni;
