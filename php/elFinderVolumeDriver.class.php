@@ -432,6 +432,13 @@ abstract class elFinderVolumeDriver {
 	protected $uploadMaxSize = 0;
 	
 	/**
+	 * Run time setting of overwrite items on upload
+	 * 
+	 * @var string
+	 */
+	protected $uploadOverwrite = true;
+	
+	/**
 	 * Mimetype detect method
 	 *
 	 * @var string
@@ -816,6 +823,9 @@ abstract class elFinderVolumeDriver {
 		if (in_array('url', $this->disabled)) {
 			$this->disabledGetUrl = true;
 		}
+		
+		// set run time setting uploadOverwrite
+		$this->uploadOverwrite = $this->options['uploadOverwrite'];
 	}
 	
 	/**
@@ -2120,9 +2130,7 @@ abstract class elFinderVolumeDriver {
 		$this->clearcache();
 		
 		if ($file && $file['name'] === $name) { // file exists and check filename for item ID based filesystem
-			// check POST data `overwrite` for 3rd party uploader
-			$overwrite = isset($_POST['overwrite'])? (bool)$_POST['overwrite'] : $this->options['uploadOverwrite'];
-			if ($overwrite) {
+			if ($this->uploadOverwrite) {
 				if (!$file['write']) {
 					return $this->setError(elFinder::ERROR_PERM_DENIED);
 				} elseif ($file['mime'] == 'directory') {
@@ -2762,8 +2770,9 @@ abstract class elFinderVolumeDriver {
 			if ($this->URL) {
 				$path = str_replace($this->separator, '/', substr($this->decode($hash), strlen($this->root) + 1));
 				if ($this->encoding) {
-					$path = str_replace('%2F', '/', rawurlencode($this->convEncIn($path, true)));
+					$path = $this->convEncIn($path, true);
 				}
+				$path = str_replace('%2F', '/', rawurlencode($path));
 				return $this->URL . $path;
 			}
 			return false;
@@ -2840,6 +2849,10 @@ abstract class elFinderVolumeDriver {
 	 */
 	public function getUploadMaxSize() {
 		return $this->uploadMaxSize;
+	}
+	
+	public function setUploadOverwrite($var) {
+		$this->uploadOverwrite = (bool)$var;
 	}
 	
 	/**

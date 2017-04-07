@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: b08860f) (2017-04-07)
+ * Version 2.1.23 (2.1-src Nightly: b7f8b0c) (2017-04-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -3821,6 +3821,9 @@ var elFinder = function(node, opts) {
 		this.trigger('cssloaded');
 	}
 	
+	// calculate elFinder node z-index
+	this.zIndexCalc();
+
 	// send initial request and start to pray >_<
 	this.trigger('init')
 		.request({
@@ -3837,19 +3840,8 @@ var elFinder = function(node, opts) {
 			self.trigger = function() { };
 		})
 		.done(function(data) {
-			// detect elFinder node z-index
-			var ni = node.css('z-index');
-			if (ni && ni !== 'auto' && ni !== 'inherit') {
-				self.zIndex = ni;
-			} else {
-				node.parents().each(function(i, n) {
-					var z = $(n).css('z-index');
-					if (z !== 'auto' && z !== 'inherit' && (z = parseInt(z))) {
-						self.zIndex = z;
-						return false;
-					}
-				});
-			}
+			// re-calculate elFinder node z-index
+			this.zIndexCalc();
 			
 			self.load().debug('api', self.api);
 			// update ui's size after init
@@ -6982,6 +6974,27 @@ elFinder.prototype = {
 	},
 	
 	/**
+	 * calculate elFinder node z-index
+	 * 
+	 * @return void
+	 */
+	zIndexCalc : function() {
+		var self = this,
+			ni = node.css('z-index');
+		if (ni && ni !== 'auto' && ni !== 'inherit') {
+			self.zIndex = ni;
+		} else {
+			node.parents().each(function(i, n) {
+				var z = $(n).css('z-index');
+				if (z !== 'auto' && z !== 'inherit' && (z = parseInt(z))) {
+					self.zIndex = z;
+					return false;
+				}
+			});
+		}
+	},
+	
+	/**
 	 * Load JavaScript files
 	 * 
 	 * @param  Array    urls      to load JavaScript file URLs
@@ -7196,7 +7209,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: b08860f)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: b7f8b0c)';
 
 
 
@@ -12552,16 +12565,19 @@ $.fn.elfindercwd = function(fm, options) {
 		fm
 			.one('init', function(){
 				var style = document.createElement('style'),
-				sheet, node, base, resizeTm;
+				sheet, node, base, resizeTm, i = 0;
 				document.head.appendChild(style);
 				sheet = style.sheet;
-				sheet.insertRule('.elfinder-cwd-wrapper-empty .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', 0);
-				sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder'+(mobile? 'LTap' : 'Drop'))+'" }', 1);
-				sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable-disabled .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', 2);
-				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result .elfinder-cwd:after{ content:"'+fm.i18n('emptySearch')+'" }', 3);
-				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-incsearch-result .elfinder-cwd:after{ content:"'+fm.i18n('emptyIncSearch')+'" }', 4);
-				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-letsearch-result .elfinder-cwd:after{ content:"'+fm.i18n('emptyLetSearch')+'" }', 5);
+				sheet.insertRule('.elfinder-cwd-wrapper-empty .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', i++);
+				sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder'+(mobile? 'LTap' : 'Drop'))+'" }', i++);
+				sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable-disabled .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', i++);
+				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result .elfinder-cwd:after{ content:"'+fm.i18n('emptySearch')+'" }', i++);
+				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-incsearch-result .elfinder-cwd:after{ content:"'+fm.i18n('emptyIncSearch')+'" }', i++);
+				sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-letsearch-result .elfinder-cwd:after{ content:"'+fm.i18n('emptyLetSearch')+'" }', i++);
 				if (! mobile) {
+					fm.one('open', function() {
+						fm.zIndex && sheet.insertRule('.ui-selectable-helper{z-index:'+fm.zIndex+';}', i++);
+					});
 					base = $('<div style="position:absolute"/>');
 					node = fm.getUI();
 					node.on('resize', function(e, data) {
@@ -12579,6 +12595,9 @@ $.fn.elfindercwd = function(fm, options) {
 						}
 					});
 				}
+			})
+			.bind('enable', function() {
+				resize();
 			})
 			.bind('open add remove searchend', function() {
 				var phash = fm.cwd().hash;
