@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: b7f8b0c) (2017-04-07)
+ * Version 2.1.23 (2.1-src Nightly: 8ef6639) (2017-04-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -3841,7 +3841,7 @@ var elFinder = function(node, opts) {
 		})
 		.done(function(data) {
 			// re-calculate elFinder node z-index
-			this.zIndexCalc();
+			self.zIndexCalc();
 			
 			self.load().debug('api', self.api);
 			// update ui's size after init
@@ -6980,6 +6980,7 @@ elFinder.prototype = {
 	 */
 	zIndexCalc : function() {
 		var self = this,
+			node = this.getUI(),
 			ni = node.css('z-index');
 		if (ni && ni !== 'auto' && ni !== 'inherit') {
 			self.zIndex = ni;
@@ -7209,7 +7210,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: b7f8b0c)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 8ef6639)';
 
 
 
