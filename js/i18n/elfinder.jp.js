@@ -166,6 +166,8 @@
 			'btnFileName':'ファイル名',  // from v2.1 added 22.5.2015
 			'btnSaveClose': '保存して閉じる', // from v2.1 added 12.6.2015
 			'btnBackup' : 'バックアップ', // fromv2.1 added 28.11.2015
+			'btnRename'    : 'リネーム',      // from v2.1.24 added 6.4.2017
+			'btnRenameAll' : 'リネーム(全て)', // from v2.1.24 added 6.4.2017
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'フォルダーを開いています',

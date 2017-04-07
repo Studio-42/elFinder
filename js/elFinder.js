@@ -4109,95 +4109,106 @@ elFinder.prototype = {
 		xhrUploading: false,
 		
 		// check file/dir exists
-		checkExists: function(files, target, fm) {
+		checkExists: function(files, target, fm, isDir) {
 			var dfrd = $.Deferred(),
-				names, name,
+				names, renames = [], hashes = {}, chkFiles = [],
 				cancel = function() {
 					var i = files.length;
 					while (--i > -1) {
 						files[i]._remove = true;
 					}
 				},
+				resolve = function() {
+					dfrd.resolve(renames, hashes);
+				},
 				check = function() {
-					var renames = [], hashes = {}, existed = [], exists = [], i, c;
-					
-					var confirm = function(ndx) {
-						var last = ndx == exists.length-1,
-						opts = {
-							title  : fm.i18n('cmdupload'),
-							text   : ['errExists', exists[ndx].name, 'confirmRepl'], 
-							all    : !last,
-							accept : {
-								label    : 'btnYes',
-								callback : function(all) {
-									!last && !all
-										? confirm(++ndx)
-										: dfrd.resolve(renames, hashes);
-								}
-							},
-							reject : {
-								label    : 'btnNo',
-								callback : function(all) {
-									var i;
-	
-									if (all) {
-										i = exists.length;
-										while (ndx < i--) {
-											files[exists[i].i]._remove = true;
+					var existed = [], exists = [], i, c,
+						confirm = function(ndx) {
+							var last = ndx == exists.length-1,
+								opts = {
+									title  : fm.i18n('cmdupload'),
+									text   : ['errExists', exists[ndx].name, 'confirmRepl'], 
+									all    : !last,
+									accept : {
+										label    : 'btnYes',
+										callback : function(all) {
+											!last && !all
+												? confirm(++ndx)
+												: resolve();
 										}
-									} else {
-										files[exists[ndx].i]._remove = true;
-									}
-	
-									!last && !all
-										? confirm(++ndx)
-										: dfrd.resolve(renames, hashes);
-								}
-							},
-							cancel : {
-								label    : 'btnCancel',
-								callback : function() {
-									cancel();
-									dfrd.resolve(renames, hashes);
-								}
-							},
-							buttons : [
-								{
-									label : 'btnBackup',
-									callback : function(all) {
-										var i;
-										if (all) {
-											i = exists.length;
-											while (ndx < i--) {
-												renames.push(exists[i].name);
+									},
+									reject : {
+										label    : 'btnNo',
+										callback : function(all) {
+											var i;
+			
+											if (all) {
+												i = exists.length;
+												while (ndx < i--) {
+													files[exists[i].i]._remove = true;
+												}
+											} else {
+												files[exists[ndx].i]._remove = true;
 											}
-										} else {
-											renames.push(exists[ndx].name);
+			
+											!last && !all
+												? confirm(++ndx)
+												: resolve();
 										}
-										!last && !all
-											? confirm(++ndx)
-											: dfrd.resolve(renames, hashes);
+									},
+									cancel : {
+										label    : 'btnCancel',
+										callback : function() {
+											cancel();
+											resolve();
+										}
+									},
+									buttons : [
+										{
+											label : 'btnBackup',
+											callback : function(all) {
+												var i;
+												if (all) {
+													i = exists.length;
+													while (ndx < i--) {
+														renames.push(exists[i].name);
+													}
+												} else {
+													renames.push(exists[ndx].name);
+												}
+												!last && !all
+													? confirm(++ndx)
+													: resolve();
+											}
+										}
+									]
+								};
+							
+							if (!isDir) {
+								opts.buttons.push({
+									label : 'btnRename' + (last? '' : 'All'),
+									callback : function() {
+										renames = null;
+										resolve();
 									}
-								}
-							]
+								});
+							}
+							if (fm.iframeCnt > 0) {
+								delete opts.reject;
+							}
+							fm.confirm(opts);
 						};
-						if (fm.iframeCnt > 0) {
-							delete opts.reject;
-						}
-						fm.confirm(opts);
-					};
 					
 					if (! fm.file(target).read) {
 						// for dropbox type
-						dfrd.resolve([]);
+						resolve();
 						return;
 					}
 					
-					names = $.map(files, function(file, i) { return file.name? {i: i, name: file.name} : null ;});
+					names = $.map(files, function(file, i) { return file.name && (!fm.UA.iOS || file.name !== 'image.jpg')? {i: i, name: file.name} : null ;});
 					
-					name = $.map(names, function(item) { return item.name;});
 					fm.request({
-						data : {cmd : 'ls', target : target, intersect : name},
+						data : {cmd : 'ls', target : target, intersect : $.map(names, function(item) { return item.name;})},
 						notify : {type : 'preupload', cnt : 1, hideCnt : true},
 						preventFail : true
 					})
@@ -4207,7 +4218,7 @@ elFinder.prototype = {
 							if (data.error) {
 								cancel();
 							} else {
-								if (fm.options.overwriteUploadConfirm && ! fm.UA.iOS && fm.option('uploadOverwrite', target)) {
+								if (fm.options.overwriteUploadConfirm && fm.option('uploadOverwrite', target)) {
 									if (data.list) {
 										if (Array.isArray(data.list)) {
 											existed = data.list || [];
@@ -4245,21 +4256,21 @@ elFinder.prototype = {
 						if (exists.length > 0) {
 							confirm(0);
 						} else {
-							dfrd.resolve([]);
+							resolve();
 						}
 					})
 					.fail(function(error) {
 						cancel();
-						dfrd.resolve([]);
+						resolve();
 						error && fm.error(error);
 					});
 				};
 			if (fm.api >= 2.1 && typeof files[0] == 'object') {
 				check();
-				return dfrd;
 			} else {
-				return dfrd.resolve([]);
+				resolve();
 			}
+			return dfrd;
 		},
 		
 		// check droped contents
@@ -4329,18 +4340,28 @@ elFinder.prototype = {
 							}
 						}
 					}
-				};
+				}, hasDirs;
 				
 				items = $.map(data.files.items, function(item){
 					return item.getAsEntry? item.getAsEntry() : item.webkitGetAsEntry();
 				});
+				$.each(items, function(i, item) {
+					if (item.isDirectory) {
+						hasDirs = true;
+						return false;
+					}
+				});
 				if (items.length > 0) {
-					fm.uploads.checkExists(items, target, fm).done(function(renames, hashes){
+					fm.uploads.checkExists(items, target, fm, hasDirs).done(function(renames, hashes){
 						var notifyto, dfds = [];
-						if (fm.options.overwriteUploadConfirm && ! fm.UA.iOS && fm.option('uploadOverwrite', target)) {
+						if (fm.options.overwriteUploadConfirm && fm.option('uploadOverwrite', target)) {
+							if (renames === null) {
+								data.overwrite = 0;
+								renames = [];
+							}
 							items = $.map(items, function(item){
 								var i, bak, hash, dfd, hi;
-								if (item.isDirectory) {
+								if (item.isDirectory && renames.length) {
 									i = $.inArray(item.name, renames);
 									if (i !== -1) {
 										renames.splice(i, 1);
@@ -4764,7 +4785,9 @@ elFinder.prototype = {
 									dropEvt: dropEvt,
 									renames: renames,
 									hashes: hashes,
-									multiupload: true}, void 0, target)
+									multiupload: true,
+									overwrite: data.overwrite === 0? 0 : void 0
+								}, void 0, target)
 								.fail(function(error) {
 									if (error && error === 'No such command') {
 										abort = true;
@@ -5023,14 +5046,12 @@ elFinder.prototype = {
 						} else {
 							formData.append('upload[]', file);
 							if (data.clipdata) {
-								formData.append('overwrite', 0);
-								formData.append('name[]', 'clip-' + (function() {
-									var d = new Date(),
-										f = function(num) {
-											return ('0' + num).slice(-2);
-										};
-									return f(d.getYear())+f((d.getMonth()+1))+f(d.getDate())/*+'-'+f(d.getHours())+f(d.getMinutes())+f(d.getSeconds())*/;
-								})());
+								data.overwrite = 0;
+								formData.append('name[]', 'clip-' + fm.date('ymd') + '.png');
+							}
+							if (fm.UA.iOS && file.name === 'image.jpg') {
+								data.overwrite = 0;
+								formData.append('name[]', 'pic-' + fm.date('ymd') + '.jpg');
 							}
 						}
 						if (file._chunk) {
@@ -5042,15 +5063,16 @@ elFinder.prototype = {
 							formData.append('mtime[]', file.lastModified? Math.round(file.lastModified/1000) : 0);
 						}
 					}
-					if (fm.UA.iOS) {
-						formData.append('overwrite', 0);
-					}
 				});
 				
 				if (isDataType) {
 					$.each(paths, function(i, path) {
 						formData.append('upload_path[]', path);
 					});
+				}
+				
+				if (data.overwrite === 0) {
+					formData.append('overwrite', 0);
 				}
 				
 				// send int value that which meta key was pressed when dropped  as `dropWith`
@@ -5095,10 +5117,10 @@ elFinder.prototype = {
 							(function() {
 								var checkDirs = $.map(mkdirs, function(name) { return name.indexOf('/') === -1 ? {name: name} : null;}),
 									cancelDirs = [];
-								fm.uploads.checkExists(checkDirs, target, fm).done(
+								fm.uploads.checkExists(checkDirs, target, fm, true).done(
 									function(res, res2) {
 										var dfds = [], dfd, bak, hash;
-										if (fm.options.overwriteUploadConfirm && ! fm.UA.iOS && fm.option('uploadOverwrite', target)) {
+										if (fm.options.overwriteUploadConfirm && fm.option('uploadOverwrite', target)) {
 											cancelDirs = $.map(checkDirs, function(dir) { return dir._remove? dir.name : null ;} );
 											checkDirs = $.map(checkDirs, function(dir) { return !dir._remove? dir : null ;} );
 										}
@@ -5190,9 +5212,13 @@ elFinder.prototype = {
 						} else {
 							fm.uploads.checkExists(files, target, fm).done(
 								function(res, res2){
-									if (fm.options.overwriteUploadConfirm && ! fm.UA.iOS && fm.option('uploadOverwrite', target)) {
-										renames = res;
-										hashes = res2;
+									if (fm.options.overwriteUploadConfirm && fm.option('uploadOverwrite', target)) {
+										if (res === null) {
+											data.overwrite = 0;
+										} else {
+											renames = res;
+											hashes = res2;
+										}
 										files = $.map(files, function(file){return !file._remove? file : null ;});
 									}
 									cnt = files.length;
@@ -5337,16 +5363,20 @@ elFinder.prototype = {
 				});
 				cnt = 1;
 			} else if (input && $(input).is(':file') && $(input).val()) {
-				if (fm.options.overwriteUploadConfirm && ! fm.UA.iOS && fm.option('uploadOverwrite', target)) {
+				if (fm.options.overwriteUploadConfirm && fm.option('uploadOverwrite', target)) {
 					names = input.files? input.files : [{ name: $(input).val().replace(/^(?:.+[\\\/])?([^\\\/]+)$/, '$1') }];
 					//names = $.map(names, function(file){return file.name? { name: file.name } : null ;});
 					dfds.push(self.uploads.checkExists(names, target, self).done(
 						function(res, res2){
-							renames = res;
-							hashes = res2;
-							cnt = $.map(names, function(file){return !file._remove? file : null ;}).length;
-							if (cnt != names.length) {
-								cnt = 0;
+							if (res === null) {
+								data.overwrite = 0;
+							} else{
+								renames = res;
+								hashes = res2;
+								cnt = $.map(names, function(file){return !file._remove? file : null ;}).length;
+								if (cnt != names.length) {
+									cnt = 0;
+								}
 							}
 						}
 					));
@@ -5376,6 +5406,10 @@ elFinder.prototype = {
 					$.each(renames, function(i, v) {
 						form.append('<input type="hidden" name="['+i+']" value="'+self.escape(v)+'"/>');
 					});
+				}
+				
+				if (data.overwrite === 0) {
+					form.append('<input type="hidden" name="overwrite" value="0"/>');
 				}
 				
 				$.each(self.options.onlyMimes||[], function(i, mime) {
@@ -6314,6 +6348,57 @@ elFinder.prototype = {
 	},
 	
 	/**
+	 * Returns a date string formatted according to the given format string
+	 * 
+	 * @param  String  format string
+	 * @param  Object  Date object
+	 * @return String
+	 */
+	date : function(format, date) {
+		var self = this,
+			output, d, dw, m, y, h, g, i, s;
+		
+		if (! date) {
+			date = new Date();
+		}
+		
+		h  = date[self.getHours]();
+		g  = h > 12 ? h - 12 : h;
+		i  = date[self.getMinutes]();
+		s  = date[self.getSeconds]();
+		d  = date[self.getDate]();
+		dw = date[self.getDay]();
+		m  = date[self.getMonth]() + 1;
+		y  = date[self.getFullYear]();
+		
+		output = format.replace(/[a-z]/gi, function(val) {
+			switch (val) {
+				case 'd': return d > 9 ? d : '0'+d;
+				case 'j': return d;
+				case 'D': return self.i18n(i18.daysShort[dw]);
+				case 'l': return self.i18n(i18.days[dw]);
+				case 'm': return m > 9 ? m : '0'+m;
+				case 'n': return m;
+				case 'M': return self.i18n(i18.monthsShort[m-1]);
+				case 'F': return self.i18n(i18.months[m-1]);
+				case 'Y': return y;
+				case 'y': return (''+y).substr(2);
+				case 'H': return h > 9 ? h : '0'+h;
+				case 'G': return h;
+				case 'g': return g;
+				case 'h': return g > 9 ? g : '0'+g;
+				case 'a': return h >= 12 ? 'pm' : 'am';
+				case 'A': return h >= 12 ? 'PM' : 'AM';
+				case 'i': return i > 9 ? i : '0'+i;
+				case 's': return s > 9 ? s : '0'+s;
+			}
+			return val;
+		});
+		
+		return output;
+	},
+	
+	/**
 	 * Return localized date
 	 * 
 	 * @param  Object  file object
@@ -6328,43 +6413,11 @@ elFinder.prototype = {
 		if (self.options.clientFormatDate && ts > 0) {
 
 			date = new Date(ts*1000);
-			
-			h  = date[self.getHours]();
-			g  = h > 12 ? h - 12 : h;
-			i  = date[self.getMinutes]();
-			s  = date[self.getSeconds]();
-			d  = date[self.getDate]();
-			dw = date[self.getDay]();
-			m  = date[self.getMonth]() + 1;
-			y  = date[self.getFullYear]();
-			
 			format = ts >= this.yesterday 
 				? this.fancyFormat 
 				: this.dateFormat;
 
-			output = format.replace(/[a-z]/gi, function(val) {
-				switch (val) {
-					case 'd': return d > 9 ? d : '0'+d;
-					case 'j': return d;
-					case 'D': return self.i18n(i18.daysShort[dw]);
-					case 'l': return self.i18n(i18.days[dw]);
-					case 'm': return m > 9 ? m : '0'+m;
-					case 'n': return m;
-					case 'M': return self.i18n(i18.monthsShort[m-1]);
-					case 'F': return self.i18n(i18.months[m-1]);
-					case 'Y': return y;
-					case 'y': return (''+y).substr(2);
-					case 'H': return h > 9 ? h : '0'+h;
-					case 'G': return h;
-					case 'g': return g;
-					case 'h': return g > 9 ? g : '0'+g;
-					case 'a': return h >= 12 ? 'pm' : 'am';
-					case 'A': return h >= 12 ? 'PM' : 'AM';
-					case 'i': return i > 9 ? i : '0'+i;
-					case 's': return s > 9 ? s : '0'+s;
-				}
-				return val;
-			});
+			output = self.date(format, date);
 			
 			return ts >= this.yesterday
 				? output.replace('$1', this.i18n(ts >= this.today ? 'Today' : 'Yesterday'))
