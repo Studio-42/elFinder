@@ -5046,19 +5046,12 @@ elFinder.prototype = {
 						} else {
 							formData.append('upload[]', file);
 							if (data.clipdata) {
-								//formData.append('overwrite', 0);
 								data.overwrite = 0;
-								formData.append('name[]', 'clip-' + (function() {
-									var d = new Date(),
-										f = function(num) {
-											return ('0' + num).slice(-2);
-										};
-									return f(d.getYear())+f((d.getMonth()+1))+f(d.getDate())/*+'-'+f(d.getHours())+f(d.getMinutes())+f(d.getSeconds())*/;
-								})());
+								formData.append('name[]', 'clip-' + fm.date('ymd') + '.png');
 							}
 							if (fm.UA.iOS && file.name === 'image.jpg') {
-								//formData.append('overwrite', 0);
 								data.overwrite = 0;
+								formData.append('name[]', 'pic-' + fm.date('ymd') + '.jpg');
 							}
 						}
 						if (file._chunk) {
@@ -6355,6 +6348,57 @@ elFinder.prototype = {
 	},
 	
 	/**
+	 * Returns a date string formatted according to the given format string
+	 * 
+	 * @param  String  format string
+	 * @param  Object  Date object
+	 * @return String
+	 */
+	date : function(format, date) {
+		var self = this,
+			output, d, dw, m, y, h, g, i, s;
+		
+		if (! date) {
+			date = new Date();
+		}
+		
+		h  = date[self.getHours]();
+		g  = h > 12 ? h - 12 : h;
+		i  = date[self.getMinutes]();
+		s  = date[self.getSeconds]();
+		d  = date[self.getDate]();
+		dw = date[self.getDay]();
+		m  = date[self.getMonth]() + 1;
+		y  = date[self.getFullYear]();
+		
+		output = format.replace(/[a-z]/gi, function(val) {
+			switch (val) {
+				case 'd': return d > 9 ? d : '0'+d;
+				case 'j': return d;
+				case 'D': return self.i18n(i18.daysShort[dw]);
+				case 'l': return self.i18n(i18.days[dw]);
+				case 'm': return m > 9 ? m : '0'+m;
+				case 'n': return m;
+				case 'M': return self.i18n(i18.monthsShort[m-1]);
+				case 'F': return self.i18n(i18.months[m-1]);
+				case 'Y': return y;
+				case 'y': return (''+y).substr(2);
+				case 'H': return h > 9 ? h : '0'+h;
+				case 'G': return h;
+				case 'g': return g;
+				case 'h': return g > 9 ? g : '0'+g;
+				case 'a': return h >= 12 ? 'pm' : 'am';
+				case 'A': return h >= 12 ? 'PM' : 'AM';
+				case 'i': return i > 9 ? i : '0'+i;
+				case 's': return s > 9 ? s : '0'+s;
+			}
+			return val;
+		});
+		
+		return output;
+	},
+	
+	/**
 	 * Return localized date
 	 * 
 	 * @param  Object  file object
@@ -6369,43 +6413,11 @@ elFinder.prototype = {
 		if (self.options.clientFormatDate && ts > 0) {
 
 			date = new Date(ts*1000);
-			
-			h  = date[self.getHours]();
-			g  = h > 12 ? h - 12 : h;
-			i  = date[self.getMinutes]();
-			s  = date[self.getSeconds]();
-			d  = date[self.getDate]();
-			dw = date[self.getDay]();
-			m  = date[self.getMonth]() + 1;
-			y  = date[self.getFullYear]();
-			
 			format = ts >= this.yesterday 
 				? this.fancyFormat 
 				: this.dateFormat;
 
-			output = format.replace(/[a-z]/gi, function(val) {
-				switch (val) {
-					case 'd': return d > 9 ? d : '0'+d;
-					case 'j': return d;
-					case 'D': return self.i18n(i18.daysShort[dw]);
-					case 'l': return self.i18n(i18.days[dw]);
-					case 'm': return m > 9 ? m : '0'+m;
-					case 'n': return m;
-					case 'M': return self.i18n(i18.monthsShort[m-1]);
-					case 'F': return self.i18n(i18.months[m-1]);
-					case 'Y': return y;
-					case 'y': return (''+y).substr(2);
-					case 'H': return h > 9 ? h : '0'+h;
-					case 'G': return h;
-					case 'g': return g;
-					case 'h': return g > 9 ? g : '0'+g;
-					case 'a': return h >= 12 ? 'pm' : 'am';
-					case 'A': return h >= 12 ? 'PM' : 'AM';
-					case 'i': return i > 9 ? i : '0'+i;
-					case 's': return s > 9 ? s : '0'+s;
-				}
-				return val;
-			});
+			output = self.date(format, date);
 			
 			return ts >= this.yesterday
 				? output.replace('$1', this.i18n(ts >= this.today ? 'Today' : 'Yesterday'))
