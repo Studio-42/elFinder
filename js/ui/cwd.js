@@ -2062,6 +2062,9 @@ $.fn.elfindercwd = function(fm, options) {
 					});
 				}
 			})
+			.bind('enable', function() {
+				resize();
+			})
 			.bind('open add remove searchend', function() {
 				var phash = fm.cwd().hash;
 				cwdHashes = $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;});
