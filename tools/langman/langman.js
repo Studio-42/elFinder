@@ -12,7 +12,8 @@ elFinder.prototype.i18 = {};
 			'language'        : 'Name of this language',
 			'direction'       : '"ltr"(Left to right) or "rtl"(Right to left)',
 			'dateFormat'      : 'For example: "d.m.Y H:i", "M d, Y h:i A", "Y/m/d h:i A" etc.',
-			'fancyDateFormat' : '"$1" is replaced "Today" or "Yesterday"'
+			'fancyDateFormat' : '"$1" is replaced "Today" or "Yesterday"',
+			'nonameDateFormat': 'to apply if upload file is noname'
 		};
 		var setTitle = function(){
 			$('title').text($('title').text().replace(/(elFinder)( [0-9.]+)?/, '$1 '+branch));
