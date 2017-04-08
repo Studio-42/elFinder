@@ -2382,7 +2382,7 @@ class elFinder {
 			}
 			
 			// Set name if name eq 'image.png' and $args has 'name' array, e.g. clipboard data
-			if (strtolower($name) === 'image.png' && is_array($args['name']) && isset($args['name'][$i])) {
+			if (strtolower(substr($name, 0, 5)) === 'image' && is_array($args['name']) && isset($args['name'][$i])) {
 				$type = $files['type'][$i];
 				$name = $args['name'][$i];
 				$ext = isset($extTable[$type])? '.' . $extTable[$type] : '';

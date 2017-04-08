@@ -736,7 +736,7 @@ var elFinder = function(node, opts) {
 	 * @type String
 	 * @default "ymd-His"
 	 **/
-	this.nonameDateFormat =  this.options.nonameDateFormat || i18n.nonameDateFormat;
+	this.nonameDateFormat = (this.options.nonameDateFormat || i18n.nonameDateFormat).replace(/[\/\\]/g, '_');
 
 	/**
 	 * Today timestamp
