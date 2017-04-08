@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: cf02b53) (2017-04-08)
+ * Version 2.1.23 (2.1-src Nightly: 62d5226) (2017-04-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -767,7 +767,7 @@ var elFinder = function(node, opts) {
 	 * @type String
 	 * @default "ymd-His"
 	 **/
-	this.nonameDateFormat =  this.options.nonameDateFormat || i18n.nonameDateFormat;
+	this.nonameDateFormat = (this.options.nonameDateFormat || i18n.nonameDateFormat).replace(/[\/\\]/g, '_');
 
 	/**
 	 * Today timestamp
@@ -7220,7 +7220,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: cf02b53)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 62d5226)';
 
 
 
