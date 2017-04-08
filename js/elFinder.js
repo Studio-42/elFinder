@@ -6377,12 +6377,12 @@ elFinder.prototype = {
 			switch (val) {
 				case 'd': return d > 9 ? d : '0'+d;
 				case 'j': return d;
-				case 'D': return self.i18n(i18.daysShort[dw]);
-				case 'l': return self.i18n(i18.days[dw]);
+				case 'D': return self.i18n(self.i18.daysShort[dw]);
+				case 'l': return self.i18n(self.i18.days[dw]);
 				case 'm': return m > 9 ? m : '0'+m;
 				case 'n': return m;
-				case 'M': return self.i18n(i18.monthsShort[m-1]);
-				case 'F': return self.i18n(i18.months[m-1]);
+				case 'M': return self.i18n(self.i18.monthsShort[m-1]);
+				case 'F': return self.i18n(self.i18.months[m-1]);
 				case 'Y': return y;
 				case 'y': return (''+y).substr(2);
 				case 'H': return h > 9 ? h : '0'+h;
