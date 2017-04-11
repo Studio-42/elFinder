@@ -328,8 +328,10 @@ abstract class elFinderVolumeDriver {
 		// allow exec chmod of read-only files
 		'allowChmodReadOnly' => false,
 		// regexp or function name to validate new file name
-		'acceptedName'    => '/^[^\.].*/', //<-- DONT touch this! Use constructor options to overwrite it!
-		// function/class method to control files permissions
+		'acceptedName'    => '/^[^\.].*/', // Notice: overwritten it in some volume drivers contractor
+		// regexp or function name to validate new directory name
+		'acceptedDirname' => '', // used `acceptedName` if empty value
+			// function/class method to control files permissions
 		'accessControl'   => null,
 		// some data required by access control
 		'accessControlData' => null,
@@ -700,6 +702,20 @@ abstract class elFinderVolumeDriver {
 	 * @var string
 	 */
 	protected $disabledGetUrl = false;
+	
+	/**
+	 * Accepted filename validator
+	 * 
+	 * @var string | callable
+	 */
+	protected $nameValidator;
+	
+	/**
+	 * Accepted dirname validator
+	 * 
+	 * @var string | callable
+	 */
+	protected $dirnameValidator;
 	
 	/*********************************************************************/
 	/*                            INITIALIZATION                         */
@@ -1233,6 +1249,10 @@ abstract class elFinderVolumeDriver {
 		$this->nameValidator = !empty($this->options['acceptedName']) && (is_string($this->options['acceptedName']) || is_callable($this->options['acceptedName']))
 			? $this->options['acceptedName']
 			: '';
+		
+		$this->dirnameValidator = !empty($this->options['acceptedDirname']) && (is_callable($this->options['acceptedDirname']) || (is_string($this->options['acceptedDirname']) && preg_match($this->options['acceptedDirname'], '') !== false))
+			? $this->options['acceptedDirname']
+			: $this->nameValidator;
 
 		$this->_checkArchivers();
 		// manual control archive types to create
@@ -1911,7 +1931,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
-		if (!$this->nameAccepted($name)) {
+		if (!$this->nameAccepted($name, true)) {
 			return $this->setError(elFinder::ERROR_INVALID_NAME);
 		}
 		
@@ -1954,7 +1974,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
-		if (!$this->nameAccepted($name)) {
+		if (!$this->nameAccepted($name, false)) {
 			return $this->setError(elFinder::ERROR_INVALID_NAME);
 		}
 		
@@ -1994,10 +2014,6 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
-		if (!$this->nameAccepted($name)) {
-			return $this->setError(elFinder::ERROR_INVALID_NAME, $name);
-		}
-		
 		if (!($file = $this->file($hash))) {
 			return $this->setError(elFinder::ERROR_FILE_NOT_FOUND);
 		}
@@ -2010,7 +2026,13 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_LOCKED, $file['name']);
 		}
 		
-		if ($file['mime'] !== 'directory') {
+		$isDir = ($file['mime'] === 'directory');
+		
+		if (!$this->nameAccepted($name, $isDir)) {
+			return $this->setError(elFinder::ERROR_INVALID_NAME, $name);
+		}
+		
+		if (! $isDir) {
 			$mimeByName = $this->mimetype($name, true);
 			if ($mimeByName && !$this->allowPutMime($mimeByName)) {
 				return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $name);
@@ -2090,11 +2112,11 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_TRGDIR_NOT_FOUND, '#'.$dst);
 		}
 
-		if (!$dir['write']) {
+		if (empty($dir['write'])) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
-		if (!$this->nameAccepted($name)) {
+		if (!$this->nameAccepted($name, false)) {
 			return $this->setError(elFinder::ERROR_INVALID_NAME);
 		}
 		
@@ -2502,7 +2524,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 
-		if ($name !== '' && !$this->nameAccepted($name)) {
+		if ($name !== '' && !$this->nameAccepted($name, false)) {
 			return $this->setError(elFinder::ERROR_INVALID_NAME);
 		}
 
@@ -3222,17 +3244,18 @@ abstract class elFinderVolumeDriver {
 	 * @return bool
 	 * @author Dmitry (dio) Levashov
 	 **/
-	protected function nameAccepted($name) {
+	protected function nameAccepted($name, $isDir = false) {
 		if (json_encode($name)===false) {
 			return false;
 		}
-		if ($this->nameValidator) {
-			if (is_callable($this->nameValidator)) {
-				$res = call_user_func($this->nameValidator, $name);
+		$nameValidator = $isDir? $this->dirnameValidator : $this->nameValidator;
+		if ($nameValidator) {
+			if (is_callable($nameValidator)) {
+				$res = call_user_func($nameValidator, $name);
 				return $res;
 			}
-			if (preg_match($this->nameValidator, '') !== false) {
-				return preg_match($this->nameValidator, $name);
+			if (preg_match($nameValidator, '') !== false) {
+				return preg_match($nameValidator, $name);
 			}
 		}
 		return true;
@@ -4399,9 +4422,11 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_COPY, '#'.$src, $volume->error());
 		}
 		
+		$srcIsDir = ($source['mime'] === 'directory');
+		
 		$errpath = $volume->path($source['hash']);
 		
-		if (!$this->nameAccepted($source['name'])) {
+		if (!$this->nameAccepted($source['name'], $srcIsDir)) {
 			return $this->setError(elFinder::ERROR_COPY, $errpath, elFinder::ERROR_INVALID_NAME);
 		}
 				
@@ -4409,7 +4434,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_COPY, $errpath, elFinder::ERROR_PERM_DENIED);
 		}
 		
-		if ($source['mime'] == 'directory') {
+		if ($srcIsDir) {
 			$test = $this->isNameExists($this->joinPathCE($destination, $name));
 			$this->clearcache();
 
@@ -5872,7 +5897,7 @@ abstract class elFinderVolumeDriver {
 					continue;
 				}
 				$isDir = is_dir($p);
-				if ($chkName && ! $this->nameAccepted($name)) {
+				if ($chkName && ! $this->nameAccepted($name, $isDir)) {
 					self::localRmdirRecursive($p);
 					$res['names'][] = $p;
 					$res['rmNames'][] = $name;
@@ -5909,7 +5934,7 @@ abstract class elFinderVolumeDriver {
 				unlink($path);
 				$res['symlinks'][] = $path;
 				$res['rmNames'][] = basename($path);
-			} else if ($chkName && ! $this->nameAccepted($name)) {
+			} else if ($chkName && ! $this->nameAccepted($name, false)) {
 				unlink($path);
 				$res['names'][] = $path;
 				$res['rmNames'][] = $name;
