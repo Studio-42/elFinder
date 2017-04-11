@@ -10,11 +10,11 @@ elFinder.prototype.commands.zipdl = function() {};
 elFinder.prototype.commands.download = function() {
 	var self   = this,
 		fm     = this.fm,
+		czipdl = null,
 		zipOn  = false,
 		mixed  = false,
 		filter = function(hashes, inExec) {
-			var czipdl = (fm.api > 2)? fm.getCommand('zipdl') : null,
-				volumeid, mixedCmd;
+			var volumeid, mixedCmd;
 			
 			if (czipdl !== null) {
 				if (fm.searchStatus.state > 1) {
@@ -69,7 +69,6 @@ elFinder.prototype.commands.download = function() {
 		var sel    = this.hashes(sel),
 			cnt    = sel.length,
 			maxReq = this.options.maxRequests || 10,
-			czipdl = (fm.api > 2)? fm.getCommand('zipdl') : null,
 			mixed  = false,
 			croot  = '';
 		
@@ -170,6 +169,10 @@ elFinder.prototype.commands.download = function() {
 					});
 				}
 			}
+		}
+	}).one('open', function() {
+		if (fm.api > 2) {
+			czipdl = fm.getCommand('zipdl');
 		}
 	});
 	

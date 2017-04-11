@@ -143,7 +143,7 @@
 				debugUL.after(target);
 				
 				debugDIV.tabs('refresh');
-				debugUL.find('a:first').click();
+				debugUL.find('a:first').trigger('click');
 			}
 		},
 		content = '',
@@ -223,7 +223,11 @@
 		}
 
 		content.find('#'+fm.namespace+'-help-about').find('.apiver').text(fm.api);
-		self.dialog = fm.dialog(content, {title : self.title, width : 530, autoOpen : false, destroyOnClose : false});
+		self.dialog = fm.dialog(content, {title : self.title, width : 530, autoOpen : false, destroyOnClose : false})
+			.on('click', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+			});
 		
 		self.state = 0;
 	});
