@@ -13,21 +13,17 @@
  *		),
  *		// global configure (optional)
  *		'plugin' => array(
-<<<<<<< HEAD
  *			'AutoResize' => array(
-=======
- *			'PluginAutoResize' => array(
->>>>>>> 614883b34d44fe190801f899858026094918c2b6
  *				'enable'         => true,       // For control by volume driver
  *				'maxWidth'       => 1024,       // Path to Water mark image
  *				'maxHeight'      => 1024,       // Margin right pixel
  *				'quality'        => 95,         // JPEG image save quality
-<<<<<<< HEAD
  *				'preserveExif'   => false,      // Preserve EXIF data (Imagick only)
  *				'forceEffect'    => false,      // For change quality of small images
-=======
->>>>>>> 614883b34d44fe190801f899858026094918c2b6
- *				'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP // Target image formats ( bit-field )
+ *				'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP, // Target image formats ( bit-field )
+ *				'offDropWith'    => null        // To disable it if it is dropped with pressing the meta key
+ *				                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
+ *				                                // In case of using any key, specify it as an array
  *			)
  *		),
  *		// each volume configure (optional)
@@ -37,21 +33,17 @@
  *				'path'   => '/path/to/files/',
  *				'URL'    => 'http://localhost/to/files/'
  *				'plugin' => array(
-<<<<<<< HEAD
  *					'AutoResize' => array(
-=======
- *					'PluginAutoResize' => array(
->>>>>>> 614883b34d44fe190801f899858026094918c2b6
  *						'enable'         => true,       // For control by volume driver
  *						'maxWidth'       => 1024,       // Path to Water mark image
  *						'maxHeight'      => 1024,       // Margin right pixel
  *						'quality'        => 95,         // JPEG image save quality
-<<<<<<< HEAD
  *						'preserveExif'   => false,      // Preserve EXIF data (Imagick only)
  *						'forceEffect'    => false,      // For change quality of small images
-=======
->>>>>>> 614883b34d44fe190801f899858026094918c2b6
- *						'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP // Target image formats ( bit-field )
+ *						'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP, // Target image formats ( bit-field )
+ *						'offDropWith'    => null        // To disable it if it is dropped with pressing the meta key
+ *						                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
+ *						                                // In case of using any key, specify it as an array
  *					)
  *				)
  *			)
@@ -62,9 +54,7 @@
  * @author Naoki Sawada
  * @license New BSD
  */
-class elFinderPluginAutoResize {
-
-	private $opts = array();
+class elFinderPluginAutoResize extends elFinderPlugin {
 
 	public function __construct($opts) {
 		$defaults = array(
@@ -72,12 +62,12 @@ class elFinderPluginAutoResize {
 			'maxWidth'       => 1024,       // Path to Water mark image
 			'maxHeight'      => 1024,       // Margin right pixel
 			'quality'        => 95,         // JPEG image save quality
-<<<<<<< HEAD
 			'preserveExif'   => false,      // Preserve EXIF data (Imagick only)
 			'forceEffect'    => false,      // For change quality of small images
-=======
->>>>>>> 614883b34d44fe190801f899858026094918c2b6
-			'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP // Target image formats ( bit-field )
+			'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP, // Target image formats ( bit-field )
+			'offDropWith'    => null        // To disable it if it is dropped with pressing the meta key
+			                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
+			                                // In case of using any key, specify it as an array
 		);
 
 		$this->opts = array_merge($defaults, $opts);
@@ -85,28 +75,24 @@ class elFinderPluginAutoResize {
 	}
 
 	public function onUpLoadPreSave(&$path, &$name, $src, $elfinder, $volume) {
-		$opts = $this->opts;
-		$volOpts = $volume->getOptionsPlugin('AutoResize');
-		if (is_array($volOpts)) {
-			$opts = array_merge($this->opts, $volOpts);
-		}
+		$opts = $this->getCurrentOpts($volume);
 		
-		if (! $opts['enable']) {
+		if (! $this->iaEnabled($opts)) {
 			return false;
 		}
 		
-<<<<<<< HEAD
+		$mime = mime_content_type($src);
+		if (substr($mime, 0, 5) !== 'image') {
+			return false;
+		}
+		
 		$srcImgInfo = getimagesize($src);
-=======
-		$srcImgInfo = @getimagesize($src);
->>>>>>> 614883b34d44fe190801f899858026094918c2b6
 		if ($srcImgInfo === false) {
 			return false;
 		}
 		
 		// check target image type
 		$imgTypes = array(
-<<<<<<< HEAD
 			IMAGETYPE_GIF  => IMG_GIF,
 			IMAGETYPE_JPEG => IMG_JPEG,
 			IMAGETYPE_PNG  => IMG_PNG,
@@ -119,25 +105,11 @@ class elFinderPluginAutoResize {
 		
 		if ($opts['forceEffect'] || $srcImgInfo[0] > $opts['maxWidth'] || $srcImgInfo[1] > $opts['maxHeight']) {
 			return $this->resize($volume, $src, $srcImgInfo, $opts['maxWidth'], $opts['maxHeight'], $opts['quality'], $opts['preserveExif']);
-=======
-				IMAGETYPE_GIF => IMG_GIF,
-				IMAGETYPE_JPEG => IMG_JPEG,
-				IMAGETYPE_PNG => IMG_PNG,
-				IMAGETYPE_WBMP => IMG_WBMP,
-		);
-		if (! ($opts['targetType'] & $imgTypes[$srcImgInfo[2]])) {
-			return false;
-		}
-		
-		if ($srcImgInfo[0] > $opts['maxWidth'] || $srcImgInfo[1] > $opts['maxHeight']) {
-			return $this->resize($src, $srcImgInfo, $opts['maxWidth'], $opts['maxHeight'], $opts['quality']);
->>>>>>> 614883b34d44fe190801f899858026094918c2b6
 		}
 		
 		return false;
 	}
 	
-<<<<<<< HEAD
 	private function resize($volume, $src, $srcImgInfo, $maxWidth, $maxHeight, $jpgQuality, $preserveExif) {
 		$zoom = min(($maxWidth/$srcImgInfo[0]),($maxHeight/$srcImgInfo[1]));
 		$width = round($srcImgInfo[0] * $zoom);
@@ -145,109 +117,5 @@ class elFinderPluginAutoResize {
 		$unenlarge = true;
 		
 		return $volume->imageUtil('resize', $src, compact('width', 'height', 'jpgQuality', 'preserveExif', 'unenlarge'));
-=======
-	private function resize($src, $srcImgInfo, $maxWidth, $maxHeight, $quality) {
-		$zoom = min(($maxWidth/$srcImgInfo[0]),($maxHeight/$srcImgInfo[1]));
-		$width = round($srcImgInfo[0] * $zoom);
-		$height = round($srcImgInfo[1] * $zoom);
-		
-		if (class_exists('Imagick')) {
-			return $this->resize_imagick($src, $width, $height, $quality);
-		} else {
-			return $this->resize_gd($src, $width, $height, $quality, $srcImgInfo);
-		}
-	}
-	
-	private function resize_gd($src, $width, $height, $quality, $srcImgInfo) {
-		switch ($srcImgInfo['mime']) {
-			case 'image/gif':
-				if (@imagetypes() & IMG_GIF) {
-					$oSrcImg = @imagecreatefromgif($src);
-				} else {
-					$ermsg = 'GIF images are not supported';
-				}
-				break;
-			case 'image/jpeg':
-				if (@imagetypes() & IMG_JPG) {
-					$oSrcImg = @imagecreatefromjpeg($src) ;
-				} else {
-					$ermsg = 'JPEG images are not supported';
-				}
-				break;
-			case 'image/png':
-				if (@imagetypes() & IMG_PNG) {
-					$oSrcImg = @imagecreatefrompng($src) ;
-				} else {
-					$ermsg = 'PNG images are not supported';
-				}
-				break;
-			case 'image/wbmp':
-				if (@imagetypes() & IMG_WBMP) {
-					$oSrcImg = @imagecreatefromwbmp($src);
-				} else {
-					$ermsg = 'WBMP images are not supported';
-				}
-				break;
-			default:
-				$oSrcImg = false;
-				$ermsg = $srcImgInfo['mime'].' images are not supported';
-				break;
-		}
-		
-		if ($oSrcImg &&  false != ($tmp = imagecreatetruecolor($width, $height))) {
-			
-			if (!imagecopyresampled($tmp, $oSrcImg, 0, 0, 0, 0, $width, $height, $srcImgInfo[0], $srcImgInfo[1])) {
-				return false;
-			}
-		
-			switch ($srcImgInfo['mime']) {
-				case 'image/gif':
-					imagegif($tmp, $src);
-					break;
-				case 'image/jpeg':
-					imagejpeg($tmp, $src, $quality);
-					break;
-				case 'image/png':
-					if (function_exists('imagesavealpha') && function_exists('imagealphablending')) {
-						imagealphablending($tmp, false);
-						imagesavealpha($tmp, true);
-					}
-					imagepng($tmp, $src);
-					break;
-				case 'image/wbmp':
-					imagewbmp($tmp, $src);
-					break;
-			}
-			
-			imagedestroy($oSrcImg);
-			imagedestroy($tmp);
-		
-			return true;
-		
-		}
-		return false;
-	}
-	
-	private function resize_imagick($src, $width, $height, $quality) {
-		try {
-			$img = new imagick($src);
-		
-			if (strtoupper($img->getImageFormat()) === 'JPEG') {
-				$img->setImageCompression(imagick::COMPRESSION_JPEG);
-				$img->setCompressionQuality($quality);
-			}
-			
-			$img->resizeImage($width, $height, Imagick::FILTER_LANCZOS, true);
-			
-			$result = $img->writeImage($src);
-			
-			$img->clear();
-			$img->destroy();
-			
-			return $result ? true : false;
-		} catch (Exception $e) {
-			return false;
-		}
->>>>>>> 614883b34d44fe190801f899858026094918c2b6
 	}
 }

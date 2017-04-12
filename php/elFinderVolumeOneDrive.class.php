@@ -417,13 +417,17 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             $stat['size'] = 0;
             if (empty($folder->childCount)) {
                 $stat['dirs'] = 0;
+            } else {
+                $stat['dirs'] = -1;
             }
         } else {
             if (isset($raw->file->mimeType)) {
                 $stat['mime'] = $raw->file->mimeType;
             }
             $stat['size'] = (int) $raw->size;
-            $stat['url'] = '1';
+            if (!$this->disabledGetUrl) {
+                $stat['url'] = '1';
+            }
             if (isset($raw->image) && $img = $raw->image) {
                 isset($img->width) ? $stat['width'] = $img->width : $stat['width'] = 0;
                 isset($img->height) ? $stat['height'] = $img->height : $stat['height'] = 0;
@@ -562,9 +566,13 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 }
 
                 if (empty($this->token)) {
-                    $result = null;
+                    $result = false;
                 } else {
-                    $result = $this->_od_query('root', false, false, array(
+                    $path = $options['path'];
+                    if ($path === '/') {
+                        $path = 'root';
+                    }
+                    $result = $this->_od_query($path, false, false, array(
                         'query' => array(
                             'select' => 'id,name',
                             'filter' => 'folder ne null',
@@ -572,7 +580,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                     ));
                 }
 
-                if (!$result) {
+                if ($result === false) {
                     $cdata = '';
                     $innerKeys = array('cmd', 'host', 'options', 'pass', 'protocol', 'user');
                     $this->ARGS = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
@@ -617,11 +625,17 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 } else {
                     $folders = [];
 
-                    foreach ($result as $res) {
-                        $folders[$res->id] = $res->name;
+                    if ($result) {
+                        foreach ($result as $res) {
+                            $folders[$res->id] = $res->name;
+                        }
+                        natcasesort($folders);
                     }
 
-                    natcasesort($folders);
+                    if ($options['pass'] === 'folders') {
+                        return ['exit' => true, 'folders' => $folders];
+                    }
+
                     $folders = ['root' => 'My OneDrive'] + $folders;
                     $folders = json_encode($folders);
 

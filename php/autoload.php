@@ -7,6 +7,7 @@ function elFinderAutoloader($name) {
 		'elFinder' => ELFINDER_PHP_ROOT_PATH . '/elFinder.class.php',
 		'elFinderConnector' => ELFINDER_PHP_ROOT_PATH . '/elFinderConnector.class.php',
 		'elFinderLibGdBmp' => ELFINDER_PHP_ROOT_PATH . '/libs/GdBmp.php',
+		'elFinderPlugin' => ELFINDER_PHP_ROOT_PATH . '/elFinderPlugin.php',
 		'elFinderPluginAutoResize' => ELFINDER_PHP_ROOT_PATH . '/plugins/AutoResize/plugin.php',
 		'elFinderPluginAutoRotate' => ELFINDER_PHP_ROOT_PATH . '/plugins/AutoRotate/plugin.php',
 		'elFinderPluginNormalizer' => ELFINDER_PHP_ROOT_PATH . '/plugins/Normalizer/plugin.php',

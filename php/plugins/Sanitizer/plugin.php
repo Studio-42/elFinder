@@ -7,18 +7,12 @@
  * ex. binding, configure on connector options
  *	$opts = array(
  *		'bind' => array(
-<<<<<<< HEAD
  *			'upload.pre mkdir.pre mkfile.pre rename.pre archive.pre ls.pre' => array(
  *				'Plugin.Sanitizer.cmdPreprocess'
  *			),
  *			'ls' => array(
  *				'Plugin.Sanitizer.cmdPostprocess'
  *			),
-=======
- *			'mkdir.pre mkfile.pre rename.pre' => array(
- *				'Plugin.Sanitizer.cmdPreprocess'
- *			),
->>>>>>> 614883b34d44fe190801f899858026094918c2b6
  *			'upload.presave' => array(
  *				'Plugin.Sanitizer.onUpLoadPreSave'
  *			)
@@ -52,35 +46,30 @@
  * @author Naoki Sawada
  * @license New BSD
  */
-class elFinderPluginSanitizer
+class elFinderPluginSanitizer extends elFinderPlugin
 {
-	private $opts = array();
-<<<<<<< HEAD
 	private $replaced = array();
 	private $keyMap = array(
 		'ls' => 'intersect',
 		'upload' => 'renames'
 	);
 
-=======
-	
->>>>>>> 614883b34d44fe190801f899858026094918c2b6
 	public function __construct($opts) {
 		$defaults = array(
 			'enable'   => true,  // For control by volume driver
 			'targets'  => array('\\','/',':','*','?','"','<','>','|'), // target chars
-			'replace'  => '_'    // replace to this
+			'replace'  => '_',   // replace to this
+			'pathAllows' => array('/') // Characters allowed in path name of characters in `targets` array
 		);
 	
 		$this->opts = array_merge($defaults, $opts);
 	}
 	
 	public function cmdPreprocess($cmd, &$args, $elfinder, $volume) {
-		$opts = $this->getOpts($volume);
+		$opts = $this->getCurrentOpts($volume);
 		if (! $opts['enable']) {
 			return false;
 		}
-<<<<<<< HEAD
 		$this->replaced[$cmd] = array();
 		$key = (isset($this->keyMap[$cmd]))? $this->keyMap[$cmd] : 'name';
 		
@@ -113,37 +102,17 @@ class elFinderPluginSanitizer
 		}
 	}
 	
-=======
-	
-		if (isset($args['name'])) {
-			$args['name'] = $this->sanitizeFileName($args['name'], $opts);
-		}
-		return true;
-	}
-
->>>>>>> 614883b34d44fe190801f899858026094918c2b6
 	public function onUpLoadPreSave(&$path, &$name, $src, $elfinder, $volume) {
-		$opts = $this->getOpts($volume);
+		$opts = $this->getCurrentOpts($volume);
 		if (! $opts['enable']) {
 			return false;
 		}
 	
 		if ($path) {
-			$path = $this->sanitizeFileName($path, $opts, array('/'));
+			$path = $this->sanitizeFileName($path, $opts, $opts['pathAllows']);
 		}
 		$name = $this->sanitizeFileName($name, $opts);
 		return true;
-	}
-	
-	private function getOpts($volume) {
-		$opts = $this->opts;
-		if (is_object($volume)) {
-			$volOpts = $volume->getOptionsPlugin('Sanitizer');
-			if (is_array($volOpts)) {
-				$opts = array_merge($this->opts, $volOpts);
-			}
-		}
-		return $opts;
 	}
 	
 	private function sanitizeFileName($filename, $opts, $allows = array()) {

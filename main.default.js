@@ -7,7 +7,7 @@
  **/
 (function(){
 	var // jQuery and jQueryUI version
-		jqver = '3.1.1',
+		jqver = '3.2.1',
 		uiver = '1.12.1',
 		
 		// Detect language (optional)
@@ -25,7 +25,7 @@
 			if (lang === 'ja') lang = 'jp';
 			else if (lang === 'pt') lang = 'pt_BR';
 			else if (lang === 'ug') lang = 'ug_CN';
-			else if (lang === 'zh') lang = (fullLang.substr(0,5) === 'zh-tw')? 'zh_TW' : 'zh_CN';
+			else if (lang === 'zh') lang = (fullLang.substr(0,5).toLowerCase() === 'zh-tw')? 'zh_TW' : 'zh_CN';
 			return lang;
 		})(),
 		

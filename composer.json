@@ -27,6 +27,12 @@
     "require": {
         "php": ">=5.2"
     },
+    "suggest": {
+        "kunalvarma05/dropbox-php-sdk": "VolumeDriver `Dropbox`2 require `kunalvarma05/dropbox-php-sdk.",
+        "google/apiclient": "VolumeDriver GoogleDrive require `google/apiclient:^2.0.",
+        "barryvdh/elfinder-flysystem-driver": "VolumeDriver for elFinder to use Flysystem as a root.",
+        "nao-pon/flysystem-google-drive": "require in GoogleDrive network volume mounting with Flysystem."
+    },
     "autoload": {
         "classmap": ["php"]
     }

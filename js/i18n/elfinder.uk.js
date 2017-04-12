@@ -3,7 +3,15 @@
  * @author Oleksandr Palianytsia
  * @version 2015-04-16
  */
-if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
+(function(root, factory) {
+	if (typeof define === 'function' && define.amd) {
+		define(['elfinder'], factory);
+	} else if (typeof exports !== 'undefined') {
+		module.exports = factory(require('elfinder'));
+	} else {
+		factory(root.elFinder);
+	}
+}(this, function(elFinder) {
 	elFinder.prototype.i18.uk = {
 		translator : 'ITLancer',
 		language   : 'Українська мова',
@@ -11,7 +19,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 		dateFormat : 'd.m.Y H:i',
 		fancyDateFormat : '$1 H:i',
 		messages   : {
-			
+
 			/********************************** errors **********************************/
 			'error'                : 'Помилка',
 			'errUnknown'           : 'Невідома помилка.',
@@ -57,7 +65,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errMaxSize'           : 'Розмір даних перевищує допустиме значення.',
 			'errFileMaxSize'       : 'Розмір файла перевищує допустиме значення.',
 			'errUploadMime'        : 'Файли цього типу заборонені.',
-			'errUploadTransfer'    : '"$1" : помилка передачі.', 
+			'errUploadTransfer'    : '"$1" : помилка передачі.',
 			'errSave'              : 'Неможливо записати "$1".',
 			'errCopy'              : 'Неможливо скопіювати "$1".',
 			'errMove'              : 'Неможливо перенести "$1".',
@@ -73,7 +81,24 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArcMaxSize'        : 'Розмір файлів архіву перевищує допустиме значення.',
 			'errResize'            : 'Неможливо масштабувати "$1".',
 			'errUsupportType'      : 'Непідтримуваний тип файла.',
-			
+            'errNotUTF8Content'    : 'Файл "$1" не в UTF-8 і не може бути відредагований.',  // added 9.11.2011
+            'errNetMount'          : 'Неможливо змонтувати "$1".', // added 17.04.2012
+            'errNetMountNoDriver'  : 'Непідтримуваний протокл.',     // added 17.04.2012
+            'errNetMountFailed'    : 'В процесі монтування сталася помилка.',         // added 17.04.2012
+            'errNetMountHostReq'   : 'Host required.', // added 18.04.2012
+            'errSessionExpires'    : 'Час сеансу минув через неактивність.',
+            'errCreatingTempDir'   : 'НЕможливо створити тимчасову директорію: "$1"',
+            'errFtpDownloadFile'   : 'Неможливо завантажити файл з FTP: "$1"',
+            'errFtpUploadFile'     : 'Неможливо завантажити файл на FTP: "$1"',
+            'errFtpMkdir'          : 'Неможливо створити віддалений каталог на FTP: "$1"',
+            'errArchiveExec'       : 'Помилка при архівації файлів: "$1"',
+            'errExtractExec'       : 'Помилка при розархівуванні файлів: "$1"',
+            'errNetUnMount'        : 'Неможливо демонтувати', // from v2.1 added 30.04.2012
+            'errConvUTF8'          : 'Неможливо конвертувати в UTF - 8', // from v2.1 added 08.04.2014
+            'errFolderUpload'      : 'Використовуйте Google Chrome, якщо ви хочете завантажити папку', // from v2.1 added 26.6.2015
+            'errSearchTimeout'     : 'Час пошуку "$1" вийшов. Результат пошуку частковий', // from v2.1 added 12.1.2016
+            'errReauthRequire'     : 'Необхідна повторна авторизація.', // from v2.1.10 added 3.24.2016
+
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Архівувати',
 			'cmdback'      : 'Назад',
@@ -102,8 +127,13 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdview'      : 'Перегляд',
 			'cmdresize'    : 'Масштабувати зображення',
 			'cmdsort'      : 'Сортування',
-			
-			/*********************************** buttons ***********************************/ 
+            'cmdnetmount'  : 'Змонтувати мережевий диск', // added 18.04.2012
+            'cmdnetunmount': 'Розмонтувати', // from v2.1 added 30.04.2012
+            'cmdplaces'    : 'To Places', // added 28.12.2014
+            'cmdchmod'     : 'Змінити права', // from v2.1 added 20.6.2015
+            'cmdopendir'   : 'Відкрии директорію', // from v2.1 added 13.1.2016
+
+			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Закрити',
 			'btnSave'   : 'Зберегти',
 			'btnRm'     : 'Вилучити',
@@ -111,7 +141,18 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Скасувати',
 			'btnNo'     : 'Ні',
 			'btnYes'    : 'Так',
-			
+			'btnMount'  : 'Підключити',  // added 18.04.2012
+			'btnApprove': 'Перейти в $1 і прийняти', // from v2.1 added 26.04.2012
+			'btnUnmount': 'Відключити', // from v2.1 added 30.04.2012
+			'btnConv'   : 'Конвертувати', // from v2.1 added 08.04.2014
+			'btnCwd'    : 'Тут',      // from v2.1 added 22.5.2015
+			'btnVolume' : 'Розділ',    // from v2.1 added 22.5.2015
+			'btnAll'    : 'Всі',       // from v2.1 added 22.5.2015
+			'btnMime'   : 'MIME тип', // from v2.1 added 22.5.2015
+			'btnFileName':'Назва файла',  // from v2.1 added 22.5.2015
+			'btnSaveClose': 'Зберегти і вийти', // from v2.1 added 12.6.2015
+			'btnBackup' : 'Резервна копія', // fromv2.1 added 28.11.2015
+
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Відкрити теку',
 			'ntffile'     : 'Відкрити файл',
@@ -131,7 +172,15 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'ntfsearch'   : 'Пошук файлів',
 			'ntfsmth'     : 'Виконується >_<',
 			'ntfloadimg'  : 'Завантаження зображення',
-			
+            'ntfnetmount' : 'Монтування мережевого диска', // added 18.04.2012
+            'ntfnetunmount': 'Розмонтування мережевого диска', // from v2.1 added 30.04.2012
+            'ntfdim'      : 'Acquiring image dimension', // added 20.05.2013
+            'ntfreaddir'  : 'Читання інформації директорії', // from v2.1 added 01.07.2013
+            'ntfurl'      : 'отримання URL посилання', // from v2.1 added 11.03.2014
+            'ntfchmod'    : 'Зміна прав файлу', // from v2.1 added 20.6.2015
+            'ntfpreupload': 'Перевірка імені завантажуваного файла', // from v2.1 added 31.11.2015
+            'ntfzipdl'    : 'Створення файлу для завантаження', // from v2.1.7 added 23.1.2016
+
 			/************************************ dates **********************************/
 			'dateUnknown' : 'невідомо',
 			'Today'       : 'сьогодні',
@@ -160,30 +209,30 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'October'     : 'жовтня',
 			'November'    : 'листопада',
 			'December'    : 'грудня',
-			'Sunday'      : 'Неділя', 
-			'Monday'      : 'Понеділок', 
-			'Tuesday'     : 'Вівторок', 
-			'Wednesday'   : 'Середа', 
-			'Thursday'    : 'Четвер', 
-			'Friday'      : 'П’ятниця', 
+			'Sunday'      : 'Неділя',
+			'Monday'      : 'Понеділок',
+			'Tuesday'     : 'Вівторок',
+			'Wednesday'   : 'Середа',
+			'Thursday'    : 'Четвер',
+			'Friday'      : 'П’ятниця',
 			'Saturday'    : 'Субота',
-			'Sun'         : 'Нд', 
-			'Mon'         : 'Пн', 
-			'Tue'         : 'Вт', 
-			'Wed'         : 'Ср', 
-			'Thu'         : 'Чт', 
-			'Fri'         : 'Пт', 
+			'Sun'         : 'Нд',
+			'Mon'         : 'Пн',
+			'Tue'         : 'Вт',
+			'Wed'         : 'Ср',
+			'Thu'         : 'Чт',
+			'Fri'         : 'Пт',
 			'Sat'         : 'Сб',
 			/******************************** sort variants ********************************/
-			'sortnameDirsFirst' : 'за назвою (теки на початку)', 
-			'sortkindDirsFirst' : 'за типом (теки на початку)', 
-			'sortsizeDirsFirst' : 'за розміром (теки на початку)', 
-			'sortdateDirsFirst' : 'за датою (теки на початку)', 
-			'sortname'          : 'за назвою', 
-			'sortkind'          : 'за типом', 
+			'sortnameDirsFirst' : 'за назвою (теки на початку)',
+			'sortkindDirsFirst' : 'за типом (теки на початку)',
+			'sortsizeDirsFirst' : 'за розміром (теки на початку)',
+			'sortdateDirsFirst' : 'за датою (теки на початку)',
+			'sortname'          : 'за назвою',
+			'sortkind'          : 'за типом',
 			'sortsize'          : 'за розміром',
 			'sortdate'          : 'за датою',
-			
+
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Підтвердіть',
 			'confirmRm'       : 'Ви справді хочете вилучити файли?<br/>Операція незворотня!',
@@ -206,7 +255,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'viewlist'        : 'Списком',
 			'viewicons'       : 'Значками',
 			'places'          : 'Розташування',
-			'calc'            : 'Вирахувати', 
+			'calc'            : 'Вирахувати',
 			'path'            : 'Шлях',
 			'aliasfor'        : 'Аліас для',
 			'locked'          : 'Заблоковано',
@@ -217,7 +266,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'yes'             : 'так',
 			'no'              : 'ні',
 			'link'            : 'Посилання',
-			'searcresult'     : 'Результати пошуку',  
+			'searcresult'     : 'Результати пошуку',
 			'selected'        : 'Вибрані елементи',
 			'about'           : 'Про',
 			'shortcuts'       : 'Ярлики',
@@ -258,7 +307,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rotate-cw'       : 'Повернути на 90 градусів за год. стр.',
 			'rotate-ccw'      : 'Повернути на 90 градусів проти год. стр.',
 			'degree'          : 'Градус',
-			
+
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Невідомо',
 			'kindFolder'      : 'Папка',
@@ -338,5 +387,5 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoOGG'    : 'Відео Ogg'
 		}
 	}
-}
+}));
 
