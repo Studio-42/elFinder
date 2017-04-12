@@ -24,92 +24,92 @@
 
 			/********************************** errors **********************************/
 			'error'                : 'エラー',
-			'errUnknown'           : '不明なエラーです',
-			'errUnknownCmd'        : '不明なコマンドです',
-			'errJqui'              : '無効なjQuery UI コンフィグレーションです。セレクタブルコンポーネント、ドラッガブルコンポーネント、ドロッパブルコンポーネントがあるかを確認して下さい',
-			'errNode'              : 'elFinderはDOM Elementが必要です',
-			'errURL'               : '無効なelFinder コンフィグレーションです! URLを設定してください',
-			'errAccess'            : 'アクセスが拒否されました',
-			'errConnect'           : 'バックエンドとの接続ができません',
-			'errAbort'             : '接続が中断されました',
-			'errTimeout'           : '接続がタイムアウトしました.',
-			'errNotFound'          : 'バックエンドが見つかりません',
-			'errResponse'          : '無効なバックエンドレスポンスです',
-			'errConf'              : 'バックエンドの設定が有効ではありません',
-			'errJSON'              : 'PHP JSON モジュールがインストールされていません',
-			'errNoVolumes'         : '読み込み可能なボリュームが入手できません',
-			'errCmdParams'         : 'コマンド "$1"のパラメーターが無効です',
-			'errDataNotJSON'       : 'JSONデータではありません',
-			'errDataEmpty'         : '空のデータです',
-			'errCmdReq'            : 'バックエンドリクエストがコマンド名を要求しています',
-			'errOpen'              : '"$1"を開くことができません',
-			'errNotFolder'         : 'オブジェクトがフォルダーではありません',
-			'errNotFile'           : 'オブジェクトがファイルではありません',
-			'errRead'              : '"$1"を読むことができません',
-			'errWrite'             : '"$1"に書きこむことができません',
-			'errPerm'              : '権限がありません',
-			'errLocked'            : '"$1" はロックされているので名前の変更、移動、削除ができません',
-			'errExists'            : '"$1"というファイル名はすでに存在しています',
-			'errInvName'           : '無効なファイル名です',
-			'errInvDirname'        : '無効なフォルダ名です',  // from v2.1.24 added 12.4.2017
-			'errFolderNotFound'    : 'フォルダーが見つかりません',
-			'errFileNotFound'      : 'ファイルが見つかりません',
-			'errTrgFolderNotFound' : 'ターゲットとするフォルダー "$1" が見つかりません',
-			'errPopup'             : 'ポップアップウィンドウが開けません。ファイルを開くにはブラウザの設定を変更してください',
-			'errMkdir'             : '"$1"フォルダーを作成することができません',
-			'errMkfile'            : '"$1"ファイルを作成することができません',
-			'errRename'            : '"$1"の名前を変更することができません',
-			'errCopyFrom'          : '"$1"からのファイルコピーが許可されていません',
-			'errCopyTo'            : '"$1"へのファイルコピーが許可されていません',
-			'errMkOutLink'         : 'ボリュームルート外へのリンクを作成することはできません', // from v2.1 added 03.10.2015
+			'errUnknown'           : '不明なエラーです。',
+			'errUnknownCmd'        : '不明なコマンドです。',
+			'errJqui'              : '無効な jQuery UI 設定です。Selectable, Draggable, Droppable コンポーネントを含める必要があります。',
+			'errNode'              : 'elFinder は DOM Element が必要です。',
+			'errURL'               : '無効な elFinder 設定です！ URLを設定されていません。',
+			'errAccess'            : 'アクセスが拒否されました。',
+			'errConnect'           : 'バックエンドとの接続ができません。',
+			'errAbort'             : '接続が中断されました。',
+			'errTimeout'           : '接続がタイムアウトしました。',
+			'errNotFound'          : 'バックエンドが見つかりません。',
+			'errResponse'          : '無効なバックエンドレスポンスです。',
+			'errConf'              : 'バックエンドの設定が有効ではありません。',
+			'errJSON'              : 'PHP JSON モジュールがインストールされていません。',
+			'errNoVolumes'         : '読み込み可能なボリュームがありません。',
+			'errCmdParams'         : 'コマンド "$1"のパラメーターが無効です。',
+			'errDataNotJSON'       : 'JSONデータではありません。',
+			'errDataEmpty'         : '空のデータです。',
+			'errCmdReq'            : 'バックエンドリクエストはコマンド名が必要です。',
+			'errOpen'              : '"$1" を開くことができません。',
+			'errNotFolder'         : 'オブジェクトがフォルダーではありません。',
+			'errNotFile'           : 'オブジェクトがファイルではありません。',
+			'errRead'              : '"$1" を読み込むことができません。',
+			'errWrite'             : '"$1" に書き込むことができません。',
+			'errPerm'              : '権限がありません。',
+			'errLocked'            : '"$1" はロックされているので名前の変更、移動、削除ができません。',
+			'errExists'            : '"$1" というアイテム名はすでに存在しています。',
+			'errInvName'           : '無効なファイル名です。',
+			'errInvDirname'        : '無効なフォルダ名です。',  // from v2.1.24 added 12.4.2017
+			'errFolderNotFound'    : 'フォルダーが見つかりません。',
+			'errFileNotFound'      : 'ファイルが見つかりません。',
+			'errTrgFolderNotFound' : 'ターゲットとするフォルダー "$1" が見つかりません。',
+			'errPopup'             : 'ポップアップウィンドウが開けません。ファイルを開くにはブラウザの設定を変更してください。',
+			'errMkdir'             : 'フォルダー "$1" を作成することができません。',
+			'errMkfile'            : 'ファイル "$1" を作成することができません。',
+			'errRename'            : '"$1" の名前を変更することができません。',
+			'errCopyFrom'          : '"$1" からのファイルコピーは許可されていません。',
+			'errCopyTo'            : '"$1" へのファイルコピーは許可されていません。',
+			'errMkOutLink'         : 'ボリュームルート外へのリンクを作成することはできません。', // from v2.1 added 03.10.2015
 			'errUpload'            : 'アップロードエラー',  // old name - errUploadCommon
-			'errUploadFile'        : '"$1"がアップロードできません', // old name - errUpload
-			'errUploadNoFiles'     : 'アップロードされたファイルはありません',
-			'errUploadTotalSize'   : 'データが許容サイズを超えています', // old name - errMaxSize
-			'errUploadFileSize'    : 'ファイルが許容サイズを超えています', //  old name - errFileMaxSize
-			'errUploadMime'        : '許可されていないファイル形式です',
-			'errUploadTransfer'    : '"$1" 転送エラーです',
-			'errUploadTemp'        : 'アップロード用一時ファイルが作成できません', // from v2.1 added 26.09.2015
-			'errNotReplace'        : 'アイテム "$1" は、すでにこの場所にありますがアイテムのタイプが違うので置き換えることはできません', // new
-			'errReplace'           : '"$1"を置き換えることができません',
-			'errSave'              : '"$1"を保存することができません',
-			'errCopy'              : '"$1"をコピーすることができません',
-			'errMove'              : '"$1"を移動することができません',
-			'errCopyInItself'      : '"$1"をそれ自身の中にコピーすることはできません',
-			'errRm'                : '"$1"を削除することができません',
-			'errRmSrc'             : '元ファイルを削除することができません',
-			'errExtract'           : '"$1"を解凍することができません',
-			'errArchive'           : 'アーカイブを作成することができません',
-			'errArcType'           : 'サポート外のアーカイブ形式です',
-			'errNoArchive'         : 'アーカイブでないかサポートされていないアーカイブ形式です',
-			'errCmdNoSupport'      : 'サポートされていないコマンドです',
-			'errReplByChild'       : 'フォルダ "$1" に含まれてるアイテムを置き換えることはできません',
-			'errArcSymlinks'       : 'シンボリックリンクまたは許容されないファイル名を含むアーカイブはセキュリティ上、解凍できません', // edited 24.06.2012
-			'errArcMaxSize'        : 'アーカイブが許容されたサイズを超えています',
-			'errResize'            : '"$1"をリサイズできません',
-			'errResizeDegree'      : 'イメージの回転角度が不正です',  // added 7.3.2013
-			'errResizeRotate'      : 'イメージを回転できません',  // added 7.3.2013
-			'errResizeSize'        : '指定されたイメージサイズが不正です',  // added 7.3.2013
-			'errResizeNoChange'    : 'イメージサイズなどの変更点がありません',  // added 7.3.2013
-			'errUsupportType'      : 'このファイルタイプはサポートされません',
-			'errNotUTF8Content'    : 'ファイル "$1" には UTF-8 以外の文字が含まれているので編集できません',  // added 9.11.2011
-			'errNetMount'          : '"$1"をマウントできません', // added 17.04.2012
-			'errNetMountNoDriver'  : 'サポートされていないプロトコルです',     // added 17.04.2012
-			'errNetMountFailed'    : 'マウントに失敗しました',         // added 17.04.2012
-			'errNetMountHostReq'   : 'ホスト名は必須です', // added 18.04.2012
-			'errSessionExpires'    : 'アクションがなかったため、セッションが期限切れになりました',
+			'errUploadFile'        : '"$1" をアップロードすることができません。', // old name - errUpload
+			'errUploadNoFiles'     : 'アップロードされたファイルはありません。',
+			'errUploadTotalSize'   : 'データが許容サイズを超えています。', // old name - errMaxSize
+			'errUploadFileSize'    : 'ファイルが許容サイズを超えています。', //  old name - errFileMaxSize
+			'errUploadMime'        : '許可されていないファイル形式です。',
+			'errUploadTransfer'    : '"$1" 転送エラーです。',
+			'errUploadTemp'        : 'アップロード用一時ファイルを作成できません。', // from v2.1 added 26.09.2015
+			'errNotReplace'        : 'アイテム "$1" はすでにこの場所にあり、アイテムのタイプが違うので置き換えることはできません。', // new
+			'errReplace'           : '"$1" を置き換えることができません。',
+			'errSave'              : '"$1" を保存することができません。',
+			'errCopy'              : '"$1" をコピーすることができません。',
+			'errMove'              : '"$1" を移動することができません。',
+			'errCopyInItself'      : '"$1" をそれ自身の中にコピーすることはできません。',
+			'errRm'                : '"$1" を削除することができません。',
+			'errRmSrc'             : '元ファイルを削除することができません。',
+			'errExtract'           : '"$1" を解凍することができません。',
+			'errArchive'           : 'アーカイブを作成することができません。',
+			'errArcType'           : 'サポート外のアーカイブ形式です。',
+			'errNoArchive'         : 'アーカイブでないかサポートされていないアーカイブ形式です。',
+			'errCmdNoSupport'      : 'サポートされていないコマンドです。',
+			'errReplByChild'       : 'フォルダ "$1" に含まれてるアイテムを置き換えることはできません。',
+			'errArcSymlinks'       : 'シンボリックリンクまたは許容されないファイル名を含むアーカイブはセキュリティ上、解凍できません。', // edited 24.06.2012
+			'errArcMaxSize'        : 'アーカイブが許容されたサイズを超えています。',
+			'errResize'            : '"$1" のリサイズまたは回転ができません。',
+			'errResizeDegree'      : 'イメージの回転角度が不正です。',  // added 7.3.2013
+			'errResizeRotate'      : 'イメージを回転できません。',  // added 7.3.2013
+			'errResizeSize'        : '指定されたイメージサイズが不正です。',  // added 7.3.2013
+			'errResizeNoChange'    : 'イメージサイズなどの変更点がありません。',  // added 7.3.2013
+			'errUsupportType'      : 'このファイルタイプはサポートされていません。',
+			'errNotUTF8Content'    : 'ファイル "$1" には UTF-8 以外の文字が含まれているので編集できません。',  // added 9.11.2011
+			'errNetMount'          : '"$1" をマウントできません。', // added 17.04.2012
+			'errNetMountNoDriver'  : 'サポートされていないプロトコルです。',     // added 17.04.2012
+			'errNetMountFailed'    : 'マウントに失敗しました。',         // added 17.04.2012
+			'errNetMountHostReq'   : 'ホスト名は必須です。', // added 18.04.2012
+			'errSessionExpires'    : 'アクションがなかったため、セッションが期限切れになりました。',
 			'errCreatingTempDir'   : '一時ディレクトリを作成できません："$1"',
 			'errFtpDownloadFile'   : 'FTP からファイルをダウンロードできません："$1"',
 			'errFtpUploadFile'     : 'FTP へファイルをアップロードできません："$1"',
 			'errFtpMkdir'          : 'FTP にリモートディレクトリを作成できません："$1"',
 			'errArchiveExec'       : 'ファイルのアーカイブ中にエラーが発生しました："$1"',
 			'errExtractExec'       : 'ファイルの抽出中にエラーが発生しました："$1"',
-			'errNetUnMount'        : 'アンマウントできません', // from v2.1 added 30.04.2012
-			'errConvUTF8'          : 'UTF-8 に変換できませんでした', // from v2.1 added 08.04.2014
-			'errFolderUpload'      : 'フォルダをアップロードしたいのであれば、モダンブラウザを試してください', // from v2.1 added 26.6.2015
-			'errSearchTimeout'     : '"$1"を検索中にタイムアウトしました。検索結果は部分的です。', // from v2.1 added 12.1.2016
-			'errReauthRequire'     : '再認可が必要です', // from v2.1.10 added 24.3.2016
-			'errMaxTargets'        : '選択可能な最大アイテム数は $1 個です', // from v2.1.17 added 17.10.2016
+			'errNetUnMount'        : 'アンマウントできません。', // from v2.1 added 30.04.2012
+			'errConvUTF8'          : 'UTF-8 に変換できませんでした。', // from v2.1 added 08.04.2014
+			'errFolderUpload'      : 'フォルダをアップロードしたいのであれば、モダンブラウザを試してください。', // from v2.1 added 26.6.2015
+			'errSearchTimeout'     : '"$1" を検索中にタイムアウトしました。検索結果は部分的です。', // from v2.1 added 12.1.2016
+			'errReauthRequire'     : '再認可が必要です。', // from v2.1.10 added 24.3.2016
+			'errMaxTargets'        : '選択可能な最大アイテム数は $1 個です。', // from v2.1.17 added 17.10.2016
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'アーカイブ作成',
@@ -148,7 +148,7 @@
 			'cmdcolwidth'  : '列幅リセット', // from v2.1.13 added 12.06.2016
 			'cmdfullscreen': 'フルスクリーン', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : '移動', // from v2.1.15 added 21.08.2016
-			
+
 			/*********************************** buttons ***********************************/
 			'btnClose'  : '閉じる',
 			'btnSave'   : '保存',
@@ -251,10 +251,10 @@
 			'sortsize'          : 'サイズ順',
 			'sortdate'          : '日付順',
 			'sortFoldersFirst'  : 'フォルダ優先',
-			'sortperm'          : '権限順',      // from v2.1.13 added 13.06.2016
-			'sortmode'          : '属性順',      // from v2.1.13 added 13.06.2016
-			'sortowner'         : 'オーナー順',  // from v2.1.13 added 13.06.2016
-			'sortgroup'         : 'グループ順',  // from v2.1.13 added 13.06.2016
+			'sortperm'          : '権限順', // from v2.1.13 added 13.06.2016
+			'sortmode'          : '属性順',       // from v2.1.13 added 13.06.2016
+			'sortowner'         : 'オーナー順',      // from v2.1.13 added 13.06.2016
+			'sortgroup'         : 'グループ順',      // from v2.1.13 added 13.06.2016
 			'sortAlsoTreeview'  : 'ツリービューも',  // from v2.1.15 added 01.08.2016
 
 			/********************************** new items **********************************/
@@ -370,10 +370,10 @@
 			'openMulti'       : '複数ファイルオープン', // from v2.1.12 added 5.14.2016
 			'openMultiConfirm': '$1 個のファイルを開こうとしています。このままブラウザで開きますか？', // from v2.1.12 added 5.14.2016
 			'emptySearch'     : '検索対象に該当するアイテムはありません。', // from v2.1.12 added 5.16.2016
-			'editingFile'     : 'ファイルを編集中です', // from v2.1.13 added 6.3.2016
-			'hasSelected'     : '$1 個のアイテムを選択中です', // from v2.1.13 added 6.3.2016
-			'hasClipboard'    : '$1 個のアイテムがクリップボードに入っています', // from v2.1.13 added 6.3.2016
-			'incSearchOnly'   : '逐次検索対象は現在のビューのみです', // from v2.1.13 added 6.30.2016
+			'editingFile'     : 'ファイルを編集中です。', // from v2.1.13 added 6.3.2016
+			'hasSelected'     : '$1 個のアイテムを選択中です。', // from v2.1.13 added 6.3.2016
+			'hasClipboard'    : '$1 個のアイテムがクリップボードに入っています。', // from v2.1.13 added 6.3.2016
+			'incSearchOnly'   : '逐次検索対象は現在のビューのみです。', // from v2.1.13 added 6.30.2016
 			'reinstate'       : '元に戻す', // from v2.1.15 added 3.8.2016
 			'complete'        : '$1 完了', // from v2.1.15 added 21.8.2016
 			'contextmenu'     : 'コンテキストメニュー', // from v2.1.15 added 9.9.2016
