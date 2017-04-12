@@ -172,7 +172,17 @@ elFinder.prototype.i18 = {};
 
 		hash = location.hash.replace(/^#/, '').match(/(2\.[01])(?::([a-zA-Z0-9-]{2,5}))/);
 		branch = (hash && hash[1])? hash[1] : '2.1';
-		lang = (hash && hash[2])? hash[2] : '';
+		lang = (hash && hash[2])? hash[2] : (function() {
+			var fullLang, lang;
+			// detection by browser language
+			fullLang = (navigator.browserLanguage || navigator.language || navigator.userLanguage);
+			lang = fullLang.substr(0,2);
+			if (lang === 'ja') lang = 'jp';
+			else if (lang === 'pt') lang = 'pt_BR';
+			else if (lang === 'ug') lang = 'ug_CN';
+			else if (lang === 'zh') lang = (fullLang.substr(0,5).toLowerCase() === 'zh-tw')? 'zh_TW' : 'zh_CN';
+			return lang;
+		})();
 
 		$('#selbr').on('change', function(e){
 			branch = $(this).find('option:selected').val();
