@@ -176,9 +176,9 @@ elFinder.prototype.resources = {
 									valid = false;
 								}
 							}
-							if (!name || name === '..' || !valid) {
+							if (!name || name === '.' || name === '..' || !valid) {
 								inError = true;
-								fm.error('errInvName', {modal: true, close: select});
+								fm.error(file.mime === 'directory'? 'errInvDirname' : 'errInvName', {modal: true, close: select});
 								return false;
 							}
 							if (fm.fileByName(name, phash)) {

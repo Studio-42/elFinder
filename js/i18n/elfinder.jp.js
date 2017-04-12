@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2016-12-13
+ * @version 2017-04-12
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -51,6 +51,7 @@
 			'errLocked'            : '"$1" はロックされているので名前の変更、移動、削除ができません',
 			'errExists'            : '"$1"というファイル名はすでに存在しています',
 			'errInvName'           : '無効なファイル名です',
+			'errInvDirname'        : '無効なフォルダ名です',  // from v2.1.24 added 12.4.2017
 			'errFolderNotFound'    : 'フォルダーが見つかりません',
 			'errFileNotFound'      : 'ファイルが見つかりません',
 			'errTrgFolderNotFound' : 'ターゲットとするフォルダー "$1" が見つかりません',

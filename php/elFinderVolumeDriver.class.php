@@ -1932,7 +1932,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if (!$this->nameAccepted($name, true)) {
-			return $this->setError(elFinder::ERROR_INVALID_NAME);
+			return $this->setError(elFinder::ERROR_INVALID_DIRNAME);
 		}
 		
 		if (($dir = $this->dir($dsthash)) == false) {
@@ -2029,7 +2029,7 @@ abstract class elFinderVolumeDriver {
 		$isDir = ($file['mime'] === 'directory');
 		
 		if (!$this->nameAccepted($name, $isDir)) {
-			return $this->setError(elFinder::ERROR_INVALID_NAME, $name);
+			return $this->setError(elFinder::ERROR_INVALID_DIRNAME);
 		}
 		
 		if (! $isDir) {
@@ -4427,7 +4427,7 @@ abstract class elFinderVolumeDriver {
 		$errpath = $volume->path($source['hash']);
 		
 		if (!$this->nameAccepted($source['name'], $srcIsDir)) {
-			return $this->setError(elFinder::ERROR_COPY, $errpath, elFinder::ERROR_INVALID_NAME);
+			return $this->setError(elFinder::ERROR_COPY, $errpath, $srcIsDir? elFinder::ERROR_INVALID_DIRNAME : elFinder::ERROR_INVALID_NAME);
 		}
 				
 		if (!$source['read']) {
