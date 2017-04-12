@@ -25,7 +25,7 @@
 			if (lang === 'ja') lang = 'jp';
 			else if (lang === 'pt') lang = 'pt_BR';
 			else if (lang === 'ug') lang = 'ug_CN';
-			else if (lang === 'zh') lang = (fullLang.substr(0,5) === 'zh-TW')? 'zh_TW' : 'zh_CN';
+			else if (lang === 'zh') lang = (fullLang.substr(0,5).toLowerCase() === 'zh-tw')? 'zh_TW' : 'zh_CN';
 			return lang;
 		})(),
 		
