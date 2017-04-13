@@ -684,12 +684,22 @@ elFinder.prototype._options = {
 	width : 'auto',
 	
 	/**
-	 * elFinder height
+	 * elFinder node height
+	 * Number: pixcel or String: Number + "%"
 	 *
-	 * @type Number
+	 * @type Number | String
 	 * @default  400
 	 */
 	height : 400,
+	
+	/**
+	 * Base node object or selector
+	 * Element which is the reference of the height percentage
+	 *
+	 * @type Object|String
+	 * @default null | $(window) (if height is percentage)
+	 **/
+	heightBase : null,
 	
 	/**
 	 * Make elFinder resizable if jquery ui resizable available

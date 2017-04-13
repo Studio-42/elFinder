@@ -205,11 +205,21 @@ var elFinder = function(node, opts) {
 		
 		/**
 		 * elFinder node height
+		 * Number: pixcel or String: Number + "%"
 		 *
-		 * @type Number
+		 * @type Number | String
 		 * @default 400
 		 **/
 		height = 400,
+		
+		/**
+		 * Base node object or selector
+		 * Element which is the reference of the height percentage
+		 *
+		 * @type Object|String
+		 * @default null | $(window) (if height is percentage)
+		 **/
+		heightBase = null,
 		
 		/**
 		 * elfinder path for sound played on remove
@@ -2405,11 +2415,57 @@ var elFinder = function(node, opts) {
 	 * Resize elfinder node
 	 * 
 	 * @param  String|Number  width
-	 * @param  Number         height
+	 * @param  String|Number  height
 	 * @return void
 	 */
 	this.resize = function(w, h) {
-		node.css('width', w).height(h).trigger('resize');
+		var getMargin = function() {
+				var m = node.outerHeight(true) - node.innerHeight(),
+					p = node;
+				
+				while(p.get(0) !== heightBase.get(0)) {
+					p = p.parent();
+					m += p.outerHeight(true) - p.innerHeight();
+					if (! p.parent().length) {
+						// reached the document
+						break;
+					}
+				}
+				return m;
+			},
+			fitToBase = function() {
+				tm && clearTimeout(tm);
+				if (! node.hasClass('elfinder-fullscreen')) {
+					tm = setTimeout(function() {
+						self.restoreSize();
+					}, 100);
+				}
+			},
+			fit = ! node.hasClass('ui-resizable'),
+			mt, tm;
+
+		if (fit && heightBase) {
+			tm && clearTimeout(tm);
+			heightBase.off('resize.' + self.namespace, fitToBase);
+		}
+		
+		if (typeof h === 'string') {
+			if (mt = h.match(/^([0-9.]+)%$/)) {
+				// setup heightBase
+				if (! heightBase || ! heightBase.length) {
+					heightBase = $(window);
+				}
+				if (! heightBase.data('marginToMyNode')) {
+					heightBase.data('marginToMyNode', getMargin());
+				}
+				
+				h = heightBase.height() * (mt[1] / 100) - heightBase.data('marginToMyNode');
+				
+				fit && heightBase.on('resize.' + self.namespace, fitToBase);
+			}
+		}
+		
+		node.css({ width : w, height : parseInt(h) }).trigger('resize');
 		this.trigger('resize', {width : node.width(), height : node.height()});
 	};
 	
@@ -3406,7 +3462,11 @@ var elFinder = function(node, opts) {
 	}
 	
 	if (this.options.height) {
-		height = parseInt(this.options.height);
+		height = this.options.height;
+	}
+	
+	if (this.options.heightBase) {
+		heightBase = $(this.options.heightBase);
 	}
 	
 	if (this.options.soundPath) {
