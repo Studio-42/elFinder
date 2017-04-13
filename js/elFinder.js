@@ -2442,7 +2442,8 @@ var elFinder = function(node, opts) {
 				}
 			},
 			fit = ! node.hasClass('ui-resizable'),
-			mt, tm;
+			prv = node.data('resizeSize') || {w: 0, h: 0},
+			mt, tm, size = {};
 
 		if (fit && heightBase) {
 			tm && clearTimeout(tm);
@@ -2465,8 +2466,14 @@ var elFinder = function(node, opts) {
 			}
 		}
 		
-		node.css({ width : w, height : parseInt(h) }).trigger('resize');
-		this.trigger('resize', {width : node.width(), height : node.height()});
+		node.css({ width : w, height : parseInt(h) });
+		size.w = node.width();
+		size.h = node.height();
+		node.data('resizeSize', size);
+		if (size.w !== prv.w || size.h !== prv.h) {
+			node.trigger('resize');
+			this.trigger('resize', {width : size.w, height : size.h});
+		}
 	};
 	
 	/**
