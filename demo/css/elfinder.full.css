@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 9f16c51) (2017-04-13)
+ * Version 2.1.23 (2.1-src Nightly: c3ee0dc) (2017-04-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -1669,6 +1669,10 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 	-moz-user-select:     text;
 	-khtml-user-select:   text;
 	user-select:          text;
+}
+
+.elfinder .std42-dialog .ui-dialog-content form label {
+	border: none;
 }
 
 /* buttons */
