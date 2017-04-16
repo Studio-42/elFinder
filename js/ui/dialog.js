@@ -356,13 +356,13 @@ $.fn.elfinderdialog = function(opts, fm) {
 					this.id && $(this).parent().find('label[for='+this.id+']').addClass(clhover);
 				})
 				.on('blur', '.'+cltabstop, function() {
-					$(this).removeClass(clhover).parent('label').removeClass(clhover);
+					$(this).removeClass(clhover).removeData('keepFocus').parent('label').removeClass(clhover);
 					this.id && $(this).parent().find('label[for='+this.id+']').removeClass(clhover);
 				})
 				.on('mouseenter mouseleave', '.'+cltabstop, function(e) {
 					var $this = $(this);
 					if (opts.btnHoverFocus) {
-						if (e.type == 'mouseenter') {
+						if (e.type == 'mouseenter' && ! $(':focus').data('keepFocus')) {
 							$this.focus();
 						}
 					} else {
