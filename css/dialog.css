@@ -160,6 +160,10 @@
 	user-select:          text;
 }
 
+.elfinder .std42-dialog .ui-dialog-content form label {
+	border: none;
+}
+
 /* buttons */
 .std42-dialog .ui-dialog-buttonpane {
 	border: 0 solid;
