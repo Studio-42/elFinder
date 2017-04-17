@@ -258,6 +258,8 @@ elFinder.prototype.commands.upload = function() {
 			}
 			var my = e.target || e.srcElement;
 			setTimeout(function () {
+				var type = 'text',
+					src;
 				if (my.innerHTML) {
 					$(my).find('img').each(function(i, v){
 						if (v.src.match(/^webkit-fake-url:\/\//)) {
@@ -267,8 +269,11 @@ elFinder.prototype.commands.upload = function() {
 							$(v).remove();
 						}
 					});
-					var src = my.innerHTML.replace(/<br[^>]*>/gi, ' ');
-					var type = src.match(/<[^>]+>/)? 'html' : 'text';
+					
+					if ($(my).find('a,img').length) {
+						type = 'html';
+					}
+					src = my.innerHTML;
 					my.innerHTML = '';
 					upload({files : [ src ], type : type});
 				}
