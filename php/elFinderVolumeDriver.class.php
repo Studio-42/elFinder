@@ -187,6 +187,9 @@ abstract class elFinderVolumeDriver {
 	 * @var array
 	 **/
 	protected $options = array(
+		// Driver ID (Prefix of volume ID), Normally, the value specified for each volume driver is used.
+		'driverId'        => '',
+		// Id (Suffix of volume ID), Normally, the number incremented according to the specified number of volumes is used.
 		'id'              => '',
 		// revision id of root directory that uses for caching control of root stat
 		'rootRev'         => '',
@@ -1017,6 +1020,11 @@ abstract class elFinderVolumeDriver {
 		}
 		if (! ($this->session instanceof elFinderSessionInterface)) {
 			return $this->setError('Session wrapper instance must be "elFinderSessionInterface".');
+		}
+		
+		// set driverId
+		if (!empty($this->options['driverId'])) {
+			$this->driverId = $this->options['driverId'];
 		}
 		
 		$this->id = $this->driverId.(!empty($this->options['id']) ? $this->options['id'] : elFinder::$volumesCnt++).'_';

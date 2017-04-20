@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 2a1b838) (2017-04-17)
+ * Version 2.1.23 (2.1-src Nightly: 555c773) (2017-04-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7287,7 +7287,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 2a1b838)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 555c773)';
 
 
 
