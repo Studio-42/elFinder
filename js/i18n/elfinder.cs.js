@@ -15,7 +15,7 @@
 }(this, function(elFinder) {
 	elFinder.prototype.i18.cs = {
 		translator : 'Jay Gridley &lt;gridley.jay@hotmail.com&gt;, RobiNN &lt;kelcakrobo@gmail.com&gt;',
-		language   : 'Czech',
+		language   : 'čeština',
 		direction  : 'ltr',
 		dateFormat : 'd. m. Y H:i', // Mar 13, 2012 05:27 PM
 		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
