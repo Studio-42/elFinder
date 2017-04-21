@@ -1,8 +1,8 @@
 /**
  * Slovak translation
  * @author Jakub Ďuraš <jkblmr@gmail.com>
- * @author RobiNN <admin@robonetwork.cf>
- * @version 2017-1-16
+ * @author RobiNN <kelcakrobo@gmail.com>
+ * @version 2017-04-21
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -14,11 +14,12 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.sk = {
-		translator : 'Jakub Ďuraš &lt;jkblmr@gmail.com&gt;, RobiNN &lt;admin@robonetwork.cf&gt;',
+		translator : 'Jakub Ďuraš &lt;jkblmr@gmail.com&gt;, RobiNN &lt;kelcakrobo@gmail.com&gt;',
 		language   : 'slovenčina',
 		direction  : 'ltr',
 		dateFormat : 'd.m.Y H:i', // Mar 13, 2012 05:27 PM
 		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
+		nonameDateFormat : 'ymd-His', // to apply if upload file is noname: 120513172700
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -50,6 +51,7 @@
 			'errLocked'            : '"$1" je uzamknutý, a nemôže byť premenovaný, presunutý alebo odstránený.',
 			'errExists'            : 'Súbor s názvom "$1" už existuje.',
 			'errInvName'           : 'Nesprávný názov súboru.',
+			'errInvDirname'        : 'Neplatný názov adresára.',  // from v2.1.24 added 12.4.2017
 			'errFolderNotFound'    : 'Priečinok nenájdený.',
 			'errFileNotFound'      : 'Súbor nenájdený.',
 			'errTrgFolderNotFound' : 'Zvolený priečinok "$1" nenájdený.',
@@ -60,15 +62,15 @@
 			'errCopyFrom'          : 'Kopírovanie súborov z média "$1" nie je povolené.',
 			'errCopyTo'            : 'Kopírovanie súborov na médium "$1" nie je povolené.',
 			'errMkOutLink'         : 'Nie je možné vytvoriť odkaz mimo koreňového zväzku.', // from v2.1 added 03.10.2015
-			'errUpload'            : 'Problém s nahrávaním.', // old name - errUploadCommon
+			'errUpload'            : 'Problém s nahrávaním.',  // old name - errUploadCommon
 			'errUploadFile'        : 'Nie je možné nahrať "$1".', // old name - errUpload
 			'errUploadNoFiles'     : 'Žiadne súbory neboli nájdené na nahranie.',
 			'errUploadTotalSize'   : 'Dáta prekračujú maximálnu povolenú veľkosť.', // old name - errMaxSize
-			'errUploadFileSize'    : 'Súbor prekračuje maximálnu povolenú veľkosť.', // old name - errFileMaxSize
+			'errUploadFileSize'    : 'Súbor prekračuje maximálnu povolenú veľkosť.', //  old name - errFileMaxSize
 			'errUploadMime'        : 'Nepovolený typ súboru.',
 			'errUploadTransfer'    : 'Problém s nahrávaním "$1".',
 			'errUploadTemp'        : 'Nie je možné vytvoriť dočasný súbor pre nahranie.', // from v2.1 added 26.09.2015
-			'errNotReplace'        : 'Objekt "$1" na tomto mieste už existuje a nemôže byť nahradený objektom s iným typom.',
+			'errNotReplace'        : 'Objekt "$1" na tomto mieste už existuje a nemôže byť nahradený objektom s iným typom.', // new
 			'errReplace'           : 'Nie je možné nahradiť "$1".',
 			'errSave'              : 'Nie je možné uložiť "$1".',
 			'errCopy'              : 'Nie je možné kopíropvať "$1".',
@@ -82,18 +84,18 @@
 			'errNoArchive'         : 'Súbor nie je archívom, alebo je nepodporovaného typu.',
 			'errCmdNoSupport'      : 'Backend nepodporuje tento príkaz.',
 			'errReplByChild'       : 'Priečinok "$1" nemôže byť nahradený položkou, ktorú už obsahuje.',
-			'errArcSymlinks'       : 'Z bezpečnostných dôvodov bolo zakázané extrahovanie archívov obsahujúcich symlinky, alebo súborov s nepovolenými menami.',
+			'errArcSymlinks'       : 'Z bezpečnostných dôvodov bolo zakázané extrahovanie archívov obsahujúcich symlinky, alebo súborov s nepovolenými menami.', // edited 24.06.2012
 			'errArcMaxSize'        : 'Súbory archívu prekračujú maximálnu povolenú veľkosť.',
 			'errResize'            : 'Nie je možné zmeniť veľkost "$1".',
-			'errResizeDegree'      : 'Neplatný stupeň otočenia.', // added 7.3.2013
-			'errResizeRotate'      : 'Nie je možné otočiť obrázok.', // added 7.3.2013
-			'errResizeSize'        : 'Neplatná veľkosť obrázka.', // added 7.3.2013
-			'errResizeNoChange'    : 'Veľkosť obrázka sa nezmení.', // added 7.3.2013
+			'errResizeDegree'      : 'Neplatný stupeň otočenia.',  // added 7.3.2013
+			'errResizeRotate'      : 'Nie je možné otočiť obrázok.',  // added 7.3.2013
+			'errResizeSize'        : 'Neplatná veľkosť obrázka.',  // added 7.3.2013
+			'errResizeNoChange'    : 'Veľkosť obrázka sa nezmení.',  // added 7.3.2013
 			'errUsupportType'      : 'Nepodporovaný typ súboru.',
-			'errNotUTF8Content'    : 'Súbor "$1" nemá obsah kódovaný v UTF-8, a nemôže byť upravený.', // added 9.11.2011
+			'errNotUTF8Content'    : 'Súbor "$1" nemá obsah kódovaný v UTF-8, a nemôže byť upravený.',  // added 9.11.2011
 			'errNetMount'          : 'Nie je možné pripojiť "$1".', // added 17.04.2012
-			'errNetMountNoDriver'  : 'Nepodporovaný protokol.', // added 17.04.2012
-			'errNetMountFailed'    : 'Pripájanie zlyhalo.', // added 17.04.2012
+			'errNetMountNoDriver'  : 'Nepodporovaný protokol.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Pripájanie zlyhalo.',         // added 17.04.2012
 			'errNetMountHostReq'   : 'Hosť je požadovaný.', // added 18.04.2012
 			'errSessionExpires'    : 'Platnosť relácie uplynula z dôvodu nečinnosti.',
 			'errCreatingTempDir'   : 'Nedá sa vytvoriť dočasný adresár: "$1"',
@@ -155,17 +157,19 @@
 			'btnCancel' : 'Zrušiť',
 			'btnNo'     : 'Nie',
 			'btnYes'    : 'Áno',
-			'btnMount'  : 'Pripojiť', // added 18.04.2012
+			'btnMount'  : 'Pripojiť',  // added 18.04.2012
 			'btnApprove': 'Ísť na $1 & schváliť', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Odpojiť', // from v2.1 added 30.04.2012
 			'btnConv'   : 'Previesť', // from v2.1 added 08.04.2014
-			'btnCwd'    : 'Tu', // from v2.1 added 22.5.2015
-			'btnVolume' : 'Médium', // from v2.1 added 22.5.2015
-			'btnAll'    : 'Všetko', // from v2.1 added 22.5.2015
+			'btnCwd'    : 'Tu',      // from v2.1 added 22.5.2015
+			'btnVolume' : 'Médium',    // from v2.1 added 22.5.2015
+			'btnAll'    : 'Všetko',       // from v2.1 added 22.5.2015
 			'btnMime'   : 'MIME typ', // from v2.1 added 22.5.2015
-			'btnFileName':'Názov súboru', // from v2.1 added 22.5.2015
+			'btnFileName':'Názov súboru',  // from v2.1 added 22.5.2015
 			'btnSaveClose': 'Uložiť & zavrieť', // from v2.1 added 12.6.2015
-			'btnBackup' : 'Zálohovať', // from v2.1 added 28.11.2015
+			'btnBackup' : 'Zálohovať', // fromv2.1 added 28.11.2015
+			'btnRename'    : 'Premenovať',      // from v2.1.24 added 6.4.2017
+			'btnRenameAll' : 'Premenovať všetko', // from v2.1.24 added 6.4.2017
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Otváranie priečinka',
@@ -248,15 +252,15 @@
 			'sortdate'          : 'podľa dátumu',
 			'sortFoldersFirst'  : 'Najskôr Priečinky',
 			'sortperm'          : 'podľa povolenia', // from v2.1.13 added 13.06.2016
-			'sortmode'          : 'podľa módu', // from v2.1.13 added 13.06.2016
-			'sortowner'         : 'podľa majiteľa', // from v2.1.13 added 13.06.2016
-			'sortgroup'         : 'podľa skupiny', // from v2.1.13 added 13.06.2016
-			'sortAlsoTreeview'  : 'Tiež stromove zobrazenie', // from v2.1.15 added 01.08.2016
+			'sortmode'          : 'podľa módu',       // from v2.1.13 added 13.06.2016
+			'sortowner'         : 'podľa majiteľa',      // from v2.1.13 added 13.06.2016
+			'sortgroup'         : 'podľa skupiny',      // from v2.1.13 added 13.06.2016
+			'sortAlsoTreeview'  : 'Tiež stromove zobrazenie',  // from v2.1.15 added 01.08.2016
 
 			/********************************** new items **********************************/
 			'untitled file.txt' : 'Nový textový súbor.txt', // added 10.11.2015
-			'untitled folder'   : 'Nový priečinok', // added 10.11.2015
-			'Archive'           : 'Nový archív', // from v2.1 added 10.11.2015
+			'untitled folder'   : 'Nový priečinok',   // added 10.11.2015
+			'Archive'           : 'Nový archív',  // from v2.1 added 10.11.2015
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Očakávam potvrdenie',
@@ -338,12 +342,12 @@
 			'port'                : 'Port', // added 18.04.2012
 			'user'                : 'Užívateľ', // added 18.04.2012
 			'pass'                : 'Heslo', // added 18.04.2012
-			'confirmUnmount'      : 'Chcete odpojiť $1?', // from v2.1 added 30.04.2012
+			'confirmUnmount'      : 'Chcete odpojiť $1?',  // from v2.1 added 30.04.2012
 			'dropFilesBrowser': 'Premiestnite alebo presunte súbory z prehliadača', // from v2.1 added 30.05.2012
 			'dropPasteFiles'  : 'Tu premiestnite alebo presunte súbory a adresy URL', // from v2.1 added 07.04.2014
 			'encoding'        : 'Kódovanie', // from v2.1 added 19.12.2014
-			'locale'          : 'Lokalizácia', // from v2.1 added 19.12.2014
-			'searchTarget'    : 'Cieľ: $1', // from v2.1 added 22.5.2015
+			'locale'          : 'Lokalizácia',   // from v2.1 added 19.12.2014
+			'searchTarget'    : 'Cieľ: $1',                // from v2.1 added 22.5.2015
 			'searchMime'      : 'Vyhľadávanie podľa vstupného MIME typu', // from v2.1 added 22.5.2015
 			'owner'           : 'Majiteľ', // from v2.1 added 20.6.2015
 			'group'           : 'Skupina', // from v2.1 added 20.6.2015
@@ -355,8 +359,8 @@
 			'emptyFolderDrop' : 'Priečinok je prázdny, premiestnite alebo presunte položky', // from v2.1.6 added 30.12.2015
 			'emptyFolderLTap' : 'Priečinok je prázdny, dlhým kliknutím pridáte položky', // from v2.1.6 added 30.12.2015
 			'quality'         : 'Kvalita', // from v2.1.6 added 5.1.2016
-			'autoSync'        : 'Automatická synchronizácia', // from v2.1.6 added 10.1.2016
-			'moveUp'          : 'Posunúť nahor', // from v2.1.6 added 18.1.2016
+			'autoSync'        : 'Automatická synchronizácia',  // from v2.1.6 added 10.1.2016
+			'moveUp'          : 'Posunúť nahor',  // from v2.1.6 added 18.1.2016
 			'getLink'         : 'Získať URL odkaz', // from v2.1.7 added 9.2.2016
 			'selectedItems'   : 'Vybraté položky ($1)', // from v2.1.7 added 2.19.2016
 			'folderId'        : 'ID priečinka', // from v2.1.10 added 3.25.2016
@@ -382,11 +386,13 @@
 			'enabled'         : 'Povolené', // from v2.1.16 added 4.10.2016
 			'disabled'        : 'Zakázané', // from v2.1.16 added 4.10.2016
 			'emptyIncSearch'  : 'Výsledky vyhľadávania sú prázdne v aktuálnom zobrazení.\\Stlačením tlačidla [Enter] rozšírite vyhľadávanie cieľa.', // from v2.1.16 added 5.10.2016
+			'emptyLetSearch'  : 'Výsledky vyhľadávania prvého listu sú v aktuálnom zobrazení prázdne.', // from v2.1.23 added 24.3.2017
 			'textLabel'       : 'Nápis textu', // from v2.1.17 added 13.10.2016
 			'minsLeft'        : '$1 minút ostáva', // from v2.1.17 added 13.11.2016
 			'openAsEncoding'  : 'Otvoriť s vybratým kódovaním', // from v2.1.19 added 2.12.2016
 			'saveAsEncoding'  : 'Uložiť s vybratým kódovaním', // from v2.1.19 added 2.12.2016
 			'selectFolder'    : 'Vyberte priečinok', // from v2.1.20 added 13.12.2016
+			'firstLetterSearch': 'Hľadanie prvého listu', // from v2.1.23 added 24.3.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
@@ -471,3 +477,4 @@
 		}
 	};
 }));
+
