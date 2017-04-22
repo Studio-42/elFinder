@@ -547,6 +547,7 @@ class elFinder {
 					$this->mountErrors[] = 'Driver "'.$class.'" : '.$e->getMessage();
 				}
 			} else {
+				$this->removeNetVolume($i, $volume);
 				$this->mountErrors[] = 'Driver "'.$class.'" does not exist';
 			}
 		}
