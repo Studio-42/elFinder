@@ -54,7 +54,7 @@ class elFinderConnector {
 		$this->elFinder = $elFinder;
 		$this->reqMethod = strtoupper($_SERVER["REQUEST_METHOD"]);
 		if ($debug) {
-			self::$contentType = 'Content-Type: text/html; charset=utf-8';
+			self::$contentType = 'Content-Type: text/plain; charset=utf-8';
 		}
 	}
 	
