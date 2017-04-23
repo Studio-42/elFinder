@@ -793,6 +793,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			array_pop($parts);
 			$parts = array_map('strtolower', $parts);
 			$stat  = array();
+			$mode  = '';
 			foreach ($parts as $part) {
 
 				list($key, $val) = explode('=', $part);
@@ -812,7 +813,15 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 						break;
 
 					case 'unix.mode':
-						$stat['chmod'] = $val;
+						$mode = strval($val);
+						break;
+
+					case 'unix.uid':
+						$stat['owner'] = $val;
+						break;
+
+					case 'unix.gid':
+						$stat['group'] = $val;
 						break;
 
 					case 'perm':
@@ -832,15 +841,16 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				$stat['size'] = 0;
 			}
 			
-			if (isset($stat['chmod'])) {
+			if ($mode) {
 				$stat['perm'] = '';
-				if ($stat['chmod'][0] == 0) {
-					$stat['chmod'] = substr($stat['chmod'], 1);
+				if ($mode[0] === '0') {
+					$mode = substr($mode, 1);
 				}
 
+				$perm = array();
 				for ($i = 0; $i <= 2; $i++) {
 					$perm[$i] = array(false, false, false);
-					$n = isset($stat['chmod'][$i]) ? $stat['chmod'][$i] : 0;
+					$n = isset($mode[$i]) ? $mode[$i] : 0;
 					
 					if ($n - 4 >= 0) {
 						$perm[$i][0] = true;
@@ -864,8 +874,6 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 					} else {
 						$stat['perm'] .= '-';
 					}
-					
-					$stat['perm'] .= ' ';
 				}
 				
 				$stat['perm'] = trim($stat['perm']);
@@ -875,8 +883,12 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 
 				$stat['read']  = $stat['mime'] == 'directory' ? $read && (($owner && $perm[0][2]) || $perm[1][2] || $perm[2][2]) : $read;
 				$stat['write'] = ($owner && $perm[0][1]) || $perm[1][1] || $perm[2][1];
-				unset($stat['chmod']);
 
+				if ($this->options['statOwner']) {
+					$stat['isowner'] = $owner;
+				} else {
+					unset($stat['owner'], $stat['group'], $stat['perm']);
+				}
 			}
 			
 			return $stat;
