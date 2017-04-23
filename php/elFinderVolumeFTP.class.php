@@ -49,6 +49,21 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected $ftpOsUnix;
 	
 	/**
+	 * FTP LIST command option
+	 * 
+	 * @var string
+	 */
+	protected $ftpListOption = '-al';
+	
+	
+	/**
+	 * Is connected server Pure FTPd?
+	 * 
+	 * @var bool
+	 */
+	protected $isPureFtpd = false;
+	
+	/**
 	 * Tmp folder path
 	 *
 	 * @var string
@@ -91,8 +106,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			'separator'     => '/',
 			'dirMode'       => 0755,
 			'fileMode'      => 0644,
-			'rootCssClass'  => 'elfinder-navbar-root-ftp'
-			
+			'rootCssClass'  => 'elfinder-navbar-root-ftp',
+			'ftpListOption' => '-al',
 		);
 		$this->options = array_merge($this->options, $opts); 
 		$this->options['mimeDetect'] = 'internal';
@@ -173,6 +188,10 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		
 		if (is_null($this->options['syncChkAsTs'])) {
 			$this->options['syncChkAsTs'] = true;
+		}
+		
+		if(isset($this->options['ftpListOption'])) {
+			$this->ftpListOption = $this->options['ftpListOption'];
 		}
 		
 		return $this->connect();
@@ -269,7 +288,30 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			}
 		}
 		
+		$help = ftp_raw($this->connect, 'HELP');
+		$this->isPureFtpd = stripos(implode(' ', $help), 'Pure-FTPd') !== false;
+		
 		return true;
+	}
+	
+	/**
+	 * Call ftp_rawlist with option prefix
+	 * 
+	 * @param string $path
+	 * @return array
+	 */
+	protected function ftpRawList($path) {
+		if ($this->isPureFtpd) {
+			$path = str_replace(' ', '\ ', $path);
+		}
+		if ($this->ftpListOption) {
+			$path = $this->ftpListOption . ' ' . $path;
+		}
+		$res = ftp_rawlist($this->connect, $path);
+		if ($res === false) {
+			$res = array();
+		}
+		return $res;
 	}
 	
 	/*********************************************************************/
@@ -439,7 +481,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 
 		$list = array();
 		$encPath = $this->convEncIn($path);
-		foreach (ftp_rawlist($this->connect, $encPath) as $raw) {
+		foreach ($this->ftpRawList($encPath) as $raw) {
 			if (($stat = $this->parseRaw($raw, $encPath))) {
 				$list[] = $stat;
 			}
@@ -707,7 +749,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				);
 				if ($this->isMyReload()) {
 					$ts = 0;
-					foreach (ftp_rawlist($this->connect, $path) as $str) {
+					foreach ($this->ftpRawList($path) as $str) {
 						if (($stat = $this->parseRaw($str, $path))) {
 							$ts = max($ts, $stat['ts']);
 						}
@@ -853,7 +895,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 **/
 	protected function _subdirs($path) {
 		
-		foreach (ftp_rawlist($this->connect, $path) as $str) {
+		foreach ($this->ftpRawList($path) as $str) {
 			$info = preg_split('/\s+/', $str, 9);
 			if (!isset($this->ftpOsUnix)) {
 				$this->ftpOsUnix = !preg_match('/\d/', substr($info[0], 0, 1));
@@ -899,7 +941,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected function _scandir($path) {
 		$files = array();
 
- 		foreach (ftp_rawlist($this->connect, $path) as $str) {
+ 		foreach ($this->ftpRawList($path) as $str) {
  			if (($stat = $this->parseRaw($str, $path, true))) {
  				$files[] = $this->_joinPath($path, $stat['name']);
  			}
@@ -1410,7 +1452,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 */
 	protected function ftp_scan_dir($remote_directory, $targets = null)
 	{
-		$buff = ftp_rawlist($this->connect, $remote_directory);
+		$buff = $this->ftpRawList($remote_directory);
 		$items = array();
 		if ($targets && is_array($targets)) {
 			$targets = array_flip($targets);
