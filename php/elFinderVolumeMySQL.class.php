@@ -148,7 +148,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			$this->tmpPath = $tmp;
 		}
 		
-		if (!$this->tmpPath && $this->tmbPath && $this->tmbPathWritable) {
+		// fallback of $this->tmp
+		if (!$this->tmpPath && $this->tmbPathWritable) {
 			$this->tmpPath = $this->tmbPath;
 		}
 

@@ -110,6 +110,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             'gdAlias' => '%s@GDrive',
             'googleApiClient' => '',
             'path' => '/',
+            'tmbPath' => '',
             'separator' => '/',
             'useGoogleTmb' => true,
             'acceptedName' => '#^[^/\\?*:|"<>]*[^./\\?*:|"<>]$#',
@@ -976,9 +977,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             }
         }
 
-        if (!$this->tmp && is_writable($this->options['tmbPath'])) {
-            $this->tmp = $this->options['tmbPath'];
-        }
         if (!$this->tmp && ($tmp = elFinder::getStaticVar('commonTempPath'))) {
             $this->tmp = $tmp;
         }
@@ -1004,6 +1002,11 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     protected function configure()
     {
         parent::configure();
+
+        // fallback of $this->tmp
+        if (!$this->tmp && $this->tmbPathWritable) {
+        	$this->tmp = $this->tmbPath;
+        }
 
         $this->disabled[] = 'archive';
         $this->disabled[] = 'extract';

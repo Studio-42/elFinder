@@ -217,7 +217,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$this->tmp = $tmp;
 		}
 		
-		if (!$this->tmp && $this->tmbPath) {
+		// fallback of $this->tmp
+		if (!$this->tmp && $this->tmbPathWritable) {
 			$this->tmp = $this->tmbPath;
 		}
 		
