@@ -2354,7 +2354,7 @@ class elFinder {
 			}
 			
 			$tmpname = $files['tmp_name'][$i];
-			$path = ($paths && isset($paths[$i]))? $paths[$i] : '';
+			$thash = ($paths && isset($paths[$i]))? $paths[$i] : '';
 			$mtime = isset($mtimes[$i])? $mtimes[$i] : 0;
 			if ($name === 'blob') {
 				if ($chunk) {
@@ -2397,7 +2397,7 @@ class elFinder {
 			// do hook function 'upload.presave'
 			if (! empty($this->listeners['upload.presave'])) {
 				foreach($this->listeners['upload.presave'] as $handler) {
-					call_user_func_array($handler, array(&$path, &$name, $tmpname, $this, $volume));
+					call_user_func_array($handler, array(&$thash, &$name, $tmpname, $this, $volume));
 				}
 			}
 			
@@ -2415,15 +2415,15 @@ class elFinder {
 				break;
 			}
 			$rnres = array();
-			if ($path !== '' && $path !== $target) {
-				if ($dir = $volume->dir($path)) {
-					$_target = $path;
-					if (! isset($addedDirs[$path])) {
-						$addedDirs[$path] = true;
+			if ($thash !== '' && $thash !== $target) {
+				if ($dir = $volume->dir($thash)) {
+					$_target = $thash;
+					if (! isset($addedDirs[$thash])) {
+						$addedDirs[$thash] = true;
 						$result['added'][] =$dir;
 					}
 				} else {
-					$result['error'] = $this->error(self::ERROR_UPLOAD, self::ERROR_TRGDIR_NOT_FOUND, 'hash@'.$path);
+					$result['error'] = $this->error(self::ERROR_UPLOAD, self::ERROR_TRGDIR_NOT_FOUND, 'hash@'.$thash);
 					break;
 				}
 			} else {
