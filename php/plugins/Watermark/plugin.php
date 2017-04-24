@@ -79,7 +79,7 @@ class elFinderPluginWatermark extends elFinderPlugin {
 
 	}
 
-	public function onUpLoadPreSave(&$path, &$name, $src, $elfinder, $volume) {
+	public function onUpLoadPreSave(&$thash, &$name, $src, $elfinder, $volume) {
 		$opts = $this->getCurrentOpts($volume);
 		
 		if (! $this->iaEnabled($opts)) {

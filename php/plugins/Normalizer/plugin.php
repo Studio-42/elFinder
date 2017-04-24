@@ -112,15 +112,13 @@ class elFinderPluginNormalizer extends elFinderPlugin
 		}
 	}
 	
-	public function onUpLoadPreSave(&$path, &$name, $src, $elfinder, $volume) {
+	// NOTE: $thash is directory hash so it unneed to process at here
+	public function onUpLoadPreSave(&$thash, &$name, $src, $elfinder, $volume) {
 		$opts = $this->getCurrentOpts($volume);
 		if (! $opts['enable']) {
 			return false;
 		}
 		
-		if ($path) {
-			$path = $this->normalize($path, $opts);
-		}
 		$name = $this->normalize($name, $opts);
 		return true;
 	}
