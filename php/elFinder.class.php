@@ -295,7 +295,7 @@ class elFinder {
 	const ERROR_LOCKED            = 'errLocked';        // '"$1" is locked and can not be renamed, moved or removed.'
 	const ERROR_EXISTS            = 'errExists';        // 'File named "$1" already exists.'
 	const ERROR_INVALID_NAME      = 'errInvName';       // 'Invalid file name.'
-	const ERROR_INVALID_DIRNAME   = 'errInvDirame';     // 'Invalid folder name.'
+	const ERROR_INVALID_DIRNAME   = 'errInvDirname';    // 'Invalid folder name.'
 	const ERROR_MKDIR             = 'errMkdir';
 	const ERROR_MKFILE            = 'errMkfile';
 	const ERROR_RENAME            = 'errRename';
