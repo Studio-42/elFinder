@@ -14,8 +14,6 @@ class elFinderSession implements elFinderSessionInterface
 	
 	protected $keys = array();
 	
-	protected $prevVal = null;
-	
 	protected $base64encode = false;
 	
 	protected $opts = array(
@@ -51,10 +49,6 @@ class elFinderSession implements elFinderSessionInterface
 		}
 		$this->started = session_id()? true : false;
 		
-		if ($this->started && is_null($this->prevVal)) {
-			$this->prevVal = $_SESSION;
-		}
-		
 		return $this;
 	}
 	
@@ -63,9 +57,8 @@ class elFinderSession implements elFinderSessionInterface
      */
 	public function close()
 	{
-		if ($this->started && $this->prevVal !== $_SESSION) {
+		if ($this->started) {
 			session_write_close();
-			$this->prevVal = $_SESSION;
 		}
 		$this->started = false;
 		
