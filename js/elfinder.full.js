@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: a7b9370) (2017-04-24)
+ * Version 2.1.23 (2.1-src Nightly: 5e6ef69) (2017-04-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7287,7 +7287,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: a7b9370)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 5e6ef69)';
 
 
 
@@ -20993,6 +20993,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 				e.stopImmediatePropagation();
 				
 				node = $('<audio class="elfinder-quicklook-preview-audio" controls preload="auto" autobuffer><source src="'+ql.fm.openUrl(file.hash)+'" /></audio>')
+					.on('change', function(e) {
+						// Firefox fire change event on seek or volume change
+						e.stopPropagation();
+					})
 					.appendTo(preview);
 				autoplay && node[0].play();
 				
@@ -21054,7 +21058,12 @@ elFinder.prototype.commands.quicklook.plugins = [
 				e.stopImmediatePropagation();
 
 				ql.hideinfo();
-				node = $('<video class="elfinder-quicklook-preview-video" controls preload="auto" autobuffer><source src="'+ql.fm.openUrl(file.hash)+'" /></video>').appendTo(preview);
+				node = $('<video class="elfinder-quicklook-preview-video" controls preload="auto" autobuffer><source src="'+ql.fm.openUrl(file.hash)+'" /></video>')
+					.on('change', function(e) {
+						// Firefox fire change event on seek or volume change
+						e.stopPropagation();
+					})
+					.appendTo(preview);
 				autoplay && node[0].play();
 
 				win.on('viewchange.video', setNavi);
