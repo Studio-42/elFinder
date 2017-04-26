@@ -173,6 +173,9 @@ class elFinderConnector {
 		}
 		
 		if (isset($data['pointer'])) {
+			// set time limit to 0
+			elFinder::extendTimeLimit(0);
+			
 			// send optional header
 			if (!empty($data['header'])) {
 				self::sendHeader($data['header']);
