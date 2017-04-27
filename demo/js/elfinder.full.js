@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: afc2729) (2017-04-27)
+ * Version 2.1.23 (2.1-src Nightly: 7f9d215) (2017-04-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -5701,7 +5701,7 @@ elFinder.prototype = {
 	normalize : function(data) {
 		var self   = this,
 			filter = function(file) { 
-				var vid, targetOptions;
+				var vid, targetOptions, isRoot;
 				
 				if (file && file.hash && file.name && file.mime) {
 					if (file.mime == 'application/x-empty') {
@@ -5712,12 +5712,16 @@ elFinder.prototype = {
 						self.optionsByHashes[file.hash] = file.options;
 					}
 					
-					if (! file.phash || file.mime === 'directory') {
+					isRoot = self.isRoot(file);
+					if (isRoot && ! file.volumeid) {
+						self.debug('warning', 'The volume root statuses requires `volumeid` property.');
+					}
+					if (isRoot || file.mime === 'directory') {
 						// set options, tmbUrls for each volume
 						if (file.volumeid) {
 							vid = file.volumeid;
 							
-							if (self.isRoot(file)) {
+							if (isRoot) {
 								if (! self.volOptions[vid]) {
 									self.volOptions[vid] = {
 										// set dispInlineRegex
@@ -5756,7 +5760,7 @@ elFinder.prototype = {
 						}
 						
 						// volume root i18n name
-						if (! file.i18 && self.isRoot(file)) {
+						if (isRoot && ! file.i18) {
 							name = 'volume_' + file.name,
 							i18 = self.i18n(false, name);
 	
@@ -7287,7 +7291,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: afc2729)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 7f9d215)';
 
 
 
