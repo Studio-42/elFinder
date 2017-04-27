@@ -386,20 +386,21 @@
 			var win     = self.window,
 				preview = self.preview.trigger('change'),
 				file    = self.value,
-				node    = cwd.find('#'+fm.cwdHash2Id(win.data('hash'))),
+				hash    = win.data('hash'),
 				close   = function() {
 					state = closed;
 					win.hide();
 					preview.children().remove();
 					self.update(0, self.value);
 					
-				};
+				},
+				node;
 				
 			win.data('hash', '');
 			if (self.opened()) {
 				state = animated;
 				win.hasClass(fullscreen) && fsicon.click();
-				node.length
+				(hash && (node = cwd.find('#'+hash)).length)
 					? win.animate(closedCss(node), 500, close)
 					: close();
 			}
