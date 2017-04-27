@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: e557397) (2017-04-26)
+ * Version 2.1.23 (2.1-src Nightly: afc2729) (2017-04-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7287,7 +7287,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: e557397)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: afc2729)';
 
 
 
@@ -16019,7 +16019,7 @@ $.fn.elfindertree = function(fm, opts) {
 							phash, cmd, reqTarget;
 						
 						while (proot) {
-							if (proot && (proot = fm.file(proot)) && (phash = proot.phash) && phash.indexOf(proot.volumeid) !== 0) {
+							if (proot && (proot = fm.file(proot)) && (phash = proot.phash) && proot.volumeid && phash.indexOf(proot.volumeid) !== 0) {
 								cmd = getCmd(phash);
 								if (cmd === 'parents') {
 									reqPush('tree', phash);
@@ -20505,20 +20505,21 @@ elFinder.prototype.commands.places = function() {
 			var win     = self.window,
 				preview = self.preview.trigger('change'),
 				file    = self.value,
-				node    = cwd.find('#'+fm.cwdHash2Id(win.data('hash'))),
+				hash    = win.data('hash'),
 				close   = function() {
 					state = closed;
 					win.hide();
 					preview.children().remove();
 					self.update(0, self.value);
 					
-				};
+				},
+				node;
 				
 			win.data('hash', '');
 			if (self.opened()) {
 				state = animated;
 				win.hasClass(fullscreen) && fsicon.click();
-				node.length
+				(hash && (node = cwd.find('#'+hash)).length)
 					? win.animate(closedCss(node), 500, close)
 					: close();
 			}
