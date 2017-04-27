@@ -647,7 +647,7 @@ $.fn.elfindertree = function(fm, opts) {
 							phash, cmd, reqTarget;
 						
 						while (proot) {
-							if (proot && (proot = fm.file(proot)) && (phash = proot.phash) && phash.indexOf(proot.volumeid) !== 0) {
+							if (proot && (proot = fm.file(proot)) && (phash = proot.phash) && proot.volumeid && phash.indexOf(proot.volumeid) !== 0) {
 								cmd = getCmd(phash);
 								if (cmd === 'parents') {
 									reqPush('tree', phash);
