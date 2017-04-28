@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: da5e3d7) (2017-04-28)
+ * Version 2.1.23 (2.1-src Nightly: b939493) (2017-04-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2118,12 +2118,12 @@ var elFinder = function(node, opts) {
 			
 			// data normalize
 			odata = self.normalize(odata);
-			if (!self.validResponse('open', response)) {
-				return dfrd.reject((response.norError || 'errResponse'));
+			if (!self.validResponse('open', odata)) {
+				return dfrd.reject((odata.norError || 'errResponse'));
 			}
 			pdata = self.normalize(pdata);
-			if (!self.validResponse('tree', response)) {
-				return dfrd.reject((response.norError || 'errResponse'));
+			if (!self.validResponse('tree', pdata)) {
+				return dfrd.reject((pdata.norError || 'errResponse'));
 			}
 			
 			var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []), onlydir);
@@ -7319,7 +7319,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: da5e3d7)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: b939493)';
 
 
 
