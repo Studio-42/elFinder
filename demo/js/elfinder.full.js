@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 7f9d215) (2017-04-27)
+ * Version 2.1.23 (2.1-src Nightly: da5e3d7) (2017-04-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -1733,9 +1733,9 @@ var elFinder = function(node, opts) {
 					return dfrd.reject(['errResponse', 'errDataNotJSON'], xhr, response);
 				} else if (response.error) {
 					return dfrd.reject(response.error, xhr, response);
-				} else if (!self.validResponse(cmd, response)) {
+				}/* else if (!self.validResponse(cmd, response)) {
 					return dfrd.reject('errResponse', xhr, response);
-				}
+				}*/
 				
 				var resolve = function() {
 					var pushLeafRoots = function(name) {
@@ -1756,7 +1756,11 @@ var elFinder = function(node, opts) {
 					}
 					
 					response = self.normalize(response);
-
+					
+					if (!self.validResponse(cmd, response)) {
+						return dfrd.reject((response.norError || 'errResponse'), xhr, response);
+					}
+					
 					if (!self.api) {
 						self.api    = response.api || 1;
 						if (self.api == '2.0' && typeof response.options.uploadMaxSize !== 'undefined') {
@@ -2114,7 +2118,13 @@ var elFinder = function(node, opts) {
 			
 			// data normalize
 			odata = self.normalize(odata);
+			if (!self.validResponse('open', response)) {
+				return dfrd.reject((response.norError || 'errResponse'));
+			}
 			pdata = self.normalize(pdata);
+			if (!self.validResponse('tree', response)) {
+				return dfrd.reject((response.norError || 'errResponse'));
+			}
 			
 			var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []), onlydir);
 
@@ -4193,10 +4203,10 @@ elFinder.prototype = {
 			return {error : ['errResponse', 'errDataNotJSON']};
 		}
 		
-		if (!this.validResponse('upload', data)) {
-			return {error : ['errResponse']};
-		}
 		data = this.normalize(data);
+		if (!this.validResponse('upload', data)) {
+			return {error : (response.norError || ['errResponse'])};
+		}
 		data.removed = $.merge((data.removed || []), $.map(data.added||[], function(f) { return f.hash; }));
 		return data;
 		
@@ -5717,6 +5727,18 @@ elFinder.prototype = {
 						self.debug('warning', 'The volume root statuses requires `volumeid` property.');
 					}
 					if (isRoot || file.mime === 'directory') {
+						// Prevention of circular reference
+						if (file.phash) {
+							if (file.phash === file.hash) {
+								error = error.concat(['Parent folder of "$1" is itself.', file.name]);
+								return null;
+							}
+							if (isRoot && file.volumeid && file.phash.indexOf(file.volumeid) === 0) {
+								error = error.concat(['Parent folder of "$1" is inner itself.', file.name]);
+								return null;
+							}
+						}
+						
 						// set options, tmbUrls for each volume
 						if (file.volumeid) {
 							vid = file.volumeid;
@@ -5799,6 +5821,7 @@ elFinder.prototype = {
 				}
 				return null;
 			},
+			error = [],
 			name, i18, i18nFolderName, prevId;
 		
 
@@ -5827,6 +5850,11 @@ elFinder.prototype = {
 		// merge options that apply only to cwd
 		if (data.cwd && data.cwd.options && data.options) {
 			$.extend(data.options, data.cwd.options);
+		}
+		
+		// check error
+		if (error.length) {
+			data.norError = ['errResponse'].concat(error);
 		}
 		
 		return data;
@@ -7291,7 +7319,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 7f9d215)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: da5e3d7)';
 
 
 
@@ -21431,7 +21459,7 @@ d=(h[l++]|h[l++]<<8|h[l++]<<16|h[l++]<<24)>>>0;(a.length&4294967295)!==d&&n(Erro
 							.parent().removeClass('ui-state-hover');
 						fm.options.syncStart = !fm.options.syncStart;
 						fm.autoSync(fm.options.syncStart? null : 'stop');
-					}).ready(function(){
+					}).on('ready', function(){
 						$(this).parent().toggleClass('ui-state-disabled', !fm.options.syncStart).css('pointer-events', 'auto');
 					})
 			};
