@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: f5045c5) (2017-05-02)
+ * Version 2.1.23 (2.1-src Nightly: b79f983) (2017-05-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7400,7 +7400,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: f5045c5)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: b79f983)';
 
 
 
@@ -23140,10 +23140,10 @@ elFinder.prototype.commands.resize = function() {
  **/
 elFinder.prototype.commands.rm = function() {
 	var self = this,
+		fm = this.fm,
 		tpl = '<div class="ui-helper-clearfix elfinder-rm-title"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}<div class="elfinder-rm-desc">{desc}</div></div>',
 		confirm = function(dfrd, targets, files, tHash, addTexts) {
-			var fm = self.fm,
-				cnt = targets.length,
+			var cnt = targets.length,
 				cwd = fm.cwd().hash,
 				descs = [],
 				dialog, text, tmb, size, f, fname;
@@ -23216,8 +23216,7 @@ elFinder.prototype.commands.rm = function() {
 			}
 		},
 		toTrash = function(dfrd, targets, tHash) {
-			var fm = self.fm,
-				dsts = {},
+			var dsts = {},
 				dirs, cnt;
 			
 			$.each(targets, function(i, h) {
@@ -23396,22 +23395,19 @@ elFinder.prototype.commands.rm = function() {
 	
 	this.getstate = function(sel, e) {
 		if (sel && sel.length) {
-			this.title = self.fm.i18n(getTHash(sel)? 'cmdtrash' : 'cmdrm');
+			self.title = fm.i18n(getTHash(sel)? 'cmdtrash' : 'cmdrm');
 		}
-		var fm = this.fm;
 		sel = sel || fm.selected();
 		return sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
 			? 0 : -1;
 	}
 	
 	this.exec = function(hashes, opts) {
-		var self   = this,
-			fm     = this.fm,
-			dfrd   = $.Deferred()
+		var dfrd   = $.Deferred()
 				.fail(function(error) {
 					error && fm.error(error);
 				}),
-			files  = this.files(hashes),
+			files  = self.files(hashes),
 			cnt    = files.length,
 			tHash  = null,
 			addTexts = opts && opts.addTexts? opts.addTexts : null,
@@ -23431,7 +23427,7 @@ elFinder.prototype.commands.rm = function() {
 		});
 
 		if (dfrd.state() === 'pending') {
-			targets = this.hashes(hashes);
+			targets = self.hashes(hashes);
 			cnt     = files.length
 			
 			if (addTexts || (self.event && self.event.originalEvent && self.event.originalEvent.shiftKey)) {
@@ -23445,7 +23441,7 @@ elFinder.prototype.commands.rm = function() {
 			
 			fm.lockfiles({files : targets});
 			
-			if (tHash && this.options.quickTrash) {
+			if (tHash && self.options.quickTrash) {
 				toTrash(dfrd, targets, tHash);
 			} else {
 				confirm(dfrd, targets, files, tHash, addTexts);
