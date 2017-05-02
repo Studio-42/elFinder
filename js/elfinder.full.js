@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: ad2d410) (2017-05-02)
+ * Version 2.1.23 (2.1-src Nightly: 15cfc3e) (2017-05-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7400,7 +7400,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: ad2d410)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 15cfc3e)';
 
 
 
@@ -9578,7 +9578,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2017-04-29
+ * @version 2017-05-02
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -9772,6 +9772,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'ntfzipdl'    : 'Creating a file for download', // from v2.1.7 added 23.1.2016
 			'ntfparents'  : 'Getting path infomation', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'Processing the uploaded file', // from v2.1.17 added 2.11.2016
+			'ntftrash'    : 'Doing throw in the trash', // from v2.1.24 added 2.5.2017
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : 'Trash', //from v2.1.24 added 29.4.2017
