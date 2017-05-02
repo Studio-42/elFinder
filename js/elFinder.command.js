@@ -75,6 +75,8 @@ elFinder.prototype.command = function(fm) {
 	
 	this.updateOnSelect = true;
 	
+	this.syncTitleOnChange = false;
+	
 	/**
 	 * elFinder events defaults handlers.
 	 * Inside handlers "this" is current command object
@@ -149,7 +151,7 @@ elFinder.prototype.command = function(fm) {
 		for (i = 0; i < this.shortcuts.length; i++) {
 			s = this.shortcuts[i];
 			cb = s.callback || self.exec;
-			s.callback = function() {
+			s.callback = function(e) {
 				var enabled, checks = {};
 				if (fm.searchStatus.state < 2) {
 					enabled = fm.isCommandEnabled(self.name);
@@ -174,7 +176,9 @@ elFinder.prototype.command = function(fm) {
 					});
 				}
 				if (enabled) {
+					self.event = e;
 					cb.call(self);
+					delete self.event;
 				}
 			};
 			!s.description && (s.description = this.title);

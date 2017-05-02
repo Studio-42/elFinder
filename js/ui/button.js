@@ -73,6 +73,10 @@ $.fn.elfinderbutton = function(cmd) {
 				button.removeClass(disabled);
 				button[cmd.active() ? 'addClass' : 'removeClass'](active);
 			}
+			if (cmd.syncTitleOnChange) {
+				text.html(cmd.title);
+				button.attr('title', cmd.title);
+			}
 		})
 		.change();
 	});
