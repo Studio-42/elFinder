@@ -744,6 +744,10 @@ class elFinder {
 			} else {
 				$dst = '';
 			}
+		} else if ($cmd === 'open') {
+			// for initial open without args `target`
+			$dstVolume = $this->default;
+			$dst = $dstVolume->defaultPath();
 		}
 		
 		$result = null;
