@@ -199,6 +199,8 @@ abstract class elFinderVolumeDriver {
 		'path'            => '',
 		// Folder hash value on elFinder to be the parent of this volume
 		'phash'           => '',
+		// Folder hash value on elFinder to trash bin of this volume, it require 'copyJoin' to true
+		'trashHash'       => '',
 		// open this path on initial request instead of root path
 		'startPath'       => '',
 		// how many subdirs levels return per request
@@ -1319,6 +1321,11 @@ abstract class elFinderVolumeDriver {
 		if ($this->options['syncMinMs'] !== 0) {
 			$this->options['syncMinMs'] = max($this->options[$this->options['syncChkAsTs']? 'tsPlSleep' : 'lsPlSleep'] * 1000, intval($this->options['syncMinMs']));
 		}
+		
+		// ` copyJoin` is required for the trash function
+		if ($this->options['trashHash'] && empty($this->options['copyJoin'])) {
+			$this->options['trashHash'] = '';
+		}
 
 		// to update options cache
 		$this->updateCache($this->root, $root);
@@ -1509,6 +1516,9 @@ abstract class elFinderVolumeDriver {
 			'i18nFolderName'  => intval($this->options['i18nFolderName']),
 			'tmbCrop'         => intval($this->options['tmbCrop'])
 		);
+		if (! empty($this->options['trashHash'])) {
+			$opts['trashHash'] = $this->options['trashHash'];
+		}
 		if ($hash === null) {
 			// call from getRootStatExtra()
 			if (! empty($this->options['icon'])) {
@@ -2258,10 +2268,16 @@ abstract class elFinderVolumeDriver {
 				if (!$stat['write']) {
 					return $this->setError($err, $errpath, elFinder::ERROR_PERM_DENIED);
 				}
-				// existed file locked or has locked child
-				if (($locked = $this->closestByAttr($test, 'locked', true))) {
-					$stat = $this->stat($locked);
-					return $this->setError(elFinder::ERROR_LOCKED, $this->path($stat['hash']));
+				if ($this->options['copyJoin']) {
+					if ($stat['locked']) {
+						return $this->setError(elFinder::ERROR_LOCKED, $this->path($stat['hash']));
+					}
+				} else {
+					// existed file locked or has locked child
+					if (($locked = $this->closestByAttr($test, 'locked', true))) {
+						$stat = $this->stat($locked);
+						return $this->setError(elFinder::ERROR_LOCKED, $this->path($stat['hash']));
+					}
 				}
 				// target is entity file of alias
 				if ($volume === $this && ((isset($file['target']) && $test == $file['target']) || $test == $this->decode($src))) {
@@ -3582,29 +3598,27 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		
+		if ($this->separator !== '/') {
+			$relpath = str_replace($this->separator, '/', $this->relpathCE($path));
+		} else {
+			$relpath = $this->relpathCE($path);
+		}
+		
+		$relpath = '/' . $relpath;
 		
 		$perm = null;
 		
 		if ($this->access) {
-			$perm = call_user_func($this->access, $name, $path, $this->options['accessControlData'], $this, $isDir);
-
+			$perm = call_user_func($this->access, $name, $path, $this->options['accessControlData'], $this, $isDir, $relpath);
 			if ($perm !== null) {
 				return !!$perm;
 			}
 		}
 		
-		if ($this->separator != '/') {
-			$path = str_replace($this->separator, '/', $this->relpathCE($path));
-		} else {
-			$path = $this->relpathCE($path);
-		}
-
-		$path = '/'.$path;
-
 		for ($i = 0, $c = count($this->attributes); $i < $c; $i++) {
 			$attrs = $this->attributes[$i];
 			
-			if (isset($attrs[$name]) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $path)) {
+			if (isset($attrs[$name]) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $relpath)) {
 				$perm = $attrs[$name];
 			} 
 		}
@@ -4462,8 +4476,15 @@ abstract class elFinderVolumeDriver {
 			
 			$this->added[] = $test;
 		} else {
-			// $mime = $source['mime'];
-			// $w = $h = 0;
+			// MIME check
+			$mimeByName = $this->mimetype($source['name'], true);
+			if ($source['mime'] === $mimeByName) {
+				$mimeByName = '';
+			}
+			if (!$this->allowPutMime($source['mime']) || ($mimeByName && !$this->allowPutMime($mimeByName))) {
+				return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $errpath);
+			}
+			
 			if (($dim = $volume->dimensions($src))) {
 				$s = explode('x', $dim);
 				$source['width']  = $s[0];
@@ -4476,19 +4497,8 @@ abstract class elFinderVolumeDriver {
 				return $this->setError(elFinder::ERROR_COPY, $errpath);
 			}
 			$volume->close($fp, $src);
-			
-			// MIME check
-			$stat = $this->stat($path);
-			$mimeByName = $this->mimetype($stat['name'], true);
-			if ($stat['mime'] === $mimeByName) {
-				$mimeByName = '';
-			}
-			if (!$this->allowPutMime($stat['mime']) || ($mimeByName && !$this->allowPutMime($mimeByName))) {
-				$this->remove($path, true);
-				return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $errpath);
-			}
-			
-			$this->added[] = $stat;
+
+			$this->added[] = $this->stat($path);;
 		}
 		
 		return $path;
