@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-04-29
+ * @version 2017-05-02
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -203,6 +203,7 @@
 			'ntfzipdl'    : 'ダウンロード用ファイルを作成中', // from v2.1.7 added 23.1.2016
 			'ntfparents'  : 'パス情報を取得しています', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'アップロード済みファイルを処理中', // from v2.1.17 added 2.11.2016
+			'ntftrash'    : 'ごみ箱に入れています', // from v2.1.24 added 2.5.2017
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : 'ごみ箱', //from v2.1.24 added 29.4.2017
