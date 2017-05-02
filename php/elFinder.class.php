@@ -739,7 +739,7 @@ class elFinder {
 		} else if (isset($args['targets']) && is_array($args['targets']) && isset($args['targets'][0])) {
 			$dst = $args['targets'][0];
 			$dstVolume = $this->volume($dst);
-			if (($_stat = $dstVolume->file($dst)) && ! empty($_stat['phash'])) {
+			if ($dstVolume && ($_stat = $dstVolume->file($dst)) && ! empty($_stat['phash'])) {
 				$dst = $_stat['phash'];
 			} else {
 				$dst = '';
