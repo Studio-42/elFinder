@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-04-12
+ * @version 2017-04-29
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -77,6 +77,7 @@
 			'errMove'              : '"$1" を移動することができません。',
 			'errCopyInItself'      : '"$1" をそれ自身の中にコピーすることはできません。',
 			'errRm'                : '"$1" を削除することができません。',
+			'errTrash'             : 'ごみ箱に入れることができません。', // from v2.1.24 added 30.4.2017
 			'errRmSrc'             : '元ファイルを削除することができません。',
 			'errExtract'           : '"$1" を解凍することができません。',
 			'errArchive'           : 'アーカイブを作成することができません。',
@@ -134,6 +135,7 @@
 			'cmdreload'    : 'リロード',
 			'cmdrename'    : 'リネーム',
 			'cmdrm'        : '削除',
+			'cmdtrash'     : 'ごみ箱へ', //from v2.1.24 added 29.4.2017
 			'cmdsearch'    : 'ファイルを探す',
 			'cmdup'        : '親ディレクトリーへ移動',
 			'cmdupload'    : 'ファイルアップロード',
@@ -202,6 +204,9 @@
 			'ntfparents'  : 'パス情報を取得しています', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'アップロード済みファイルを処理中', // from v2.1.17 added 2.11.2016
 
+			/*********************************** volumes *********************************/
+			'volume_Trash' : 'ごみ箱', //from v2.1.24 added 29.4.2017
+
 			/************************************ dates **********************************/
 			'dateUnknown' : '不明',
 			'Today'       : '今日',
@@ -264,11 +269,12 @@
 
 			/********************************** messages **********************************/
 			'confirmReq'      : '処理を実行しますか？',
-			'confirmRm'       : '本当にファイルを削除しますか?<br/>この操作は取り消せません！',
+			'confirmRm'       : 'アイテムを完全に削除してもよろしいですか？<br/>この操作は取り消せません！',
 			'confirmRepl'     : '古いファイルを新しいファイルで上書きしますか？',
 			'confirmConvUTF8' : 'UTF-8 以外の文字が含まれています。<br/>UTF-8  に変換しますか？<br/>変換後の保存でコンテンツは UTF-8 になります。', // from v2.1 added 08.04.2014
 			'confirmNonUTF8'  : 'このファイルの文字エンコーディングを判別できませんでした。編集するには一時的に UTF-8 に変換する必要があります。<br/>文字エンコーディングを指定してください。', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : '変更されています。<br/>保存せずに閉じると編集内容が失われます。', // from v2.1 added 15.7.2015
+			'confirmTrash'    : 'アイテムをごみ箱に移動してもよろしいですか？', //from v2.1.24 added 29.4.2017
 			'apllyAll'        : '全てに適用します',
 			'name'            : '名前',
 			'size'            : 'サイズ',
