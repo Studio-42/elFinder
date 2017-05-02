@@ -392,6 +392,34 @@ var elFinder = function(node, opts) {
 		},
 		
 		/**
+		 * Maximum number of concurrent connections on request
+		 * 
+		 * @type Number
+		 */
+		requestMaxConn,
+		
+		/**
+		 * Current number of connections
+		 * 
+		 * @type Number
+		 */
+		requestCnt = 0,
+		
+		/**
+		 * Queue waiting for connection
+		 * 
+		 * @type Array
+		 */
+		requestQueue = [],
+		
+		/**
+		 * Flag to cancel the `open` command waiting for connection
+		 * 
+		 * @type Boolean
+		 */
+		requestQueueSkipOpen = false,
+		
+		/**
 		 * Exec shortcut
 		 *
 		 * @param  jQuery.Event  keydown/keypress event
@@ -624,6 +652,9 @@ var elFinder = function(node, opts) {
 	 * @default "get"
 	 **/
 	this.requestType = /^(get|post)$/i.test(this.options.requestType) ? this.options.requestType.toLowerCase() : 'get';
+	
+	// set `requestMaxConn` by option
+	requestMaxConn = Math.max(parseInt(this.options.requestMaxConn), 1);
 	
 	/**
 	 * Any data to send across every ajax request
@@ -1788,6 +1819,15 @@ var elFinder = function(node, opts) {
 				xhrAbort(e);
 			},
 			request = function() {
+				if (isOpen) {
+					if (requestQueueSkipOpen) {
+						return dfrd.reject();
+					}
+					requestQueueSkipOpen = true;
+				}
+				
+				requestCnt++;
+				
 				dfrd.fail(function(error, xhr, response) {
 					xhrAbort();
 					self.trigger(cmd + 'fail', response);
@@ -1856,7 +1896,14 @@ var elFinder = function(node, opts) {
 
 				delete options.preventFail
 
-				dfrd.xhr = xhr = self.transport.send(options).fail(error).done(success);
+				dfrd.xhr = xhr = self.transport.send(options).always(function() {
+					--requestCnt;
+					if (requestQueue.length) {
+						requestQueue.shift()();
+					} else {
+						requestQueueSkipOpen = false;
+					} 
+				}).fail(error).done(success);
 				
 				if (isOpen || (data.compare && cmd === 'info')) {
 					// add autoSync xhr into queue
@@ -1885,6 +1932,22 @@ var elFinder = function(node, opts) {
 				
 				return dfrd;
 			},
+			queueingRequest = function() {
+				if (isOpen) {
+					requestQueueSkipOpen = false;
+				}
+				if (requestCnt < requestMaxConn) {
+					// do request
+					return request();
+				} else {
+					if (isOpen) {
+						requestQueue.unshift(request);
+					} else {
+						requestQueue.push(request);
+					}
+					return dfrd;
+				}
+			},
 			bindData = {opts: opts, result: true};
 		
 		// trigger "request.cmd" that callback be able to cancel request by substituting "false" for "event.data.result"
@@ -1895,7 +1958,7 @@ var elFinder = function(node, opts) {
 			return dfrd.reject();
 		} else if (typeof bindData.result === 'object' && bindData.result.promise) {
 			bindData.result
-				.done(request)
+				.done(queueingRequest)
 				.fail(function() {
 					self.trigger(cmd + 'done');
 					dfrd.reject();
@@ -1903,8 +1966,7 @@ var elFinder = function(node, opts) {
 			return dfrd;
 		}
 		
-		// do request
-		return request();
+		return queueingRequest();
 	};
 	
 	/**
@@ -3370,6 +3432,15 @@ var elFinder = function(node, opts) {
 	 * @type Object
 	 */
 	this.volOptions = {};
+
+	/**
+	 * Hash of trash holders
+	 * key: trash folder hash
+	 * val: source volume hash
+	 * 
+	 * @type Object
+	 */
+	this.trashes = {};
 
 	/**
 	 * cwd options of each folder/file
@@ -5735,6 +5806,11 @@ elFinder.prototype = {
 									targetOptions.tmbUrl = file.tmbUrl;
 								}
 								
+								// check trash bin hash
+								if (targetOptions.trashHash) {
+									self.trashes[targetOptions.trashHash] = file.hash;
+								}
+								
 								// set immediate properties
 								$.each(self.optionProperties, function(i, k) {
 									if (targetOptions[k]) {
@@ -5782,6 +5858,11 @@ elFinder.prototype = {
 									file.ts = f.ts;
 								}
 							});
+						}
+						
+						// lock trash bins holder
+						if (self.trashes[file.hash]) {
+							file.locked = true;
 						}
 					}
 					delete file.options;

@@ -19,6 +19,14 @@ elFinder.prototype._options = {
 	 * @default "get"
 	 */
 	requestType : 'get',
+	
+	/**
+	 * Maximum number of concurrent connections on request
+	 * 
+	 * @type Number
+	 * @default 3
+	 */
+	requestMaxConn : 3,
 
 	/**
 	 * Transport to send request to backend.
@@ -379,6 +387,10 @@ elFinder.prototype._options = {
 		resize: {
 			// defalt status of snap to 8px grid of the jpeg image ("enable" or "disable")
 			grid8px : 'enable'
+		},
+		rm: {
+			// If trash is valid, items moves immediately to the trash holder without confirm.
+			quickTrash : true
 		},
 		help : {view : ['about', 'shortcuts', 'help', 'debug']}
 	},

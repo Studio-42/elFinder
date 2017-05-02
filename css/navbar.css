@@ -116,6 +116,7 @@
 
 /* root icon of each volume */
 .elfinder-tree .elfinder-navbar-root-local   .elfinder-navbar-icon { background-image:url("../img/volume_icon_local.png"); background-position:0 0; }
+.elfinder-tree .elfinder-navbar-root-trash   .elfinder-navbar-icon { background-image:url("../img/volume_icon_trash.png"); background-position:0 0; }
 .elfinder-tree .elfinder-navbar-root-ftp     .elfinder-navbar-icon { background-image:url("../img/volume_icon_ftp.png"); background-position:0 0; }
 .elfinder-tree .elfinder-navbar-root-sql     .elfinder-navbar-icon { background-image:url("../img/volume_icon_sql.png"); background-position:0 0; }
 .elfinder-tree .elfinder-navbar-root-dropbox .elfinder-navbar-icon { background-image:url("../img/volume_icon_dropbox.png"); background-position:0 0; }

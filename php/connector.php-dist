@@ -309,6 +309,7 @@ $opts = array(
 			'path'       => '../files/',
 			'startPath'  => '../files/test/',
 			'URL'        => dirname($_SERVER['PHP_SELF']) . '/../files/',
+			'trashHash'  => 't1_Lw',                     // elFinder's hash of trash folder
 			// 'treeDeep'   => 3,
 			// 'alias'      => 'File system',
 			'mimeDetect' => 'internal',
@@ -335,6 +336,17 @@ $opts = array(
 			'uploadDeny'  => array('all'),                // All Mimetypes not allowed to upload
 			'uploadAllow' => array('image', 'text/plain'),// Mimetype `image` and `text/plain` allowed to upload
 			'uploadOrder' => array('deny', 'allow'),      // allowed Mimetype `image` and `text/plain` only
+		),
+		// Trash volume
+		array(
+			'id'            => '1',
+			'driver'        => 'Trash',
+			'path'          => '../files/.trash/',
+			'tmbURL'        => dirname($_SERVER['PHP_SELF']) . '/../files/.trash/.tmb/',
+			'uploadDeny'    => array('all'),                // Recomend the same settings as the original volume that uses the trash
+			'uploadAllow'   => array('image', 'text/plain'),// Same as above
+			'uploadOrder'   => array('deny', 'allow'),      // Same as above
+			'accessControl' => 'access',                    // Same as above
 		),
 		// array(
 		// 	'driver'     => 'LocalFileSystem',

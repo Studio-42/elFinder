@@ -188,6 +188,16 @@
 .elfinder-cwd .elfinder-navbar-root-local.elfinder-droppable-active .elfinder-cwd-icon {
 	background-position:1px -1px;
 }
+.elfinder-navbar-root-trash .elfinder-cwd-icon,
+.elfinder-cwd .elfinder-navbar-root-trash.elfinder-droppable-active .elfinder-cwd-icon,
+.elfinder-cwd-view-list .elfinder-navbar-root-trash td .elfinder-cwd-icon {
+	background-image:url("../img/volume_icon_trash.png");
+	background-position:0 0;
+	background-size: contain;
+}
+.elfinder-cwd .elfinder-navbar-root-trash.elfinder-droppable-active .elfinder-cwd-icon {
+	background-position:1px -1px;
+}
 .elfinder-navbar-root-ftp .elfinder-cwd-icon,
 .elfinder-cwd .elfinder-navbar-root-ftp.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd-view-list .elfinder-navbar-root-ftp td .elfinder-cwd-icon  {
