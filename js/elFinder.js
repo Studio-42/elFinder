@@ -1231,7 +1231,7 @@ var elFinder = function(node, opts) {
 	 * @return Array
 	 */
 	this.getDisabledCmds = function(targets) {
-		var disabled = [];
+		var disabled = ['hidden'];
 		if (! Array.isArray(targets)) {
 			targets = [ targets ];
 		}

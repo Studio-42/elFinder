@@ -26,7 +26,8 @@ class elFinderVolumeTrash extends elFinderVolumeLocalFileSystem
         $this->options['quarantine'] = '';
         $this->options['rootCssClass'] = 'elfinder-navbar-root-trash';
         $this->options['copyOverwrite'] = false;
-        $this->options['disabled'] = array('archive', 'duplicate', 'edit', 'extract', 'mkfile', 'put', 'rename', 'resize', 'upload');
+        $this->options['uiCmdMap'] = array('paste' => 'hidden', 'mkdir' => 'hidden', 'copy' => 'restore');
+        $this->options['disabled'] = array('archive', 'duplicate', 'edit', 'extract', 'mkfile', 'places', 'put', 'rename', 'resize', 'upload');
     }
 
     public function mount(array $opts)

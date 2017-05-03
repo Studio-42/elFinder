@@ -40,6 +40,9 @@ $.fn.elfinderbutton = function(cmd) {
 			
 		text.hide();
 		
+		// set self button object to cmd object
+		cmd.button = button;
+		
 		// if command has variants create menu
 		if (Array.isArray(cmd.variants)) {
 			button.addClass('elfinder-menubutton');
