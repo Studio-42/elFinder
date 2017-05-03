@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: fd2c65b) (2017-05-02)
+ * Version 2.1.23 (2.1-src Nightly: 915c82f) (2017-05-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -1262,7 +1262,7 @@ var elFinder = function(node, opts) {
 	 * @return Array
 	 */
 	this.getDisabledCmds = function(targets) {
-		var disabled = [];
+		var disabled = ['hidden'];
 		if (! Array.isArray(targets)) {
 			targets = [ targets ];
 		}
@@ -7400,7 +7400,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: fd2c65b)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 915c82f)';
 
 
 
@@ -9674,12 +9674,13 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
 			'errArchiveExec'       : 'Error while archiving files: "$1"',
 			'errExtractExec'       : 'Error while extracting files: "$1"',
-			'errNetUnMount'        : 'Unable to unmount', // from v2.1 added 30.04.2012
+			'errNetUnMount'        : 'Unable to unmount.', // from v2.1 added 30.04.2012
 			'errConvUTF8'          : 'Not convertible to UTF-8', // from v2.1 added 08.04.2014
 			'errFolderUpload'      : 'Try the modern browser, If you\'d like to upload the folder.', // from v2.1 added 26.6.2015
 			'errSearchTimeout'     : 'Timed out while searching "$1". Search result is partial.', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : 'Re-authorization is required.', // from v2.1.10 added 24.3.2016
 			'errMaxTargets'        : 'Max number of selectable items is $1.', // from v2.1.17 added 17.10.2016
+			'errRestore'           : 'Unable to restore from the trash. Can\'t identify the restore destination.', // from v2.1.24 added 3.5.2017
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',
@@ -9705,6 +9706,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'cmdrename'    : 'Rename',
 			'cmdrm'        : 'Delete',
 			'cmdtrash'     : 'Into trash', //from v2.1.24 added 29.4.2017
+			'cmdrestore'   : 'Restore', //from v2.1.24 added 3.5.2017
 			'cmdsearch'    : 'Find files',
 			'cmdup'        : 'Go to parent directory',
 			'cmdupload'    : 'Upload files',
@@ -9746,7 +9748,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'ntfopen'     : 'Open folder',
 			'ntffile'     : 'Open file',
 			'ntfreload'   : 'Reload folder content',
-			'ntfmkdir'    : 'Creating directory',
+			'ntfmkdir'    : 'Creating holder',
 			'ntfmkfile'   : 'Creating files',
 			'ntfrm'       : 'Delete files',
 			'ntfcopy'     : 'Copy files',
@@ -9773,6 +9775,8 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'ntfparents'  : 'Getting path infomation', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'Processing the uploaded file', // from v2.1.17 added 2.11.2016
 			'ntftrash'    : 'Doing throw in the trash', // from v2.1.24 added 2.5.2017
+			'ntfrestore'  : 'Doing restore from tha trash', // from v2.1.24 added 3.5.2017
+			'ntfchkdir'   : 'Checking destination folder', // from v2.1.24 added 3.5.2017
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : 'Trash', //from v2.1.24 added 29.4.2017
@@ -10100,6 +10104,9 @@ $.fn.elfinderbutton = function(cmd) {
 			};
 			
 		text.hide();
+		
+		// set self button object to cmd object
+		cmd.button = button;
 		
 		// if command has variants create menu
 		if (Array.isArray(cmd.variants)) {
@@ -15404,6 +15411,14 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				}
 			}
 			
+			if (Object.keys(fm.commandMap).length) {
+				$.each(fm.commandMap, function(from, to){
+					if (to === 'hidden') {
+						disabled.push(from);
+					}
+				});
+			}
+			
 			if (!dispre || dispre.toString() !== disabled.sort().toString()) {
 				render(disabled && disabled.length? disabled : null);
 				doRender = true;
@@ -18836,6 +18851,25 @@ elFinder.prototype.commands.fullscreen = function() {
 
 }).prototype = { forceLoad : true }; // this is required command
 
+
+/*
+ * File: /js/commands/hidden.js
+ */
+
+/**
+ * @class  elFinder command "hidden"
+ * Always hidden command for uiCmdMap
+ *
+ * @author Naoki Sawada
+ **/
+elFinder.prototype.commands.hidden = function() {
+	//this._disabled = true;
+	this.hidden = true;
+	this.updateOnSelect = false;
+	this.getstate = function() {
+		return -1;
+	}
+};
 
 /*
  * File: /js/commands/home.js
@@ -23129,6 +23163,223 @@ elFinder.prototype.commands.resize = function() {
 
 
 /*
+ * File: /js/commands/restore.js
+ */
+
+/**
+ * @class  elFinder command "restore"
+ * Restore items from the trash
+ *
+ * @author Naoki Sawada
+ **/
+elFinder.prototype.commands.restore = function() {
+	var self = this,
+		fm = this.fm,
+		restore = function(dfrd, files, targets) {
+			var rHashes = {},
+				others = [],
+				found = false;
+			
+			fm.lockfiles({files : targets});
+			
+			$.each(files, function(i, f) {
+				var phash = f.phash,
+					pfile,
+					srcRoot, tPath;
+				while(phash) {
+					if (srcRoot = fm.trashes[phash]) {
+						if (! rHashes[srcRoot]) {
+							if (found) {
+								// Keep items of other trash
+								others.push(f.hash);
+								return null; // continue $.each
+							}
+							rHashes[srcRoot] = {};
+							found = true;
+						}
+
+						tPath = fm.path(f.hash).substr(fm.path(phash).length).replace(/\\/g, '/');
+						tPath = tPath.replace(/\/[^\/]+?$/, '');
+						if (tPath === '') {
+							tPath = '/';
+						}
+						if (!rHashes[srcRoot][tPath]) {
+							rHashes[srcRoot][tPath] = [];
+						}
+						rHashes[srcRoot][tPath].push(f.hash);
+						break;
+					}
+					
+					// Go up one level for next check
+					pfile = fm.file(phash);
+					
+					if (!pfile) {
+						phash = false;
+						// Detection method for search results
+						$.each(fm.trashes, function(ph) {
+							var file = fm.file(ph),
+								filePath = fm.path(ph);
+							if ((!file.volumeid || f.hash.indexOf(file.volumeid) === 0) && fm.path(f.hash).indexOf(filePath) === 0) {
+								phash = ph;
+								return false;
+							}
+						});
+					} else {
+						phash = pfile.phash;
+					}
+				}
+			});
+			
+			if (found) {
+				$.each(rHashes, function(src, dsts) {
+					var dirs = Object.keys(dsts),
+						cnt = dirs.length;
+					fm.request({
+						data   : {cmd  : 'mkdir', target : src, dirs : dirs}, 
+						notify : {type : 'chkdir', cnt : cnt},
+						preventFail : true
+					})
+					.fail(function(error) {
+						dfrd.reject(error);
+						fm.unlockfiles({files : targets});
+					})
+					.done(function(data) {
+						var margeRes = function(data) {
+								$.each(data, function(k, v) {
+									if (Array.isArray(v)) {
+										if (res[k]) {
+											res[k] = res[k].concat(v);
+										} else {
+											res[k] = v;
+										}
+									}
+								});
+								if (data.sync) {
+									res.sync = 1;
+								}
+							},
+							err = ['errRestore'],
+							res = {},
+							hasNtf = function() {
+								return fm.ui.notify.children('.elfinder-notify-restore').length;
+							},
+							hashes, hasNtf, tm, prg, prgSt;
+						
+						if (hashes = data.hashes) {
+							prg = 1 / cnt * 100;
+							prgSt = 1;
+							tm = setTimeout(function() {
+								fm.notify({type : 'restore', cnt : 1, hideCnt : true, progress : prgSt});
+							}, fm.notifyDelay);
+							$.each(dsts, function(dir, files) {
+								if (hashes[dir]) {
+									fm.request({
+										data   : {cmd : 'paste', dst : hashes[dir], targets : files, cut : 1},
+										preventDefault : true
+									})
+									.fail(function(error) {
+										if (error) {
+											err = err.concat(error);
+										}
+									})
+									.done(function(data) {
+										margeRes(data);
+										if (data.warning) {
+											err = err.concat(data.warning);
+											delete data.warning;
+										}
+										// fire some event to update cache/ui
+										data.removed && data.removed.length && fm.remove(data);
+										data.added   && data.added.length   && fm.add(data);
+										data.changed && data.changed.length && fm.change(data);
+										// fire event with command name
+										fm.trigger('paste', data);
+										// fire event with command name + 'done'
+										fm.trigger('pastedone');
+										// force update content
+										data.sync && fm.sync();
+									})
+									.always(function() {
+										var hashes, addTexts, end = 2;
+										if (hasNtf()) {
+											fm.notify({type : 'restore', cnt : 0, hideCnt : true, progress : prg});
+										} else {
+											prgSt+= prg;
+										}
+										if (--cnt < 1) {
+											tm && clearTimeout(tm);
+											hasNtf() && fm.notify({type : 'restore', cnt  : -1});
+											fm.unlockfiles({files : targets});
+											if (Object.keys(res).length) {
+												if (err.length > 1) {
+													fm.error(err);
+												}
+												dfrd.done(res);
+											} else {
+												dfrd.reject(err);
+											}
+											if (others.length) {
+												// Restore items of other trash
+												fm.exec('restore', others);
+											}
+										}
+									});
+								}
+							});
+						} else {
+							dfrd.reject('errFolderNotFound');
+							fm.unlockfiles({files : targets});
+						}
+					});
+				});
+			} else {
+				fm.unlockfiles({files : targets});
+				dfrd.reject('errRestore');
+			}
+		};
+	
+	this.updateOnSelect  = false;
+	this.shortcuts = [{
+		pattern     : 'ctrl+z'
+	}];
+	
+	this.getstate = function(sel, e) {
+		sel = sel || fm.selected();
+		return sel.length && $.map(sel, function(h) {var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
+			? 0 : -1;
+	}
+	
+	this.exec = function(hashes) {
+		var dfrd   = $.Deferred()
+				.fail(function(error) {
+					error && fm.error(error);
+				}),
+			files  = self.files(hashes);
+
+		if (! files.length) {
+			return dfrd.reject();
+		}
+		
+		$.each(files, function(i, file) {
+			if (fm.isRoot(file)) {
+				return !dfrd.reject(['errRestore', file.name]);
+			}
+			if (file.locked) {
+				return !dfrd.reject(['errLocked', file.name]);
+			}
+		});
+
+		if (dfrd.state() === 'pending') {
+			restore(dfrd, files, hashes);
+		}
+			
+		return dfrd;
+	}
+
+};
+
+
+/*
  * File: /js/commands/rm.js
  */
 
@@ -23238,7 +23489,7 @@ elFinder.prototype.commands.rm = function() {
 			if (cnt) {
 				fm.request({
 					data   : {cmd  : 'mkdir', target : tHash, dirs : dirs}, 
-					notify : {type : 'mkdir', cnt : cnt},
+					notify : {type : 'chkdir', cnt : cnt},
 					preventFail : true
 				})
 				.fail(function(error) {
@@ -23382,23 +23633,51 @@ elFinder.prototype.commands.rm = function() {
 			return thash;
 		};
 	
+	fm.bind('contextmenu', function(e) {
+		self.update(void(0), getTHash(e.data.targets)? 'trash' : 'rm');
+	});
+	
 	this.syncTitleOnChange = true;
-	this.updateOnSelect  = false;
+	this.updateOnSelect = true;
 	this.shortcuts = [{
 		pattern     : 'delete ctrl+backspace shift+delete'
 	}];
 	this.handlers = {
 		'open' : function() {
-			self.title = self.fm.i18n(self.fm.option('trashHash')? 'cmdtrash' : 'cmdrm');
-			self.change();
+			self.update(void(0), fm.i18n(self.fm.option('trashHash')? 'trash' : 'rm'));
 		}
 	}
 	
-	this.getstate = function(sel, e) {
-		if (sel && sel.length) {
-			self.title = fm.i18n(getTHash(sel)? 'cmdtrash' : 'cmdrm');
-		}
+	this.init = function() {
+		self.change(function() {
+			delete self.extra;
+			self.title = fm.i18n('cmd' + self.value);
+			self.className = self.value;
+			self.button.children('span.elfinder-button-icon')[self.value === 'trash'? 'addClass' : 'removeClass']('elfinder-button-icon-trash');
+			if (self.value === 'trash') {
+				self.extra = {
+					icon: 'rm',
+					node: $('<span/>')
+						.attr({title: fm.i18n('cmdrm')})
+						.on('click touchstart', function(e){
+							if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+								return;
+							}
+							e.stopPropagation();
+							e.preventDefault();
+							self.exec(void(0), {forceRm : true});
+						})
+				};
+			}
+		});
+	}
+	
+	this.getstate = function(sel) {
+		var name;
 		sel = sel || fm.selected();
+		if (sel && sel.length) {
+			self.value = getTHash(sel)? 'trash' : 'rm';
+		}
 		return sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
 			? 0 : -1;
 	}
@@ -23412,6 +23691,7 @@ elFinder.prototype.commands.rm = function() {
 			cnt    = files.length,
 			tHash  = null,
 			addTexts = opts && opts.addTexts? opts.addTexts : null,
+			forceRm = opts && opts.forceRm,
 			targets;
 
 		if (! cnt) {
@@ -23431,7 +23711,7 @@ elFinder.prototype.commands.rm = function() {
 			targets = self.hashes(hashes);
 			cnt     = files.length
 			
-			if (addTexts || (self.event && self.event.originalEvent && self.event.originalEvent.shiftKey)) {
+			if (addTexts || forceRm || (self.event && self.event.originalEvent && self.event.originalEvent.shiftKey)) {
 				tHash = '';
 				self.title = fm.i18n('cmdrm');
 			}

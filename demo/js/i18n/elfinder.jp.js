@@ -111,6 +111,7 @@
 			'errSearchTimeout'     : '"$1" を検索中にタイムアウトしました。検索結果は部分的です。', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : '再認可が必要です。', // from v2.1.10 added 24.3.2016
 			'errMaxTargets'        : '選択可能な最大アイテム数は $1 個です。', // from v2.1.17 added 17.10.2016
+			'errRestore'           : '宛先の特定ができないため、ごみ箱から戻せません。', // from v2.1.24 added 3.5.2017
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'アーカイブ作成',
@@ -136,6 +137,7 @@
 			'cmdrename'    : 'リネーム',
 			'cmdrm'        : '削除',
 			'cmdtrash'     : 'ごみ箱へ', //from v2.1.24 added 29.4.2017
+			'cmdrestore'   : '元に戻す', //from v2.1.24 added 3.5.2017
 			'cmdsearch'    : 'ファイルを探す',
 			'cmdup'        : '親ディレクトリーへ移動',
 			'cmdupload'    : 'ファイルアップロード',
@@ -177,7 +179,7 @@
 			'ntfopen'     : 'フォルダーを開いています',
 			'ntffile'     : 'ファイルを開いています',
 			'ntfreload'   : 'フォルダーを再読込しています',
-			'ntfmkdir'    : 'ディレクトリーを作成しています',
+			'ntfmkdir'    : 'フォルダーを作成しています',
 			'ntfmkfile'   : 'ファイルを作成しています',
 			'ntfrm'       : 'ファイルを削除しています',
 			'ntfcopy'     : 'ファイルをコピーしています',
@@ -204,6 +206,8 @@
 			'ntfparents'  : 'パス情報を取得しています', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'アップロード済みファイルを処理中', // from v2.1.17 added 2.11.2016
 			'ntftrash'    : 'ごみ箱に入れています', // from v2.1.24 added 2.5.2017
+			'ntfrestore'  : 'ごみ箱から元に戻しています', // from v2.1.24 added 2.5.2017
+			'ntfchkdir'   : '宛先ホルダーを確認しています', // from v2.1.24 added 3.5.2017
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : 'ごみ箱', //from v2.1.24 added 29.4.2017
