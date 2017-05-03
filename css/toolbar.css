@@ -122,7 +122,9 @@
 .elfinder-button-icon-open      { background-position: 0 -176px; } 
 .elfinder-button-icon-mkdir     { background-position: 0 -192px; }
 .elfinder-button-icon-mkfile    { background-position: 0 -208px; }
-.elfinder-button-icon-rm        { background-position: 0 -224px; }
+.elfinder-button-icon-rm        { background-position: 0 -832px; }
+.elfinder-button-icon-trash     { background-position: 0 -224px; }
+.elfinder-button-icon-restore   { background-position: 0 -816px; }
 .elfinder-button-icon-copy      { background-position: 0 -240px; }
 .elfinder-button-icon-cut       { background-position: 0 -256px; }
 .elfinder-button-icon-paste     { background-position: 0 -272px; }
