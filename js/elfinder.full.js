@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 49224df) (2017-05-04)
+ * Version 2.1.23 (2.1-src Nightly: 3f542c7) (2017-05-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -5783,7 +5783,7 @@ elFinder.prototype = {
 		var self   = this,
 			chkCmdMap = function(opts) {
 				// Disable command to replace with other command
-				var toDisable, disabled;
+				var disabled;
 				if (opts.uiCmdMap) {
 					if (Object.keys(opts.uiCmdMap).length) {
 						disabled = opts.disabled;
@@ -7417,7 +7417,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 49224df)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 3f542c7)';
 
 
 
@@ -12306,7 +12306,7 @@ $.fn.elfindercwd = function(fm, options) {
 						       .removeClass('ui-state-disabled'); // for old jQueryUI see https://bugs.jqueryui.com/ticket/5974
 					} else {
 						wrapper[fm.isCommandEnabled('upload')? 'addClass' : 'removeClass']('native-droppable');
-						wrapper.droppable('enable');
+						wrapper.droppable(fm.isCommandEnabled('paste')? 'enable' : 'disable');
 					}
 				});
 			},
