@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 3f542c7) (2017-05-04)
+ * Version 2.1.23 (2.1-src Nightly: c7eb4ca) (2017-05-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -280,17 +280,6 @@ var elFinder = function(node, opts) {
 				// support volume driver option `uiCmdMap`
 				if (uiCmdMapPrev !== JSON.stringify(self.commandMap)) {
 					uiCmdMapPrev = JSON.stringify(self.commandMap);
-					if (Object.keys(self.commandMap).length) {
-						// for contextmenu
-						contextmenu = self.getUI('contextmenu');
-						if (!contextmenu.data('cmdMaps')) {
-							contextmenu.data('cmdMaps', {});
-						}
-						volumeid = data.cwd? data.cwd.volumeid : null;
-						if (volumeid && !contextmenu.data('cmdMaps')[volumeid]) {
-							contextmenu.data('cmdMaps')[volumeid] = self.commandMap;
-						}
-					}
 				}
 			} else {
 				self.options.sync = 0;
@@ -7417,7 +7406,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 3f542c7)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: c7eb4ca)';
 
 
 
@@ -9765,7 +9754,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'ntfopen'     : 'Open folder',
 			'ntffile'     : 'Open file',
 			'ntfreload'   : 'Reload folder content',
-			'ntfmkdir'    : 'Creating holder',
+			'ntfmkdir'    : 'Creating folder',
 			'ntfmkfile'   : 'Creating files',
 			'ntfrm'       : 'Delete files',
 			'ntfcopy'     : 'Copy files',
@@ -10479,20 +10468,18 @@ $.fn.elfindercontextmenu = function(fm) {
 			create = function(type, targets) {
 				var sep    = false,
 					insSep = false,
-					cmdMap = {},
 					disabled = [],
 					isCwd = type === 'cwd',
-					selcnt = 0;
+					selcnt = 0,
+					cmdMap;
 
 				currentType = type;
-				if (menu.data('cmdMaps')) {
-					$.each(menu.data('cmdMaps'), function(i, v){
-						if (targets[0].indexOf(i, 0) == 0) {
-							cmdMap = v;
-							return false;
-						}
-					});
+				
+				// get current uiCmdMap option
+				if (!(cmdMap = fm.option('uiCmdMap', isCwd? void(0) : targets[0]))) {
+					cmdMap = {};
 				}
+				
 				if (!isCwd) {
 					disabled = fm.getDisabledCmds(targets);
 				}
