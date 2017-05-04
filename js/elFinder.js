@@ -5754,12 +5754,11 @@ elFinder.prototype = {
 				// Disable command to replace with other command
 				var toDisable, disabled;
 				if (opts.uiCmdMap) {
-					toDisable = Object.keys(opts.uiCmdMap);
-					if (toDisable.length) {
+					if (Object.keys(opts.uiCmdMap).length) {
 						disabled = opts.disabled;
-						$.each(toDisable, function(i, c) {
-							if ($.inArray(c, disabled) === -1) {
-								disabled.push(c);
+						$.each(opts.uiCmdMap, function(f, t) {
+							if (t === 'hidden' && $.inArray(f, disabled) === -1) {
+								disabled.push(f);
 							}
 						});
 					}
