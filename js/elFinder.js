@@ -5752,7 +5752,7 @@ elFinder.prototype = {
 		var self   = this,
 			chkCmdMap = function(opts) {
 				// Disable command to replace with other command
-				var toDisable, disabled;
+				var disabled;
 				if (opts.uiCmdMap) {
 					if (Object.keys(opts.uiCmdMap).length) {
 						disabled = opts.disabled;
