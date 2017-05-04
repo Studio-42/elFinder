@@ -249,17 +249,6 @@ var elFinder = function(node, opts) {
 				// support volume driver option `uiCmdMap`
 				if (uiCmdMapPrev !== JSON.stringify(self.commandMap)) {
 					uiCmdMapPrev = JSON.stringify(self.commandMap);
-					if (Object.keys(self.commandMap).length) {
-						// for contextmenu
-						contextmenu = self.getUI('contextmenu');
-						if (!contextmenu.data('cmdMaps')) {
-							contextmenu.data('cmdMaps', {});
-						}
-						volumeid = data.cwd? data.cwd.volumeid : null;
-						if (volumeid && !contextmenu.data('cmdMaps')[volumeid]) {
-							contextmenu.data('cmdMaps')[volumeid] = self.commandMap;
-						}
-					}
 				}
 			} else {
 				self.options.sync = 0;
