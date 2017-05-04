@@ -5750,6 +5750,21 @@ elFinder.prototype = {
 	 */
 	normalize : function(data) {
 		var self   = this,
+			chkCmdMap = function(opts) {
+				// Disable command to replace with other command
+				var toDisable, disabled;
+				if (opts.uiCmdMap) {
+					toDisable = Object.keys(opts.uiCmdMap);
+					if (toDisable.length) {
+						disabled = opts.disabled;
+						$.each(toDisable, function(i, c) {
+							if ($.inArray(c, disabled) === -1) {
+								disabled.push(c);
+							}
+						});
+					}
+				}
+			},
 			filter = function(file) { 
 				var vid, targetOptions, isRoot;
 				
@@ -5805,6 +5820,9 @@ elFinder.prototype = {
 								if (file.tmbUrl) {
 									targetOptions.tmbUrl = file.tmbUrl;
 								}
+								
+								// check uiCmdMap
+								chkCmdMap(targetOptions);
 								
 								// check trash bin hash
 								if (targetOptions.trashHash) {
