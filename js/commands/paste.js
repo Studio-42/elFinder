@@ -246,7 +246,7 @@ elFinder.prototype.commands.paste = function() {
 					paste(files);
 				} else {
 					
-					if (!fm.option('copyOverwrite')) {
+					if (!fm.option('copyOverwrite', dst.hash)) {
 						paste(files);
 					} else {
 						internames = $.map(files, function(f) { return f.name});
