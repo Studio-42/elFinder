@@ -27,6 +27,10 @@
 .elfinder-workzone { background:#fff; }
 
 /* current directory */
+/* Is in trash */
+.elfinder-cwd-wrapper.elfinder-cwd-wrapper-trash {
+	background-color: #f0efef;
+}
 /* selected file in "icons" view */
 .elfinder-cwd-view-icons .elfinder-cwd-file .ui-state-hover { background:#ccc; }
 

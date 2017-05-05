@@ -2073,7 +2073,18 @@ $.fn.elfindercwd = function(fm, options) {
 				cwdHashes = $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;});
 			})
 			.bind('open', function() {
+				var inTrash = function() {
+					var isIn = false;
+					$.each(cwdParents, function(i, h) {
+						if (fm.trashes[h]) {
+							isIn = true;
+							return false;
+						}
+					});
+					return isIn;
+				};
 				cwdParents = fm.parents(fm.cwd().hash);
+				wrapper[inTrash()? 'addClass':'removeClass']('elfinder-cwd-wrapper-trash');
 				incHashes = void 0;
 				unselectAll();
 				content();
