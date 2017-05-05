@@ -14,6 +14,9 @@ elFinder.prototype.commands.restore = function() {
 				found = false;
 			
 			fm.lockfiles({files : targets});
+			dfrd.fail(function() {
+				fm.unlockfiles({files : targets});
+			});
 			
 			$.each(files, function(i, f) {
 				var phash = f.phash,
@@ -77,96 +80,35 @@ elFinder.prototype.commands.restore = function() {
 						fm.unlockfiles({files : targets});
 					})
 					.done(function(data) {
-						var margeRes = function(data) {
-								$.each(data, function(k, v) {
-									if (Array.isArray(v)) {
-										if (res[k]) {
-											res[k] = res[k].concat(v);
-										} else {
-											res[k] = v;
-										}
-									}
-								});
-								if (data.sync) {
-									res.sync = 1;
-								}
-							},
-							err = ['errRestore'],
-							res = {},
-							hasNtf = function() {
-								return fm.ui.notify.children('.elfinder-notify-restore').length;
-							},
-							hashes, hasNtf, tm, prg, prgSt;
+						var cmdPaste, hashes;
 						
 						if (hashes = data.hashes) {
-							prg = 1 / cnt * 100;
-							prgSt = 1;
-							tm = setTimeout(function() {
-								fm.notify({type : 'restore', cnt : 1, hideCnt : true, progress : prgSt});
-							}, fm.notifyDelay);
-							$.each(dsts, function(dir, files) {
-								if (hashes[dir]) {
-									fm.request({
-										data   : {cmd : 'paste', dst : hashes[dir], targets : files, cut : 1},
-										preventDefault : true
-									})
-									.fail(function(error) {
-										if (error) {
-											err = err.concat(error);
-										}
-									})
-									.done(function(data) {
-										margeRes(data);
-										if (data.warning) {
-											err = err.concat(data.warning);
-											delete data.warning;
-										}
-										// fire some event to update cache/ui
-										data.removed && data.removed.length && fm.remove(data);
-										data.added   && data.added.length   && fm.add(data);
-										data.changed && data.changed.length && fm.change(data);
-										// fire event with command name
-										fm.trigger('paste', data);
-										// fire event with command name + 'done'
-										fm.trigger('pastedone');
-										// force update content
-										data.sync && fm.sync();
-									})
-									.always(function() {
-										var hashes, addTexts, end = 2;
-										if (hasNtf()) {
-											fm.notify({type : 'restore', cnt : 0, hideCnt : true, progress : prg});
-										} else {
-											prgSt+= prg;
-										}
-										if (--cnt < 1) {
-											tm && clearTimeout(tm);
-											hasNtf() && fm.notify({type : 'restore', cnt  : -1});
-											fm.unlockfiles({files : targets});
-											if (Object.keys(res).length) {
-												if (err.length > 1) {
-													fm.error(err);
+							cmdPaste = fm.getCommand('paste');
+							if (cmdPaste) {
+								$.each(dsts, function(dir, files) {
+									if (hashes[dir]) {
+										fm.clipboard(files, true);
+										cmdPaste.exec([ hashes[dir] ], {_cmd : 'restore'})
+										.always(function() {
+											if (--cnt < 1) {
+												dfrd.resolve();
+												if (others.length) {
+													// Restore items of other trash
+													fm.exec('restore', others);
 												}
-												dfrd.done(res);
-											} else {
-												dfrd.reject(err);
 											}
-											if (others.length) {
-												// Restore items of other trash
-												fm.exec('restore', others);
-											}
-										}
-									});
-								}
-							});
+										});
+									}
+								});
+							} else {
+								dfrd.reject(['errRestore', 'errCmdNoSupport', '(paste)']);
+							}
 						} else {
 							dfrd.reject('errFolderNotFound');
-							fm.unlockfiles({files : targets});
 						}
 					});
 				});
 			} else {
-				fm.unlockfiles({files : targets});
 				dfrd.reject('errRestore');
 			}
 		};
