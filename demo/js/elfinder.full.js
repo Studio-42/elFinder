@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: c7eb4ca) (2017-05-04)
+ * Version 2.1.23 (2.1-src Nightly: 2ebda99) (2017-05-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7406,7 +7406,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: c7eb4ca)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 2ebda99)';
 
 
 
@@ -9759,7 +9759,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'ntfrm'       : 'Delete files',
 			'ntfcopy'     : 'Copy files',
 			'ntfmove'     : 'Move files',
-			'ntfprepare'  : 'Prepare to copy files',
+			'ntfprepare'  : 'Checking existing items',
 			'ntfrename'   : 'Rename files',
 			'ntfupload'   : 'Uploading files',
 			'ntfdownload' : 'Downloading files',
@@ -9851,6 +9851,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'confirmReq'      : 'Confirmation required',
 			'confirmRm'       : 'Are you sure you want to permanently remove items?<br/>This cannot be undone!',
 			'confirmRepl'     : 'Replace old file with new one?',
+			'confirmRest'     : 'Replace existing item with the item in trash?', // fromv2.1.24 added 5.5.2017
 			'confirmConvUTF8' : 'Not in UTF-8<br/>Convert to UTF-8?<br/>Contents become UTF-8 by saving after conversion.', // from v2.1 added 08.04.2014
 			'confirmNonUTF8'  : 'Character encoding of this file couldn\'t be detected. It need to temporarily convert to UTF-8 for editting.<br/>Please select character encoding of this file.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'It has been modified.<br/>Losing work if you do not save changes.', // from v2.1 added 15.7.2015
@@ -9909,8 +9910,9 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'dropFiles'       : 'Drop files here',
 			'or'              : 'or',
 			'selectForUpload' : 'Select files',
-			'moveFiles'       : 'Move files',
-			'copyFiles'       : 'Copy files',
+			'moveFiles'       : 'Move items',
+			'copyFiles'       : 'Copy items',
+			'restoreFiles'    : 'Restore items', // from v2.1.24 added 5.5.2017
 			'rmFromPlaces'    : 'Remove from places',
 			'aspectRatio'     : 'Aspect ratio',
 			'scale'           : 'Scale',
@@ -12845,7 +12847,18 @@ $.fn.elfindercwd = function(fm, options) {
 				cwdHashes = $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;});
 			})
 			.bind('open', function() {
+				var inTrash = function() {
+					var isIn = false;
+					$.each(cwdParents, function(i, h) {
+						if (fm.trashes[h]) {
+							isIn = true;
+							return false;
+						}
+					});
+					return isIn;
+				};
 				cwdParents = fm.parents(fm.cwd().hash);
+				wrapper[inTrash()? 'addClass':'removeClass']('elfinder-cwd-wrapper-trash');
 				incHashes = void 0;
 				unselectAll();
 				content();
@@ -19961,14 +19974,15 @@ elFinder.prototype.commands.paste = function() {
 		return this.fm.clipboard().length && dst.mime == 'directory' && dst.write ? 0 : -1;
 	}
 	
-	this.exec = function(dst) {
+	this.exec = function(dst, opts) {
 		var self   = this,
 			fm     = self.fm,
 			dst    = dst ? this.files(dst)[0] : fm.cwd(),
 			files  = fm.clipboard(),
 			cnt    = files.length,
 			cut    = cnt ? files[0].cut : false,
-			error  = cut ? 'errMove' : 'errCopy',
+			cmd    = (opts && opts._cmd)? opts._cmd : (cut? 'move' : 'copy'),
+			error  = 'err' + cmd.charAt(0).toUpperCase() + cmd.substr(1),
 			fpaste = [],
 			fcopy  = [],
 			dfrd   = $.Deferred()
@@ -20006,8 +20020,8 @@ elFinder.prototype.commands.paste = function() {
 						}
 
 						fm.confirm({
-							title  : fm.i18n(cut ? 'moveFiles' : 'copyFiles'),
-							text   : ['errExists', file.name, 'confirmRepl'], 
+							title  : fm.i18n(cmd + 'Files'),
+							text   : ['errExists', file.name, cmd === 'restore'? 'confirmRest' : 'confirmRepl'], 
 							all    : !last,
 							accept : {
 								label    : 'btnYes',
@@ -20125,7 +20139,7 @@ elFinder.prototype.commands.paste = function() {
 						
 						fm.request({
 								data   : {cmd : 'paste', dst : dst.hash, targets : files, cut : cut ? 1 : 0, src : src, renames : renames, hashes : hashes, suffix : fm.options.backupSuffix},
-								notify : {type : cut ? 'move' : 'copy', cnt : cnt}
+								notify : {type : cmd, cnt : cnt}
 							})
 							.done(function(data) {
 								var newItem, node;
@@ -20152,7 +20166,7 @@ elFinder.prototype.commands.paste = function() {
 											} else {
 												fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
 											}
-											fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd' + (cut ? 'move' : 'copy'))]), extNode: node});
+											fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd' + cmd)]), extNode: node});
 										}
 									});
 								}
@@ -20171,7 +20185,7 @@ elFinder.prototype.commands.paste = function() {
 					paste(files);
 				} else {
 					
-					if (!fm.option('copyOverwrite')) {
+					if (!fm.option('copyOverwrite', dst.hash)) {
 						paste(files);
 					} else {
 						internames = $.map(files, function(f) { return f.name});
@@ -23185,6 +23199,9 @@ elFinder.prototype.commands.restore = function() {
 				found = false;
 			
 			fm.lockfiles({files : targets});
+			dfrd.fail(function() {
+				fm.unlockfiles({files : targets});
+			});
 			
 			$.each(files, function(i, f) {
 				var phash = f.phash,
@@ -23248,96 +23265,35 @@ elFinder.prototype.commands.restore = function() {
 						fm.unlockfiles({files : targets});
 					})
 					.done(function(data) {
-						var margeRes = function(data) {
-								$.each(data, function(k, v) {
-									if (Array.isArray(v)) {
-										if (res[k]) {
-											res[k] = res[k].concat(v);
-										} else {
-											res[k] = v;
-										}
-									}
-								});
-								if (data.sync) {
-									res.sync = 1;
-								}
-							},
-							err = ['errRestore'],
-							res = {},
-							hasNtf = function() {
-								return fm.ui.notify.children('.elfinder-notify-restore').length;
-							},
-							hashes, hasNtf, tm, prg, prgSt;
+						var cmdPaste, hashes;
 						
 						if (hashes = data.hashes) {
-							prg = 1 / cnt * 100;
-							prgSt = 1;
-							tm = setTimeout(function() {
-								fm.notify({type : 'restore', cnt : 1, hideCnt : true, progress : prgSt});
-							}, fm.notifyDelay);
-							$.each(dsts, function(dir, files) {
-								if (hashes[dir]) {
-									fm.request({
-										data   : {cmd : 'paste', dst : hashes[dir], targets : files, cut : 1},
-										preventDefault : true
-									})
-									.fail(function(error) {
-										if (error) {
-											err = err.concat(error);
-										}
-									})
-									.done(function(data) {
-										margeRes(data);
-										if (data.warning) {
-											err = err.concat(data.warning);
-											delete data.warning;
-										}
-										// fire some event to update cache/ui
-										data.removed && data.removed.length && fm.remove(data);
-										data.added   && data.added.length   && fm.add(data);
-										data.changed && data.changed.length && fm.change(data);
-										// fire event with command name
-										fm.trigger('paste', data);
-										// fire event with command name + 'done'
-										fm.trigger('pastedone');
-										// force update content
-										data.sync && fm.sync();
-									})
-									.always(function() {
-										var hashes, addTexts, end = 2;
-										if (hasNtf()) {
-											fm.notify({type : 'restore', cnt : 0, hideCnt : true, progress : prg});
-										} else {
-											prgSt+= prg;
-										}
-										if (--cnt < 1) {
-											tm && clearTimeout(tm);
-											hasNtf() && fm.notify({type : 'restore', cnt  : -1});
-											fm.unlockfiles({files : targets});
-											if (Object.keys(res).length) {
-												if (err.length > 1) {
-													fm.error(err);
+							cmdPaste = fm.getCommand('paste');
+							if (cmdPaste) {
+								$.each(dsts, function(dir, files) {
+									if (hashes[dir]) {
+										fm.clipboard(files, true);
+										cmdPaste.exec([ hashes[dir] ], {_cmd : 'restore'})
+										.always(function() {
+											if (--cnt < 1) {
+												dfrd.resolve();
+												if (others.length) {
+													// Restore items of other trash
+													fm.exec('restore', others);
 												}
-												dfrd.done(res);
-											} else {
-												dfrd.reject(err);
 											}
-											if (others.length) {
-												// Restore items of other trash
-												fm.exec('restore', others);
-											}
-										}
-									});
-								}
-							});
+										});
+									}
+								});
+							} else {
+								dfrd.reject(['errRestore', 'errCmdNoSupport', '(paste)']);
+							}
 						} else {
 							dfrd.reject('errFolderNotFound');
-							fm.unlockfiles({files : targets});
 						}
 					});
 				});
 			} else {
-				fm.unlockfiles({files : targets});
 				dfrd.reject('errRestore');
 			}
 		};
