@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 65e2d23) (2017-05-07)
+ * Version 2.1.23 (2.1-src Nightly: de7174d) (2017-05-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -3380,8 +3380,8 @@ var elFinder = function(node, opts) {
 	// in getFileCallback set - change default actions on double click/enter/ctrl+enter
 	if (this.commands.getfile) {
 		if (typeof(this.options.getFileCallback) == 'function') {
-			this.bind('dblclick', function(e) {
-				e.preventDefault();
+			this.bind('dblclick', function() {
+				this.preventDefault();
 				self.exec('getfile').fail(function() {
 					self.exec('open');
 				});
@@ -7443,7 +7443,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 65e2d23)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: de7174d)';
 
 
 
@@ -7653,7 +7653,7 @@ if ($.ui) {
 
 	if (self.element.hasClass('touch-punch')) {
 		// Delegate the touch handlers to the widget's element
-		self.element.bind({
+		self.element.on({
 		  touchstart: $.proxy(self, '_touchStart'),
 		  touchmove: $.proxy(self, '_touchMove'),
 		  touchend: $.proxy(self, '_touchEnd')
@@ -7673,7 +7673,7 @@ if ($.ui) {
 
 	if (self.element.hasClass('touch-punch')) {
 		// Delegate the touch handlers to the widget's element
-		self.element.unbind({
+		self.element.off({
 		  touchstart: $.proxy(self, '_touchStart'),
 		  touchmove: $.proxy(self, '_touchMove'),
 		  touchend: $.proxy(self, '_touchEnd')
@@ -9036,8 +9036,8 @@ elFinder.prototype.command = function(fm) {
 		}
 
 		if (this.disableOnSearch) {
-			fm.bind('search searchend', function(e) {
-				self._disabled = e.type === 'search'? true : ! (this.alwaysEnabled || fm.isCommandEnabled(name));
+			fm.bind('search searchend', function() {
+				self._disabled = this.type === 'search'? true : ! (this.alwaysEnabled || fm.isCommandEnabled(name));
 				self.update(void(0), self.value);
 			});
 		}
@@ -11467,7 +11467,7 @@ $.fn.elfindercwd = function(fm, options) {
 						if (pdir) {
 							parent = $(itemhtml($.extend(true, {}, pdir, {name : '..', mime : 'directory'})))
 								.addClass('elfinder-cwd-parent')
-								.bind('mousedown click mouseup touchstart touchmove touchend dblclick mouseenter', function(e) {
+								.on('mousedown click mouseup touchstart touchmove touchend dblclick mouseenter', function(e) {
 									e.preventDefault();
 									e.stopPropagation();
 								})
@@ -12882,24 +12882,24 @@ $.fn.elfindercwd = function(fm, options) {
 			.bind('open add remove searchend', function() {
 				var phash = fm.cwd().hash;
 				cwdHashes = $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;});
-			})
-			.bind('open', function() {
-				var inTrash = function() {
-					var isIn = false;
-					$.each(cwdParents, function(i, h) {
-						if (fm.trashes[h]) {
-							isIn = true;
-							return false;
-						}
-					});
-					return isIn;
-				};
-				cwdParents = fm.parents(fm.cwd().hash);
-				wrapper[inTrash()? 'addClass':'removeClass']('elfinder-cwd-wrapper-trash');
-				incHashes = void 0;
-				unselectAll();
-				content();
-				resize();
+				if (this.type === 'open') {
+					var inTrash = function() {
+						var isIn = false;
+						$.each(cwdParents, function(i, h) {
+							if (fm.trashes[h]) {
+								isIn = true;
+								return false;
+							}
+						});
+						return isIn;
+					};
+					cwdParents = fm.parents(fm.cwd().hash);
+					wrapper[inTrash()? 'addClass':'removeClass']('elfinder-cwd-wrapper-trash');
+					incHashes = void 0;
+					unselectAll();
+					content();
+					resize();
+				}
 			})
 			.bind('search', function(e) {
 				cwdHashes = $.map(e.data.files, function(f) { return f.hash; });
@@ -14149,9 +14149,9 @@ $.fn.elfinderpath = function(fm) {
 				fit();
 			})
 			// on swipe to navbar show/hide
-			.bind('navbarshow navbarhide', function(e) {
+			.bind('navbarshow navbarhide', function() {
 				var wz = fm.getUI('workzone');
-				if (e.type === 'navbarshow') {
+				if (this.type === 'navbarshow') {
 					wz.height(wz.height() + wzbase.outerHeight());
 					path.prependTo(fm.getUI('statusbar'));
 					wzbase.detach();
@@ -14725,8 +14725,9 @@ $.fn.elfinderplaces = function(fm, opts) {
 				}
 				changed && save();
 			})
-			.bind('sync netmount', function(e) {
-				var hashes = Object.keys(dirs);
+			.bind('sync netmount', function() {
+				var hashes = Object.keys(dirs),
+					ev = this;
 				if (hashes.length) {
 					root.prepend(spinner);
 
@@ -14748,7 +14749,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 						});
 						$.each(dirs, function(h, f) {
 							if (!f.notfound != !!exists[h]) {
-								if ((f.phash === cwd && e.type !== 'netmount') || (exists[h] && exists[h].mime !== 'directory')) {
+								if ((f.phash === cwd && ev.type !== 'netmount') || (exists[h] && exists[h].mime !== 'directory')) {
 									if (remove(h)) {
 										updated = true;
 									}
@@ -15451,11 +15452,11 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		
 		render();
 		
-		fm.bind('open sync select', function(e) {
+		fm.bind('open sync select', function() {
 			var disabled = fm.option('disabled'),
 				doRender, sel;
 			
-			if (e.type === 'select') {
+			if (this.type === 'select') {
 				if (fm.searchStatus.state < 2) {
 					return;
 				}
@@ -21634,12 +21635,12 @@ d=(h[l++]|h[l++]<<8|h[l++]<<16|h[l++]<<24)>>>0;(a.length&4294967295)!==d&&n(Erro
 	};
 	
 	this.init = function() {
-		this.fm.bind('search searchend', function(e) {
-			search = e.type == 'search';
+		this.fm.bind('search searchend', function() {
+			search = this.type == 'search';
 		});
 	};
 	
-	this.fm.bind('contextmenu', function(e){
+	this.fm.bind('contextmenu', function(){
 		var fm = self.fm;
 		if (fm.options.sync >= 1000) {
 			self.extra = {
