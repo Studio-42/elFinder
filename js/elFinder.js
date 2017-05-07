@@ -2176,11 +2176,11 @@ var elFinder = function(node, opts) {
 	};
 	
 	/**
-	 * Array that has to unbind events
+	 * Arrays that has to unbind events
 	 * 
-	 * @type Array
+	 * @type Object
 	 */
-	this.toUnbindEvents = [];
+	this.toUnbindEvents = {};
 	
 	/**
 	 * Attach listener to events
