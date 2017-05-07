@@ -656,7 +656,7 @@ $.fn.elfindercwd = function(fm, options) {
 						if (pdir) {
 							parent = $(itemhtml($.extend(true, {}, pdir, {name : '..', mime : 'directory'})))
 								.addClass('elfinder-cwd-parent')
-								.bind('mousedown click mouseup touchstart touchmove touchend dblclick mouseenter', function(e) {
+								.on('mousedown click mouseup touchstart touchmove touchend dblclick mouseenter', function(e) {
 									e.preventDefault();
 									e.stopPropagation();
 								})
@@ -2071,24 +2071,24 @@ $.fn.elfindercwd = function(fm, options) {
 			.bind('open add remove searchend', function() {
 				var phash = fm.cwd().hash;
 				cwdHashes = $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;});
-			})
-			.bind('open', function() {
-				var inTrash = function() {
-					var isIn = false;
-					$.each(cwdParents, function(i, h) {
-						if (fm.trashes[h]) {
-							isIn = true;
-							return false;
-						}
-					});
-					return isIn;
-				};
-				cwdParents = fm.parents(fm.cwd().hash);
-				wrapper[inTrash()? 'addClass':'removeClass']('elfinder-cwd-wrapper-trash');
-				incHashes = void 0;
-				unselectAll();
-				content();
-				resize();
+				if (this.type === 'open') {
+					var inTrash = function() {
+						var isIn = false;
+						$.each(cwdParents, function(i, h) {
+							if (fm.trashes[h]) {
+								isIn = true;
+								return false;
+							}
+						});
+						return isIn;
+					};
+					cwdParents = fm.parents(fm.cwd().hash);
+					wrapper[inTrash()? 'addClass':'removeClass']('elfinder-cwd-wrapper-trash');
+					incHashes = void 0;
+					unselectAll();
+					content();
+					resize();
+				}
 			})
 			.bind('search', function(e) {
 				cwdHashes = $.map(e.data.files, function(f) { return f.hash; });

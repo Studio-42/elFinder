@@ -186,8 +186,8 @@ elFinder.prototype.command = function(fm) {
 		}
 
 		if (this.disableOnSearch) {
-			fm.bind('search searchend', function(e) {
-				self._disabled = e.type === 'search'? true : ! (this.alwaysEnabled || fm.isCommandEnabled(name));
+			fm.bind('search searchend', function() {
+				self._disabled = this.type === 'search'? true : ! (this.alwaysEnabled || fm.isCommandEnabled(name));
 				self.update(void(0), self.value);
 			});
 		}

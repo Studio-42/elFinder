@@ -127,11 +127,11 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		
 		render();
 		
-		fm.bind('open sync select', function(e) {
+		fm.bind('open sync select', function() {
 			var disabled = fm.option('disabled'),
 				doRender, sel;
 			
-			if (e.type === 'select') {
+			if (this.type === 'select') {
 				if (fm.searchStatus.state < 2) {
 					return;
 				}

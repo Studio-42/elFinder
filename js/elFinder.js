@@ -3349,8 +3349,8 @@ var elFinder = function(node, opts) {
 	// in getFileCallback set - change default actions on double click/enter/ctrl+enter
 	if (this.commands.getfile) {
 		if (typeof(this.options.getFileCallback) == 'function') {
-			this.bind('dblclick', function(e) {
-				e.preventDefault();
+			this.bind('dblclick', function() {
+				this.preventDefault();
 				self.exec('getfile').fail(function() {
 					self.exec('open');
 				});
