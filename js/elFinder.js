@@ -2234,6 +2234,7 @@ var elFinder = function(node, opts) {
 	
 	/**
 	 * Fire event - send notification to all event listeners
+	 * In the callback `this` becames an event object
 	 *
 	 * @param  String   event type
 	 * @param  Object   data to send across event
@@ -2271,7 +2272,7 @@ var elFinder = function(node, opts) {
 				}
 
 				try {
-					if (handlers[i](event, this) === false 
+					if (handlers[i].call(event, event, this) === false 
 					|| event.isDefaultPrevented()) {
 						this.debug('event-stoped', event.type);
 						break;
@@ -5616,7 +5617,7 @@ elFinder.prototype = {
 					type: event,
 					callback: h
 				});
-				return callback.apply(self.getListeners(e.type), arguments);
+				return callback.apply(this, arguments);
 			};
 		return this.bind(event, h);
 	},
