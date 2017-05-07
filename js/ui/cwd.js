@@ -1239,7 +1239,7 @@ $.fn.elfindercwd = function(fm, options) {
 				if (!fm.cwd().hash && fm.currentReqCmd !== 'open') {
 					$.each(cwdParents.reverse(), function(i, h) {
 						if (fm.files()[h]) {
-							fm.one(fm.currentReqCmd + 'done', function(e, fm) {
+							fm.one(fm.currentReqCmd + 'done', function() {
 								!fm.cwd().hash && fm.exec('open', h);
 							});
 							return false;
