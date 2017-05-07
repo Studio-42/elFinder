@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 2ebda99) (2017-05-05)
+ * Version 2.1.23 (2.1-src Nightly: 062382b) (2017-05-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -1612,7 +1612,7 @@ var elFinder = function(node, opts) {
 			data     = $.extend({}, o.customData, {mimes : o.onlyMimes}, opts.data || opts),
 			// command name
 			cmd      = data.cmd,
-			isOpen   = (cmd === 'open'),
+			isOpen   = (!opts.asNotOpen && cmd === 'open'),
 			// call default fail callback (display error dialog) ?
 			deffail  = !(opts.preventDefault || opts.preventFail),
 			// call default success callback ?
@@ -1867,7 +1867,17 @@ var elFinder = function(node, opts) {
 					return dfrd.reject(['errMaxTargets', self.maxTargets]);
 				}
 
-				defdone && dfrd.done(done);
+				if (defdone) {
+					dfrd.done(done);
+				} else if (cmd === 'open'){
+					dfrd.done(function(data) {
+						var cwd = data.cwd.hash;
+						cache(data.files);
+						if (!files[cwd]) {
+							cache([data.cwd]);
+						}
+					})
+				}
 				if (notify.type && notify.cnt) {
 					if (cancel) {
 						notify.cancel = dfrd;
@@ -2197,6 +2207,13 @@ var elFinder = function(node, opts) {
 	};
 	
 	/**
+	 * Array that has to unbind events
+	 * 
+	 * @type Array
+	 */
+	this.toUnbindEvents = [];
+	
+	/**
 	 * Attach listener to events
 	 * To bind to multiply events at once, separate events names by space
 	 * 
@@ -2205,12 +2222,13 @@ var elFinder = function(node, opts) {
 	 * @return elFinder
 	 */
 	this.bind = function(event, callback) {
-		var i;
+		var i, len;
 		
 		if (typeof(callback) == 'function') {
-			event = ('' + event).toLowerCase().split(/\s+/);
+			event = ('' + event).toLowerCase().replace(/^\s+|\s+$/g, '').split(/\s+/);
 			
-			for (i = 0; i < event.length; i++) {
+			len = event.length;
+			for (i = 0; i < len; i++) {
 				if (listeners[event[i]] === void(0)) {
 					listeners[event[i]] = [];
 				}
@@ -2229,17 +2247,19 @@ var elFinder = function(node, opts) {
 	 * @return elFinder
 	 */
 	this.unbind = function(event, callback) {
-		var i, l, ci;
+		var i, len, l, ci;
 		
 		event = ('' + event).toLowerCase().split(/\s+/);
 		
-		for (i = 0; i < event.length; i++) {
-			l = listeners[event[i]] || [];
-			ci = $.inArray(callback, l);
-			ci > -1 && l.splice(ci, 1);
+		len = event.length;
+		for (i = 0; i < len; i++) {
+			if (l = listeners[event[i]]) {
+				ci = $.inArray(callback, l);
+				ci > -1 && l.splice(ci, 1);
+			}
 		}
 		
-		callback = null
+		callback = null;
 		return this;
 	};
 	
@@ -2291,6 +2311,13 @@ var elFinder = function(node, opts) {
 					window.console && window.console.log && window.console.log(ex);
 				}
 				
+			}
+			
+			if (this.toUnbindEvents.length) {
+				$.each(this.toUnbindEvents, function(i, v) {
+					self.unbind(v.type, v.callback);
+				});
+				this.toUnbindEvents = [];
 			}
 		}
 		return this;
@@ -3329,10 +3356,11 @@ var elFinder = function(node, opts) {
 
 	// We listen and emit a sound on delete according to option
 	if (true === this.options.sound) {
-		this.bind('rm', function(e) {
-			var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"');
+		this.bind('playsound', function(e) {
+			var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"'),
+				file = e.data && e.data.soundFile;
 
-			play && play != '' && play != 'no' && $(beeper).html('<source src="' + soundPath + 'rm.wav" type="audio/wav">')[0].play()
+			play && file && play != '' && play != 'no' && $(beeper).html('<source src="' + soundPath + file + '" type="audio/wav">')[0].play();
 		});
 	}
 
@@ -3973,7 +4001,7 @@ var elFinder = function(node, opts) {
 	// send initial request and start to pray >_<
 	this.trigger('init')
 		.request({
-			data        : {cmd : 'open', target : self.startDir(), init : 1, tree : this.ui.tree ? 1 : 0}, 
+			data        : {cmd : 'open', target : self.startDir(), init : 1, tree : self.ui.tree ? 1 : 0}, 
 			preventDone : true,
 			notify      : {type : 'open', cnt : 1, hideCnt : true},
 			freeze      : true
@@ -3995,6 +4023,7 @@ var elFinder = function(node, opts) {
 			// initial open
 			open(data);
 			self.trigger('open', data);
+			self.trigger('opendone');
 			
 			if (inFrame && self.options.enableAlways) {
 				$(window).focus();
@@ -5610,7 +5639,10 @@ elFinder.prototype = {
 	one : function(event, callback) {
 		var self = this,
 			h    = function(e, f) {
-				setTimeout(function() {self.unbind(event, h);}, 3);
+				self.toUnbindEvents.push({
+					type: event,
+					callback: h
+				});
 				return callback.apply(self.getListeners(e.type), arguments);
 			};
 		return this.bind(event, h);
@@ -7406,7 +7438,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 2ebda99)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 062382b)';
 
 
 
@@ -19977,11 +20009,12 @@ elFinder.prototype.commands.paste = function() {
 	this.exec = function(dst, opts) {
 		var self   = this,
 			fm     = self.fm,
+			opts   = opts || {},
 			dst    = dst ? this.files(dst)[0] : fm.cwd(),
 			files  = fm.clipboard(),
 			cnt    = files.length,
 			cut    = cnt ? files[0].cut : false,
-			cmd    = (opts && opts._cmd)? opts._cmd : (cut? 'move' : 'copy'),
+			cmd    = opts._cmd? opts._cmd : (cut? 'move' : 'copy'),
 			error  = 'err' + cmd.charAt(0).toUpperCase() + cmd.substr(1),
 			fpaste = [],
 			fcopy  = [],
@@ -20166,7 +20199,7 @@ elFinder.prototype.commands.paste = function() {
 											} else {
 												fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
 											}
-											fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd' + cmd)]), extNode: node});
+											!opts.noToast && fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd' + cmd)]), extNode: node});
 										}
 									});
 								}
@@ -23193,109 +23226,193 @@ elFinder.prototype.commands.resize = function() {
 elFinder.prototype.commands.restore = function() {
 	var self = this,
 		fm = this.fm,
-		restore = function(dfrd, files, targets) {
-			var rHashes = {},
-				others = [],
-				found = false;
-			
-			fm.lockfiles({files : targets});
-			dfrd.fail(function() {
-				fm.unlockfiles({files : targets});
-			});
+		getFilesRecursively = function(files) {
+			var dfd = $.Deferred(),
+				dirs = [],
+				results = [],
+				reqs = [];
 			
 			$.each(files, function(i, f) {
-				var phash = f.phash,
-					pfile,
-					srcRoot, tPath;
-				while(phash) {
-					if (srcRoot = fm.trashes[phash]) {
-						if (! rHashes[srcRoot]) {
-							if (found) {
-								// Keep items of other trash
-								others.push(f.hash);
-								return null; // continue $.each
-							}
-							rHashes[srcRoot] = {};
-							found = true;
-						}
-
-						tPath = fm.path(f.hash).substr(fm.path(phash).length).replace(/\\/g, '/');
-						tPath = tPath.replace(/\/[^\/]+?$/, '');
-						if (tPath === '') {
-							tPath = '/';
-						}
-						if (!rHashes[srcRoot][tPath]) {
-							rHashes[srcRoot][tPath] = [];
-						}
-						rHashes[srcRoot][tPath].push(f.hash);
-						break;
-					}
-					
-					// Go up one level for next check
-					pfile = fm.file(phash);
-					
-					if (!pfile) {
-						phash = false;
-						// Detection method for search results
-						$.each(fm.trashes, function(ph) {
-							var file = fm.file(ph),
-								filePath = fm.path(ph);
-							if ((!file.volumeid || f.hash.indexOf(file.volumeid) === 0) && fm.path(f.hash).indexOf(filePath) === 0) {
-								phash = ph;
-								return false;
-							}
-						});
-					} else {
-						phash = pfile.phash;
-					}
-				}
+				f.mime === 'directory'? dirs.push(f) : results.push(f);
 			});
 			
-			if (found) {
-				$.each(rHashes, function(src, dsts) {
-					var dirs = Object.keys(dsts),
-						cnt = dirs.length;
-					fm.request({
-						data   : {cmd  : 'mkdir', target : src, dirs : dirs}, 
-						notify : {type : 'chkdir', cnt : cnt},
-						preventFail : true
-					})
-					.fail(function(error) {
-						dfrd.reject(error);
-						fm.unlockfiles({files : targets});
-					})
-					.done(function(data) {
-						var cmdPaste, hashes;
-						
-						if (hashes = data.hashes) {
-							cmdPaste = fm.getCommand('paste');
-							if (cmdPaste) {
-								$.each(dsts, function(dir, files) {
-									if (hashes[dir]) {
-										fm.clipboard(files, true);
-										cmdPaste.exec([ hashes[dir] ], {_cmd : 'restore'})
-										.always(function() {
-											if (--cnt < 1) {
-												dfrd.resolve();
-												if (others.length) {
-													// Restore items of other trash
-													fm.exec('restore', others);
-												}
-											}
-										});
-									}
-								});
-							} else {
-								dfrd.reject(['errRestore', 'errCmdNoSupport', '(paste)']);
-							}
-						} else {
-							dfrd.reject('errFolderNotFound');
+			if (dirs.length) {
+				$.each(dirs, function(i, d) {
+					reqs.push(fm.request({
+						data : {cmd  : 'open', target : d.hash},
+						preventDefault : true,
+						asNotOpen : true
+					}));
+				});
+				$.when.apply($, reqs).fail(function() {
+					dfd.reject();
+				}).done(function() {
+					var items = [];
+					$.each(arguments, function(i, r) {
+						var files;
+						if (r.files) {
+							items = items.concat(r.files);
 						}
+					});
+					getFilesRecursively(items).done(function(res) {
+						results = results.concat(res);
+						dfd.resolve(results);
 					});
 				});
 			} else {
-				dfrd.reject('errRestore');
+				dfd.resolve(results);
 			}
+			
+			return dfd.promise();
+		},
+		restore = function(dfrd, files, targets) {
+			var rHashes = {},
+				others = [],
+				found = false,
+				dirs = [],
+				tm;
+			
+			fm.lockfiles({files : targets});
+			
+			dirs = $.map(files, function(f) {
+				return f.mime === 'directory'? f.hash : null;
+			});
+			
+			dfrd.done(function() {
+				dirs && fm.exec('rm', dirs, {forceRm : true, quiet : true});
+			}).always(function() {
+				fm.unlockfiles({files : targets});
+			});
+			
+			tm = setTimeout(function() {
+				fm.notify({type : 'search', cnt : 1, hideCnt : true});
+			}, fm.notifyDelay);
+			
+			
+			getFilesRecursively(files).always(function() {
+				tm && clearTimeout(tm);
+				fm.notify({type : 'search', cnt : -1, hideCnt : true});
+			}).fail(function() {
+				dfrd.reject('errRestore', 'errFileNotFound');
+			}).done(function(res) {
+				var errFolderNotfound = ['errRestore', 'errFolderNotFound'],
+					dirTop = '';
+				
+				if (res.length) {
+					$.each(res, function(i, f) {
+						var phash = f.phash,
+							pfile,
+							srcRoot, tPath;
+						while(phash) {
+							if (srcRoot = fm.trashes[phash]) {
+								if (! rHashes[srcRoot]) {
+									if (found) {
+										// Keep items of other trash
+										others.push(f.hash);
+										return null; // continue $.each
+									}
+									rHashes[srcRoot] = {};
+									found = true;
+								}
+		
+								tPath = fm.path(f.hash).substr(fm.path(phash).length).replace(/\\/g, '/');
+								tPath = tPath.replace(/\/[^\/]+?$/, '');
+								if (tPath === '') {
+									tPath = '/';
+								}
+								if (!rHashes[srcRoot][tPath]) {
+									rHashes[srcRoot][tPath] = [];
+								}
+								rHashes[srcRoot][tPath].push(f.hash);
+								if (!dirTop || dirTop.length > tPath.length) {
+									dirTop = tPath;
+								}
+								break;
+							}
+							
+							// Go up one level for next check
+							pfile = fm.file(phash);
+							
+							if (!pfile) {
+								phash = false;
+								// Detection method for search results
+								$.each(fm.trashes, function(ph) {
+									var file = fm.file(ph),
+										filePath = fm.path(ph);
+									if ((!file.volumeid || f.hash.indexOf(file.volumeid) === 0) && fm.path(f.hash).indexOf(filePath) === 0) {
+										phash = ph;
+										return false;
+									}
+								});
+							} else {
+								phash = pfile.phash;
+							}
+						}
+					});
+					if (found) {
+						$.each(rHashes, function(src, dsts) {
+							var dirs = Object.keys(dsts),
+								cnt = dirs.length;
+							fm.request({
+								data   : {cmd  : 'mkdir', target : src, dirs : dirs}, 
+								notify : {type : 'chkdir', cnt : cnt},
+								preventFail : true
+							}).fail(function(error) {
+								dfrd.reject(error);
+								fm.unlockfiles({files : targets});
+							}).done(function(data) {
+								var cmdPaste, hashes;
+								
+								if (hashes = data.hashes) {
+									cmdPaste = fm.getCommand('paste');
+									if (cmdPaste) {
+										// wait until file cache made
+										fm.one('mkdirdone', function() {
+											var hasErr = false;
+											$.each(dsts, function(dir, files) {
+												if (hashes[dir]) {
+													if (fm.file(hashes[dir])) {
+														fm.clipboard(files, true);
+														cmdPaste.exec([ hashes[dir] ], {_cmd : 'restore', noToast : dir !== dirTop})
+														.done(function(data) {
+															if (data && (data.error || data.warning)) {
+																hasErr = true;
+															}
+														})
+														.fail(function() {
+															hasErr = true;
+														})
+														.always(function() {
+															if (--cnt < 1) {
+																dfrd[hasErr? 'reject' : 'resolve']();
+																if (others.length) {
+																	// Restore items of other trash
+																	fm.exec('restore', others);
+																}
+															}
+														});
+													} else {
+														dfrd.reject(errFolderNotfound);
+													}
+												}
+											});
+										});
+									} else {
+										dfrd.reject(['errRestore', 'errCmdNoSupport', '(paste)']);
+									}
+								} else {
+									dfrd.reject(errFolderNotfound);
+								}
+							});
+						});
+					} else {
+						dfrd.reject(errFolderNotfound);
+					}
+				} else {
+					dfrd.reject('errFileNotFound');
+					dirs && fm.exec('rm', dirs, {forceRm : true, quiet : true});
+				}
+			});
 		};
 	
 	this.updateOnSelect  = false;
@@ -23539,7 +23656,8 @@ elFinder.prototype.commands.rm = function() {
 													fm.error(err);
 												}
 											}
-											dfrd.done(res);
+											res._noSound = true;
+											dfrd.resolve(res);
 										} else {
 											dfrd.reject(err);
 										}
@@ -23557,10 +23675,11 @@ elFinder.prototype.commands.rm = function() {
 				fm.unlockfiles({files : targets});
 			}
 		},
-		remove = function(dfrd, targets) {
+		remove = function(dfrd, targets, quiet) {
+			var notify = quiet? {} : {type : 'rm', cnt : targets.length};
 			fm.request({
 				data   : {cmd  : 'rm', targets : targets}, 
-				notify : {type : 'rm', cnt : targets.length},
+				notify : notify,
 				preventFail : true
 			})
 			.fail(function(error) {
@@ -23570,7 +23689,7 @@ elFinder.prototype.commands.rm = function() {
 				if (data.error || data.warning) {
 					data.sync = true;
 				}
-				dfrd.done(data);
+				dfrd.resolve(data);
 			})
 			.always(function() {
 				fm.unlockfiles({files : targets});
@@ -23643,15 +23762,19 @@ elFinder.prototype.commands.rm = function() {
 	}
 	
 	this.exec = function(hashes, opts) {
-		var dfrd   = $.Deferred()
+		var opts   = opts || {},
+			dfrd   = $.Deferred()
 				.fail(function(error) {
 					error && fm.error(error);
+				}).done(function(data) {
+					!opts.quiet && !data._noSound && data.removed && data.removed.length && fm.trigger('playsound', {soundFile : 'rm.wav'});
 				}),
 			files  = self.files(hashes),
 			cnt    = files.length,
 			tHash  = null,
-			addTexts = opts && opts.addTexts? opts.addTexts : null,
-			forceRm = opts && opts.forceRm,
+			addTexts = opts.addTexts? opts.addTexts : null,
+			forceRm = opts.forceRm,
+			quiet = opts.quiet,
 			targets;
 
 		if (! cnt) {
@@ -23685,7 +23808,11 @@ elFinder.prototype.commands.rm = function() {
 			if (tHash && self.options.quickTrash) {
 				toTrash(dfrd, targets, tHash);
 			} else {
-				confirm(dfrd, targets, files, tHash, addTexts);
+				if (quiet) {
+					remove(dfrd, targets, quiet);
+				} else {
+					confirm(dfrd, targets, files, tHash, addTexts);
+				}
 			}
 		}
 			
