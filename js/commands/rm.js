@@ -195,7 +195,8 @@ elFinder.prototype.commands.rm = function() {
 													fm.error(err);
 												}
 											}
-											dfrd.done(res);
+											res._noSound = true;
+											dfrd.resolve(res);
 										} else {
 											dfrd.reject(err);
 										}
@@ -213,10 +214,11 @@ elFinder.prototype.commands.rm = function() {
 				fm.unlockfiles({files : targets});
 			}
 		},
-		remove = function(dfrd, targets) {
+		remove = function(dfrd, targets, quiet) {
+			var notify = quiet? {} : {type : 'rm', cnt : targets.length};
 			fm.request({
 				data   : {cmd  : 'rm', targets : targets}, 
-				notify : {type : 'rm', cnt : targets.length},
+				notify : notify,
 				preventFail : true
 			})
 			.fail(function(error) {
@@ -226,7 +228,7 @@ elFinder.prototype.commands.rm = function() {
 				if (data.error || data.warning) {
 					data.sync = true;
 				}
-				dfrd.done(data);
+				dfrd.resolve(data);
 			})
 			.always(function() {
 				fm.unlockfiles({files : targets});
@@ -299,15 +301,19 @@ elFinder.prototype.commands.rm = function() {
 	}
 	
 	this.exec = function(hashes, opts) {
-		var dfrd   = $.Deferred()
+		var opts   = opts || {},
+			dfrd   = $.Deferred()
 				.fail(function(error) {
 					error && fm.error(error);
+				}).done(function(data) {
+					!opts.quiet && !data._noSound && data.removed && data.removed.length && fm.trigger('playsound', {soundFile : 'rm.wav'});
 				}),
 			files  = self.files(hashes),
 			cnt    = files.length,
 			tHash  = null,
-			addTexts = opts && opts.addTexts? opts.addTexts : null,
-			forceRm = opts && opts.forceRm,
+			addTexts = opts.addTexts? opts.addTexts : null,
+			forceRm = opts.forceRm,
+			quiet = opts.quiet,
 			targets;
 
 		if (! cnt) {
@@ -341,7 +347,11 @@ elFinder.prototype.commands.rm = function() {
 			if (tHash && self.options.quickTrash) {
 				toTrash(dfrd, targets, tHash);
 			} else {
-				confirm(dfrd, targets, files, tHash, addTexts);
+				if (quiet) {
+					remove(dfrd, targets, quiet);
+				} else {
+					confirm(dfrd, targets, files, tHash, addTexts);
+				}
 			}
 		}
 			

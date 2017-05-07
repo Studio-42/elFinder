@@ -1581,7 +1581,7 @@ var elFinder = function(node, opts) {
 			data     = $.extend({}, o.customData, {mimes : o.onlyMimes}, opts.data || opts),
 			// command name
 			cmd      = data.cmd,
-			isOpen   = (cmd === 'open'),
+			isOpen   = (!opts.asNotOpen && cmd === 'open'),
 			// call default fail callback (display error dialog) ?
 			deffail  = !(opts.preventDefault || opts.preventFail),
 			// call default success callback ?
@@ -1836,7 +1836,17 @@ var elFinder = function(node, opts) {
 					return dfrd.reject(['errMaxTargets', self.maxTargets]);
 				}
 
-				defdone && dfrd.done(done);
+				if (defdone) {
+					dfrd.done(done);
+				} else if (cmd === 'open'){
+					dfrd.done(function(data) {
+						var cwd = data.cwd.hash;
+						cache(data.files);
+						if (!files[cwd]) {
+							cache([data.cwd]);
+						}
+					})
+				}
 				if (notify.type && notify.cnt) {
 					if (cancel) {
 						notify.cancel = dfrd;
@@ -2166,6 +2176,13 @@ var elFinder = function(node, opts) {
 	};
 	
 	/**
+	 * Array that has to unbind events
+	 * 
+	 * @type Array
+	 */
+	this.toUnbindEvents = [];
+	
+	/**
 	 * Attach listener to events
 	 * To bind to multiply events at once, separate events names by space
 	 * 
@@ -2174,12 +2191,13 @@ var elFinder = function(node, opts) {
 	 * @return elFinder
 	 */
 	this.bind = function(event, callback) {
-		var i;
+		var i, len;
 		
 		if (typeof(callback) == 'function') {
-			event = ('' + event).toLowerCase().split(/\s+/);
+			event = ('' + event).toLowerCase().replace(/^\s+|\s+$/g, '').split(/\s+/);
 			
-			for (i = 0; i < event.length; i++) {
+			len = event.length;
+			for (i = 0; i < len; i++) {
 				if (listeners[event[i]] === void(0)) {
 					listeners[event[i]] = [];
 				}
@@ -2198,17 +2216,19 @@ var elFinder = function(node, opts) {
 	 * @return elFinder
 	 */
 	this.unbind = function(event, callback) {
-		var i, l, ci;
+		var i, len, l, ci;
 		
 		event = ('' + event).toLowerCase().split(/\s+/);
 		
-		for (i = 0; i < event.length; i++) {
-			l = listeners[event[i]] || [];
-			ci = $.inArray(callback, l);
-			ci > -1 && l.splice(ci, 1);
+		len = event.length;
+		for (i = 0; i < len; i++) {
+			if (l = listeners[event[i]]) {
+				ci = $.inArray(callback, l);
+				ci > -1 && l.splice(ci, 1);
+			}
 		}
 		
-		callback = null
+		callback = null;
 		return this;
 	};
 	
@@ -2260,6 +2280,13 @@ var elFinder = function(node, opts) {
 					window.console && window.console.log && window.console.log(ex);
 				}
 				
+			}
+			
+			if (this.toUnbindEvents.length) {
+				$.each(this.toUnbindEvents, function(i, v) {
+					self.unbind(v.type, v.callback);
+				});
+				this.toUnbindEvents = [];
 			}
 		}
 		return this;
@@ -3298,10 +3325,11 @@ var elFinder = function(node, opts) {
 
 	// We listen and emit a sound on delete according to option
 	if (true === this.options.sound) {
-		this.bind('rm', function(e) {
-			var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"');
+		this.bind('playsound', function(e) {
+			var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"'),
+				file = e.data && e.data.soundFile;
 
-			play && play != '' && play != 'no' && $(beeper).html('<source src="' + soundPath + 'rm.wav" type="audio/wav">')[0].play()
+			play && file && play != '' && play != 'no' && $(beeper).html('<source src="' + soundPath + file + '" type="audio/wav">')[0].play();
 		});
 	}
 
@@ -3942,7 +3970,7 @@ var elFinder = function(node, opts) {
 	// send initial request and start to pray >_<
 	this.trigger('init')
 		.request({
-			data        : {cmd : 'open', target : self.startDir(), init : 1, tree : this.ui.tree ? 1 : 0}, 
+			data        : {cmd : 'open', target : self.startDir(), init : 1, tree : self.ui.tree ? 1 : 0}, 
 			preventDone : true,
 			notify      : {type : 'open', cnt : 1, hideCnt : true},
 			freeze      : true
@@ -3964,6 +3992,7 @@ var elFinder = function(node, opts) {
 			// initial open
 			open(data);
 			self.trigger('open', data);
+			self.trigger('opendone');
 			
 			if (inFrame && self.options.enableAlways) {
 				$(window).focus();
@@ -5579,7 +5608,10 @@ elFinder.prototype = {
 	one : function(event, callback) {
 		var self = this,
 			h    = function(e, f) {
-				setTimeout(function() {self.unbind(event, h);}, 3);
+				self.toUnbindEvents.push({
+					type: event,
+					callback: h
+				});
 				return callback.apply(self.getListeners(e.type), arguments);
 			};
 		return this.bind(event, h);
