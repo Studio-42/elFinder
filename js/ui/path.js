@@ -146,9 +146,9 @@ $.fn.elfinderpath = function(fm) {
 				fit();
 			})
 			// on swipe to navbar show/hide
-			.bind('navbarshow navbarhide', function(e) {
+			.bind('navbarshow navbarhide', function() {
 				var wz = fm.getUI('workzone');
-				if (e.type === 'navbarshow') {
+				if (this.type === 'navbarshow') {
 					wz.height(wz.height() + wzbase.outerHeight());
 					path.prependTo(fm.getUI('statusbar'));
 					wzbase.detach();
