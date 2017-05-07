@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 062382b) (2017-05-07)
+ * Version 2.1.23 (2.1-src Nightly: ec1d825) (2017-05-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2271,19 +2271,19 @@ var elFinder = function(node, opts) {
 	 * @param  Boolean  allow modify data (call by reference of data)
 	 * @return elFinder
 	 */
-	this.trigger = function(event, data, allowModify) {
-		var event    = event.toLowerCase(),
-			isopen   = (event === 'open'),
-			handlers = listeners[event] || [], i, l, jst;
+	this.trigger = function(type, data, allowModify) {
+		var type     = type.toLowerCase(),
+			isopen   = (type === 'open'),
+			handlers = listeners[type] || [], i, l, jst, event;
 		
-		this.debug('event-'+event, data);
+		this.debug('event-'+type, data);
 		
 		if (isopen && !allowModify) {
 			// for performance tuning
 			jst = JSON.stringify(data);
 		}
 		if (l = handlers.length) {
-			event = $.Event(event);
+			event = $.Event(type);
 			if (allowModify) {
 				event.data = data;
 			}
@@ -2313,11 +2313,11 @@ var elFinder = function(node, opts) {
 				
 			}
 			
-			if (this.toUnbindEvents.length) {
-				$.each(this.toUnbindEvents, function(i, v) {
+			if (this.toUnbindEvents[type] && this.toUnbindEvents[type].length) {
+				$.each(this.toUnbindEvents[type], function(i, v) {
 					self.unbind(v.type, v.callback);
 				});
-				this.toUnbindEvents = [];
+				delete this.toUnbindEvents[type];
 			}
 		}
 		return this;
@@ -5637,9 +5637,13 @@ elFinder.prototype = {
 	 * @return elFinder
 	 */
 	one : function(event, callback) {
-		var self = this,
-			h    = function(e, f) {
-				self.toUnbindEvents.push({
+		var self  = this,
+			event = event.toLowerCase(),
+			h     = function(e, f) {
+				if (!self.toUnbindEvents[event]) {
+					self.toUnbindEvents[event] = [];
+				}
+				self.toUnbindEvents[event].push({
 					type: event,
 					callback: h
 				});
@@ -7438,7 +7442,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 062382b)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: ec1d825)';
 
 
 
