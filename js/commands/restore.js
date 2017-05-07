@@ -8,109 +8,193 @@
 elFinder.prototype.commands.restore = function() {
 	var self = this,
 		fm = this.fm,
-		restore = function(dfrd, files, targets) {
-			var rHashes = {},
-				others = [],
-				found = false;
-			
-			fm.lockfiles({files : targets});
-			dfrd.fail(function() {
-				fm.unlockfiles({files : targets});
-			});
+		getFilesRecursively = function(files) {
+			var dfd = $.Deferred(),
+				dirs = [],
+				results = [],
+				reqs = [];
 			
 			$.each(files, function(i, f) {
-				var phash = f.phash,
-					pfile,
-					srcRoot, tPath;
-				while(phash) {
-					if (srcRoot = fm.trashes[phash]) {
-						if (! rHashes[srcRoot]) {
-							if (found) {
-								// Keep items of other trash
-								others.push(f.hash);
-								return null; // continue $.each
-							}
-							rHashes[srcRoot] = {};
-							found = true;
-						}
-
-						tPath = fm.path(f.hash).substr(fm.path(phash).length).replace(/\\/g, '/');
-						tPath = tPath.replace(/\/[^\/]+?$/, '');
-						if (tPath === '') {
-							tPath = '/';
-						}
-						if (!rHashes[srcRoot][tPath]) {
-							rHashes[srcRoot][tPath] = [];
-						}
-						rHashes[srcRoot][tPath].push(f.hash);
-						break;
-					}
-					
-					// Go up one level for next check
-					pfile = fm.file(phash);
-					
-					if (!pfile) {
-						phash = false;
-						// Detection method for search results
-						$.each(fm.trashes, function(ph) {
-							var file = fm.file(ph),
-								filePath = fm.path(ph);
-							if ((!file.volumeid || f.hash.indexOf(file.volumeid) === 0) && fm.path(f.hash).indexOf(filePath) === 0) {
-								phash = ph;
-								return false;
-							}
-						});
-					} else {
-						phash = pfile.phash;
-					}
-				}
+				f.mime === 'directory'? dirs.push(f) : results.push(f);
 			});
 			
-			if (found) {
-				$.each(rHashes, function(src, dsts) {
-					var dirs = Object.keys(dsts),
-						cnt = dirs.length;
-					fm.request({
-						data   : {cmd  : 'mkdir', target : src, dirs : dirs}, 
-						notify : {type : 'chkdir', cnt : cnt},
-						preventFail : true
-					})
-					.fail(function(error) {
-						dfrd.reject(error);
-						fm.unlockfiles({files : targets});
-					})
-					.done(function(data) {
-						var cmdPaste, hashes;
-						
-						if (hashes = data.hashes) {
-							cmdPaste = fm.getCommand('paste');
-							if (cmdPaste) {
-								$.each(dsts, function(dir, files) {
-									if (hashes[dir]) {
-										fm.clipboard(files, true);
-										cmdPaste.exec([ hashes[dir] ], {_cmd : 'restore'})
-										.always(function() {
-											if (--cnt < 1) {
-												dfrd.resolve();
-												if (others.length) {
-													// Restore items of other trash
-													fm.exec('restore', others);
-												}
-											}
-										});
-									}
-								});
-							} else {
-								dfrd.reject(['errRestore', 'errCmdNoSupport', '(paste)']);
-							}
-						} else {
-							dfrd.reject('errFolderNotFound');
+			if (dirs.length) {
+				$.each(dirs, function(i, d) {
+					reqs.push(fm.request({
+						data : {cmd  : 'open', target : d.hash},
+						preventDefault : true,
+						asNotOpen : true
+					}));
+				});
+				$.when.apply($, reqs).fail(function() {
+					dfd.reject();
+				}).done(function() {
+					var items = [];
+					$.each(arguments, function(i, r) {
+						var files;
+						if (r.files) {
+							items = items.concat(r.files);
 						}
+					});
+					getFilesRecursively(items).done(function(res) {
+						results = results.concat(res);
+						dfd.resolve(results);
 					});
 				});
 			} else {
-				dfrd.reject('errRestore');
+				dfd.resolve(results);
 			}
+			
+			return dfd.promise();
+		},
+		restore = function(dfrd, files, targets) {
+			var rHashes = {},
+				others = [],
+				found = false,
+				dirs = [],
+				tm;
+			
+			fm.lockfiles({files : targets});
+			
+			dirs = $.map(files, function(f) {
+				return f.mime === 'directory'? f.hash : null;
+			});
+			
+			dfrd.done(function() {
+				dirs && fm.exec('rm', dirs, {forceRm : true, quiet : true});
+			}).always(function() {
+				fm.unlockfiles({files : targets});
+			});
+			
+			tm = setTimeout(function() {
+				fm.notify({type : 'search', cnt : 1, hideCnt : true});
+			}, fm.notifyDelay);
+			
+			
+			getFilesRecursively(files).always(function() {
+				tm && clearTimeout(tm);
+				fm.notify({type : 'search', cnt : -1, hideCnt : true});
+			}).fail(function() {
+				dfrd.reject('errRestore', 'errFileNotFound');
+			}).done(function(res) {
+				var errFolderNotfound = ['errRestore', 'errFolderNotFound'],
+					dirTop = '';
+				
+				if (res.length) {
+					$.each(res, function(i, f) {
+						var phash = f.phash,
+							pfile,
+							srcRoot, tPath;
+						while(phash) {
+							if (srcRoot = fm.trashes[phash]) {
+								if (! rHashes[srcRoot]) {
+									if (found) {
+										// Keep items of other trash
+										others.push(f.hash);
+										return null; // continue $.each
+									}
+									rHashes[srcRoot] = {};
+									found = true;
+								}
+		
+								tPath = fm.path(f.hash).substr(fm.path(phash).length).replace(/\\/g, '/');
+								tPath = tPath.replace(/\/[^\/]+?$/, '');
+								if (tPath === '') {
+									tPath = '/';
+								}
+								if (!rHashes[srcRoot][tPath]) {
+									rHashes[srcRoot][tPath] = [];
+								}
+								rHashes[srcRoot][tPath].push(f.hash);
+								if (!dirTop || dirTop.length > tPath.length) {
+									dirTop = tPath;
+								}
+								break;
+							}
+							
+							// Go up one level for next check
+							pfile = fm.file(phash);
+							
+							if (!pfile) {
+								phash = false;
+								// Detection method for search results
+								$.each(fm.trashes, function(ph) {
+									var file = fm.file(ph),
+										filePath = fm.path(ph);
+									if ((!file.volumeid || f.hash.indexOf(file.volumeid) === 0) && fm.path(f.hash).indexOf(filePath) === 0) {
+										phash = ph;
+										return false;
+									}
+								});
+							} else {
+								phash = pfile.phash;
+							}
+						}
+					});
+					if (found) {
+						$.each(rHashes, function(src, dsts) {
+							var dirs = Object.keys(dsts),
+								cnt = dirs.length;
+							fm.request({
+								data   : {cmd  : 'mkdir', target : src, dirs : dirs}, 
+								notify : {type : 'chkdir', cnt : cnt},
+								preventFail : true
+							}).fail(function(error) {
+								dfrd.reject(error);
+								fm.unlockfiles({files : targets});
+							}).done(function(data) {
+								var cmdPaste, hashes;
+								
+								if (hashes = data.hashes) {
+									cmdPaste = fm.getCommand('paste');
+									if (cmdPaste) {
+										// wait until file cache made
+										fm.one('mkdirdone', function() {
+											var hasErr = false;
+											$.each(dsts, function(dir, files) {
+												if (hashes[dir]) {
+													if (fm.file(hashes[dir])) {
+														fm.clipboard(files, true);
+														cmdPaste.exec([ hashes[dir] ], {_cmd : 'restore', noToast : dir !== dirTop})
+														.done(function(data) {
+															if (data && (data.error || data.warning)) {
+																hasErr = true;
+															}
+														})
+														.fail(function() {
+															hasErr = true;
+														})
+														.always(function() {
+															if (--cnt < 1) {
+																dfrd[hasErr? 'reject' : 'resolve']();
+																if (others.length) {
+																	// Restore items of other trash
+																	fm.exec('restore', others);
+																}
+															}
+														});
+													} else {
+														dfrd.reject(errFolderNotfound);
+													}
+												}
+											});
+										});
+									} else {
+										dfrd.reject(['errRestore', 'errCmdNoSupport', '(paste)']);
+									}
+								} else {
+									dfrd.reject(errFolderNotfound);
+								}
+							});
+						});
+					} else {
+						dfrd.reject(errFolderNotfound);
+					}
+				} else {
+					dfrd.reject('errFileNotFound');
+					dirs && fm.exec('rm', dirs, {forceRm : true, quiet : true});
+				}
+			});
 		};
 	
 	this.updateOnSelect  = false;

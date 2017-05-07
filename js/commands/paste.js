@@ -39,11 +39,12 @@ elFinder.prototype.commands.paste = function() {
 	this.exec = function(dst, opts) {
 		var self   = this,
 			fm     = self.fm,
+			opts   = opts || {},
 			dst    = dst ? this.files(dst)[0] : fm.cwd(),
 			files  = fm.clipboard(),
 			cnt    = files.length,
 			cut    = cnt ? files[0].cut : false,
-			cmd    = (opts && opts._cmd)? opts._cmd : (cut? 'move' : 'copy'),
+			cmd    = opts._cmd? opts._cmd : (cut? 'move' : 'copy'),
 			error  = 'err' + cmd.charAt(0).toUpperCase() + cmd.substr(1),
 			fpaste = [],
 			fcopy  = [],
@@ -228,7 +229,7 @@ elFinder.prototype.commands.paste = function() {
 											} else {
 												fm.trigger('selectfiles', {files : $.map(data.added, function(f) {return f.hash;})});
 											}
-											fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd' + cmd)]), extNode: node});
+											!opts.noToast && fm.toast({msg: fm.i18n(['complete', fm.i18n('cmd' + cmd)]), extNode: node});
 										}
 									});
 								}
