@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 39d0215) (2017-05-07)
+ * Version 2.1.23 (2.1-src Nightly: 65e2d23) (2017-05-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2265,6 +2265,7 @@ var elFinder = function(node, opts) {
 	
 	/**
 	 * Fire event - send notification to all event listeners
+	 * In the callback `this` becames an event object
 	 *
 	 * @param  String   event type
 	 * @param  Object   data to send across event
@@ -2302,7 +2303,7 @@ var elFinder = function(node, opts) {
 				}
 
 				try {
-					if (handlers[i](event, this) === false 
+					if (handlers[i].call(event, event, this) === false 
 					|| event.isDefaultPrevented()) {
 						this.debug('event-stoped', event.type);
 						break;
@@ -5647,7 +5648,7 @@ elFinder.prototype = {
 					type: event,
 					callback: h
 				});
-				return callback.apply(self.getListeners(e.type), arguments);
+				return callback.apply(this, arguments);
 			};
 		return this.bind(event, h);
 	},
@@ -7442,7 +7443,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 39d0215)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 65e2d23)';
 
 
 
@@ -12049,7 +12050,7 @@ $.fn.elfindercwd = function(fm, options) {
 				if (!fm.cwd().hash && fm.currentReqCmd !== 'open') {
 					$.each(cwdParents.reverse(), function(i, h) {
 						if (fm.files()[h]) {
-							fm.one(fm.currentReqCmd + 'done', function(e, fm) {
+							fm.one(fm.currentReqCmd + 'done', function() {
 								!fm.cwd().hash && fm.exec('open', h);
 							});
 							return false;
