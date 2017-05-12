@@ -180,6 +180,18 @@
 	opacity: .5; filter:Alpha(Opacity=50);
 }
 
+/* pager button */
+.elfinder-navbar-pager {
+	width: 100%;
+	box-sizing: border-box;
+	padding-top: 3px;
+	padding-bottom: 3px;
+}
+.elfinder-touch .elfinder-navbar-pager {
+	padding-top: 10x;
+	padding-bottom: 10px;
+}
+
 .elfinder-places {
 	border: none;
 	margin: 0;

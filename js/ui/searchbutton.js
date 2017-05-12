@@ -211,7 +211,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 				}
 			})
 			.bind('open', function() {
-				incVal = '';
+				incVal && abort();
 			})
 			.bind('cwdinit', function() {
 				cwdReady = false;

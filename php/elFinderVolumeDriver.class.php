@@ -1851,6 +1851,7 @@ abstract class elFinderVolumeDriver {
 		$tree = array();
 		
 		while ($path && $path != $this->root) {
+			elFinder::extendTimeLimit();
 			$path = $this->dirnameCE($path);
 			if (!($stat = $this->stat($path)) || !empty($stat['hidden']) || !$stat['read']) {
 				return false;
@@ -1859,6 +1860,7 @@ abstract class elFinderVolumeDriver {
 			array_unshift($tree, $stat);
 			if (!$lineal) {
 				foreach ($this->gettree($path, 0) as $dir) {
+					elFinder::extendTimeLimit();
 					if (!in_array($dir, $tree)) {
 						$tree[] = $dir;
 					}

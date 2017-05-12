@@ -1622,7 +1622,12 @@ var elFinder = function(node, opts) {
 			done = function(data) {
 				data.warning && self.error(data.warning);
 				
-				isOpen && open(data);
+				if (isOpen) {
+					open(data);
+				} else {
+					cache(data.files || []);
+					cache(data.tree || []);
+				}
 
 				self.lazy(function() {
 					// fire some event to update cache/ui
@@ -1836,17 +1841,8 @@ var elFinder = function(node, opts) {
 					return dfrd.reject(['errMaxTargets', self.maxTargets]);
 				}
 
-				if (defdone) {
-					dfrd.done(done);
-				} else if (cmd === 'open'){
-					dfrd.done(function(data) {
-						var cwd = data.cwd.hash;
-						cache(data.files);
-						if (!files[cwd]) {
-							cache([data.cwd]);
-						}
-					})
-				}
+				defdone && dfrd.done(done);
+				
 				if (notify.type && notify.cnt) {
 					if (cancel) {
 						notify.cancel = dfrd;
@@ -1966,6 +1962,20 @@ var elFinder = function(node, opts) {
 		}
 		
 		return queueingRequest();
+	};
+	
+	/**
+	 * Call cache()
+	 * Store info about files/dirs in "files" object.
+	 *
+	 * @param  Array  files
+	 * @return void
+	 */
+	this.cache = function(dataArray) {
+		if (! Array.isArray(dataArray)) {
+			dataArray = [ dataArray ];
+		}
+		cache(dataArray);
 	};
 	
 	/**
@@ -3256,9 +3266,6 @@ var elFinder = function(node, opts) {
 
 			self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
 		})
-		.bind('tree parents', function(e) {
-			cache(e.data.tree || []);
-		})
 		.bind('tmb', function(e) {
 			$.each(e.data.images||[], function(hash, tmb) {
 				if (files[hash]) {
@@ -3319,6 +3326,7 @@ var elFinder = function(node, opts) {
 		})
 		.bind('searchend', function() {
 			self.searchStatus.state = 0;
+			self.searchStatus.ininc = false;
 			self.searchStatus.mixed = false;
 		})
 

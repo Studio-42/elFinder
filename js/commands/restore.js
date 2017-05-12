@@ -36,6 +36,7 @@ elFinder.prototype.commands.restore = function() {
 							items = items.concat(r.files);
 						}
 					});
+					fm.cache(items);
 					getFilesRecursively(items).done(function(res) {
 						results = results.concat(res);
 						dfd.resolve(results);
