@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: de7174d) (2017-05-08)
+ * Version 2.1.23 (2.1-src Nightly: 78bd8d2) (2017-05-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2173,6 +2173,18 @@ button.elfinder-info-button {
 	top:50%;
 	margin:-8px 2px 0 2px;
 	opacity: .5; filter:Alpha(Opacity=50);
+}
+
+/* pager button */
+.elfinder-navbar-pager {
+	width: 100%;
+	box-sizing: border-box;
+	padding-top: 3px;
+	padding-bottom: 3px;
+}
+.elfinder-touch .elfinder-navbar-pager {
+	padding-top: 10x;
+	padding-bottom: 10px;
 }
 
 .elfinder-places {
