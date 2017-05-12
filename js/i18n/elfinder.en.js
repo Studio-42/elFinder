@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2017-05-02
+ * @version 2017-05-11
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -166,6 +166,8 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'btnBackup' : 'Backup', // fromv2.1 added 28.11.2015
 			'btnRename'    : 'Rename',      // from v2.1.24 added 6.4.2017
 			'btnRenameAll' : 'Rename(All)', // from v2.1.24 added 6.4.2017
+			'btnPrevious' : 'Prev ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnNext'     : 'Next ($1/$2)', // from v2.1.24 added 11.5.2017
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Open folder',

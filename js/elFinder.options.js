@@ -489,6 +489,9 @@ elFinder.prototype._options = {
 			openCwdOnOpen  : true,
 			// auto load current dir parents
 			syncTree : true,
+			// Maximum number of display of each child trees
+			// The tree of directories with children exceeding this number will be split
+			subTreeMax : 100,
 			// Numbar of max connctions of subdirs request
 			subdirsMaxConn : 3,
 			// Number of max simultaneous processing directory of subdirs
