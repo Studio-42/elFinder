@@ -1861,14 +1861,14 @@ abstract class elFinderVolumeDriver {
 			if (!$lineal) {
 				foreach ($this->gettree($path, 0) as $dir) {
 					elFinder::extendTimeLimit();
-					if (!in_array($dir, $tree)) {
-						$tree[] = $dir;
+					if (!isset($tree[$dir['hash']])) {
+						$tree[$dir['hash']] = $dir;
 					}
 				}
 			}
 		}
 
-		return $tree ? $tree : array($current);
+		return $tree ? array_values($tree) : array($current);
 	}
 
 	/**

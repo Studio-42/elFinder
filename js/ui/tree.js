@@ -908,6 +908,9 @@ $.fn.elfindertree = function(fm, opts) {
 									}
 								}
 								dfd.resolve(res);
+							})
+							.fail(function() {
+								dfd.reject();
 							});
 							
 							return dfd;
@@ -957,19 +960,25 @@ $.fn.elfindertree = function(fm, opts) {
 							dfrd.resolve();
 						}
 					},
-					rmSpinner = function() {
+					rmSpinner = function(fail) {
 						if (baseNode) {
 							spinner.remove();
-							baseNode.addClass(collapsed+' '+loaded);
+							baseNode.addClass(collapsed + (fail? '' : (' ' + loaded)));
 						}
 					},
-					dfrd = $.Deferred().always(rmSpinner),
+					dfrd = $.Deferred(),
 					baseNode, spinner;
 				
 				if (!$('#'+fm.navHash2Id(cwdhash)).length) {
 					loadParents()
-					.done(function(res) { done(res, dfrd); })
-					.fail(function() { dfrd.reject(); });
+					.done(function(res) {
+						done(res, dfrd);
+						rmSpinner();
+					})
+					.fail(function() { 
+						rmSpinner(true);
+						dfrd.reject();
+					});
 				} else {
 					done(void(0), dfrd);
 				}

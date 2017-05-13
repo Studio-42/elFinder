@@ -635,7 +635,7 @@ $.fn.elfindercwd = function(fm, options) {
 							bufferExt.repaintJob = fm.asyncJob(function() {
 								chk();
 								if (! tgt.length) {
-									bufferExt.repaintJob._abort(true);
+									bufferExt.repaintJob && bufferExt.repaintJob._abort(true);
 								}
 							}, arr).done(done);
 						}
