@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: bb19083) (2017-05-13)
+ * Version 2.1.23 (2.1-src Nightly: 18c85a0) (2017-05-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7451,7 +7451,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: bb19083)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 18c85a0)';
 
 
 
@@ -11459,7 +11459,7 @@ $.fn.elfindercwd = function(fm, options) {
 							bufferExt.repaintJob = fm.asyncJob(function() {
 								chk();
 								if (! tgt.length) {
-									bufferExt.repaintJob._abort(true);
+									bufferExt.repaintJob && bufferExt.repaintJob._abort(true);
 								}
 							}, arr).done(done);
 						}
@@ -16506,6 +16506,9 @@ $.fn.elfindertree = function(fm, opts) {
 									}
 								}
 								dfd.resolve(res);
+							})
+							.fail(function() {
+								dfd.reject();
 							});
 							
 							return dfd;
@@ -16555,19 +16558,25 @@ $.fn.elfindertree = function(fm, opts) {
 							dfrd.resolve();
 						}
 					},
-					rmSpinner = function() {
+					rmSpinner = function(fail) {
 						if (baseNode) {
 							spinner.remove();
-							baseNode.addClass(collapsed+' '+loaded);
+							baseNode.addClass(collapsed + (fail? '' : (' ' + loaded)));
 						}
 					},
-					dfrd = $.Deferred().always(rmSpinner),
+					dfrd = $.Deferred(),
 					baseNode, spinner;
 				
 				if (!$('#'+fm.navHash2Id(cwdhash)).length) {
 					loadParents()
-					.done(function(res) { done(res, dfrd); })
-					.fail(function() { dfrd.reject(); });
+					.done(function(res) {
+						done(res, dfrd);
+						rmSpinner();
+					})
+					.fail(function() { 
+						rmSpinner(true);
+						dfrd.reject();
+					});
 				} else {
 					done(void(0), dfrd);
 				}
