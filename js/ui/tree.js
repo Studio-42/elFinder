@@ -32,6 +32,14 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			openCwd   = opts.openCwdOnOpen,
 
+			
+			/**
+			 * Auto loading current directory parents and do expand their node
+			 *
+			 * @type Boolean
+			 */
+			syncTree  = openCwd || opts.syncTree,
+			
 			/**
 			 * Subtree class name
 			 *
@@ -730,16 +738,20 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			autoScroll = function(target) {
 				var self = $(this),
-					dfrd = $.Deferred();
+					dfrd = $.Deferred(),
+					current, parent, top, treeH, bottom, tgtTop;
 				self.data('autoScrTm') && clearTimeout(self.data('autoScrTm'));
 				self.data('autoScrTm', setTimeout(function() {
-					var current = $('#'+(target || fm.navHash2Id(fm.cwd().hash)));
+					current = $('#'+(target || fm.navHash2Id(fm.cwd().hash)));
 					
 					if (current.length) {
-						var parent = tree.parent().stop(false, true),
-						top = parent.offset().top,
-						treeH = parent.height(),
-						bottom = top + treeH - current.outerHeight(),
+						// expand parents directory
+						(openCwd? current : current.parent()).parents('.elfinder-navbar-wrapper').children('.'+loaded).addClass(expanded).next('.'+subtree).show();
+						
+						parent = tree.parent().stop(false, true);
+						top = parent.offset().top;
+						treeH = parent.height();
+						bottom = top + treeH - current.outerHeight();
 						tgtTop = current.offset().top;
 						
 						if (tgtTop < top || tgtTop > bottom) {
@@ -835,13 +847,44 @@ $.fn.elfindertree = function(fm, opts) {
 						reqs = $.map(ends, function(h) {
 							var d = fm.file(h),
 								isRoot = d? fm.isRoot(d) : false,
-								node = $('#'+fm.navHash2Id(h));
+								node = $('#'+fm.navHash2Id(h)),
+								getPhash = function(h, depth) {
+									var d, ph,
+										depth = depth || 1;
+									ph = (d = fm.file(h))? d.phash : false;
+									if (ph && depth > 1) {
+										return getPhash(ph, --depth);
+									}
+									return ph;
+								},
+								closest = (function() {
+									var phash = getPhash(h);
+									while (phash) {
+										if ($('#'+fm.navHash2Id(phash)).hasClass(loaded)) {
+											break;
+										}
+										phash = getPhash(phash);
+									}
+									if (!phash) {
+										phash = fm.root(h);
+									}
+									return phash;
+								})(),
+								cmd;
 							
 							if (!node.hasClass(loaded) && (isRoot || !d || !$('#'+fm.navHash2Id(d.phash)).hasClass(loaded))) {
-								if (!baseHash) {
-									baseHash = (isRoot || !d)? h : d.phash;
+								if (isRoot || closest === getPhash(h, 2)) {
+									cmd = 'tree';
+									if (!isRoot) {
+										h = getPhash(h);
+									}
+								} else {
+									cmd = 'parents';
 								}
-								return makeReq(isRoot? 'tree' : 'parents', h);
+								if (!baseHash) {
+									baseHash = (cmd === 'tree')? h : closest;
+								}
+								return makeReq(cmd, h);
 							}
 							return null;
 						});
@@ -849,7 +892,7 @@ $.fn.elfindertree = function(fm, opts) {
 						if (reqs.length) {
 							selectPages(fm.file(baseHash));
 							baseId = fm.navHash2Id(baseHash);
-							autoScroll(baseId);
+							syncTree && autoScroll(baseId);
 							baseNode = $('#'+baseId);
 							spinner = $(fm.res('tpl', 'navspinner')).insertBefore(baseNode.children('.'+arrow));
 							baseNode.removeClass(collapsed);
@@ -874,26 +917,14 @@ $.fn.elfindertree = function(fm, opts) {
 					},
 					done= function(res, dfrd) {
 						var open = function() {
-								if (opts.syncTree) {
-									parent = cwd.phash;
-									while(parent) {
-										toOpen.unshift(parent);
-										parent = (fm.file(parent) || {}).phash;
-									}
-									if (openCwd) {
-										toOpen.push(cwdhash);
-									}
-								} else if (openRoot && baseNode) {
-									toOpen = [ baseNode.hash ];
+								checkSubdirs();
+								if (openRoot && baseNode) {
+									findSubtree(baseNode.hash).show().prev(selNavdir).addClass(expanded);
 									openRoot = false;
 								}
-								$.each(toOpen, function(i, h) {
-									findSubtree(h).show().prev(selNavdir).addClass(expanded);
-								});
-								checkSubdirs();
-								autoScroll();
+								syncTree && autoScroll();
 							},
-							toOpen = [], baseNode, parent, current, dirs;
+							current;
 						
 						if (res) {
 							$.each(res, function(endHash, dirs) {
@@ -932,7 +963,8 @@ $.fn.elfindertree = function(fm, opts) {
 							baseNode.addClass(collapsed+' '+loaded);
 						}
 					},
-					baseNode, spinner, dfrd = $.Deferred().always(rmSpinner);
+					dfrd = $.Deferred().always(rmSpinner),
+					baseNode, spinner;
 				
 				if (!$('#'+fm.navHash2Id(cwdhash)).length) {
 					loadParents()

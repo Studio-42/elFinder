@@ -487,7 +487,7 @@ elFinder.prototype._options = {
 			openRootOnLoad : true,
 			// expand current work directory on open
 			openCwdOnOpen  : true,
-			// auto load current dir parents
+			// auto loading current directory parents and do expand their node.
 			syncTree : true,
 			// Maximum number of display of each child trees
 			// The tree of directories with children exceeding this number will be split
