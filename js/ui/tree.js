@@ -951,6 +951,9 @@ $.fn.elfindertree = function(fm, opts) {
 							current.addClass(active);
 						}
 						
+						// mark as loaded to cwd parents
+						current.parents('.elfinder-navbar-wrapper').children('.'+navdir).addClass(loaded);
+						
 						if (res) {
 							fm.lazy(open).done(function() {
 								dfrd.resolve();
@@ -1390,7 +1393,8 @@ $.fn.elfindertree = function(fm, opts) {
 					endsMap = {},
 					endsVid = {},
 					topVid = '',
-					single = false;
+					single = false,
+					current;
 				
 				fm.lazy(function() {
 					dirs = filter(fm.files());
@@ -1398,8 +1402,16 @@ $.fn.elfindertree = function(fm, opts) {
 					
 					tree.empty();
 					
+					// append volume roots at first
+					updateTree($.map(fm.roots, function(h) {
+						var dir = fm.file(h);
+						return dir && fm.isRoot(dir)? dir : null;
+					}));
+					
 					if (!Object.keys(hasMoreDirs).length) {
 						updateTree(dirs);
+						current = selectPages();
+						updateArrows(dirs, loaded);
 					} else {
 						ends = getEnds();
 						if (ends.length > 1) {
@@ -1424,17 +1436,17 @@ $.fn.elfindertree = function(fm, opts) {
 						if (single) {
 							$.each(ends, function(i, endHash) {
 								updateTree(dirs);
-								selectPages(fm.file(endHash));
+								current = selectPages(fm.file(endHash));
+								updateArrows(dirs, loaded);
 							});
 						} else {
 							$.each(endsMap, function(endHash, dirs) {
 								updateTree(dirs);
-								selectPages(fm.file(endHash));
+								current = selectPages(fm.file(endHash));
+								updateArrows(dirs, loaded);
 							});
 						}
 					}
-					
-					updateArrows(dirs, loaded);
 					
 					sync();
 				}, 100);
