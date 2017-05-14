@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 18c85a0) (2017-05-13)
+ * Version 2.1.23 (2.1-src Nightly: 893341c) (2017-05-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -169,6 +169,13 @@ var elFinder = function(node, opts) {
 		files = {},
 		
 		/**
+		 * Files/dirs hash cache of each dirs
+		 *
+		 * @type Object
+		 **/
+		ownFiles = {},
+		
+		/**
 		 * Selected files hashes
 		 *
 		 * @type Array
@@ -288,6 +295,7 @@ var elFinder = function(node, opts) {
 			if (data.init) {
 				// init - reset cache
 				files = {};
+				ownFiles = {};
 			} else {
 				// remove only files from prev cwd
 				// and collapsed directory (included 100+ directories) to empty for perfomance tune in DnD
@@ -321,8 +329,7 @@ var elFinder = function(node, opts) {
 							 .removeClass(rmClass)
 							 .next('.elfinder-navbar-subtree').empty();
 						}
-						delete files[i];
-						self.optionsByHashes[i] && delete self.optionsByHashes[i];
+						deleteCache(files[i]);
 					} else if (isDir) {
 						stayDirs[phash] = true;
 					}
@@ -373,17 +380,22 @@ var elFinder = function(node, opts) {
 			var defsorter = { name: true, perm: true, date: true,  size: true, kind: true },
 				sorterChk = (self.sorters.length === 0),
 				l         = data.length,
+				setSorter = function(f) {
+					f = f || {},
+					self.sorters = [];
+					$.each(self.sortRules, function(key) {
+						if (defsorter[key] || typeof f[key] !== 'undefined' || (key === 'mode' && typeof f.perm !== 'undefined')) {
+							self.sorters.push(key);
+						}
+					});
+				},
 				f, i;
 
 			for (i = 0; i < l; i++) {
 				f = data[i];
 				if (f.name && f.hash && f.mime) {
 					if (sorterChk && f.phash === cwd) {
-						$.each(self.sortRules, function(key) {
-							if (defsorter[key] || typeof f[key] !== 'undefined' || (key === 'mode' && typeof f.perm !== 'undefined')) {
-								self.sorters.push(key);
-							}
-						});
+						setSorter(f);
 						sorterChk = false;
 					}
 					
@@ -406,9 +418,40 @@ var elFinder = function(node, opts) {
 						}
 					}
 					
+					files[f.hash] && deleteCache(files[f.hash]);
 					files[f.hash] = f;
+					if (f.mime === 'directory' && !ownFiles[f.hash]) {
+						ownFiles[f.hash] = {};
+					}
+					if (f.phash) {
+						if (!ownFiles[f.phash]) {
+							ownFiles[f.phash] = {};
+						}
+						ownFiles[f.phash][f.hash] = true;
+					}
 				} 
 			}
+			
+			// for empty folder
+			sorterChk && setSorter();
+		},
+		
+		/**
+		 * Delete cache data of files, ownFiles and self.optionsByHashes
+		 * 
+		 * @param  Object  file
+		 * @return void
+		 */
+		deleteCache = function(file) {
+			var hash = file.hash,
+				phash = file.phash;
+			
+			if (phash && ownFiles[phash]) {
+				 delete ownFiles[phash][hash];
+			}
+			ownFiles[hash] && delete ownFiles[hash];
+			self.optionsByHashes[hash] && delete self.optionsByHashes[hash];
+			delete files[hash];
 		},
 		
 		/**
@@ -1281,9 +1324,24 @@ var elFinder = function(node, opts) {
 	/**
 	 * Return all cached files
 	 * 
-	 * @return Array
+	 * @param  String  parent hash
+	 * @return Object
 	 */
-	this.files = function() {
+	this.files = function(phash) {
+		var items = {};
+		if (phash) {
+			if (!ownFiles[phash]) {
+				return {};
+			}
+			$.each(ownFiles[phash], function(h) {
+				if (files[h]) {
+					items[h] = files[h];
+				} else {
+					delete ownFiles[phash][h];
+				}
+			});
+			return $.extend(true, {}, items);
+		}
 		return $.extend(true, {}, files);
 	};
 	
@@ -3335,7 +3393,7 @@ var elFinder = function(node, opts) {
 								f.phash == hash && rm(h);
 							});
 						}
-						delete files[hash];
+						deleteCache(files[hash]);
 					}
 				};
 		
@@ -4450,7 +4508,7 @@ elFinder.prototype = {
 											return $.inArray(name.name, existed) !== -1 ? name : null ;
 										});
 										if (existed.length && target == fm.cwd().hash) {
-											cwdItems = $.map(fm.files(), function(file) { return (file.phash == target) ? file.name : null; } );
+											cwdItems = $.map(fm.files(target), function(file) { return file.name; } );
 											if ($.map(existed, function(n) { 
 												return $.inArray(n, cwdItems) === -1? true : null;
 											}).length){
@@ -5819,13 +5877,15 @@ elFinder.prototype = {
 				// Disable command to replace with other command
 				var disabled;
 				if (opts.uiCmdMap) {
-					if (Object.keys(opts.uiCmdMap).length) {
+					if ($.isPlainObject(opts.uiCmdMap) && Object.keys(opts.uiCmdMap).length) {
 						disabled = opts.disabled;
 						$.each(opts.uiCmdMap, function(f, t) {
 							if (t === 'hidden' && $.inArray(f, disabled) === -1) {
 								disabled.push(f);
 							}
 						});
+					} else {
+						delete opts.uiCmdMap;
 					}
 				}
 			},
@@ -7451,7 +7511,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 18c85a0)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 893341c)';
 
 
 
@@ -12894,7 +12954,8 @@ $.fn.elfindercwd = function(fm, options) {
 			})
 			.bind('open add remove searchend', function() {
 				var phash = fm.cwd().hash;
-				cwdHashes = $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;});
+				//cwdHashes = $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;});
+				cwdHashes = $.map(fm.files(phash), function(f) { return f.hash; });
 				if (this.type === 'open') {
 					var inTrash = function() {
 						var isIn = false;
@@ -15210,7 +15271,7 @@ $.fn.elfinderstat = function(fm) {
 		
 		fm
 		.bind('open reload add remove change searchend', function() {
-			setstat(fm.files(), fm.cwd().hash);
+			setstat(fm.files(fm.cwd().hash), fm.cwd().hash);
 		})
 		.bind('searchend', function() {
 			search = false;
@@ -16983,56 +17044,59 @@ $.fn.elfindertree = function(fm, opts) {
 		})
 		.bind('sortchange', function() {
 			if (fm.sortAlsoTreeview || prevSortTreeview !== fm.sortAlsoTreeview) {
-				var dirs = filter(fm.files()),
+				var dirs,
 					ends = [],
 					endsMap = {},
 					endsVid = {},
 					topVid = '',
 					single = false;
 				
-				prevSortTreeview = fm.sortAlsoTreeview;
-				
-				tree.empty();
-				
-				if (!Object.keys(hasMoreDirs).length) {
-					updateTree(dirs);
-				} else {
-					ends = getEnds();
-					if (ends.length > 1) {
-						$.each(ends, function(i, end) {
-							var vid = fm.file(fm.root(end)).volumeid; 
-							if (i === 0) {
-								topVid = vid;
-							}
-							endsVid[vid] = end;
-							endsMap[end] = [];
-						});
-						$.each(dirs, function(i, d) {
-							if (!d.volumeid) {
-								single = true;
-								return false;
-							}
-							endsMap[endsVid[d.volumeid] || endsVid[topVid]].push(d);
-						});
+				fm.lazy(function() {
+					dirs = filter(fm.files());
+					prevSortTreeview = fm.sortAlsoTreeview;
+					
+					tree.empty();
+					
+					if (!Object.keys(hasMoreDirs).length) {
+						updateTree(dirs);
 					} else {
-						single = true;
+						ends = getEnds();
+						if (ends.length > 1) {
+							$.each(ends, function(i, end) {
+								var vid = fm.file(fm.root(end)).volumeid; 
+								if (i === 0) {
+									topVid = vid;
+								}
+								endsVid[vid] = end;
+								endsMap[end] = [];
+							});
+							$.each(dirs, function(i, d) {
+								if (!d.volumeid) {
+									single = true;
+									return false;
+								}
+								endsMap[endsVid[d.volumeid] || endsVid[topVid]].push(d);
+							});
+						} else {
+							single = true;
+						}
+						if (single) {
+							$.each(ends, function(i, endHash) {
+								updateTree(dirs);
+								selectPages(fm.file(endHash));
+							});
+						} else {
+							$.each(endsMap, function(endHash, dirs) {
+								updateTree(dirs);
+								selectPages(fm.file(endHash));
+							});
+						}
 					}
-					if (single) {
-						$.each(ends, function(i, endHash) {
-							updateTree(dirs);
-							selectPages(fm.file(endHash));
-						});
-					} else {
-						$.each(endsMap, function(endHash, dirs) {
-							updateTree(dirs);
-							selectPages(fm.file(endHash));
-						});
-					}
-				}
-				
-				updateArrows(dirs, loaded);
-				
-				sync();
+					
+					updateArrows(dirs, loaded);
+					
+					sync();
+				}, 100);
 			}
 		});
 
@@ -19952,13 +20016,13 @@ elFinder.prototype.commands.netunmount = function() {
 								if (navTo.length) {
 									open = fm.navId2Hash(navTo[0].id);
 								} else {
-									var files = fm.files();
-									for (var i in files) {
-										if (fm.file(i).mime == 'directory') {
-											open = i;
-											break;
+									// fallback
+									$.each(fm.files(), function(h, f) {
+										if (f.mime == 'directory') {
+											open = h;
+											return null;
 										}
-									}
+									});
 								}
 								fm.exec('open', open);
 							}
@@ -24252,7 +24316,8 @@ elFinder.prototype.commands.sort = function() {
 					};
 				if ($.inArray(name, fm.sorters) !== -1) {
 					var arr = name == fm.sortType ? (sort.order == 'asc'? 's' : 'n') : '';
-					self.variants.push([sort, (arr? '<span class="ui-icon ui-icon-arrowthick-1-'+arr+'"></span>' : '') + '&nbsp;' + fm.i18n('sort'+name)]);			}
+					self.variants.push([sort, (arr? '<span class="ui-icon ui-icon-arrowthick-1-'+arr+'"></span>' : '') + '&nbsp;' + fm.i18n('sort'+name)]);
+				}
 			});
 			self.variants.push('|');
 			self.variants.push([
@@ -24486,8 +24551,8 @@ elFinder.prototype.commands.upload = function() {
 			},
 			getSelector = function() {
 				var hash = targetDir.hash,
-					dirs = $.map(fm.files(), function(f) {
-						return (f.mime === 'directory' && f.write && f.phash && f.phash === hash)? f : null; 
+					dirs = $.map(fm.files(hash), function(f) {
+						return (f.mime === 'directory' && f.write)? f : null; 
 					});
 				
 				if (! dirs.length) {
