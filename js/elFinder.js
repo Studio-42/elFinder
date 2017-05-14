@@ -138,6 +138,13 @@ var elFinder = function(node, opts) {
 		files = {},
 		
 		/**
+		 * Files/dirs hash cache of each dirs
+		 *
+		 * @type Object
+		 **/
+		ownFiles = {},
+		
+		/**
 		 * Selected files hashes
 		 *
 		 * @type Array
@@ -257,6 +264,7 @@ var elFinder = function(node, opts) {
 			if (data.init) {
 				// init - reset cache
 				files = {};
+				ownFiles = {};
 			} else {
 				// remove only files from prev cwd
 				// and collapsed directory (included 100+ directories) to empty for perfomance tune in DnD
@@ -290,8 +298,7 @@ var elFinder = function(node, opts) {
 							 .removeClass(rmClass)
 							 .next('.elfinder-navbar-subtree').empty();
 						}
-						delete files[i];
-						self.optionsByHashes[i] && delete self.optionsByHashes[i];
+						deleteCache(files[i]);
 					} else if (isDir) {
 						stayDirs[phash] = true;
 					}
@@ -342,17 +349,22 @@ var elFinder = function(node, opts) {
 			var defsorter = { name: true, perm: true, date: true,  size: true, kind: true },
 				sorterChk = (self.sorters.length === 0),
 				l         = data.length,
+				setSorter = function(f) {
+					f = f || {},
+					self.sorters = [];
+					$.each(self.sortRules, function(key) {
+						if (defsorter[key] || typeof f[key] !== 'undefined' || (key === 'mode' && typeof f.perm !== 'undefined')) {
+							self.sorters.push(key);
+						}
+					});
+				},
 				f, i;
 
 			for (i = 0; i < l; i++) {
 				f = data[i];
 				if (f.name && f.hash && f.mime) {
 					if (sorterChk && f.phash === cwd) {
-						$.each(self.sortRules, function(key) {
-							if (defsorter[key] || typeof f[key] !== 'undefined' || (key === 'mode' && typeof f.perm !== 'undefined')) {
-								self.sorters.push(key);
-							}
-						});
+						setSorter(f);
 						sorterChk = false;
 					}
 					
@@ -375,9 +387,40 @@ var elFinder = function(node, opts) {
 						}
 					}
 					
+					files[f.hash] && deleteCache(files[f.hash]);
 					files[f.hash] = f;
+					if (f.mime === 'directory' && !ownFiles[f.hash]) {
+						ownFiles[f.hash] = {};
+					}
+					if (f.phash) {
+						if (!ownFiles[f.phash]) {
+							ownFiles[f.phash] = {};
+						}
+						ownFiles[f.phash][f.hash] = true;
+					}
 				} 
 			}
+			
+			// for empty folder
+			sorterChk && setSorter();
+		},
+		
+		/**
+		 * Delete cache data of files, ownFiles and self.optionsByHashes
+		 * 
+		 * @param  Object  file
+		 * @return void
+		 */
+		deleteCache = function(file) {
+			var hash = file.hash,
+				phash = file.phash;
+			
+			if (phash && ownFiles[phash]) {
+				 delete ownFiles[phash][hash];
+			}
+			ownFiles[hash] && delete ownFiles[hash];
+			self.optionsByHashes[hash] && delete self.optionsByHashes[hash];
+			delete files[hash];
 		},
 		
 		/**
@@ -1250,9 +1293,24 @@ var elFinder = function(node, opts) {
 	/**
 	 * Return all cached files
 	 * 
-	 * @return Array
+	 * @param  String  parent hash
+	 * @return Object
 	 */
-	this.files = function() {
+	this.files = function(phash) {
+		var items = {};
+		if (phash) {
+			if (!ownFiles[phash]) {
+				return {};
+			}
+			$.each(ownFiles[phash], function(h) {
+				if (files[h]) {
+					items[h] = files[h];
+				} else {
+					delete ownFiles[phash][h];
+				}
+			});
+			return $.extend(true, {}, items);
+		}
 		return $.extend(true, {}, files);
 	};
 	
@@ -3304,7 +3362,7 @@ var elFinder = function(node, opts) {
 								f.phash == hash && rm(h);
 							});
 						}
-						delete files[hash];
+						deleteCache(files[hash]);
 					}
 				};
 		
@@ -4419,7 +4477,7 @@ elFinder.prototype = {
 											return $.inArray(name.name, existed) !== -1 ? name : null ;
 										});
 										if (existed.length && target == fm.cwd().hash) {
-											cwdItems = $.map(fm.files(), function(file) { return (file.phash == target) ? file.name : null; } );
+											cwdItems = $.map(fm.files(target), function(file) { return file.name; } );
 											if ($.map(existed, function(n) { 
 												return $.inArray(n, cwdItems) === -1? true : null;
 											}).length){
@@ -5788,13 +5846,15 @@ elFinder.prototype = {
 				// Disable command to replace with other command
 				var disabled;
 				if (opts.uiCmdMap) {
-					if (Object.keys(opts.uiCmdMap).length) {
+					if ($.isPlainObject(opts.uiCmdMap) && Object.keys(opts.uiCmdMap).length) {
 						disabled = opts.disabled;
 						$.each(opts.uiCmdMap, function(f, t) {
 							if (t === 'hidden' && $.inArray(f, disabled) === -1) {
 								disabled.push(f);
 							}
 						});
+					} else {
+						delete opts.uiCmdMap;
 					}
 				}
 			},

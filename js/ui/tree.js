@@ -1385,56 +1385,59 @@ $.fn.elfindertree = function(fm, opts) {
 		})
 		.bind('sortchange', function() {
 			if (fm.sortAlsoTreeview || prevSortTreeview !== fm.sortAlsoTreeview) {
-				var dirs = filter(fm.files()),
+				var dirs,
 					ends = [],
 					endsMap = {},
 					endsVid = {},
 					topVid = '',
 					single = false;
 				
-				prevSortTreeview = fm.sortAlsoTreeview;
-				
-				tree.empty();
-				
-				if (!Object.keys(hasMoreDirs).length) {
-					updateTree(dirs);
-				} else {
-					ends = getEnds();
-					if (ends.length > 1) {
-						$.each(ends, function(i, end) {
-							var vid = fm.file(fm.root(end)).volumeid; 
-							if (i === 0) {
-								topVid = vid;
-							}
-							endsVid[vid] = end;
-							endsMap[end] = [];
-						});
-						$.each(dirs, function(i, d) {
-							if (!d.volumeid) {
-								single = true;
-								return false;
-							}
-							endsMap[endsVid[d.volumeid] || endsVid[topVid]].push(d);
-						});
+				fm.lazy(function() {
+					dirs = filter(fm.files());
+					prevSortTreeview = fm.sortAlsoTreeview;
+					
+					tree.empty();
+					
+					if (!Object.keys(hasMoreDirs).length) {
+						updateTree(dirs);
 					} else {
-						single = true;
+						ends = getEnds();
+						if (ends.length > 1) {
+							$.each(ends, function(i, end) {
+								var vid = fm.file(fm.root(end)).volumeid; 
+								if (i === 0) {
+									topVid = vid;
+								}
+								endsVid[vid] = end;
+								endsMap[end] = [];
+							});
+							$.each(dirs, function(i, d) {
+								if (!d.volumeid) {
+									single = true;
+									return false;
+								}
+								endsMap[endsVid[d.volumeid] || endsVid[topVid]].push(d);
+							});
+						} else {
+							single = true;
+						}
+						if (single) {
+							$.each(ends, function(i, endHash) {
+								updateTree(dirs);
+								selectPages(fm.file(endHash));
+							});
+						} else {
+							$.each(endsMap, function(endHash, dirs) {
+								updateTree(dirs);
+								selectPages(fm.file(endHash));
+							});
+						}
 					}
-					if (single) {
-						$.each(ends, function(i, endHash) {
-							updateTree(dirs);
-							selectPages(fm.file(endHash));
-						});
-					} else {
-						$.each(endsMap, function(endHash, dirs) {
-							updateTree(dirs);
-							selectPages(fm.file(endHash));
-						});
-					}
-				}
-				
-				updateArrows(dirs, loaded);
-				
-				sync();
+					
+					updateArrows(dirs, loaded);
+					
+					sync();
+				}, 100);
 			}
 		});
 

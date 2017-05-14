@@ -2070,7 +2070,8 @@ $.fn.elfindercwd = function(fm, options) {
 			})
 			.bind('open add remove searchend', function() {
 				var phash = fm.cwd().hash;
-				cwdHashes = $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;});
+				//cwdHashes = $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;});
+				cwdHashes = $.map(fm.files(phash), function(f) { return f.hash; });
 				if (this.type === 'open') {
 					var inTrash = function() {
 						var isIn = false;

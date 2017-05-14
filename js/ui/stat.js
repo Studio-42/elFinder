@@ -38,7 +38,7 @@ $.fn.elfinderstat = function(fm) {
 		
 		fm
 		.bind('open reload add remove change searchend', function() {
-			setstat(fm.files(), fm.cwd().hash);
+			setstat(fm.files(fm.cwd().hash), fm.cwd().hash);
 		})
 		.bind('searchend', function() {
 			search = false;
