@@ -17,7 +17,8 @@ elFinder.prototype.commands.sort = function() {
 					};
 				if ($.inArray(name, fm.sorters) !== -1) {
 					var arr = name == fm.sortType ? (sort.order == 'asc'? 's' : 'n') : '';
-					self.variants.push([sort, (arr? '<span class="ui-icon ui-icon-arrowthick-1-'+arr+'"></span>' : '') + '&nbsp;' + fm.i18n('sort'+name)]);			}
+					self.variants.push([sort, (arr? '<span class="ui-icon ui-icon-arrowthick-1-'+arr+'"></span>' : '') + '&nbsp;' + fm.i18n('sort'+name)]);
+				}
 			});
 			self.variants.push('|');
 			self.variants.push([
