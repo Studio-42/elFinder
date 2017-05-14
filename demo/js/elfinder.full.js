@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 922fa6b) (2017-05-14)
+ * Version 2.1.23 (2.1-src Nightly: f407096) (2017-05-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7540,7 +7540,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 922fa6b)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: f407096)';
 
 
 
@@ -16270,7 +16270,7 @@ $.fn.elfindertree = function(fm, opts) {
 									parts = dirs.slice(start, start + max);
 									hasMoreDirs[target] = parent;
 									prev = start? Math.max(-1, start - max) : -1;
-									next = (start + max > dirs.length)? 0 : start + max;
+									next = (start + max >= dirs.length)? 0 : start + max;
 									total = Math.ceil(dirs.length/max);
 									page = Math.ceil(start/max);
 								}
