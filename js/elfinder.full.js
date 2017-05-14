@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 893341c) (2017-05-14)
+ * Version 2.1.23 (2.1-src Nightly: ef3471d) (2017-05-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -282,11 +282,12 @@ var elFinder = function(node, opts) {
 				rmClass, hashes, calc, gc, collapsed, prevcwd;
 			
 			if (self.api >= 2.1) {
-				self.commandMap = (data.options.uiCmdMap && Object.keys(data.options.uiCmdMap).length)? data.options.uiCmdMap : {};
-				
-				// support volume driver option `uiCmdMap`
-				if (uiCmdMapPrev !== JSON.stringify(self.commandMap)) {
-					uiCmdMapPrev = JSON.stringify(self.commandMap);
+				if (data.options.uiCmdMap) {
+					// support volume driver option `uiCmdMap`
+					self.commandMap = (data.options.uiCmdMap && Object.keys(data.options.uiCmdMap).length)? data.options.uiCmdMap : {};
+					if (uiCmdMapPrev !== JSON.stringify(self.commandMap)) {
+						uiCmdMapPrev = JSON.stringify(self.commandMap);
+					}
 				}
 			} else {
 				self.options.sync = 0;
@@ -636,9 +637,16 @@ var elFinder = function(node, opts) {
 	/**
 	 * Volume option to set the properties of the root Stat
 	 * 
-	 * @type Array
+	 * @type Object
 	 */
-	this.optionProperties = ['icon', 'csscls', 'tmbUrl', 'uiCmdMap', 'netkey', 'disabled'];
+	this.optionProperties = {
+		icon: void(0),
+		csscls: void(0),
+		tmbUrl: void(0),
+		uiCmdMap: {},
+		netkey: void(0),
+		disabled: []
+	};
 	
 	if (opts.ui) {
 		this.options.ui = opts.ui;
@@ -5889,6 +5897,23 @@ elFinder.prototype = {
 					}
 				}
 			},
+			normalizeOptions = function(opts) {
+				var getType = function(v) {
+					var type = typeof v;
+					if (type === 'object' && Array.isArray(v)) {
+						type = 'array';
+					}
+					return type;
+				};
+				$.each(self.optionProperties, function(k, empty) {
+					if (empty !== void(0)) {
+						if (!opts[k] || getType(opts[k]) !== getType(empty)) {
+							opts[k] = empty;
+						}
+					}
+				});
+				return opts;
+			},
 			filter = function(file) { 
 				var vid, targetOptions, isRoot;
 				
@@ -5898,7 +5923,7 @@ elFinder.prototype = {
 					}
 
 					if (file.options) {
-						self.optionsByHashes[file.hash] = file.options;
+						self.optionsByHashes[file.hash] = normalizeOptions(file.options);
 					}
 					
 					isRoot = self.isRoot(file);
@@ -5934,7 +5959,7 @@ elFinder.prototype = {
 								
 								if (file.options) {
 									// >= v.2.1.14 has file.options
-									targetOptions = $.extend(targetOptions, file.options);
+									$.extend(targetOptions, file.options);
 								}
 								
 								// for compat <= v2.1.13
@@ -5954,7 +5979,7 @@ elFinder.prototype = {
 								}
 								
 								// set immediate properties
-								$.each(self.optionProperties, function(i, k) {
+								$.each(self.optionProperties, function(k) {
 									if (targetOptions[k]) {
 										file[k] = targetOptions[k];
 									}
@@ -6017,8 +6042,12 @@ elFinder.prototype = {
 			name, i18, i18nFolderName, prevId;
 		
 
+		if (data.options) {
+			normalizeOptions(data.options);
+		}
+		
 		if (data.cwd) {
-			if (data.cwd.volumeid && data.options && Object.keys(data.options).length) {
+			if (data.cwd.volumeid && data.options && Object.keys(data.options).length && self.isRoot(data.cwd)) {
 				self.volOptions[data.cwd.volumeid] = data.options;
 			}
 			data.cwd = filter(data.cwd);
@@ -6041,7 +6070,7 @@ elFinder.prototype = {
 
 		// merge options that apply only to cwd
 		if (data.cwd && data.cwd.options && data.options) {
-			$.extend(data.options, data.cwd.options);
+			$.extend(data.options, normalizeOptions(data.cwd.options));
 		}
 		
 		// check error
@@ -7511,7 +7540,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 893341c)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: ef3471d)';
 
 
 
