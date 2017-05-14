@@ -582,7 +582,7 @@ $.fn.elfindertree = function(fm, opts) {
 									parts = dirs.slice(start, start + max);
 									hasMoreDirs[target] = parent;
 									prev = start? Math.max(-1, start - max) : -1;
-									next = (start + max > dirs.length)? 0 : start + max;
+									next = (start + max >= dirs.length)? 0 : start + max;
 									total = Math.ceil(dirs.length/max);
 									page = Math.ceil(start/max);
 								}
