@@ -349,17 +349,22 @@ var elFinder = function(node, opts) {
 			var defsorter = { name: true, perm: true, date: true,  size: true, kind: true },
 				sorterChk = (self.sorters.length === 0),
 				l         = data.length,
+				setSorter = function(f) {
+					f = f || {},
+					self.sorters = [];
+					$.each(self.sortRules, function(key) {
+						if (defsorter[key] || typeof f[key] !== 'undefined' || (key === 'mode' && typeof f.perm !== 'undefined')) {
+							self.sorters.push(key);
+						}
+					});
+				},
 				f, i;
 
 			for (i = 0; i < l; i++) {
 				f = data[i];
 				if (f.name && f.hash && f.mime) {
 					if (sorterChk && f.phash === cwd) {
-						$.each(self.sortRules, function(key) {
-							if (defsorter[key] || typeof f[key] !== 'undefined' || (key === 'mode' && typeof f.perm !== 'undefined')) {
-								self.sorters.push(key);
-							}
-						});
+						setSorter(f);
 						sorterChk = false;
 					}
 					
@@ -395,6 +400,9 @@ var elFinder = function(node, opts) {
 					}
 				} 
 			}
+			
+			// for empty folder
+			sorterChk && setSorter();
 		},
 		
 		/**
@@ -5838,13 +5846,15 @@ elFinder.prototype = {
 				// Disable command to replace with other command
 				var disabled;
 				if (opts.uiCmdMap) {
-					if (Object.keys(opts.uiCmdMap).length) {
+					if ($.isPlainObject(opts.uiCmdMap) && Object.keys(opts.uiCmdMap).length) {
 						disabled = opts.disabled;
 						$.each(opts.uiCmdMap, function(f, t) {
 							if (t === 'hidden' && $.inArray(f, disabled) === -1) {
 								disabled.push(f);
 							}
 						});
+					} else {
+						delete opts.uiCmdMap;
 					}
 				}
 			},
