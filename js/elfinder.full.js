@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: ef3471d) (2017-05-14)
+ * Version 2.1.23 (2.1-src Nightly: 922fa6b) (2017-05-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7540,7 +7540,7 @@ if (!Array.isArray) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: ef3471d)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 922fa6b)';
 
 
 
@@ -16639,6 +16639,9 @@ $.fn.elfindertree = function(fm, opts) {
 							current.addClass(active);
 						}
 						
+						// mark as loaded to cwd parents
+						current.parents('.elfinder-navbar-wrapper').children('.'+navdir).addClass(loaded);
+						
 						if (res) {
 							fm.lazy(open).done(function() {
 								dfrd.resolve();
@@ -17078,7 +17081,8 @@ $.fn.elfindertree = function(fm, opts) {
 					endsMap = {},
 					endsVid = {},
 					topVid = '',
-					single = false;
+					single = false,
+					current;
 				
 				fm.lazy(function() {
 					dirs = filter(fm.files());
@@ -17086,8 +17090,16 @@ $.fn.elfindertree = function(fm, opts) {
 					
 					tree.empty();
 					
+					// append volume roots at first
+					updateTree($.map(fm.roots, function(h) {
+						var dir = fm.file(h);
+						return dir && fm.isRoot(dir)? dir : null;
+					}));
+					
 					if (!Object.keys(hasMoreDirs).length) {
 						updateTree(dirs);
+						current = selectPages();
+						updateArrows(dirs, loaded);
 					} else {
 						ends = getEnds();
 						if (ends.length > 1) {
@@ -17112,17 +17124,17 @@ $.fn.elfindertree = function(fm, opts) {
 						if (single) {
 							$.each(ends, function(i, endHash) {
 								updateTree(dirs);
-								selectPages(fm.file(endHash));
+								current = selectPages(fm.file(endHash));
+								updateArrows(dirs, loaded);
 							});
 						} else {
 							$.each(endsMap, function(endHash, dirs) {
 								updateTree(dirs);
-								selectPages(fm.file(endHash));
+								current = selectPages(fm.file(endHash));
+								updateArrows(dirs, loaded);
 							});
 						}
 					}
-					
-					updateArrows(dirs, loaded);
 					
 					sync();
 				}, 100);
