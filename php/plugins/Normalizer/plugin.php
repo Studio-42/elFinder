@@ -28,6 +28,7 @@
  *				'enable'    => true,
  *				'nfc'       => true,
  *				'nfkc'      => true,
+ *				'umlauts'   => false,
  *				'lowercase' => false,
  * 				'convmap'   => array()
  *			)
@@ -43,6 +44,7 @@
  *						'enable'    => true,
  *						'nfc'       => true,
  *						'nfkc'      => true,
+ *						'umlauts'   => false,
  * 						'lowercase' => false,
  * 						'convmap'   => array()
  *					)
@@ -68,6 +70,7 @@ class elFinderPluginNormalizer extends elFinderPlugin
 			'enable'    => true,  // For control by volume driver
 			'nfc'       => true,  // Canonical Decomposition followed by Canonical Composition
 			'nfkc'      => true,  // Compatibility Decomposition followed by Canonical
+			'umlauts'   => false, // Convert umlauts with their closest 7 bit ascii equivalent
 			'lowercase' => false, // Make chars lowercase
 			'convmap'   => array()// Convert map ('FROM' => 'TO') array
 		);
@@ -141,6 +144,11 @@ class elFinderPluginNormalizer extends elFinderPlugin
 					if ($opts['nfkc'])
 						$str = $normalizer->normalize($str, 'NFKC');
 				}
+			}
+		}
+		if ($opts['umlauts']) {
+			if (strpos($str = htmlentities($str, ENT_QUOTES, 'UTF-8'), '&') !== false) {
+				$str = html_entity_decode(preg_replace('~&([a-z]{1,2})(?:acute|cedil|circ|grave|lig|orn|ring|slash|tilde|uml);~i', '$1', $str), ENT_QUOTES, 'utf-8');
 			}
 		}
 		if ($opts['convmap'] && is_array($opts['convmap'])) {
