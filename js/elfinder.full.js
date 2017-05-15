@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 33c34df) (2017-05-15)
+ * Version 2.1.23 (2.1-src Nightly: 479158b) (2017-05-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7552,7 +7552,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 33c34df)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 479158b)';
 
 
 
@@ -16632,19 +16632,18 @@ $.fn.elfindertree = function(fm, opts) {
 						if (res) {
 							$.each(res, function(endHash, dirs) {
 								dirs && updateTree(dirs);
-								current = selectPages(fm.file(endHash));
+								selectPages(fm.file(endHash));
 								dirs && updateArrows(dirs, loaded);
 							});
-						} else {
-							current = selectPages();
 						}
 						
 						if (cwdDirs) {
 							(fm.api < 2.1) && cwdDirs.push(cwd);
 							updateTree(cwdDirs);
-							(fm.api < 2.1) && (current = selectPages());
-							current.addClass(loaded);
 						}
+						
+						// set current node
+						current = selectPages();
 						
 						if (!current.hasClass(active)) {
 							tree.find(selNavdir+'.'+active).removeClass(active);
