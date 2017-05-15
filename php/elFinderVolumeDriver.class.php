@@ -1839,6 +1839,7 @@ abstract class elFinderVolumeDriver {
 	 *
 	 * @param  string    $hash   directory hash
 	 * @param  bool|null $lineal only lineal parents
+	 * @param  string    $until  hash that is enough to that extent >= 2.1.24
 	 * @return array
 	 * @author Dmitry (dio) Levashov
 	 **/
@@ -1846,7 +1847,14 @@ abstract class elFinderVolumeDriver {
 		if (($current = $this->dir($hash)) == false) {
 			return false;
 		}
-
+		
+		$args = func_get_args();
+		// checks 3rd param `$until` (elFinder >= 2.1.24)
+		$until = '';
+		if (isset($args[2])) {
+			$until = $args[2];
+		}
+		
 		$path = $this->decode($hash);
 		$tree = array();
 		
@@ -1865,6 +1873,10 @@ abstract class elFinderVolumeDriver {
 						$tree[$dir['hash']] = $dir;
 					}
 				}
+			}
+			
+			if ($until && $until === $this->encode($path)) {
+				break;
 			}
 		}
 
