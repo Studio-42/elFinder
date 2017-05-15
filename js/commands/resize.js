@@ -26,7 +26,7 @@ elFinder.prototype.commands.resize = function() {
 		
 		if (enabled && (! file || (file && file.read && file.write && file.mime.indexOf('image/') !== -1 ))) {
 			return fm.request({
-				data : $.extend(data, {
+				data : Object.assign(data, {
 					cmd : 'resize'
 				}),
 				notify : {type : 'resize', cnt : 1},

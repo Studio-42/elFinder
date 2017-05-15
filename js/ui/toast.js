@@ -23,7 +23,7 @@ $.fn.elfindertoast = function(opts, fm) {
 		extNode: undefined
 	};
 	return this.each(function() {
-		opts = $.extend({}, defOpts, opts || {});
+		opts = Object.assign({}, defOpts, opts || {});
 		
 		var self = $(this),
 			show = function(notm) {

@@ -4,7 +4,7 @@ $.fn.elfinderoverlay = function(opts) {
 	var fm = this.parent().elfinder('instance');
 	
 	this.filter(':not(.elfinder-overlay)').each(function() {
-		opts = $.extend({}, opts);
+		opts = Object.assign({}, opts);
 		$(this).addClass('ui-front ui-widget-overlay elfinder-overlay')
 			.hide()
 			.mousedown(function(e) {

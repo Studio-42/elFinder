@@ -214,7 +214,7 @@
 				// CAUTION: DO NOT TOUCH `e.data`
 				if (e.data && e.data.debug) {
 					tabDebug.show();
-					self.debug = { options : e.data.options, debug : $.extend({ cmd : fm.currentReqCmd }, e.data.debug) };
+					self.debug = { options : e.data.options, debug : Object.assign({ cmd : fm.currentReqCmd }, e.data.debug) };
 					if (self.dialog/* && self.dialog.is(':visible')*/) {
 						debugRender();
 					}

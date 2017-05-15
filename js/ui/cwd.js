@@ -770,7 +770,7 @@ $.fn.elfindercwd = function(fm, options) {
 						}
 						
 						if (Object.keys(atmb).length) {
-							$.extend(bufferExt.attachTmbs, atmb);
+							Object.assign(bufferExt.attachTmbs, atmb);
 						}
 						
 						if (init) {
@@ -928,7 +928,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 *
 			 * @type Object
 			 */
-			droppable = $.extend({}, fm.droppable, {
+			droppable = Object.assign({}, fm.droppable, {
 				over : function(e, ui) {
 					var dst    = $(this),
 						helper = ui.helper,
@@ -1076,7 +1076,7 @@ $.fn.elfindercwd = function(fm, options) {
 					};
 
 				if ($.isPlainObject(tmbs) && Object.keys(tmbs).length) {
-					$.extend(bufferExt.attachTmbs, tmbs);
+					Object.assign(bufferExt.attachTmbs, tmbs);
 					$.each(tmbs, chk);
 					if (! reload && bufferExt.getTmbs.length) {
 						loadThumbnails();
@@ -1221,7 +1221,7 @@ $.fn.elfindercwd = function(fm, options) {
 					setColwidth();
 					bottomMarkerShow(place);
 					if (Object.keys(atmb).length) {
-						$.extend(bufferExt.attachTmbs, atmb);
+						Object.assign(bufferExt.attachTmbs, atmb);
 					}
 				}
 			},
@@ -1279,7 +1279,7 @@ $.fn.elfindercwd = function(fm, options) {
 			customColsNameBuild = function() {
 				var name = '',
 				customColsName = '',
-				names = $.extend({}, msg, options.listView.columnsCustomName);
+				names = Object.assign({}, msg, options.listView.columnsCustomName);
 				for (var i = 0; i < customCols.length; i++) {
 					if (typeof names[customCols[i]] !== 'undefined') {
 						name = names[customCols[i]];
@@ -1896,7 +1896,7 @@ $.fn.elfindercwd = function(fm, options) {
 				}),
 			wrapper = $('<div class="elfinder-cwd-wrapper"/>')
 				// make cwd itself droppable for folders from nav panel
-				.droppable($.extend({}, droppable, {autoDisable: false}))
+				.droppable(Object.assign({}, droppable, {autoDisable: false}))
 				.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
 				.on('touchstart.'+fm.namespace, wrapperContextMenu.touchstart)
 				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, wrapperContextMenu.touchend)
@@ -1984,7 +1984,7 @@ $.fn.elfindercwd = function(fm, options) {
 			winScrTm;
 
 		// setup by options
-		replacement = $.extend(replacement, options.replacement || {});
+		replacement = Object.assign(replacement, options.replacement || {});
 		
 		try {
 			colWidth = fm.storage('cwdColWidth')? fm.storage('cwdColWidth') : null;
@@ -2188,7 +2188,7 @@ $.fn.elfindercwd = function(fm, options) {
 				}
 				
 				cwdOffset = cwd.offset();
-				wz.data('rectangle', $.extend(
+				wz.data('rectangle', Object.assign(
 					{
 						width: wz.width(),
 						height: wz.height(),

@@ -17,7 +17,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			filter   = function(opts) {
 				return $.map(opts, function(v) {
 					if ($.isPlainObject(v)) {
-						options = $.extend(options, v);
+						options = Object.assign(options, v);
 						return null;
 					}
 					return [v];
@@ -222,7 +222,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 					h     = self.height(),
 					tbh   = self.outerHeight(true),
 					delta = tbh - h,
-					opt   = $.extend({
+					opt   = Object.assign({
 						step: function(now) {
 							wz.height(wzh + (toshow? (now + delta) * -1 : h - now));
 							fm.trigger('resize');
@@ -243,7 +243,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 					}, data);
 				self.data('swipeClose', ! toshow).stop(true, true).animate({height : 'toggle'}, opt);
 				autoHide.toolbar = !toshow;
-				fm.storage('autoHide', $.extend(fm.storage('autoHide'), {toolbar: autoHide.toolbar}));
+				fm.storage('autoHide', Object.assign(fm.storage('autoHide'), {toolbar: autoHide.toolbar}));
 			});
 		}
 	});

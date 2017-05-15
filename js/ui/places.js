@@ -489,7 +489,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 						exists[hash] = f;
 					});
 					$.each(dirs, function(h, f) {
-						add(exists[h] || $.extend({notfound: true}, f));
+						add(exists[h] || Object.assign({notfound: true}, f));
 					});
 					if (fm.storage('placesState') > 0) {
 						root.click();
@@ -581,7 +581,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 										updated = true;
 									}
 								} else {
-									if (update(exists[h] || $.extend({notfound: true}, f))) {
+									if (update(exists[h] || Object.assign({notfound: true}, f))) {
 										updated = true;
 									}
 								}

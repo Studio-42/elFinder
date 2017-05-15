@@ -141,7 +141,7 @@
 						form.method = typeof opts.method === 'string' && opts.method.toLowerCase() === 'get'? 'GET' : 'POST';
 						form.target = target;
 						form.style.display = 'none';
-						var params = $.extend({}, fm.options.customData, {
+						var params = Object.assign({}, fm.options.customData, {
 							cmd: 'file',
 							target: file.hash
 						});
