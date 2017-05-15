@@ -351,7 +351,7 @@ var elFinder = function(node, opts) {
 				sorterChk = (self.sorters.length === 0),
 				l         = data.length,
 				setSorter = function(f) {
-					f = f || {},
+					var f = f || {};
 					self.sorters = [];
 					$.each(self.sortRules, function(key) {
 						if (defsorter[key] || typeof f[key] !== 'undefined' || (key === 'mode' && typeof f.perm !== 'undefined')) {
@@ -388,7 +388,7 @@ var elFinder = function(node, opts) {
 						}
 					}
 					
-					files[f.hash] && deleteCache(files[f.hash]);
+					files[f.hash] && deleteCache(files[f.hash], true);
 					files[f.hash] = f;
 					if (f.mime === 'directory' && !ownFiles[f.hash]) {
 						ownFiles[f.hash] = {};
@@ -410,17 +410,20 @@ var elFinder = function(node, opts) {
 		 * Delete cache data of files, ownFiles and self.optionsByHashes
 		 * 
 		 * @param  Object  file
+		 * @param  Boolean update
 		 * @return void
 		 */
-		deleteCache = function(file) {
+		deleteCache = function(file, update) {
 			var hash = file.hash,
 				phash = file.phash;
 			
 			if (phash && ownFiles[phash]) {
 				 delete ownFiles[phash][hash];
 			}
-			ownFiles[hash] && delete ownFiles[hash];
-			self.optionsByHashes[hash] && delete self.optionsByHashes[hash];
+			if (!update) {
+				ownFiles[hash] && delete ownFiles[hash];
+				self.optionsByHashes[hash] && delete self.optionsByHashes[hash];
+			}
 			delete files[hash];
 		},
 		
