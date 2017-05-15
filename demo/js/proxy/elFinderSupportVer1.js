@@ -91,7 +91,7 @@ window.elFinderSupportVer1 = function(upload) {
 
 				$.each(opts.data.targets, function(i, hash) {
 					$.ajax(Object.assign(_opts, {data : {cmd : 'duplicate', target : hash, current : fm.file(hash).phash}}))
-						.error(function(error) {
+						.fail(function(error) {
 							fm.error(fm.res('error', 'connect'));
 						})
 						.done(function(data) {
