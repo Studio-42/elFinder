@@ -132,7 +132,7 @@ class elFinder {
 		'open'      => array('target' => false, 'tree' => false, 'init' => false, 'mimes' => false, 'compare' => false),
 		'ls'        => array('target' => true, 'mimes' => false, 'intersect' => false),
 		'tree'      => array('target' => true),
-		'parents'   => array('target' => true),
+		'parents'   => array('target' => true, 'until' => false),
 		'tmb'       => array('targets' => true),
 		'file'      => array('target' => true, 'download' => false),
 		'zipdl'     => array('targets' => true, 'download' => false),
@@ -1279,9 +1279,10 @@ class elFinder {
 	 **/
 	protected function parents($args) {
 		$target = $args['target'];
+		$until = $args['until'];
 		
 		if (($volume = $this->volume($target)) == false
-		|| ($tree = $volume->parents($target)) == false) {
+		|| ($tree = $volume->parents($target, false, $until)) == false) {
 			return array('error' => $this->error(self::ERROR_OPEN, '#'.$target));
 		}
 
