@@ -2934,20 +2934,20 @@ abstract class elFinderVolumeDriver {
 		if (! isset($options['bgColorFb'])) {
 			$options['bgColorFb'] = $this->options['bgColorFb'];
 		}
+		
+		// check 'width' ,'height'
+		if (in_array($mode, array('resize', 'propresize', 'crop', 'fitsquare'))) {
+			if (empty($options['width']) || empty($options['height'])) {
+				return false;
+			}
+		}
+		
 		switch($mode) {
 			case 'rotate':
 				if (empty($options['degree'])) {
 					return true;
 				}
 				return (bool)$this->imgRotate($src, $options['degree'], $options['bgColorFb'], null, $options['jpgQuality']);
-			
-			case 'resize':
-			case 'propresize':
-			case 'crop':
-			case 'fitsquare':
-				if (empty($options['width']) || empty($options['height'])) {
-					return false;
-				}
 			
 			case 'resize':
 				return (bool)$this->imgResize($src, $options['width'], $options['height'], false, true, null, $options['jpgQuality'], $options);
@@ -2959,6 +2959,7 @@ abstract class elFinderVolumeDriver {
 				if (isset($options['x']) && isset($options['y'])) {
 					return (bool)$this->imgCrop($src, $options['width'], $options['height'], $options['x'], $options['y'], null, $options['jpgQuality']);
 				}
+				break;
 			
 			case 'fitsquare':
 				return (bool)$this->imgSquareFit($src, $options['width'], $options['height'], 'center', 'middle', $options['bgcolor'], null, $options['jpgQuality']);
