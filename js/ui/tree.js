@@ -932,19 +932,18 @@ $.fn.elfindertree = function(fm, opts) {
 						if (res) {
 							$.each(res, function(endHash, dirs) {
 								dirs && updateTree(dirs);
-								current = selectPages(fm.file(endHash));
+								selectPages(fm.file(endHash));
 								dirs && updateArrows(dirs, loaded);
 							});
-						} else {
-							current = selectPages();
 						}
 						
 						if (cwdDirs) {
 							(fm.api < 2.1) && cwdDirs.push(cwd);
 							updateTree(cwdDirs);
-							(fm.api < 2.1) && (current = selectPages());
-							current.addClass(loaded);
 						}
+						
+						// set current node
+						current = selectPages();
 						
 						if (!current.hasClass(active)) {
 							tree.find(selNavdir+'.'+active).removeClass(active);
