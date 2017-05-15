@@ -98,7 +98,7 @@ $.fn.elfindercontextmenu = function(fm) {
 				})
 				.draggable(dragOpt),
 			subpos  = fm.direction == 'ltr' ? 'left' : 'right',
-			types = $.extend({}, fm.options.contextmenu),
+			types = Object.assign({}, fm.options.contextmenu),
 			tpl     = '<div class="'+cmItem+'{className}"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"{style}/><span>{label}</span></div>',
 			item = function(label, icon, callback, opts) {
 				var className = '',
@@ -242,7 +242,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					mh         = fm.UA.Mobile? 20 : 2,
 					x          = x - (bpos? bpos.left : 0),
 					y          = y - (bpos? bpos.top : 0),
-					css        = $.extend(css || {}, {
+					css        = Object.assign(css || {}, {
 						top  : Math.max(0, y + mh + height < bheight ? y + mh : y - (y + height - bheight)),
 						left : Math.max(0, (x < width + mw || x + mw + width < bwidth)? x + mw : x - mw - width),
 						opacity : '1'

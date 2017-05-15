@@ -17,7 +17,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 					wz  = fm.getUI('workzone'),
 					wzRect = wz.data('rectangle'),
 					cwdOffset = cwd.offset();
-				wz.data('rectangle', $.extend(wzRect, { cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width() }));
+				wz.data('rectangle', Object.assign(wzRect, { cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width() }));
 			};
 
 			fm.one('cssloaded', function() {
@@ -65,7 +65,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 					setWzRect();
 				});
 				autoHide.navbar = (mode !== 'show');
-				fm.storage('autoHide', $.extend(fm.storage('autoHide'), {navbar: autoHide.navbar}));
+				fm.storage('autoHide', Object.assign(fm.storage('autoHide'), {navbar: autoHide.navbar}));
 			});
 		}
 		

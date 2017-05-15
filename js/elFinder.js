@@ -351,7 +351,7 @@ var elFinder = function(node, opts) {
 				sorterChk = (self.sorters.length === 0),
 				l         = data.length,
 				setSorter = function(f) {
-					f = f || {},
+					var f = f || {};
 					self.sorters = [];
 					$.each(self.sortRules, function(key) {
 						if (defsorter[key] || typeof f[key] !== 'undefined' || (key === 'mode' && typeof f.perm !== 'undefined')) {
@@ -388,7 +388,7 @@ var elFinder = function(node, opts) {
 						}
 					}
 					
-					files[f.hash] && deleteCache(files[f.hash]);
+					files[f.hash] && deleteCache(files[f.hash], true);
 					files[f.hash] = f;
 					if (f.mime === 'directory' && !ownFiles[f.hash]) {
 						ownFiles[f.hash] = {};
@@ -410,17 +410,20 @@ var elFinder = function(node, opts) {
 		 * Delete cache data of files, ownFiles and self.optionsByHashes
 		 * 
 		 * @param  Object  file
+		 * @param  Boolean update
 		 * @return void
 		 */
-		deleteCache = function(file) {
+		deleteCache = function(file, update) {
 			var hash = file.hash,
 				phash = file.phash;
 			
 			if (phash && ownFiles[phash]) {
 				 delete ownFiles[phash][hash];
 			}
-			ownFiles[hash] && delete ownFiles[hash];
-			self.optionsByHashes[hash] && delete self.optionsByHashes[hash];
+			if (!update) {
+				ownFiles[hash] && delete ownFiles[hash];
+				self.optionsByHashes[hash] && delete self.optionsByHashes[hash];
+			}
 			delete files[hash];
 		},
 		
@@ -628,12 +631,12 @@ var elFinder = function(node, opts) {
 	if (opts.uiOptions) {
 		if (opts.uiOptions.toolbar && Array.isArray(opts.uiOptions.toolbar)) {
 			if ($.isPlainObject(opts.uiOptions.toolbar[opts.uiOptions.toolbar.length - 1])) {
-				$.extend(this.options.uiOptions.toolbarExtra, opts.uiOptions.toolbar.pop());
+				Object.assign(this.options.uiOptions.toolbarExtra, opts.uiOptions.toolbar.pop());
 			}
 			this.options.uiOptions.toolbar = opts.uiOptions.toolbar;
 		}
 		if (opts.uiOptions.toolbarExtra && $.isPlainObject(opts.uiOptions.toolbarExtra)) {
-			$.extend(this.options.uiOptions.toolbarExtra, opts.uiOptions.toolbarExtra);
+			Object.assign(this.options.uiOptions.toolbarExtra, opts.uiOptions.toolbarExtra);
 		}
 	
 		if (opts.uiOptions.cwd && opts.uiOptions.cwd.listView) {
@@ -683,7 +686,7 @@ var elFinder = function(node, opts) {
 		}
 	})();
 
-	$.extend(this.options.contextmenu, opts.contextmenu);
+	Object.assign(this.options.contextmenu, opts.contextmenu);
 	
 	/**
 	 * Ajax request type
@@ -1317,9 +1320,9 @@ var elFinder = function(node, opts) {
 					delete ownFiles[phash][h];
 				}
 			});
-			return $.extend(true, {}, items);
+			return Object.assign({}, items);
 		}
-		return $.extend(true, {}, files);
+		return Object.assign({}, files);
 	};
 	
 	/**
@@ -1371,7 +1374,7 @@ var elFinder = function(node, opts) {
 		if (! asyncOpt || ! files[hash]) {
 			return path;
 		} else {
-			asyncOpt = $.extend({notify: {type : 'parents', cnt : 1, hideCnt : true}}, asyncOpt);
+			asyncOpt = Object.assign({notify: {type : 'parents', cnt : 1, hideCnt : true}}, asyncOpt);
 			
 			var dfd    = $.Deferred(),
 				notify = asyncOpt.notify,
@@ -1464,7 +1467,7 @@ var elFinder = function(node, opts) {
 			return baseUrl + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/')
 		}
 
-		var params = $.extend({}, this.customData, {
+		var params = Object.assign({}, this.customData, {
 			cmd: 'file',
 			target: file.hash
 		});
@@ -1567,7 +1570,7 @@ var elFinder = function(node, opts) {
 	 * @return Array
 	 */
 	this.selectedFiles = function() {
-		return $.map(selected, function(hash) { return files[hash] ? $.extend({}, files[hash]) : null });
+		return $.map(selected, function(hash) { return files[hash] ? Object.assign({}, files[hash]) : null });
 	};
 	
 	/**
@@ -1644,7 +1647,7 @@ var elFinder = function(node, opts) {
 			o        = this.options,
 			dfrd     = $.Deferred(),
 			// request data
-			data     = $.extend({}, o.customData, {mimes : o.onlyMimes}, opts.data || opts),
+			data     = Object.assign({}, o.customData, {mimes : o.onlyMimes}, opts.data || opts),
 			// command name
 			cmd      = data.cmd,
 			isOpen   = (!opts.asNotOpen && cmd === 'open'),
@@ -1653,7 +1656,7 @@ var elFinder = function(node, opts) {
 			// call default success callback ?
 			defdone  = !(opts.preventDefault || opts.preventDone),
 			// options for notify dialog
-			notify   = $.extend({}, opts.notify),
+			notify   = Object.assign({}, opts.notify),
 			// make cancel button
 			cancel   = !!opts.cancel,
 			// do not normalize data - return as is
@@ -1667,7 +1670,7 @@ var elFinder = function(node, opts) {
 			// open notify dialog timeout
 			timeout,
 			// request options
-			options = $.extend({
+			options = Object.assign({
 				url      : o.url,
 				async    : true,
 				type     : this.requestType,
@@ -1831,7 +1834,7 @@ var elFinder = function(node, opts) {
 					}
 					
 					if (response.options) {
-						cwdOptions = $.extend({}, cwdOptionsDefault, response.options);
+						cwdOptions = Object.assign({}, cwdOptionsDefault, response.options);
 					}
 
 					if (response.netDrivers) {
@@ -2343,7 +2346,7 @@ var elFinder = function(node, opts) {
 				if (handlers[i].length) {
 					if (!allowModify) {
 						// to avoid data modifications. remember about "sharing" passing arguments in js :) 
-						event.data = isopen? JSON.parse(jst) : $.extend(true, {}, data);
+						event.data = isopen? JSON.parse(jst) : Object.assign({}, data);
 					}
 				}
 
@@ -3144,7 +3147,7 @@ var elFinder = function(node, opts) {
 		return alert(this.i18n('errURL'));
 	}
 
-	$.extend($.ui.keyCode, {
+	Object.assign($.ui.keyCode, {
 		'F1' : 112,
 		'F2' : 113,
 		'F3' : 114,
@@ -3327,7 +3330,7 @@ var elFinder = function(node, opts) {
 			opts.buttons[self.i18n(self.i18n('btnClose'))] = function() { $(this).elfinderdialog('close'); };
 
 			if (e.data.opts && $.isPlainObject(e.data.opts)) {
-				$.extend(opts, e.data.opts);
+				Object.assign(opts, e.data.opts);
 			}
 
 			self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
@@ -3352,7 +3355,7 @@ var elFinder = function(node, opts) {
 						}
 					});
 				}
-				files[hash] = files[hash] ? $.extend(files[hash], file) : file;
+				files[hash] = files[hash] ? Object.assign(files[hash], file) : file;
 			});
 		})
 		.remove(function(e) {
@@ -3383,7 +3386,7 @@ var elFinder = function(node, opts) {
 			
 		})
 		.bind('searchstart', function(e) {
-			$.extend(self.searchStatus, e.data);
+			Object.assign(self.searchStatus, e.data);
 			self.searchStatus.state = 1;
 		})
 		.bind('search', function(e) {
@@ -3475,18 +3478,18 @@ var elFinder = function(node, opts) {
 	
 	// load commands
 	$.each(this.commands, function(name, cmd) {
-		var proto = $.extend({}, cmd.prototype),
+		var proto = Object.assign({}, cmd.prototype),
 			extendsCmd, opts;
 		if ($.isFunction(cmd) && !self._commands[name] && (cmd.prototype.forceLoad || $.inArray(name, self.options.commands) !== -1)) {
 			extendsCmd = cmd.prototype.extendsCmd || '';
 			if (extendsCmd) {
 				if ($.isFunction(self.commands[extendsCmd])) {
-					cmd.prototype = $.extend({}, base, new self.commands[extendsCmd](), cmd.prototype);
+					cmd.prototype = Object.assign({}, base, new self.commands[extendsCmd](), cmd.prototype);
 				} else {
 					return true;
 				}
 			} else {
-				cmd.prototype = $.extend({}, base, cmd.prototype);
+				cmd.prototype = Object.assign({}, base, cmd.prototype);
 			}
 			self._commands[name] = new cmd();
 			cmd.prototype = proto;
@@ -5778,7 +5781,7 @@ elFinder.prototype = {
 			return '';
 		}
 
-		o = $.extend({}, this.options.cookie);
+		o = Object.assign({}, this.options.cookie);
 		if (value === null) {
 			value = '';
 			o.expires = -1;
@@ -5928,7 +5931,7 @@ elFinder.prototype = {
 								
 								if (file.options) {
 									// >= v.2.1.14 has file.options
-									$.extend(targetOptions, file.options);
+									Object.assign(targetOptions, file.options);
 								}
 								
 								// for compat <= v2.1.13
@@ -6039,7 +6042,7 @@ elFinder.prototype = {
 
 		// merge options that apply only to cwd
 		if (data.cwd && data.cwd.options && data.options) {
-			$.extend(data.options, normalizeOptions(data.cwd.options));
+			Object.assign(data.options, normalizeOptions(data.cwd.options));
 		}
 		
 		// check error
@@ -7026,7 +7029,7 @@ elFinder.prototype = {
 	 */
 	makeNetmountOptionOauth : function(protocol, name, host, opts) {
 		var noOffline = typeof opts === 'boolean'? opts : null, // for backward compat
-			opts = $.extend({
+			opts = Object.assign({
 				noOffline : false,
 				root      : 'root',
 				pathI18n  : 'folderId',
@@ -7334,9 +7337,9 @@ elFinder.prototype = {
 			});
 			success();
 		} else {
-			opts = $.isPlainObject(opts)? $.extend(defOpts, opts) : defOpts;
+			opts = $.isPlainObject(opts)? Object.assign(defOpts, opts) : defOpts;
 			(function appendScript() {
-				$.ajax($.extend(opts, {
+				$.ajax(Object.assign(opts, {
 					url: urls.shift(),
 					success: urls.length? appendScript : success
 				}));
@@ -7379,7 +7382,7 @@ elFinder.prototype = {
 				dfrd._abort = function() {};
 			}),
 			abortFlg = false,
-			parms = $.extend({
+			parms = Object.assign({
 				interval : 0,
 				numPerOnce : 1
 			}, opts || {}),
@@ -7498,3 +7501,12 @@ if (!Array.isArray) {
 		return jQuery.isArray(arr);
 	};
 }
+// Object.assign
+if (!Object.assign) {
+	Object.assign = function(target) {
+		Array.prototype.shift.call(arguments);
+		Array.prototype.unshift.call(arguments, target);
+		return jQuery.extend.apply(null, arguments);
+	};
+}
+

@@ -38,7 +38,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 		return this;
 	}
 	
-	opts = $.extend({}, $.fn.elfinderdialog.defaults, opts);
+	opts = Object.assign({}, $.fn.elfinderdialog.defaults, opts);
 	
 	if (opts.allowMinimize && opts.allowMinimize === 'auto') {
 		opts.allowMinimize = this.find('textarea,input').length? true : false; 

@@ -128,7 +128,7 @@ elFinder.prototype.command = function(fm) {
 		this.name      = name;
 		this.title     = fm.messages['cmd'+name] ? fm.i18n('cmd'+name)
 		               : ((this.extendsCmd && fm.messages['cmd'+this.extendsCmd]) ? fm.i18n('cmd'+this.extendsCmd) : name), 
-		this.options   = $.extend({}, this.options, opts);
+		this.options   = Object.assign({}, this.options, opts);
 		this.listeners = [];
 
 		if (opts.shortcuts) {
@@ -144,7 +144,7 @@ elFinder.prototype.command = function(fm) {
 			this._handlers.select = function() { this.update(void(0), this.value); }
 		}
 
-		$.each($.extend({}, self._handlers, self.handlers), function(cmd, handler) {
+		$.each(Object.assign({}, self._handlers, self.handlers), function(cmd, handler) {
 			fm.bind(cmd, $.proxy(handler, self));
 		});
 

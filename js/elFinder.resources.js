@@ -197,7 +197,7 @@ elFinder.prototype.resources = {
 								fm.lockfiles({files : [id]});
 
 								fm.request({
-										data        : $.extend({cmd : cmd, name : name, target : phash}, data || {}), 
+										data        : Object.assign({cmd : cmd, name : name, target : phash}, data || {}), 
 										notify      : {type : cmd, cnt : 1},
 										preventFail : true,
 										syncOnFail  : true
