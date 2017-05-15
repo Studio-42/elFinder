@@ -833,12 +833,16 @@ $.fn.elfindertree = function(fm, opts) {
 						var dfd  = $.Deferred(),
 							reqs = [],
 							ends = getEnds(dir),
-							makeReq = function(cmd, h) {
-								return fm.request({
-									data : {
+							makeReq = function(cmd, h, until) {
+								var data = {
 										cmd    : cmd,
 										target : h
-									},
+									};
+								if (until) {
+									data.until = until;
+								}
+								return fm.request({
+									data : data,
 									preventFail : true
 								});
 							},
@@ -857,15 +861,19 @@ $.fn.elfindertree = function(fm, opts) {
 									}
 									return ph;
 								},
+								until,
 								closest = (function() {
 									var phash = getPhash(h);
+									until = phash;
 									while (phash) {
 										if ($('#'+fm.navHash2Id(phash)).hasClass(loaded)) {
 											break;
 										}
+										until = phash;
 										phash = getPhash(phash);
 									}
 									if (!phash) {
+										until = void(0);
 										phash = fm.root(h);
 									}
 									return phash;
@@ -873,7 +881,8 @@ $.fn.elfindertree = function(fm, opts) {
 								cmd;
 							
 							if (!node.hasClass(loaded) && (isRoot || !d || !$('#'+fm.navHash2Id(d.phash)).hasClass(loaded))) {
-								if (isRoot || closest === getPhash(h, 2)) {
+								if (isRoot || closest === getPhash(h) || closest === getPhash(h, 2)) {
+									until = void(0);
 									cmd = 'tree';
 									if (!isRoot) {
 										h = getPhash(h);
@@ -884,7 +893,7 @@ $.fn.elfindertree = function(fm, opts) {
 								if (!baseHash) {
 									baseHash = (cmd === 'tree')? h : closest;
 								}
-								return makeReq(cmd, h);
+								return makeReq(cmd, h, until);
 							}
 							return null;
 						});
@@ -904,7 +913,7 @@ $.fn.elfindertree = function(fm, opts) {
 								if (argLen > 0) {
 									for (i = 0; i < argLen; i++) {
 										data = arguments[i].tree || [];
-										res[ends[i]] = JSON.parse(JSON.stringify(filter(data)));
+										res[ends[i]] = Object.assign([], filter(data));
 									}
 								}
 								dfd.resolve(res);
@@ -1171,7 +1180,7 @@ $.fn.elfindertree = function(fm, opts) {
 
 						fm.request({cmd : 'tree', target : fm.navId2Hash(link.attr('id'))})
 							.done(function(data) { 
-								updateTree(JSON.parse(JSON.stringify(filter(data.tree)))); 
+								updateTree(Object.assign([], filter(data.tree))); 
 								
 								if (stree.children().length) {
 									link.addClass(collapsed+' '+expanded);
