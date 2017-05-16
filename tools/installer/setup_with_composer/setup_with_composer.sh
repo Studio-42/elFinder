@@ -16,6 +16,9 @@ ln -s ./vendor/studio-42/elfinder/sounds
 echo '# mkdir files #'
 mkdir files
 
+echo '# mkdir files/.trash #'
+mkdir files/.trash
+
 echo '# mkdir .tmp #'
 mkdir .tmp
 
