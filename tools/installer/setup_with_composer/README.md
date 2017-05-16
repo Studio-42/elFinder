@@ -28,8 +28,8 @@ elFinder and library updates to run `php composer.phar update` in the server she
 ├── img -> ./vendor/studio-42/elfinder/img
 ├── index.html
 ├── js -> ./vendor/studio-42/elfinder/js
+├── main.js
 ├── sounds -> ./vendor/studio-42/elfinder/sounds
-├── tree.txt
 └── vendor
     ├── .htaccess
     ├── autoload.php
@@ -42,13 +42,6 @@ elFinder and library updates to run `php composer.phar update` in the server she
     │   ├── autoload_real.php
     │   ├── include_paths.php
     │   └── installed.json
-    ├── dropbox-php
-    │   └── dropbox-php
-    ├── pear
-    │   ├── auth
-    │   ├── http_request2
-    │   ├── net_url2
-    │   └── pear_exception
     └── studio-42
         └── elfinder
 ```
