@@ -7,15 +7,6 @@ curl -sS https://getcomposer.org/installer | php
 echo '# composer require studio-42/elfinder 2.1.x@dev #'
 php composer.phar require studio-42/elfinder 2.1.x@dev
 
-echo '# composer require dropbox-php/dropbox-php dev-master #'
-php composer.phar require dropbox-php/dropbox-php dev-master
-
-echo '# composer require pear/auth #'
-php composer.phar require pear/auth
-
-echo '# composer require pear/http_request2 #'
-php composer.phar require pear/http_request2
-
 echo '# make synlink css, img, js #'
 ln -s ./vendor/studio-42/elfinder/css
 ln -s ./vendor/studio-42/elfinder/img
@@ -34,19 +25,11 @@ order deny,allow
 deny from all
 EOD
 
-echo '# make connector.php #'
-cat << \EOD > connector.php
+echo '# make connector.minimal.php #'
+cat << \EOD > connector.minimal.php
 <?php
 //////////////////////////////////////////////////////////////////////
 // CONFIGS
-
-// FTP driver to netmount
-$useFtpNetmout = true;
-
-// Dropbox driver to netmount
-// Dropbox driver need next two settings. You can get at https://www.dropbox.com/developers
-define('ELFINDER_DROPBOX_CONSUMERKEY',    '');
-define('ELFINDER_DROPBOX_CONSUMERSECRET', '');
 
 // Set root path/url
 define('ELFINDER_ROOT_PATH', dirname(__FILE__));
@@ -73,38 +56,19 @@ $opts = array(
 			'uploadOrder'   => array('deny', 'allow'),      // allowed Mimetype `image` and `text/plain` only
 			'accessControl' => 'access'                     // disable and hide dot starting files (OPTIONAL)
 		)
+	),
+	'optionsNetVolumes' => array(
+		'*' => array(
+			'tmbURL'    => ELFINDER_ROOT_URL  . '/files/.tmb',
+			'tmbPath'   => ELFINDER_ROOT_PATH . '/files/.tmb',
+			'syncMinMs' => 30000
+		)
 	)
 );
 
 //////////////////////////////////////////////////////////////////////
 // load composer autoload.php
 require './vendor/autoload.php';
-
-// setup elFinderVolumeMyFTP for netmount
-if ($useFtpNetmout) {
-	class elFinderVolumeMyFTP extends elFinderVolumeFTP
-	{
-		protected function init() {
-			$this->options = array_merge($this->options, $GLOBALS['netvolumeOpts']);
-			return parent::init();
-		}
-	}
-	// overwrite net driver class name
-	elFinder::$netDrivers['ftp'] = 'MyFTP';
-}
-
-// setup elFinderVolumeMyDropbox for netmount
-if (ELFINDER_DROPBOX_CONSUMERKEY && ELFINDER_DROPBOX_CONSUMERSECRET) {
-	class elFinderVolumeMyDropbox extends elFinderVolumeDropbox
-	{
-		protected function init() {
-			$this->options = array_merge($this->options, $GLOBALS['netvolumeOpts']);
-			return parent::init();
-		}
-	}
-	// overwrite net driver class name
-	elFinder::$netDrivers['dropbox'] = 'MyDropbox';
-}
 
 /**
  * Simple function to demonstrate how to control file access using "accessControl" callback.
@@ -133,31 +97,13 @@ cat << \EOD > index.html
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>elFinder 2.1.x with PHP connector</title>
+		<title>elFinder 2.1.x source version with PHP connector</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2" />
 
-		<!-- jQuery and jQuery UI (REQUIRED) -->
-		<link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-		<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+		<!-- Require JS (REQUIRED) -->
+		<!-- Rename "main.default.js" to "main.js" and edit it if you need configure elFInder options or any things -->
+		<script data-main="./main.default.js" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.3.2/require.min.js"></script>
 
-		<!-- elFinder CSS (REQUIRED) -->
-		<link rel="stylesheet" type="text/css" href="css/elfinder.min.css">
-		<link rel="stylesheet" type="text/css" href="css/theme.css">
-
-		<!-- elFinder JS (REQUIRED) -->
-		<script src="js/elfinder.min.js"></script>
-
-		<!-- elFinder initialization (REQUIRED) -->
-		<script type="text/javascript" charset="utf-8">
-			// Documentation for client options:
-			// https://github.com/Studio-42/elFinder/wiki/Client-configuration-options
-			$(document).ready(function() {
-				$('#elfinder').elfinder({
-					url : 'connector.php'  // connector URL (REQUIRED)
-				});
-			});
-		</script>
 	</head>
 	<body>
 
