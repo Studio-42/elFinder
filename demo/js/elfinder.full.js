@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 081888c) (2017-05-16)
+ * Version 2.1.23 (2.1-src Nightly: 410a3a5) (2017-05-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7550,7 +7550,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 081888c)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 410a3a5)';
 
 
 
@@ -17048,6 +17048,8 @@ $.fn.elfindertree = function(fm, opts) {
 			$.each(hasMoreDirs, function(h, node) {
 				node.trigger('update.'+fm.namespace, { change: 'done' });
 			});
+			
+			sync();
 		})
 		// remove dirs
 		.remove(function(e) {
