@@ -1,3 +1,31 @@
+2017-05-xx  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.24):
+		- [js:options] Fixed #1947 add client option `dispInlineRegex` for legacy connectors
+		- [js:options] Fixed #1948 separate uiOptions.toolbar extra options to uiOptions.toolbarExtra
+		- [js:core,php:core] Fixed #1951 set name to uploaded items from clipboard data
+		- [js:core,php:core] Fixed #1951 to IE and correction to Firefox
+		- [js:core] Fixed #1953 to selectable "Rename" when item name exists on upload
+		- [VD:abstract] Fixed #1952 urlencode of results file.url on upload
+		- [VD:abstract] Fixed #1959 add connector roots option `acceptedDirname`
+		- [js:core] Fixed #1965 add an option `heightBase` to client configuration
+		- [VD:abstract] Fixed #1974 add an option `driverId` (prefix of volumeid)
+		- [php:connector] Fixed #1975 possible XSS issue on debug mode of connector
+		- [VD:FTP] Fixed #1982 problem with connect to Pure-FTPd
+		- [php:plugin:Normalizer,Sanitizer] Fixed #1983 upload fails due to unnecessary conversion
+		- [cmd:quicklook] Fixed #1985 seek and volume change disabled in Firefox
+		- [js:core,cmd:rm,VD:trash] Fixed #1065 add "Trash" feature
+		- [php:core] Fixed #1990 sometimes in initial request, pass to bind callback `$volume` is empty
+		- [cmd:rm,trash,restore] Fixed #1991 implementation of restore function
+		- [js:core] Fixed #1996 pass an event object as `this` into binded callback
+		- [ui:tree] Fixed #1999 split display of many directories 
+		- [js:core] Fixed #2005 prevent folder switching heavy as folders increase
+		- [VD:abstract] Fixed #2000 `elFinderVolumeDriver::imageUtil()` is not working properly
+		- [plugin:normalizer] Fixed #2004 add an option `umlauts
+		- [VD:LocalFileSystem] Fixed #2009 corrention of an option `keepTimestamp`(upload)`
+		- And some minor bug fixes
+
+
 2017-03-31  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.23):
