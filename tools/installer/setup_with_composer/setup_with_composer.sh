@@ -31,16 +31,12 @@ cat << \EOD > connector.php
 //////////////////////////////////////////////////////////////////////
 // CONFIGS
 
+// Enable FTP connector netmount
+$useFtpNetMount = true;
+
 // Set root path/url
 define('ELFINDER_ROOT_PATH', dirname(__FILE__));
 define('ELFINDER_ROOT_URL' , dirname($_SERVER['SCRIPT_NAME']));
-
-// Thumbnail, Sync min second option for netmount
-$netvolumeOpts = array(
-	'tmbURL'    => ELFINDER_ROOT_URL  . '/files/.tmb',
-	'tmbPath'   => ELFINDER_ROOT_PATH . '/files/.tmb',
-	'syncMinMs' => 30000
-);
 
 // Volumes config
 // Documentation for connector options:
@@ -69,6 +65,11 @@ $opts = array(
 //////////////////////////////////////////////////////////////////////
 // load composer autoload.php
 require './vendor/autoload.php';
+
+// Enable FTP connector netmount
+if ($useFtpNetMount) {
+	elFinder::$netDrivers['ftp'] = 'FTP';
+}
 
 /**
  * Simple function to demonstrate how to control file access using "accessControl" callback.
@@ -104,10 +105,10 @@ cat << \EOD > index.html
 		<script data-main="./main.js" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.3.2/require.min.js"></script>
 
 	</head>
-	<body>
+	<body style="margin:0; padding:0;">
 
 		<!-- Element where elFinder will be created (REQUIRED) -->
-		<div id="elfinder"></div>
+		<div id="elfinder" style="height:100%; border:none;"></div>
 
 	</body>
 </html>
@@ -148,6 +149,9 @@ cat << \EOD > main.js
 		// Documentation for client options:
 		// https://github.com/Studio-42/elFinder/wiki/Client-configuration-options
 		opts = {
+			width: '100%',
+			height: '100%',
+			resizable: false,
 			url : 'connector.php', // connector URL (REQUIRED)
 			lang: lang             // auto detected language (optional)
 		},
