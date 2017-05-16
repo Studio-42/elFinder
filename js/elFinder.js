@@ -7503,9 +7503,7 @@ if (!Array.isArray) {
 }
 // Object.assign
 if (!Object.assign) {
-	Object.assign = function(target) {
-		Array.prototype.shift.call(arguments);
-		Array.prototype.unshift.call(arguments, target);
+	Object.assign = function() {
 		return jQuery.extend.apply(null, arguments);
 	};
 }
