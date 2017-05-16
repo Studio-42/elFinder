@@ -152,7 +152,7 @@ task('prebuild', function(){
 			path.join('js', 'i18n'), path.join('js', 'extras'), path.join('js', 'proxy'),
 			'php',
 			path.join('php', '.tmp'), path.join('php', 'libs'), path.join('php', 'resources'),
-			'files'];
+			'files', path.join('files', '.trash')];
 	if (plugins.length) {
 		dir.push(path.join('php', 'plugins'));
 		for (var i in plugins) {
@@ -256,7 +256,9 @@ task('misc', function(){
 		.concat(files['i18n'])
 		.concat(path.join(src, 'css', 'theme.css'))
 		.concat(files['php'])
-		.concat(files['misc']);
+		.concat(files['misc'])
+		.concat(path.join(src, 'files', '.gitignore'))
+		.concat(path.join(src, 'files', '.trash', '.gitignore'));
 	for (i in cf)
 	{
 		var dst = cf[i].replace(src, '').substr(1);
@@ -278,7 +280,8 @@ desc('clean build dir');
 task('clean', function(){
 	console.log('cleaning the floor');
 	uf = [path.join('js', 'elfinder.full.js'), path.join('js', 'elfinder.min.js'),
-		path.join('css', 'elfinder.full.css'), path.join('css', 'elfinder.min.css')];
+		path.join('css', 'elfinder.full.css'), path.join('css', 'elfinder.min.css'),
+		path.join('files', '.trash', '.gitignore'), path.join('files', '.gitignore')];
 	// clean images, sounds, js/i18n and php only if we are not in src
 	if (src != path.resolve()) {
 		uf = uf
@@ -307,7 +310,7 @@ task('clean', function(){
 	// }
 	if (src != path.resolve()) {
 		var ud = [
-			'css', 'img', 'sounds', 'files',
+			'css', 'img', 'sounds', path.join('files', '.trash'), 'files',
 			path.join('js', 'proxy'), path.join('js', 'i18n'), path.join('js', 'extras'), 'js',
 			path.join('php', '.tmp'), path.join('php', 'libs'), path.join('php', 'resources')]
 			.concat(grep(path.join('php', 'plugins')))
