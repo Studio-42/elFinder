@@ -908,8 +908,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				return false;
 			}
 			// keep timestamp on upload
-			if ($mtime && $this->ARGS['cmd'] === 'upload' && isset($this->options['keepTimestamp']['upload'])) {
-				touch($path, $mtime);
+			if ($mtime && $this->ARGS['cmd'] === 'upload') {
+				touch($path, isset($this->options['keepTimestamp']['upload'])? $mtime : time());
 			}
 			// re-create the source file for remove processing of paste command
 			$isCmdPaste && !$isCmdCopy && touch($uri);

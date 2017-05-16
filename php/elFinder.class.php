@@ -2407,6 +2407,7 @@ class elFinder {
 			}
 			
 			if ($mtime) {
+				// for keep timestamp option in the LocalFileSystem volume
 				touch($tmpname, $mtime);
 			}
 			
