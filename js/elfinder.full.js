@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.23 (2.1-src Nightly: 410a3a5) (2017-05-16)
+ * Version 2.1.23 (2.1-src Nightly: b8b51e4) (2017-05-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7550,7 +7550,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.23 (2.1-src Nightly: 410a3a5)';
+elFinder.prototype.version = '2.1.23 (2.1-src Nightly: b8b51e4)';
 
 
 
@@ -16524,11 +16524,13 @@ $.fn.elfindertree = function(fm, opts) {
 			 * If current directory is not in tree - load it and its parents
 			 *
 			 * @param Array directory objects of cwd
+			 * @param Boolean do auto scroll
 			 * @return Object jQuery Deferred
 			 */
-			sync = function(cwdDirs) {
+			sync = function(cwdDirs, autoScr) {
 				var cwd     = fm.cwd(),
 					cwdhash = cwd.hash,
+					autoScr = autoScr === void(0)? syncTree : autoScr,
 					loadParents = function(dir) {
 						var dfd  = $.Deferred(),
 							reqs = [],
@@ -16601,7 +16603,7 @@ $.fn.elfindertree = function(fm, opts) {
 						if (reqs.length) {
 							selectPages(fm.file(baseHash));
 							baseId = fm.navHash2Id(baseHash);
-							syncTree && autoScroll(baseId);
+							autoScr && autoScroll(baseId);
 							baseNode = $('#'+baseId);
 							spinner = $(fm.res('tpl', 'navspinner')).insertBefore(baseNode.children('.'+arrow));
 							baseNode.removeClass(collapsed);
@@ -16634,7 +16636,7 @@ $.fn.elfindertree = function(fm, opts) {
 									findSubtree(baseNode.hash).show().prev(selNavdir).addClass(expanded);
 									openRoot = false;
 								}
-								syncTree && autoScroll();
+								autoScr && autoScroll();
 							},
 							current;
 						
@@ -17049,7 +17051,7 @@ $.fn.elfindertree = function(fm, opts) {
 				node.trigger('update.'+fm.namespace, { change: 'done' });
 			});
 			
-			sync();
+			sync(void(0), false);
 		})
 		// remove dirs
 		.remove(function(e) {
