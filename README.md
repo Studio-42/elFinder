@@ -169,7 +169,7 @@ You can create or modify the language file to use translation tool. Please refer
 
 3rd party Themes
 --------------------
-Hint: [How to load CSS with RequireJS?](https://github.com/Studio-42/elFinder/wiki/How-to-load-CSS-with-RequireJS%3F))
+Hint: [How to load CSS with RequireJS?](https://github.com/Studio-42/elFinder/wiki/How-to-load-CSS-with-RequireJS%3F)
 
  * [lokothodida/elfinder-theme-moono](https://github.com/lokothodida/elfinder-theme-moono)
  * [lokothodida/elfinder-theme-windows-10](https://github.com/lokothodida/elfinder-theme-windows-10)
