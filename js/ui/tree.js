@@ -824,11 +824,13 @@ $.fn.elfindertree = function(fm, opts) {
 			 * If current directory is not in tree - load it and its parents
 			 *
 			 * @param Array directory objects of cwd
+			 * @param Boolean do auto scroll
 			 * @return Object jQuery Deferred
 			 */
-			sync = function(cwdDirs) {
+			sync = function(cwdDirs, autoScr) {
 				var cwd     = fm.cwd(),
 					cwdhash = cwd.hash,
+					autoScr = autoScr === void(0)? syncTree : autoScr,
 					loadParents = function(dir) {
 						var dfd  = $.Deferred(),
 							reqs = [],
@@ -901,7 +903,7 @@ $.fn.elfindertree = function(fm, opts) {
 						if (reqs.length) {
 							selectPages(fm.file(baseHash));
 							baseId = fm.navHash2Id(baseHash);
-							syncTree && autoScroll(baseId);
+							autoScr && autoScroll(baseId);
 							baseNode = $('#'+baseId);
 							spinner = $(fm.res('tpl', 'navspinner')).insertBefore(baseNode.children('.'+arrow));
 							baseNode.removeClass(collapsed);
@@ -934,7 +936,7 @@ $.fn.elfindertree = function(fm, opts) {
 									findSubtree(baseNode.hash).show().prev(selNavdir).addClass(expanded);
 									openRoot = false;
 								}
-								syncTree && autoScroll();
+								autoScr && autoScroll();
 							},
 							current;
 						
@@ -1349,7 +1351,7 @@ $.fn.elfindertree = function(fm, opts) {
 				node.trigger('update.'+fm.namespace, { change: 'done' });
 			});
 			
-			sync();
+			sync(void(0), false);
 		})
 		// remove dirs
 		.remove(function(e) {
