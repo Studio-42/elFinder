@@ -1348,6 +1348,8 @@ $.fn.elfindertree = function(fm, opts) {
 			$.each(hasMoreDirs, function(h, node) {
 				node.trigger('update.'+fm.namespace, { change: 'done' });
 			});
+			
+			sync();
 		})
 		// remove dirs
 		.remove(function(e) {
