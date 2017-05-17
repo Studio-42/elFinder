@@ -25,6 +25,7 @@ elFinder and library updates to run `php composer.phar update` in the server she
 ├── connector.php
 ├── css -> ./vendor/studio-42/elfinder/css
 ├── files
+│   └── .trash
 ├── img -> ./vendor/studio-42/elfinder/img
 ├── index.html
 ├── js -> ./vendor/studio-42/elfinder/js
