@@ -3369,9 +3369,11 @@ var elFinder = function(node, opts) {
 							if (roots[hash]) {
 								delete self.roots[roots[hash]];
 							}
-							$.each(files, function(h, f) {
-								f.phash == hash && rm(h);
-							});
+							if (self.searchStatus.state < 2) {
+								$.each(files, function(h, f) {
+									f.phash == hash && rm(h);
+								});
+							}
 						}
 						deleteCache(files[hash]);
 					}
@@ -6010,6 +6012,18 @@ elFinder.prototype = {
 				}
 				return null;
 			},
+			getDescendants = function(hashes) {
+				var res = [];
+				$.each(self.files(), function(h, f) {
+					$.each(self.parents(h), function(i, ph) {
+						if ($.inArray(ph, hashes) !== -1 && $.inArray(h, hashes) === -1) {
+							res.push(h);
+							return false;
+						}
+					});
+				});
+				return res;
+			},
 			error = [],
 			name, i18, i18nFolderName, prevId;
 		
@@ -6035,6 +6049,9 @@ elFinder.prototype = {
 		}
 		if (data.changed) {
 			data.changed = $.map(data.changed, filter);
+		}
+		if (data.removed && data.removed.length && self.searchStatus.state === 2) {
+			data.removed = data.removed.concat(getDescendants(data.removed));
 		}
 		if (data.api) {
 			data.init = true;

@@ -1233,12 +1233,15 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			remove = function(files) {
-				var l = files.length, hash, n, ndx;
+				var l = files.length,
+					inSearch = fm.searchStatus.state === 2,
+					hash, n, ndx, allItems;
 
 				// removed cwd
 				if (!fm.cwd().hash && fm.currentReqCmd !== 'open') {
+					allItems = fm.files();
 					$.each(cwdParents.reverse(), function(i, h) {
-						if (fm.files()[h]) {
+						if (allItems[h]) {
 							fm.one(fm.currentReqCmd + 'done', function() {
 								!fm.cwd().hash && fm.exec('open', h);
 							});
@@ -1257,10 +1260,17 @@ $.fn.elfindercwd = function(fm, options) {
 						} catch(e) {
 							fm.debug('error', e);
 						}
-					} else if ((ndx = index(hash)) != -1) {
+					} else if ((ndx = index(hash)) !== -1) {
 						buffer.splice(ndx, 1);
 					}
+					if (inSearch) {
+						if ((ndx = $.inArray(hash, cwdHashes)) !== -1) {
+							cwdHashes.splice(ndx, 1);
+						}
+					}
 				}
+				
+				inSearch && fm.trigger('cwdhasheschange', cwdHashes);
 				
 				setColwidth();
 			},
@@ -2071,10 +2081,13 @@ $.fn.elfindercwd = function(fm, options) {
 				resize();
 			})
 			.bind('open add remove searchend', function() {
-				var phash = fm.cwd().hash;
-				//cwdHashes = $.map(fm.files(), function(f) { return f.phash == phash ? f.hash : null ;});
-				cwdHashes = $.map(fm.files(phash), function(f) { return f.hash; });
-				if (this.type === 'open') {
+				var phash = fm.cwd().hash,
+					type = this.type;
+				if (type === 'open' || type === 'searchend' || fm.searchStatus.state < 2) {
+					cwdHashes = $.map(fm.files(phash), function(f) { return f.hash; });
+					fm.trigger('cwdhasheschange', cwdHashes);
+				}
+				if (type === 'open') {
 					var inTrash = function() {
 						var isIn = false;
 						$.each(cwdParents, function(i, h) {
@@ -2095,6 +2108,7 @@ $.fn.elfindercwd = function(fm, options) {
 			})
 			.bind('search', function(e) {
 				cwdHashes = $.map(e.data.files, function(f) { return f.hash; });
+				fm.trigger('cwdhasheschange', cwdHashes);
 				incHashes = void 0;
 				fm.searchStatus.ininc = false;
 				content();
@@ -2232,9 +2246,17 @@ $.fn.elfindercwd = function(fm, options) {
 					regex = query? new RegExp(query.replace(/([\\*\;\.\?\[\]\{\}\(\)\^\$\-\|])/g, '\\$1'), 'i') : null,
 					files = regex
 						? $.map(e.data.added || [], function(f) { return ((! fm.searchStatus.ininc && fm.searchStatus.target === '' && fm.searchStatus.mime === '') || f.phash == phash) && (f.name.match(regex) || (f.i18 && f.i18.match(regex)))? f : null ;})
-						: $.map(e.data.added || [], function(f) { return f.phash == phash ? f : null; })
+						: $.map(e.data.added || [], function(f) { return f.phash === phash ? f : null; })
 						;
 				add(files);
+				if (fm.searchStatus.state === 2) {
+					$.each(files, function(i, f) {
+						if ($.inArray(f.hash, cwdHashes) === -1) {
+							cwdHashes.push(f.hash);
+						}
+					});
+					fm.trgger('cwdhasheschange', cwdHashes);
+				}
 				list && resize();
 				wrapper.trigger(scrollEvent);
 			})

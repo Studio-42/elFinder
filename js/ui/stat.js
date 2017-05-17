@@ -17,35 +17,25 @@ $.fn.elfinderstat = function(fm) {
 			titlesize  = fm.i18n('size'),
 			titleitems = fm.i18n('items'),
 			titlesel   = fm.i18n('selected'),
-			setstat    = function(files, cwd) {
+			setstat    = function(files) {
 				var c = 0, 
 					s = 0;
 
 				$.each(files, function(i, file) {
-					if (!cwd || file.phash == cwd) {
-						c++;
-						s += parseInt(file.size)||0;
-					}
+					c++;
+					s += parseInt(file.size)||0;
 				})
 				size.html(titleitems+': <span class="elfinder-stat-incsearch"></span>'+c+', '+titlesize+': '+fm.formatSize(s));
 			},
 			setIncsearchStat = function(data) {
 				size.find('span.elfinder-stat-incsearch').html(data? data.hashes.length + ' / ' : '');
-			},
-			search = false;
+			};
 
 		fm.getUI('statusbar').prepend(size).append(sel).show();
 		
 		fm
-		.bind('open reload add remove change searchend', function() {
-			setstat(fm.files(fm.cwd().hash), fm.cwd().hash);
-		})
-		.bind('searchend', function() {
-			search = false;
-		})
-		.search(function(e) {
-			search = true;
-			setstat(e.data.files);
+		.bind('cwdhasheschange', function(e) {
+			setstat($.map(e.data, function(h) { return fm.file(h); }));
 		})
 		.select(function() {
 			var s = 0,
@@ -57,7 +47,7 @@ $.fn.elfinderstat = function(fm) {
 			if (files.length == 1) {
 				file = files[0];
 				s = file.size;
-				if (search) {
+				if (fm.searchStatus.state === 2) {
 					dirs.push('<a href="#elf_'+file.phash+'" data-hash="'+file.hash+'">'+(file.path? file.path.replace(/\/[^\/]*$/, '') : '..')+'</a>');
 				}
 				dirs.push(fm.escape(file.i18 || file.name));
