@@ -600,7 +600,9 @@ $.fn.elfindertree = function(fm, opts) {
 												primary: "ui-icon-caret-1-n"
 											}
 										})
-										.on('click', function() {
+										.on('click', function(e) {
+											e.preventDefault();
+											e.stopPropagation();
 											render(prev, 'up');
 										});
 								} else {
@@ -614,7 +616,9 @@ $.fn.elfindertree = function(fm, opts) {
 												primary: "ui-icon-caret-1-s"
 											}
 										})
-										.on('click', function() {
+										.on('click', function(e) {
+											e.preventDefault();
+											e.stopPropagation();
 											render(next, 'down');
 										});
 								} else {
