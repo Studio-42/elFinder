@@ -77,8 +77,8 @@ h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
 #elfinder {
   height: 400px;
   width: 300px;
-  background-image: url("../demo/img/progress.gif");
-  background-repeat: repeat-x;
+  background-image: url("../images/loading.gif");
+  background-repeat: no-repeat;
   background-position: center center;
   margin: auto;
 }
