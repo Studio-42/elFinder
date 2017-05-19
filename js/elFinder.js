@@ -5881,7 +5881,7 @@ elFinder.prototype = {
 				};
 				$.each(self.optionProperties, function(k, empty) {
 					if (empty !== void(0)) {
-						if (!opts[k] || getType(opts[k]) !== getType(empty)) {
+						if (opts[k] && getType(opts[k]) !== getType(empty)) {
 							opts[k] = empty;
 						}
 					}
