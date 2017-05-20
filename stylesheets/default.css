@@ -25,7 +25,7 @@ h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
 
   .header h1 {
     padding-left: 10px;
-    padding-top: 12px;
+    padding-top: 2px;
     font-family: 'Ubuntu', serif;
     font-size: 3em;
     font-style: normal;
@@ -39,7 +39,19 @@ h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
     margin: 0;
     float: left;
   }
-
+  
+  .header h1 > iframe {
+    display: inline-block;
+    margin-top: 10px;
+    position: absolute;
+    width: 100px;
+    height: 20px;
+  }
+  
+  .header h1 > iframe.gh-fork {
+    margin-left: 110px;
+  }
+  
   .header h1 span {
     font-size: 0.42em;
     font-style: italic;
