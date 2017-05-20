@@ -156,3 +156,15 @@ h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
 * html .clearfix {height:1%;}
 *+html .clearfix {width:100%;height:1px;}
 .clearfix {display: block;}
+
+/* ACE Editor IME Fix */
+@font-face {
+  font-family: 'ime_jp_rp';
+  src: url('./ime_jp_rp.woff') format('woff');
+}
+.ace_editor > .ace_text-input {
+  padding-top: 1px;
+  padding-left: 1px;
+  letter-spacing: 1px;
+  font-family: 'ime_jp_rp', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+}
