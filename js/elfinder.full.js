@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 7473b1f) (2017-05-19)
+ * Version 2.1.24 (2.1-src Nightly: aaeafbd) (2017-05-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7567,7 +7567,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 7473b1f)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: aaeafbd)';
 
 
 
@@ -8047,10 +8047,10 @@ elFinder.prototype._options = {
 	commands : ['*'],
 	// Available commands list
 	//commands : [
-	//	'archive', 'back', 'chmod', 'colwidth', 'copy', 'cut', 'download', 'duplicate',
-	//	'edit', 'extract', 'forward', 'fullscreen', 'getfile', 'help', 'home', 'info',
-	//	'mkdir', 'mkfile', 'netmount', 'netunmount', 'open', 'opendir', 'paste', 'places',
-	//	'quicklook', 'reload', 'rename', 'resize', 'rm', 'search', 'sort', 'up', 'upload', 'view'
+	//	archive, back, chmod, colwidth, copy, cut, download, duplicate, edit, extract,
+	//	forward, fullscreen, getfile, help, home, info, mkdir, mkfile, netmount, netunmount,
+	//	open, opendir, paste, places, quicklook, reload, rename, resize, restore, rm,
+	//	search, sort, up, upload, view, zipdl
 	//],
 	
 	/**
@@ -23653,7 +23653,7 @@ elFinder.prototype.commands.resize = function() {
  *
  * @author Naoki Sawada
  **/
-elFinder.prototype.commands.restore = function() {
+(elFinder.prototype.commands.restore = function() {
 	var self = this,
 		fm = this.fm,
 		getFilesRecursively = function(files) {
@@ -23884,7 +23884,7 @@ elFinder.prototype.commands.restore = function() {
 		return dfrd;
 	}
 
-};
+}).prototype = { forceLoad : true }; // this is required command
 
 
 /*
