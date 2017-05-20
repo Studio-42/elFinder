@@ -172,10 +172,10 @@ elFinder.prototype._options = {
 	commands : ['*'],
 	// Available commands list
 	//commands : [
-	//	'archive', 'back', 'chmod', 'colwidth', 'copy', 'cut', 'download', 'duplicate',
-	//	'edit', 'extract', 'forward', 'fullscreen', 'getfile', 'help', 'home', 'info',
-	//	'mkdir', 'mkfile', 'netmount', 'netunmount', 'open', 'opendir', 'paste', 'places',
-	//	'quicklook', 'reload', 'rename', 'resize', 'rm', 'search', 'sort', 'up', 'upload', 'view'
+	//	archive, back, chmod, colwidth, copy, cut, download, duplicate, edit, extract,
+	//	forward, fullscreen, getfile, help, home, info, mkdir, mkfile, netmount, netunmount,
+	//	open, opendir, paste, places, quicklook, reload, rename, resize, restore, rm,
+	//	search, sort, up, upload, view, zipdl
 	//],
 	
 	/**
