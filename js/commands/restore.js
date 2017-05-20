@@ -5,7 +5,7 @@
  *
  * @author Naoki Sawada
  **/
-elFinder.prototype.commands.restore = function() {
+(elFinder.prototype.commands.restore = function() {
 	var self = this,
 		fm = this.fm,
 		getFilesRecursively = function(files) {
@@ -236,4 +236,4 @@ elFinder.prototype.commands.restore = function() {
 		return dfrd;
 	}
 
-};
+}).prototype = { forceLoad : true }; // this is required command
