@@ -44,7 +44,7 @@
 							load : function(textarea) {
 								var self = this,
 									dfrd = $.Deferred(),
-									cdn  = '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.5',
+									cdn  = '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.6',
 									start = function() {
 										var editor, editorBase, mode,
 										ta = $(textarea),
