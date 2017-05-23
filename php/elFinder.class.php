@@ -2660,6 +2660,8 @@ class elFinder {
 					$enc = '';
 				}
 			}
+		} else {
+			$content = 'data:' . ($mime? $mime : 'application/octet-stream') . ';base64,'.base64_encode($content);
 		}
 		
 		if ($enc !== false) {
