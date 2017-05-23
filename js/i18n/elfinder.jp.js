@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-05-11
+ * @version 2017-05-23
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -112,6 +112,7 @@
 			'errReauthRequire'     : '再認可が必要です。', // from v2.1.10 added 24.3.2016
 			'errMaxTargets'        : '選択可能な最大アイテム数は $1 個です。', // from v2.1.17 added 17.10.2016
 			'errRestore'           : '宛先の特定ができないため、ごみ箱から戻せません。', // from v2.1.24 added 3.5.2017
+			'errEditorNotFound'    : 'このファイルタイプのエディターがありません。', // from v2.1.25 added 23.5.2017
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'アーカイブ作成',

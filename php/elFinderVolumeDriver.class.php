@@ -312,6 +312,8 @@ abstract class elFinderVolumeDriver {
 		'uploadMaxSize'   => 0,
 		// maximum number of chunked upload connection. `-1` to disable chunked upload
 		'uploadMaxConn'   => 3,
+		// maximum get file size. NOTE - Maximum value is 50% of PHP memory_limit
+		'getMaxSize'      => 0,
 		// files dates format
 		'dateFormat'      => 'j M Y H:i',
 		// files time format
@@ -445,6 +447,14 @@ abstract class elFinderVolumeDriver {
 	 * @var string
 	 */
 	protected $uploadOverwrite = true;
+	
+	/**
+	 * Maximum allowed get file size.
+	 * Set as number or string with unit - "10M", "500K", "1G"
+	 *
+	 * @var int|string
+	 **/
+	protected $getMaxSize = 0;
 	
 	/**
 	 * Mimetype detect method
@@ -1110,20 +1120,7 @@ abstract class elFinderVolumeDriver {
 		}
 			
 		if (!empty($this->options['uploadMaxSize'])) {
-			$size = ''.$this->options['uploadMaxSize'];
-			$unit = strtolower(substr($size, strlen($size) - 1));
-			$n = 1;
-			switch ($unit) {
-				case 'k':
-					$n = 1024;
-					break;
-				case 'm':
-					$n = 1048576;
-					break;
-				case 'g':
-					$n = 1073741824;
-			}
-			$this->uploadMaxSize = intval($size)*$n;
+			$this->uploadMaxSize = elFinder::getIniBytes('', $this->options['uploadMaxSize']);
 		}
 		// Set maximum to PHP_INT_MAX
 		if (!defined('PHP_INT_MAX')) {
@@ -1131,6 +1128,13 @@ abstract class elFinderVolumeDriver {
 		}
 		if ($this->uploadMaxSize < 1 || $this->uploadMaxSize > PHP_INT_MAX) {
 			$this->uploadMaxSize = PHP_INT_MAX;
+		}
+		
+		// Set to get maximum size to 50% of memory_limit
+		if (empty($this->options['getMaxSize'])) {
+			$this->getMaxSize = elFinder::getIniBytes('memory_limit') / 2;
+		} else {
+			$this->getMaxSize = min(elFinder::getIniBytes('memory_limit') / 2, elFinder::getIniBytes('', $this->options['getMaxSize']));
 		}
 		
 		$this->disabled = isset($this->options['disabled']) && is_array($this->options['disabled'])
@@ -2454,6 +2458,10 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
+		if ($file['size'] > $this->getMaxSize) {
+			return $this->setError(elFinder::ERROR_UPLOAD_FILE_SIZE);
+		}
+		
 		return $this->_getContents($this->convEncIn($this->decode($hash), true));
 	}
 	
@@ -2478,6 +2486,15 @@ abstract class elFinderVolumeDriver {
 		
 		if (!$file['write']) {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
+		}
+		
+		// check data cheme
+		if (preg_match('~^data:(.+?/.+?);base64,~', $content, $m)) {
+			$dMime =$m[1];
+			if ($dMime !== $file['mime']) {
+				return $this->setError(elFinder::ERROR_PERM_DENIED);
+			}
+			$content = base64_decode(substr($content, strlen($m[0])));
 		}
 		
 		// check MIME

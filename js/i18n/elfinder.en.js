@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2017-05-11
+ * @version 2017-05-23
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -104,6 +104,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'errReauthRequire'     : 'Re-authorization is required.', // from v2.1.10 added 24.3.2016
 			'errMaxTargets'        : 'Max number of selectable items is $1.', // from v2.1.17 added 17.10.2016
 			'errRestore'           : 'Unable to restore from the trash. Can\'t identify the restore destination.', // from v2.1.24 added 3.5.2017
+			'errEditorNotFound'    : 'Editor not found to this file type.', // from v2.1.25 added 23.5.2017
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',

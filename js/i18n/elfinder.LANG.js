@@ -118,6 +118,7 @@
 			'errReauthRequire'     : 'Re-authorization is required.', // from v2.1.10 added 24.3.2016
 			'errMaxTargets'        : 'Max number of selectable items is $1.', // from v2.1.17 added 17.10.2016
 			'errRestore'           : 'Unable to restore from the trash. Can\'t identify the restore destination.', // from v2.1.24 added 3.5.2017
+			'errEditorNotFound'    : 'Editor not found to this file type.', // from v2.1.25 added 23.5.2017
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',
