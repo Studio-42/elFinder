@@ -107,6 +107,7 @@
 											onLoad: onload || function(){},
 											onClose: function() { $(container).hide(); },
 											appendTo: container.get(0),
+											maxSize: 2048,
 											language: getLang()
 										});
 										// return editor instance
