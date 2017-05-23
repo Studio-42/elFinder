@@ -39,6 +39,140 @@
 				edit : {
 					editors : [
 						{
+							// Adobe Creative SDK Creative Tools Image Editor UI
+							// MIME types to accept
+							mimes : ['image/jpeg', 'image/png'],
+							// HTML of this editor
+							html : '<div style="width:100%;height:300px;text-align:center;"><img/></div>',
+							// Initialization of editing node
+							init : function(id, file, content, fm) {
+								var node = $(this).children('img:first'),
+									spnr = $('<div/>')
+										.css({
+											position: 'absolute',
+											top: '50%',
+											textAlign: 'center',
+											width: '100%',
+											fontSize: '16pt'
+										})
+										.html(fm.i18n('ntfloadimg'))
+										.hide()
+										.appendTo(this);
+								
+								node.data('mime', file.mime)
+									.attr('id', id+'-img')
+									.attr('src', content)
+									.css({'height':'', 'max-width':'100%', 'max-height':'100%', 'cursor':'pointer'})
+									.data('loading', function(done) {
+										var btns = node.closest('.elfinder-dialog').find('button');
+										btns.prop('disabled', !done)[done? 'removeClass' : 'addClass']('ui-state-disabled');
+										node.css('opacity', done? '' : '0.3');
+										spnr[done? 'hide' : 'show']();
+										return node;
+									});
+							},
+							// Get data uri scheme
+							getContent : function() {
+								return $(this).children('img').attr('src');
+							},
+							// Launch Aviary Feather editor when dialog open
+							load : function(base) {
+								var self = this,
+									fm = this.fm,
+									node = $(base).children('img'),
+									dfrd = $.Deferred(),
+									init = function(onload) {
+										var getLang = function() {
+												var langMap = {
+													'jp' : 'ja',
+													'zh_TW' : 'zh_HANT',
+													'zh_CN' : 'zh_HANS'
+												};
+												return langMap[fm.lang]? langMap[fm.lang] : fm.lang;
+											};
+										node.on('click', launch).data('loading')();
+										featherEditor = new Aviary.Feather({
+											apiKey: '6e62687b643a413cbb6aedf72ced95e3',
+											onSave: function(imageID, newURL) {
+												featherEditor.showWaitIndicator();
+												node.on('load error', function() {
+														node.data('loading')(true);
+													})
+													.attr('crossorigin', 'anonymous')
+													.attr('src', newURL)
+													.data('loading')();
+												featherEditor.close();
+											},
+											onLoad: onload || function(){},
+											onClose: function() { $(container).hide(); },
+											appendTo: container.get(0),
+											language: getLang()
+										});
+										// return editor instance
+										dfrd.resolve(featherEditor);
+									},
+									launch = function() {
+										$(container).show();
+										featherEditor.launch({
+											image: node.attr('id'),
+											url: node.attr('src')
+										});
+										node.data('loading')(true);
+									},
+									featherEditor, container;
+								
+								// load script then init
+								if (typeof Aviary === 'undefined') {
+									if (!(container = $('#elfinder-aviary-container')).length) {
+										container = $('<div id="elfinder-aviary-container" class="ui-front"/>').css({
+											position: 'fixed',
+											top: 0,
+											right: 0,
+											width: '100%',
+											height: $(window).height(),
+											overflow: 'auto'
+										}).hide().appendTo('body');
+										$(window).on('resize', function() {
+											container.css('height', $(window).height());
+										});
+									}
+									fm.loadScript(['https://dme0ih8comzn4.cloudfront.net/imaging/v3/editor.js'], function() {
+										init(launch);
+									});
+								} else {
+									container = $('#elfinder-aviary-container');
+									init();
+									launch();
+								}
+								return dfrd;
+							},
+							// Convert content url to data uri scheme to save content
+							save : function(base) {
+								var imgBase64 = function(node) {
+										var style = node.attr('style'),
+											img, canvas, ctx;
+										// reset css for getting image size
+										node.attr('style', '');
+										// img node
+										img = node.get(0);
+										// New Canvas
+										canvas = document.createElement('canvas');
+										canvas.width  = img.width;
+										canvas.height = img.height;
+										// restore css
+										node.attr('style', style);
+										// Draw Image
+										canvas.getContext('2d').drawImage(img, 0, 0);
+										// To Base64
+										return canvas.toDataURL(node.data('mime'));
+									},
+									node = $(base).children('img');
+								if (node.attr('src').substr(0, 5) !== 'data:') {
+									node.attr('src', imgBase64(node));
+								}
+							}
+						},
+						{
 							// ACE Editor
 							// `mimes` is not set for support everything kind of text file
 							load : function(textarea) {
