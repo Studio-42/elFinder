@@ -81,6 +81,7 @@
 								var self = this,
 									fm = this.fm,
 									node = $(base).children('img'),
+									elfNode = fm.getUI(),
 									dfrd = $.Deferred(),
 									init = function(onload) {
 										var getLang = function() {
@@ -133,9 +134,14 @@
 											width: '100%',
 											height: $(window).height(),
 											overflow: 'auto'
-										}).hide().appendTo('body');
+										}).hide().appendTo(elfNode.hasClass('elfinder-fullscreen')? elfNode : 'body');
+										// fit to window size
 										$(window).on('resize', function() {
 											container.css('height', $(window).height());
+										});
+										// bind switch fullscreen event
+										elfNode.on('resize', function(e) {
+											e.data.fullscreen && container.appendTo(e.data.fullscreen === 'on'? elfNode : 'body')
 										});
 									}
 									fm.loadScript(['https://dme0ih8comzn4.cloudfront.net/imaging/v3/editor.js'], function() {
@@ -143,6 +149,8 @@
 									});
 								} else {
 									container = $('#elfinder-aviary-container');
+									// always moves to last
+									container.appendTo(container.parent());
 									init();
 									launch();
 								}
