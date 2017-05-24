@@ -188,144 +188,145 @@ elFinder.prototype.commands.edit = function() {
 				},
 				ta, old, dialogNode, selEncoding, extEditor;
 				
-				$.each(self.options.editors || [], function(i, editor) {
-					if (mimeMatch(file.mime, editor.mimes || null)
-					&& extMatch(file.name, editor.exts || null)
-					&& typeof editor.load == 'function'
-					&& typeof editor.save == 'function') {
-						if (editor.html) {
-							ta = $(editor.html);
-						}
-						
-						extEditor = {
-							init     : editor.init || null,
-							load     : editor.load,
-							getContent : editor.getContent || null,
-							save     : editor.save,
-							close    : typeof editor.close == 'function' ? editor.close : function() {},
-							focus    : typeof editor.focus == 'function' ? editor.focus : function() {},
-							resize   : typeof editor.resize == 'function' ? editor.resize : function() {},
-							instance : null,
-							doSave   : save,
-							doCancel : cancel,
-							doClose  : savecl,
-							file     : file,
-							fm       : fm
-						};
-						
-						return false;
-					}
-				});
-				
-				if (!ta) {
-					if (file.mime.indexOf('text/') !== 0 && $.inArray(file.mime, mimes) === -1) {
-						return dfrd.reject('errEditorNotFound');
-					}
-					(function() {
-						var stateChange = function() {
-								if (selEncoding) {
-									if (changed()) {
-										selEncoding.attr('title', fm.i18n('saveAsEncoding')).addClass('elfinder-edit-changed');
-									} else {
-										selEncoding.attr('title', fm.i18n('openAsEncoding')).removeClass('elfinder-edit-changed');
-									}
-								}
-							};
-							
-						ta = $('<textarea class="elfinder-file-edit '+fm.res('class', 'editing')+'" rows="20" id="'+id+'-ta"></textarea>')
-							.on('input propertychange', stateChange);
-	
-						ta.initEditArea = function(id, file, content) {
-							var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [];
-							ta.val(content);
-							if (content === '' || ! encoding || encoding !== 'UTF-8') {
-								heads.push({value: 'UTF-8'});
-							}
-							selEncoding = getEncSelect(heads).on('touchstart', function(e) {
-								// for touch punch event handler
-								e.stopPropagation();
-							}).on('change', function() {
-								// reload to change encoding if not edited
-								if (! changed() && ta.getContent() !== '') {
-									cancel();
-									edit(file, $(this).val());
-								}
-							}).on('mouseover', stateChange);
-							ta.parent().prev().find('.elfinder-titlebar-button:last')
-								.after($('<span class="elfinder-titlebar-button-right"/>').append(selEncoding));
-							
-							//fm.disable();
-							ta.focus(); 
-							ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
-						};
-					})();
-				}
-				
-				if (extEditor) {
-					ta.editor = extEditor;
-					if (typeof extEditor.init === 'function') {
-						ta.initEditArea = extEditor.init;
+			$.each(self.options.editors || [], function(i, editor) {
+				if (mimeMatch(file.mime, editor.mimes || null)
+				&& extMatch(file.name, editor.exts || null)
+				&& typeof editor.load == 'function'
+				&& typeof editor.save == 'function') {
+					if (editor.html) {
+						ta = $(editor.html);
 					}
 					
-					if (typeof extEditor.getContent === 'function') {
-						ta.getContent = extEditor.getContent;
-					}
-				}
-				
-				if (! ta.initEditArea) {
-					ta.initEditArea = function() {};
-				}
-				
-				if (! ta.getContent) {
-					ta.getContent = function() {
-						return rtrim(ta.val());
+					extEditor = {
+						init     : editor.init || null,
+						load     : editor.load,
+						getContent : editor.getContent || null,
+						save     : editor.save,
+						close    : typeof editor.close == 'function' ? editor.close : function() {},
+						focus    : typeof editor.focus == 'function' ? editor.focus : function() {},
+						resize   : typeof editor.resize == 'function' ? editor.resize : function() {},
+						instance : null,
+						doSave   : save,
+						doCancel : cancel,
+						doClose  : savecl,
+						file     : file,
+						fm       : fm
 					};
+					
+					return false;
 				}
-				
-				if (!ta.editor) {
-					ta.keydown(function(e) {
-						var code = e.keyCode,
-							value, start;
-						
-						e.stopPropagation();
-						if (code == $.ui.keyCode.TAB) {
-							e.preventDefault();
-							// insert tab on tab press
-							if (this.setSelectionRange) {
-								value = this.value;
-								start = this.selectionStart;
-								this.value = value.substr(0, start) + "\t" + value.substr(this.selectionEnd);
-								start += 1;
-								this.setSelectionRange(start, start);
+			});
+			
+			if (!ta) {
+				if (file.mime.indexOf('text/') !== 0 && $.inArray(file.mime, mimes) === -1) {
+					return dfrd.reject('errEditorNotFound');
+				}
+				(function() {
+					var stateChange = function() {
+							if (selEncoding) {
+								if (changed()) {
+									selEncoding.attr('title', fm.i18n('saveAsEncoding')).addClass('elfinder-edit-changed');
+								} else {
+									selEncoding.attr('title', fm.i18n('openAsEncoding')).removeClass('elfinder-edit-changed');
+								}
 							}
-						}
+						};
 						
-						if (e.ctrlKey || e.metaKey) {
-							// close on ctrl+w/q
-							if (code == 'Q'.charCodeAt(0) || code == 'W'.charCodeAt(0)) {
-								e.preventDefault();
+					ta = $('<textarea class="elfinder-file-edit '+fm.res('class', 'editing')+'" rows="20" id="'+id+'-ta"></textarea>')
+						.on('input propertychange', stateChange);
+
+					ta.initEditArea = function(id, file, content) {
+						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [];
+						ta.val(content);
+						if (content === '' || ! encoding || encoding !== 'UTF-8') {
+							heads.push({value: 'UTF-8'});
+						}
+						selEncoding = getEncSelect(heads).on('touchstart', function(e) {
+							// for touch punch event handler
+							e.stopPropagation();
+						}).on('change', function() {
+							// reload to change encoding if not edited
+							if (! changed() && ta.getContent() !== '') {
 								cancel();
+								edit(file, $(this).val());
 							}
-							if (code == 'S'.charCodeAt(0)) {
-								e.preventDefault();
-								save();
-							}
-						}
+						}).on('mouseover', stateChange);
+						ta.parent().prev().find('.elfinder-titlebar-button:last')
+							.after($('<span class="elfinder-titlebar-button-right"/>').append(selEncoding));
 						
-					}).on('mouseenter', function(){this.focus();});
+						//fm.disable();
+						ta.focus(); 
+						ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
+					};
+				})();
+			}
+			
+			if (extEditor) {
+				ta.editor = extEditor;
+				if (typeof extEditor.init === 'function') {
+					ta.initEditArea = extEditor.init;
 				}
 				
-				opts.buttons[fm.i18n('btnSave')]      = save;
-				opts.buttons[fm.i18n('btnSaveClose')] = savecl;
-				opts.buttons[fm.i18n('btnSaveAs')]    = saveAs;
-				opts.buttons[fm.i18n('btnCancel')]    = cancel;
-				
-				dialogNode = fm.dialog(ta, opts)
-					.attr('id', id)
-					.on('keydown keyup keypress', function(e) {
-						e.stopPropagation();
-					}).closest('.ui-dialog');
-				return dfrd.promise();
+				if (typeof extEditor.getContent === 'function') {
+					ta.getContent = extEditor.getContent;
+				}
+			}
+			
+			if (! ta.initEditArea) {
+				ta.initEditArea = function() {};
+			}
+			
+			if (! ta.getContent) {
+				ta.getContent = function() {
+					return rtrim(ta.val());
+				};
+			}
+			
+			if (!ta.editor) {
+				ta.keydown(function(e) {
+					var code = e.keyCode,
+						value, start;
+					
+					e.stopPropagation();
+					if (code == $.ui.keyCode.TAB) {
+						e.preventDefault();
+						// insert tab on tab press
+						if (this.setSelectionRange) {
+							value = this.value;
+							start = this.selectionStart;
+							this.value = value.substr(0, start) + "\t" + value.substr(this.selectionEnd);
+							start += 1;
+							this.setSelectionRange(start, start);
+						}
+					}
+					
+					if (e.ctrlKey || e.metaKey) {
+						// close on ctrl+w/q
+						if (code == 'Q'.charCodeAt(0) || code == 'W'.charCodeAt(0)) {
+							e.preventDefault();
+							cancel();
+						}
+						if (code == 'S'.charCodeAt(0)) {
+							e.preventDefault();
+							save();
+						}
+					}
+					
+				}).on('mouseenter', function(){this.focus();});
+			}
+			
+			opts.buttons[fm.i18n('btnSave')]      = save;
+			opts.buttons[fm.i18n('btnSaveClose')] = savecl;
+			opts.buttons[fm.i18n('btnSaveAs')]    = saveAs;
+			opts.buttons[fm.i18n('btnCancel')]    = cancel;
+			
+			dialogNode = fm.dialog(ta, opts)
+				.attr('id', id)
+				.on('keydown keyup keypress', function(e) {
+					e.stopPropagation();
+				}).closest('.ui-dialog');
+			
+			return dfrd.promise();
 		},
 		
 		/**
