@@ -59,8 +59,10 @@ elFinder.prototype.resources = {
 	
 	mixin : {
 		make : function() {
-			var fm   = this.fm,
+			var self = this,
+				fm   = this.fm,
 				cmd  = this.name,
+				req  = this.requestCmd || cmd,
 				wz   = fm.getUI('workzone'),
 				org  = (this.origin && this.origin === 'navbar')? 'tree' : 'cwd',
 				ui   = fm.getUI(org),
@@ -197,7 +199,7 @@ elFinder.prototype.resources = {
 								fm.lockfiles({files : [id]});
 
 								fm.request({
-										data        : Object.assign({cmd : cmd, name : name, target : phash}, data || {}), 
+										data        : Object.assign({cmd : req, name : name, target : phash}, data || {}), 
 										notify      : {type : cmd, cnt : 1},
 										preventFail : true,
 										syncOnFail  : true
@@ -215,11 +217,11 @@ elFinder.prototype.resources = {
 												dirhash = item.hash,
 												newItem = ui.find('#'+fm[find](dirhash));
 											if (sel && move) {
-												fm.one(cmd+'done', function() {
+												fm.one(req+'done', function() {
 													fm.exec('paste', dirhash);
 												});
 											}
-											fm.one(cmd+'done', function() {
+											fm.one(req+'done', function() {
 												var acts = {
 														'directory' : { cmd: 'open', msg: 'cmdopendir' },
 														'text/plain': { cmd: 'edit', msg: 'cmdedit' },
@@ -228,7 +230,7 @@ elFinder.prototype.resources = {
 													act, extNode;
 												newItem = ui.find('#'+fm[find](item.hash));
 												if (data.added.length === 1) {
-													act = acts[item.mime] || acts['default'];
+													act = self.nextAction || acts[item.mime] || acts['default'];
 													extNode = $('<div/>').append(
 														$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"><span class="ui-button-text">'
 															+fm.i18n(act.msg)

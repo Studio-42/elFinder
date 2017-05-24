@@ -54,12 +54,10 @@ elFinder.prototype.commands.edit = function() {
 		dialog = function(id, file, content, encoding) {
 
 			var dfrd = $.Deferred(),
-				ta,
-				old,
-				save = function() {
+				save = function(hash) {
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
 					old = ta.getContent();
-					dfrd.notifyWith(ta, [selEncoding? selEncoding.val():void(0)]);
+					dfrd.notifyWith(ta, [selEncoding? selEncoding.val():void(0), hash]);
 				},
 				cancel = function() {
 					ta.elfinderdialog('close');
@@ -68,20 +66,44 @@ elFinder.prototype.commands.edit = function() {
 					save();
 					cancel();
 				},
+				saveAs = function() {
+					var prevOld = old,
+						fail = function() {
+							old = prevOld;
+							dialogNode.fadeIn();
+						};
+					
+					self.mime = file.mime;
+					self.prefix = file.name;
+					self.requestCmd = 'mkfile';
+					self.nextAction = { cmd: 'edit', msg: 'cmdedit' };
+					dialogNode.fadeOut();
+					$.proxy(fm.res('mixin', 'make'), self)()
+						.done(function(data) {
+							if (data.added && data.added.length) {
+								save(data.added[0].hash);
+								dialogNode.show();
+								cancel();
+							} else {
+								fail();
+							}
+						})
+						.fail(fail);
+				},
 				changed = function() {
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
 					return  (old !== ta.getContent());
 				},
 				opts = {
 					title   : fm.escape(file.name),
-					width   : self.options.dialogWidth || 450,
+					width   : self.options.dialogWidth || (Math.min(650, $(window).width() * .9)),
 					buttons : {},
 					allowMaximize : true,
 					btnHoverFocus : false,
 					closeOnEscape : false,
 					close   : function() {
 						var close = function(){
-							dfrd.reject();
+							dfrd.resolve();
 							ta.editor && ta.editor.close(ta[0], ta.editor.instance);
 							ta.elfinderdialog('destroy');
 						};
@@ -100,7 +122,13 @@ elFinder.prototype.commands.edit = function() {
 								cancel : {
 									label    : 'btnClose',
 									callback : close
-								}
+								},
+								buttons : [{
+									label    : 'btnSaveAs',
+									callback : function() {
+										saveAs();
+									}
+								}]
 							});
 						} else {
 							close();
@@ -158,8 +186,7 @@ elFinder.prototype.commands.edit = function() {
 					}
 					return false;
 				},
-				selEncoding,
-				extEditor;
+				ta, old, dialogNode, selEncoding, extEditor;
 				
 				$.each(self.options.editors || [], function(i, editor) {
 					if (mimeMatch(file.mime, editor.mimes || null)
@@ -290,13 +317,14 @@ elFinder.prototype.commands.edit = function() {
 				
 				opts.buttons[fm.i18n('btnSave')]      = save;
 				opts.buttons[fm.i18n('btnSaveClose')] = savecl;
+				opts.buttons[fm.i18n('btnSaveAs')]    = saveAs;
 				opts.buttons[fm.i18n('btnCancel')]    = cancel;
 				
-				fm.dialog(ta, opts)
+				dialogNode = fm.dialog(ta, opts)
 					.attr('id', id)
 					.on('keydown keyup keypress', function(e) {
 						e.stopPropagation();
-					});
+					}).closest('.ui-dialog');
 				return dfrd.promise();
 		},
 		
@@ -366,8 +394,14 @@ elFinder.prototype.commands.edit = function() {
 					});
 				} else {
 					dialog(id, file, data.content, data.encoding)
-						.progress(function(encoding) {
+						.done(function(data) {
+							dfrd.resolve(data);
+						})
+						.progress(function(encoding, newHash) {
 							var ta = this;
+							if (newHash) {
+								hash = newHash;
+							}
 							fm.request({
 								options : {type : 'post'},
 								data : {
@@ -384,7 +418,6 @@ elFinder.prototype.commands.edit = function() {
 							})
 							.done(function(data) {
 								data.changed && data.changed.length && fm.change(data);
-								dfrd.resolve(data);
 								setTimeout(function(){
 									ta.focus();
 									ta.editor && ta.editor.focus(ta[0], ta.editor.instance);
