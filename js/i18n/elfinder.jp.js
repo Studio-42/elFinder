@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-05-23
+ * @version 2017-05-24
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -177,6 +177,7 @@
 			'btnRenameAll' : 'リネーム(全て)', // from v2.1.24 added 6.4.2017
 			'btnPrevious' : '前へ ($1/$2)', // from v2.1.24 added 11.5.2017
 			'btnNext'     : '次へ ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnSaveAs'   : '別名保存', // from v2.1.25 added 24.5.2017
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'フォルダーを開いています',

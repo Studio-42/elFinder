@@ -2860,7 +2860,9 @@ var elFinder = function(node, opts) {
 		var lastnode = node.children(':last');
 		target = $(target);
 		if (lastnode.get(0) !== target.get(0)) {
-			lastnode.after(target);
+			target.trigger('beforedommove')
+				.insertAfter(lastnode)
+				.trigger('dommove');
 		}
 	};
 	
