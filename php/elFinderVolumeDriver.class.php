@@ -2491,7 +2491,7 @@ abstract class elFinderVolumeDriver {
 		// check data cheme
 		if (preg_match('~^data:(.+?/.+?);base64,~', $content, $m)) {
 			$dMime =$m[1];
-			if ($dMime !== $file['mime']) {
+			if ($file['size'] > 0 && $dMime !== $file['mime']) {
 				return $this->setError(elFinder::ERROR_PERM_DENIED);
 			}
 			$content = base64_decode(substr($content, strlen($m[0])));
