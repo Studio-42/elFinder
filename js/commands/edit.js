@@ -70,25 +70,49 @@ elFinder.prototype.commands.edit = function() {
 					var prevOld = old,
 						fail = function() {
 							old = prevOld;
+							fm.disable();
+							ta.addClass(clsEditing);
 							dialogNode.fadeIn();
-						};
+						},
+						make = function() {
+							self.mime = file.mime;
+							self.prefix = file.name;
+							self.requestCmd = 'mkfile';
+							self.nextAction = { cmd: 'edit', msg: 'cmdedit' };
+							self.data = {target : file.phash};
+							fm.trigger('selectfiles', { files: [ file.hash ] });
+							$.proxy(fm.res('mixin', 'make'), self)()
+								.done(function(data) {
+									if (data.added && data.added.length) {
+										save(data.added[0].hash);
+										dialogNode.show();
+										cancel();
+									} else {
+										fail();
+									}
+								})
+								.fail(fail)
+								.always(function() {
+									delete self.mime;
+									delete self.prefix;
+									delete self.nextAction;
+									delete self.data;
+								});
+							fm.trigger('unselectfiles', { files: [ file.hash ] });
+						},
+						reqOpen = null;
 					
-					self.mime = file.mime;
-					self.prefix = file.name;
-					self.requestCmd = 'mkfile';
-					self.nextAction = { cmd: 'edit', msg: 'cmdedit' };
 					dialogNode.fadeOut();
-					$.proxy(fm.res('mixin', 'make'), self)()
-						.done(function(data) {
-							if (data.added && data.added.length) {
-								save(data.added[0].hash);
-								dialogNode.show();
-								cancel();
-							} else {
-								fail();
-							}
-						})
-						.fail(fail);
+					ta.removeClass(clsEditing);
+					fm.enable();
+					
+					if (fm.searchStatus.state < 2 && file.phash !== fm.cwd().hash) {
+						reqOpen = fm.exec('open', file.phash);
+					}
+					
+					$.when([reqOpen]).done(function() {
+						reqOpen? fm.one('cwdrender', make) : make();
+					}).fail(fail);
 				},
 				changed = function() {
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
@@ -186,6 +210,7 @@ elFinder.prototype.commands.edit = function() {
 					}
 					return false;
 				},
+				clsEditing = fm.res('class', 'editing'),
 				ta, old, dialogNode, selEncoding, extEditor;
 				
 			$.each(self.options.editors || [], function(i, editor) {
@@ -232,7 +257,7 @@ elFinder.prototype.commands.edit = function() {
 							}
 						};
 						
-					ta = $('<textarea class="elfinder-file-edit '+fm.res('class', 'editing')+'" rows="20" id="'+id+'-ta"></textarea>')
+					ta = $('<textarea class="elfinder-file-edit" rows="20" id="'+id+'-ta"></textarea>')
 						.on('input propertychange', stateChange);
 
 					ta.initEditArea = function(id, file, content) {
@@ -260,6 +285,8 @@ elFinder.prototype.commands.edit = function() {
 					};
 				})();
 			}
+			
+			ta.addClass(clsEditing);
 			
 			if (extEditor) {
 				ta.editor = extEditor;
