@@ -252,6 +252,11 @@
 	display: none;
 }
 
+.elfinder-resize-preset-container {
+	box-sizing: border-box;
+	border-radius: 5px;
+}
+
 /********************** COMMAND "EDIT" ****************************/
 /* edit text file textarea */
 .elfinder-file-edit {
