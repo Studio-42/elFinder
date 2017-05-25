@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 3e7f1c9) (2017-05-24)
+ * Version 2.1.24 (2.1-src Nightly: 12b9118) (2017-05-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7569,7 +7569,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 3e7f1c9)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 12b9118)';
 
 
 
@@ -9419,7 +9419,7 @@ elFinder.prototype.resources = {
 					}
 					node.removeClass('ui-front').css('position', '');
 					if (tarea) {
-						nnode.css('max-height', '');
+						nnode && nnode.css('max-height', '');
 					} else if (pnode) {
 						pnode.css('width', '')
 							.parent('td').css('overflow', '');
@@ -9443,7 +9443,7 @@ elFinder.prototype.resources = {
 						fm.trigger('resMixinMake');
 					}),
 				id    = 'tmp_'+parseInt(Math.random()*100000),
-				phash = tree? fm.file(sel[0]).hash : fm.cwd().hash,
+				phash = this.data && this.data.target? this.data.target : (tree? fm.file(sel[0]).hash : fm.cwd().hash),
 				date = new Date(),
 				file   = {
 					hash  : id,
@@ -9491,7 +9491,7 @@ elFinder.prototype.resources = {
 							}
 						}
 					})
-					.keydown(function(e) {
+					.on('keydown', function(e) {
 						e.stopImmediatePropagation();
 						if (e.keyCode == $.ui.keyCode.ESCAPE) {
 							dfrd.reject();
@@ -9499,10 +9499,13 @@ elFinder.prototype.resources = {
 							input.blur();
 						}
 					})
-					.mousedown(function(e) {
+					.on('mousedown click dblclick', function(e) {
 						e.stopPropagation();
+						if (e.type === 'dblclick') {
+							e.preventDefault();
+						}
 					})
-					.blur(function() {
+					.on('blur', function() {
 						var name   = $.trim(input.val()),
 							parent = input.parent(),
 							valid  = true,
@@ -9600,11 +9603,11 @@ elFinder.prototype.resources = {
 					}),
 				select = function() {
 					var name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '');
-					inError = false;
-					if (fm.UA.Mobile) {
+					if (!inError && fm.UA.Mobile) {
 						overlay.on('click', cancel)
 							.removeClass('ui-front').elfinderoverlay('show');
 					}
+					inError = false;
 					input.select().focus();
 					input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
 				},
@@ -13227,7 +13230,7 @@ $.fn.elfindercwd = function(fm, options) {
 							cwdHashes.push(f.hash);
 						}
 					});
-					fm.trgger('cwdhasheschange', cwdHashes);
+					fm.trigger('cwdhasheschange', cwdHashes);
 				}
 				list && resize();
 				wrapper.trigger(scrollEvent);
@@ -18362,25 +18365,49 @@ elFinder.prototype.commands.edit = function() {
 					var prevOld = old,
 						fail = function() {
 							old = prevOld;
+							fm.disable();
+							ta.addClass(clsEditing);
 							dialogNode.fadeIn();
-						};
+						},
+						make = function() {
+							self.mime = file.mime;
+							self.prefix = file.name;
+							self.requestCmd = 'mkfile';
+							self.nextAction = { cmd: 'edit', msg: 'cmdedit' };
+							self.data = {target : file.phash};
+							fm.trigger('selectfiles', { files: [ file.hash ] });
+							$.proxy(fm.res('mixin', 'make'), self)()
+								.done(function(data) {
+									if (data.added && data.added.length) {
+										save(data.added[0].hash);
+										dialogNode.show();
+										cancel();
+									} else {
+										fail();
+									}
+								})
+								.fail(fail)
+								.always(function() {
+									delete self.mime;
+									delete self.prefix;
+									delete self.nextAction;
+									delete self.data;
+								});
+							fm.trigger('unselectfiles', { files: [ file.hash ] });
+						},
+						reqOpen = null;
 					
-					self.mime = file.mime;
-					self.prefix = file.name;
-					self.requestCmd = 'mkfile';
-					self.nextAction = { cmd: 'edit', msg: 'cmdedit' };
 					dialogNode.fadeOut();
-					$.proxy(fm.res('mixin', 'make'), self)()
-						.done(function(data) {
-							if (data.added && data.added.length) {
-								save(data.added[0].hash);
-								dialogNode.show();
-								cancel();
-							} else {
-								fail();
-							}
-						})
-						.fail(fail);
+					ta.removeClass(clsEditing);
+					fm.enable();
+					
+					if (fm.searchStatus.state < 2 && file.phash !== fm.cwd().hash) {
+						reqOpen = fm.exec('open', file.phash);
+					}
+					
+					$.when([reqOpen]).done(function() {
+						reqOpen? fm.one('cwdrender', make) : make();
+					}).fail(fail);
 				},
 				changed = function() {
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
@@ -18478,6 +18505,7 @@ elFinder.prototype.commands.edit = function() {
 					}
 					return false;
 				},
+				clsEditing = fm.res('class', 'editing'),
 				ta, old, dialogNode, selEncoding, extEditor;
 				
 			$.each(self.options.editors || [], function(i, editor) {
@@ -18524,7 +18552,7 @@ elFinder.prototype.commands.edit = function() {
 							}
 						};
 						
-					ta = $('<textarea class="elfinder-file-edit '+fm.res('class', 'editing')+'" rows="20" id="'+id+'-ta"></textarea>')
+					ta = $('<textarea class="elfinder-file-edit" rows="20" id="'+id+'-ta"></textarea>')
 						.on('input propertychange', stateChange);
 
 					ta.initEditArea = function(id, file, content) {
@@ -18552,6 +18580,8 @@ elFinder.prototype.commands.edit = function() {
 					};
 				})();
 			}
+			
+			ta.addClass(clsEditing);
 			
 			if (extEditor) {
 				ta.editor = extEditor;
@@ -22280,7 +22310,7 @@ elFinder.prototype.commands.rename = function() {
 					.css('position', '')
 					.off('unselect.'+fm.namespace, unselect);
 				if (tarea) {
-					node.css('max-height', '');
+					node && node.css('max-height', '');
 				} else if (!navbar) {
 					pnode.css('width', '')
 						.parent('td').css('overflow', '');
@@ -22402,7 +22432,6 @@ elFinder.prototype.commands.rename = function() {
 					}
 				})
 				.on('mousedown click dblclick', function(e) {
-					// click for touch device
 					e.stopPropagation();
 					if (e.type === 'dblclick') {
 						e.preventDefault();
@@ -22411,13 +22440,13 @@ elFinder.prototype.commands.rename = function() {
 				.on('blur', blur),
 			select = function() {
 				var name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '');
+				if (!inError && fm.UA.Mobile) {
+					overlay.on('click', cancel)
+						.removeClass('ui-front').elfinderoverlay('show');
+				}
 				if (inError) {
 					inError = false;
 					input.on('blur', blur);
-				}
-				if (fm.UA.Mobile) {
-					overlay.on('click', cancel)
-						.removeClass('ui-front').elfinderoverlay('show');
 				}
 				input.select().focus();
 				input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
