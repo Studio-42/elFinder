@@ -2255,7 +2255,7 @@ $.fn.elfindercwd = function(fm, options) {
 							cwdHashes.push(f.hash);
 						}
 					});
-					fm.trgger('cwdhasheschange', cwdHashes);
+					fm.trigger('cwdhasheschange', cwdHashes);
 				}
 				list && resize();
 				wrapper.trigger(scrollEvent);
