@@ -10,6 +10,13 @@ var elFinder = function(node, opts) {
 	var self = this,
 		
 		/**
+		 * Plugin name to check for conflicts with bootstrap etc
+		 *
+		 * @type Array
+		 **/
+		conflictChecks = ['button'],
+		
+		/**
 		 * Node on which elfinder creating
 		 *
 		 * @type jQuery
@@ -655,6 +662,14 @@ var elFinder = function(node, opts) {
 	if (! inFrame && ! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
 		this.options.enableAlways = true;
 	}
+	
+	// Check and save conflicts with bootstrap etc
+	this.noConflicts = {};
+	$.each(conflictChecks, function(i, p) {
+		if ($.fn[p] && typeof $.fn[p].noConflict === 'function') {
+			self.noConflicts[p] = $.fn[p].noConflict();
+		}
+	});
 	
 	/**
 	 * Is elFinder over CORS
