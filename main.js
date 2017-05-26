@@ -74,13 +74,13 @@
 							},
 							// Get data uri scheme
 							getContent : function() {
-								return $(this).children('img').attr('src');
+								return $(this).children('img:first').attr('src');
 							},
 							// Launch Aviary Feather editor when dialog open
 							load : function(base) {
 								var self = this,
 									fm = this.fm,
-									node = $(base).children('img'),
+									node = $(base).children('img:first'),
 									elfNode = fm.getUI(),
 									dfrd = $.Deferred(),
 									init = function(onload) {
@@ -176,7 +176,7 @@
 										// To Base64
 										return canvas.toDataURL(node.data('mime'));
 									},
-									node = $(base).children('img');
+									node = $(base).children('img:first');
 								if (node.attr('src').substr(0, 5) !== 'data:') {
 									node.attr('src', imgBase64(node));
 								}
