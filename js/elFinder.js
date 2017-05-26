@@ -3942,11 +3942,16 @@ var elFinder = function(node, opts) {
 			var lastX, lastY, nodeOffset, nodeWidth, nodeTop, navbarW, toolbarH,
 				navbar = self.getUI('navbar'),
 				toolbar = self.getUI('toolbar'),
+				moveEv = 'touchmove.stopscroll',
+				moveTm,
 				moveOn  = function(e) {
 					e.preventDefault();
+					moveTm && clearTimeout(moveTm);
 				},
 				moveOff = function() {
-					$(document).off('touchmove', moveOn);
+					moveTm = setTimeout(function() {
+						node.off(moveEv);
+					}, 100);
 				},
 				handleW, handleH = 50;
 
@@ -4001,10 +4006,8 @@ var elFinder = function(node, opts) {
 						nodeTop = nodeOffset.top;
 						if (y - nodeTop < (toolbar.is(':hidden')? handleH : (toolbarH + 30))) {
 							lastY = y;
-							$(document).on('touchmove.' + namespace, moveOn);
-							setTimeout(function() {
-								moveOff();
-							}, 500);
+							node.on(moveEv, moveOn);
+							moveOff();
 						} else {
 							lastY = false;
 						}
