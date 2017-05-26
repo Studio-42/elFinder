@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: aefefeb) (2017-05-26)
+ * Version 2.1.24 (2.1-src Nightly: cd902c3) (2017-05-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7584,7 +7584,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: aefefeb)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: cd902c3)';
 
 
 
@@ -23551,11 +23551,16 @@ elFinder.prototype.commands.resize = function() {
 						
 						preset.css('width', presW).show();
 						presetc.css('width', presW).show();
+						if (!presetc.children('span.elfinder-resize-preset:visible').length) {
+							presetc.hide();
+						}
 					},
 					preset = (function() {
-						var sets = $('<fieldset class="elfinder-resize-preset-container">').append($('<legend>').html(fm.i18n('presets'))).hide();
+						var sets = $('<fieldset class="elfinder-resize-preset-container">').append($('<legend>').html(fm.i18n('presets'))).hide(),
+							hasC;
 						$.each(presetSize, function(i, s) {
 							if (s.length === 2) {
+								hasC = true;
 								sets.append($('<span class="elfinder-resize-preset"/>')
 									.data('s', s)
 									.text(s[0]+'x'+s[1])
@@ -23563,7 +23568,11 @@ elFinder.prototype.commands.resize = function() {
 								);
 							}
 						});
-						return sets;
+						if (!hasC) {
+							return $();
+						} else {
+							return sets;
+						}
 					})(),
 					presetc = preset.clone(true),
 					dMinBtn, base;
