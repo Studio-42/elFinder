@@ -107,7 +107,7 @@ elFinder.prototype.commands.edit = function() {
 					fm.enable();
 					
 					if (fm.searchStatus.state < 2 && file.phash !== fm.cwd().hash) {
-						reqOpen = fm.exec('open', file.phash);
+						reqOpen = fm.exec('open', [file.phash]);
 					}
 					
 					$.when([reqOpen]).done(function() {
