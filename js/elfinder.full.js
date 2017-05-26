@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 35a1eb6) (2017-05-26)
+ * Version 2.1.24 (2.1-src Nightly: aefefeb) (2017-05-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -39,6 +39,13 @@ var elFinder = function(node, opts) {
 	//this.time('load');
 	
 	var self = this,
+		
+		/**
+		 * Plugin name to check for conflicts with bootstrap etc
+		 *
+		 * @type Array
+		 **/
+		conflictChecks = ['button'],
 		
 		/**
 		 * Node on which elfinder creating
@@ -686,6 +693,14 @@ var elFinder = function(node, opts) {
 	if (! inFrame && ! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
 		this.options.enableAlways = true;
 	}
+	
+	// Check and save conflicts with bootstrap etc
+	this.noConflicts = {};
+	$.each(conflictChecks, function(i, p) {
+		if ($.fn[p] && typeof $.fn[p].noConflict === 'function') {
+			self.noConflicts[p] = $.fn[p].noConflict();
+		}
+	});
 	
 	/**
 	 * Is elFinder over CORS
@@ -7569,7 +7584,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 35a1eb6)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: aefefeb)';
 
 
 
