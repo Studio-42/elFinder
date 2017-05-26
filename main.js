@@ -65,7 +65,7 @@
 									.attr('src', content)
 									.css({'height':'', 'max-width':'100%', 'max-height':'100%', 'cursor':'pointer'})
 									.data('loading', function(done) {
-										var btns = node.closest('.elfinder-dialog').find('button');
+										var btns = node.closest('.elfinder-dialog').find('button,.elfinder-titlebar-button');
 										btns.prop('disabled', !done)[done? 'removeClass' : 'addClass']('ui-state-disabled');
 										node.css('opacity', done? '' : '0.3');
 										spnr[done? 'hide' : 'show']();
