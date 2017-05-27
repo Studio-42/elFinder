@@ -566,8 +566,15 @@ elFinder.prototype.commands.resize = function() {
 					},
 					img     = $('<img/>')
 						.on('load', function() {
-							owidth  = img.get(0).width || img.width();
-							oheight = img.get(0).height || img.height();
+							var elm = img.get(0),
+								memSize = elm.naturalWidth? null : {w: img.width(), h: img.height()};
+							
+							memSize && img.removeAttr('width').removeAttr('height');
+							
+							owidth  = elm.naturalWidth || elm.width || img.width();
+							oheight = elm.naturalHeight || elm.height || img.height();
+							
+							memSize && img.width(memSize.w).height(memSize.h);
 							
 							dMinBtn.show();
 
