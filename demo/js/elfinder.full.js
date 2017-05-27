@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 201c8dc) (2017-05-27)
+ * Version 2.1.24 (2.1-src Nightly: 804ddd5) (2017-05-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7587,7 +7587,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 201c8dc)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 804ddd5)';
 
 
 
@@ -18423,7 +18423,7 @@ elFinder.prototype.commands.edit = function() {
 					fm.enable();
 					
 					if (fm.searchStatus.state < 2 && file.phash !== fm.cwd().hash) {
-						reqOpen = fm.exec('open', [file.phash]);
+						reqOpen = fm.exec('open', [file.phash], {thash: file.phash});
 					}
 					
 					$.when([reqOpen]).done(function() {
