@@ -888,7 +888,7 @@ elFinder.prototype._options = {
 		// current directory menu
 		cwd    : ['reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'view', 'sort', 'colwidth', '|', 'info', '|', 'fullscreen'],
 		// current directory file menu
-		files  : ['getfile', '|' ,'open', 'download', 'opendir', 'quicklook', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'edit', 'rename', 'resize', '|', 'archive', 'extract', '|', 'places', 'info', 'chmod', 'netunmount']
+		files  : ['getfile', '|' ,'open', 'download', 'opendir', 'quicklook', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', '|', 'rename', 'edit', 'resize', '|', 'archive', 'extract', '|', 'places', 'info', 'chmod', 'netunmount']
 	},
 
 	/**
