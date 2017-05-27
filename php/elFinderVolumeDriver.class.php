@@ -454,7 +454,7 @@ abstract class elFinderVolumeDriver {
 	 *
 	 * @var int|string
 	 **/
-	protected $getMaxSize = 0;
+	protected $getMaxSize = -1;
 	
 	/**
 	 * Mimetype detect method
@@ -1131,10 +1131,11 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		// Set to get maximum size to 50% of memory_limit
-		if (empty($this->options['getMaxSize'])) {
-			$this->getMaxSize = elFinder::getIniBytes('memory_limit') / 2;
+		$memLimit = elFinder::getIniBytes('memory_limit') / 2;
+		if ($memLimit > 0) {
+			$this->getMaxSize = empty($this->options['getMaxSize'])? $memLimit : min($memLimit, elFinder::getIniBytes('', $this->options['getMaxSize']));
 		} else {
-			$this->getMaxSize = min(elFinder::getIniBytes('memory_limit') / 2, elFinder::getIniBytes('', $this->options['getMaxSize']));
+			$this->getMaxSize = -1;
 		}
 		
 		$this->disabled = isset($this->options['disabled']) && is_array($this->options['disabled'])
@@ -2458,7 +2459,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_PERM_DENIED);
 		}
 		
-		if ($file['size'] > $this->getMaxSize) {
+		if ($this->getMaxSize > 0 && $file['size'] > $this->getMaxSize) {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_SIZE);
 		}
 		
