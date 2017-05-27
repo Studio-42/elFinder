@@ -141,7 +141,7 @@
 										});
 										// bind switch fullscreen event
 										elfNode.on('resize', function(e) {
-											e.data.fullscreen && container.appendTo(e.data.fullscreen === 'on'? elfNode : 'body')
+											e.data && e.data.fullscreen && container.appendTo(e.data.fullscreen === 'on'? elfNode : 'body')
 										});
 									}
 									fm.loadScript(['https://dme0ih8comzn4.cloudfront.net/imaging/v3/editor.js'], function() {
