@@ -170,8 +170,16 @@ elFinder.prototype.commands.edit = function() {
 									ta.editor.instance = instance;
 									ta.editor.focus(ta[0], ta.editor.instance);
 									old = ta.getContent();
+								}).fail(function(error) {
+									error && fm.error(error);
+									ta.elfinderdialog('destroy');
 								});
 							} else {
+								if (loadRes && (typeof loadRes === 'string' || Array.isArray(loadRes))) {
+									fm.error(loadRes);
+									ta.elfinderdialog('destroy');
+									return;
+								}
 								ta.editor.instance = loadRes;
 								ta.editor.focus(ta[0], ta.editor.instance);
 								old = ta.getContent();
