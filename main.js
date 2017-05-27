@@ -140,8 +140,8 @@
 											container.css('height', $(window).height());
 										});
 										// bind switch fullscreen event
-										elfNode.on('resize', function(e) {
-											e.data && e.data.fullscreen && container.appendTo(e.data.fullscreen === 'on'? elfNode : 'body')
+										elfNode.on('resize', function(e, data) {
+											data && data.fullscreen && container.appendTo(data.fullscreen === 'on'? elfNode : 'body');
 										});
 									}
 									fm.loadScript(['https://dme0ih8comzn4.cloudfront.net/imaging/v3/editor.js'], function() {
