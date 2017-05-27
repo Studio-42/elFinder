@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: d18c05f) (2017-05-26)
+ * Version 2.1.24 (2.1-src Nightly: 7e06298) (2017-05-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7587,7 +7587,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: d18c05f)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 7e06298)';
 
 
 
@@ -18486,8 +18486,16 @@ elFinder.prototype.commands.edit = function() {
 									ta.editor.instance = instance;
 									ta.editor.focus(ta[0], ta.editor.instance);
 									old = ta.getContent();
+								}).fail(function(error) {
+									error && fm.error(error);
+									ta.elfinderdialog('destroy');
 								});
 							} else {
+								if (loadRes && (typeof loadRes === 'string' || Array.isArray(loadRes))) {
+									fm.error(loadRes);
+									ta.elfinderdialog('destroy');
+									return;
+								}
 								ta.editor.instance = loadRes;
 								ta.editor.focus(ta[0], ta.editor.instance);
 								old = ta.getContent();
@@ -23101,8 +23109,15 @@ elFinder.prototype.commands.resize = function() {
 					},
 					img     = $('<img/>')
 						.on('load', function() {
-							owidth  = img.get(0).width || img.width();
-							oheight = img.get(0).height || img.height();
+							var elm = img.get(0),
+								memSize = elm.naturalWidth? null : {w: img.width(), h: img.height()};
+							
+							memSize && img.removeAttr('width').removeAttr('height');
+							
+							owidth  = elm.naturalWidth || elm.width || img.width();
+							oheight = elm.naturalHeight || elm.height || img.height();
+							
+							memSize && img.width(memSize.w).height(memSize.h);
 							
 							dMinBtn.show();
 
