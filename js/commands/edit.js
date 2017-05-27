@@ -122,6 +122,7 @@ elFinder.prototype.commands.edit = function() {
 					title   : fm.escape(file.name),
 					width   : self.options.dialogWidth || (Math.min(650, $(window).width() * .9)),
 					buttons : {},
+					allowMinimize : true,
 					allowMaximize : true,
 					btnHoverFocus : false,
 					closeOnEscape : false,
