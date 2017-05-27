@@ -124,6 +124,11 @@
 									},
 									featherEditor, container;
 								
+								// Cancel editing with IE8
+								if (fm.UA.ltIE8) {
+									return dfrd.reject('IE8 does not supported.');
+								}
+								
 								// load script then init
 								if (typeof Aviary === 'undefined') {
 									if (!(container = $('#elfinder-aviary-container')).length) {
