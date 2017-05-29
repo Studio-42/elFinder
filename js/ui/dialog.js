@@ -62,6 +62,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 			clhover    = 'ui-state-hover',
 			cltabstop  = 'elfinder-tabstop',
 			cl1stfocus = 'elfinder-focus',
+			clmodal    = 'elfinder-dialog-modal',
 			id         = parseInt(Math.random()*1000000),
 			titlebar   = $('<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix"><span class="elfinder-dialog-title">'+opts.title+'</span></div>'),
 			buttonset  = $('<div class="ui-dialog-buttonset"/>'),
@@ -278,7 +279,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 						});
 					} 
 					
-					dialog.data('modal') && fm.getUI('overlay').elfinderoverlay('show');
+					if (dialog.data('modal')) {
+						dialog.addClass(clmodal);
+						fm.getUI('overlay').elfinderoverlay('show');
+					}
 					
 					dialog.trigger('totop');
 					
@@ -329,8 +333,12 @@ $.fn.elfinderdialog = function(opts, fm) {
 						titlebar.children('.elfinder-titlebar-minimize').trigger('mousedown');
 					}
 					
-					fm.toFront(dialog);
-					elfNode.children('.'+cldialog).removeClass(clactive+' ui-front');
+					if (!dialog.data('modal') && fm.getUI('overlay').is(':visible')) {
+						fm.getUI('overlay').before(dialog);
+					} else {
+						fm.toFront(dialog);
+					}
+					elfNode.children('.'+cldialog+':not(.'+clmodal+')').removeClass(clactive+' ui-front');
 					dialog.addClass(clactive+' ui-front');
 
 					! fm.UA.Mobile && tabstopNext().focus();
