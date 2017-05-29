@@ -279,7 +279,7 @@ elFinder.prototype.resources = {
 				// for tree
 				dst, dstCls, collapsed, expanded, arrow, subtree;
 
-			if ((! tree && this.disabled()) || !node.length) {
+			if ((! tree && (this.requestCmd? fm.getCommand(req) : this).disabled()) || !node.length) {
 				return dfrd.reject();
 			}
 
