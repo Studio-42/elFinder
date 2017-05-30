@@ -29,7 +29,7 @@ $.fn.elfinderbutton = function(cmd) {
 							e.stopPropagation();
 							menu.slideToggle(100);
 						} else {
-							cmd.exec();
+							cmd.exec(void(0), { _currentType: 'toolbar', _currentNode: button });
 						}
 						
 					}
