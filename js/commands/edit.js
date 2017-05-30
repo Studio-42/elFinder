@@ -9,8 +9,8 @@ elFinder.prototype.commands.edit = function() {
 	var self  = this,
 		fm    = this.fm,
 		dlcls = 'elfinder-dialog-edit',
-		mimes = fm.res('mimes', 'text') || [],
-		binMimeRegex,
+		texts = fm.res('mimes', 'text') || [],
+		mimes = [],
 		rtrim = function(str){
 			return str.replace(/\s+$/, '');
 		},
@@ -44,7 +44,7 @@ elFinder.prototype.commands.edit = function() {
 				ext = files[0].name.replace(/^.*(\.[^.]+)$/, '$1');
 			}
 			return $.map(files, function(file) {
-				return (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, mimes) !== -1 || binMimeRegex.test(file.mime)) 
+				return (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, texts) !== -1 || $.inArray(file.mime, mimes) !== -1) 
 					&& file.mime.indexOf('text/rtf')
 					&& (!self.onlyMimes.length || $.inArray(file.mime, self.onlyMimes) !== -1)
 					&& file.read && file.write
@@ -222,12 +222,13 @@ elFinder.prototype.commands.edit = function() {
 					doCancel : cancel,
 					doClose  : savecl,
 					file     : file,
-					fm       : fm
+					fm       : fm,
+					confObj  : editor
 				};
 			}
 			
 			if (!ta) {
-				if (file.mime.indexOf('text/') !== 0 && $.inArray(file.mime, mimes) === -1) {
+				if (file.mime.indexOf('text/') !== 0 && $.inArray(file.mime, texts) === -1) {
 					return dfrd.reject('errEditorNotFound');
 				}
 				(function() {
@@ -465,7 +466,7 @@ elFinder.prototype.commands.edit = function() {
 		 */
 		setEditors = function(file) {
 			var mimeMatch = function(fileMime, editorMimes){
-					editorMimes = editorMimes || mimes.concat('text/');
+					editorMimes = editorMimes || texts.concat('text/');
 					if ($.inArray(fileMime, editorMimes) !== -1 ) {
 						return true;
 					}
@@ -514,9 +515,31 @@ elFinder.prototype.commands.edit = function() {
 	
 	this.init = function() {
 		var self = this,
-			fm = this.fm;
+			fm   = this.fm,
+			opts = this.options;
+		
 		this.onlyMimes = this.options.mimes || [];
-		binMimeRegex = self.options.binMimeRegex? self.options.binMimeRegex : /$^/;
+		
+		// editors setup
+		if (opts.editors && Array.isArray(opts.editors)) {
+			$.each(opts.editors, function(i, editor) {
+				if (editor.setup && typeof editor.setup === 'function') {
+					editor.setup.call(editor, opts, fm);
+				}
+				if (!editor.disabled) {
+					if (editor.mimes && Array.isArray(editor.mimes)) {
+						mimes = mimes.concat(editor.mimes);
+					}
+				}
+			});
+			
+			mimes = ($.uniqueSort || $.unique)(mimes);
+			
+			opts.editors = $.map(opts.editors, function(e) {
+				return e.disabled? null : e;
+			});
+		}
+		
 		fm.bind('select', function() {
 			if (self.enabled()) {
 				setEditors(fm.file(fm.selected()[0]));
