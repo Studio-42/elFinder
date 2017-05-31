@@ -25,7 +25,7 @@
 					var reParam = new RegExp('(?:[\?&]|&amp;)CKEditorFuncNum=([^&]+)', 'i'),
 						match = window.location.search.match(reParam);
 					return (match && match.length > 1) ? match[1] : '';
-				})(), file.url);
+				})(), fm.convAbsUrl(file.url));
 				fm.destroy();
 				window.close();
 			};
@@ -515,6 +515,11 @@
 				name : 'CKEditor'
 			},
 			exts  : ['htm', 'html', 'xhtml'],
+			setup : function(opts, fm) {
+				if (opts.extraOptions && opts.extraOptions.managerUrl) {
+					this.managerUrl = opts.extraOptions.managerUrl;
+				}
+			},
 			load : function(textarea) {
 				var self = this,
 					fm   = this.fm,
@@ -523,7 +528,16 @@
 						var base = $(textarea).parent(),
 							dlg = base.closest('.elfinder-dialog'),
 							h = base.height(),
-							loc = window.location;
+							reg = /([&?]getfile=)[^&]+/,
+							loc = self.confObj.managerUrl || window.location.href,
+							name = 'ckeditor';
+						
+						// make manager location
+						if (reg.test(loc)) {
+							loc = loc.replace(reg, '$1' + name);
+						} else {
+							loc += '?getfile=' + name;
+						}
 						// set base height
 						base.height(h);
 						// CKEditor configure
@@ -531,7 +545,7 @@
 							startupFocus : true,
 							fullPage: true,
 							allowedContent: true,
-							filebrowserBrowseUrl : loc.origin + loc.pathname + (loc.search? loc.search.replace(/([&?])getfile=[^&]+/, '$1getfile=ckeditor') : '?getfile=ckeditor'),
+							filebrowserBrowseUrl : loc,
 							on: {
 								'instanceReady' : function(e) {
 									var editor = e.editor;
@@ -581,6 +595,11 @@
 				name : 'TinyMCE'
 			},
 			exts  : ['htm', 'html', 'xhtml'],
+			setup : function(opts, fm) {
+				if (opts.extraOptions && opts.extraOptions.managerUrl) {
+					this.managerUrl = opts.extraOptions.managerUrl;
+				}
+			},
 			load : function(textarea) {
 				var self = this,
 					fm   = this.fm,
@@ -630,9 +649,19 @@
 								dfrd.resolve(editor);
 							},
 							file_picker_callback : function (callback, value, meta) {
-								var loc = window.location;
+								var reg = /([&?]getfile=)[^&]+/,
+									loc = self.confObj.managerUrl || window.location.href,
+									name = 'tinymce';
+								
+								// make manager location
+								if (reg.test(loc)) {
+									loc = loc.replace(reg, '$1' + name);
+								} else {
+									loc += '?getfile=' + name;
+								}
+								// launch TinyMCE
 								tinymce.activeEditor.windowManager.open({
-									file: loc.origin + loc.pathname + (loc.search? loc.search.replace(/([&?])getfile=[^&]+/, '$1getfile=tinymce') : '?getfile=tinymce'),
+									file: loc,
 									title: 'elFinder',
 									width: 900,	 
 									height: 450,
