@@ -1,11 +1,45 @@
 (function(editors, elFinder) {
 	if (typeof define === 'function' && define.amd) {
-		define(editors);
+		define(['elfinder'], editors);
 	} else if (elFinder) {
 		var optEditors = elFinder.prototype._options.commandsOptions.edit.editors;
-		elFinder.prototype._options.commandsOptions.edit.editors = optEditors.concat(editors());
+		elFinder.prototype._options.commandsOptions.edit.editors = optEditors.concat(editors(elFinder));
 	}
-}(function() {
+}(function(elFinder) {
+	var // get query of getfile
+		getfile = window.location.search.match(/getfile=([a-z]+)/),
+		// cdns location
+		cdns = {
+			ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.6',
+			codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.26.0',
+			ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.7.0',
+			tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.6.3'
+		};
+	
+	// check getfile callback function
+	if (getfile) {
+		getfile = getfile[1];
+		if (getfile === 'ckeditor') {
+			elFinder.prototype._options.getFileCallback = function(file, fm) {
+				window.opener.CKEDITOR.tools.callFunction((function() {
+					var reParam = new RegExp('(?:[\?&]|&amp;)CKEditorFuncNum=([^&]+)', 'i'),
+						match = window.location.search.match(reParam);
+					return (match && match.length > 1) ? match[1] : '';
+				})(), file.url);
+				fm.destroy();
+				window.close();
+			};
+		} else if (getfile === 'tinymce') {
+			elFinder.prototype._options.getFileCallback = function(file, fm) {
+				// pass selected file data to TinyMCE
+				parent.tinymce.activeEditor.windowManager.getParams().oninsert(file, fm);
+				// close popup window
+				parent.tinymce.activeEditor.windowManager.close();
+			};
+		}
+	}
+	
+	// return editors Array
 	return [
 		{
 			// Adobe Creative SDK Creative Tools Image Editor UI
@@ -175,7 +209,7 @@
 			load : function(textarea) {
 				var self = this,
 					dfrd = $.Deferred(),
-					cdn  = '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.6',
+					cdn  = cdns.ace,
 					start = function() {
 						var editor, editorBase, mode,
 						ta = $(textarea),
@@ -352,7 +386,7 @@
 				name : 'CodeMirror'
 			},
 			load : function(textarea) {
-				var cmUrl = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.26.0',
+				var cmUrl = cdns.codemirror,
 					useRequire = (typeof define === 'function' && define.amd),
 					dfrd = $.Deferred(),
 					self = this,
@@ -488,7 +522,8 @@
 					init = function() {
 						var base = $(textarea).parent(),
 							dlg = base.closest('.elfinder-dialog'),
-							h = base.height();
+							h = base.height(),
+							loc = window.location;
 						// set base height
 						base.height(h);
 						// CKEditor configure
@@ -496,6 +531,7 @@
 							startupFocus : true,
 							fullPage: true,
 							allowedContent: true,
+							filebrowserBrowseUrl : loc.origin + loc.pathname + (loc.search? loc.search.replace(/([&?])getfile=[^&]+/, '$1getfile=ckeditor') : '?getfile=ckeditor'),
 							on: {
 								'instanceReady' : function(e) {
 									var editor = e.editor;
@@ -515,7 +551,7 @@
 						});
 					};
 				if (typeof CKEDITOR === 'undefined') {
-					$.getScript('//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.6.0/ckeditor.js', init);
+					$.getScript(cdns.ckeditor + '/ckeditor.js', init);
 				} else {
 					init();
 				}
@@ -573,7 +609,9 @@
 						tinymce.init({
 							selector: '#' + textarea.id,
 							plugins: [
-								'fullpage' // require for getting full HTML
+								'fullpage', // require for getting full HTML
+								'image', 'link', 'media',
+								'code'
 							],
 							init_instance_callback : function(editor) {
 								// fit height on init
@@ -590,11 +628,47 @@
 								});
 								// return editor instance
 								dfrd.resolve(editor);
+							},
+							file_picker_callback : function (callback, value, meta) {
+								var loc = window.location;
+								tinymce.activeEditor.windowManager.open({
+									file: loc.origin + loc.pathname + (loc.search? loc.search.replace(/([&?])getfile=[^&]+/, '$1getfile=tinymce') : '?getfile=tinymce'),
+									title: 'elFinder',
+									width: 900,	 
+									height: 450,
+									resizable: 'yes'
+								}, {
+									oninsert: function (file, elf) {
+										var url, reg, info;
+
+										// URL normalization
+										url = elf.convAbsUrl(file.url);
+										
+										// Make file info
+										info = file.name + ' (' + elf.formatSize(file.size) + ')';
+
+										// Provide file and text for the link dialog
+										if (meta.filetype == 'file') {
+											callback(url, {text: info, title: info});
+										}
+
+										// Provide image and alt text for the image dialog
+										if (meta.filetype == 'image') {
+											callback(url, {alt: info});
+										}
+
+										// Provide alternative source and posted for the media dialog
+										if (meta.filetype == 'media') {
+											callback(url);
+										}
+									}
+								});
+								return false;
 							}
 						});
 					};
 				if (typeof tinymce === 'undefined') {
-					$.getScript('//cdnjs.cloudflare.com/ajax/libs/tinymce/4.5.0/tinymce.min.js', init);
+					$.getScript(cdns.tinymce + '/tinymce.min.js', init);
 				} else {
 					init(true);
 				}
@@ -613,6 +687,14 @@
 				// fit height to base node on dialog resize
 				textarea._setHeight();
 			}
+		},
+		{
+			// Simple Text (basic textarea editor)
+			info : {
+				name : 'Simple Text'
+			},
+			load : function(){},
+			save : function(){}
 		}
 	];
 }, window.elFinder));
