@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 4a81ae5) (2017-05-31)
+ * Version 2.1.24 (2.1-src Nightly: d99f561) (2017-05-31)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7587,7 +7587,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 4a81ae5)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: d99f561)';
 
 
 
@@ -19310,7 +19310,12 @@ elFinder.prototype.commands.fullscreen = function() {
 					
 					fm.trigger('getfile', {files : data});
 					
-					res = self.callback(data, fm);
+					try {
+						res = self.callback(data, fm);
+					} catch(e) {
+						fm.error(['Error in `getFileCallback`.', e.message]);
+						return;
+					}
 					
 					if (typeof res === 'object' && typeof res.done === 'function') {
 						res.done(done)
