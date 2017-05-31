@@ -35,7 +35,8 @@
 			commandsOptions : {
 				edit : {
 					extraOptions : {
-						creativeCloudApiKey : '6e62687b643a413cbb6aedf72ced95e3'
+						creativeCloudApiKey : '6e62687b643a413cbb6aedf72ced95e3',
+						managerUrl : 'manager.html'
 					}
 				},
 				quicklook : {
@@ -51,7 +52,7 @@
 		},
 		
 		// Start elFinder (REQUIRED)
-		start = function(elFinder, editors, i18nfmsg) {
+		start = function(elFinder, editors, i18nfmsg, extOpts) {
 			// load jQueryUI CSS
 			elFinder.prototype.loadCss('//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/themes/smoothness/jquery-ui.css');
 			
@@ -65,6 +66,8 @@
 				
 				// editors marges to opts.commandOptions.edit
 				opts.commandsOptions.edit.editors = (opts.commandsOptions.edit.editors || []).concat(editors);
+				
+				Object.assign(opts, extOpts);
 				
 				i18nFolderMsgs = i18nfmsg;
 				
@@ -83,6 +86,7 @@
 					'elfinder'
 					, 'extras/editors.default'
 					, 'i18nfmsg'
+					, 'extOpts'
 					, (lang !== 'en')? 'elfinder.lang' : null    // load detected language
 					, 'extras/quicklook.googledocs'                    // optional GoogleDocs preview
 					, (lang === 'jp')? 'extras/encoding-japanese.min' : null // optional Japanese decoder for archive preview
