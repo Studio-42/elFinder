@@ -482,7 +482,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 				.done(function(data) {
 					var exists = {};
 					
-					data.files && fm.cache(data.files);
+					data.files && data.files.length && fm.cache(data.files);
 					
 					$.each(data.files, function(i, f) {
 						var hash = f.hash;

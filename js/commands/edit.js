@@ -372,7 +372,8 @@ elFinder.prototype.commands.edit = function() {
 			
 			fm.request({
 				data   : {cmd : 'get', target  : hash, conv : conv},
-				notify : {type : 'file', cnt : 1}
+				notify : {type : 'file', cnt : 1},
+				preventDefault : true
 			})
 			.done(function(data) {
 				var selEncoding;

@@ -114,6 +114,9 @@ elFinder.prototype.commands.search = function() {
 					}
 				}
 				
+				// because "preventDone : true" so update files cache
+				data.files && data.files.length && fm.cache(data.files);
+				
 				fm.lazy(function() {
 					fm.trigger('search', data);
 				}).then(function() {
