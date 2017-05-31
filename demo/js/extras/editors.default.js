@@ -529,7 +529,7 @@
 							dlg = base.closest('.elfinder-dialog'),
 							h = base.height(),
 							reg = /([&?]getfile=)[^&]+/,
-							loc = self.confObj.managerUrl || window.location.href,
+							loc = self.confObj.managerUrl || window.location.href.replace(/#.*$/, ''),
 							name = 'ckeditor';
 						
 						// make manager location
@@ -650,7 +650,7 @@
 							},
 							file_picker_callback : function (callback, value, meta) {
 								var reg = /([&?]getfile=)[^&]+/,
-									loc = self.confObj.managerUrl || window.location.href,
+									loc = self.confObj.managerUrl || window.location.href.replace(/#.*$/, ''),
 									name = 'tinymce';
 								
 								// make manager location
