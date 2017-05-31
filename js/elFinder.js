@@ -369,7 +369,7 @@ var elFinder = function(node, opts) {
 				f, i;
 
 			for (i = 0; i < l; i++) {
-				f = data[i];
+				f = Object.assign({}, data[i]);
 				if (f.name && f.hash && f.mime) {
 					if (sorterChk && f.phash === cwd) {
 						setSorter(f);
@@ -1704,15 +1704,61 @@ var elFinder = function(node, opts) {
 			 * @return void
 			 **/
 			done = function(data) {
+				var remove = function(removed) {
+					var l       = removed.length,
+						roots   = {},
+						rm      = function(hash) {
+							var file = files[hash], i;
+							if (file) {
+								if (file.mime === 'directory') {
+									if (roots[hash]) {
+										delete self.roots[roots[hash]];
+									}
+									if (self.searchStatus.state < 2) {
+										$.each(files, function(h, f) {
+											f.phash == hash && rm(h);
+										});
+									}
+								}
+								deleteCache(files[hash]);
+							}
+						};
+				
+					$.each(self.roots, function(k, v) {
+						roots[v] = k;
+					});
+					while (l--) {
+						rm(removed[l]);
+					}
+				};
+				
 				data.warning && self.error(data.warning);
 				
 				if (isOpen) {
 					open(data);
 				} else {
-					cache(data.files || []);
-					cache(data.tree || []);
+					if (data.removed && data.removed.length) {
+						remove(data.removed);
+					}
+					data.files && data.files.length && cache(data.files);
+					data.tree && data.tree.length && cache(data.tree);
+					data.added && data.added.length && cache(data.added);
 				}
-
+				
+				if (data.changed && data.changed.length) {
+					$.each(data.changed, function(i, file) {
+						var hash = file.hash;
+						if (files[hash]) {
+							$.each(['locked', 'hidden', 'width', 'height'], function(i, v){
+								if (files[hash][v] && !file[v]) {
+									delete files[hash][v];
+								}
+							});
+						}
+						files[hash] = files[hash] ? Object.assign(files[hash], file) : file;
+					});
+				}
+				
 				self.lazy(function() {
 					// fire some event to update cache/ui
 					data.removed && data.removed.length && self.remove(data);
@@ -2336,16 +2382,14 @@ var elFinder = function(node, opts) {
 	 * @return elFinder
 	 */
 	this.trigger = function(type, data, allowModify) {
-		var type     = type.toLowerCase(),
-			isopen   = (type === 'open'),
-			handlers = listeners[type] || [], i, l, jst, event;
+		var type      = type.toLowerCase(),
+			isopen    = (type === 'open'),
+			dataIsObj = (typeof data === 'object'),
+			handlers  = listeners[type] || [], i, l, jst, event;
 		
 		this.debug('event-'+type, data);
 		
-		if (isopen && !allowModify) {
-			// for performance tuning
-			jst = JSON.stringify(data);
-		}
+		allowModify = true;
 		if (l = handlers.length) {
 			event = $.Event(type);
 			if (allowModify) {
@@ -2357,11 +2401,14 @@ var elFinder = function(node, opts) {
 					// probably un-binded this handler
 					continue;
 				}
-				// only callback has argument
+				// set `event.data` only callback has argument
 				if (handlers[i].length) {
 					if (!allowModify) {
 						// to avoid data modifications. remember about "sharing" passing arguments in js :) 
-						event.data = isopen? JSON.parse(jst) : Object.assign({}, data);
+						if (dataIsObj && !jst) {
+							jst = JSON.stringify(data);
+						}
+						event.data = jst? JSON.parse(jst) : data;
 					}
 				}
 
@@ -3359,58 +3406,12 @@ var elFinder = function(node, opts) {
 				}
 			})
 		})
-		.add(function(e) {
-			cache(e.data.added || []);
-		})
-		.change(function(e) {
-			$.each(e.data.changed||[], function(i, file) {
-				var hash = file.hash;
-				if (files[hash]) {
-					$.each(['locked', 'hidden', 'width', 'height'], function(i, v){
-						if (files[hash][v] && !file[v]) {
-							delete files[hash][v];
-						}
-					});
-				}
-				files[hash] = files[hash] ? Object.assign(files[hash], file) : file;
-			});
-		})
-		.remove(function(e) {
-			var removed = e.data.removed||[],
-				l       = removed.length,
-				roots   = {},
-				rm      = function(hash) {
-					var file = files[hash], i;
-					if (file) {
-						if (file.mime === 'directory') {
-							if (roots[hash]) {
-								delete self.roots[roots[hash]];
-							}
-							if (self.searchStatus.state < 2) {
-								$.each(files, function(h, f) {
-									f.phash == hash && rm(h);
-								});
-							}
-						}
-						deleteCache(files[hash]);
-					}
-				};
-		
-			$.each(self.roots, function(k, v) {
-				roots[v] = k;
-			});
-			while (l--) {
-				rm(removed[l]);
-			}
-			
-		})
 		.bind('searchstart', function(e) {
 			Object.assign(self.searchStatus, e.data);
 			self.searchStatus.state = 1;
 		})
 		.bind('search', function(e) {
 			self.searchStatus.state = 2;
-			cache(e.data.files || []);
 		})
 		.bind('searchend', function() {
 			self.searchStatus.state = 0;
