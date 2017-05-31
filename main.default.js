@@ -40,7 +40,10 @@
 					extraOptions : {
 						// set API key to enable Creative Cloud image editor
 						// see https://console.adobe.io/
-						creativeCloudApiKey : ''
+						creativeCloudApiKey : '',
+						// browsing manager URL for CKEditor, TinyMCE
+						// uses self location with the empty value
+						managerUrl : ''
 					}
 				}
 				,quicklook : {
