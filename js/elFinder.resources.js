@@ -242,7 +242,7 @@ elFinder.prototype.resources = {
 															$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
 														})
 														.on('click', function() {
-															fm.exec(act.cmd, item.hash);
+															fm.exec(act.cmd, [item.hash], { _currentType: 'toast', _currentNode: $(this) });
 														})
 													);
 												}
