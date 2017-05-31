@@ -50,7 +50,12 @@
 					
 					fm.trigger('getfile', {files : data});
 					
-					res = self.callback(data, fm);
+					try {
+						res = self.callback(data, fm);
+					} catch(e) {
+						fm.error(['Error in `getFileCallback`.', e.message]);
+						return;
+					}
 					
 					if (typeof res === 'object' && typeof res.done === 'function') {
 						res.done(done)
