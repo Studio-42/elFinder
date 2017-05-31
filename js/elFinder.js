@@ -2557,6 +2557,11 @@ var elFinder = function(node, opts) {
 	this.isCommandEnabled = function(name, dstHash) {
 		var disabled,
 			cvid = self.cwd().volumeid || '';
+		
+		// In serach results use selected item hash to check
+		if (!dstHash && self.searchStatus.state > 1 && self.selected().length) {
+			dstHash = self.selected()[0];
+		}
 		if (dstHash && (! cvid || dstHash.indexOf(cvid) !== 0)) {
 			disabled = self.option('disabled', dstHash);
 			if (! disabled) {
