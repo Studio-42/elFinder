@@ -7,6 +7,7 @@
  **/  
 (elFinder.prototype.commands.open = function() {
 	this.alwaysEnabled = true;
+	this.noChangeDirOnRemovedCwd = true;
 	
 	this._handlers = {
 		dblclick : function(e) { e.preventDefault(); this.exec() },

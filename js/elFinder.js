@@ -7282,7 +7282,7 @@ elFinder.prototype = {
 		opts = opts || {};
 		
 		$.each(files, function(i, f) {
-			if (f.phash === cwdHash) {
+			if (f.phash === cwdHash || self.searchStatus.state > 1) {
 				newItem = newItem.add(cwd.find('#'+self.cwdHash2Id(f.hash)));
 				if (opts.firstOnly) {
 					return false;
