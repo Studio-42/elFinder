@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: faf00a2) (2017-06-01)
+ * Version 2.1.24 (2.1-src Nightly: b1018e1) (2017-06-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2157,6 +2157,7 @@ var elFinder = function(node, opts) {
 	this.updateCache = function(data) {
 		if ($.isPlainObject(data)) {
 			data.files && data.files.length && cache(data.files);
+			data.tree && data.tree.length && cache(data.tree);
 			data.removed && data.removed.length && remove(data.removed);
 			data.added && data.added.length && cache(data.added);
 			data.changed && data.changed.length && change(data.changed);
@@ -7623,7 +7624,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: faf00a2)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: b1018e1)';
 
 
 
@@ -9676,7 +9677,7 @@ elFinder.prototype.resources = {
 				// for tree
 				dst, dstCls, collapsed, expanded, arrow, subtree;
 
-			if ((! tree && (this.requestCmd? fm.getCommand(req) : this).disabled()) || !node.length) {
+			if (!fm.isCommandEnabled(req, phash) || !node.length) {
 				return dfrd.reject();
 			}
 
