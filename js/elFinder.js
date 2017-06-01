@@ -2126,6 +2126,7 @@ var elFinder = function(node, opts) {
 	this.updateCache = function(data) {
 		if ($.isPlainObject(data)) {
 			data.files && data.files.length && cache(data.files);
+			data.tree && data.tree.length && cache(data.tree);
 			data.removed && data.removed.length && remove(data.removed);
 			data.added && data.added.length && cache(data.added);
 			data.changed && data.changed.length && change(data.changed);
