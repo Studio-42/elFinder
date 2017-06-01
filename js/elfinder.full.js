@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: b1018e1) (2017-06-01)
+ * Version 2.1.24 (2.1-src Nightly: 9595063) (2017-06-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7313,7 +7313,7 @@ elFinder.prototype = {
 		opts = opts || {};
 		
 		$.each(files, function(i, f) {
-			if (f.phash === cwdHash) {
+			if (f.phash === cwdHash || self.searchStatus.state > 1) {
 				newItem = newItem.add(cwd.find('#'+self.cwdHash2Id(f.hash)));
 				if (opts.firstOnly) {
 					return false;
@@ -7624,7 +7624,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: b1018e1)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 9595063)';
 
 
 
@@ -9126,6 +9126,13 @@ elFinder.prototype.command = function(fm) {
 	 * @type  Boolen
 	 */
 	this.alwaysEnabled = false;
+	
+	/**
+	 * Do not change dirctory on removed current work directory
+	 * 
+	 * @type  Boolen
+	 */
+	this.noChangeDirOnRemovedCwd = false;
 	
 	/**
 	 * If true, this means command was disabled by connector.
@@ -12282,11 +12289,12 @@ $.fn.elfindercwd = function(fm, options) {
 			 */
 			remove = function(files) {
 				var l = files.length,
-					inSearch = fm.searchStatus.state === 2,
+					inSearch = fm.searchStatus.state > 1,
+					curCmd = fm.getCommand(fm.currentReqCmd) || {},
 					hash, n, ndx, allItems;
 
 				// removed cwd
-				if (!fm.cwd().hash && fm.currentReqCmd !== 'open') {
+				if (!fm.cwd().hash && !curCmd.noChangeDirOnRemovedCwd) {
 					allItems = fm.files();
 					$.each(cwdParents.reverse(), function(i, h) {
 						if (allItems[h]) {
@@ -13293,7 +13301,7 @@ $.fn.elfindercwd = function(fm, options) {
 				var phash = fm.cwd().hash,
 					regex = query? new RegExp(query.replace(/([\\*\;\.\?\[\]\{\}\(\)\^\$\-\|])/g, '\\$1'), 'i') : null,
 					files = regex
-						? $.map(e.data.added || [], function(f) { return ((! fm.searchStatus.ininc && fm.searchStatus.target === '' && fm.searchStatus.mime === '') || f.phash == phash) && (f.name.match(regex) || (f.i18 && f.i18.match(regex)))? f : null ;})
+						? $.map(e.data.added || [], function(f) { return ((! fm.searchStatus.ininc && (fm.searchStatus.target === '' || fm.searchStatus.mixed) && fm.searchStatus.mime === '') || f.phash == phash) && (f.name.match(regex) || (f.i18 && f.i18.match(regex)))? f : null ;})
 						: $.map(e.data.added || [], function(f) { return f.phash === phash ? f : null; })
 						;
 				add(files);
@@ -20525,6 +20533,7 @@ elFinder.prototype.commands.netunmount = function() {
  **/  
 (elFinder.prototype.commands.open = function() {
 	this.alwaysEnabled = true;
+	this.noChangeDirOnRemovedCwd = true;
 	
 	this._handlers = {
 		dblclick : function(e) { e.preventDefault(); this.exec() },
@@ -22493,6 +22502,7 @@ d=(h[l++]|h[l++]<<8|h[l++]<<16|h[l++]<<24)>>>0;(a.length&4294967295)!==d&&n(Erro
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
 elFinder.prototype.commands.rename = function() {
+	this.noChangeDirOnRemovedCwd = true;
 	
 	this.shortcuts = [{
 		pattern     : 'f2'+(this.fm.OS == 'mac' ? ' enter' : '')
@@ -22539,9 +22549,6 @@ elFinder.prototype.commands.rename = function() {
 				}
 			}, colwidth,
 			dfrd     = $.Deferred()
-				.done(function(data){
-					incwd && fm.exec('open', data.added[0].hash);
-				})
 				.fail(function(error) {
 					var parent = input.parent(),
 						name   = fm.escape(file.i18 || file.name);
@@ -22619,12 +22626,19 @@ elFinder.prototype.commands.rename = function() {
 							}
 						})
 						.done(function(data) {
-							dfrd.resolve(data);
-							if (!navbar && data && data.added && data.added[0]) {
-								var newItem = fm.findCwdNodes(data.added);
-								if (newItem.length) {
-									newItem.trigger('scrolltoview');
-								}
+							dfrd.resolve();
+							if (incwd) {
+								fm.exec('open', data.added[0].hash);
+							} else {
+								fm.one('renamedone', function() {
+									fm.searchStatus.state > 1 && fm.selectfiles({ files: [data.added[0].hash] });
+									if (!navbar && data && data.added && data.added[0]) {
+										var newItem = fm.findCwdNodes(data.added);
+										if (newItem.length) {
+											newItem.trigger('scrolltoview');
+										}
+									}
+								});
 							}
 						})
 						.always(function() {
