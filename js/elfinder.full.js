@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 4a70102) (2017-05-31)
+ * Version 2.1.24 (2.1-src Nightly: faf00a2) (2017-06-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -442,6 +442,60 @@ var elFinder = function(node, opts) {
 			
 			// for empty folder
 			sorterChk && setSorter();
+		},
+		
+		/**
+		 * Delete file object from files caches
+		 * 
+		 * @param  Array  removed hashes
+		 * @return void
+		 */
+		remove = function(removed) {
+			var l       = removed.length,
+				roots   = {},
+				rm      = function(hash) {
+					var file = files[hash], i;
+					if (file) {
+						if (file.mime === 'directory') {
+							if (roots[hash]) {
+								delete self.roots[roots[hash]];
+							}
+							if (self.searchStatus.state < 2) {
+								$.each(files, function(h, f) {
+									f.phash == hash && rm(h);
+								});
+							}
+						}
+						deleteCache(files[hash]);
+					}
+				};
+		
+			$.each(self.roots, function(k, v) {
+				roots[v] = k;
+			});
+			while (l--) {
+				rm(removed[l]);
+			}
+		},
+		
+		/**
+		 * Update file object in files caches
+		 * 
+		 * @param  Array  changed file objects
+		 * @return void
+		 */
+		change = function(changed) {
+			$.each(changed, function(i, file) {
+				var hash = file.hash;
+				if (files[hash]) {
+					$.each(['locked', 'hidden', 'width', 'height'], function(i, v){
+						if (files[hash][v] && !file[v]) {
+							delete files[hash][v];
+						}
+					});
+				}
+				files[hash] = files[hash] ? Object.assign(files[hash], file) : file;
+			});
 		},
 		
 		/**
@@ -1735,60 +1789,15 @@ var elFinder = function(node, opts) {
 			 * @return void
 			 **/
 			done = function(data) {
-				var remove = function(removed) {
-					var l       = removed.length,
-						roots   = {},
-						rm      = function(hash) {
-							var file = files[hash], i;
-							if (file) {
-								if (file.mime === 'directory') {
-									if (roots[hash]) {
-										delete self.roots[roots[hash]];
-									}
-									if (self.searchStatus.state < 2) {
-										$.each(files, function(h, f) {
-											f.phash == hash && rm(h);
-										});
-									}
-								}
-								deleteCache(files[hash]);
-							}
-						};
-				
-					$.each(self.roots, function(k, v) {
-						roots[v] = k;
-					});
-					while (l--) {
-						rm(removed[l]);
-					}
-				};
-				
 				data.warning && self.error(data.warning);
 				
 				if (isOpen) {
 					open(data);
 				} else {
-					if (data.removed && data.removed.length) {
-						remove(data.removed);
-					}
-					data.files && data.files.length && cache(data.files);
-					data.tree && data.tree.length && cache(data.tree);
-					data.added && data.added.length && cache(data.added);
+					self.updateCache(data);
 				}
 				
-				if (data.changed && data.changed.length) {
-					$.each(data.changed, function(i, file) {
-						var hash = file.hash;
-						if (files[hash]) {
-							$.each(['locked', 'hidden', 'width', 'height'], function(i, v){
-								if (files[hash][v] && !file[v]) {
-									delete files[hash][v];
-								}
-							});
-						}
-						files[hash] = files[hash] ? Object.assign(files[hash], file) : file;
-					});
-				}
+				data.changed && data.changed.length && change(data.changed);
 				
 				self.lazy(function() {
 					// fire some event to update cache/ui
@@ -2140,6 +2149,21 @@ var elFinder = function(node, opts) {
 	};
 	
 	/**
+	 * Update file object caches by respose data object
+	 * 
+	 * @param  Object  respose data object
+	 * @return void
+	 */
+	this.updateCache = function(data) {
+		if ($.isPlainObject(data)) {
+			data.files && data.files.length && cache(data.files);
+			data.removed && data.removed.length && remove(data.removed);
+			data.added && data.added.length && cache(data.added);
+			data.changed && data.changed.length && change(data.changed);
+		}
+	};
+	
+	/**
 	 * Compare current files cache with new files and return diff
 	 * 
 	 * @param  Array   new files
@@ -2249,10 +2273,10 @@ var elFinder = function(node, opts) {
 				while(phash) {
 					if (pdir = self.file(phash)) {
 						if (phash.indexOf(curId) !== 0) {
+							parents.push( {target: phash, cmd: 'tree'} );
 							if (! self.isRoot(pdir)) {
-								parents.push( {target: phash, cmd: 'tree'} );
+								parents.push( {target: phash, cmd: 'parents'} );
 							}
-							parents.push( {target: phash, cmd: 'parents'} );
 							curRoot = self.file(self.root(phash));
 							curId = curRoot? curRoot.volumeid : null;
 						}
@@ -2330,6 +2354,10 @@ var elFinder = function(node, opts) {
 			var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []), onlydir);
 
 			diff.added.push(odata.cwd);
+			
+			self.updateCache(diff);
+			
+			// trigger events
 			diff.removed.length && self.remove(diff);
 			diff.added.length   && self.add(diff);
 			diff.changed.length && self.change(diff);
@@ -3780,6 +3808,7 @@ var elFinder = function(node, opts) {
 						self.error(data.error);
 					} else {
 						data.warning && self.error(data.warning);
+						self.updateCache(data);
 						data.removed && data.removed.length && self.remove(data);
 						data.added   && data.added.length   && self.add(data);
 						data.changed && data.changed.length && self.change(data);
@@ -4817,6 +4846,7 @@ elFinder.prototype = {
 						if (data) {
 							self.currentReqCmd = 'upload';
 							data.warning && self.error(data.warning);
+							self.updateCache(data);
 							data.removed && self.remove(data);
 							data.added   && self.add(data);
 							data.changed && self.change(data);
@@ -6561,7 +6591,7 @@ elFinder.prototype = {
 	uniqueName : function(prefix, phash, glue) {
 		var i = 0, ext = '', p, name;
 		
-		prefix = this.i18n(prefix); 
+		prefix = this.i18n(false, prefix);
 		phash = phash || this.cwd().hash;
 		glue = (typeof glue === 'undefined')? ' ' : glue;
 
@@ -7593,7 +7623,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 4a70102)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: faf00a2)';
 
 
 
