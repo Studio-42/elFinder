@@ -6,6 +6,7 @@
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
 elFinder.prototype.commands.rename = function() {
+	this.noChangeDirOnRemovedCwd = true;
 	
 	this.shortcuts = [{
 		pattern     : 'f2'+(this.fm.OS == 'mac' ? ' enter' : '')
@@ -52,9 +53,6 @@ elFinder.prototype.commands.rename = function() {
 				}
 			}, colwidth,
 			dfrd     = $.Deferred()
-				.done(function(data){
-					incwd && fm.exec('open', data.added[0].hash);
-				})
 				.fail(function(error) {
 					var parent = input.parent(),
 						name   = fm.escape(file.i18 || file.name);
@@ -132,12 +130,19 @@ elFinder.prototype.commands.rename = function() {
 							}
 						})
 						.done(function(data) {
-							dfrd.resolve(data);
-							if (!navbar && data && data.added && data.added[0]) {
-								var newItem = fm.findCwdNodes(data.added);
-								if (newItem.length) {
-									newItem.trigger('scrolltoview');
-								}
+							dfrd.resolve();
+							if (incwd) {
+								fm.exec('open', data.added[0].hash);
+							} else {
+								fm.one('renamedone', function() {
+									fm.searchStatus.state > 1 && fm.selectfiles({ files: [data.added[0].hash] });
+									if (!navbar && data && data.added && data.added[0]) {
+										var newItem = fm.findCwdNodes(data.added);
+										if (newItem.length) {
+											newItem.trigger('scrolltoview');
+										}
+									}
+								});
 							}
 						})
 						.always(function() {

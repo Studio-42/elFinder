@@ -64,6 +64,13 @@ elFinder.prototype.command = function(fm) {
 	this.alwaysEnabled = false;
 	
 	/**
+	 * Do not change dirctory on removed current work directory
+	 * 
+	 * @type  Boolen
+	 */
+	this.noChangeDirOnRemovedCwd = false;
+	
+	/**
 	 * If true, this means command was disabled by connector.
 	 * @see this.update()
 	 *
