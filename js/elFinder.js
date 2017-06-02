@@ -3480,10 +3480,10 @@ var elFinder = function(node, opts) {
 	// in getFileCallback set - change default actions on double click/enter/ctrl+enter
 	if (this.commands.getfile) {
 		if (typeof(this.options.getFileCallback) == 'function') {
-			this.bind('dblclick', function() {
+			this.bind('dblclick', function(e) {
 				this.preventDefault();
 				self.exec('getfile').fail(function() {
-					self.exec('open');
+					self.exec('open', e.data && e.data.file? [ e.data.file ]: void(0));
 				});
 			});
 			this.shortcut({
