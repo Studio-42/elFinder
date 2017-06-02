@@ -68,7 +68,15 @@ elFinder.prototype.commands.login = function() {
 				fm.error(res.error);
 			} else {
 				self.update(void(0), res.uname? res.uname : '');
-				fm.sync();
+				var tm,
+					dfd = fm.sync().always(function() { 
+						tm && clearTimeout(tm); 
+					});
+				
+				tm = setTimeout(function() {
+					fm.notify({type : 'reload', cnt : 1, hideCnt : true});
+					dfd.always(function() { fm.notify({type : 'reload', cnt  : -1}); });
+				}, fm.notifyDelay);
 			}
 		});
 	};
