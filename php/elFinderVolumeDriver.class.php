@@ -5692,19 +5692,19 @@ abstract class elFinderVolumeDriver {
 				$arcs['create']['application/x-tar']  = array('cmd' => 'tar', 'argc' => '-cf', 'ext' => 'tar');
 				$arcs['extract']['application/x-tar'] = array('cmd' => 'tar', 'argc' => '-xf', 'ext' => 'tar', 'toSpec' => '-C ');
 				unset($o);
-				$test = $this->procExec('gzip --version', $o, $c);
+				$this->procExec('gzip --version', $o, $c);
 				if ($c == 0) {
 					$arcs['create']['application/x-gzip']  = array('cmd' => 'tar', 'argc' => '-czf', 'ext' => 'tgz');
 					$arcs['extract']['application/x-gzip'] = array('cmd' => 'tar', 'argc' => '-xzf', 'ext' => 'tgz', 'toSpec' => '-C ');
 				}
 				unset($o);
-				$test = $this->procExec('bzip2 --version', $o, $c);
+				$this->procExec('bzip2 --version', $o, $c);
 				if ($c == 0) {
 					$arcs['create']['application/x-bzip2']  = array('cmd' => 'tar', 'argc' => '-cjf', 'ext' => 'tbz');
 					$arcs['extract']['application/x-bzip2'] = array('cmd' => 'tar', 'argc' => '-xjf', 'ext' => 'tbz', 'toSpec' => '-C ');
 				}
 				unset($o);
-				$test = $this->procExec('xz --version', $o, $c);
+				$this->procExec('xz --version', $o, $c);
 				if ($c == 0) {
 					$arcs['create']['application/x-xz']  = array('cmd' => 'tar', 'argc' => '-cJf', 'ext' => 'xz');
 					$arcs['extract']['application/x-xz'] = array('cmd' => 'tar', 'argc' => '-xJf', 'ext' => 'xz', 'toSpec' => '-C ');
@@ -5724,13 +5724,11 @@ abstract class elFinderVolumeDriver {
 			$this->procExec('rar --version', $o, $c);
 			if ($c == 0 || $c == 7) {
 				$arcs['create']['application/x-rar']  = array('cmd' => 'rar', 'argc' => 'a -inul', 'ext' => 'rar');
-				$arcs['extract']['application/x-rar'] = array('cmd' => 'rar', 'argc' => 'x -y',    'ext' => 'rar');
-			} else {
-				unset($o);
-				$test = $this->procExec('unrar', $o, $c);
-				if ($c==0 || $c == 7) {
-					$arcs['extract']['application/x-rar'] = array('cmd' => 'unrar', 'argc' => 'x -y', 'ext' => 'rar', 'toSpec' => '');
-				}
+			}
+			unset($o);
+			$this->procExec('unrar', $o, $c);
+			if ($c==0 || $c == 7) {
+				$arcs['extract']['application/x-rar'] = array('cmd' => 'unrar', 'argc' => 'x -y', 'ext' => 'rar', 'toSpec' => '');
 			}
 			unset($o);
 			$this->procExec('7za --help', $o, $c);
@@ -5769,6 +5767,9 @@ abstract class elFinderVolumeDriver {
 					}
 					if (empty($arcs['extract']['application/x-tar'])) {
 						$arcs['extract']['application/x-tar'] = array('cmd' => '7z', 'argc' => 'x -ttar -y', 'ext' => 'tar', 'toSpec' => '-o');
+					}
+					if (empty($arcs['extract']['application/x-rar'])) {
+						$arcs['extract']['application/x-rar'] = array('cmd' => '7z', 'argc' => 'x -trar -y', 'ext' => 'rar', 'toSpec' => '-o');
 					}
 				}
 			}
