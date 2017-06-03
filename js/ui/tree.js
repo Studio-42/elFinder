@@ -1109,11 +1109,19 @@ $.fn.elfindertree = function(fm, opts) {
 					var link = $(this),
 						hash = fm.navId2Hash(link.attr('id')),
 						file = fm.file(hash);
-					
-						if (link.data('longtap')) {
-							e.stopPropagation();
+
+					if (link.data('longtap')) {
+						e.stopPropagation();
 						return;
 					}
+
+                    var doNotPropagate = fm.middleware.propagate(fm, 'tree.click', [this, link, hash, file]);
+                    if (doNotPropagate) {
+                        e.stopPropagation();
+                        if (doNotPropagate !== true)
+                            fm.error(doNotPropagate);
+                        return;
+                    }
 					
 					if (hash != fm.cwd().hash && !link.hasClass(disabled)) {
 						fm.exec('open', hash).done(function() {
@@ -1161,6 +1169,13 @@ $.fn.elfindertree = function(fm, opts) {
 						slideTH = 30, cnt;
 
 					e.stopPropagation();
+
+                    var doNotPropagate = fm.middleware.propagate(fm, 'tree.clickArrow', [this, arrow, link, stree, dfrd]);
+                    if(doNotPropagate){
+                        if (doNotPropagate !==true)
+                            fm.error(doNotPropagate);
+                        return;
+                    }
 
 					if (link.hasClass(loaded)) {
 						link.toggleClass(expanded);
