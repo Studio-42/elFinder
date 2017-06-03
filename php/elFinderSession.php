@@ -43,9 +43,9 @@ class elFinderSession implements elFinderSessionInterface
 				session_start();
 			}
 		} else {
-			set_error_handler(array($this, 'session_start_error'),  E_NOTICE);
-			session_start();
-			restore_error_handler();
+			if (session_id() === '') {
+				session_start();
+			}
 		}
 		$this->started = session_id()? true : false;
 		
@@ -233,5 +233,4 @@ class elFinderSession implements elFinderSessionInterface
 		return $data;
 	}
 
-	protected function session_start_error($errno , $errstr) {}
 }
