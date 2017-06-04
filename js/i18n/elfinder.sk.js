@@ -2,7 +2,7 @@
  * Slovak translation
  * @author Jakub Ďuraš <jkblmr@gmail.com>
  * @author RobiNN <kelcakrobo@gmail.com>
- * @version 2017-04-21
+ * @version 2017-06-02
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -70,18 +70,19 @@
 			'errUploadMime'        : 'Nepovolený typ súboru.',
 			'errUploadTransfer'    : 'Problém s nahrávaním "$1".',
 			'errUploadTemp'        : 'Nie je možné vytvoriť dočasný súbor pre nahranie.', // from v2.1 added 26.09.2015
-			'errNotReplace'        : 'Objekt "$1" na tomto mieste už existuje a nemôže byť nahradený objektom s iným typom.', // new
+			'errNotReplace'        : 'Objekt "$1" na tomto mieste už existuje a nemôže byť nahradený objektom iného typu.', // new
 			'errReplace'           : 'Nie je možné nahradiť "$1".',
 			'errSave'              : 'Nie je možné uložiť "$1".',
 			'errCopy'              : 'Nie je možné kopíropvať "$1".',
 			'errMove'              : 'Nie je možné preniesť "$1".',
 			'errCopyInItself'      : 'Nie je možné kopírovať "$1" do seba.',
 			'errRm'                : 'Nie je možné vymazať "$1".',
+			'errTrash'             : 'Nie je možné presunúť do koša.', // from v2.1.24 added 30.4.2017
 			'errRmSrc'             : 'Nie je možné odstrániť zdrojové súbor(y).',
 			'errExtract'           : 'Nie je možné extrahovať súbory z "$1".',
 			'errArchive'           : 'Nie je možné vytvoriť archív.',
 			'errArcType'           : 'Nepodporovaný typ archívu.',
-			'errNoArchive'         : 'Súbor nie je archívom, alebo je nepodporovaného typu.',
+			'errNoArchive'         : 'Súbor nie je archív alebo má nepodporovaný typ archívu.',
 			'errCmdNoSupport'      : 'Backend nepodporuje tento príkaz.',
 			'errReplByChild'       : 'Priečinok "$1" nemôže byť nahradený položkou, ktorú už obsahuje.',
 			'errArcSymlinks'       : 'Z bezpečnostných dôvodov bolo zakázané extrahovanie archívov obsahujúcich symlinky, alebo súborov s nepovolenými menami.', // edited 24.06.2012
@@ -110,6 +111,8 @@
 			'errSearchTimeout'     : 'Vypršal časový limit pri hľadaní "$1". Výsledok vyhľadávania je čiastočný.', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : 'Opätovné povolenie je nutné.', // from v2.1.10 added 24.3.2016
 			'errMaxTargets'        : 'Maximálny počet voliteľných predmetov je $1.', // from v2.1.17 added 17.10.2016
+			'errRestore'           : 'Nepodarilo sa obnoviť z koša. Cieľ obnovenia nie je možné identifikovať.', // from v2.1.24 added 3.5.2017
+			'errEditorNotFound'    : 'Editor tohto typu súboru nebol nájdený.', // from v2.1.25 added 23.5.2017
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Vytvoriť archív',
@@ -134,6 +137,8 @@
 			'cmdreload'    : 'Obnoviť',
 			'cmdrename'    : 'Premenovať',
 			'cmdrm'        : 'Vymazať',
+			'cmdtrash'     : 'Do koša', //from v2.1.24 added 29.4.2017
+			'cmdrestore'   : 'Obnoviť', //from v2.1.24 added 3.5.2017
 			'cmdsearch'    : 'Nájsť súbory',
 			'cmdup'        : 'Prejsť do nadradeného priečinka',
 			'cmdupload'    : 'Nahrať súbory',
@@ -170,6 +175,9 @@
 			'btnBackup' : 'Zálohovať', // fromv2.1 added 28.11.2015
 			'btnRename'    : 'Premenovať',      // from v2.1.24 added 6.4.2017
 			'btnRenameAll' : 'Premenovať všetko', // from v2.1.24 added 6.4.2017
+			'btnPrevious' : 'Predchádzajúce ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnNext'     : 'Ďalšie ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnSaveAs'   : 'Uložiť ako', // from v2.1.25 added 24.5.2017
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Otváranie priečinka',
@@ -201,6 +209,12 @@
 			'ntfzipdl'    : 'Vytvorenie súboru na stiahnutie', // from v2.1.7 added 23.1.2016
 			'ntfparents'  : 'Získanie informácie o ceste', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'Spracovanie nahraného súboru', // from v2.1.17 added 2.11.2016
+			'ntftrash'    : 'Vhadzovanie do koša', // from v2.1.24 added 2.5.2017
+			'ntfrestore'  : 'Vykonávanie obnovy z koša', // from v2.1.24 added 3.5.2017
+			'ntfchkdir'   : 'Kontrola cieľového priečinka', // from v2.1.24 added 3.5.2017
+
+			/*********************************** volumes *********************************/
+			'volume_Trash' : 'Kôš', //from v2.1.24 added 29.4.2017
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'neznámy',
@@ -266,9 +280,11 @@
 			'confirmReq'      : 'Očakávam potvrdenie',
 			'confirmRm'       : 'Určite chcete vymazať súbory?<br/>Nebude sa to dať vrátiť späť!',
 			'confirmRepl'     : 'Nahradiť starý súbor novým?',
+			'confirmRest'     : 'Nahradiť existujúcu položku s položkou v koši?', // fromv2.1.24 added 5.5.2017
 			'confirmConvUTF8' : 'Nie je v UTF-8<br/>Previesť na UTF-8?<br/>Obsah sa stane UTF-8 uložením po konverzii.', // from v2.1 added 08.04.2014
 			'confirmNonUTF8'  : 'Kódovanie tohto súboru nemoholo byť detekované. Pre editáciu dočasne potrebujete previesť na UTF-8 .<br/>Prosím, vyberte kódovanie znakov tohto súboru.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'Bol upravený.<br/>Ak zmeny neuložíte, stratíte vykonanú prácu.', // from v2.1 added 15.7.2015
+			'confirmTrash'    : 'Naozaj chcete presunúť položky do koša?', //from v2.1.24 added 29.4.2017
 			'apllyAll'        : 'Použiť na všetky',
 			'name'            : 'Meno',
 			'size'            : 'Veľkosť',
@@ -325,6 +341,7 @@
 			'selectForUpload' : 'Vyberte súbory',
 			'moveFiles'       : 'Premiestniť súbory',
 			'copyFiles'       : 'Kopírovať súbory',
+			'restoreFiles'    : 'Obnoviť položky', // from v2.1.24 added 5.5.2017
 			'rmFromPlaces'    : 'Odstrániť z umiestnení',
 			'aspectRatio'     : 'Pomer zobrazenia',
 			'scale'           : 'Mierka',
@@ -379,7 +396,7 @@
 			'contextmenu'     : 'Kontextové menu', // from v2.1.15 added 9.9.2016
 			'pageTurning'     : 'Otáčanie stránky', // from v2.1.15 added 10.9.2016
 			'volumeRoots'     : 'Korene média', // from v2.1.16 added 16.9.2016
-			'reset'           : 'Reset', // from v2.1.16 added 1.10.2016
+			'reset'           : 'Resetovať', // from v2.1.16 added 1.10.2016
 			'bgcolor'         : 'Farba pozadia', // from v2.1.16 added 1.10.2016
 			'colorPicker'     : 'Výber farby', // from v2.1.16 added 1.10.2016
 			'8pxgrid'         : '8px mriežka', // from v2.1.16 added 4.10.2016
@@ -393,6 +410,7 @@
 			'saveAsEncoding'  : 'Uložiť s vybratým kódovaním', // from v2.1.19 added 2.12.2016
 			'selectFolder'    : 'Vyberte priečinok', // from v2.1.20 added 13.12.2016
 			'firstLetterSearch': 'Hľadanie prvého listu', // from v2.1.23 added 24.3.2017
+			'presets'         : 'Presety', // from v2.1.25 added 26.5.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
