@@ -489,7 +489,7 @@
 			win.appendTo(parent);
 			
 			// close window on escape
-			$(document).keydown(function(e) {
+			$(document).on('keydown.'+fm.namespace, function(e) {
 				e.keyCode == $.ui.keyCode.ESCAPE && self.opened() && win.trigger('close')
 			})
 			
