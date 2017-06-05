@@ -96,6 +96,7 @@
 					node = $(base).children('img:first'),
 					elfNode = fm.getUI(),
 					dfrd = $.Deferred(),
+					container = $('#elfinder-aviary-container'),
 					init = function(onload) {
 						var getLang = function() {
 								var langMap = {
@@ -105,6 +106,31 @@
 								};
 								return langMap[fm.lang]? langMap[fm.lang] : fm.lang;
 							};
+							
+						if (!container.length) {
+							container = $('<div id="elfinder-aviary-container" class="ui-front"/>').css({
+								position: 'fixed',
+								top: 0,
+								right: 0,
+								width: '100%',
+								height: $(window).height(),
+								overflow: 'auto'
+							}).hide().appendTo(elfNode.hasClass('elfinder-fullscreen')? elfNode : 'body');
+							// fit to window size
+							$(window).on('resize.'+fm.namespace, function() {
+								container.css('height', $(window).height());
+							});
+							// bind switch fullscreen event
+							elfNode.on('resize.'+fm.namespace, function(e, data) {
+								data && data.fullscreen && container.appendTo(data.fullscreen === 'on'? elfNode : 'body');
+							});
+							fm.bind('destroy', function() {
+								container.remove();
+							});
+						} else {
+							// always moves to last
+							container.appendTo(container.parent());
+						}
 						node.on('click', launch).data('loading')();
 						featherEditor = new Aviary.Feather({
 							apiKey: self.confObj.apiKey,
@@ -135,7 +161,7 @@
 						});
 						node.data('loading')(true);
 					},
-					featherEditor, container, extraOpts;
+					featherEditor, extraOpts;
 				
 				// Cancel editing with IE8
 				if (fm.UA.ltIE8) {
@@ -144,31 +170,10 @@
 				
 				// load script then init
 				if (typeof Aviary === 'undefined') {
-					if (!(container = $('#elfinder-aviary-container')).length) {
-						container = $('<div id="elfinder-aviary-container" class="ui-front"/>').css({
-							position: 'fixed',
-							top: 0,
-							right: 0,
-							width: '100%',
-							height: $(window).height(),
-							overflow: 'auto'
-						}).hide().appendTo(elfNode.hasClass('elfinder-fullscreen')? elfNode : 'body');
-						// fit to window size
-						$(window).on('resize', function() {
-							container.css('height', $(window).height());
-						});
-						// bind switch fullscreen event
-						elfNode.on('resize', function(e, data) {
-							data && data.fullscreen && container.appendTo(data.fullscreen === 'on'? elfNode : 'body');
-						});
-					}
 					fm.loadScript(['https://dme0ih8comzn4.cloudfront.net/imaging/v3/editor.js'], function() {
 						init(launch);
 					});
 				} else {
-					container = $('#elfinder-aviary-container');
-					// always moves to last
-					container.appendTo(container.parent());
 					init();
 					launch();
 				}
