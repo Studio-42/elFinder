@@ -2516,7 +2516,7 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$this->clearcache();
-		return $this->convEncOut($this->_filePutContents($this->convEncIn($path), $content)) ? $this->stat($path) : false;
+		return $this->convEncOut($this->_filePutContents($this->convEncIn($path), $this->convEncIn($content))) ? $this->stat($path) : false;
 	}
 
 	/**
