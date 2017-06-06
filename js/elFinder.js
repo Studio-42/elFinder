@@ -654,7 +654,7 @@ var elFinder = function(node, opts) {
 				}
 				fm.loadCss([baseUrl+'css/elfinder.min.css', baseUrl+'css/theme.css']);
 				
-				this.baseUrl = baseUrl;
+				fm.baseUrl = baseUrl;
 				
 				// additional CSS files
 				if (Array.isArray(fm.options.cssAutoLoad)) {
