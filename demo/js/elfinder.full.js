@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 58849f3) (2017-06-07)
+ * Version 2.1.24 (2.1-src Nightly: 8600c41) (2017-06-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -650,6 +650,13 @@ var elFinder = function(node, opts) {
 	this.netDrivers = [];
 	
 	/**
+	 * Base URL of elfFinder library starting from Manager HTML
+	 * 
+	 * @type String
+	 */
+	this.baseUrl = '';
+	
+	/**
 	 * Configuration options
 	 *
 	 * @type Object
@@ -677,6 +684,8 @@ var elFinder = function(node, opts) {
 					}
 				}
 				fm.loadCss([baseUrl+'css/elfinder.min.css', baseUrl+'css/theme.css']);
+				
+				this.baseUrl = baseUrl;
 				
 				// additional CSS files
 				if (Array.isArray(fm.options.cssAutoLoad)) {
@@ -750,6 +759,10 @@ var elFinder = function(node, opts) {
 	
 	if (! inFrame && ! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
 		this.options.enableAlways = true;
+	}
+	
+	if (this.baseUrl === '') {
+		this.baseUrl = this.options.baseUrl? this.options.baseUrl : '';
 	}
 	
 	// Check and save conflicts with bootstrap etc
@@ -7629,7 +7642,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 58849f3)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 8600c41)';
 
 
 
@@ -8083,6 +8096,15 @@ elFinder.prototype._options = {
 	 */
 	lang : 'en',
 
+	/**
+	 * Base URL of elfFinder library starting from Manager HTML
+	 * Auto detect when cssAutoLoad is `true`
+	 * 
+	 * @type String
+	 * @default "./"
+	 */
+	baseUrl : './',
+	
 	/**
 	 * Auto load required CSS
 	 * `false` to disable this function or
@@ -18986,7 +19008,7 @@ elFinder.prototype.commands.edit = function() {
 				if (Object.keys(editors).length > 1) {
 					self.variants = [];
 					$.each(editors, function(name, editor) {
-						self.variants.push([{ editor: editor }, fm.i18n(name), editor.info && editor.info.iconImg? editor.info.iconImg : 'edit']);
+						self.variants.push([{ editor: editor }, fm.i18n(name), editor.info && editor.info.iconImg? fm.baseUrl + editor.info.iconImg : 'edit']);
 					});
 				} else {
 					delete self.variants;
@@ -19020,7 +19042,7 @@ elFinder.prototype.commands.edit = function() {
 							{
 								label    : fm.escape(name),
 								icon     : ed.info && ed.info.icon? ed.info.icon : 'edit',
-								options  : { iconImg: ed.info && ed.info.iconImg? ed.info.iconImg : void(0) },
+								options  : { iconImg: ed.info && ed.info.iconImg? fm.baseUrl + ed.info.iconImg : void(0) },
 								callback : function() {
 									dfd.resolve(ed);
 								}
