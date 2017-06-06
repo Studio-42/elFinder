@@ -14,6 +14,139 @@
 			codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.26.0',
 			ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.7.0',
 			tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.6.3'
+		},
+		initImgTag = function(id, file, content, fm) {
+			var node = $(this).children('img:first'),
+				spnr = $('<div/>')
+					.css({
+						position: 'absolute',
+						top: '50%',
+						textAlign: 'center',
+						width: '100%',
+						fontSize: '16pt'
+					})
+					.html(fm.i18n('ntfloadimg'))
+					.hide()
+					.appendTo(this);
+			
+			node.data('file', file)
+				.attr('id', id+'-img')
+				.attr('src', content)
+				.css({'height':'', 'max-width':'100%', 'max-height':'100%', 'cursor':'pointer'})
+				.data('loading', function(done) {
+					var btns = node.closest('.elfinder-dialog').find('button,.elfinder-titlebar-button');
+					btns.prop('disabled', !done)[done? 'removeClass' : 'addClass']('ui-state-disabled');
+					node.css('opacity', done? '' : '0.3');
+					spnr[done? 'hide' : 'show']();
+					return node;
+				});
+		},
+		imgBase64 = function(node, mime) {
+			var style = node.attr('style'),
+				img, canvas, ctx, data;
+			try {
+				// reset css for getting image size
+				node.attr('style', '');
+				// img node
+				img = node.get(0);
+				// New Canvas
+				canvas = document.createElement('canvas');
+				canvas.width  = img.width;
+				canvas.height = img.height;
+				// restore css
+				node.attr('style', style);
+				// Draw Image
+				canvas.getContext('2d').drawImage(img, 0, 0);
+				// To Base64
+				data = canvas.toDataURL(mime);
+			} catch(e) {
+				data = node.attr('src');
+			}
+			return data;
+		},
+		pixlrSetup = function(opts, fm) {
+			var hasFlash = (function() {
+				var hasFlash;
+				try {
+					hasFlash = !!(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
+				} catch (e) {
+					hasFlash = !!(navigator && navigator.mimeTypes["application/x-shockwave-flash"]);
+				}
+				return hasFlash;
+			})();
+			if (!hasFlash) {
+				this.disabled = true;
+			} else {
+				(function() {
+					var pixlr = window.location.search.match(/[?&]pixlr=([^&]+)/),
+						image = window.location.search.match(/[?&]image=([^&]+)/),
+						p, ifm, url, node;
+					if (pixlr) {
+						// case of redirected from pixlr.com
+						p = window.parent
+						ifm = p.$('#'+pixlr[1]+'iframe').hide();
+						node = p.$('#'+pixlr[1]).data('resizeoff')();
+						if (image[1].substr(0, 4) === 'http') {
+							url = image[1];
+							if (window.location.protocol === 'https:') {
+								url = url.replace(/^http:/, 'https:');
+							}
+							node.on('load error', function() {
+									node.data('loading')(true);
+								})
+								.attr('src', url)
+								.data('loading')();
+						} else {
+							node.data('loading')(true);
+						}
+						ifm.remove();
+					}
+				})();
+			}
+		},
+		pixlrLoad = function(mode, base) {
+			var fm = this.fm,
+				node = $(base).children('img:first')
+					.data('loading')()
+					.data('resizeoff', function() {
+						$(window).off('resize.'+node.attr('id'));
+						return node;
+					})
+					.on('click', function() {
+						launch();
+					}),
+				elfNode = fm.getUI(),
+				container = $('<iframe class="ui-front" allowtransparency="true">'),
+				file = node.data('file'),
+				src = 'https://pixlr.com/'+mode+'/?s=c',
+				myurl = window.location.href.toString().replace(/#.*$/, ''),
+				launch = function() {
+					myurl += (myurl.indexOf('?') === -1? '?' : '&') + 'pixlr='+node.attr('id');
+					src += '&referrer=elFinder&locktitle=true&locktype=true';
+					src += '&exit='+encodeURIComponent(myurl+'&image=0');
+					src += '&target='+encodeURIComponent(myurl);
+					src += '&title='+encodeURIComponent(file.name);
+					src += '&image='+encodeURIComponent(node.attr('src'));
+					container
+						.attr('id', node.attr('id')+'iframe')
+						.attr('src', src)
+						.css({
+							width: '100%',
+							height: $(window).height()+'px',
+							position: 'fixed',
+							display: 'block',
+							backgroundColor: 'transparent',
+							border: 'none',
+							top: 0,
+							right: 0
+						})
+						.appendTo(elfNode.hasClass('elfinder-fullscreen')? elfNode : 'body');
+					// fit to window size
+					$(window).on('resize.'+node.attr('id'), function() {
+						container.css('height', $(window).height());
+					});
+				};
+			launch();
 		};
 	
 	// check getfile callback function
@@ -42,6 +175,66 @@
 	// return editors Array
 	return [
 		{
+			// Pixlr Editor
+			info : {
+				name : 'Pixlr Editor'
+			},
+			// MIME types to accept
+			mimes : ['image/jpeg', 'image/png'],
+			// HTML of this editor
+			html : '<div style="width:100%;height:300px;text-align:center;"><img/></div>',
+			// called on initialization of elFinder cmd edit (this: this editor's config object)
+			setup : function(opts, fm) {
+				pixlrSetup.call(this, opts, fm);
+			},
+			// Initialization of editing node (this: this editors HTML node)
+			init : function(id, file, content, fm) {
+				initImgTag.call(this, id, file, fm.convAbsUrl(fm.openUrl(file.hash, true)), fm);
+			},
+			// Get data uri scheme (this: this editors HTML node)
+			getContent : function() {
+				return $(this).children('img:first').attr('src');
+			},
+			load : function(base) {
+				pixlrLoad.call(this, 'editor', base)
+			},
+			save : function(base) {},
+			// unbind resize event function
+			close : function(base) {
+				//$(window).off('resize.'+$(base).children('img:first').attr('id'));
+			}
+		},
+		{
+			// Pixlr Editor
+			info : {
+				name : 'Pixlr Express'
+			},
+			// MIME types to accept
+			mimes : ['image/jpeg', 'image/png'],
+			// HTML of this editor
+			html : '<div style="width:100%;height:300px;text-align:center;"><img/></div>',
+			// called on initialization of elFinder cmd edit (this: this editor's config object)
+			setup : function(opts, fm) {
+				pixlrSetup.call(this, opts, fm);
+			},
+			// Initialization of editing node (this: this editors HTML node)
+			init : function(id, file, content, fm) {
+				initImgTag.call(this, id, file, fm.convAbsUrl(fm.openUrl(file.hash, true)), fm);
+			},
+			// Get data uri scheme (this: this editors HTML node)
+			getContent : function() {
+				return $(this).children('img:first').attr('src');
+			},
+			load : function(base) {
+				pixlrLoad.call(this, 'express', base)
+			},
+			save : function(base) {},
+			// unbind resize event function
+			close : function(base) {
+				//$(window).off('resize.'+$(base).children('img:first').attr('id'));
+			}
+		},
+		{
 			// Adobe Creative SDK Creative Tools Image Editor UI
 			// MIME types to accept
 			info : {
@@ -52,7 +245,7 @@
 			html : '<div style="width:100%;height:300px;text-align:center;"><img/></div>',
 			// called on initialization of elFinder cmd edit (this: this editor's config object)
 			setup : function(opts, fm) {
-				if (!opts.extraOptions || !opts.extraOptions.creativeCloudApiKey) {
+				if (fm.UA.ltIE8 || !opts.extraOptions || !opts.extraOptions.creativeCloudApiKey) {
 					this.disabled = true;
 				} else {
 					this.apiKey = opts.extraOptions.creativeCloudApiKey;
@@ -60,30 +253,7 @@
 			},
 			// Initialization of editing node (this: this editors HTML node)
 			init : function(id, file, content, fm) {
-				var node = $(this).children('img:first'),
-					spnr = $('<div/>')
-						.css({
-							position: 'absolute',
-							top: '50%',
-							textAlign: 'center',
-							width: '100%',
-							fontSize: '16pt'
-						})
-						.html(fm.i18n('ntfloadimg'))
-						.hide()
-						.appendTo(this);
-				
-				node.data('mime', file.mime)
-					.attr('id', id+'-img')
-					.attr('src', content)
-					.css({'height':'', 'max-width':'100%', 'max-height':'100%', 'cursor':'pointer'})
-					.data('loading', function(done) {
-						var btns = node.closest('.elfinder-dialog').find('button,.elfinder-titlebar-button');
-						btns.prop('disabled', !done)[done? 'removeClass' : 'addClass']('ui-state-disabled');
-						node.css('opacity', done? '' : '0.3');
-						spnr[done? 'hide' : 'show']();
-						return node;
-					});
+				initImgTag.call(this, id, file, content, fm);
 			},
 			// Get data uri scheme (this: this editors HTML node)
 			getContent : function() {
@@ -163,11 +333,6 @@
 					},
 					featherEditor, extraOpts;
 				
-				// Cancel editing with IE8
-				if (fm.UA.ltIE8) {
-					return dfrd.reject('IE8 does not supported.');
-				}
-				
 				// load script then init
 				if (typeof Aviary === 'undefined') {
 					fm.loadScript(['https://dme0ih8comzn4.cloudfront.net/imaging/v3/editor.js'], function() {
@@ -181,27 +346,9 @@
 			},
 			// Convert content url to data uri scheme to save content
 			save : function(base) {
-				var imgBase64 = function(node) {
-						var style = node.attr('style'),
-							img, canvas, ctx;
-						// reset css for getting image size
-						node.attr('style', '');
-						// img node
-						img = node.get(0);
-						// New Canvas
-						canvas = document.createElement('canvas');
-						canvas.width  = img.width;
-						canvas.height = img.height;
-						// restore css
-						node.attr('style', style);
-						// Draw Image
-						canvas.getContext('2d').drawImage(img, 0, 0);
-						// To Base64
-						return canvas.toDataURL(node.data('mime'));
-					},
-					node = $(base).children('img:first');
+				var node = $(base).children('img:first');
 				if (node.attr('src').substr(0, 5) !== 'data:') {
-					node.attr('src', imgBase64(node));
+					node.attr('src', imgBase64(node, node.data('mime')));
 				}
 			}
 		},
