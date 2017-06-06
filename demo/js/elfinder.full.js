@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: c9ab170) (2017-06-04)
+ * Version 2.1.24 (2.1-src Nightly: 3898c6a) (2017-06-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2730,21 +2730,13 @@ var elFinder = function(node, opts) {
 				}
 				return m;
 			},
-			fitToBase = function() {
-				tm && clearTimeout(tm);
-				if (! node.hasClass('elfinder-fullscreen')) {
-					tm = setTimeout(function() {
-						self.restoreSize();
-					}, 100);
-				}
-			},
 			fit = ! node.hasClass('ui-resizable'),
 			prv = node.data('resizeSize') || {w: 0, h: 0},
-			mt, tm, size = {};
+			mt, size = {};
 
-		if (fit && heightBase) {
-			tm && clearTimeout(tm);
-			heightBase.off('resize.' + self.namespace, fitToBase);
+		if (heightBase && heightBase.data('resizeTm')) {
+			clearTimeout(heightBase.data('resizeTm'));
+		//	heightBase.off('resize.' + self.namespace, fitToBase);
 		}
 		
 		if (typeof h === 'string') {
@@ -2756,10 +2748,21 @@ var elFinder = function(node, opts) {
 				if (! heightBase.data('marginToMyNode')) {
 					heightBase.data('marginToMyNode', getMargin());
 				}
-				
+				if (! heightBase.data('fitToBaseFunc')) {
+					heightBase.data('fitToBaseFunc', function() {
+						var tm = heightBase.data('resizeTm');
+						tm && clearTimeout(tm);
+						if (! node.hasClass('elfinder-fullscreen')) {
+							heightBase.data('resizeTm', setTimeout(function() {
+								self.restoreSize();
+							}, 100));
+						}
+					});
+				}
 				h = heightBase.height() * (mt[1] / 100) - heightBase.data('marginToMyNode');
 				
-				fit && heightBase.on('resize.' + self.namespace, fitToBase);
+				heightBase.off('resize.' + self.namespace, heightBase.data('fitToBaseFunc'));
+				fit && heightBase.on('resize.' + self.namespace, heightBase.data('fitToBaseFunc'));
 			}
 		}
 		
@@ -7626,7 +7629,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: c9ab170)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 3898c6a)';
 
 
 
@@ -21681,7 +21684,7 @@ elFinder.prototype.commands.places = function() {
 			win.appendTo(parent);
 			
 			// close window on escape
-			$(document).keydown(function(e) {
+			$(document).on('keydown.'+fm.namespace, function(e) {
 				e.keyCode == $.ui.keyCode.ESCAPE && self.opened() && win.trigger('close')
 			})
 			
