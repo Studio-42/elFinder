@@ -147,6 +147,15 @@ elFinder.prototype._options = {
 	lang : 'en',
 
 	/**
+	 * Base URL of elfFinder library starting from Manager HTML
+	 * Auto detect when cssAutoLoad is `true`
+	 * 
+	 * @type String
+	 * @default "./"
+	 */
+	baseUrl : './',
+	
+	/**
 	 * Auto load required CSS
 	 * `false` to disable this function or
 	 * CSS URL Array to load additional CSS files

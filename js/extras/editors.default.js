@@ -178,7 +178,7 @@
 			// Pixlr Editor
 			info : {
 				name : 'Pixlr Editor',
-				iconImg : './img/edit_pixlreditor.png'
+				iconImg : 'img/edit_pixlreditor.png'
 			},
 			// MIME types to accept
 			mimes : ['image/jpeg', 'image/png'],
@@ -209,7 +209,7 @@
 			// Pixlr Editor
 			info : {
 				name : 'Pixlr Express',
-				iconImg : './img/edit_pixlrexpress.png'
+				iconImg : 'img/edit_pixlrexpress.png'
 			},
 			// MIME types to accept
 			mimes : ['image/jpeg', 'image/png'],
@@ -241,7 +241,7 @@
 			// MIME types to accept
 			info : {
 				name : 'Creative Cloud',
-				iconImg : './img/edit_creativecloud.png'
+				iconImg : 'img/edit_creativecloud.png'
 			},
 			mimes : ['image/jpeg', 'image/png'],
 			// HTML of this editor
@@ -360,7 +360,7 @@
 			// `mimes` is not set for support everything kind of text file
 			info : {
 				name : 'ACE Editor',
-				iconImg : './img/edit_aceeditor.png'
+				iconImg : 'img/edit_aceeditor.png'
 			},
 			load : function(textarea) {
 				var self = this,
@@ -540,7 +540,7 @@
 			// `mimes` is not set for support everything kind of text file
 			info : {
 				name : 'CodeMirror',
-				iconImg : './img/edit_codemirror.png'
+				iconImg : 'img/edit_codemirror.png'
 			},
 			load : function(textarea) {
 				var cmUrl = cdns.codemirror,
@@ -670,7 +670,7 @@
 			// CKEditor for html file
 			info : {
 				name : 'CKEditor',
-				iconImg : './img/edit_ckeditor.png'
+				iconImg : 'img/edit_ckeditor.png'
 			},
 			exts  : ['htm', 'html', 'xhtml'],
 			setup : function(opts, fm) {
@@ -751,7 +751,7 @@
 			// TinyMCE for html file
 			info : {
 				name : 'TinyMCE',
-				iconImg : './img/edit_tinymce.png'
+				iconImg : 'img/edit_tinymce.png'
 			},
 			exts  : ['htm', 'html', 'xhtml'],
 			setup : function(opts, fm) {
