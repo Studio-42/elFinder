@@ -1,3 +1,18 @@
+2017-0x-xx  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.25):
+		- [php] Fixed #2014 "Parse error" on PHP < 5.3
+		- [core,API] Fixed #1431 cmd `edit` supports Data Uri Scheme
+		- [cmd:edit] Added Pixlr Editor, Pixlr Express, Cleative Cloud Image editor, Ace Editor, CodeMirror, CkEditor and TinyMCE as default editors
+		- [cmd:edit] Fixed #2020 add "Save As" button 
+		- [cmd:resize] Fixed #2016 add Preset size buttons
+		- [cmd:resize] Fixed #2019 conflict with the bootstrap.js
+		- [CD:abstract] Fixed #2025 cannot edit any files with `memory_limit` = -1
+		- [cmd:edit] Fixed #2027 make it selectable from multiple editors
+		- [VD:abstract,LocalFileSystem] Fixed #2035 support multipart rar extraction
+		- And some minor bug fixes
+
+
 2017-05-19  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.24):
