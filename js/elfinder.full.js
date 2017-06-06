@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 3898c6a) (2017-06-06)
+ * Version 2.1.24 (2.1-src Nightly: 58849f3) (2017-06-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7629,7 +7629,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 3898c6a)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 58849f3)';
 
 
 
@@ -10576,6 +10576,13 @@ $.fn.elfindercontextmenu = function(fm) {
 						callback();
 					});
 			},
+			urlIcon = function(iconUrl) {
+				return {
+					backgroundImage: 'url("'+iconUrl+'")',
+					backgroundRepeat: 'no-repeat',
+					backgroundSize: 'contain'
+				};
+			},
 			base, cwd,
 			nodes, selected, subnodes, subselected, autoSyncStop, subHoverTm,
 
@@ -10912,10 +10919,19 @@ $.fn.elfindercontextmenu = function(fm) {
 								});
 							
 							$.each(cmd.variants, function(i, variant) {
-								submenu.append(
-									variant === '|' ? '<div class="elfinder-contextmenu-separator"/>' :
-									$('<div class="'+cmItem+' '+smItem+'"><span>'+variant[1]+'</span></div>').data('exec', variant[0])
-								);
+								var item = variant === '|' ? '<div class="elfinder-contextmenu-separator"/>' :
+									$('<div class="'+cmItem+' '+smItem+'"><span>'+variant[1]+'</span></div>').data('exec', variant[0]),
+									iconClass, icon;
+								if (typeof variant[2] !== 'undefined') {
+									icon = $('<span/>').addClass('elfinder-button-icon elfinder-contextmenu-icon');
+									if (! /\//.test(variant[2])) {
+										icon.addClass('elfinder-button-icon-'+variant[2]);
+									} else {
+										icon.css(urlIcon(variant[2]));
+									}
+									item.prepend(icon).addClass(smItem+'-icon');
+								}
+								submenu.append(item);
 							});
 								
 						} else {
@@ -18970,7 +18986,7 @@ elFinder.prototype.commands.edit = function() {
 				if (Object.keys(editors).length > 1) {
 					self.variants = [];
 					$.each(editors, function(name, editor) {
-						self.variants.push([{ editor: editor }, fm.i18n(name)]);
+						self.variants.push([{ editor: editor }, fm.i18n(name), editor.info && editor.info.iconImg? editor.info.iconImg : 'edit']);
 					});
 				} else {
 					delete self.variants;
@@ -19004,6 +19020,7 @@ elFinder.prototype.commands.edit = function() {
 							{
 								label    : fm.escape(name),
 								icon     : ed.info && ed.info.icon? ed.info.icon : 'edit',
+								options  : { iconImg: ed.info && ed.info.iconImg? ed.info.iconImg : void(0) },
 								callback : function() {
 									dfd.resolve(ed);
 								}
