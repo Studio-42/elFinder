@@ -547,7 +547,7 @@ elFinder.prototype.commands.edit = function() {
 				if (Object.keys(editors).length > 1) {
 					self.variants = [];
 					$.each(editors, function(name, editor) {
-						self.variants.push([{ editor: editor }, fm.i18n(name)]);
+						self.variants.push([{ editor: editor }, fm.i18n(name), editor.info && editor.info.iconImg? editor.info.iconImg : 'edit']);
 					});
 				} else {
 					delete self.variants;
@@ -581,6 +581,7 @@ elFinder.prototype.commands.edit = function() {
 							{
 								label    : fm.escape(name),
 								icon     : ed.info && ed.info.icon? ed.info.icon : 'edit',
+								options  : { iconImg: ed.info && ed.info.iconImg? ed.info.iconImg : void(0) },
 								callback : function() {
 									dfd.resolve(ed);
 								}
