@@ -1729,7 +1729,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function _copy($source, $targetDir, $name)
     {
-        $path = $this->_normpath($targetDir.'/'.$name);
+        $source = $this->_normpath($source);
+        $targetDir = $this->_normpath($targetDir);
 
         try {
             $file = new \Google_Service_Drive_DriveFile();

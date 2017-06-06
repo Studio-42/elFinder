@@ -1919,18 +1919,18 @@ class elFinder {
 	}
 	
 	/**
-	 * Detect file type extension by local path
+	 * Detect file MIME Type by local path
 	 * 
 	 * @param  string $path Local path
-	 * @return string file type extension with dot
+	 * @return string file MIME Type
 	 * @author Naoki Sawada
 	 */
-	protected function detectFileExtension($path) {
+	protected function detectMimeType($path) {
 		static $type, $finfo, $volume;
 		if (!$type) {
 			$keys = array_keys($this->volumes);
 			$volume = $this->volumes[$keys[0]];
-			
+				
 			if (class_exists('finfo', false)) {
 				$tmpFileInfo = explode(';', finfo_file(finfo_open(FILEINFO_MIME), __FILE__));
 			} else {
@@ -1942,7 +1942,7 @@ class elFinder {
 				$finfo = finfo_open(FILEINFO_MIME);
 			} elseif (function_exists('mime_content_type')
 					&& preg_match($regexp, array_shift(explode(';', mime_content_type(__FILE__))))) {
-				$type = 'mime_content_type';
+						$type = 'mime_content_type';
 			} elseif (function_exists('getimagesize')) {
 				$type = 'getimagesize';
 			} else {
@@ -1964,7 +1964,7 @@ class elFinder {
 		if ($mime) {
 			$mime = explode(';', $mime);
 			$mime = trim($mime[0]);
-			
+				
 			if (in_array($mime, array('application/x-empty', 'inode/x-empty'))) {
 				// finfo return this mime for empty files
 				$mime = 'text/plain';
@@ -1973,8 +1973,20 @@ class elFinder {
 				$mime = 'application/zip';
 			}
 		}
-
-		$ext = $mime? $volume->getExtentionByMime($mime) : '';
+		
+		return $mime? $mime : 'unknown';
+	}
+	
+	/**
+	 * Detect file type extension by local path
+	 * 
+	 * @param  string $path Local path
+	 * @return string file type extension with dot
+	 * @author Naoki Sawada
+	 */
+	protected function detectFileExtension($path) {
+		$mime = $this->detectMimeType($path);
+		$ext = $mime !== 'unknown'? $volume->getExtentionByMime($mime) : '';
 		return $ext? ('.' . $ext) : '';
 	}
 	
@@ -2697,7 +2709,15 @@ class elFinder {
 		
 		$this->itemLock($target);
 		
-		if (! empty($args['encoding'])) {
+		if (preg_match('~^https?://~i', $args['content'])) {
+			$fp = $this->get_remote_contents($args['content'], 30, 5, 'Mozilla/5.0', tmpfile());
+			if (! $fp) {
+				return  array('error' => self::ERROR_SAVE, $args['content'], self::ERROR_FILE_NOT_FOUND);
+			}
+			$fmeta = stream_get_meta_data($fp);
+			$mime = $this->detectMimeType($fmeta['uri']);
+			$args['content'] = 'data:'.$mime.';base64,'.base64_encode(file_get_contents($fmeta['uri']));
+		} else if (! empty($args['encoding'])) {
 			$content = iconv('UTF-8', $args['encoding'], $args['content']);
 			if ($content === false && function_exists('mb_detect_encoding')) {
 				$content = mb_convert_encoding($args['content'], $args['encoding'], 'UTF-8');
