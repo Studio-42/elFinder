@@ -619,6 +619,13 @@ var elFinder = function(node, opts) {
 	this.netDrivers = [];
 	
 	/**
+	 * Base URL of elfFinder library starting from Manager HTML
+	 * 
+	 * @type String
+	 */
+	this.baseUrl = '';
+	
+	/**
 	 * Configuration options
 	 *
 	 * @type Object
@@ -646,6 +653,8 @@ var elFinder = function(node, opts) {
 					}
 				}
 				fm.loadCss([baseUrl+'css/elfinder.min.css', baseUrl+'css/theme.css']);
+				
+				this.baseUrl = baseUrl;
 				
 				// additional CSS files
 				if (Array.isArray(fm.options.cssAutoLoad)) {
@@ -719,6 +728,10 @@ var elFinder = function(node, opts) {
 	
 	if (! inFrame && ! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
 		this.options.enableAlways = true;
+	}
+	
+	if (this.baseUrl === '') {
+		this.baseUrl = this.options.baseUrl? this.options.baseUrl : '';
 	}
 	
 	// Check and save conflicts with bootstrap etc
