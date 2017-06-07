@@ -782,7 +782,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
         // fallback of $this->tmp
         if (!$this->tmp && $this->tmbPathWritable) {
-        	$this->tmp = $this->tmbPath;
+            $this->tmp = $this->tmbPath;
         }
 
         $this->disabled[] = 'archive';
@@ -1012,6 +1012,13 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      **/
     public function getContentUrl($hash, $options = array())
     {
+        if (!empty($options['temporary'])) {
+            // try make temporary file
+            $url = parent::getContentUrl($hash, $options);
+            if ($url) {
+                return $url;
+            }
+        }
         $res = '';
         if (($file = $this->file($hash)) == false || !$file['url'] || $file['url'] == 1) {
             $path = $this->decode($hash);

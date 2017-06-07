@@ -80,6 +80,24 @@ abstract class elFinderVolumeDriver {
 	protected $URL = '';
 	
 	/**
+	 * A file save destination path when a temporary content URL is required
+	 * on a network volume or the like
+	 * If not specified, it tries to use "Connector Path/../files/.tmb".
+	 *
+	 * @var string
+	 */
+	protected $tmpLinkPath = '';
+	
+	/**
+	 * A file save destination URL when a temporary content URL is required
+	 * on a network volume or the like
+	 * If not specified, it tries to use "Connector URL/../files/.tmb".
+	 *
+	 * @var string
+	 */
+	protected $tmpLinkUrl = '';
+	
+	/**
 	 * Thumbnails dir path
 	 *
 	 * @var string
@@ -268,6 +286,10 @@ abstract class elFinderVolumeDriver {
 		// '.' is allow inline of all of MIME types
 		// '$^' is not allow inline of all of MIME types
 		'dispInlineRegex' => '^(?:(?:image|video|audio)|(?:text/plain|application/pdf)$)',
+		// temporary content URL's base path
+		'tmpLinkPath'     => '',
+		// temporary content URL's base URL
+		'tmpLinkUrl'      => '',
 		// directory for thumbnails
 		'tmbPath'         => '.tmb',
 		// mode to create thumbnails dir
@@ -1332,7 +1354,57 @@ abstract class elFinderVolumeDriver {
 		if ($this->options['trashHash'] && empty($this->options['copyJoin'])) {
 			$this->options['trashHash'] = '';
 		}
-
+		
+		// set tmpLinkPath
+		if (elFinder::$tmpLinkPath && !$this->options['tmpLinkPath']) {
+			$this->options['tmpLinkPath'] = elFinder::$tmpLinkPath;
+		}
+		if ($this->options['tmpLinkPath'] && is_writable($this->options['tmpLinkPath'])) {
+			$this->tmpLinkPath = realpath($this->options['tmpLinkPath']);
+		} else if (!$this->options['URL'] && is_writable('../files/.tmb')) {
+			$this->tmpLinkPath = realpath('../files/.tmb');
+			$this->options['tmpLinkUrl'] = '';
+			if (! elFinder::$tmpLinkPath) {
+				elFinder::$tmpLinkPath = $this->tmpLinkPath;
+				elFinder::$tmpLinkUrl = '';
+			}
+		}
+		
+		// set tmpLinkUrl
+		if (elFinder::$tmpLinkUrl && !$this->options['tmpLinkUrl']) {
+			$this->options['tmpLinkUrl'] = elFinder::$tmpLinkUrl;
+		}
+		if ($this->options['tmpLinkUrl']) {
+			$this->tmpLinkUrl = $this->options['tmpLinkUrl'];
+		}
+		if ($this->tmpLinkPath && !$this->tmpLinkUrl) {
+			$cur = realpath('./');
+			$i = 0;
+			while($cur !== $this->systemRoot && strpos($this->tmpLinkPath, $cur) !== 0) {
+				$i++;
+				$cur = dirname($cur);
+			}
+			list($req) = explode('?', $_SERVER['REQUEST_URI']);
+			$reqs = explode('/', dirname($req));
+			$uri = join('/', array_slice($reqs, 0, count($reqs) - 1)).substr($this->tmpLinkPath, strlen($cur));
+			$https = (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off');
+			$this->tmpLinkUrl = ($https ? 'https://' : 'http://')
+				.$_SERVER['SERVER_NAME'] // host
+				.(((! $https && $_SERVER['SERVER_PORT'] == 80) || ($https && $_SERVER['SERVER_PORT'] == 443)) ? '' : (':' . $_SERVER['SERVER_PORT']))  // port
+				.$uri;
+			if (! elFinder::$tmpLinkUrl) {
+				elFinder::$tmpLinkUrl = $this->tmpLinkUrl;
+			}
+		}
+		
+		// remove last '/'
+		if ($this->tmpLinkPath) {
+			$this->tmpLinkPath = rtrim($this->tmpLinkPath, '/');
+		}
+		if ($this->tmpLinkUrl) {
+			$this->tmpLinkUrl = rtrim($this->tmpLinkUrl, '/');
+		}
+		
 		// to update options cache
 		$this->updateCache($this->root, $root);
 
@@ -2842,7 +2914,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 */
 	public function getContentUrl($hash, $options = array()) {
-		if (($file = $this->file($hash)) == false || (isset($file['url']) && $file['url'] == 1)) {
+		if (($file = $this->file($hash)) === false) {
 			return false;
 		}
 		if (empty($file['url'])) {
@@ -2856,7 +2928,24 @@ abstract class elFinderVolumeDriver {
 			}
 			return false;
 		} else {
-			return $file['url'];
+			if  ($file['url'] != 1) {
+				return $file['url'];
+			} else if (!empty($options['temporary']) && $this->tmpLinkPath) {
+				$name = 'temp_' . md5($hash);
+				$path = $this->tmpLinkPath . DIRECTORY_SEPARATOR . $name;
+				$contents = $this->getContents($hash);
+				$gc = create_function('$p,$t', 'foreach(glob($p) as $f) { (filemtime($f) < (time() - $t)) && unlink($f); }');
+				/*$gc = function($p,$t) {
+					foreach(glob($p) as $f) {
+						(filemtime($f) < (time() - $t)) && unlink($f);
+					}
+				};*/
+				register_shutdown_function($gc, $this->tmpLinkPath . DIRECTORY_SEPARATOR . 'temp_*', elFinder::$tmpLinkLifeTime);
+				if (file_put_contents($path, $this->getContents($hash))) {
+					return $this->tmpLinkUrl . '/' . $name;
+				}
+			}
+			return false;
 		}
 	}
 	
