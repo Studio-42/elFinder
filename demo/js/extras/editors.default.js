@@ -120,7 +120,13 @@
 				file = node.data('file'),
 				src = 'https://pixlr.com/'+mode+'/?s=c',
 				myurl = window.location.href.toString().replace(/#.*$/, ''),
+				error = function() {
+					container.remove();
+					node.data('loading')(true);
+					fm.error('Can not launch Pixlr.');
+				},
 				launch = function() {
+					errtm = setTimeout(error, 10000);
 					myurl += (myurl.indexOf('?') === -1? '?' : '&') + 'pixlr='+node.attr('id');
 					src += '&referrer=elFinder&locktitle=true&locktype=true';
 					src += '&exit='+encodeURIComponent(myurl+'&image=0');
@@ -140,12 +146,17 @@
 							top: 0,
 							right: 0
 						})
+						.on('load', function() {
+							errtm && clearTimeout(errtm);
+						})
+						.on('error', error)
 						.appendTo(elfNode.hasClass('elfinder-fullscreen')? elfNode : 'body');
 					// fit to window size
 					$(window).on('resize.'+node.attr('id'), function() {
 						container.css('height', $(window).height());
 					});
-				};
+				},
+				errtm;
 			launch();
 		};
 	
@@ -178,7 +189,8 @@
 			// Pixlr Editor
 			info : {
 				name : 'Pixlr Editor',
-				iconImg : 'img/edit_pixlreditor.png'
+				iconImg : 'img/edit_pixlreditor.png',
+				urlAsContent: true
 			},
 			// MIME types to accept
 			mimes : ['image/jpeg', 'image/png'],
@@ -189,15 +201,16 @@
 				pixlrSetup.call(this, opts, fm);
 			},
 			// Initialization of editing node (this: this editors HTML node)
-			init : function(id, file, content, fm) {
-				initImgTag.call(this, id, file, fm.convAbsUrl(fm.openUrl(file.hash, true)), fm);
+			init : function(id, file, url, fm) {
+				//initImgTag.call(this, id, file, fm.convAbsUrl(fm.openUrl(file.hash, true)), fm);
+				initImgTag.call(this, id, file, fm.convAbsUrl(url), fm);
 			},
 			// Get data uri scheme (this: this editors HTML node)
 			getContent : function() {
 				return $(this).children('img:first').attr('src');
 			},
 			load : function(base) {
-				pixlrLoad.call(this, 'editor', base)
+				pixlrLoad.call(this, 'editor', base);
 			},
 			save : function(base) {},
 			// unbind resize event function
@@ -209,7 +222,8 @@
 			// Pixlr Editor
 			info : {
 				name : 'Pixlr Express',
-				iconImg : 'img/edit_pixlrexpress.png'
+				iconImg : 'img/edit_pixlrexpress.png',
+				urlAsContent: true
 			},
 			// MIME types to accept
 			mimes : ['image/jpeg', 'image/png'],
@@ -220,15 +234,15 @@
 				pixlrSetup.call(this, opts, fm);
 			},
 			// Initialization of editing node (this: this editors HTML node)
-			init : function(id, file, content, fm) {
-				initImgTag.call(this, id, file, fm.convAbsUrl(fm.openUrl(file.hash, true)), fm);
+			init : function(id, file, url, fm) {
+				initImgTag.call(this, id, file, fm.convAbsUrl(url), fm);
 			},
 			// Get data uri scheme (this: this editors HTML node)
 			getContent : function() {
 				return $(this).children('img:first').attr('src');
 			},
 			load : function(base) {
-				pixlrLoad.call(this, 'express', base)
+				pixlrLoad.call(this, 'express', base);
 			},
 			save : function(base) {},
 			// unbind resize event function
