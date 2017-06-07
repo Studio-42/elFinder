@@ -1005,7 +1005,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
         // fallback of $this->tmp
         if (!$this->tmp && $this->tmbPathWritable) {
-        	$this->tmp = $this->tmbPath;
+            $this->tmp = $this->tmbPath;
         }
 
         $this->disabled[] = 'archive';
@@ -1327,6 +1327,13 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      */
     public function getContentUrl($hash, $options = [])
     {
+        if (!empty($options['temporary'])) {
+            // try make temporary file
+            $url = parent::getContentUrl($hash, $options);
+            if ($url) {
+                return $url;
+            }
+        }
         if (($file = $this->file($hash)) == false || !$file['url'] || $file['url'] == 1) {
             $path = $this->decode($hash);
 

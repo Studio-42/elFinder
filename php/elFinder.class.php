@@ -54,6 +54,30 @@ class elFinder {
 	public static $defaultMimefile = '';
 	
 	/**
+	 * A file save destination path when a temporary content URL is required
+	 * on a network volume or the like
+	 * It can be overwritten by volume route setting
+	 * 
+	 * @var string
+	 */
+	public static $tmpLinkPath = '';
+	
+	/**
+	 * A file save destination URL when a temporary content URL is required
+	 * on a network volume or the like
+	 * It can be overwritten by volume route setting
+	 *
+	 * @var string
+	 */
+	public static $tmpLinkUrl = '';
+	
+	/**
+	 * Temporary content URL lifetime (seconds)
+	 * 
+	 * @var integer
+	 */
+	public static $tmpLinkLifeTime = 3600;
+	/**
 	 * elFinder session wrapper object
 	 * 
 	 * @var elFinderSessionInterface
@@ -436,6 +460,15 @@ class elFinder {
 			if (!is_writable(elFinder::$commonTempPath)) {
 				elFinder::$commonTempPath = '';
 			}
+		}
+		if (! empty($opts['tmpLinkPath'])) {
+			elFinder::$tmpLinkPath = $opts['tmpLinkPath'];
+		}
+		if (! empty($opts['tmpLinkUrl'])) {
+			elFinder::$tmpLinkUrl = $opts['tmpLinkUrl'];
+		}
+		if (! empty($opts['tmpLinkLifeTime'])) {
+			elFinder::$tmpLinkLifeTime = $opts['tmpLinkLifeTime'];
 		}
 		$this->maxArcFilesSize = isset($opts['maxArcFilesSize'])? intval($opts['maxArcFilesSize']) : 0;
 		$this->optionsNetVolumes = (isset($opts['optionsNetVolumes']) && is_array($opts['optionsNetVolumes']))? $opts['optionsNetVolumes'] : array();
