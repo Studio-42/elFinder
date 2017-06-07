@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 0776088) (2017-06-07)
+ * Version 2.1.24 (2.1-src Nightly: f88a80b) (2017-06-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -728,12 +728,13 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder .elfinder-contextmenu .elfinder-contextmenu-item span { display:block; }
 
 /* submenu item in rtl/ltr enviroment */
+.elfinder .elfinder-contextmenu-sub .elfinder-contextmenu-item { padding-left:12px; padding-right:12px; }
 .elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-item { text-align:left; }
 .elfinder .elfinder-contextmenu-rtl .elfinder-contextmenu-item { text-align:right; }
-.elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-sub .elfinder-contextmenu-item { padding-left:12px;  }
-.elfinder .elfinder-contextmenu-rtl .elfinder-contextmenu-sub .elfinder-contextmenu-item { padding-right:12px; }
 .elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-sub .elfinder-contextsubmenu-item-icon { padding-left:28px;  }
 .elfinder .elfinder-contextmenu-rtl .elfinder-contextmenu-sub .elfinder-contextsubmenu-item-icon { padding-right:28px; }
+.elfinder-touch .elfinder-contextmenu-ltr .elfinder-contextmenu-sub .elfinder-contextsubmenu-item-icon { padding-left:36px;  }
+.elfinder-touch .elfinder-contextmenu-rtl .elfinder-contextmenu-sub .elfinder-contextsubmenu-item-icon { padding-right:36px; }
 
 /* command/submenu icon */
 .elfinder .elfinder-contextmenu-extra-icon,
