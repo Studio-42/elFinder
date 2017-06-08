@@ -1561,7 +1561,7 @@ var elFinder = function(node, opts) {
 				data : { cmd : 'url', target : hash, options : { temporary: temp? 1 : 0 } },
 				preventDefault : true,
 				options: {async: async},
-				notify: async? {type : 'url', cnt : 1, hideCnt : true} : {}
+				notify: async? {type : temp? 'file' : 'url', cnt : 1, hideCnt : true} : {}
 			})
 			.done(function(data) {
 				file.url = data.url || '';
