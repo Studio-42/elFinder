@@ -3721,12 +3721,10 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		
+		$relpath = $this->relpathCE($path);
 		if ($this->separator !== '/') {
-			$relpath = str_replace($this->separator, '/', $this->relpathCE($path));
-		} else {
-			$relpath = $this->relpathCE($path);
+			$relpath = str_replace($this->separator, '/', $relpath);
 		}
-		
 		$relpath = '/' . $relpath;
 		
 		$perm = null;
@@ -3759,27 +3757,7 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function allowCreate($dir, $name, $isDir = null) {
-		$path = $this->joinPathCE($dir, $name);
-		$perm = null;
-		
-		if ($this->access) {
-			$perm = call_user_func($this->access, 'write', $path, $this->options['accessControlData'], $this, $isDir);			
-			if ($perm !== null) {
-				return !!$perm;
-			}
-		}
-		
-		$testPath = $this->separator.$this->relpathCE($path);
-		
-		for ($i = 0, $c = count($this->attributes); $i < $c; $i++) {
-			$attrs = $this->attributes[$i];
-			
-			if (isset($attrs['write']) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $testPath)) {
-				$perm = $attrs['write'];
-			} 
-		}
-		
-		return $perm === null ? true : $perm;
+		return $this->attr($this->joinPathCE($dir, $name), 'write', true, $isDir);
 	}
 	
 	/**
