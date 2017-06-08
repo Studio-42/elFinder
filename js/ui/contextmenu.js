@@ -282,11 +282,12 @@ $.fn.elfindercontextmenu = function(fm) {
 				fm.UA.Mobile && autoToggle();
 				
 				setTimeout(function() {
-					fm.getUI().one('click', close)
+					fm.getUI().one('click.' + fm.namespace, close);
 				}, 0);
 			},
 			
 			close = function() {
+				fm.getUI().off('click.' + fm.namespace, close);
 				$(document).off('keydown.' + fm.namespace, keyEvts);
 				currentType = null;
 				

@@ -38,8 +38,7 @@
 					.hide()
 					.appendTo(this);
 			
-			node.data('file', file)
-				.attr('id', id+'-img')
+			node.attr('id', id+'-img')
 				.attr('src', content)
 				.css({'height':'', 'max-width':'100%', 'max-height':'100%', 'cursor':'pointer'})
 				.data('loading', function(done) {
@@ -119,7 +118,7 @@
 					}),
 				elfNode = fm.getUI(),
 				container = $('<iframe class="ui-front" allowtransparency="true">'),
-				file = node.data('file'),
+				file = this.file,
 				src = 'https://pixlr.com/'+mode+'/?s=c',
 				myurl = window.location.href.toString().replace(/#.*$/, ''),
 				error = function() {
