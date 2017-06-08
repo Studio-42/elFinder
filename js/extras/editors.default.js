@@ -15,6 +15,15 @@
 			ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.7.0',
 			tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.6.3'
 		},
+		hasFlash = (function() {
+			var hasFlash;
+			try {
+				hasFlash = !!(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
+			} catch (e) {
+				hasFlash = !!(navigator && navigator.mimeTypes["application/x-shockwave-flash"]);
+			}
+			return hasFlash;
+		})(),
 		initImgTag = function(id, file, content, fm) {
 			var node = $(this).children('img:first'),
 				spnr = $('<div/>')
@@ -64,44 +73,37 @@
 			}
 			return data;
 		},
-		pixlrSetup = function(opts, fm) {
-			var hasFlash = (function() {
-				var hasFlash;
-				try {
-					hasFlash = !!(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
-				} catch (e) {
-					hasFlash = !!(navigator && navigator.mimeTypes["application/x-shockwave-flash"]);
+		pixlrCallBack = function() {
+			if (!hasFlash || window.parent === window) {
+				return;
+			}
+			var pixlr = window.location.search.match(/[?&]pixlr=([^&]+)/),
+			image = window.location.search.match(/[?&]image=([^&]+)/),
+			p, ifm, url, node;
+			if (pixlr) {
+				// case of redirected from pixlr.com
+				p = window.parent
+				ifm = p.$('#'+pixlr[1]+'iframe').hide();
+				node = p.$('#'+pixlr[1]).data('resizeoff')();
+				if (image[1].substr(0, 4) === 'http') {
+					url = image[1];
+					if (window.location.protocol === 'https:') {
+						url = url.replace(/^http:/, 'https:');
+					}
+					node.on('load error', function() {
+							node.data('loading')(true);
+						})
+						.attr('src', url)
+						.data('loading')();
+				} else {
+					node.data('loading')(true);
 				}
-				return hasFlash;
-			})();
+				ifm.remove();
+			}
+		};
+		pixlrSetup = function(opts, fm) {
 			if (!hasFlash) {
 				this.disabled = true;
-			} else {
-				(function() {
-					var pixlr = window.location.search.match(/[?&]pixlr=([^&]+)/),
-						image = window.location.search.match(/[?&]image=([^&]+)/),
-						p, ifm, url, node;
-					if (pixlr) {
-						// case of redirected from pixlr.com
-						p = window.parent
-						ifm = p.$('#'+pixlr[1]+'iframe').hide();
-						node = p.$('#'+pixlr[1]).data('resizeoff')();
-						if (image[1].substr(0, 4) === 'http') {
-							url = image[1];
-							if (window.location.protocol === 'https:') {
-								url = url.replace(/^http:/, 'https:');
-							}
-							node.on('load error', function() {
-									node.data('loading')(true);
-								})
-								.attr('src', url)
-								.data('loading')();
-						} else {
-							node.data('loading')(true);
-						}
-						ifm.remove();
-					}
-				})();
 			}
 		},
 		pixlrLoad = function(mode, base) {
@@ -159,6 +161,9 @@
 				errtm;
 			launch();
 		};
+	
+	// check callback from pixlr
+	pixlrCallBack();
 	
 	// check getfile callback function
 	if (getfile) {
