@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 4d6d9f4) (2017-06-09)
+ * Version 2.1.24 (2.1-src Nightly: 779a0ab) (2017-06-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2010,7 +2010,7 @@ var elFinder = function(node, opts) {
 			},
 			xhr, _xhr,
 			xhrAbort = function(e) {
-				if (xhr.state() === 'pending') {
+				if (xhr && xhr.state() === 'pending') {
 					xhr.quiet = true;
 					xhr.abort();
 					if (e && e.type != 'unload' && e.type != 'destroy') {
@@ -7674,7 +7674,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 4d6d9f4)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 779a0ab)';
 
 
 
@@ -8423,7 +8423,11 @@ elFinder.prototype._options = {
 		},
 		rm: {
 			// If trash is valid, items moves immediately to the trash holder without confirm.
-			quickTrash : true
+			quickTrash : true,
+			// Maximum wait seconds when checking the number of items to into the trash
+			infoCheckWait : 10,
+			// Maximum number of items that can be placed into the Trash at one time
+			toTrashMaxItems : 1000
 		},
 		help : {view : ['about', 'shortcuts', 'help', 'debug']}
 	},
@@ -9918,7 +9922,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2017-05-26
+ * @version 2017-06-09
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -10320,6 +10324,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'selectFolder'    : 'Select folder', // from v2.1.20 added 13.12.2016
 			'firstLetterSearch': 'First letter search', // from v2.1.23 added 24.3.2017
 			'presets'         : 'Presets', // from v2.1.25 added 26.5.2017
+			'tooManyToTrash'  : 'It\'s too many items so it can\'t into trash.', // from v2.1.25 added 9.6.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -20070,13 +20075,39 @@ elFinder.prototype.commands.hidden = function() {
 						replSpinner(msg.unknown, 'size');
 					}).done(function() {
 						var size = 0,
+							fileCnt = 0,
+							dirCnt = 0,
 							argLen = arguments.length,
+							cnts = [],
+							cntsTxt= '',
 							i;
 						
 						for (i = 0; i < argLen; i++) {
 							size += parseInt(arguments[i].size);
+							if (fileCnt !== false) {
+								if (typeof arguments[i].fileCnt === 'undefined') {
+									fileCnt = false;
+								}
+								fileCnt += parseInt(arguments[i].fileCnt || 0);
+							}
+							if (dirCnt !== false) {
+								if (typeof arguments[i].dirCnt === 'undefined') {
+									dirCnt = false;
+								}
+								dirCnt += parseInt(arguments[i].dirCnt || 0);
+							}
 						}
-						replSpinner(size >= 0 ? fm.formatSize(size) : msg.unknown, 'size');
+						if (dirCnt !== false){
+							cnts.push(msg.folders + ': ' + dirCnt);
+						}
+						if (fileCnt !== false){
+							cnts.push(msg.files + ': ' + fileCnt);
+						}
+						if (cnts.length) {
+							cntsTxt = '<br>' + cnts.join(', ');
+						}
+						
+						replSpinner((size >= 0 ? fm.formatSize(size) : msg.unknown) + cntsTxt, 'size');
 					});
 					
 					fm.autoSync();
@@ -24583,134 +24614,183 @@ elFinder.prototype.commands.rm = function() {
 		},
 		toTrash = function(dfrd, targets, tHash) {
 			var dsts = {},
-				dirs, cnt;
+				itemCnt = targets.length,
+				maxCnt = self.options.toTrashMaxItems,
+				checkDirs = [],
+				reqDfd = $.Deferred(),
+				req, dirs, cnt;
 			
+			if (itemCnt > maxCnt) {
+				confirm(dfrd, targets, self.files(targets), null, [fm.i18n('tooManyToTrash')]);
+				return;
+			}
+			
+			// Directory preparation preparation and directory enumeration
 			$.each(targets, function(i, h) {
-				var path = fm.path(h).replace(/\\/g, '/'),
+				var file = fm.file(h),
+					path = fm.path(h).replace(/\\/g, '/'),
 					m = path.match(/^[^\/]+?(\/(?:[^\/]+?\/)*)[^\/]+?$/);
 				
-				if (m) {
-					m[1] = m[1].replace(/(^\/.*?)\/?$/, '$1');
-					if (! dsts[m[1]]) {
-						dsts[m[1]] = [];
+				if (file) {
+					if (m) {
+						m[1] = m[1].replace(/(^\/.*?)\/?$/, '$1');
+						if (! dsts[m[1]]) {
+							dsts[m[1]] = [];
+						}
+						dsts[m[1]].push(h);
 					}
-					dsts[m[1]].push(h);
+					if (file.mime === 'directory') {
+						checkDirs.push(h);
+					}
 				}
 			});
 			
-			dirs = Object.keys(dsts);
-			cnt = dirs.length;
-			if (cnt) {
-				fm.request({
-					data   : {cmd  : 'mkdir', target : tHash, dirs : dirs}, 
-					notify : {type : 'chkdir', cnt : cnt},
-					preventFail : true
-				})
-				.fail(function(error) {
-					dfrd.reject(error);
-					fm.unlockfiles({files : targets});
-				})
-				.done(function(data) {
-					var margeRes = function(data) {
-							$.each(data, function(k, v) {
-								if (Array.isArray(v)) {
-									if (res[k]) {
-										res[k] = res[k].concat(v);
-									} else {
-										res[k] = v;
-									}
-								}
-							});
-							if (data.sync) {
-								res.sync = 1;
-							}
-						},
-						err = ['errTrash'],
-						res = {},
-						hasNtf = function() {
-							return fm.ui.notify.children('.elfinder-notify-trash').length;
-						},
-						hashes, hasNtf, tm, prg, prgSt;
-					
-					if (hashes = data.hashes) {
-						prg = 1 / cnt * 100;
-						prgSt = 1;
-						tm = setTimeout(function() {
-							fm.notify({type : 'trash', cnt : 1, hideCnt : true, progress : prgSt});
-						}, fm.notifyDelay);
-						$.each(dsts, function(dir, files) {
-							if (hashes[dir]) {
-								fm.request({
-									data   : {cmd : 'paste', dst : hashes[dir], targets : files, cut : 1},
-									preventDefault : true
-								})
-								.fail(function(error) {
-									if (error) {
-										err = err.concat(error);
-									}
-								})
-								.done(function(data) {
-									margeRes(data);
-									if (data.warning) {
-										err = err.concat(data.warning);
-										delete data.warning;
-									}
-									// fire some event to update cache/ui
-									data.removed && data.removed.length && fm.remove(data);
-									data.added   && data.added.length   && fm.add(data);
-									data.changed && data.changed.length && fm.change(data);
-									// fire event with command name
-									fm.trigger('paste', data);
-									// fire event with command name + 'done'
-									fm.trigger('pastedone');
-									// force update content
-									data.sync && fm.sync();
-								})
-								.always(function() {
-									var hashes, addTexts, end = 2;
-									if (hasNtf()) {
-										fm.notify({type : 'trash', cnt : 0, hideCnt : true, progress : prg});
-									} else {
-										prgSt+= prg;
-									}
-									if (--cnt < 1) {
-										tm && clearTimeout(tm);
-										hasNtf() && fm.notify({type : 'trash', cnt  : -1});
-										fm.unlockfiles({files : targets});
-										if (Object.keys(res).length) {
-											if (err.length > 1) {
-												if (res.removed || res.removed.length) {
-													hashes = $.map(targets, function(h) {
-														return $.inArray(h, res.removed) === -1? h : null;
-													});
-												}
-												if (hashes.length) {
-													if (err > end) {
-														end = (fm.messages[err[end-1]] || '').indexOf('$') === -1? end : end + 1;
-													}
-													self.exec(hashes, { addTexts: err.slice(0, end) });
-												} else {
-													fm.error(err);
-												}
-											}
-											res._noSound = true;
-											dfrd.resolve(res);
+			// Check directory information
+			if (checkDirs.length) {
+				req = fm.request({
+					data : {cmd : 'size', targets : checkDirs},
+					notify : {type: 'readdir', cnt: 1, hideCnt: true},
+					preventDefault : true
+				}).done(function(data) {
+					var cnt = 0;
+					data.fileCnt && (cnt += parseInt(data.fileCnt));
+					data.dirCnt && (cnt += parseInt(data.dirCnt));
+					reqDfd[cnt > maxCnt ? 'reject' : 'resolve']();
+				}).fail(function() {
+					reqDfd.reject();
+				});
+				setTimeout(function() {
+					var xhr = (req && req.xhr)? req.xhr : null;
+					if (xhr && xhr.state() == 'pending') {
+						xhr.quiet = true;
+						xhr.abort();
+						reqDfd.reject();
+					}
+				}, self.options.infoCheckWait * 1000);
+			} else {
+				reqDfd.resolve();
+			}
+			
+			// Directory creation and paste command execution
+			reqDfd.done(function() {
+				dirs = Object.keys(dsts);
+				cnt = dirs.length;
+				if (cnt) {
+					fm.request({
+						data   : {cmd  : 'mkdir', target : tHash, dirs : dirs}, 
+						notify : {type : 'chkdir', cnt : cnt},
+						preventFail : true
+					})
+					.fail(function(error) {
+						dfrd.reject(error);
+						fm.unlockfiles({files : targets});
+					})
+					.done(function(data) {
+						var margeRes = function(data) {
+								$.each(data, function(k, v) {
+									if (Array.isArray(v)) {
+										if (res[k]) {
+											res[k] = res[k].concat(v);
 										} else {
-											dfrd.reject(err);
+											res[k] = v;
 										}
 									}
 								});
-							}
-						});
-					} else {
-						dfrd.reject('errFolderNotFound');
-						fm.unlockfiles({files : targets});
-					}
-				});
-			} else {
-				dfrd.reject(['error', 'The folder hierarchy to be deleting can not be determined.']);
-				fm.unlockfiles({files : targets});
-			}
+								if (data.sync) {
+									res.sync = 1;
+								}
+							},
+							err = ['errTrash'],
+							res = {},
+							hasNtf = function() {
+								return fm.ui.notify.children('.elfinder-notify-trash').length;
+							},
+							hashes, hasNtf, tm, prg, prgSt;
+						
+						if (hashes = data.hashes) {
+							prg = 1 / cnt * 100;
+							prgSt = cnt === 1? 100 : 5;
+							tm = setTimeout(function() {
+								fm.notify({type : 'trash', cnt : 1, hideCnt : true, progress : prgSt});
+							}, fm.notifyDelay);
+							$.each(dsts, function(dir, files) {
+								if (hashes[dir]) {
+									fm.request({
+										data   : {cmd : 'paste', dst : hashes[dir], targets : files, cut : 1},
+										preventDefault : true
+									})
+									.fail(function(error) {
+										if (error) {
+											err = err.concat(error);
+										}
+									})
+									.done(function(data) {
+										data = fm.normalize(data);
+										fm.updateCache(data);
+										margeRes(data);
+										if (data.warning) {
+											err = err.concat(data.warning);
+											delete data.warning;
+										}
+										// fire some event to update cache/ui
+										data.removed && data.removed.length && fm.remove(data);
+										data.added   && data.added.length   && fm.add(data);
+										data.changed && data.changed.length && fm.change(data);
+										// fire event with command name
+										fm.trigger('paste', data);
+										// fire event with command name + 'done'
+										fm.trigger('pastedone');
+										// force update content
+										data.sync && fm.sync();
+									})
+									.always(function() {
+										var hashes, addTexts, end = 2;
+										if (hasNtf()) {
+											fm.notify({type : 'trash', cnt : 0, hideCnt : true, progress : prg});
+										} else {
+											prgSt+= prg;
+										}
+										if (--cnt < 1) {
+											tm && clearTimeout(tm);
+											hasNtf() && fm.notify({type : 'trash', cnt  : -1});
+											fm.unlockfiles({files : targets});
+											if (Object.keys(res).length) {
+												if (err.length > 1) {
+													if (res.removed || res.removed.length) {
+														hashes = $.map(targets, function(h) {
+															return $.inArray(h, res.removed) === -1? h : null;
+														});
+													}
+													if (hashes.length) {
+														if (err > end) {
+															end = (fm.messages[err[end-1]] || '').indexOf('$') === -1? end : end + 1;
+														}
+														self.exec(hashes, { addTexts: err.slice(0, end) });
+													} else {
+														fm.error(err);
+													}
+												}
+												res._noSound = true;
+												dfrd.resolve(res);
+											} else {
+												dfrd.reject(err);
+											}
+										}
+									});
+								}
+							});
+						} else {
+							dfrd.reject('errFolderNotFound');
+							fm.unlockfiles({files : targets});
+						}
+					});
+				} else {
+					dfrd.reject(['error', 'The folder hierarchy to be deleting can not be determined.']);
+					fm.unlockfiles({files : targets});
+				}
+			}).fail(function() {
+				confirm(dfrd, targets, self.files(targets), null, [fm.i18n('tooManyToTrash')]);
+			});
 		},
 		remove = function(dfrd, targets, quiet) {
 			var notify = quiet? {} : {type : 'rm', cnt : targets.length};

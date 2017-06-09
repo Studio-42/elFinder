@@ -10,6 +10,8 @@
 		- [CD:abstract] Fixed #2025 cannot edit any files with `memory_limit` = -1
 		- [cmd:edit] Fixed #2027 make it selectable from multiple editors
 		- [VD:abstract,LocalFileSystem] Fixed #2035 support multipart rar extraction
+		- [VD:abstract] Fixed #2040 Fatal error on create the item with PHP>=7.1
+		- [cmd:rm] Fixed #2042 add command options `infoCheckWait`, `toTrashMaxItems`
 		- And some minor bug fixes
 
 

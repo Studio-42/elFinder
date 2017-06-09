@@ -644,6 +644,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _scandir($path) {
+		elFinder::extendTimeLimit();
 		$files = array();
 		$cache = array();
 		$dirWritable = is_writable($path);
