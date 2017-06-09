@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-05-26
+ * @version 2017-06-09
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -411,6 +411,7 @@
 			'selectFolder'    : 'フォルダーを選択', // from v2.1.20 added 13.12.2016
 			'firstLetterSearch': '一文字目で検索', // from v2.1.23 added 24.3.2017
 			'presets'         : 'プリセット', // from v2.1.25 added 26.5.2017
+			'tooManyToTrash'  : 'アイテム数が多すぎるのでごみ箱に入れられません。', // from v2.1.25 added 9.6.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
