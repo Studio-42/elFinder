@@ -152,6 +152,8 @@ elFinder.prototype.commands.rm = function() {
 									}
 								})
 								.done(function(data) {
+									data = fm.normalize(data);
+									fm.updateCache(data);
 									margeRes(data);
 									if (data.warning) {
 										err = err.concat(data.warning);
