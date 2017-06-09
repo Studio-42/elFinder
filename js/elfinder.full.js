@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 1339bbe) (2017-06-08)
+ * Version 2.1.24 (2.1-src Nightly: 4d6d9f4) (2017-06-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7674,7 +7674,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 1339bbe)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 4d6d9f4)';
 
 
 
@@ -18557,10 +18557,10 @@ elFinder.prototype.commands.edit = function() {
 		dialog = function(id, file, content, encoding, editor) {
 
 			var dfrd = $.Deferred(),
-				save = function(hash) {
+				save = function() {
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
 					old = getContent();
-					dfrd.notifyWith(ta, [selEncoding? selEncoding.val():void(0), hash]);
+					dfrd.notifyWith(ta, [selEncoding? selEncoding.val():void(0), ta.data('hash')]);
 				},
 				cancel = function() {
 					ta.elfinderdialog('close');
@@ -18765,7 +18765,7 @@ elFinder.prototype.commands.edit = function() {
 				})();
 			}
 			
-			ta.addClass(clsEditing);
+			ta.addClass(clsEditing).data('hash', file.hash);
 			
 			if (extEditor) {
 				ta.editor = extEditor;
