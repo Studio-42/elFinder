@@ -4586,7 +4586,7 @@ abstract class elFinderVolumeDriver {
 				return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $errpath);
 			}
 			
-			if (($dim = $volume->dimensions($src))) {
+			if (strpos($source['mime'], 'image') === 0 && ($dim = $volume->dimensions($src))) {
 				$s = explode('x', $dim);
 				$source['width']  = $s[0];
 				$source['height'] = $s[1];
