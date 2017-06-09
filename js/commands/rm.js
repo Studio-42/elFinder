@@ -136,7 +136,7 @@ elFinder.prototype.commands.rm = function() {
 					
 					if (hashes = data.hashes) {
 						prg = 1 / cnt * 100;
-						prgSt = 1;
+						prgSt = cnt === 1? 100 : 5;
 						tm = setTimeout(function() {
 							fm.notify({type : 'trash', cnt : 1, hideCnt : true, progress : prgSt});
 						}, fm.notifyDelay);
