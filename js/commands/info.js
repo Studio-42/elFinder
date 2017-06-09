@@ -186,13 +186,39 @@
 						replSpinner(msg.unknown, 'size');
 					}).done(function() {
 						var size = 0,
+							fileCnt = 0,
+							dirCnt = 0,
 							argLen = arguments.length,
+							cnts = [],
+							cntsTxt= '',
 							i;
 						
 						for (i = 0; i < argLen; i++) {
 							size += parseInt(arguments[i].size);
+							if (fileCnt !== false) {
+								if (typeof arguments[i].fileCnt === 'undefined') {
+									fileCnt = false;
+								}
+								fileCnt += parseInt(arguments[i].fileCnt || 0);
+							}
+							if (dirCnt !== false) {
+								if (typeof arguments[i].dirCnt === 'undefined') {
+									dirCnt = false;
+								}
+								dirCnt += parseInt(arguments[i].dirCnt || 0);
+							}
 						}
-						replSpinner(size >= 0 ? fm.formatSize(size) : msg.unknown, 'size');
+						if (dirCnt !== false){
+							cnts.push(msg.folders + ': ' + dirCnt);
+						}
+						if (fileCnt !== false){
+							cnts.push(msg.files + ': ' + fileCnt);
+						}
+						if (cnts.length) {
+							cntsTxt = '<br>' + cnts.join(', ');
+						}
+						
+						replSpinner((size >= 0 ? fm.formatSize(size) : msg.unknown) + cntsTxt, 'size');
 					});
 					
 					fm.autoSync();
