@@ -1979,7 +1979,7 @@ var elFinder = function(node, opts) {
 			},
 			xhr, _xhr,
 			xhrAbort = function(e) {
-				if (xhr.state() === 'pending') {
+				if (xhr && xhr.state() === 'pending') {
 					xhr.quiet = true;
 					xhr.abort();
 					if (e && e.type != 'unload' && e.type != 'destroy') {

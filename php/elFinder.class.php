@@ -1522,6 +1522,9 @@ class elFinder {
 	 **/
 	protected function size($args) {
 		$size = 0;
+		$files = 0;
+		$dirs = 0;
+		$itemCount = true;
 		
 		foreach ($args['targets'] as $target) {
 			if (($volume = $this->volume($target)) == false
@@ -1530,9 +1533,26 @@ class elFinder {
 				return array('error' => $this->error(self::ERROR_OPEN, '#'.$target));
 			}
 			
-			$size += $volume->size($target);
+			$volRes = $volume->size($target);
+			if (is_array($volRes)) {
+				if (! empty($volRes['size'])) {
+					$size += $volRes['size'];
+				}
+				if ($itemCount) {
+					if (! empty($volRes['files'])) {
+						$files += $volRes['files'];
+					}
+					if (! empty($volRes['dirs'])) {
+						$dirs += $volRes['dirs'];
+					}
+				}
+			} else if (is_numeric($volRes)) {
+				$size += $volRes;
+				$files = $dirs = 'unknown';
+				$itemCount = false;
+			}
 		}
-		return array('size' => $size);
+		return array('size' => $size, 'fileCnt' => $files, 'dirCnt' => $dirs);
 	}
 	
 	/**

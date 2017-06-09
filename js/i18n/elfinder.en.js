@@ -1,7 +1,7 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2017-05-26
+ * @version 2017-06-09
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -403,6 +403,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'selectFolder'    : 'Select folder', // from v2.1.20 added 13.12.2016
 			'firstLetterSearch': 'First letter search', // from v2.1.23 added 24.3.2017
 			'presets'         : 'Presets', // from v2.1.25 added 26.5.2017
+			'tooManyToTrash'  : 'It\'s too many items so it can\'t into trash.', // from v2.1.25 added 9.6.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',

@@ -441,7 +441,11 @@ elFinder.prototype._options = {
 		},
 		rm: {
 			// If trash is valid, items moves immediately to the trash holder without confirm.
-			quickTrash : true
+			quickTrash : true,
+			// Maximum wait seconds when checking the number of items to into the trash
+			infoCheckWait : 10,
+			// Maximum number of items that can be placed into the Trash at one time
+			toTrashMaxItems : 1000
 		},
 		help : {view : ['about', 'shortcuts', 'help', 'debug']}
 	},
