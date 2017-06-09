@@ -63,10 +63,10 @@ elFinder.prototype.commands.edit = function() {
 		dialog = function(id, file, content, encoding, editor) {
 
 			var dfrd = $.Deferred(),
-				save = function(hash) {
+				save = function() {
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
 					old = getContent();
-					dfrd.notifyWith(ta, [selEncoding? selEncoding.val():void(0), hash]);
+					dfrd.notifyWith(ta, [selEncoding? selEncoding.val():void(0), ta.data('hash')]);
 				},
 				cancel = function() {
 					ta.elfinderdialog('close');
@@ -271,7 +271,7 @@ elFinder.prototype.commands.edit = function() {
 				})();
 			}
 			
-			ta.addClass(clsEditing);
+			ta.addClass(clsEditing).data('hash', file.hash);
 			
 			if (extEditor) {
 				ta.editor = extEditor;
