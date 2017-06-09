@@ -4169,25 +4169,39 @@ abstract class elFinderVolumeDriver {
 		
 		elFinder::extendTimeLimit();
 		
+		$result = array('size' => 0, 'files' => 0, 'dirs' => 0);
 		$stat = $this->stat($path);
 
 		if (empty($stat) || !$stat['read'] || !empty($stat['hidden'])) {
-			return 'unknown';
+			$result['size'] = 'unknown';
+			return $result;
 		}
 		
 		if ($stat['mime'] != 'directory') {
-			return $stat['size'];
+			$result['size'] = intval($stat['size']);
+			$result['files'] = 1;
+			return $result;
 		}
 		
 		$subdirs = $this->options['checkSubfolders'];
 		$this->options['checkSubfolders'] = true;
-		$result = 0;
 		foreach ($this->getScandir($path) as $stat) {
-			$size = $stat['mime'] == 'directory' && $stat['read'] 
+			if ($isDir = ($stat['mime'] === 'directory' && $stat['read'])) {
+				++$result['dirs'];
+			} else {
+				++$result['files'];
+			}
+			$res = $isDir
 				? $this->countSize($this->decode($stat['hash'])) 
-				: (isset($stat['size']) ? intval($stat['size']) : 0);
-			if ($size > 0) {
-				$result += $size;
+				: (isset($stat['size']) ? array('size' => intval($stat['size'])) : array());
+			if (! empty($res['size']) && is_numeric($res['size'])) {
+				$result['size'] += $res['size'];
+			}
+			if (! empty($res['files']) && is_numeric($res['files'])) {
+				$result['files'] += $res['files'];
+			}
+			if (! empty($res['dirs']) && is_numeric($res['dirs'])) {
+				$result['dirs'] += $res['dirs'];
 			}
 		}
 		$this->options['checkSubfolders'] = $subdirs;
