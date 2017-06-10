@@ -91,7 +91,8 @@ elFinder.prototype.commands.edit = function() {
 							$.proxy(fm.res('mixin', 'make'), self)()
 								.done(function(data) {
 									if (data.added && data.added.length) {
-										save(data.added[0].hash);
+										ta.data('hash', data.added[0].hash);
+										save();
 										dialogNode.show();
 										cancel();
 									} else {
