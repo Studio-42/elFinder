@@ -2033,11 +2033,12 @@ class elFinder {
 	/**
 	 * Detect file type extension by local path
 	 * 
+	 * @param  object $volume elFinderVolumeDriver instance
 	 * @param  string $path Local path
 	 * @return string file type extension with dot
 	 * @author Naoki Sawada
 	 */
-	protected function detectFileExtension($path) {
+	protected function detectFileExtension($volume, $path) {
 		$mime = $this->detectMimeType($path);
 		$ext = $mime !== 'unknown'? $volume->getExtentionByMime($mime) : '';
 		return $ext? ('.' . $ext) : '';
@@ -2388,7 +2389,7 @@ class elFinder {
 										rename($tmpfname, $tmpfname . $_ext);
 										$tmpfname = $tmpfname . $_ext;
 									}
-									$_b = $this->detectFileExtension($tmpfname);
+									$_b = $this->detectFileExtension($volume, $tmpfname);
 									$_name = $_a.$_b;
 								} else {
 									$_b = '.'.$_b;
