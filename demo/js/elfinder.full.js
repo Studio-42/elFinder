@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: bb741bc) (2017-06-10)
+ * Version 2.1.24 (2.1-src Nightly: 2aa40f6) (2017-06-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7674,7 +7674,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: bb741bc)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 2aa40f6)';
 
 
 
@@ -9705,15 +9705,9 @@ elFinder.prototype.resources = {
 												});
 											}
 											fm.one(req+'done', function() {
-												var acts = {
-														'directory' : { cmd: 'open', msg: 'cmdopendir' },
-														'text/plain': { cmd: 'edit', msg: 'cmdedit' },
-														'default'   : { cmd: 'open', msg: 'cmdopen' }
-													},
-													act, extNode;
+												var extNode;
 												newItem = ui.find('#'+fm[find](item.hash));
-												if (data.added.length === 1) {
-													act = self.nextAction || acts[item.mime] || acts['default'];
+												if (data.added.length === 1 && act.cmd) {
 													extNode = $('<div/>').append(
 														$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"><span class="ui-button-text">'
 															+fm.i18n(act.msg)
@@ -9756,6 +9750,12 @@ elFinder.prototype.resources = {
 					node.trigger('scrolltoview');
 				},
 				inError = false,
+				acts    = {
+						'directory' : { cmd: 'open', msg: 'cmdopendir' },
+						'text/plain': { cmd: 'edit', msg: 'cmdedit' },
+						'default'   : { cmd: 'open', msg: 'cmdopen' }
+					},
+				act     = Object.assign({}, self.nextAction || acts[item.mime] || acts['default']),
 				// for tree
 				dst, dstCls, collapsed, expanded, arrow, subtree;
 
@@ -18590,7 +18590,8 @@ elFinder.prototype.commands.edit = function() {
 							$.proxy(fm.res('mixin', 'make'), self)()
 								.done(function(data) {
 									if (data.added && data.added.length) {
-										save(data.added[0].hash);
+										ta.data('hash', data.added[0].hash);
+										save();
 										dialogNode.show();
 										cancel();
 									} else {
@@ -23877,6 +23878,7 @@ elFinder.prototype.commands.resize = function() {
 								self.mime = file.mime;
 								self.prefix = file.name;
 								self.requestCmd = 'mkfile';
+								self.nextAction = {};
 								self.data = {target : file.phash};
 								$.proxy(fm.res('mixin', 'make'), self)()
 									.done(function(data) {
