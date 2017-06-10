@@ -915,7 +915,7 @@ elFinder.prototype.commands.resize = function() {
 							}
 						}
 					},
-					save = function() {
+					checkVals = function() {
 						var w, h, x, y, d, q, b = '';
 						
 						if (mode == 'resize') {
@@ -931,40 +931,47 @@ elFinder.prototype.commands.resize = function() {
 							h = oheight;
 							d = parseInt(degree.val()) || 0;
 							if (d < 0 || d > 360) {
-								return fm.error('Invalid rotate degree');
+								fm.error('Invalid rotate degree');
+								return false;
 							}
 							if (d == 0 || d == 360) {
-								return fm.error('errResizeNoChange');
+								fm.error('errResizeNoChange');
+								return false;
 							}
 							b = bg.val();
 						}
 						q = quality? parseInt(quality.val()) : 0;
 						
 						if (mode != 'rotate') {
-
 							if (w <= 0 || h <= 0) {
-								return fm.error('Invalid image size');
+								fm.error('Invalid image size');
+								return false;
 							}
-							
 							if (w == owidth && h == oheight) {
-								return fm.error('errResizeNoChange');
+								fm.error('errResizeNoChange');
+								return false;
 							}
-
 						}
 						
-						dialog.elfinderdialog('close');
+						return {w: w, h: h, x: x, y: y, d: d, q: q, b: b};
+					},
+					save = function() {
+						var vals;
 						
-						self.resizeRequest({
-							target : file.hash,
-							width  : w,
-							height : h,
-							x      : x,
-							y      : y,
-							degree : d,
-							quality: q,
-							bg     : b,
-							mode   : mode
-						}, file, dfrd);
+						if (vals = checkVals()) {
+							dialog.elfinderdialog('close');
+							self.resizeRequest({
+								target : file.hash,
+								width  : vals.w,
+								height : vals.h,
+								x      : vals.x,
+								y      : vals.y,
+								degree : vals.d,
+								quality: vals.q,
+								bg     : vals.b,
+								mode   : mode
+							}, file, dfrd);
+						}
 					},
 					saveAs = function() {
 						var fail = function() {
@@ -1019,17 +1026,20 @@ elFinder.prototype.commands.resize = function() {
 								fm.trigger('unselectfiles', { files: [ file.hash ] });
 							},
 							reqOpen = null,
+							dialogs;
+						
+						if (checkVals()) {
 							dialogs = fm.getUI().children('.'+dlcls).fadeOut();
-						
-						base.removeClass(clactive);
+							base.removeClass(clactive);
+								
+							if (fm.searchStatus.state < 2 && file.phash !== fm.cwd().hash) {
+								reqOpen = fm.exec('open', [file.phash], {thash: file.phash});
+							}
 							
-						if (fm.searchStatus.state < 2 && file.phash !== fm.cwd().hash) {
-							reqOpen = fm.exec('open', [file.phash], {thash: file.phash});
+							$.when([reqOpen]).done(function() {
+								reqOpen? fm.one('cwdrender', make) : make();
+							}).fail(fail);
 						}
-						
-						$.when([reqOpen]).done(function() {
-							reqOpen? fm.one('cwdrender', make) : make();
-						}).fail(fail);
 					},
 					buttons = {},
 					hline   = 'elfinder-resize-handle-hline',
