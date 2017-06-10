@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 779a0ab) (2017-06-10)
+ * Version 2.1.24 (2.1-src Nightly: bb741bc) (2017-06-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7674,7 +7674,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 779a0ab)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: bb741bc)';
 
 
 
@@ -13921,7 +13921,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 							if (e.keyCode == $.ui.keyCode.ESCAPE && dialog.hasClass(clactive)) {
 								self.elfinderdialog('close');
 							}
-						})
+						});
 					}
 				})
 				.on('close', function() {
@@ -23008,7 +23008,8 @@ elFinder.prototype.commands.resize = function() {
 			ctrgrup = $().controlgroup? 'controlgroup' : 'buttonset',
 			grid8Def = typeof this.options.grid8px === 'undefind' || this.options.grid8px !== 'disable'? true : false,
 			presetSize = Array.isArray(this.options.presetSize)? this.options.presetSize : [],
-			
+			dlcls = 'elfinder-dialog-resize',
+			clactive = 'elfinder-dialog-active',
 			open = function(file, id) {
 				var isJpeg   = (file.mime === 'image/jpeg'),
 					dialog   = $('<div class="elfinder-dialog-resize '+fm.res('class', 'editing')+'"/>'),
@@ -23524,7 +23525,13 @@ elFinder.prototype.commands.resize = function() {
 												callback : function(){
 													$(this).focus();
 												}
-											}
+											},
+											buttons : [{
+												label    : 'btnSaveAs',
+												callback : function() {
+													setTimeout(saveAs, 10);
+												}
+											}]
 										});
 										return;
 									}
@@ -23860,6 +23867,70 @@ elFinder.prototype.commands.resize = function() {
 							mode   : mode
 						}, file, dfrd);
 					},
+					saveAs = function() {
+						var fail = function() {
+								dialogs.fadeIn(function() {
+									base.addClass(clactive);
+								});
+							},
+							make = function() {
+								self.mime = file.mime;
+								self.prefix = file.name;
+								self.requestCmd = 'mkfile';
+								self.data = {target : file.phash};
+								$.proxy(fm.res('mixin', 'make'), self)()
+									.done(function(data) {
+										var hash;
+										if (data.added && data.added.length) {
+											hash = data.added[0].hash;
+											fm.url(file.hash, { async: true, temporary: true }).done(function(url) {
+												fm.request({
+													options : {type : 'post'},
+													data : {
+														cmd     : 'put',
+														target  : hash,
+														content : fm.convAbsUrl(url)
+													},
+													notify : {type : 'save', cnt : 1},
+													syncOnFail : true
+												})
+												.fail(fail)
+												.done(function(data) {
+													data = fm.normalize(data);
+													fm.updateCache(data);
+													file = fm.file(hash);
+													data.changed && data.changed.length && fm.change(data);
+													base.show().find('.elfinder-dialog-title').html(fm.escape(file.name));
+													save();
+													dialogs.fadeIn();
+												});
+											}).fail(fail);
+										} else {
+											fail();
+										}
+									})
+									.fail(fail)
+									.always(function() {
+										delete self.mime;
+										delete self.prefix;
+										delete self.nextAction;
+										delete self.data;
+									});
+								fm.trigger('unselectfiles', { files: [ file.hash ] });
+							},
+							reqOpen = null,
+							dialogs = fm.getUI().children('.'+dlcls).fadeOut();
+						
+						base.removeClass(clactive);
+							
+						if (fm.searchStatus.state < 2 && file.phash !== fm.cwd().hash) {
+							reqOpen = fm.exec('open', [file.phash], {thash: file.phash});
+						}
+						
+						$.when([reqOpen]).done(function() {
+							reqOpen? fm.one('cwdrender', make) : make();
+						}).fail(fail);
+					},
 					buttons = {},
 					hline   = 'elfinder-resize-handle-hline',
 					vline   = 'elfinder-resize-handle-vline',
@@ -24052,6 +24123,7 @@ elFinder.prototype.commands.resize = function() {
 				dialog.append(preview, control);
 				
 				buttons[fm.i18n('btnApply')] = save;
+				buttons[fm.i18n('btnSaveAs')] = function() { setTimeout(function() { saveAs(); }, 10) };
 				buttons[fm.i18n('btnCancel')] = function() { dialog.elfinderdialog('close'); };
 				
 				dialog.find('input,button').addClass('elfinder-tabstop');
@@ -24077,7 +24149,7 @@ elFinder.prototype.commands.resize = function() {
 							dinit();
 						}
 					}
-				}).attr('id', id).parent();
+				}).attr('id', id).closest('.ui-dialog').addClass(dlcls);
 				
 				// for IE < 9 dialog mising at open second+ time.
 				if (fm.UA.ltIE8) {
