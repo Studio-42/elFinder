@@ -225,15 +225,9 @@ elFinder.prototype.resources = {
 												});
 											}
 											fm.one(req+'done', function() {
-												var acts = {
-														'directory' : { cmd: 'open', msg: 'cmdopendir' },
-														'text/plain': { cmd: 'edit', msg: 'cmdedit' },
-														'default'   : { cmd: 'open', msg: 'cmdopen' }
-													},
-													act, extNode;
+												var extNode;
 												newItem = ui.find('#'+fm[find](item.hash));
-												if (data.added.length === 1) {
-													act = self.nextAction || acts[item.mime] || acts['default'];
+												if (data.added.length === 1 && act.cmd) {
 													extNode = $('<div/>').append(
 														$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"><span class="ui-button-text">'
 															+fm.i18n(act.msg)
@@ -276,6 +270,12 @@ elFinder.prototype.resources = {
 					node.trigger('scrolltoview');
 				},
 				inError = false,
+				acts    = {
+						'directory' : { cmd: 'open', msg: 'cmdopendir' },
+						'text/plain': { cmd: 'edit', msg: 'cmdedit' },
+						'default'   : { cmd: 'open', msg: 'cmdopen' }
+					},
+				act     = Object.assign({}, self.nextAction || acts[item.mime] || acts['default']),
 				// for tree
 				dst, dstCls, collapsed, expanded, arrow, subtree;
 
