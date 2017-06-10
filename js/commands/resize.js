@@ -976,6 +976,7 @@ elFinder.prototype.commands.resize = function() {
 								self.mime = file.mime;
 								self.prefix = file.name;
 								self.requestCmd = 'mkfile';
+								self.nextAction = {};
 								self.data = {target : file.phash};
 								$.proxy(fm.res('mixin', 'make'), self)()
 									.done(function(data) {
