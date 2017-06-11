@@ -218,15 +218,20 @@ elFinder.prototype.resources = {
 										if (data && data.added && data.added[0]) {
 											var item    = data.added[0],
 												dirhash = item.hash,
-												newItem = ui.find('#'+fm[find](dirhash)),
-												nextAct = acts[item.mime] || act;
+												newItem = ui.find('#'+fm[find](dirhash));
 											if (sel && move) {
 												fm.one(req+'done', function() {
 													fm.exec('paste', dirhash);
 												});
 											}
 											fm.one(req+'done', function() {
-												var extNode;
+												var acts    = {
+														'directory' : { cmd: 'open', msg: 'cmdopendir' },
+														'text/plain': { cmd: 'edit', msg: 'cmdedit' },
+														'default'   : { cmd: 'open', msg: 'cmdopen' }
+													},
+													nextAct = nextAction || acts[item.mime] || acts['default'],
+													extNode;
 												newItem = ui.find('#'+fm[find](item.hash));
 												if (data.added.length === 1 && nextAct.cmd) {
 													extNode = $('<div/>').append(
@@ -271,12 +276,7 @@ elFinder.prototype.resources = {
 					node.trigger('scrolltoview');
 				},
 				inError = false,
-				acts    = {
-					'directory' : { cmd: 'open', msg: 'cmdopendir' },
-					'text/plain': { cmd: 'edit', msg: 'cmdedit' },
-					'default'   : { cmd: 'open', msg: 'cmdopen' }
-				},
-				act     = Object.assign({}, self.nextAction || acts['default']),
+				nextAction,
 				// for tree
 				dst, dstCls, collapsed, expanded, arrow, subtree;
 
@@ -284,6 +284,10 @@ elFinder.prototype.resources = {
 				return dfrd.reject();
 			}
 
+			if ($.isPlainObject(self.nextAction)){
+				nextAction = Object.assign({}, self.nextAction);
+			}
+			
 			if (tree) {
 				dst = $('#'+fm[find](phash));
 				collapsed = fm.res('class', 'navcollapse');
