@@ -218,7 +218,8 @@ elFinder.prototype.resources = {
 										if (data && data.added && data.added[0]) {
 											var item    = data.added[0],
 												dirhash = item.hash,
-												newItem = ui.find('#'+fm[find](dirhash));
+												newItem = ui.find('#'+fm[find](dirhash)),
+												nextAct = acts[item.mime] || act;
 											if (sel && move) {
 												fm.one(req+'done', function() {
 													fm.exec('paste', dirhash);
@@ -227,16 +228,16 @@ elFinder.prototype.resources = {
 											fm.one(req+'done', function() {
 												var extNode;
 												newItem = ui.find('#'+fm[find](item.hash));
-												if (data.added.length === 1 && act.cmd) {
+												if (data.added.length === 1 && nextAct.cmd) {
 													extNode = $('<div/>').append(
 														$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"><span class="ui-button-text">'
-															+fm.i18n(act.msg)
+															+fm.i18n(nextAct.msg)
 															+'</span></button>')
 														.on('mouseenter mouseleave', function(e) { 
 															$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
 														})
 														.on('click', function() {
-															fm.exec(act.cmd, [item.hash], { _currentType: 'toast', _currentNode: $(this) });
+															fm.exec(nextAct.cmd, [item.hash], { _currentType: 'toast', _currentNode: $(this) });
 														})
 													);
 												}
@@ -271,11 +272,11 @@ elFinder.prototype.resources = {
 				},
 				inError = false,
 				acts    = {
-						'directory' : { cmd: 'open', msg: 'cmdopendir' },
-						'text/plain': { cmd: 'edit', msg: 'cmdedit' },
-						'default'   : { cmd: 'open', msg: 'cmdopen' }
-					},
-				act     = Object.assign({}, self.nextAction || acts[item.mime] || acts['default']),
+					'directory' : { cmd: 'open', msg: 'cmdopendir' },
+					'text/plain': { cmd: 'edit', msg: 'cmdedit' },
+					'default'   : { cmd: 'open', msg: 'cmdopen' }
+				},
+				act     = Object.assign({}, self.nextAction || acts['default']),
 				// for tree
 				dst, dstCls, collapsed, expanded, arrow, subtree;
 
