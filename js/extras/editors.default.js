@@ -194,7 +194,8 @@
 			info : {
 				name : 'Pixlr Editor',
 				iconImg : 'img/edit_pixlreditor.png',
-				urlAsContent: true
+				urlAsContent: true,
+				single: true
 			},
 			// MIME types to accept
 			mimes : ['image/jpeg', 'image/png'],
@@ -227,7 +228,8 @@
 			info : {
 				name : 'Pixlr Express',
 				iconImg : 'img/edit_pixlrexpress.png',
-				urlAsContent: true
+				urlAsContent: true,
+				single: true
 			},
 			// MIME types to accept
 			mimes : ['image/jpeg', 'image/png'],
@@ -259,7 +261,8 @@
 			// MIME types to accept
 			info : {
 				name : 'Creative Cloud',
-				iconImg : 'img/edit_creativecloud.png'
+				iconImg : 'img/edit_creativecloud.png',
+				single: true
 			},
 			mimes : ['image/jpeg', 'image/png'],
 			// HTML of this editor
@@ -535,11 +538,13 @@
 					};
 
 				// check ace & start
-				if (typeof ace === 'undefined') {
-					self.fm.loadScript([ cdn+'/ace.js' ], start, void 0, {obj: window, name: 'ace'});
-				} else {
-					start();
+				if (!self.confObj.loader) {
+					self.confObj.loader = $.Deferred();
+					self.fm.loadScript([ cdn+'/ace.js' ], function() {
+						self.confObj.loader.resolve();
+					}, void 0, {obj: window, name: 'ace'});
 				}
+				self.confObj.loader.done(start);
 
 				return dfrd;
 			},
@@ -632,7 +637,8 @@
 						.prependTo(base.next());
 					};
 				// load script then start
-				if (!this.CodeMirror) {
+				if (!self.confObj.loader) {
+					self.confObj.loader = $.Deferred();
 					if (useRequire) {
 						require.config({
 							packages: [{
@@ -652,7 +658,7 @@
 							'codemirror/mode/meta.min'
 						], function(CodeMirror) {
 							this.CodeMirror = CodeMirror;
-							start();
+							self.confObj.loader.resolve();
 						});
 					} else {
 						self.fm.loadScript([
@@ -661,14 +667,12 @@
 							cmUrl + '/mode/meta.min.js'
 						], function() {
 							this.CodeMirror = CodeMirror;
-							start();
+							self.confObj.loader.resolve();
 						});
 					}
 					self.fm.loadCss(cmUrl + '/codemirror.css');
-				} else {
-					start();
 				}
-				
+				self.confObj.loader.done(start);
 				return dfrd;
 			},
 			close : function(textarea, instance) {
@@ -740,11 +744,14 @@
 							}
 						});
 					};
-				if (typeof CKEDITOR === 'undefined') {
-					$.getScript(cdns.ckeditor + '/ckeditor.js', init);
-				} else {
-					init();
+
+				if (!self.confObj.loader) {
+					self.confObj.loader = $.Deferred();
+					$.getScript(cdns.ckeditor + '/ckeditor.js', function() {
+						self.confObj.loader.resolve();
+					});
 				}
+				self.confObj.loader.done(init);
 				return dfrd;
 			},
 			close : function(textarea, instance) {
@@ -781,7 +788,7 @@
 				var self = this,
 					fm   = this.fm,
 					dfrd = $.Deferred(),
-					init = function(loaded) {
+					init = function() {
 						var base = $(textarea).parent(),
 							dlg = base.closest('.elfinder-dialog'),
 							h = base.height(),
@@ -811,9 +818,7 @@
 							],
 							init_instance_callback : function(editor) {
 								// fit height on init
-								setTimeout(function() {
-									textarea._setHeight(h);
-								}, loaded? 0 : 500);
+								textarea._setHeight(h);
 								// re-build on dom move
 								dlg.one('beforedommove.'+fm.namespace, function() {
 									tinymce.execCommand('mceRemoveEditor', false, textarea.id);
@@ -873,11 +878,16 @@
 							}
 						});
 					};
-				if (typeof tinymce === 'undefined') {
-					$.getScript(cdns.tinymce + '/tinymce.min.js', init);
-				} else {
-					init(true);
+				
+				if (!self.confObj.loader) {
+					self.confObj.loader = $.Deferred();
+					$.getScript(cdns.tinymce + '/tinymce.min.js', function() {
+						setTimeout(function() {
+							self.confObj.loader.resolve();
+						}, 0);
+					});
 				}
+				self.confObj.loader.done(init);
 				return dfrd;
 			},
 			close : function(textarea, instance) {

@@ -10,6 +10,7 @@ elFinder.prototype.commands.edit = function() {
 		fm    = this.fm,
 		dlcls = 'elfinder-dialog-edit',
 		texts = fm.res('mimes', 'text') || [],
+		mimesSingle = [],
 		mimes = [],
 		rtrim = function(str){
 			return str.replace(/\s+$/, '');
@@ -44,7 +45,7 @@ elFinder.prototype.commands.edit = function() {
 				ext = files[0].name.replace(/^.*(\.[^.]+)$/, '$1');
 			}
 			return $.map(files, function(file) {
-				return (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, texts) !== -1 || $.inArray(file.mime, mimes) !== -1) 
+				return (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, texts) !== -1 || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
 					&& file.mime.indexOf('text/rtf')
 					&& (!self.onlyMimes.length || $.inArray(file.mime, self.onlyMimes) !== -1)
 					&& file.read && file.write
@@ -472,9 +473,10 @@ elFinder.prototype.commands.edit = function() {
 		 * Set current editors
 		 * 
 		 * @param  Object  file object
+		 * @param  Number  cnt  count of selected items
 		 * @return Void
 		 */
-		setEditors = function(file) {
+		setEditors = function(file, cnt) {
 			var mimeMatch = function(fileMime, editorMimes){
 					editorMimes = editorMimes || texts.concat('text/');
 					if ($.inArray(fileMime, editorMimes) !== -1 ) {
@@ -507,7 +509,8 @@ elFinder.prototype.commands.edit = function() {
 			editors = {};
 			$.each(self.options.editors || [], function(i, editor) {
 				var name;
-				if (mimeMatch(file.mime, editor.mimes || null)
+				if ((cnt === 1 || !editor.info || !editor.info.single)
+						&& mimeMatch(file.mime, editor.mimes || null)
 						&& extMatch(file.name, editor.exts || null)
 						&& typeof editor.load == 'function'
 						&& typeof editor.save == 'function') {
@@ -538,11 +541,15 @@ elFinder.prototype.commands.edit = function() {
 				}
 				if (!editor.disabled) {
 					if (editor.mimes && Array.isArray(editor.mimes)) {
-						mimes = mimes.concat(editor.mimes);
+						mimesSingle = mimesSingle.concat(editor.mimes);
+						if (!editor.info || !editor.info.single) {
+							mimes = mimes.concat(editor.mimes);
+						}
 					}
 				}
 			});
 			
+			mimesSingle = ($.uniqueSort || $.unique)(mimesSingle);
 			mimes = ($.uniqueSort || $.unique)(mimes);
 			
 			opts.editors = $.map(opts.editors, function(e) {
@@ -552,7 +559,7 @@ elFinder.prototype.commands.edit = function() {
 		
 		fm.bind('select', function() {
 			if (self.enabled()) {
-				setEditors(fm.file(fm.selected()[0]));
+				setEditors(fm.file(fm.selected()[0]), fm.selected().length);
 				if (Object.keys(editors).length > 1) {
 					self.variants = [];
 					$.each(editors, function(name, editor) {
