@@ -981,7 +981,7 @@ elFinder.prototype.commands.resize = function() {
 							},
 							make = function() {
 								self.mime = file.mime;
-								self.prefix = file.name;
+								self.prefix = file.name.replace(/ \d+(\.[^.]+)?$/, '$1');
 								self.requestCmd = 'mkfile';
 								self.nextAction = {};
 								self.data = {target : file.phash};
@@ -1233,7 +1233,7 @@ elFinder.prototype.commands.resize = function() {
 				dialog.append(preview, control);
 				
 				buttons[fm.i18n('btnApply')] = save;
-				buttons[fm.i18n('btnSaveAs')] = function() { setTimeout(function() { saveAs(); }, 10) };
+				buttons[fm.i18n('btnSaveAs')] = function() { setTimeout(saveAs, 10); };
 				buttons[fm.i18n('btnCancel')] = function() { dialog.elfinderdialog('close'); };
 				
 				dialog.find('input,button').addClass('elfinder-tabstop');
