@@ -31,7 +31,7 @@ elFinder.prototype.commands.search = function() {
 		var fm = this.fm,
 			reqDef = [],
 			onlyMimes = fm.options.onlyMimes,
-			phash;
+			phash, targetVolids = [];
 		
 		if (typeof q == 'string' && q) {
 			if (typeof target == 'object') {
@@ -78,6 +78,8 @@ elFinder.prototype.commands.search = function() {
 							while(phash) {
 								if (target === phash) {
 									$.each(roots, function() {
+										var f = fm.file(this);
+										f && f.volumeid && targetVolids.push(f.volumeid);
 										reqDef.push(fm.request({
 											data   : {cmd : 'search', q : q, target : this, mimes : mime},
 											notify : {type : 'search', cnt : 1, hideCnt : false},
@@ -95,7 +97,7 @@ elFinder.prototype.commands.search = function() {
 				reqDef = [$.Deferred().resolve({files: []})];
 			}
 			
-			fm.searchStatus.mixed = (reqDef.length > 1);
+			fm.searchStatus.mixed = (reqDef.length > 1)? targetVolids : false;
 			
 			return $.when.apply($, reqDef).done(function(data) {
 				var argLen = arguments.length,
