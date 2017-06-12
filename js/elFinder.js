@@ -958,7 +958,7 @@ var elFinder = function(node, opts) {
 		query  : '',
 		target : '',
 		mime   : '',
-		mixed  : false, // in multi volumes search
+		mixed  : false, // in multi volumes search: false or Array that target volume ids
 		ininc  : false // in incremental search
 	};
 
