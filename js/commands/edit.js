@@ -84,7 +84,7 @@ elFinder.prototype.commands.edit = function() {
 						},
 						make = function() {
 							self.mime = file.mime;
-							self.prefix = file.name;
+							self.prefix = file.name.replace(/ \d+(\.[^.]+)?$/, '$1');
 							self.requestCmd = 'mkfile';
 							self.nextAction = { cmd: 'edit', msg: 'cmdedit' };
 							self.data = {target : file.phash};
