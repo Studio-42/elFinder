@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 9d1d493) (2017-06-11)
+ * Version 2.1.24 (2.1-src Nightly: e45657b) (2017-06-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7674,7 +7674,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 9d1d493)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: e45657b)';
 
 
 
@@ -7832,7 +7832,7 @@ if ($.ui) {
 	var x = event.originalEvent.changedTouches[0].screenX.toFixed(0);
 	var y = event.originalEvent.changedTouches[0].screenY.toFixed(0);
 	// Ignore if it's a "false" move (position not changed)
-	if (Math.abs(posX - x) <= 2 && Math.abs(posY - y) <= 2) {
+	if (Math.abs(posX - x) <= 4 && Math.abs(posY - y) <= 4) {
 		return;
 	}
 
@@ -9698,15 +9698,20 @@ elFinder.prototype.resources = {
 										if (data && data.added && data.added[0]) {
 											var item    = data.added[0],
 												dirhash = item.hash,
-												newItem = ui.find('#'+fm[find](dirhash)),
-												nextAct = acts[item.mime] || act;
+												newItem = ui.find('#'+fm[find](dirhash));
 											if (sel && move) {
 												fm.one(req+'done', function() {
 													fm.exec('paste', dirhash);
 												});
 											}
 											fm.one(req+'done', function() {
-												var extNode;
+												var acts    = {
+														'directory' : { cmd: 'open', msg: 'cmdopendir' },
+														'text/plain': { cmd: 'edit', msg: 'cmdedit' },
+														'default'   : { cmd: 'open', msg: 'cmdopen' }
+													},
+													nextAct = nextAction || acts[item.mime] || acts['default'],
+													extNode;
 												newItem = ui.find('#'+fm[find](item.hash));
 												if (data.added.length === 1 && nextAct.cmd) {
 													extNode = $('<div/>').append(
@@ -9751,12 +9756,7 @@ elFinder.prototype.resources = {
 					node.trigger('scrolltoview');
 				},
 				inError = false,
-				acts    = {
-					'directory' : { cmd: 'open', msg: 'cmdopendir' },
-					'text/plain': { cmd: 'edit', msg: 'cmdedit' },
-					'default'   : { cmd: 'open', msg: 'cmdopen' }
-				},
-				act     = Object.assign({}, self.nextAction || acts['default']),
+				nextAction,
 				// for tree
 				dst, dstCls, collapsed, expanded, arrow, subtree;
 
@@ -9764,6 +9764,10 @@ elFinder.prototype.resources = {
 				return dfrd.reject();
 			}
 
+			if ($.isPlainObject(self.nextAction)){
+				nextAction = Object.assign({}, self.nextAction);
+			}
+			
 			if (tree) {
 				dst = $('#'+fm[find](phash));
 				collapsed = fm.res('class', 'navcollapse');
@@ -18510,6 +18514,7 @@ elFinder.prototype.commands.edit = function() {
 		fm    = this.fm,
 		dlcls = 'elfinder-dialog-edit',
 		texts = fm.res('mimes', 'text') || [],
+		mimesSingle = [],
 		mimes = [],
 		rtrim = function(str){
 			return str.replace(/\s+$/, '');
@@ -18544,7 +18549,7 @@ elFinder.prototype.commands.edit = function() {
 				ext = files[0].name.replace(/^.*(\.[^.]+)$/, '$1');
 			}
 			return $.map(files, function(file) {
-				return (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, texts) !== -1 || $.inArray(file.mime, mimes) !== -1) 
+				return (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, texts) !== -1 || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
 					&& file.mime.indexOf('text/rtf')
 					&& (!self.onlyMimes.length || $.inArray(file.mime, self.onlyMimes) !== -1)
 					&& file.read && file.write
@@ -18584,7 +18589,7 @@ elFinder.prototype.commands.edit = function() {
 						},
 						make = function() {
 							self.mime = file.mime;
-							self.prefix = file.name;
+							self.prefix = file.name.replace(/ \d+(\.[^.]+)?$/, '$1');
 							self.requestCmd = 'mkfile';
 							self.nextAction = { cmd: 'edit', msg: 'cmdedit' };
 							self.data = {target : file.phash};
@@ -18972,9 +18977,10 @@ elFinder.prototype.commands.edit = function() {
 		 * Set current editors
 		 * 
 		 * @param  Object  file object
+		 * @param  Number  cnt  count of selected items
 		 * @return Void
 		 */
-		setEditors = function(file) {
+		setEditors = function(file, cnt) {
 			var mimeMatch = function(fileMime, editorMimes){
 					editorMimes = editorMimes || texts.concat('text/');
 					if ($.inArray(fileMime, editorMimes) !== -1 ) {
@@ -19007,7 +19013,8 @@ elFinder.prototype.commands.edit = function() {
 			editors = {};
 			$.each(self.options.editors || [], function(i, editor) {
 				var name;
-				if (mimeMatch(file.mime, editor.mimes || null)
+				if ((cnt === 1 || !editor.info || !editor.info.single)
+						&& mimeMatch(file.mime, editor.mimes || null)
 						&& extMatch(file.name, editor.exts || null)
 						&& typeof editor.load == 'function'
 						&& typeof editor.save == 'function') {
@@ -19038,11 +19045,15 @@ elFinder.prototype.commands.edit = function() {
 				}
 				if (!editor.disabled) {
 					if (editor.mimes && Array.isArray(editor.mimes)) {
-						mimes = mimes.concat(editor.mimes);
+						mimesSingle = mimesSingle.concat(editor.mimes);
+						if (!editor.info || !editor.info.single) {
+							mimes = mimes.concat(editor.mimes);
+						}
 					}
 				}
 			});
 			
+			mimesSingle = ($.uniqueSort || $.unique)(mimesSingle);
 			mimes = ($.uniqueSort || $.unique)(mimes);
 			
 			opts.editors = $.map(opts.editors, function(e) {
@@ -19052,7 +19063,7 @@ elFinder.prototype.commands.edit = function() {
 		
 		fm.bind('select', function() {
 			if (self.enabled()) {
-				setEditors(fm.file(fm.selected()[0]));
+				setEditors(fm.file(fm.selected()[0]), fm.selected().length);
 				if (Object.keys(editors).length > 1) {
 					self.variants = [];
 					$.each(editors, function(name, editor) {
@@ -23884,7 +23895,7 @@ elFinder.prototype.commands.resize = function() {
 							},
 							make = function() {
 								self.mime = file.mime;
-								self.prefix = file.name;
+								self.prefix = file.name.replace(/ \d+(\.[^.]+)?$/, '$1');
 								self.requestCmd = 'mkfile';
 								self.nextAction = {};
 								self.data = {target : file.phash};
@@ -24136,7 +24147,7 @@ elFinder.prototype.commands.resize = function() {
 				dialog.append(preview, control);
 				
 				buttons[fm.i18n('btnApply')] = save;
-				buttons[fm.i18n('btnSaveAs')] = function() { setTimeout(function() { saveAs(); }, 10) };
+				buttons[fm.i18n('btnSaveAs')] = function() { setTimeout(saveAs, 10); };
 				buttons[fm.i18n('btnCancel')] = function() { dialog.elfinderdialog('close'); };
 				
 				dialog.find('input,button').addClass('elfinder-tabstop');
