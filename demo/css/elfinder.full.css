@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 7150a47) (2017-06-12)
+ * Version 2.1.24 (2.1-src Nightly: 2cc50b7) (2017-06-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -276,6 +276,7 @@
 	padding:2px;
 	border:1px solid #ccc;
 	box-sizing: border-box;
+	resize: none;
 }
 .elfinder-touch .elfinder-file-edit {
 	font-size: 16px;
