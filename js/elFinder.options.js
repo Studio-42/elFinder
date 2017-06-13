@@ -470,6 +470,8 @@ elFinder.prototype._options = {
 	/**
 	 * Hash of default directory path to open
 	 * 
+	 * NOTE: This setting will be disabled if the target folder is specified in location.hash.
+	 * 
 	 * If you want to find the hash in Javascript
 	 * can be obtained with the following code. (In the case of a standard hashing method)
 	 * 
