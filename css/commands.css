@@ -266,6 +266,7 @@
 	padding:2px;
 	border:1px solid #ccc;
 	box-sizing: border-box;
+	resize: none;
 }
 .elfinder-touch .elfinder-file-edit {
 	font-size: 16px;

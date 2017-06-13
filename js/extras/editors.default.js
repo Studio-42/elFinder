@@ -574,7 +574,7 @@
 						var CodeMirror = this.CodeMirror,
 							ta   = $(textarea),
 							base = ta.parent(),
-							editorBase;
+							editor, editorBase;
 						
 						// set base height
 						base.height(base.height());
@@ -726,6 +726,7 @@
 							fullPage: true,
 							allowedContent: true,
 							filebrowserBrowseUrl : loc,
+							removePlugins: 'resize',
 							on: {
 								'instanceReady' : function(e) {
 									var editor = e.editor;
@@ -811,10 +812,11 @@
 						// TinyMCE configure
 						tinymce.init({
 							selector: '#' + textarea.id,
+							resize: false,
 							plugins: [
 								'fullpage', // require for getting full HTML
 								'image', 'link', 'media',
-								'code'
+								'code', 'fullscreen'
 							],
 							init_instance_callback : function(editor) {
 								// fit height on init
