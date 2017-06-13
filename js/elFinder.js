@@ -734,13 +734,27 @@ var elFinder = function(node, opts) {
 		this.baseUrl = this.options.baseUrl? this.options.baseUrl : '';
 	}
 	
-	// Check and save conflicts with bootstrap etc
+	/**
+	 * Original functions evacuated by conflict check
+	 * 
+	 * @type Object
+	 */
 	this.noConflicts = {};
-	$.each(conflictChecks, function(i, p) {
-		if ($.fn[p] && typeof $.fn[p].noConflict === 'function') {
-			self.noConflicts[p] = $.fn[p].noConflict();
-		}
-	});
+	
+	/**
+	 * Check and save conflicts with bootstrap etc
+	 * 
+	 * @type Function
+	 */
+	this.noConflict = function() {
+		$.each(conflictChecks, function(i, p) {
+			if ($.fn[p] && typeof $.fn[p].noConflict === 'function') {
+				self.noConflicts[p] = $.fn[p].noConflict();
+			}
+		});
+	}
+	// do check conflict
+	this.noConflict();
 	
 	/**
 	 * Is elFinder over CORS
