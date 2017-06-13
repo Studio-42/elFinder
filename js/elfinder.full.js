@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 7150a47) (2017-06-12)
+ * Version 2.1.24 (2.1-src Nightly: 2cc50b7) (2017-06-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -765,13 +765,27 @@ var elFinder = function(node, opts) {
 		this.baseUrl = this.options.baseUrl? this.options.baseUrl : '';
 	}
 	
-	// Check and save conflicts with bootstrap etc
+	/**
+	 * Original functions evacuated by conflict check
+	 * 
+	 * @type Object
+	 */
 	this.noConflicts = {};
-	$.each(conflictChecks, function(i, p) {
-		if ($.fn[p] && typeof $.fn[p].noConflict === 'function') {
-			self.noConflicts[p] = $.fn[p].noConflict();
-		}
-	});
+	
+	/**
+	 * Check and save conflicts with bootstrap etc
+	 * 
+	 * @type Function
+	 */
+	this.noConflict = function() {
+		$.each(conflictChecks, function(i, p) {
+			if ($.fn[p] && typeof $.fn[p].noConflict === 'function') {
+				self.noConflicts[p] = $.fn[p].noConflict();
+			}
+		});
+	}
+	// do check conflict
+	this.noConflict();
 	
 	/**
 	 * Is elFinder over CORS
@@ -7674,7 +7688,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 7150a47)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 2cc50b7)';
 
 
 
@@ -8451,6 +8465,8 @@ elFinder.prototype._options = {
 	
 	/**
 	 * Hash of default directory path to open
+	 * 
+	 * NOTE: This setting will be disabled if the target folder is specified in location.hash.
 	 * 
 	 * If you want to find the hash in Javascript
 	 * can be obtained with the following code. (In the case of a standard hashing method)
