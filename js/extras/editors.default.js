@@ -498,7 +498,7 @@
 						// TextArea button and Setting button
 						$('<div class="ui-dialog-buttonset"/>').css('float', 'left')
 						.append(
-							$('<button>TextArea</button>')
+							$('<button/>').html(self.fm.i18n('TextArea'))
 							.button()
 							.on('click', function(){
 								if (ta.data('ace')) {
@@ -511,7 +511,7 @@
 									editorBase.show();
 									editor.setValue(ta.hide().val(), -1);
 									editor.focus();
-									$(this).text('TextArea');
+									$(this).html(self.fm.i18n('TextArea'));
 								}
 							})
 						)
@@ -616,7 +616,7 @@
 						// TextArea button and Setting button
 						$('<div class="ui-dialog-buttonset"/>').css('float', 'left')
 						.append(
-							$('<button>TextArea</button>')
+							$('<button/>').html(self.fm.i18n('TextArea'))
 							.button()
 							.on('click', function(){
 								if (ta.data('cm')) {
@@ -630,7 +630,7 @@
 									editor.setValue(ta.hide().val());
 									editor.refresh();
 									editor.focus();
-									$(this).text('TextArea');
+									$(this).html(self.fm.i18n('TextArea'));
 								}
 							})
 						)
@@ -909,7 +909,7 @@
 		{
 			// Simple Text (basic textarea editor)
 			info : {
-				name : 'Simple Text'
+				name : 'TextArea'
 			},
 			load : function(){},
 			save : function(){}
