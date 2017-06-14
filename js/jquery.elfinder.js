@@ -233,36 +233,48 @@ if ($.ui) {
 
 })(jQuery);
 
-$.fn.elfinder = function(o) {
+$.fn.elfinder = function(o, o2) {
 	
-	if (o == 'instance') {
+	if (o === 'instance') {
 		return this.getElFinder();
 	}
 	
 	return this.each(function() {
 		
-		var cmd = typeof(o) == 'string' ? o : '';
+		var cmd = typeof(o) == 'string' ? o : '',
+			opts;
+		
 		if (!this.elfinder) {
-			new elFinder(this, typeof(o) == 'object' ? o : {});
-		}
-		
-		switch(cmd) {
-			case 'close':
-			case 'hide':
-				this.elfinder.hide();
-				break;
+			if ($.isPlainObject(o)) {
+				new elFinder(this, o);
+			}
+		} else {
+			switch(cmd) {
+				case 'close':
+				case 'hide':
+					this.elfinder.hide();
+					break;
+					
+				case 'open':
+				case 'show':
+					this.elfinder.show();
+					break;
+					
+				case 'destroy':
+					this.elfinder.destroy();
+					break;
 				
-			case 'open':
-			case 'show':
-				this.elfinder.show();
-				break;
-				
-			case'destroy':
-				this.elfinder.destroy();
-				break;
+				case 'reload':
+				case 'restart':
+					if (this.elfinder) {
+						opts = this.elfinder.options;
+						this.elfinder.destroy();
+						new elFinder(this, $.extend(true, opts, $.isPlainObject(o2)? o2 : {}));
+					}
+					break;
+			}
 		}
-		
-	})
+	});
 };
 
 $.fn.getElFinder = function() {
