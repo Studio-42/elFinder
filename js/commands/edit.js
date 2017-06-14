@@ -372,7 +372,7 @@ elFinder.prototype.commands.edit = function() {
 				return dfrd.reject(error);
 			}
 			
-			if (editor.info && editor.info.urlAsContent) {
+			if (editor && editor.info && editor.info.urlAsContent) {
 				req = $.Deferred();
 				fm.url(hash, { async: true, temporary: true }).done(function(url) {
 					req.resolve({content: url});
