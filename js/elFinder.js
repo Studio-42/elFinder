@@ -29,15 +29,7 @@ var elFinder = function(node, opts) {
 		 * @see this.destroy
 		 * @type jQuery
 		 **/
-		prevContent = $('<div/>').append(node.contents()),
-		
-		/**
-		 * Store node inline styles
-		 *
-		 * @see this.destroy
-		 * @type String
-		 **/
-		prevStyle = node.attr('style'),
+		prevContent = $('<div/>').append(node.contents()).attr('class', node.attr('class') || '').attr('style', node.attr('style') || ''),
 		
 		/**
 		 * Instance ID. Required to get/set cookie
@@ -2895,12 +2887,14 @@ var elFinder = function(node, opts) {
 			$(window).off('.' + namespace);
 			$(document).off('.' + namespace);
 			self.trigger = function(){}
-			node.off();
-			node.removeData();
-			node.empty();
-			node[0].elfinder = null;
 			$(beeper).remove();
-			node.append(prevContent.contents()).removeClass(this.cssClass).attr('style', prevStyle);
+			node.off()
+				.removeData()
+				.empty()
+				.append(prevContent.contents())
+				.attr('class', prevContent.attr('class'))
+				.attr('style', prevContent.attr('style'));
+			delete node[0].elfinder;
 		}
 	};
 	
