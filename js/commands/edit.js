@@ -441,7 +441,18 @@ elFinder.prototype.commands.edit = function() {
 								dfrd.reject(error);
 							})
 							.done(function(data) {
-								data.changed && data.changed.length && fm.change(data);
+								var newItem;
+								if (data && data.changed && data.changed[0]) {
+									fm.one('putdone', function() {
+										newItem = fm.findCwdNodes(data.changed);
+										if (newItem.length) {
+											newItem.trigger('scrolltoview');
+										} else {
+											fm.trigger('selectfiles', {files : $.map(data.changed, function(f) {return f.hash;})});
+											fm.toast({msg: fm.i18n(['complete', fm.i18n('btnSave')])});
+										}
+									});
+								}
 								setTimeout(function(){
 									ta.focus();
 									ta.editor && ta.editor.focus(ta[0], ta.editor.instance);
