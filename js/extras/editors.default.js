@@ -372,7 +372,7 @@
 			save : function(base) {
 				var node = $(base).children('img:first');
 				if (node.attr('src').substr(0, 5) !== 'data:') {
-					node.attr('src', imgBase64(node, node.data('mime')));
+					node.attr('src', imgBase64(node, this.file.mime));
 				}
 			}
 		},
