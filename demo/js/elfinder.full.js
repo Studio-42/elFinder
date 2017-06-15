@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 96e8cf6) (2017-06-15)
+ * Version 2.1.24 (2.1-src Nightly: 276e6c0) (2017-06-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7682,7 +7682,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 96e8cf6)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 276e6c0)';
 
 
 
@@ -8449,7 +8449,12 @@ elFinder.prototype._options = {
 			// Maximum number of items that can be placed into the Trash at one time
 			toTrashMaxItems : 1000
 		},
-		help : {view : ['about', 'shortcuts', 'help', 'debug']}
+		help : {
+			// Tabs to show
+			view : ['about', 'shortcuts', 'help', 'debug'],
+			// HTML source URL of the heip tab
+			helpSource : ''
+		}
 	},
 	
 	/**
@@ -19819,7 +19824,7 @@ elFinder.prototype.commands.fullscreen = function() {
 	
 	fm.one('load', function() {
 		var parts = self.options.view || ['about', 'shortcuts', 'help', 'debug'],
-			tabDebug, i;
+			tabDebug, i, helpSource;
 		
 		// debug tab require jQueryUI Tabs Widget
 		if (! $.fn.tabs) {
@@ -19836,7 +19841,10 @@ elFinder.prototype.commands.fullscreen = function() {
 
 		$.inArray('about', parts) !== -1 && about();
 		$.inArray('shortcuts', parts) !== -1 && shortcuts();
-		$.inArray('help', parts) !== -1 && help();
+		if ($.inArray('help', parts) !== -1) {
+			helpSource = fm.baseUrl+'js/i18n/help/%s.html';
+			help();
+		}
 		$.inArray('debug', parts) !== -1 && debug();
 		
 		html.push('</div>');
@@ -19847,7 +19855,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				$(this).toggleClass('ui-state-hover');
 			})
 			.children()
-			.click(function(e) {
+			.on('click', function(e) {
 				var link = $(this);
 				
 				e.preventDefault();
@@ -19865,7 +19873,10 @@ elFinder.prototype.commands.fullscreen = function() {
 		if (useDebug) {
 			tabDebug = content.find('.elfinder-help-tab-debug').hide();
 			debugDIV = content.find('#'+fm.namespace+'-help-debug').children('div:first').tabs();
-			debugUL = debugDIV.children('ul:first');
+			debugUL = debugDIV.children('ul:first').on('click', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+			});
 
 			self.debug = {};
 	
@@ -19884,9 +19895,21 @@ elFinder.prototype.commands.fullscreen = function() {
 		content.find('#'+fm.namespace+'-help-about').find('.apiver').text(fm.api);
 		self.dialog = fm.dialog(content, {title : self.title, width : 530, autoOpen : false, destroyOnClose : false})
 			.on('click', function(e) {
-				e.preventDefault();
 				e.stopPropagation();
 			});
+		
+		if (helpSource) {
+			$.ajax({
+				url: self.options.helpSource? self.options.helpSource : helpSource.replace('%s', fm.lang),
+				dataType: 'html'
+			}).done(function(source) {
+				$('#'+fm.namespace+'-help-help').html(source);
+			}).fail(function() {
+				$.get(helpSource.replace('%s', 'en'), function(source) {
+					$('#'+fm.namespace+'-help-help').html(source);
+				});
+			});
+		}
 		
 		self.state = 0;
 	});
