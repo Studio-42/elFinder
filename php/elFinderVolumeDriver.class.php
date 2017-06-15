@@ -4077,18 +4077,22 @@ abstract class elFinderVolumeDriver {
 		}
 		$ext = (false === $pos = strrpos($name, '.')) ? '' : substr($name, $pos + 1);
 		if (! $nameCheck && is_readable($path)) {
-			if ($this->mimeDetect == 'finfo') {
-				if ($type = finfo_file($this->finfo, $path)) {
-					if ($ext && preg_match('~^application/(?:octet-stream|(?:x-)?zip)~', $type)) {
-						if (isset(elFinderVolumeDriver::$mimetypes[$ext])) $type = elFinderVolumeDriver::$mimetypes[$ext];
-					} else if ($ext === 'js' && preg_match('~^text/~', $type)) {
-						$type = 'text/javascript';
+			if (filesize($path) > 0) {
+				if ($this->mimeDetect == 'finfo') {
+					if ($type = finfo_file($this->finfo, $path)) {
+						if ($ext && preg_match('~^application/(?:octet-stream|(?:x-)?zip)~', $type)) {
+							if (isset(elFinderVolumeDriver::$mimetypes[$ext])) $type = elFinderVolumeDriver::$mimetypes[$ext];
+						} else if ($ext === 'js' && preg_match('~^text/~', $type)) {
+							$type = 'text/javascript';
+						}
+					} else {
+						$type = 'unknown';
 					}
-				} else {
-					$type = 'unknown';
+				} else if ($this->mimeDetect == 'mime_content_type') {
+					$type = mime_content_type($path);
 				}
-			} else if ($this->mimeDetect == 'mime_content_type') {
-				$type = mime_content_type($path);
+			} else {
+				$type = 'text/plain';
 			}
 		}
 		if (! $type) {
