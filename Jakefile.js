@@ -39,7 +39,8 @@ var dirmode = 0755,
 
 		'sounds':	grep(path.join(src, 'sounds'), '\\.wav'),
 
-		'i18n': grep(path.join(src, 'js', 'i18n'), '\\.js', 'elfinder.en.js'),
+		'i18n': grep(path.join(src, 'js', 'i18n'), '\\.js', 'elfinder.en.js')
+				.concat(grep(path.join(src, 'js', 'i18n', 'help'), '\\.html')),
 
 		'php':
 			[
@@ -149,7 +150,7 @@ task('prebuild', function(){
 	console.log('build dir:  ' + path.resolve());
 	console.log('src dir:    ' + src);
 	var dir = ['css', 'js', 'img', 'sounds',
-			path.join('js', 'i18n'), path.join('js', 'extras'), path.join('js', 'proxy'),
+			path.join('js', 'i18n'), path.join('js', 'i18n', 'help'), path.join('js', 'extras'), path.join('js', 'proxy'),
 			'php',
 			path.join('php', '.tmp'), path.join('php', 'libs'), path.join('php', 'resources'),
 			'files', path.join('files', '.trash')];
@@ -288,7 +289,8 @@ task('clean', function(){
 			.concat(path.join('css', 'theme.css'))
 			.concat(grep('img', '\\.png|\\.gif'))
 			.concat(grep('sounds', '\\.wav'))
-			.concat(grep(path.join('js', 'i18n')))
+			.concat(grep(path.join('js', 'i18n', 'help')))
+			.concat(grep(path.join('js', 'i18n'), '\\.js'))
 			.concat(grep(path.join('js', 'extras')))
 			.concat([path.join('js', 'proxy', 'elFinderSupportVer1.js'), 'Changelog', 'README.md', 'elfinder.html', 'composer.json', 'LICENSE.md', 'main.default.js', path.join('files', 'readme.txt')])
 			.concat(grep('php', '\\.php|\\.sql'))
@@ -311,7 +313,7 @@ task('clean', function(){
 	if (src != path.resolve()) {
 		var ud = [
 			'css', 'img', 'sounds', path.join('files', '.trash'), 'files',
-			path.join('js', 'proxy'), path.join('js', 'i18n'), path.join('js', 'extras'), 'js',
+			path.join('js', 'proxy'), path.join('js', 'i18n', 'help'), path.join('js', 'i18n'), path.join('js', 'extras'), 'js',
 			path.join('php', '.tmp'), path.join('php', 'libs'), path.join('php', 'resources')]
 			.concat(grep(path.join('php', 'plugins')))
 			.concat([path.join('php', 'plugins'), 'php']);
