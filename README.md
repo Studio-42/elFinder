@@ -61,6 +61,7 @@ Features
  * Keyboard shortcuts
  * Standard methods of file/group selection using mouse or keyboard
  * Move/Copy files with Drag & Drop
+ * Drag & Drop to outside by starting drag with alt/option key press
  * Archives create/extract (zip, rar, 7z, tar, gzip, bzip2)
  * Rich context menu and toolbar
  * Quicklook, preview for common file types
