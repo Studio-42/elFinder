@@ -447,7 +447,12 @@ elFinder.prototype._options = {
 			// Maximum number of items that can be placed into the Trash at one time
 			toTrashMaxItems : 1000
 		},
-		help : {view : ['about', 'shortcuts', 'help', 'debug']}
+		help : {
+			// Tabs to show
+			view : ['about', 'shortcuts', 'help', 'debug'],
+			// HTML source URL of the heip tab
+			helpSource : ''
+		}
 	},
 	
 	/**
