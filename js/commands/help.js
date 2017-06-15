@@ -235,14 +235,16 @@
 			});
 		
 		if (helpSource) {
-			$.ajax({
-				url: self.options.helpSource? self.options.helpSource : helpSource.replace('%s', fm.lang),
-				dataType: 'html'
-			}).done(function(source) {
-				$('#'+fm.namespace+'-help-help').html(source);
-			}).fail(function() {
-				$.get(helpSource.replace('%s', 'en'), function(source) {
+			self.dialog.one('initContents', function() {
+				$.ajax({
+					url: self.options.helpSource? self.options.helpSource : helpSource.replace('%s', fm.lang),
+					dataType: 'html'
+				}).done(function(source) {
 					$('#'+fm.namespace+'-help-help').html(source);
+				}).fail(function() {
+					$.get(helpSource.replace('%s', 'en'), function(source) {
+						$('#'+fm.namespace+'-help-help').html(source);
+					});
 				});
 			});
 		}
@@ -255,7 +257,7 @@
 	};
 	
 	this.exec = function() {
-		this.dialog.elfinderdialog('open').find('.ui-tabs-nav li a:first').click();
+		this.dialog.trigger('initContents').elfinderdialog('open').find('.ui-tabs-nav li a:first').click();
 	};
 
 }).prototype = { forceLoad : true }; // this is required command
