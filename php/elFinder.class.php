@@ -1588,9 +1588,19 @@ class elFinder {
 				}
 				$tgt =& $reset;
 			}
-			return ($res = $this->ensureDirsRecursively($volume, $target, $mkdirs)) === false
-				? array('error' => $this->error(self::ERROR_MKDIR, $name, $volume->error()))
-				: array('added' => $res['stats'], 'hashes' => $res['hashes']);
+			$res = $this->ensureDirsRecursively($volume, $target, $mkdirs);
+			if ($res['error']) {
+				$errors = $volume->error();
+				if ($res['hashes']) {
+					$this->rm(array('targets' => $res['hashes']));
+				}
+				return array('error' => $this->error(self::ERROR_MKDIR, $res['error'][0], $errors));
+			} else {
+				return array('added' => $res['stats'], 'hashes' => $res['hashes']);
+			}
+			//return ($res = $this->ensureDirsRecursively($volume, $target, $mkdirs)) === false
+			//	? array('error' => $this->error(self::ERROR_MKDIR, $name, $volume->error()))
+			//	: array('added' => $res['stats'], 'hashes' => $res['hashes']);
 		} else {
 			return ($dir = $volume->mkdir($target, $name)) == false
 				? array('error' => $this->error(self::ERROR_MKDIR, $name, $volume->error()))
@@ -3319,7 +3329,7 @@ class elFinder {
 	 * @author Naoki Sawada
 	 **/
 	protected function ensureDirsRecursively($volume, $target, $dirs, $path = '') {
-		$res = array('stats' => array(), 'hashes' => array());
+		$res = array('stats' => array(), 'hashes' => array(), 'error' => array());
 		foreach($dirs as $name => $sub) {
 			$name = (string)$name;
 			if ((($parent = $volume->realpath($target)) && ($dir = $volume->dir($volume->getHash($parent, $name)))) || ($dir = $volume->mkdir($target, $name))) {
@@ -3327,14 +3337,13 @@ class elFinder {
 				$res['stats'][] = $dir;
 				$res['hashes'][$_path] = $dir['hash'];
 				if (count($sub)) {
-					if ($subRes = $this->ensureDirsRecursively($volume, $dir['hash'], $sub, $_path)) {
-						$res = array_merge_recursive($res, $subRes);
-					} else {
-						return false;
+					$res = array_merge_recursive($res, $this->ensureDirsRecursively($volume, $dir['hash'], $sub, $_path));
+					if ($res['error']) {
+						break;
 					}
 				}
 			} else {
-				return false;
+				$res['error'][] = $name;
 			}
 		}
 		return $res;
