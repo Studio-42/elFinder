@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 533352e) (2017-06-15)
+ * Version 2.1.24 (2.1-src Nightly: 83caaf8) (2017-06-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -1913,6 +1913,8 @@ var elFinder = function(node, opts) {
 								error = ['errConnect', 'errAccess', 'HTTP error ' + xhr.status];
 							} else if (xhr.status == 404) {
 								error = ['errConnect', 'errNotFound', 'HTTP error ' + xhr.status];
+							} else if (xhr.status >= 500) {
+								error = ['errResponse', 'errServerError', 'HTTP error ' + xhr.status];
 							} else {
 								if (xhr.status == 414 && options.type === 'get') {
 									// retry by POST method
@@ -4880,20 +4882,34 @@ elFinder.prototype = {
 				retryWait   = 10000, // 10 sec
 				retryMax    = 30, // 10 sec * 30 = 300 secs (Max 5 mins)
 				retry       = 0,
+				getFile     = function(files) {
+					var dfd = $.Deferred(),
+						file;
+					if (files.promise) {
+						files.always(function(f) {
+							dfd.resolve(Array.isArray(f) && f.length? (isDataType? f[0][0] : f[0]) : {});
+						});
+					} else {
+						dfd.resolve(files.length? (isDataType? files[0][0] : files[0]) : {});
+					}
+					return dfd;
+				},
 				dfrd   = $.Deferred()
 					.fail(function(error) {
 						if (self.uploads.xhrUploading) {
-							setTimeout(function() { self.sync(); }, 5000);
-							var file = files.length? (isDataType? files[0][0] : files[0]) : {};
-							if (file._cid) {
-								formData = new FormData();
-								files = [{_chunkfail: true}];
-								formData.append('chunk', file._chunk);
-								formData.append('cid'  , file._cid);
-								isDataType = false;
-								send(files);
-							}
+							getFile(files).done(function(file) {
+								if (file._cid) {
+									setTimeout(function() { self.sync(); }, 5000);
+									formData = new FormData();
+									files = [{_chunkfail: true}];
+									formData.append('chunk', file._chunk);
+									formData.append('cid'  , file._cid);
+									isDataType = false;
+									send(files);
+								}
+							});
 						}
+						self.sync();
 						self.uploads.xhrUploading = false;
 						files = null;
 						error && self.error(error);
@@ -5030,7 +5046,7 @@ elFinder.prototype = {
 					if (status > 500) {
 						error = 'errResponse';
 					} else {
-						error = 'errConnect';
+						error = ['errResponse', 'errServerError'];
 					}
 				} else {
 					if (!xhr.responseText) {
@@ -5040,8 +5056,9 @@ elFinder.prototype = {
 				
 				if (error) {
 					node.trigger('uploadabort');
-					var file = isDataType? files[0][0] : files[0];
-					return dfrd.reject(file._cid? null : error);
+					getFile(files).done(function(file) {
+						return dfrd.reject(file._cid? null : error);
+					});
 				}
 				
 				loaded = filesize;
@@ -5566,7 +5583,8 @@ elFinder.prototype = {
 												// ensure directories
 												fm.request({
 													data   : {cmd : 'mkdir', target : target, dirs : mkdirs},
-													notify : {type : 'mkdir', cnt : mkdirs.length}
+													notify : {type : 'mkdir', cnt : mkdirs.length},
+													preventFail: true
 												})
 												.fail(function(error) {
 													error = error || ['errUnknown'];
@@ -5646,7 +5664,8 @@ elFinder.prototype = {
 								// ensure directories
 								fm.request({
 									data   : {cmd : 'mkdir', target : target, dirs : result[4]},
-									notify : {type : 'mkdir', cnt : result[4].length}
+									notify : {type : 'mkdir', cnt : result[4].length},
+									preventFail: true
 								})
 								.fail(function(error) {
 									error = error || ['errUnknown'];
@@ -7682,7 +7701,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 533352e)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 83caaf8)';
 
 
 
@@ -9954,7 +9973,7 @@ $.fn.dialogelfinder = function(opts) {
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2017-06-14
+ * @version 2017-06-16
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -10058,6 +10077,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'errMaxTargets'        : 'Max number of selectable items is $1.', // from v2.1.17 added 17.10.2016
 			'errRestore'           : 'Unable to restore from the trash. Can\'t identify the restore destination.', // from v2.1.24 added 3.5.2017
 			'errEditorNotFound'    : 'Editor not found to this file type.', // from v2.1.25 added 23.5.2017
+			'errServerError'       : 'Error occurred on the server side.', // from v2.1.25 added 16.6.2017
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',
