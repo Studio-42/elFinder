@@ -2663,11 +2663,9 @@ class elFinder {
 		$mime = isset($file['mime'])? $file['mime'] : '';
 		if ($mime && strtolower(substr($mime, 0, 4)) === 'text') {
 			$enc = '';
-			if (! $args['conv'] || $args['conv'] == '1') {
-				// detect encoding
-				if ($content === '') {
-					$enc = '';
-				} else {
+			if ($content !== '') {
+				if (! $args['conv'] || $args['conv'] == '1') {
+					// detect encoding
 					if (function_exists('mb_detect_encoding')) {
 						if ($enc = mb_detect_encoding($content , mb_detect_order(), true)) {
 							$encu = strtoupper($enc);
@@ -2712,18 +2710,18 @@ class elFinder {
 							return array('doconv' => $enc);
 						}
 					}
-				}
-			} 
-			if ($args['conv']) {
-				$enc = $args['conv'];
-				if (strtoupper($enc) !== 'UTF-8') {
-					$_content = $content;
-					$content = iconv($enc, 'UTF-8', $content);
-					if ($content === false && function_exists('mb_convert_encoding')) {
-						$content = mb_convert_encoding($_content, 'UTF-8', $enc);
+				} 
+				if ($args['conv']) {
+					$enc = $args['conv'];
+					if (strtoupper($enc) !== 'UTF-8') {
+						$_content = $content;
+						$content = iconv($enc, 'UTF-8', $content);
+						if ($content === false && function_exists('mb_convert_encoding')) {
+							$content = mb_convert_encoding($_content, 'UTF-8', $enc);
+						}
+					} else {
+						$enc = '';
 					}
-				} else {
-					$enc = '';
 				}
 			}
 		} else {
