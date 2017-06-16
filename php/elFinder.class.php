@@ -1591,16 +1591,13 @@ class elFinder {
 			$res = $this->ensureDirsRecursively($volume, $target, $mkdirs);
 			if ($res['error']) {
 				$errors = $volume->error();
-				if ($res['hashes']) {
-					$this->rm(array('targets' => $res['hashes']));
+				if ($res['makes']) {
+					$this->rm(array('targets' => $res['makes']));
 				}
 				return array('error' => $this->error(self::ERROR_MKDIR, $res['error'][0], $errors));
 			} else {
 				return array('added' => $res['stats'], 'hashes' => $res['hashes']);
 			}
-			//return ($res = $this->ensureDirsRecursively($volume, $target, $mkdirs)) === false
-			//	? array('error' => $this->error(self::ERROR_MKDIR, $name, $volume->error()))
-			//	: array('added' => $res['stats'], 'hashes' => $res['hashes']);
 		} else {
 			return ($dir = $volume->mkdir($target, $name)) == false
 				? array('error' => $this->error(self::ERROR_MKDIR, $name, $volume->error()))
@@ -3325,15 +3322,20 @@ class elFinder {
 	 * @param  string  $target  Target hash
 	 * @param  string  $dirs    Array of directory tree to ensure
 	 * @param  string  $path    Relative path form target hash
-	 * @return array|false      array('stats' => array([stat of maked directory]), 'hashes' => array('[path]' => '[hash]'))
+	 * @return array|false      array('stats' => array([stat of maked directory]), 'hashes' => array('[path]' => '[hash]'), 'makes' => array([New directory hashes]), 'error' => array([Error name]))
 	 * @author Naoki Sawada
 	 **/
 	protected function ensureDirsRecursively($volume, $target, $dirs, $path = '') {
-		$res = array('stats' => array(), 'hashes' => array(), 'error' => array());
+		$res = array('stats' => array(), 'hashes' => array(), 'makes' => array(), 'error' => array());
 		foreach($dirs as $name => $sub) {
 			$name = (string)$name;
-			if ((($parent = $volume->realpath($target)) && ($dir = $volume->dir($volume->getHash($parent, $name)))) || ($dir = $volume->mkdir($target, $name))) {
+			$newDir = null;
+			if ((($parent = $volume->realpath($target)) && ($dir = $volume->dir($volume->getHash($parent, $name)))) || ($newDir = $volume->mkdir($target, $name))) {
 				$_path = $path . '/' . $name;
+				if ($newDir) {
+					$res['makes'][] = $newDir['hash'];
+					$dir = $newDir;
+				}
 				$res['stats'][] = $dir;
 				$res['hashes'][$_path] = $dir['hash'];
 				if (count($sub)) {
