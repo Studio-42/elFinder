@@ -968,7 +968,7 @@ elFinder.prototype._options = {
 	/**
 	 * Debug config
 	 *
-	 * @type Array|Boolean
+	 * @type Array|String('auto')|Boolean(true|false)
 	 */
 	// debug : true
 	debug : ['error', 'warning', 'event-destroy']
