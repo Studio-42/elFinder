@@ -3139,7 +3139,7 @@ class elFinder {
 				break;
 		}
 		
-		if (defind('E_DEPRECATED')) {
+		if (defined('E_DEPRECATED')) {
 			switch ($errno) {
 				case E_DEPRECATED:
 				case E_USER_DEPRECATED:
