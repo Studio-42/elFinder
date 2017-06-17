@@ -412,6 +412,8 @@ class elFinder {
 		if ($this->debug) {
 			error_reporting(defined('ELFINDER_DEBUG_ERRORLEVEL')? ELFINDER_DEBUG_ERRORLEVEL : -1);
 			ini_set('diaplay_errors', '1');
+			// clear output buffer and stop output filters
+			while(ob_get_level() && ob_end_clean()){}
 		}
 
 		if (! interface_exists('elFinderSessionInterface')) {
@@ -3125,6 +3127,26 @@ class elFinder {
 				elFinder::$phpErrors[] = "NOTICE: $errstr in $errfile line $errline.";
 				$proc = true;
 				break;
+				
+			case E_STRICT:
+				elFinder::$phpErrors[] = "STRICT: $errstr in $errfile line $errline.";
+				$proc = true;
+				break;
+				
+			case E_RECOVERABLE_ERROR:
+				elFinder::$phpErrors[] = "RECOVERABLE_ERROR: $errstr in $errfile line $errline.";
+				$proc = true;
+				break;
+		}
+		
+		if (defind('E_DEPRECATED')) {
+			switch ($errno) {
+				case E_DEPRECATED:
+				case E_USER_DEPRECATED:
+					elFinder::$phpErrors[] = "DEPRECATED: $errstr in $errfile line $errline.";
+					$proc = true;
+					break;
+			}
 		}
 		
 		return $proc;

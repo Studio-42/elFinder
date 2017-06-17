@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: f1f070e) (2017-06-16)
+ * Version 2.1.24 (2.1-src Nightly: 1f304f3) (2017-06-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -755,6 +755,21 @@ var elFinder = function(node, opts) {
 	
 	if (this.baseUrl === '') {
 		this.baseUrl = this.options.baseUrl? this.options.baseUrl : '';
+	}
+	
+	// make options.debug
+	if (this.options.debug === true) {
+		this.options.debug = 'all';
+	} else if (Array.isArray(this.options.debug)) {
+		(function() {
+			var d = {};
+			$.each(self.options.debug, function() {
+				d[this] = true;
+			});
+			self.options.debug = d;
+		})();
+	} else {
+		this.options.debug = false;
 	}
 	
 	/**
@@ -1880,7 +1895,8 @@ var elFinder = function(node, opts) {
 			 * @return void
 			 **/
 			error = function(xhr, status) {
-				var error, data;
+				var error, data, 
+					d = self.options.debug;
 				
 				switch (status) {
 					case 'abort':
@@ -1892,9 +1908,9 @@ var elFinder = function(node, opts) {
 					case 'parsererror': 
 						error = ['errResponse', 'errDataNotJSON'];
 						if (xhr.responseText) {
-							self.debug('backend-debug', { debug: {phpErrors: [ xhr.responseText] }});
-							if (! cwd) {
-								xhr.responseText && error.push(xhr.responseText);
+							self.debug('backend-debug', { debug: {backendErrors: [ xhr.responseText] }});
+							if (! cwd || (d && (d === 'all' || d['backend-error']))) {
+								error.push(xhr.responseText);
 							}
 						}
 						break;
@@ -1938,8 +1954,17 @@ var elFinder = function(node, opts) {
 			 * @return void
 			 **/
 			success = function(response) {
+				var d = self.options.debug;
+				
 				// Set currrent request command name
 				self.currentReqCmd = cmd;
+				
+				if (response.debug && (!d || (d !== 'all' && !d['backend-error']))) {
+					if (!d) {
+						self.options.debug = {};
+					}
+					self.options.debug['backend-error'] = true
+				}
 				
 				if (raw) {
 					response && response.debug && self.debug('backend-debug', response);
@@ -7622,7 +7647,7 @@ elFinder.prototype = {
 	debug : function(type, m) {
 		var d = this.options.debug;
 
-		if (d == 'all' || d === true || (Array.isArray(d) && $.inArray(type, d) != -1)) {
+		if (d && (d === 'all' || d[type])) {
 			window.console && window.console.log && window.console.log('elfinder debug: ['+type+'] ['+this.id+']', m);
 		} 
 		
@@ -7701,7 +7726,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: f1f070e)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 1f304f3)';
 
 
 
@@ -8989,7 +9014,7 @@ elFinder.prototype._options = {
 	/**
 	 * Debug config
 	 *
-	 * @type Array|Boolean
+	 * @type Array|String('auto')|Boolean(true|false)
 	 */
 	// debug : true
 	debug : ['error', 'warning', 'event-destroy']
