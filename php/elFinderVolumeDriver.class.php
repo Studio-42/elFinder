@@ -226,9 +226,11 @@ abstract class elFinderVolumeDriver {
 		// root url, not set to disable sending URL to client (replacement for old "fileURL" option)
 		'URL'             => '',
 		// directory link url to own manager url with folder hash (`true`, `false` or default `'auto'`: URL is empty then `true` else `false`)
-		'dirUrlOwn'     => 'auto',
+		'dirUrlOwn'       => 'auto',
 		// directory separator. required by client to show paths correctly
 		'separator'       => DIRECTORY_SEPARATOR,
+		// Use '/' as directory separator when the path hash encode/decode on the Windows server too
+		'winHashFix'      => false,
 		// Server character encoding (default is '': UTF-8)
 		'encoding'        => '',
 		// for convert character encoding (default is '': Not change locale)
@@ -641,6 +643,13 @@ abstract class elFinderVolumeDriver {
 	 * @var string
 	 **/
 	protected $separator = DIRECTORY_SEPARATOR;
+	
+	/**
+	 * Directory separator for decode/encode hash
+	 *
+	 * @var string
+	 **/
+	protected $separatorForHash = '';
 	
 	/**
 	 * System Root path (Unix like: '/', Windows: '\', 'C:\' or 'D:\'...)
@@ -1065,6 +1074,9 @@ abstract class elFinderVolumeDriver {
 		$this->id = $this->driverId.(!empty($this->options['id']) ? $this->options['id'] : elFinder::$volumesCnt++).'_';
 		$this->root = $this->normpathCE($this->options['path']);
 		$this->separator = isset($this->options['separator']) ? $this->options['separator'] : DIRECTORY_SEPARATOR;
+		if (! empty($this->options['winHashFix'])) {
+			$this->separatorForHash = ($this->separator !== '/') ? '/' : '';
+		}
 		$this->systemRoot = isset($this->options['systemRoot']) ? $this->options['systemRoot'] : $this->separator;
 		
 		// set server encoding
@@ -3324,7 +3336,10 @@ abstract class elFinderVolumeDriver {
 			if ($p === '')	{
 				$p = $this->separator;
 			}
-
+			// change separator
+			if ($this->separatorForHash) {
+				$p = str_replace($this->separator, $this->separatorForHash, $p);
+			}
 			// TODO crypt path and return hash
 			$hash = $this->crypt($p);
 			// hash is used as id in HTML that means it must contain vaild chars
@@ -3353,7 +3368,11 @@ abstract class elFinderVolumeDriver {
 			// replace HTML safe base64 to normal
 			$h = base64_decode(strtr($h, '-_.', '+/='));
 			// TODO uncrypt hash and return path
-			$path = $this->uncrypt($h); 
+			$path = $this->uncrypt($h);
+			// change separator
+			if ($this->separatorForHash) {
+				$path = str_replace($this->separatorForHash, $this->separator, $path);
+			}
 			// append ROOT to path after it was cut in encode
 			return $this->abspathCE($path);//$this->root.($path === $this->separator ? '' : $this->separator.$path); 
 		}
