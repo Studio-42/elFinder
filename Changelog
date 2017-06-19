@@ -12,6 +12,9 @@
 		- [VD:abstract,LocalFileSystem] Fixed #2035 support multipart rar extraction
 		- [VD:abstract] Fixed #2040 Fatal error on create the item with PHP>=7.1
 		- [cmd:rm] Fixed #2042 add command options `infoCheckWait`, `toTrashMaxItems`
+		- [cmd:resize] Fixed #2043 add "Save As" button into the resize dialog
+		- [js:core] Fixed #2050 handling server errors during upload
+		- [VD:abstract] Fixed #2054 to use the same hash value as Linux on Windows server
 		- And some minor bug fixes
 
 
