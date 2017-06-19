@@ -744,6 +744,15 @@
 								}
 							}
 						});
+						CKEDITOR.on('dialogDefinition', function(e) {
+							var dlg = e.data.definition.dialog;
+							dlg.on('show', function(e) {
+								fm.getUI().append($('.cke_dialog_background_cover')).append(this.getElement().$)
+							});
+							dlg.on('hide', function(e) {
+								$('body:first').append($('.cke_dialog_background_cover')).append(this.getElement().$)
+							});
+						});
 					};
 
 				if (!self.confObj.loader) {
@@ -880,6 +889,9 @@
 							}
 						});
 					};
+				
+ 				// impossible launch TineMCE in native fullscreen mode
+ 				fm.getUI().hasClass('elfinder-fullscreen-native') && fm.exec('fullscreen');
 				
 				if (!self.confObj.loader) {
 					self.confObj.loader = $.Deferred();
