@@ -3,7 +3,7 @@
 	* elFinder (2.1.25):
 		- [php] Fixed #2014 "Parse error" on PHP < 5.3
 		- [core,API] Fixed #1431 cmd `edit` supports Data Uri Scheme
-		- [cmd:edit] Added Pixlr Editor, Pixlr Express, Cleative Cloud Image editor, Ace Editor, CodeMirror, CkEditor and TinyMCE as default editors
+		- [cmd:edit] Added Pixlr Editor, Pixlr Express, Cleative Cloud Image editor, Ace Editor, CodeMirror, SimpleMDE, CKEditor and TinyMCE as default editors
 		- [cmd:edit] Fixed #2020 add "Save As" button 
 		- [cmd:resize] Fixed #2016 add Preset size buttons
 		- [cmd:resize] Fixed #2019 conflict with the bootstrap.js
