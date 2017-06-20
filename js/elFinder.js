@@ -2056,7 +2056,7 @@ var elFinder = function(node, opts) {
 									navigate.toast = {};
 								}
 								
-								!navigate.noselect && self.trigger('selectfiles', {files : hashes});
+								!navigate.noselect && self.trigger('selectfiles', {files : self.searchStatus.state > 1 ? $.map(targets, function(f) { return f.hash; }) : hashes});
 								
 								if (newItems.length) {
 									if (!navigate.noscroll) {
