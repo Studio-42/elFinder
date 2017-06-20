@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 71212e6) (2017-06-20)
+ * Version 2.1.24 (2.1-src Nightly: b571707) (2017-06-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2041,7 +2041,7 @@ var elFinder = function(node, opts) {
 					if (navigate) {
 						actionTarget = navigate.target || 'added';
 						if (response[actionTarget] && response[actionTarget].length) {
-							fm.one(cmd + 'done', function() {
+							self.one(cmd + 'done', function() {
 								var targets  = response[actionTarget],
 									newItems = self.findCwdNodes(targets),
 									inCwdHashes = function() {
@@ -2071,7 +2071,7 @@ var elFinder = function(node, opts) {
 																if (typeof done === 'function') {
 																	done();
 																} else if (done === 'select') {
-																	fm.trigger('selectfiles', {files : inCwdHashes()});
+																	self.trigger('selectfiles', {files : inCwdHashes()});
 																}
 															});
 														}
@@ -2087,7 +2087,7 @@ var elFinder = function(node, opts) {
 									navigate.toast = {};
 								}
 								
-								!navigate.noselect && fm.trigger('selectfiles', {files : hashes});
+								!navigate.noselect && self.trigger('selectfiles', {files : hashes});
 								
 								if (newItems.length) {
 									if (!navigate.noscroll) {
@@ -2095,11 +2095,11 @@ var elFinder = function(node, opts) {
 										self.resources.blink(newItems, 'lookme');
 									}
 									if ($.isPlainObject(navigate.toast.incwd)) {
-										fm.toast(makeToast(navigate.toast.incwd));
+										self.toast(makeToast(navigate.toast.incwd));
 									}
 								} else {
 									if ($.isPlainObject(navigate.toast.inbuffer)) {
-										fm.toast(makeToast(navigate.toast.inbuffer));
+										self.toast(makeToast(navigate.toast.inbuffer));
 									}
 								}
 							});
@@ -7798,7 +7798,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 71212e6)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: b571707)';
 
 
 
