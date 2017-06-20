@@ -13,7 +13,8 @@
 			ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.6',
 			codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.26.0',
 			ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.7.0',
-			tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.6.3'
+			tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.6.3',
+			simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2'
 		},
 		hasFlash = (function() {
 			var hasFlash;
@@ -548,6 +549,9 @@
 
 				return dfrd;
 			},
+			close : function(textarea, instance) {
+				instance && instance.destroy();
+			},
 			save : function(textarea, instance) {
 				instance && $(textarea).data('ace') && (textarea.value = instance.session.getValue());
 			},
@@ -607,7 +611,11 @@
 						}
 						
 						// editor base node
-						editorBase = $(editor.getWrapperElement());
+						editorBase = $(editor.getWrapperElement()).css({
+							// fix CSS conflict to SimpleMDE
+							padding: 0,
+					    	border: 'none'
+						});
 						ta.data('cm', true);
 						
 						// fit height to base
@@ -686,6 +694,81 @@
 			},
 			resize : function(textarea, instance, e, data) {
 				instance && instance.refresh();
+			}
+		},
+		{
+			// SimpleMDE
+			info : {
+				name : 'SimpleMDE'/*,
+				iconImg : 'img/edit_simplemde.png'*/
+			},
+			exts  : ['md'],
+			load : function(textarea) {
+				var self = this,
+					base = $(textarea).parent(),
+					dfrd = $.Deferred(),
+					start = function() {
+						var h     = base.height(),
+							delta = base.outerHeight(true) - h + 14,
+							editor, editorBase;
+						
+						// fit height function
+						textarea._setHeight = function(h) {
+							var h    = h || base.height(),
+								ctrH = 0,
+								areaH;
+							base.children('.editor-toolbar,.editor-statusbar').each(function() {
+								ctrH += $(this).outerHeight(true);
+							});
+							areaH = h - ctrH - delta;
+							editorBase.height(areaH);
+							editor.codemirror.refresh();
+							return areaH;
+						};
+						
+						// set base height
+						base.height(h);
+						
+						// make editor
+						editor = new SimpleMDE({
+							element: textarea,
+							autofocus: true
+						});
+						dfrd.resolve(editor);
+						
+						// editor base node
+						editorBase = $(editor.codemirror.getWrapperElement());
+						
+						// fit height to base
+						editorBase.css('min-height', '50px')
+							.children('.CodeMirror-scroll').css('min-height', '50px');
+						textarea._setHeight(h);
+					};
+
+				// check SimpleMDE & start
+				if (!self.confObj.loader) {
+					self.confObj.loader = $.Deferred();
+					self.fm.loadCss(cdns.simplemde+'/simplemde.min.css');
+					self.fm.loadScript([cdns.simplemde+'/simplemde.min.js'], function() {
+						self.confObj.loader.resolve();
+					}, void 0, {obj: window, name: 'SimpleMDE'});
+				}
+				self.confObj.loader.done(start);
+
+				return dfrd;
+			},
+			close : function(textarea, instance) {
+				instance.toTextArea();
+				instance = null;
+			},
+			save : function(textarea, instance) {
+				instance && (textarea.value = instance.value());
+			},
+			focus : function(textarea, instance) {
+				instance && instance.codemirror.focus();
+			},
+			resize : function(textarea, instance, e, data) {
+				instance && textarea._setHeight();
 			}
 		},
 		{
