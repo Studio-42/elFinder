@@ -2020,7 +2020,7 @@ var elFinder = function(node, opts) {
 									hashes   = inCwdHashes(),
 									makeToast  = function(t) {
 										var node = void(0),
-											data = t.action.data,
+											data = t.action? t.action.data : void(0),
 											cmd, msg, done;
 										if ((data || hashes.length) && t.action && (msg = t.action.msg) && (cmd = t.action.cmd) && (!t.action.cwdNot || t.action.cwdNot !== self.cwd().hash)) {
 											done = t.action.done;
