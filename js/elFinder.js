@@ -2010,7 +2010,7 @@ var elFinder = function(node, opts) {
 					if (navigate) {
 						actionTarget = navigate.target || 'added';
 						if (response[actionTarget] && response[actionTarget].length) {
-							fm.one(cmd + 'done', function() {
+							self.one(cmd + 'done', function() {
 								var targets  = response[actionTarget],
 									newItems = self.findCwdNodes(targets),
 									inCwdHashes = function() {
@@ -2040,7 +2040,7 @@ var elFinder = function(node, opts) {
 																if (typeof done === 'function') {
 																	done();
 																} else if (done === 'select') {
-																	fm.trigger('selectfiles', {files : inCwdHashes()});
+																	self.trigger('selectfiles', {files : inCwdHashes()});
 																}
 															});
 														}
@@ -2056,7 +2056,7 @@ var elFinder = function(node, opts) {
 									navigate.toast = {};
 								}
 								
-								!navigate.noselect && fm.trigger('selectfiles', {files : hashes});
+								!navigate.noselect && self.trigger('selectfiles', {files : hashes});
 								
 								if (newItems.length) {
 									if (!navigate.noscroll) {
@@ -2064,11 +2064,11 @@ var elFinder = function(node, opts) {
 										self.resources.blink(newItems, 'lookme');
 									}
 									if ($.isPlainObject(navigate.toast.incwd)) {
-										fm.toast(makeToast(navigate.toast.incwd));
+										self.toast(makeToast(navigate.toast.incwd));
 									}
 								} else {
 									if ($.isPlainObject(navigate.toast.inbuffer)) {
-										fm.toast(makeToast(navigate.toast.inbuffer));
+										self.toast(makeToast(navigate.toast.inbuffer));
 									}
 								}
 							});
