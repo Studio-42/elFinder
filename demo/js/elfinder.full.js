@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: f36904e) (2017-06-21)
+ * Version 2.1.24 (2.1-src Nightly: eef655b) (2017-06-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7798,7 +7798,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: f36904e)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: eef655b)';
 
 
 
@@ -9848,7 +9848,7 @@ elFinder.prototype.resources = {
 												newItem = ui.find('#'+fm[find](dirhash)),
 												acts    = {
 													'directory' : { cmd: 'open', msg: 'cmdopendir' },
-													'text/plain': { cmd: 'edit', msg: 'cmdedit' },
+													'text'      : { cmd: 'edit', msg: 'cmdedit' },
 													'default'   : { cmd: 'open', msg: 'cmdopen' }
 												};
 											if (sel && move) {
@@ -9857,7 +9857,7 @@ elFinder.prototype.resources = {
 												});
 											}
 											if (!move) {
-												Object.assign(nextAct, nextAction || acts[item.mime] || acts['default']);
+												Object.assign(nextAct, nextAction || acts[item.mime] || acts[item.mime.split('/')[0]] || acts[$.inArray(item.mime, fm.resources.mimes.text) !== -1 ? 'text' : 'none'] || acts['default']);
 												Object.assign(toast, nextAct.cmd ? {
 													incwd    : {msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), action: nextAct},
 													inbuffer : {msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), action: nextAct}

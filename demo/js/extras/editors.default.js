@@ -16,6 +16,7 @@
 			tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.6.3',
 			simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2'
 		},
+		useRequire = (typeof define === 'function' && define.amd),
 		hasFlash = (function() {
 			var hasFlash;
 			try {
@@ -571,11 +572,10 @@
 			},
 			load : function(textarea) {
 				var cmUrl = cdns.codemirror,
-					useRequire = (typeof define === 'function' && define.amd),
 					dfrd = $.Deferred(),
 					self = this,
-					start = function() {
-						var CodeMirror = this.CodeMirror,
+					start = function(CodeMirror) {
+						var //CodeMirror = this.CodeMirror,
 							ta   = $(textarea),
 							base = ta.parent(),
 							editor, editorBase;
@@ -665,8 +665,8 @@
 							'codemirror/addon/mode/loadmode.min',
 							'codemirror/mode/meta.min'
 						], function(CodeMirror) {
-							this.CodeMirror = CodeMirror;
-							self.confObj.loader.resolve();
+							//this.CodeMirror = CodeMirror;
+							self.confObj.loader.resolve(CodeMirror);
 						});
 					} else {
 						self.fm.loadScript([
@@ -674,8 +674,8 @@
 							cmUrl + '/addon/mode/loadmode.min.js',
 							cmUrl + '/mode/meta.min.js'
 						], function() {
-							this.CodeMirror = CodeMirror;
-							self.confObj.loader.resolve();
+							//this.CodeMirror = CodeMirror;
+							self.confObj.loader.resolve(CodeMirror);
 						});
 					}
 					self.fm.loadCss(cmUrl + '/codemirror.css');
@@ -707,7 +707,7 @@
 				var self = this,
 					base = $(textarea).parent(),
 					dfrd = $.Deferred(),
-					start = function() {
+					start = function(SimpleMDE) {
 						var h     = base.height(),
 							delta = base.outerHeight(true) - h + 14,
 							editor, editorBase;
@@ -749,9 +749,17 @@
 				if (!self.confObj.loader) {
 					self.confObj.loader = $.Deferred();
 					self.fm.loadCss(cdns.simplemde+'/simplemde.min.css');
-					self.fm.loadScript([cdns.simplemde+'/simplemde.min.js'], function() {
-						self.confObj.loader.resolve();
-					}, void 0, {obj: window, name: 'SimpleMDE'});
+					if (useRequire) {
+						require([
+							cdns.simplemde+'/simplemde.min.js'
+						], function(SimpleMDE) {
+							self.confObj.loader.resolve(SimpleMDE);
+						});
+					} else {
+						self.fm.loadScript([cdns.simplemde+'/simplemde.min.js'], function() {
+							self.confObj.loader.resolve(SimpleMDE);
+						}, void 0, {obj: window, name: 'SimpleMDE'});
+					}
 				}
 				self.confObj.loader.done(start);
 
