@@ -235,12 +235,12 @@ elFinder.prototype.resources = {
 											}
 											if (!move) {
 												Object.assign(nextAct, nextAction || acts[item.mime] || acts['default']);
-												if (nextAct.cmd) {
-													Object.assign(toast, {
-														incwd    : {msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), action: nextAct},
-														inbuffer : {msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), action: nextAct}
-													});
-												}
+												Object.assign(toast, nextAct.cmd ? {
+													incwd    : {msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), action: nextAct},
+													inbuffer : {msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), action: nextAct}
+												} : {
+													inbuffer : {msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)])}
+												});
 											}
 										}
 									});
