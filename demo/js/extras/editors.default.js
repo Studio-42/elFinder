@@ -758,7 +758,7 @@
 				return dfrd;
 			},
 			close : function(textarea, instance) {
-				instance.toTextArea();
+				instance && instance.toTextArea();
 				instance = null;
 			},
 			save : function(textarea, instance) {
