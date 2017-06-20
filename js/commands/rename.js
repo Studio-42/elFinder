@@ -121,7 +121,8 @@ elFinder.prototype.commands.rename = function() {
 					fm.lockfiles({files : [file.hash]});
 					fm.request({
 							data   : {cmd : 'rename', target : file.hash, name : name},
-							notify : {type : 'rename', cnt : 1}
+							notify : {type : 'rename', cnt : 1},
+							navigate : {}
 						})
 						.fail(function(error) {
 							dfrd.reject();
@@ -133,16 +134,6 @@ elFinder.prototype.commands.rename = function() {
 							dfrd.resolve();
 							if (incwd) {
 								fm.exec('open', data.added[0].hash);
-							} else {
-								fm.one('renamedone', function() {
-									fm.searchStatus.state > 1 && fm.selectfiles({ files: [data.added[0].hash] });
-									if (!navbar && data && data.added && data.added[0]) {
-										var newItem = fm.findCwdNodes(data.added);
-										if (newItem.length) {
-											newItem.trigger('scrolltoview');
-										}
-									}
-								});
 							}
 						})
 						.always(function() {
