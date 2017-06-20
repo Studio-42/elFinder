@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: b571707) (2017-06-20)
+ * Version 2.1.24 (2.1-src Nightly: fb6e4d0) (2017-06-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2051,7 +2051,7 @@ var elFinder = function(node, opts) {
 									hashes   = inCwdHashes(),
 									makeToast  = function(t) {
 										var node = void(0),
-											data = t.action.data,
+											data = t.action? t.action.data : void(0),
 											cmd, msg, done;
 										if ((data || hashes.length) && t.action && (msg = t.action.msg) && (cmd = t.action.cmd) && (!t.action.cwdNot || t.action.cwdNot !== self.cwd().hash)) {
 											done = t.action.done;
@@ -7798,7 +7798,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: b571707)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: fb6e4d0)';
 
 
 
@@ -9858,12 +9858,12 @@ elFinder.prototype.resources = {
 											}
 											if (!move) {
 												Object.assign(nextAct, nextAction || acts[item.mime] || acts['default']);
-												if (nextAct.cmd) {
-													Object.assign(toast, {
-														incwd    : {msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), action: nextAct},
-														inbuffer : {msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), action: nextAct}
-													});
-												}
+												Object.assign(toast, nextAct.cmd ? {
+													incwd    : {msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), action: nextAct},
+													inbuffer : {msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), action: nextAct}
+												} : {
+													inbuffer : {msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)])}
+												});
 											}
 										}
 									});
@@ -17733,6 +17733,8 @@ elFinder.prototype.commands.archive = function() {
 	this.variants = [];
 	
 	this.disableOnSearch = false;
+	
+	this.nextAction = {};
 	
 	/**
 	 * Update mimes on open/reload
