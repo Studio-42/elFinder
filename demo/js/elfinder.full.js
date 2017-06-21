@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: eef655b) (2017-06-21)
+ * Version 2.1.24 (2.1-src Nightly: 11cb177) (2017-06-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -1910,7 +1910,6 @@ var elFinder = function(node, opts) {
 					case 'parsererror': 
 						error = ['errResponse', 'errDataNotJSON'];
 						if (xhr.responseText) {
-							self.debug('backend-debug', { debug: {backendErrors: [ xhr.responseText] }});
 							if (! cwd || (d && (d === 'all' || d['backend-error']))) {
 								error.push(xhr.responseText);
 							}
@@ -4307,6 +4306,19 @@ var elFinder = function(node, opts) {
 			self.trigger = function() { };
 		})
 		.done(function(data) {
+			var trashDisable = function(th) {
+					var src = self.file(self.trashes[th]),
+						d = self.options.debug,
+						error;
+					
+					if (src && src.volumeid) {
+						delete self.volOptions[src.volumeid].trashHash;
+					}
+					self.trashes[th] = false;
+					self.debug('backend-error', 'Trash hash "'+th+'" was not found or not writable.');
+				},
+				toChkTh = {};
+			
 			// re-calculate elFinder node z-index
 			self.zIndexCalc();
 			
@@ -4321,6 +4333,35 @@ var elFinder = function(node, opts) {
 			if (inFrame && self.options.enableAlways) {
 				$(window).focus();
 			}
+			
+			// check self.trashes
+			$.each(self.trashes, function(th) {
+				var dir = self.file(th),
+					src;
+				if (! dir) {
+					toChkTh[th] = true;
+				} else if (dir.mime !== 'directory' || ! dir.write) {
+					trashDisable(th);
+				}
+			});
+			if (Object.keys(toChkTh).length) {
+				self.request({
+					data : {cmd : 'info', targets : Object.keys(toChkTh)},
+					preventDefault : true
+				}).done(function(data) {
+					if (data && data.files) {
+						$.each(data.files, function(i, dir) {
+							self.log(dir);
+							if (dir.mime === 'directory' && dir.write) {
+								delete toChkTh[dir.hash];
+							}
+						});
+					}
+				}).always(function() {
+					$.each(toChkTh, trashDisable);
+				})
+			}
+			
 		});
 	
 	// self.timeEnd('load'); 
@@ -6211,7 +6252,11 @@ elFinder.prototype = {
 								
 								// check trash bin hash
 								if (targetOptions.trashHash) {
-									self.trashes[targetOptions.trashHash] = file.hash;
+									if (self.trashes[targetOptions.trashHash] === false) {
+										delete targetOptions.trashHash;
+									} else {
+										self.trashes[targetOptions.trashHash] = file.hash;
+									}
 								}
 								
 								// set immediate properties
@@ -7723,7 +7768,12 @@ elFinder.prototype = {
 			window.console && window.console.log && window.console.log('elfinder debug: ['+type+'] ['+this.id+']', m);
 		} 
 		
-		if (type === 'backend-debug') {
+		if (type === 'backend-error') {
+			if (! this.cwd().hash || (d && (d === 'all' || d['backend-error']))) {
+				m = Array.isArray(m)? m : [ m ];
+				this.error(m);
+			}
+		} else if (type === 'backend-debug') {
 			this.trigger('backenddebug', m);
 		}
 		
@@ -7798,7 +7848,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: eef655b)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 11cb177)';
 
 
 
@@ -21339,6 +21389,12 @@ elFinder.prototype.commands.paste = function() {
 									}
 								}
 							})
+							.done(function() {
+								dfrd.resolve();
+							})
+							.fail(function() {
+								dfrd.reject();
+							})
 							.always(function() {
 								fm.unlockfiles({files : files});
 							});
@@ -24551,11 +24607,13 @@ elFinder.prototype.commands.resize = function() {
 (elFinder.prototype.commands.restore = function() {
 	var self = this,
 		fm = this.fm,
+		fakeCnt = 0,
 		getFilesRecursively = function(files) {
 			var dfd = $.Deferred(),
 				dirs = [],
 				results = [],
-				reqs = [];
+				reqs = [],
+				phashes = [];
 			
 			$.each(files, function(i, f) {
 				f.mime === 'directory'? dirs.push(f) : results.push(f);
@@ -24568,6 +24626,7 @@ elFinder.prototype.commands.resize = function() {
 						preventDefault : true,
 						asNotOpen : true
 					}));
+					phashes[i] = d.hash;
 				});
 				$.when.apply($, reqs).fail(function() {
 					dfd.reject();
@@ -24576,7 +24635,17 @@ elFinder.prototype.commands.resize = function() {
 					$.each(arguments, function(i, r) {
 						var files;
 						if (r.files) {
-							items = items.concat(r.files);
+							if (r.files.length) {
+								items = items.concat(r.files);
+							} else {
+								items.push({
+									hash: 'fakefile_' + (fakeCnt++),
+									phash: phashes[i],
+									mime: 'fakefile',
+									name: 'fakefile',
+									ts: 0
+								});
+							}
 						}
 					});
 					fm.cache(items);
@@ -24614,7 +24683,7 @@ elFinder.prototype.commands.resize = function() {
 				fm.notify({type : 'search', cnt : 1, hideCnt : true});
 			}, fm.notifyDelay);
 			
-			
+			fakeCnt = 0;
 			getFilesRecursively(files).always(function() {
 				tm && clearTimeout(tm);
 				fm.notify({type : 'search', cnt : -1, hideCnt : true});
@@ -24649,7 +24718,11 @@ elFinder.prototype.commands.resize = function() {
 								if (!rHashes[srcRoot][tPath]) {
 									rHashes[srcRoot][tPath] = [];
 								}
-								rHashes[srcRoot][tPath].push(f.hash);
+								if (f.mime === 'fakefile') {
+									fm.updateCache({removed:[f.hash]});
+								} else {
+									rHashes[srcRoot][tPath].push(f.hash);
+								}
 								if (!dirTop || dirTop.length > tPath.length) {
 									dirTop = tPath;
 								}
@@ -24697,28 +24770,38 @@ elFinder.prototype.commands.resize = function() {
 											var hasErr = false;
 											$.each(dsts, function(dir, files) {
 												if (hashes[dir]) {
-													if (fm.file(hashes[dir])) {
-														fm.clipboard(files, true);
-														cmdPaste.exec([ hashes[dir] ], {_cmd : 'restore', noToast : dir !== dirTop})
-														.done(function(data) {
-															if (data && (data.error || data.warning)) {
-																hasErr = true;
-															}
-														})
-														.fail(function() {
-															hasErr = true;
-														})
-														.always(function() {
-															if (--cnt < 1) {
-																dfrd[hasErr? 'reject' : 'resolve']();
-																if (others.length) {
-																	// Restore items of other trash
-																	fm.exec('restore', others);
+													if (files.length) {
+														if (fm.file(hashes[dir])) {
+															fm.clipboard(files, true);
+															cmdPaste.exec([ hashes[dir] ], {_cmd : 'restore', noToast : dir !== dirTop})
+															.done(function(data) {
+																if (data && (data.error || data.warning)) {
+																	hasErr = true;
 																}
-															}
-														});
+															})
+															.fail(function() {
+																hasErr = true;
+															})
+															.always(function() {
+																if (--cnt < 1) {
+																	dfrd[hasErr? 'reject' : 'resolve']();
+																	if (others.length) {
+																		// Restore items of other trash
+																		fm.exec('restore', others);
+																	}
+																}
+															});
+														} else {
+															dfrd.reject(errFolderNotfound);
+														}
 													} else {
-														dfrd.reject(errFolderNotfound);
+														if (--cnt < 1) {
+															dfrd.resolve();
+															if (others.length) {
+																// Restore items of other trash
+																fm.exec('restore', others);
+															}
+														}
 													}
 												}
 											});
