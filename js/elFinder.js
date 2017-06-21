@@ -4320,7 +4320,6 @@ var elFinder = function(node, opts) {
 				}).done(function(data) {
 					if (data && data.files) {
 						$.each(data.files, function(i, dir) {
-							self.log(dir);
 							if (dir.mime === 'directory' && dir.write) {
 								delete toChkTh[dir.hash];
 							}
