@@ -1879,7 +1879,6 @@ var elFinder = function(node, opts) {
 					case 'parsererror': 
 						error = ['errResponse', 'errDataNotJSON'];
 						if (xhr.responseText) {
-							self.debug('backend-debug', { debug: {backendErrors: [ xhr.responseText] }});
 							if (! cwd || (d && (d === 'all' || d['backend-error']))) {
 								error.push(xhr.responseText);
 							}
@@ -4276,6 +4275,19 @@ var elFinder = function(node, opts) {
 			self.trigger = function() { };
 		})
 		.done(function(data) {
+			var trashDisable = function(th) {
+					var src = self.file(self.trashes[th]),
+						d = self.options.debug,
+						error;
+					
+					if (src && src.volumeid) {
+						delete self.volOptions[src.volumeid].trashHash;
+					}
+					self.trashes[th] = false;
+					self.debug('backend-error', 'Trash hash "'+th+'" was not found or not writable.');
+				},
+				toChkTh = {};
+			
 			// re-calculate elFinder node z-index
 			self.zIndexCalc();
 			
@@ -4290,6 +4302,35 @@ var elFinder = function(node, opts) {
 			if (inFrame && self.options.enableAlways) {
 				$(window).focus();
 			}
+			
+			// check self.trashes
+			$.each(self.trashes, function(th) {
+				var dir = self.file(th),
+					src;
+				if (! dir) {
+					toChkTh[th] = true;
+				} else if (dir.mime !== 'directory' || ! dir.write) {
+					trashDisable(th);
+				}
+			});
+			if (Object.keys(toChkTh).length) {
+				self.request({
+					data : {cmd : 'info', targets : Object.keys(toChkTh)},
+					preventDefault : true
+				}).done(function(data) {
+					if (data && data.files) {
+						$.each(data.files, function(i, dir) {
+							self.log(dir);
+							if (dir.mime === 'directory' && dir.write) {
+								delete toChkTh[dir.hash];
+							}
+						});
+					}
+				}).always(function() {
+					$.each(toChkTh, trashDisable);
+				})
+			}
+			
 		});
 	
 	// self.timeEnd('load'); 
@@ -6180,7 +6221,11 @@ elFinder.prototype = {
 								
 								// check trash bin hash
 								if (targetOptions.trashHash) {
-									self.trashes[targetOptions.trashHash] = file.hash;
+									if (self.trashes[targetOptions.trashHash] === false) {
+										delete targetOptions.trashHash;
+									} else {
+										self.trashes[targetOptions.trashHash] = file.hash;
+									}
 								}
 								
 								// set immediate properties
@@ -7692,7 +7737,12 @@ elFinder.prototype = {
 			window.console && window.console.log && window.console.log('elfinder debug: ['+type+'] ['+this.id+']', m);
 		} 
 		
-		if (type === 'backend-debug') {
+		if (type === 'backend-error') {
+			if (! this.cwd().hash || (d && (d === 'all' || d['backend-error']))) {
+				m = Array.isArray(m)? m : [ m ];
+				this.error(m);
+			}
+		} else if (type === 'backend-debug') {
 			this.trigger('backenddebug', m);
 		}
 		
