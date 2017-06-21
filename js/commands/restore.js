@@ -8,11 +8,13 @@
 (elFinder.prototype.commands.restore = function() {
 	var self = this,
 		fm = this.fm,
+		fakeCnt = 0,
 		getFilesRecursively = function(files) {
 			var dfd = $.Deferred(),
 				dirs = [],
 				results = [],
-				reqs = [];
+				reqs = [],
+				phashes = [];
 			
 			$.each(files, function(i, f) {
 				f.mime === 'directory'? dirs.push(f) : results.push(f);
@@ -25,6 +27,7 @@
 						preventDefault : true,
 						asNotOpen : true
 					}));
+					phashes[i] = d.hash;
 				});
 				$.when.apply($, reqs).fail(function() {
 					dfd.reject();
@@ -33,7 +36,17 @@
 					$.each(arguments, function(i, r) {
 						var files;
 						if (r.files) {
-							items = items.concat(r.files);
+							if (r.files.length) {
+								items = items.concat(r.files);
+							} else {
+								items.push({
+									hash: 'fakefile_' + (fakeCnt++),
+									phash: phashes[i],
+									mime: 'fakefile',
+									name: 'fakefile',
+									ts: 0
+								});
+							}
 						}
 					});
 					fm.cache(items);
@@ -71,7 +84,7 @@
 				fm.notify({type : 'search', cnt : 1, hideCnt : true});
 			}, fm.notifyDelay);
 			
-			
+			fakeCnt = 0;
 			getFilesRecursively(files).always(function() {
 				tm && clearTimeout(tm);
 				fm.notify({type : 'search', cnt : -1, hideCnt : true});
@@ -106,7 +119,11 @@
 								if (!rHashes[srcRoot][tPath]) {
 									rHashes[srcRoot][tPath] = [];
 								}
-								rHashes[srcRoot][tPath].push(f.hash);
+								if (f.mime === 'fakefile') {
+									fm.updateCache({removed:[f.hash]});
+								} else {
+									rHashes[srcRoot][tPath].push(f.hash);
+								}
 								if (!dirTop || dirTop.length > tPath.length) {
 									dirTop = tPath;
 								}
@@ -154,28 +171,38 @@
 											var hasErr = false;
 											$.each(dsts, function(dir, files) {
 												if (hashes[dir]) {
-													if (fm.file(hashes[dir])) {
-														fm.clipboard(files, true);
-														cmdPaste.exec([ hashes[dir] ], {_cmd : 'restore', noToast : dir !== dirTop})
-														.done(function(data) {
-															if (data && (data.error || data.warning)) {
-																hasErr = true;
-															}
-														})
-														.fail(function() {
-															hasErr = true;
-														})
-														.always(function() {
-															if (--cnt < 1) {
-																dfrd[hasErr? 'reject' : 'resolve']();
-																if (others.length) {
-																	// Restore items of other trash
-																	fm.exec('restore', others);
+													if (files.length) {
+														if (fm.file(hashes[dir])) {
+															fm.clipboard(files, true);
+															cmdPaste.exec([ hashes[dir] ], {_cmd : 'restore', noToast : dir !== dirTop})
+															.done(function(data) {
+																if (data && (data.error || data.warning)) {
+																	hasErr = true;
 																}
-															}
-														});
+															})
+															.fail(function() {
+																hasErr = true;
+															})
+															.always(function() {
+																if (--cnt < 1) {
+																	dfrd[hasErr? 'reject' : 'resolve']();
+																	if (others.length) {
+																		// Restore items of other trash
+																		fm.exec('restore', others);
+																	}
+																}
+															});
+														} else {
+															dfrd.reject(errFolderNotfound);
+														}
 													} else {
-														dfrd.reject(errFolderNotfound);
+														if (--cnt < 1) {
+															dfrd.resolve();
+															if (others.length) {
+																// Restore items of other trash
+																fm.exec('restore', others);
+															}
+														}
 													}
 												}
 											});

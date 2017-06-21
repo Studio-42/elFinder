@@ -215,6 +215,12 @@ elFinder.prototype.commands.paste = function() {
 									}
 								}
 							})
+							.done(function() {
+								dfrd.resolve();
+							})
+							.fail(function() {
+								dfrd.reject();
+							})
 							.always(function() {
 								fm.unlockfiles({files : files});
 							});
