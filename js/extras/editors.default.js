@@ -575,8 +575,7 @@
 					dfrd = $.Deferred(),
 					self = this,
 					start = function(CodeMirror) {
-						var //CodeMirror = this.CodeMirror,
-							ta   = $(textarea),
+						var ta   = $(textarea),
 							base = ta.parent(),
 							editor, editorBase;
 						
@@ -665,7 +664,6 @@
 							'codemirror/addon/mode/loadmode.min',
 							'codemirror/mode/meta.min'
 						], function(CodeMirror) {
-							//this.CodeMirror = CodeMirror;
 							self.confObj.loader.resolve(CodeMirror);
 						});
 					} else {
@@ -674,7 +672,6 @@
 							cmUrl + '/addon/mode/loadmode.min.js',
 							cmUrl + '/mode/meta.min.js'
 						], function() {
-							//this.CodeMirror = CodeMirror;
 							self.confObj.loader.resolve(CodeMirror);
 						});
 					}
@@ -699,8 +696,8 @@
 		{
 			// SimpleMDE
 			info : {
-				name : 'SimpleMDE'/*,
-				iconImg : 'img/edit_simplemde.png'*/
+				name : 'SimpleMDE',
+				iconImg : 'img/edit_simplemde.png'
 			},
 			exts  : ['md'],
 			load : function(textarea) {
