@@ -588,7 +588,12 @@
 						// CodeMirror configure
 						editor = CodeMirror.fromTextArea(textarea, {
 							lineNumbers: true,
-							lineWrapping: true
+							lineWrapping: true,
+							extraKeys : {
+								'Ctrl-S': function() { self.doSave(); },
+								'Ctrl-Q': function() { self.doCancel(); },
+								'Ctrl-W': function() { self.doCancel(); }
+							}
 						});
 						
 						// return editor instance
