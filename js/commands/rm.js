@@ -236,7 +236,7 @@ elFinder.prototype.commands.rm = function() {
 														if (err > end) {
 															end = (fm.messages[err[end-1]] || '').indexOf('$') === -1? end : end + 1;
 														}
-														self.exec(hashes, { addTexts: err.slice(0, end) });
+														self.exec(hashes, { addTexts: err.slice(0, end), forceRm: true });
 													} else {
 														fm.error(err);
 													}
@@ -382,7 +382,7 @@ elFinder.prototype.commands.rm = function() {
 			targets = self.hashes(hashes);
 			cnt     = files.length
 			
-			if (addTexts || forceRm || (self.event && self.event.originalEvent && self.event.originalEvent.shiftKey)) {
+			if (forceRm || (self.event && self.event.originalEvent && self.event.originalEvent.shiftKey)) {
 				tHash = '';
 				self.title = fm.i18n('cmdrm');
 			}

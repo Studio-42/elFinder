@@ -225,7 +225,8 @@
 			});
 		};
 	
-	this.updateOnSelect  = false;
+	this.linkedCmds = ['copy', 'paste', 'mkdir', 'rm'];
+	this.updateOnSelect = false;
 	this.shortcuts = [{
 		pattern     : 'ctrl+z'
 	}];
