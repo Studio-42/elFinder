@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-06-16
+ * @version 2017-06-22
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -114,6 +114,7 @@
 			'errRestore'           : '宛先の特定ができないため、ごみ箱から戻せません。', // from v2.1.24 added 3.5.2017
 			'errEditorNotFound'    : 'このファイルタイプのエディターがありません。', // from v2.1.25 added 23.5.2017
 			'errServerError'       : 'サーバー側でエラーが発生しました。', // from v2.1.25 added 16.6.2017
+			'errEmpty'             : 'フォルダー"$1"を空にすることができません。', // from v2.1.25 added 22.6.2017
 			
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'アーカイブ作成',
@@ -154,6 +155,7 @@
 			'cmdcolwidth'  : '列幅リセット', // from v2.1.13 added 12.06.2016
 			'cmdfullscreen': 'フルスクリーン', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : '移動', // from v2.1.15 added 21.08.2016
+			'cmdempty'     : 'フォルダーを空に', // from v2.1.25 added 22.06.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : '閉じる',
@@ -414,6 +416,8 @@
 			'presets'         : 'プリセット', // from v2.1.25 added 26.5.2017
 			'tooManyToTrash'  : 'アイテム数が多すぎるのでごみ箱に入れられません。', // from v2.1.25 added 9.6.2017
 			'TextArea'        : 'テキストエリア', // from v2.1.25 added 14.6.2017
+			'folderToEmpty'   : 'フォルダー"$1"を空にします。', // from v2.1.25 added 22.6.2017
+			'filderIsEmpty'   : 'フォルダー"$1"にアイテムはありません。', // from v2.1.25 added 22.6.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
