@@ -1009,7 +1009,8 @@
 		{
 			// Simple Text (basic textarea editor)
 			info : {
-				name : 'TextArea'
+				name : 'TextArea',
+				useTextAreaEvent : true
 			},
 			load : function(){},
 			save : function(){}

@@ -246,6 +246,40 @@ elFinder.prototype.commands.edit = function() {
 						
 					ta = $('<textarea class="elfinder-file-edit" rows="20" id="'+id+'-ta"></textarea>')
 						.on('input propertychange', stateChange);
+					
+					if (!ta.editor || !ta.editor.info || ta.editor.info.useTextAreaEvent) {
+						ta.on('keydown', function(e) {
+							var code = e.keyCode,
+								value, start;
+							
+							e.stopPropagation();
+							if (code == $.ui.keyCode.TAB) {
+								e.preventDefault();
+								// insert tab on tab press
+								if (this.setSelectionRange) {
+									value = this.value;
+									start = this.selectionStart;
+									this.value = value.substr(0, start) + "\t" + value.substr(this.selectionEnd);
+									start += 1;
+									this.setSelectionRange(start, start);
+								}
+							}
+							
+							if (e.ctrlKey || e.metaKey) {
+								// close on ctrl+w/q
+								if (code == 'Q'.charCodeAt(0) || code == 'W'.charCodeAt(0)) {
+									e.preventDefault();
+									cancel();
+								}
+								if (code == 'S'.charCodeAt(0)) {
+									e.preventDefault();
+									save();
+								}
+							}
+							
+						})
+						.on('mouseenter', function(){this.focus();});
+					}
 
 					ta.initEditArea = function(id, file, content) {
 						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [];
@@ -294,39 +328,6 @@ elFinder.prototype.commands.edit = function() {
 				ta.getContent = function() {
 					return rtrim(ta.val());
 				};
-			}
-			
-			if (!ta.editor) {
-				ta.keydown(function(e) {
-					var code = e.keyCode,
-						value, start;
-					
-					e.stopPropagation();
-					if (code == $.ui.keyCode.TAB) {
-						e.preventDefault();
-						// insert tab on tab press
-						if (this.setSelectionRange) {
-							value = this.value;
-							start = this.selectionStart;
-							this.value = value.substr(0, start) + "\t" + value.substr(this.selectionEnd);
-							start += 1;
-							this.setSelectionRange(start, start);
-						}
-					}
-					
-					if (e.ctrlKey || e.metaKey) {
-						// close on ctrl+w/q
-						if (code == 'Q'.charCodeAt(0) || code == 'W'.charCodeAt(0)) {
-							e.preventDefault();
-							cancel();
-						}
-						if (code == 'S'.charCodeAt(0)) {
-							e.preventDefault();
-							save();
-						}
-					}
-					
-				}).on('mouseenter', function(){this.focus();});
 			}
 			
 			opts.buttons[fm.i18n('btnSave')]      = save;
