@@ -120,6 +120,7 @@
 			'errRestore'           : 'Unable to restore from the trash. Can\'t identify the restore destination.', // from v2.1.24 added 3.5.2017
 			'errEditorNotFound'    : 'Editor not found to this file type.', // from v2.1.25 added 23.5.2017
 			'errServerError'       : 'Error occurred on the server side.', // from v2.1.25 added 16.6.2017
+			'errEmpty'             : 'Unable to empty folder "$1".', // from v2.1.25 added 22.6.2017
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',
@@ -160,6 +161,7 @@
 			'cmdcolwidth'  : 'Reset column width', // from v2.1.13 added 12.06.2016
 			'cmdfullscreen': 'Full Screen', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : 'Move', // from v2.1.15 added 21.08.2016
+			'cmdempty'     : 'Empty the folder', // from v2.1.25 added 22.06.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
@@ -420,6 +422,8 @@
 			'presets'         : 'Presets', // from v2.1.25 added 26.5.2017
 			'tooManyToTrash'  : 'It\'s too many items so it can\'t into trash.', // from v2.1.25 added 9.6.2017
 			'TextArea'        : 'TextArea', // from v2.1.25 added 14.6.2017
+			'folderToEmpty'   : 'Empty the folder "$1".', // from v2.1.25 added 22.6.2017
+			'filderIsEmpty'   : 'There are no items in a folder "$1".', // from v2.1.25 added 22.6.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
