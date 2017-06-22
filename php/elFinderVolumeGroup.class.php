@@ -32,6 +32,7 @@ class elFinderVolumeGroup extends elFinderVolumeDriver {
 			'cut',
 			'duplicate',
 			'edit',
+			'empty',
 			'extract',
 			'getfile',
 			'mkdir',

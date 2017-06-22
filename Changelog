@@ -15,6 +15,8 @@
 		- [cmd:resize] Fixed #2043 add "Save As" button into the resize dialog
 		- [js:core] Fixed #2050 handling server errors during upload
 		- [VD:abstract] Fixed #2054 to use the same hash value as Linux on Windows server
+		- [js:restore] Fixed #2057 problem of empty folder handling
+		- [cmd:empty] Fixed #2061 add a new command `empty` - "Empty the folder"
 		- And some minor bug fixes
 
 

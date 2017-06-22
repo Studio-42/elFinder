@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 40c8797) (2017-06-22)
+ * Version 2.1.24 (2.1-src Nightly: d20c1dd) (2017-06-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -1052,7 +1052,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-cwd .elfinder-navbar-root-network.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd-view-list .elfinder-navbar-root-network td .elfinder-cwd-icon  {
 	background-image:url("../img/toolbar.png");
-	background-position: 0 82.7%; /* Don't forget change % when toolbar.png edited */
+	background-position: 0 81.1%; /* Don't forget change % when toolbar.png edited */
 	background-size: cover;
 }
 .elfinder-cwd .elfinder-navbar-root-network.elfinder-droppable-active .elfinder-cwd-icon {
@@ -2920,6 +2920,7 @@ embed.elfinder-quicklook-preview-audio {
 .elfinder-button-icon-colwidth  { background-position: 0 -768px; }
 .elfinder-button-icon-fullscreen  { background-position: 0 -784px; }
 .elfinder-button-icon-unfullscreen{ background-position: 0 -800px; }
+.elfinder-button-icon-empty     { background-position: 0 -848px; }
 
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton { overflow:visible; }
