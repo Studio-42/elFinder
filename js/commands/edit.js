@@ -65,9 +65,17 @@ elFinder.prototype.commands.edit = function() {
 
 			var dfrd = $.Deferred(),
 				save = function() {
-					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
+					var encord = selEncoding? selEncoding.val():void(0),
+						conf;
+					if (ta.editor) {
+						ta.editor.save(ta[0], ta.editor.instance);
+						conf = ta.editor.confObj;
+						if (conf.info && conf.info.schemeContent) {
+							encord = 'scheme';
+						}
+					}
 					old = getContent();
-					dfrd.notifyWith(ta, [selEncoding? selEncoding.val():void(0), ta.data('hash')]);
+					dfrd.notifyWith(ta, [encord, ta.data('hash')]);
 				},
 				cancel = function() {
 					ta.elfinderdialog('close');
