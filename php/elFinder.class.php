@@ -2762,6 +2762,7 @@ class elFinder {
 	 */
 	protected function put($args) {
 		$target = $args['target'];
+		$encoding = isset($args['encoding'])? $args['encoding'] : '';
 		
 		if (($volume = $this->volume($target)) == false
 		|| ($file = $volume->file($target)) == false) {
@@ -2770,18 +2771,23 @@ class elFinder {
 		
 		$this->itemLock($target);
 		
-		if (preg_match('~^https?://~i', $args['content'])) {
-			$fp = $this->get_remote_contents($args['content'], 30, 5, 'Mozilla/5.0', tmpfile());
-			if (! $fp) {
-				return  array('error' => self::ERROR_SAVE, $args['content'], self::ERROR_FILE_NOT_FOUND);
+		if ($encoding === 'scheme') {
+			if (preg_match('~^https?://~i', $args['content'])) {
+				$fp = $this->get_remote_contents($args['content'], 30, 5, 'Mozilla/5.0', tmpfile());
+				if (! $fp) {
+					return  array('error' => self::ERROR_SAVE, $args['content'], self::ERROR_FILE_NOT_FOUND);
+				}
+				$fmeta = stream_get_meta_data($fp);
+				$mime = $this->detectMimeType($fmeta['uri']);
+				$args['content'] = 'data:'.$mime.';base64,'.base64_encode(file_get_contents($fmeta['uri']));
 			}
-			$fmeta = stream_get_meta_data($fp);
-			$mime = $this->detectMimeType($fmeta['uri']);
-			$args['content'] = 'data:'.$mime.';base64,'.base64_encode(file_get_contents($fmeta['uri']));
-		} else if (! empty($args['encoding'])) {
-			$content = iconv('UTF-8', $args['encoding'], $args['content']);
+			$encoding = '';
+			$args['content'] = "\0" . $args['content'];
+		}
+		if ($encoding) {
+			$content = iconv('UTF-8', $encoding, $args['content']);
 			if ($content === false && function_exists('mb_detect_encoding')) {
-				$content = mb_convert_encoding($args['content'], $args['encoding'], 'UTF-8');
+				$content = mb_convert_encoding($args['content'], $encoding, 'UTF-8');
 			}
 			if ($content !== false) {
 				$args['content'] = $content;
