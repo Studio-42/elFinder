@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: d20c1dd) (2017-06-22)
+ * Version 2.1.24 (2.1-src Nightly: 962ffec) (2017-06-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7847,7 +7847,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: d20c1dd)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 962ffec)';
 
 
 
@@ -18768,9 +18768,17 @@ elFinder.prototype.commands.edit = function() {
 
 			var dfrd = $.Deferred(),
 				save = function() {
-					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
+					var encord = selEncoding? selEncoding.val():void(0),
+						conf;
+					if (ta.editor) {
+						ta.editor.save(ta[0], ta.editor.instance);
+						conf = ta.editor.confObj;
+						if (conf.info && conf.info.schemeContent) {
+							encord = 'scheme';
+						}
+					}
 					old = getContent();
-					dfrd.notifyWith(ta, [selEncoding? selEncoding.val():void(0), ta.data('hash')]);
+					dfrd.notifyWith(ta, [encord, ta.data('hash')]);
 				},
 				cancel = function() {
 					ta.elfinderdialog('close');
@@ -18949,6 +18957,40 @@ elFinder.prototype.commands.edit = function() {
 						
 					ta = $('<textarea class="elfinder-file-edit" rows="20" id="'+id+'-ta"></textarea>')
 						.on('input propertychange', stateChange);
+					
+					if (!ta.editor || !ta.editor.info || ta.editor.info.useTextAreaEvent) {
+						ta.on('keydown', function(e) {
+							var code = e.keyCode,
+								value, start;
+							
+							e.stopPropagation();
+							if (code == $.ui.keyCode.TAB) {
+								e.preventDefault();
+								// insert tab on tab press
+								if (this.setSelectionRange) {
+									value = this.value;
+									start = this.selectionStart;
+									this.value = value.substr(0, start) + "\t" + value.substr(this.selectionEnd);
+									start += 1;
+									this.setSelectionRange(start, start);
+								}
+							}
+							
+							if (e.ctrlKey || e.metaKey) {
+								// close on ctrl+w/q
+								if (code == 'Q'.charCodeAt(0) || code == 'W'.charCodeAt(0)) {
+									e.preventDefault();
+									cancel();
+								}
+								if (code == 'S'.charCodeAt(0)) {
+									e.preventDefault();
+									save();
+								}
+							}
+							
+						})
+						.on('mouseenter', function(){this.focus();});
+					}
 
 					ta.initEditArea = function(id, file, content) {
 						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [];
@@ -18997,39 +19039,6 @@ elFinder.prototype.commands.edit = function() {
 				ta.getContent = function() {
 					return rtrim(ta.val());
 				};
-			}
-			
-			if (!ta.editor) {
-				ta.keydown(function(e) {
-					var code = e.keyCode,
-						value, start;
-					
-					e.stopPropagation();
-					if (code == $.ui.keyCode.TAB) {
-						e.preventDefault();
-						// insert tab on tab press
-						if (this.setSelectionRange) {
-							value = this.value;
-							start = this.selectionStart;
-							this.value = value.substr(0, start) + "\t" + value.substr(this.selectionEnd);
-							start += 1;
-							this.setSelectionRange(start, start);
-						}
-					}
-					
-					if (e.ctrlKey || e.metaKey) {
-						// close on ctrl+w/q
-						if (code == 'Q'.charCodeAt(0) || code == 'W'.charCodeAt(0)) {
-							e.preventDefault();
-							cancel();
-						}
-						if (code == 'S'.charCodeAt(0)) {
-							e.preventDefault();
-							save();
-						}
-					}
-					
-				}).on('mouseenter', function(){this.focus();});
 			}
 			
 			opts.buttons[fm.i18n('btnSave')]      = save;
