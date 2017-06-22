@@ -673,7 +673,7 @@
 							cmUrl + '/mode/meta.min.js'
 						], function() {
 							self.confObj.loader.resolve(CodeMirror);
-						});
+						}, void 0, {obj: window, name: 'CodeMirror'});
 					}
 					self.fm.loadCss(cmUrl + '/codemirror.css');
 				}
