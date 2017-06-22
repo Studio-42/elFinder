@@ -21,23 +21,28 @@ elFinder.prototype.commands.empty = function() {
 	this.exec = function(hashes) {
 		var dirs = this.files(hashes),
 			cnt  = dirs.length,
-			dfrd = $.Deferred().done(function() {
-				var data = {changed: {}};
-				fm.toast({msg: fm.i18n(['complete', fm.i18n('cmdempty')])});
-				$.each(dirs, function(i, dir) {
-					delete dir.dirs;
-					data.changed[dir.hash] = dir;
-				});
-				fm.change(data);
-			}),
-			errs = cnt,
+			dfrd = $.Deferred()
+				.done(function() {
+					var data = {changed: {}};
+					fm.toast({msg: fm.i18n(['"'+success.join('", ')+'"', 'complete', fm.i18n('cmdempty')])});
+					$.each(dirs, function(i, dir) {
+						data.changed[dir.hash] = dir;
+					});
+					fm.change(data);
+				})
+				.always(function() {
+					var cwd = fm.cwd().hash;
+					fm.trigger('selectfiles', {files: $.map(dirs, function(d) { return cwd === d.phash? d.hash : null; })});
+				}),
+			success = [],
 			done = function(res) {
-				if (res === true) {
-					--errs;
+				if (typeof res === 'number') {
+					success.push(dirs[res].name);
+					delete dirs[res].dirs;
 				} else {
 					res && fm.error(res);
 				}
-				(--cnt < 1) && dfrd[errs? 'reject' : 'resolve']();
+				(--cnt < 1) && dfrd[success.length? 'resolve' : 'reject']();
 			};
 
 		$.each(dirs, function(i, dir) {
@@ -79,9 +84,10 @@ elFinder.prototype.commands.empty = function() {
 						if (targets.length) {
 							fm.exec('rm', targets, { addTexts : [ fm.i18n('folderToEmpty', dir.name) ] })
 							.fail(function(error) {
+								fm.trigger('unselectfiles', {files: fm.selected()});
 								done(error || '');
 							})
-							.done(function() { done(true); });
+							.done(function() { done(i); });
 						}
 					}
 				} else {
