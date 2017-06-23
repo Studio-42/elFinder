@@ -340,13 +340,19 @@ elFinder.prototype.commands.rm = function() {
 	}
 	
 	this.getstate = function(sel) {
-		var name;
+		var state;
+		
 		sel = sel || fm.selected();
-		if (sel && sel.length) {
-			self.value = getTHash(sel)? 'trash' : 'rm';
-		}
-		return sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
+		state = sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
 			? 0 : -1;
+		
+		if (sel && sel.length && fm.searchStatus.state > 1) {
+			setTimeout(function() {
+				self.update(state, getTHash(sel)? 'trash' : 'rm');
+			}, 0);
+		}
+		
+		return state;
 	}
 	
 	this.exec = function(hashes, opts) {
