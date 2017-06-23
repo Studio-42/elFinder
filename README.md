@@ -61,6 +61,7 @@ Features
  * Keyboard shortcuts
  * Standard methods of file/group selection using mouse or keyboard
  * Move/Copy files with Drag & Drop
+ * Drag & Drop to outside by starting drag with alt/option key press
  * Archives create/extract (zip, rar, 7z, tar, gzip, bzip2)
  * Rich context menu and toolbar
  * Quicklook, preview for common file types
@@ -123,7 +124,7 @@ Installation
 Downloads
 ------------
 **Stable releases** ([Changelog](https://github.com/Studio-42/elFinder/blob/master/Changelog))
- + [elFinder 2.1.24](https://github.com/Studio-42/elFinder/archive/2.1.24.zip)
+ + [elFinder 2.1.25](https://github.com/Studio-42/elFinder/archive/2.1.25.zip)
  + [elFinder 2.0.9](https://github.com/Studio-42/elFinder/archive/2.0.9.zip) (deprecated)
 
 **Nightly builds**
