@@ -577,7 +577,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				if ($dirItr->hasChildren()) {
 					$dirs = true;
 					$name = $dirItr->getSubPathName();
-					while($name) {
+					while($dirItr->valid()) {
 						if (!$this->attr($path . DIRECTORY_SEPARATOR . $name, 'read', null, true)) {
 							$dirs = false;
 							$dirItr->next();
