@@ -2,7 +2,7 @@
  * Czech translation
  * @author Jay Gridley <gridley.jay@hotmail.com>
  * @author RobiNN <kelcakrobo@gmail.com>
- * @version 2017-04-21
+ * @version 2017-06-23
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -77,6 +77,7 @@
 			'errMove'              : '"$1" nelze přemístit.',
 			'errCopyInItself'      : '"$1" nelze zkopírovat do sebe sama.',
 			'errRm'                : '"$1" nelze odstranit.',
+			'errTrash'             : 'Nelze se dostat do koše.', // from v2.1.24 added 30.4.2017
 			'errRmSrc'             : 'Nelze odstranit zdrojový soubor(y).',
 			'errExtract'           : 'Nelze extrahovat soubory z "$1".',
 			'errArchive'           : 'Nelze vytvořit archív.',
@@ -110,6 +111,10 @@
 			'errSearchTimeout'     : 'Vypršení časového limitu při hledání "$1". Je částečně výsledkem hledání.', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : 'Opětovné povolení je nutné.', // from v2.1.10 added 24.3.2016
 			'errMaxTargets'        : 'Maximální počet volitelných předmětů je $1.', // from v2.1.17 added 17.10.2016
+			'errRestore'           : 'Nelze obnovit z koše. Nelze identifikovat cíl obnovení.', // from v2.1.24 added 3.5.2017
+			'errEditorNotFound'    : 'Editor tohoto typu souboru nebyl nalezen.', // from v2.1.25 added 23.5.2017
+			'errServerError'       : 'Došlo k chybě na straně serveru.', // from v2.1.25 added 16.6.2017
+			'errEmpty'             : 'Nelze vyprázdnit složku "$1".', // from v2.1.25 added 22.6.2017
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Vytvořit archív',
@@ -134,6 +139,8 @@
 			'cmdreload'    : 'Obnovit',
 			'cmdrename'    : 'Přejmenovat',
 			'cmdrm'        : 'Smazat',
+			'cmdtrash'     : 'Do koše', //from v2.1.24 added 29.4.2017
+			'cmdrestore'   : 'Obnovit', //from v2.1.24 added 3.5.2017
 			'cmdsearch'    : 'Najít soubory',
 			'cmdup'        : 'Přejít do nadřazené složky',
 			'cmdupload'    : 'Nahrát soubor(y)',
@@ -148,6 +155,7 @@
 			'cmdcolwidth'  : 'Obnovení šířku sloupce', // from v2.1.13 added 12.06.2016
 			'cmdfullscreen': 'Celá obrazovka', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : 'Posouvat', // from v2.1.15 added 21.08.2016
+			'cmdempty'     : 'Vyprázdnit složku', // from v2.1.25 added 22.06.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zavřít',
@@ -170,6 +178,9 @@
 			'btnBackup' : 'Zálohovat', // fromv2.1 added 28.11.2015
 			'btnRename'    : 'Přejmenovat',      // from v2.1.24 added 6.4.2017
 			'btnRenameAll' : 'Přejmenovat vše', // from v2.1.24 added 6.4.2017
+			'btnPrevious' : 'Předch ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnNext'     : 'Další ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnSaveAs'   : 'Uložit jako', // from v2.1.25 added 24.5.2017
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Otevírání složky',
@@ -201,6 +212,12 @@
 			'ntfzipdl'    : 'Vytvořit soubor ke stažení', // from v2.1.7 added 23.1.2016
 			'ntfparents'  : 'Získání informací o cestě', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'Zpracování nahraného souboru', // from v2.1.17 added 2.11.2016
+			'ntftrash'    : 'Hodit do koše', // from v2.1.24 added 2.5.2017
+			'ntfrestore'  : 'Obnova z koše', // from v2.1.24 added 3.5.2017
+			'ntfchkdir'   : 'Kontrola cílové složky', // from v2.1.24 added 3.5.2017
+
+			/*********************************** volumes *********************************/
+			'volume_Trash' : 'Koš', //from v2.1.24 added 29.4.2017
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'neznámý',
@@ -266,9 +283,11 @@
 			'confirmReq'      : 'Požadováno potvrzení',
 			'confirmRm'       : 'Opravdu chcete odstranit tyto soubory?<br/>Operace nelze vrátit!',
 			'confirmRepl'     : 'Nahradit staré soubory novými?',
+			'confirmRest'     : 'Nahradit stávající položku položkou z koše?', // fromv2.1.24 added 5.5.2017
 			'confirmConvUTF8' : 'Není v UTF-8, převést do UTF-8?<br/>Obsah po převodu se stává UTF-8.', // from v2.1 added 08.04.2014
 			'confirmNonUTF8'  : 'Kódování tohoto souboru nemoholo rozpoznán. Pro úpravy je třeba dočasně převést do kódování UTF-8.<br/>Prosím, vyberte kódování znaků souboru.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'Byl změněn.<br/>Pokud obsahuje neuložené změny, dojde ke ztrátě práce.', // from v2.1 added 15.7.2015
+			'confirmTrash'    : 'Opravdu chcete položky přesunout do koše?', //from v2.1.24 added 29.4.2017
 			'apllyAll'        : 'Pro všechny',
 			'name'            : 'Název',
 			'size'            : 'Velikost',
@@ -325,6 +344,7 @@
 			'selectForUpload' : 'Vyberte soubory',
 			'moveFiles'       : 'Přesunout sobory',
 			'copyFiles'       : 'Zkopírovat soubory',
+			'restoreFiles'    : 'Obnovit položky', // from v2.1.24 added 5.5.2017
 			'rmFromPlaces'    : 'Odstranit z míst',
 			'aspectRatio'     : 'Poměr stran',
 			'scale'           : 'Měřítko',
@@ -393,6 +413,11 @@
 			'saveAsEncoding'  : 'Uložit s vybraným kódováním', // from v2.1.19 added 2.12.2016
 			'selectFolder'    : 'Vyberte složku', // from v2.1.20 added 13.12.2016
 			'firstLetterSearch': 'Hledání prvního listu', // from v2.1.23 added 24.3.2017
+			'presets'         : 'Předvolby', // from v2.1.25 added 26.5.2017
+			'tooManyToTrash'  : 'Je to příliš mnoho položek, takže se nemohou dostat do koše.', // from v2.1.25 added 9.6.2017
+			'TextArea'        : 'TextArea', // from v2.1.25 added 14.6.2017
+			'folderToEmpty'   : 'Vyprázdnit složku "$1".', // from v2.1.25 added 22.6.2017
+			'filderIsEmpty'   : 'Ve složce "$1" nejsou žádné položky.', // from v2.1.25 added 22.6.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámý',
