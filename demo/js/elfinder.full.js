@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.24 (2.1-src Nightly: 496492f) (2017-06-22)
+ * Version 2.1.24 (2.1-src Nightly: 77c49a3) (2017-06-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7847,7 +7847,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 496492f)';
+elFinder.prototype.version = '2.1.24 (2.1-src Nightly: 77c49a3)';
 
 
 
@@ -25333,13 +25333,19 @@ elFinder.prototype.commands.rm = function() {
 	}
 	
 	this.getstate = function(sel) {
-		var name;
+		var state;
+		
 		sel = sel || fm.selected();
-		if (sel && sel.length) {
-			self.value = getTHash(sel)? 'trash' : 'rm';
-		}
-		return sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
+		state = sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
 			? 0 : -1;
+		
+		if (sel && sel.length && fm.searchStatus.state > 1) {
+			setTimeout(function() {
+				self.update(state, getTHash(sel)? 'trash' : 'rm');
+			}, 0);
+		}
+		
+		return state;
 	}
 	
 	this.exec = function(hashes, opts) {
