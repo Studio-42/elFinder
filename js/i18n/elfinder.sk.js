@@ -2,7 +2,7 @@
  * Slovak translation
  * @author Jakub Ďuraš <jkblmr@gmail.com>
  * @author RobiNN <kelcakrobo@gmail.com>
- * @version 2017-06-02
+ * @version 2017-06-23
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -113,6 +113,8 @@
 			'errMaxTargets'        : 'Maximálny počet voliteľných predmetov je $1.', // from v2.1.17 added 17.10.2016
 			'errRestore'           : 'Nepodarilo sa obnoviť z koša. Cieľ obnovenia nie je možné identifikovať.', // from v2.1.24 added 3.5.2017
 			'errEditorNotFound'    : 'Editor tohto typu súboru nebol nájdený.', // from v2.1.25 added 23.5.2017
+			'errServerError'       : 'Vyskytla sa chyba na strane servera.', // from v2.1.25 added 16.6.2017
+			'errEmpty'             : 'Nepodarilo sa vyprázdniť priečinok "$1".', // from v2.1.25 added 22.6.2017
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Vytvoriť archív',
@@ -153,6 +155,7 @@
 			'cmdcolwidth'  : 'Resetovať šírku stĺpca', // from v2.1.13 added 12.06.2016
 			'cmdfullscreen': 'Celá obrazovka', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : 'Posúvať', // from v2.1.15 added 21.08.2016
+			'cmdempty'     : 'Vyprázdniť priečinok', // from v2.1.25 added 22.06.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zavrieť',
@@ -411,6 +414,10 @@
 			'selectFolder'    : 'Vyberte priečinok', // from v2.1.20 added 13.12.2016
 			'firstLetterSearch': 'Hľadanie prvého listu', // from v2.1.23 added 24.3.2017
 			'presets'         : 'Presety', // from v2.1.25 added 26.5.2017
+			'tooManyToTrash'  : 'Je to príliš veľa položiek, takže sa nemôže dostať do koša.', // from v2.1.25 added 9.6.2017
+			'TextArea'        : 'TextArea', // from v2.1.25 added 14.6.2017
+			'folderToEmpty'   : 'Vyprázdniť priečinok "$1".', // from v2.1.25 added 22.6.2017
+			'filderIsEmpty'   : 'V priečinku "$1" nie sú žiadne položky.', // from v2.1.25 added 22.6.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
