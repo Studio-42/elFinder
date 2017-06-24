@@ -203,7 +203,7 @@
 			// MIME types to accept
 			mimes : ['image/jpeg', 'image/png'],
 			// HTML of this editor
-			html : '<div style="width:100%;height:300px;text-align:center;"><img/></div>',
+			html : '<div style="width:100%;height:300px;max-height:100%;text-align:center;"><img/></div>',
 			// called on initialization of elFinder cmd edit (this: this editor's config object)
 			setup : function(opts, fm) {
 				pixlrSetup.call(this, opts, fm);
@@ -238,7 +238,7 @@
 			// MIME types to accept
 			mimes : ['image/jpeg', 'image/png'],
 			// HTML of this editor
-			html : '<div style="width:100%;height:300px;text-align:center;"><img/></div>',
+			html : '<div style="width:100%;height:300px;max-height:100%;text-align:center;"><img/></div>',
 			// called on initialization of elFinder cmd edit (this: this editor's config object)
 			setup : function(opts, fm) {
 				pixlrSetup.call(this, opts, fm);
@@ -271,7 +271,7 @@
 			},
 			mimes : ['image/jpeg', 'image/png'],
 			// HTML of this editor
-			html : '<div style="width:100%;height:300px;text-align:center;"><img/></div>',
+			html : '<div style="width:100%;height:300px;max-height:100%;text-align:center;"><img/></div>',
 			// called on initialization of elFinder cmd edit (this: this editor's config object)
 			setup : function(opts, fm) {
 				if (fm.UA.ltIE8 || !opts.extraOptions || !opts.extraOptions.creativeCloudApiKey) {
@@ -321,6 +321,8 @@
 							});
 							// bind switch fullscreen event
 							elfNode.on('resize.'+fm.namespace, function(e, data) {
+								e.preventDefault();
+								e.stopPropagation();
 								data && data.fullscreen && container.appendTo(data.fullscreen === 'on'? elfNode : 'body');
 							});
 							fm.bind('destroy', function() {
