@@ -8,7 +8,9 @@ $.fn.elfinderpanel = function(fm) {
 			var navbar = fm.getUI('navbar');
 			
 			panel.css(margin, parseInt(navbar.outerWidth(true)));
-			navbar.on('resize', function() {
+			navbar.on('resize', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
 				panel.is(':visible') && panel.css(margin, parseInt(navbar.outerWidth(true)))
 			})
 		})

@@ -10,6 +10,8 @@ elFinder.prototype.commands.fullscreen = function() {
 	var self   = this,
 		fm     = this.fm,
 		update = function(e, data) {
+			e.preventDefault();
+			e.stopPropagation();
 			if (data && data.fullscreen) {
 				self.update(void(0), (data.fullscreen === 'on'));
 			}
