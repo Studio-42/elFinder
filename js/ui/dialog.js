@@ -284,6 +284,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 				.css({
 					width     : opts.width,
 					height    : opts.height,
+					minWidth  : opts.minWidth,
+					minHeight : opts.minHeight,
 					maxWidth  : opts.maxWidth,
 					maxHeight : opts.maxHeight
 				})
@@ -324,7 +326,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 					
 					if (syncSize.enabled) {
-						self.css({ overflow: 'hidden' });
 						syncSize.defaultSize = { width: self.width(), height: self.height() };
 						dialog.trigger('resize').trigger('posinit');
 					}
@@ -562,7 +563,7 @@ $.fn.elfinderdialog.defaults = {
 	width     : 320,
 	height    : 'auto',
 	minWidth  : 200,
-	minHeight : 110,
+	minHeight : 70,
 	maxWidth  : null,
 	maxHeight : null,
 	allowMinimize : 'auto',
