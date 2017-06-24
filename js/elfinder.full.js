@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.25 (2.1-src Nightly: 397310b) (2017-06-25)
+ * Version 2.1.25 (2.1-src Nightly: f5bf8e3) (2017-06-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7849,7 +7849,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.25 (2.1-src Nightly: 397310b)';
+elFinder.prototype.version = '2.1.25 (2.1-src Nightly: f5bf8e3)';
 
 
 
@@ -14124,6 +14124,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 				.css({
 					width     : opts.width,
 					height    : opts.height,
+					minWidth  : opts.minWidth,
+					minHeight : opts.minHeight,
 					maxWidth  : opts.maxWidth,
 					maxHeight : opts.maxHeight
 				})
@@ -14164,7 +14166,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 					
 					if (syncSize.enabled) {
-						self.css({ overflow: 'hidden' });
 						syncSize.defaultSize = { width: self.width(), height: self.height() };
 						dialog.trigger('resize').trigger('posinit');
 					}
@@ -14402,7 +14403,7 @@ $.fn.elfinderdialog.defaults = {
 	width     : 320,
 	height    : 'auto',
 	minWidth  : 200,
-	minHeight : 110,
+	minHeight : 70,
 	maxWidth  : null,
 	maxHeight : null,
 	allowMinimize : 'auto',
@@ -18919,6 +18920,7 @@ elFinder.prototype.commands.edit = function() {
 					title   : fm.escape(file.name),
 					width   : self.options.dialogWidth || (Math.min(650, $(window).width() * .9)),
 					buttons : {},
+					minHeight : 160,
 					maxWidth  : 'window',
 					maxHeight : 'window',
 					allowMinimize : true,
@@ -19128,7 +19130,9 @@ elFinder.prototype.commands.edit = function() {
 				.attr('id', id)
 				.on('keydown keyup keypress', function(e) {
 					e.stopPropagation();
-				}).closest('.ui-dialog').addClass(dlcls);
+				})
+				.css({ overflow: 'hidden' })
+				.closest('.ui-dialog').addClass(dlcls);
 			
 			return dfrd.promise();
 		},
@@ -20246,7 +20250,14 @@ elFinder.prototype.commands.fullscreen = function() {
 		}
 
 		content.find('#'+fm.namespace+'-help-about').find('.apiver').text(fm.api);
-		self.dialog = fm.dialog(content, {title : self.title, width : 530, autoOpen : false, destroyOnClose : false})
+		self.dialog = fm.dialog(content, {
+				title : self.title,
+				width : 530,
+				maxWidth: 'window',
+				maxHeight: 'window',
+				autoOpen : false,
+				destroyOnClose : false
+			})
 			.on('click', function(e) {
 				e.stopPropagation();
 			});
