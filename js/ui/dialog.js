@@ -326,7 +326,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 					
 					if (syncSize.enabled) {
-						self.css({ overflow: 'hidden' });
 						syncSize.defaultSize = { width: self.width(), height: self.height() };
 						dialog.trigger('resize').trigger('posinit');
 					}

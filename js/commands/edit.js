@@ -350,7 +350,9 @@ elFinder.prototype.commands.edit = function() {
 				.attr('id', id)
 				.on('keydown keyup keypress', function(e) {
 					e.stopPropagation();
-				}).closest('.ui-dialog').addClass(dlcls);
+				})
+				.css({ overflow: 'hidden' })
+				.closest('.ui-dialog').addClass(dlcls);
 			
 			return dfrd.promise();
 		},
