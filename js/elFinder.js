@@ -2867,13 +2867,15 @@ var elFinder = function(node, opts) {
 					heightBase.data('marginToMyNode', getMargin());
 				}
 				if (! heightBase.data('fitToBaseFunc')) {
-					heightBase.data('fitToBaseFunc', function() {
+					heightBase.data('fitToBaseFunc', function(e) {
 						var tm = heightBase.data('resizeTm');
+						e.preventDefault();
+						e.stopPropagation();
 						tm && clearTimeout(tm);
 						if (! node.hasClass('elfinder-fullscreen')) {
 							heightBase.data('resizeTm', setTimeout(function() {
 								self.restoreSize();
-							}, 100));
+							}, 50));
 						}
 					});
 				}

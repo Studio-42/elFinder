@@ -80,6 +80,8 @@ $.fn.elfindernavbar = function(fm, opts) {
 					}
 				})
 				.on('resize scroll', function(e) {
+					e.preventDefault();
+					e.stopPropagation();
 					if (! ltr && e.type === 'resize') {
 						nav.css('left', 0);
 					}
@@ -110,8 +112,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 		} else {
 			if (fm.UA.Mobile) {
 				fm.one('cssloaded', function() {
-					nav.data('defWidth', nav.width());
-					$(window).on('resize.' + fm.namespace, function(e){
+					var set = function() {
 						setWidth = nav.parent().width() / 2;
 						if (nav.data('defWidth') > setWidth) {
 							nav.width(setWidth);
@@ -119,7 +120,10 @@ $.fn.elfindernavbar = function(fm, opts) {
 							nav.width(nav.data('defWidth'));
 						}
 						nav.data('width', nav.width());
-					});
+					}
+					nav.data('defWidth', nav.width());
+					$(window).on('resize.' + fm.namespace, set);
+					set();
 				});
 			}
 		}
