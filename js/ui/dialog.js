@@ -15,16 +15,21 @@ $.fn.elfinderdialog = function(opts, fm) {
 			var dialog = e.data;
 			syncTm && clearTimeout(syncTm);
 			syncTm = setTimeout(function() {
-				var opts;
+				var opts, prevH, offset;
 				if (syncSize.enabled) {
+					prevH = dialog.height();
 					opts = {
 						maxWidth : syncSize.width?  $(window).width() - bodyMargin.width  : null,
 						maxHeight: syncSize.height? $(window).height() - bodyMargin.height : null
 					};
-					if (dialog.data('hasResizable')) {
-						dialog.resizable('option', opts);
+					if (prevH !== dialog.height()) {
+						offset = dialog.offset();
+						window.scrollTo(offset.top, offset.left);
 					}
 					dialog.css(opts).trigger('resize');
+					if (dialog.data('hasResizable') && (dialog.resizable('option', 'maxWidth') < opts.maxWidth || dialog.resizable('option', 'maxHeight') < opts.maxHeight)) {
+						dialog.resizable('option', opts);
+					}
 				}
 			}, 50);
 		},
@@ -410,9 +415,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 						oh += $(this).outerHeight(true);
 					});
 					if (syncSize.enabled) {
-						self.height(syncSize.defaultSize.height);
+						self.height(Math.min(syncSize.defaultSize.height, Math.max(parseInt(dialog.css('max-height')), parseInt(dialog.css('min-height'))) - oh - dialog.data('margin-y')));
+					} else {
+						self.height(dialog.height() - oh - dialog.data('margin-y'));
 					}
-					self.height(dialog.height() - oh - dialog.data('margin-y'));
 					if (typeof(opts.resize) === 'function') {
 						$.proxy(opts.resize, self[0])(e, data);
 					}
@@ -528,7 +534,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 						dialog.data('resizing', false);
 					}, 200));
 					if (syncSize.enabled) {
-						syncSize.defaultSize = ui.size;
+						syncSize.defaultSize = { width: self.width(), height: self.height() };
 					}
 				},
 				resize     : function(e, ui) {
