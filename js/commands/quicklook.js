@@ -532,23 +532,32 @@
 				}
 			});
 			
-			preview.on('update', function(data) {
-				var hash = data.file.hash,
+			preview.on('update', function(e) {
+				var file = e.file,
+					hash = file.hash,
 					serach = (fm.searchStatus.mixed && fm.searchStatus.state > 1);
 				
-				// set current dispInlineRegex
-				self.dispInlineRegex = cwdDispInlineRegex;
-				if (serach || fm.optionsByHashes[hash]) {
-					try {
-						self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', hash));
-					} catch(e) {
-						try {
-							self.dispInlineRegex = new RegExp(!fm.isRoot(data.file)? fm.option('dispInlineRegex', data.file.phash) : fm.options.dispInlineRegex);
-						} catch(e) {
-							self.dispInlineRegex = /^$/;
+				if (file.mime !== 'directory') {
+					if (parseInt(file.size)) {
+						// set current dispInlineRegex
+						self.dispInlineRegex = cwdDispInlineRegex;
+						if (serach || fm.optionsByHashes[hash]) {
+							try {
+								self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', hash));
+							} catch(e) {
+								try {
+									self.dispInlineRegex = new RegExp(!fm.isRoot(file)? fm.option('dispInlineRegex', file.phash) : fm.options.dispInlineRegex);
+								} catch(e) {
+									self.dispInlineRegex = /^$/;
+								}
+							}
 						}
+					} else {
+						//  do not preview of file that size = 0
+						e.stopImmediatePropagation();
 					}
 				}
+				
 				self.info.show();
 			});
 
