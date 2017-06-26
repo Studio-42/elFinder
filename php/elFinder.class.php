@@ -19,6 +19,13 @@ class elFinder {
 	protected $version = '2.1';
 	
 	/**
+	 * API revision that this connector supports all functions
+	 * 
+	 * @var integer
+	 */
+	protected $revision = 25;
+	
+	/**
 	 * Storages (root dirs)
 	 *
 	 * @var array
@@ -621,6 +628,16 @@ class elFinder {
 	 **/
 	public function version() {
 		return $this->version;
+	}
+	
+	/**
+	 * Return revision (api) number
+	 *
+	 * @return string
+	 * @author Naoki Sawada
+	 **/
+	public function revision() {
+		return $this->revision;
 	}
 	
 	/**
@@ -1256,7 +1273,7 @@ class elFinder {
 		}
 		
 		if (!empty($args['init'])) {
-			$result['api'] = $this->version;
+			$result['api'] = $this->version + ($this->revision / 10000);
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');
 			$result['uplMaxFile'] = ini_get('max_file_uploads');
 			$result['netDrivers'] = array_keys(self::$netDrivers);
@@ -3382,6 +3399,15 @@ class elFinder {
 	/***************************************************************************/
 	/*                           static  utils                                 */
 	/***************************************************************************/
+	
+	/**
+	 * Return full version of API that this connector supports all functions
+	 * 
+	 * @return string
+	 */
+	public static function getApiFullVersion() {
+		return $this->version + '.' + $this->revision;
+	}
 	
 	/**
 	 * Return Is Animation Gif
