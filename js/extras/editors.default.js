@@ -1013,7 +1013,7 @@
 			},
 			resize : function(textarea, instance, e, data) {
 				// fit height to base node on dialog resize
-				textarea._setHeight();
+				instance && textarea._setHeight();
 			}
 		},
 		{

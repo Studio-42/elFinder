@@ -419,11 +419,13 @@ $.fn.elfinderdialog = function(opts, fm) {
 					} else {
 						h = dialog.height() - oh - dialog.data('margin-y');
 					}
-					self.height(h).outerHeight();
-					minH = self.height();
-					minH = (h < minH)? (minH + oh + dialog.data('margin-y')) : opts.minHeight;
-					dialog.css('min-height', minH);
-					dialog.data('hasResizable') && dialog.resizable('option', { minHeight: minH });
+					self.height(h);
+					setTimeout(function() { // Firefox need setTimeout to get new height value
+						minH = self.height();
+						minH = (h < minH)? (minH + oh + dialog.data('margin-y')) : opts.minHeight;
+						dialog.css('min-height', minH);
+						dialog.data('hasResizable') && dialog.resizable('option', { minHeight: minH });
+					}, 0);
 					if (typeof(opts.resize) === 'function') {
 						$.proxy(opts.resize, self[0])(e, data);
 					}
