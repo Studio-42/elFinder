@@ -3406,7 +3406,7 @@ class elFinder {
 	 * @return string
 	 */
 	public static function getApiFullVersion() {
-		return $this->version + '.' + $this->revision;
+		return $this->version . '.' . $this->revision;
 	}
 	
 	/**
