@@ -408,17 +408,22 @@ $.fn.elfinderdialog = function(opts, fm) {
 					css && dialog.css(css);
 				})
 				.on('resize', function(e, data) {
-					var oh = 0;
+					var oh = 0, h, minH;
 					e.stopPropagation();
 					e.preventDefault();
 					dialog.children('.ui-widget-header,.ui-dialog-buttonpane').each(function() {
 						oh += $(this).outerHeight(true);
 					});
-					if (syncSize.enabled) {
-						self.height(Math.min(syncSize.defaultSize.height, Math.max(parseInt(dialog.css('max-height')), parseInt(dialog.css('min-height'))) - oh - dialog.data('margin-y')));
+					if (syncSize.enabled && !e.originalEvent) {
+						h = Math.min(syncSize.defaultSize.height, Math.max(parseInt(dialog.css('max-height')), parseInt(dialog.css('min-height'))) - oh - dialog.data('margin-y'));
 					} else {
-						self.height(dialog.height() - oh - dialog.data('margin-y'));
+						h = dialog.height() - oh - dialog.data('margin-y');
 					}
+					self.height(h).outerHeight();
+					minH = self.height();
+					minH = (h < minH)? (minH + oh + dialog.data('margin-y')) : opts.minHeight;
+					dialog.css('min-height', minH);
+					dialog.data('hasResizable') && dialog.resizable('option', { minHeight: minH });
 					if (typeof(opts.resize) === 'function') {
 						$.proxy(opts.resize, self[0])(e, data);
 					}
@@ -536,9 +541,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 					if (syncSize.enabled) {
 						syncSize.defaultSize = { width: self.width(), height: self.height() };
 					}
-				},
-				resize     : function(e, ui) {
-					dialog.trigger('resize');
 				}
 			}).data('hasResizable', true);
 		} 
