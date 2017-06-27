@@ -140,7 +140,6 @@ elFinder.prototype.commands.edit = function() {
 					title   : fm.escape(file.name),
 					width   : self.options.dialogWidth || (Math.min(650, $(window).width() * .9)),
 					buttons : {},
-					minHeight : 160,
 					maxWidth  : 'window',
 					maxHeight : 'window',
 					allowMinimize : true,
@@ -351,7 +350,7 @@ elFinder.prototype.commands.edit = function() {
 				.on('keydown keyup keypress', function(e) {
 					e.stopPropagation();
 				})
-				.css({ overflow: 'hidden' })
+				.css({ overflow: 'hidden', minHeight: '7em' })
 				.closest('.ui-dialog').addClass(dlcls);
 			
 			return dfrd.promise();
