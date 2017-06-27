@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.25 (2.1-src Nightly: 56b121f) (2017-06-26)
+ * Version 2.1.25 (2.1-src Nightly: a123c99) (2017-06-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7849,7 +7849,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.25 (2.1-src Nightly: 56b121f)';
+elFinder.prototype.version = '2.1.25 (2.1-src Nightly: a123c99)';
 
 
 
@@ -20066,7 +20066,7 @@ elFinder.prototype.commands.fullscreen = function() {
 			html.push(linktpltgt[r](url, 'http://elfinder.org/')[r](link, fm.i18n('homepage')));
 			html.push(linktpltgt[r](url, 'https://github.com/Studio-42/elFinder/wiki')[r](link, fm.i18n('docs')));
 			html.push(linktpltgt[r](url, 'https://github.com/Studio-42/elFinder')[r](link, fm.i18n('github')));
-			html.push(linktpltgt[r](url, 'http://twitter.com/elrte_elfinder')[r](link, fm.i18n('twitter')));
+			//html.push(linktpltgt[r](url, 'http://twitter.com/elrte_elfinder')[r](link, fm.i18n('twitter')));
 			
 			html.push(sep);
 			
@@ -20087,8 +20087,8 @@ elFinder.prototype.commands.fullscreen = function() {
 			html.push('<div class="'+lic+'">'+fm.i18n('icons')+': Pixelmixer, <a href="http://p.yusukekamiyamane.com" target="_blank">Fugue</a></div>');
 			
 			html.push(sep);
-			html.push('<div class="'+lic+'">Licence: BSD Licence</div>');
-			html.push('<div class="'+lic+'">Copyright © 2009-2016, Studio 42</div>');
+			html.push('<div class="'+lic+'">Licence: 3-clauses BSD Licence</div>');
+			html.push('<div class="'+lic+'">Copyright © 2009-2017, Studio 42</div>');
 			html.push('<div class="'+lic+'">„ …'+fm.i18n('dontforget')+' ”</div>');
 			html.push('</div>');
 		},
@@ -22286,23 +22286,32 @@ elFinder.prototype.commands.places = function() {
 				}
 			});
 			
-			preview.on('update', function(data) {
-				var hash = data.file.hash,
+			preview.on('update', function(e) {
+				var file = e.file,
+					hash = file.hash,
 					serach = (fm.searchStatus.mixed && fm.searchStatus.state > 1);
 				
-				// set current dispInlineRegex
-				self.dispInlineRegex = cwdDispInlineRegex;
-				if (serach || fm.optionsByHashes[hash]) {
-					try {
-						self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', hash));
-					} catch(e) {
-						try {
-							self.dispInlineRegex = new RegExp(!fm.isRoot(data.file)? fm.option('dispInlineRegex', data.file.phash) : fm.options.dispInlineRegex);
-						} catch(e) {
-							self.dispInlineRegex = /^$/;
+				if (file.mime !== 'directory') {
+					if (parseInt(file.size)) {
+						// set current dispInlineRegex
+						self.dispInlineRegex = cwdDispInlineRegex;
+						if (serach || fm.optionsByHashes[hash]) {
+							try {
+								self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', hash));
+							} catch(e) {
+								try {
+									self.dispInlineRegex = new RegExp(!fm.isRoot(file)? fm.option('dispInlineRegex', file.phash) : fm.options.dispInlineRegex);
+								} catch(e) {
+									self.dispInlineRegex = /^$/;
+								}
+							}
 						}
+					} else {
+						//  do not preview of file that size = 0
+						e.stopImmediatePropagation();
 					}
 				}
+				
 				self.info.show();
 			});
 
