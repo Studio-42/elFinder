@@ -368,7 +368,7 @@
 				if (typeof Aviary === 'undefined') {
 					fm.loadScript(['https://dme0ih8comzn4.cloudfront.net/imaging/v3/editor.js'], function() {
 						init(launch);
-					});
+					}, {loadType: 'tag'});
 				} else {
 					init();
 					launch();
@@ -678,12 +678,15 @@
 						});
 					} else {
 						self.fm.loadScript([
-							cmUrl + '/codemirror.min.js',
-							cmUrl + '/addon/mode/loadmode.min.js',
-							cmUrl + '/mode/meta.min.js'
+							cmUrl + '/codemirror.min.js'
 						], function() {
-							self.confObj.loader.resolve(CodeMirror);
-						}, void 0, {obj: window, name: 'CodeMirror'});
+							self.fm.loadScript([
+								cmUrl + '/addon/mode/loadmode.min.js',
+								cmUrl + '/mode/meta.min.js'
+							], function() {
+								self.confObj.loader.resolve(CodeMirror);
+							});
+						}, {loadType: 'tag'});
 					}
 					self.fm.loadCss(cmUrl + '/codemirror.css');
 				}
@@ -765,7 +768,7 @@
 					} else {
 						self.fm.loadScript([cdns.simplemde+'/simplemde.min.js'], function() {
 							self.confObj.loader.resolve(SimpleMDE);
-						}, void 0, {obj: window, name: 'SimpleMDE'});
+						}, {loadType: 'tag'});
 					}
 				}
 				self.confObj.loader.done(start);
