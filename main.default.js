@@ -76,7 +76,6 @@
 					'elfinder'
 					, 'extras/editors.default'                   // load text, image editors
 					, 'elFinderConfig'
-					, (lang !== 'en')? 'elfinder.lang' : null    // load detected language
 				//	, 'extras/quicklook.googledocs'              // optional preview for GoogleApps contents on the GoogleDrive volume
 				//	, (lang === 'jp')? 'extras/encoding-japanese.min' : null // optional Japanese decoder for archive preview
 				],
@@ -96,11 +95,7 @@
 		paths : {
 			'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(ie8? '1.12.4' : jqver)+'/jquery.min',
 			'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/jquery-ui.min',
-			'elfinder' : 'elfinder.min',
-			'elfinder.lang': [
-				'i18n/elfinder.'+lang,
-				'i18n/elfinder.fallback'
-			]
+			'elfinder' : 'elfinder.min'
 		},
 		waitSeconds : 10 // optional
 	});
