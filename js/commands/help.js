@@ -92,6 +92,15 @@
 			html.push('</div>');
 			// end help
 		},
+		usePref = false,
+		preference = function() {
+			usePref = true;
+			// preference tab
+			html.push('<div id="'+fm.namespace+'-help-preference" class="ui-tabs-panel ui-widget-content ui-corner-bottom">');
+			html.push('<div class="ui-widget-content elfinder-help-preference"></div>');
+			html.push('</div>');
+			// end preference
+		},
 		useDebug = false,
 		debug = function() {
 			useDebug = true;
@@ -159,7 +168,73 @@
 	}];
 	
 	fm.one('load', function() {
-		var parts = self.options.view || ['about', 'shortcuts', 'help', 'debug'],
+		var setupPref = function() {
+				var tab = content.find('.elfinder-help-preference'),
+					langSel = $('<select/>').on('change', function() {
+						var lang = $(this).val();
+						fm.storage('lang', lang);
+						$('#'+fm.id).elfinder('reload');
+					}),
+					optTags = [],
+					langs = self.options.langs || {
+						ar: 'اللغة العربية',
+						bg: 'български език',
+						ca: 'Català',
+						cs: 'čeština',
+						da: 'dansk',
+						de: 'Deutsch',
+						el: 'Ελληνικά',
+						en: 'English',
+						es: 'español',
+						fa: 'فارسی‌‎, پارسی‌',
+						fo: 'Føroyskt',
+						fr: 'Français',
+						he: 'עברית‎',
+						hr: 'Hrvatski',
+						hu: 'magyar',
+						id: 'Bahasa Indonesia',
+						it: 'Italiano',
+						jp: '日本語',
+						ko: '한국어',
+						nl: 'Nederlands',
+						no: 'norsk',
+						pl: 'język polski',
+						pt_BR: 'Português',
+						ro: 'Română',
+						ru: 'русский язык',
+						sk: 'slovenský jazyk',
+						sl: 'slovenščina',
+						sr: 'српски језик',
+						sv: 'svenska',
+						tr: 'Türkçe',
+						ug_CN: 'ئۇيغۇرچە',
+						uk: 'Українська мова',
+						vi: 'Tiếng Việt',
+						zh_CN: '简体中文',
+						zh_TW: '正體中文'
+					},
+					forms = { language: '', clearBrowserData: '' },
+					dls = $();
+				
+				$.each(langs, function(lang, name) {
+					optTags.push('<option value="'+lang+'">'+name+'</option>');
+				});
+				forms.language = langSel.append(optTags.join(''));
+				
+				forms.clearBrowserData = $('<button/>').text(fm.i18n('reset')).button().on('click', function(e) {
+					e.preventDefault();
+					fm.storage();
+					$('#'+fm.id).elfinder('reload');
+				});
+				
+				$.each(forms, function(n, f) {
+					dls = dls.add($('<dt>'+fm.i18n(n)+'</dt>')).add($('<dd/>').append(f));
+				});
+				
+				tab.append($('<dl/>').append(dls));
+				langSel.val(fm.lang);
+			},
+			parts = self.options.view || ['about', 'shortcuts', 'help', 'preference', 'debug'],
 			tabDebug, i, helpSource;
 		
 		// debug tab require jQueryUI Tabs Widget
@@ -181,6 +256,7 @@
 			helpSource = fm.baseUrl+'js/i18n/help/%s.html';
 			help();
 		}
+		$.inArray('preference', parts) !== -1 && preference();
 		$.inArray('debug', parts) !== -1 && debug();
 		
 		html.push('</div>');
@@ -204,6 +280,9 @@
 				
 			})
 			.filter(':first').click();
+		
+		// preference
+		usePref && setupPref();
 		
 		// debug
 		if (useDebug) {

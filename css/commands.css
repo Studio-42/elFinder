@@ -432,6 +432,25 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
   /*font-size: 1.2em;*/
 }
 
+.elfinder-help-preference dl {
+	width: 100%;
+}
+.elfinder-help-preference dt {
+	display: block;
+	width: 200px;
+	clear: left;
+	float: left;
+	max-width: 50%;
+	margin-bottom: 1em;
+}
+.elfinder-rtl .elfinder-help-preference dt {
+	clear: right;
+	float: right;
+}
+.elfinder-help-preference dd {
+	margin-bottom: 1em;
+}
+
 /********************** COMMAND "INFO" ****************************/
 .elfinder-info-title .elfinder-cwd-bgurl:after {
 	left: -28px;
