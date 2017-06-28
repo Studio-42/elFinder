@@ -65,6 +65,7 @@ var dirmode = 0755,
 				path.join(src, 'README.md'),
 				path.join(src, 'composer.json'),
 				path.join(src, 'elfinder.html'),
+				path.join(src, 'elfinder.legacy.html'),
 				path.join(src, 'main.default.js')
 			]
 			.concat(grep(path.join(src, 'js', 'extras'), '\\.js$'))
@@ -192,8 +193,8 @@ file({'css/elfinder.full.css': files['elfinder.full.css']}, function(){
 desc('optimize elfinder.min.css');
 file({'css/elfinder.min.css': ['css/elfinder.full.css']}, function () {
 	console.log('optimize elfinder.min.css');
-	var cssOptimized = csso.minify(fs.readFileSync('css/elfinder.full.css').toString()).css;
-	fs.writeFileSync(this.name, cssOptimized);
+	var cssOptimized = csso.minify(fs.readFileSync('css/elfinder.full.css').toString());
+	fs.writeFileSync(this.name, cssOptimized.css || cssOptimized);
 });
 
 // JS
