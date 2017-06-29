@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.25 (2.1-src Nightly: 3f0f2ac) (2017-06-29)
+ * Version 2.1.25 (2.1-src Nightly: 93379e0) (2017-06-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -313,14 +313,18 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-help { margin-bottom:.5em; }
 
 /* fix tabs */
-.elfinder-help .ui-tabs-panel { padding:.5em; }
+.elfinder-help .ui-tabs-panel {
+	padding:.5em;
+	overflow: auto;
+	padding: 10px;
+}
 .elfinder-dialog .ui-tabs .ui-tabs-nav li a { padding:.2em 1em;}
 
 .elfinder-help-shortcuts {
-	height:300px;
-	padding:1em;
-	margin:.5em 0;
-	overflow:auto;
+	height: auto;
+	padding: 10px;
+	margin: 0;
+	box-sizing: border-box;
 }
 .elfinder-help-shortcut { white-space:nowrap; clear:both;}
 
@@ -393,7 +397,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 }
 
 .elfinder-help-debug {
-	height:auto;
+	height:100%;
 	padding:0;
 	margin:0;
 	overflow:none;
@@ -401,7 +405,6 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 }
 
 .elfinder-help-debug .ui-tabs-panel {
-	height:310px;
 	padding: 0;
 	margin: 0;
 	overflow:auto;
@@ -440,6 +443,13 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 
 .elfinder-help-debug dd span {
   /*font-size: 1.2em;*/
+}
+
+.elfinder-help-preference {
+	padding: 10px;
+	height: auto;
+	min-height: 100%;
+	box-sizing: border-box;
 }
 
 .elfinder-help-preference dl {
