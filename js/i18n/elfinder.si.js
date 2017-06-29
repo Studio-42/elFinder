@@ -1,67 +1,75 @@
 /**
- * English translation
+ * Sinhala translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2017-06-28
+ * @author CodeLyokoXtEAM <XcodeLyokoTEAM@gmail.com>
+ * @version 2017-06-29
  */
-// elfinder.en.js is integrated into elfinder.(full|min).js by jake build
-if (typeof elFinder === 'function' && elFinder.prototype.i18) {
-	elFinder.prototype.i18.en = {
-		translator : 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;',
-		language   : 'English',
+(function(root, factory) {
+	if (typeof define === 'function' && define.amd) {
+		define(['elfinder'], factory);
+	} else if (typeof exports !== 'undefined') {
+		module.exports = factory(require('elfinder'));
+	} else {
+		factory(root.elFinder);
+	}
+}(this, function(elFinder) {
+	elFinder.prototype.i18.si = {
+		translator : 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;, CodeLyokoXtEAM &lt;XcodeLyokoTEAM@gmail.com&gt;',
+		language   : 'Sinhala',
 		direction  : 'ltr',
-		dateFormat : 'M d, Y h:i A', // Mar 13, 2012 05:27 PM
-		fancyDateFormat : '$1 h:i A', // will produce smth like: Today 12:25 PM,
-		nonameDateFormat : 'ymd-His', // to apply if upload file is noname: 120513172700
+		dateFormat : 'Y.m.d h:i A', // Mar 13, 2012 05:27 PM
+		fancyDateFormat : '$1 h:i A', // will produce smth like: Today 12:25 PM
+		nonameDateFormat : 'Ymd-His', // to apply if upload file is noname: 120513172700
 		messages   : {
 
 			/********************************** errors **********************************/
-			'error'                : 'Error',
-			'errUnknown'           : 'Unknown error.',
-			'errUnknownCmd'        : 'Unknown command.',
-			'errJqui'              : 'Invalid jQuery UI configuration. Selectable, draggable and droppable components must be included.',
-			'errNode'              : 'elFinder requires DOM Element to be created.',
-			'errURL'               : 'Invalid elFinder configuration! URL option is not set.',
-			'errAccess'            : 'Access denied.',
-			'errConnect'           : 'Unable to connect to backend.',
-			'errAbort'             : 'Connection aborted.',
-			'errTimeout'           : 'Connection timeout.',
-			'errNotFound'          : 'Backend not found.',
-			'errResponse'          : 'Invalid backend response.',
-			'errConf'              : 'Invalid backend configuration.',
-			'errJSON'              : 'PHP JSON module not installed.',
-			'errNoVolumes'         : 'Readable volumes not available.',
-			'errCmdParams'         : 'Invalid parameters for command "$1".',
-			'errDataNotJSON'       : 'Data is not JSON.',
-			'errDataEmpty'         : 'Data is empty.',
-			'errCmdReq'            : 'Backend request requires command name.',
-			'errOpen'              : 'Unable to open "$1".',
-			'errNotFolder'         : 'Object is not a folder.',
-			'errNotFile'           : 'Object is not a file.',
-			'errRead'              : 'Unable to read "$1".',
-			'errWrite'             : 'Unable to write into "$1".',
-			'errPerm'              : 'Permission denied.',
-			'errLocked'            : '"$1" is locked and can not be renamed, moved or removed.',
-			'errExists'            : 'File named "$1" already exists.',
-			'errInvName'           : 'Invalid file name.',
-			'errInvDirname'        : 'Invalid folder name.',  // from v2.1.24 added 12.4.2017
-			'errFolderNotFound'    : 'Folder not found.',
-			'errFileNotFound'      : 'File not found.',
-			'errTrgFolderNotFound' : 'Target folder "$1" not found.',
-			'errPopup'             : 'Browser prevented opening popup window. To open file enable it in browser options.',
-			'errMkdir'             : 'Unable to create folder "$1".',
-			'errMkfile'            : 'Unable to create file "$1".',
-			'errRename'            : 'Unable to rename "$1".',
-			'errCopyFrom'          : 'Copying files from volume "$1" not allowed.',
-			'errCopyTo'            : 'Copying files to volume "$1" not allowed.',
-			'errMkOutLink'         : 'Unable to create a link to outside the volume root.', // from v2.1 added 03.10.2015
-			'errUpload'            : 'Upload error.',  // old name - errUploadCommon
-			'errUploadFile'        : 'Unable to upload "$1".', // old name - errUpload
-			'errUploadNoFiles'     : 'No files found for upload.',
-			'errUploadTotalSize'   : 'Data exceeds the maximum allowed size.', // old name - errMaxSize
-			'errUploadFileSize'    : 'File exceeds maximum allowed size.', //  old name - errFileMaxSize
-			'errUploadMime'        : 'File type not allowed.',
-			'errUploadTransfer'    : '"$1" transfer error.',
-			'errUploadTemp'        : 'Unable to make temporary file for upload.', // from v2.1 added 26.09.2015
+			'error'                : 'දෝෂයකි.',
+			'errUnknown'           : 'නොදන්නා දෝෂයකි.',
+			'errUnknownCmd'        : 'නොදන්නා විධානයකි.',
+			'errJqui'              : 'වලංගු නොවන jQuery UI සැකැස්මකි. තේරිය හැකි, ඇදගෙන යාම සහ ඇද දැමිය හැකි කොටස් ඇතුළත් කළ යුතුය.',
+			'errNode'              : 'ElFinder විසින් DOM Element නිර්මාණය කිරීමට අවශ්‍යව අැත.',
+			'errURL'               : 'වලංගු නොවන elFinder සැකැස්මකි! URL විකල්පය සැකසා නැත.',
+			'errAccess'            : 'භාවිතය අත්හිටුවා ඇත.',
+			'errConnect'           : 'Backend වෙත සම්බන්ධ වීමට නොහැකිය.',
+			'errAbort'             : 'සම්බන්ධතාවය වසාදමා ඇත.',
+			'errTimeout'           : 'සම්බන්ධතා කල් ඉකුත්වී ඇත.',
+			'errNotFound'          : 'Backend සොයාගත නොහැකි විය.',
+			'errResponse'          : 'වලංගු නොවන Backend ප්‍රතිචාරය.',
+			'errConf'              : 'වලංගු නොවන Backend සැකැස්මකි.',
+			'errJSON'              : 'PHP JSON මොඩියුලය ස්ථාපනය කර නැත.',
+			'errNoVolumes'         : ' කියවිය හැකි volumes නොමැත.',
+			'errCmdParams'         : '"$1" නම් විධානය වලංගු නොවන පරාමිතියකි.',
+			'errDataNotJSON'       : 'JSON දත්ත නොවේ.',
+			'errDataEmpty'         : 'හිස් දත්තයකි.',
+			'errCmdReq'            : 'Backend සඳහා ඉල්ලන ලද විධානයේ නම අවශ්‍ය වේ.',
+			'errOpen'              : '"$1" විවෘත කළ නොහැක.',
+			'errNotFolder'         : 'Object ෆොල්ඩරයක් නොවේ.',
+			'errNotFile'           : 'Object ගොනුවක් නොවේ.',
+			'errRead'              : '"$1" කියවීමට නොහැක.',
+			'errWrite'             : '"$1" තුල ලිවීමට නොහැකිය.',
+			'errPerm'              : 'අවසරය නොමැත.',
+			'errLocked'            : '"$1" අගුළු දමා ඇති අතර එය නැවත නම් කිරීම, සම්පූර්ණයෙන් විස්ථාපනය කිරීම හෝ ඉවත් කිරීම කළ නොහැක.',
+			'errExists'            : '"$1" නම් ගොනුව දැනටමත් පවතී.',
+			'errInvName'           : 'ගොනු නම වලංගු නොවේ.',
+			'errInvDirname'        : 'ෆෝල්ඩර් නම වලංගු නොවේ.',  // from v2.1.24 added 12.4.2017
+			'errFolderNotFound'    : 'ෆෝල්ඩරය හමු නොවිණි.',
+			'errFileNotFound'      : 'ගොනුව හමු නොවිණි.',
+			'errTrgFolderNotFound' : 'ඉලක්කගත ෆෝල්ඩරය "$1" හමු නොවිනි.',
+			'errPopup'             : 'බ්‍රවුසරය උත්පතන කවුළුව විවෘත කිරීම වළක්වයි. ගොනු විවෘත කිරීම සඳහා බ්‍රවුසරයේ විකල්ප තුළ එය සක්රිය කරන්න.',
+			'errMkdir'             : '"$1" ෆෝල්ඩරය සෑදීමට නොහැකිය.',
+			'errMkfile'            : '"$1" ගොනුව සෑදිය නොහැක..',
+			'errRename'            : '"$1" නැවත නම් කිරීමට නොහැකි විය.',
+			'errCopyFrom'          : '"$1" volume යෙන් ගොනු පිටපත් කිරීම තහනම්ය.',
+			'errCopyTo'            : '"$1" volume යට ගොනු පිටපත් කිරීම තහනම්ය.',
+			'errMkOutLink'         : 'volume root යෙන් පිටත link නිර්මාණය කිරීමට නොහැකි විය.', // from v2.1 added 03.10.2015
+			'errUpload'            : 'Upload කිරීමේ දෝෂයකි.',  // old name - errUploadCommon
+			'errUploadFile'        : '"$1" Upload කිරීමට නොහැකි විය.', // old name - errUpload
+			'errUploadNoFiles'     : 'Upload කිරීම සඳහා ගොනු කිසිවක් සොයාගත නොහැකි විය.',
+			'errUploadTotalSize'   : 'දත්ත අවසර දී අැති උපරිම ප්‍රමාණය ඉක්මවා ඇත.', // old name - errMaxSize
+			'errUploadFileSize'    : 'ගොනු අවසර දී අැති උපරිම ප්‍රමාණය ඉක්මවා ඇත.', //  old name - errFileMaxSize
+			'errUploadMime'        : 'ගොනු වර්ගයට අවසර නැත.',
+			'errUploadTransfer'    : '"$1" ව මාරු කිරීමේ දෝෂයකි.',
+			'errUploadTemp'        : 'upload කිරීම සඳහා තාවකාලික ගොනුව සෑදිය නොහැක.', // from v2.1 added 26.09.2015
 			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.', // new
 			'errReplace'           : 'Unable to replace "$1".',
 			'errSave'              : 'Unable to save "$1".',
@@ -496,5 +504,5 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'kindVideoOGG'    : 'Ogg movie'
 		}
 	};
-}
+}));
 
