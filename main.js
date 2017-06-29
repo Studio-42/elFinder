@@ -98,11 +98,7 @@
 					}).bind('destroy', function() {
 						document.title = title;
 					});
-				}).elfinder('instance')
-					.one('cssloaded', function(e, fm) {
-						fm.getUI().css('background-image', 'none');
-					}
-				);
+				});
 			});
 		},
 		
