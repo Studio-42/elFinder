@@ -37,13 +37,19 @@ $.fn.elfinderworkzone = function(fm) {
 					wz.height(height);
 					fm.trigger('wzresize');
 				}
+			},
+			cssloaded = function() {
+				wdelta = wz.outerHeight(true) - wz.height();
+				fitsize();
 			};
 			
 		parent.add(window).on('resize.' + fm.namespace, fitsize);
-		fm.one('cssloaded', function() {
-			wdelta = wz.outerHeight(true) - wz.height();
-			fitsize();
-		}).bind('uiresize', fitsize);
+		if (fm.cssloaded) {
+			cssloaded();
+		} else {
+			fm.one('cssloaded', cssloaded);
+		}
+		fm.bind('uiresize', fitsize);
 	});
 	return this;
 };
