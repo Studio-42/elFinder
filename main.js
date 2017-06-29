@@ -43,11 +43,6 @@
 					googleDocsMimes : ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
 				}
 			},
-			handlers : {
-				init : function(e, fm) {
-					$.extend(fm.messages, i18nFolderMsgs.en, i18nFolderMsgs[fm.lang] || {});
-				}
-			},
 			lang: lang
 		},
 		
@@ -72,10 +67,42 @@
 				i18nFolderMsgs = i18nfmsg;
 				
 				// Make elFinder (REQUIRED)
-				$('#elfinder').elfinder(opts).elfinder('instance')
+				$('#elfinder').elfinder(opts, function(fm, extraObj) {
+					// `init` event callback function
+					fm.bind('init', function() {
+						$.extend(fm.messages, i18nFolderMsgs.en, i18nFolderMsgs[fm.lang] || {});
+						// Optional for Japanese decoder "extras/encoding-japanese.min"
+						delete fm.options.rawStringDecoder;
+						if (fm.lang === 'jp') {
+							require(
+								[ 'extras/encoding-japanese.min' ],
+								function(Encoding) {
+									if (Encoding.convert) {
+										fm.options.rawStringDecoder = function(s) {
+											return Encoding.convert(s,{to:'UNICODE',type:'string'});
+										};
+									}
+								}
+							);
+						}
+					});
+					// for example set document.title dynamically.
+					var title = document.title;
+					fm.bind('open', function() {
+						var path = '',
+							cwd  = fm.cwd();
+						if (cwd) {
+							path = fm.path(cwd.hash) || null;
+						}
+						document.title = path? path + ':' + title : title;
+					}).bind('destroy', function() {
+						document.title = title;
+					});
+				}).elfinder('instance')
 					.one('cssloaded', function(e, fm) {
 						fm.getUI().css('background-image', 'none');
-					});;
+					}
+				);
 			});
 		},
 		
@@ -87,9 +114,7 @@
 					, 'extras/editors.default'
 					, 'i18nfmsg'
 					, 'extOpts'
-					, (lang !== 'en')? 'elfinder.lang' : null    // load detected language
 					, 'extras/quicklook.googledocs'                    // optional GoogleDocs preview
-					, (lang === 'jp')? 'extras/encoding-japanese.min' : null // optional Japanese decoder for archive preview
 					, 'elfinderBasicAuth'
 					, xdr
 				],
@@ -120,10 +145,6 @@
 			'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(ie8? '1.12.4' : jqver)+'/jquery.min',
 			'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/jquery-ui.min',
 			'elfinder' : 'elfinder.min',
-			'elfinder.lang': [
-				'i18n/elfinder.'+lang,
-				'i18n/elfinder.fallback'
-			],
 			'i18nfmsg' : '../../i18nFolderMsgs',
 			'jquery.xdr': '../xdr/jquery.xdr'
 		},
