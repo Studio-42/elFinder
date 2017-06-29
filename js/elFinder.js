@@ -4,7 +4,7 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-var elFinder = function(node, opts) {
+var elFinder = function(node, opts, bootCallback) {
 	//this.time('load');
 	
 	var self = this,
@@ -29,6 +29,13 @@ var elFinder = function(node, opts) {
 		 * @type jQuery
 		 **/
 		node = $(node),
+		
+		/**
+		 * Object of events originally registered in this node
+		 * 
+		 * @type Object
+		 */
+		prevEvents = $.extend(true, {}, $._data(node.get(0), 'events')),
 		
 		/**
 		 * Store node contents.
@@ -588,6 +595,18 @@ var elFinder = function(node, opts) {
 		})(),
 		bootUp;
 
+	// check opt.bootCallback
+	if (opts.bootCallback && typeof opts.bootCallback === 'function') {
+		(function() {
+			var func = bootCallback,
+				opFunc = opts.bootCallback;
+			bootCallback = function(fm, extraObj) {
+				func && typeof func === 'function' && func.call(this, fm, extraObj);
+				opFunc.call(this, fm, extraObj);
+			}
+		})();
+	}
+	delete opts.bootCallback;
 
 	/**
 	 * Protocol version
@@ -623,6 +642,20 @@ var elFinder = function(node, opts) {
 	 * @type String
 	 */
 	this.baseUrl = '';
+	
+	/**
+	 * Is elFinder CSS loaded
+	 * 
+	 * @type Boolean
+	 */
+	this.cssloaded = false;
+	
+	/**
+	 * Callback function at boot up that option specified at elFinder starting
+	 * 
+	 * @type Function
+	 */
+	this.bootCallback;
 	
 	/**
 	 * Configuration options
@@ -666,6 +699,7 @@ var elFinder = function(node, opts) {
 					if (--cnt < 0 || node.css('visibility') !== 'hidden') {
 						clearInterval(fi);
 						hide.remove();
+						fm.cssloaded = true;
 						fm.trigger('cssloaded');
 					}
 				}, 10);
@@ -2800,6 +2834,12 @@ var elFinder = function(node, opts) {
 				.attr('class', prevContent.attr('class'))
 				.attr('style', prevContent.attr('style'));
 			delete node[0].elfinder;
+			// restore kept events
+			$.each(prevEvents, function(n, arr) {
+				$.each(arr, function(i, o) {
+					node.on(o.type + (o.namespace? '.'+o.namespace : ''), o.selector, o.handler);
+				});
+			});
 		}
 	};
 	
@@ -3702,7 +3742,6 @@ var elFinder = function(node, opts) {
 	// store instance in node
 	node[0].elfinder = this;
 
-	
 	// auto load language file
 	dfrdsBeforeBootup.push((function() {
 		var lang   = self.lang,
@@ -4297,6 +4336,7 @@ var elFinder = function(node, opts) {
 
 		// trigger event cssloaded if cddAutoLoad disabled
 		if (! self.options.cssAutoLoad) {
+			self.cssloaded = true;
 			self.trigger('cssloaded');
 		}
 
@@ -4379,8 +4419,16 @@ var elFinder = function(node, opts) {
 		// End of bootUp()
 	};
 	
+	// call bootCallback function with elFinder instance, extraObject - { dfrdsBeforeBootup: dfrdsBeforeBootup }
+	if (bootCallback && typeof bootCallback === 'function') {
+		self.bootCallback = bootCallback;
+		bootCallback.call(node.get(0), self, { dfrdsBeforeBootup: dfrdsBeforeBootup });
+	}
+	
 	// call dfrdsBeforeBootup functions then boot up elFinder
-	$.when.apply(null, dfrdsBeforeBootup).done(bootUp).fail(function(error) {
+	$.when.apply(null, dfrdsBeforeBootup).done(function() {
+		bootUp();
+	}).fail(function(error) {
 		self.error(error);
 	});
 };

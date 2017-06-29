@@ -31,6 +31,25 @@
 							googleDocsMimes : ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
 						}
 					}
+					// bootCalback calls at before elFinder boot up 
+					,bootCallback : function(fm, extraObj) {
+						/* any bind functions etc. */
+						fm.bind('init', function() {
+							// any your code
+						});
+						// for example set document.title dynamically.
+						var title = document.title;
+						fm.bind('open', function() {
+							var path = '',
+								cwd  = fm.cwd();
+							if (cwd) {
+								path = fm.path(cwd.hash) || null;
+							}
+							document.title = path? path + ':' + title : title;
+						}).bind('destroy', function() {
+							document.title = title;
+						});
+					}
 				},
 				managers : {
 					// 'DOM Element ID': { /* elFinder options of this DOM Element */ }
