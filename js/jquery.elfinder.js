@@ -241,12 +241,13 @@ $.fn.elfinder = function(o, o2) {
 	
 	return this.each(function() {
 		
-		var cmd = typeof(o) == 'string' ? o : '',
+		var cmd          = typeof o  === 'string'  ? o  : '',
+			bootCallback = typeof o2 === 'function'? o2 : void(0),
 			opts;
 		
 		if (!this.elfinder) {
 			if ($.isPlainObject(o)) {
-				new elFinder(this, o);
+				new elFinder(this, o, bootCallback);
 			}
 		} else {
 			switch(cmd) {
@@ -268,8 +269,9 @@ $.fn.elfinder = function(o, o2) {
 				case 'restart':
 					if (this.elfinder) {
 						opts = this.elfinder.options;
+						bootCallback = this.elfinder.bootCallback;
 						this.elfinder.destroy();
-						new elFinder(this, $.extend(true, opts, $.isPlainObject(o2)? o2 : {}));
+						new elFinder(this, $.extend(true, opts, $.isPlainObject(o2)? o2 : {}), bootCallback);
 					}
 					break;
 			}

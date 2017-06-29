@@ -456,6 +456,20 @@ elFinder.prototype._options = {
 	},
 	
 	/**
+	 * Callback for prepare boot up
+	 * 
+	 * - The this object in the function is an elFinder node
+	 * - The first parameter is elFinder Instance
+	 * - The second parameter is an object of other parameters
+	 *   For now it can use `dfrdsBeforeBootup` Array
+	 * 
+	 * @type Function
+	 * @default null
+	 * @return void
+	 */
+	bootCallback : null,
+	
+	/**
 	 * Callback for "getfile" commands.
 	 * Required to use elFinder with WYSIWYG editors etc..
 	 *

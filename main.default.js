@@ -35,7 +35,7 @@
 			elFinder.prototype.loadCss('//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/themes/smoothness/jquery-ui.css');
 			
 			$(function() {
-				var optEeditors = {
+				var optEditors = {
 						commandsOptions: {
 							edit: {
 								editors: Array.isArray(editors)? editors : []
@@ -43,25 +43,42 @@
 						}
 					},
 					opts = {};
-				// Optional for Japanese decoder "extras/encoding-japanese.min"
-				if (window.Encoding && Encoding.convert) {
-					elFinder.prototype._options.rawStringDecoder = function(s) {
-						return Encoding.convert(s,{to:'UNICODE',type:'string'});
-					};
-				}
 				
 				// Interpretation of "elFinderConfig"
 				if (config && config.managers) {
 					$.each(config.managers, function(id, mOpts) {
-						opts = Object.assign({}, config.defaultOpts || {});
+						opts = Object.assign(opts, config.defaultOpts || {});
 						// editors marges to opts.commandOptions.edit
 						try {
 							mOpts.commandsOptions.edit.editors = mOpts.commandsOptions.edit.editors.concat(editors || []);
 						} catch(e) {
-							Object.assign(mOpts, optEeditors);
+							Object.assign(mOpts, optEditors);
 						}
 						// Make elFinder
-						$('#' + id).elfinder($.extend(true, { lang: lang }, opts, mOpts || {}));
+						$('#' + id).elfinder(
+							// 1st Arg - options
+							$.extend(true, { lang: lang }, opts, mOpts || {}),
+							// 2nd Arg - before boot up function
+							function(fm, extraObj) {
+								// `init` event callback function
+								fm.bind('init', function() {
+									// Optional for Japanese decoder "extras/encoding-japanese.min"
+									delete fm.options.rawStringDecoder;
+									if (fm.lang === 'jp') {
+										require(
+											[ 'extras/encoding-japanese.min' ],
+											function(Encoding) {
+												if (Encoding.convert) {
+													fm.options.rawStringDecoder = function(s) {
+														return Encoding.convert(s,{to:'UNICODE',type:'string'});
+													};
+												}
+											}
+										);
+									}
+								});
+							}
+						);
 					});
 				} else {
 					alert('"elFinderConfig" object is wrong.');
@@ -77,7 +94,6 @@
 					, 'extras/editors.default'                   // load text, image editors
 					, 'elFinderConfig'
 				//	, 'extras/quicklook.googledocs'              // optional preview for GoogleApps contents on the GoogleDrive volume
-				//	, (lang === 'jp')? 'extras/encoding-japanese.min' : null // optional Japanese decoder for archive preview
 				],
 				start,
 				function(error) {
