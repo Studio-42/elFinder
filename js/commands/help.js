@@ -209,6 +209,7 @@
 						pt_BR: 'Português',
 						ro: 'Română',
 						ru: 'русский язык',
+						si: 'සිංහල',
 						sk: 'slovenský jazyk',
 						sl: 'slovenščina',
 						sr: 'српски језик',
