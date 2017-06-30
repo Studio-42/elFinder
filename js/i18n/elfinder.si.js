@@ -70,34 +70,34 @@
 			'errUploadMime'        : 'ගොනු වර්ගයට අවසර නැත.',
 			'errUploadTransfer'    : '"$1" ව මාරු කිරීමේ දෝෂයකි.',
 			'errUploadTemp'        : 'upload කිරීම සඳහා තාවකාලික ගොනුව සෑදිය නොහැක.', // from v2.1 added 26.09.2015
-			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.', // new
-			'errReplace'           : 'Unable to replace "$1".',
-			'errSave'              : 'Unable to save "$1".',
-			'errCopy'              : 'Unable to copy "$1".',
-			'errMove'              : 'Unable to move "$1".',
-			'errCopyInItself'      : 'Unable to copy "$1" into itself.',
-			'errRm'                : 'Unable to remove "$1".',
-			'errTrash'             : 'Unable into trash.', // from v2.1.24 added 30.4.2017
-			'errRmSrc'             : 'Unable remove source file(s).',
-			'errExtract'           : 'Unable to extract files from "$1".',
-			'errArchive'           : 'Unable to create archive.',
-			'errArcType'           : 'Unsupported archive type.',
-			'errNoArchive'         : 'File is not archive or has unsupported archive type.',
-			'errCmdNoSupport'      : 'Backend does not support this command.',
-			'errReplByChild'       : 'The folder "$1" can\'t be replaced by an item it contains.',
-			'errArcSymlinks'       : 'For security reason denied to unpack archives contains symlinks or files with not allowed names.', // edited 24.06.2012
-			'errArcMaxSize'        : 'Archive files exceeds maximum allowed size.',
-			'errResize'            : 'Unable to resize "$1".',
-			'errResizeDegree'      : 'Invalid rotate degree.',  // added 7.3.2013
-			'errResizeRotate'      : 'Unable to rotate image.',  // added 7.3.2013
-			'errResizeSize'        : 'Invalid image size.',  // added 7.3.2013
-			'errResizeNoChange'    : 'Image size not changed.',  // added 7.3.2013
-			'errUsupportType'      : 'Unsupported file type.',
-			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',  // added 9.11.2011
-			'errNetMount'          : 'Unable to mount "$1".', // added 17.04.2012
-			'errNetMountNoDriver'  : 'Unsupported protocol.',     // added 17.04.2012
-			'errNetMountFailed'    : 'Mount failed.',         // added 17.04.2012
-			'errNetMountHostReq'   : 'Host required.', // added 18.04.2012
+			'errNotReplace'        : '"$1" දැනටමත් මෙම ස්ථානයේ පවතී, වෙනත් වර්ගයකිනි ප්‍රතිස්ථාපනය කළ නොහැක.', // new
+			'errReplace'           : '"$1" ප්‍රතිස්ථාපනය කළ නොහැක.',
+			'errSave'              : '"$1" සුරැකීමට නොහැක.',
+			'errCopy'              : '"$1" පිටපත් කිරීමට නොහැක.',
+			'errMove'              : '"$1" සම්පූර්ණයෙන් විස්ථාපනය කිරීමට නොහැක.',
+			'errCopyInItself'      : '"$1" තුලට පිටපත් කිරීමට නොහැක.',
+			'errRm'                : '"$1" ඉවත් කිරීමට නොහැකි විය.',
+			'errTrash'             : 'කුණු-කූඩය තුලට දැමීමට නොහැක.', // from v2.1.24 added 30.4.2017
+			'errRmSrc'             : 'ප්‍රභව ගොනු(ව) ඉවත් කළ නොහැක.',
+			'errExtract'           : '"$1" වෙතින් ගොනු දිග හැරීමට නොහැක.',
+			'errArchive'           : 'සංරක්ෂිතය සෑදීමට නොහැකි විය.',
+			'errArcType'           : 'නොගැලපෙන සංරක්ෂණ වර්ගයකි.',
+			'errNoArchive'         : 'ගොනුව නොගැලපෙන සංරක්ෂණ වර්ගයක් හෝ සංරක්ෂිතයක් නොවේ.',
+			'errCmdNoSupport'      : 'Backend මෙම විධානය නොදනී.',
+			'errReplByChild'       : '"$1" ෆෝල්ඩරය එහිම අඩංගු අයිතමයක් මගින් ප්‍රතිස්ථාපනය කළ නොහැක.',
+			'errArcSymlinks'       : 'ආරක්ෂිත හේතුව නිසා අනුමත නොකෙරෙන සබැඳි සම්බන්දතා හෝ ලිපිගොනු නම් අඩංගු බැවින් සංරක්ෂිතය දිග හැරීම කිරීමට ඉඩ නොදෙන.', // edited 24.06.2012
+			'errArcMaxSize'        : 'සංරක්ෂිතය ලිපිගොනු උපරිම ප්‍රමාණය ඉක්මවා ඇත.',
+			'errResize'            : 'ප්‍රතිප්‍රමාණය කිරීමට නොහැකි විය.',
+			'errResizeDegree'      : 'වලංගු නොවන භ්‍රමණ කෝණයකි.',  // added 7.3.2013
+			'errResizeRotate'      : 'රූපය භ්‍රමණය කිරීමට නොහැකි විය.',  // added 7.3.2013
+			'errResizeSize'        : 'රූපයේ ප්‍රමාණය වලංගු නොවේ.',  // added 7.3.2013
+			'errResizeNoChange'    : 'රූපයේ ප්‍රමාණය වෙනස් නොවුණි.',  // added 7.3.2013
+			'errUsupportType'      : 'නොගැලපෙන ගොනු වර්ගයකි.',
+			'errNotUTF8Content'    : '"$1" ගොනුව UTF-8 හි නොමැති අතර සංස්කරණය කළ නොහැක.',  // added 9.11.2011
+			'errNetMount'          : '"$1" සවි කිරීමට(mount කිරීමට) නොහැක.', // added 17.04.2012
+			'errNetMountNoDriver'  : 'protocol නොගැලපේ.',     // added 17.04.2012
+			'errNetMountFailed'    : 'සවි කිරීම(mount කිරීම) අසාර්ථක විය.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'ධාරකය(Host) අවශ්‍ය වේ.', // added 18.04.2012
 			'errSessionExpires'    : 'Your session has expired due to inactivity.',
 			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
 			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
