@@ -33,7 +33,7 @@
 			'errConnect'           : 'Backend වෙත සම්බන්ධ වීමට නොහැකිය.',
 			'errAbort'             : 'සම්බන්ධතාවය වසාදමා ඇත.',
 			'errTimeout'           : 'සම්බන්ධතා කල් ඉකුත්වී ඇත.',
-			'errNotFound'          : 'Backend සොයාගත නොහැකි විය.',
+			'errNotFound'          : 'පසුබිම(Backend) සොයාගත නොහැකි විය.',
 			'errResponse'          : 'වලංගු නොවන පසුබිම(Backend) ප්‍රතිචාරය.',
 			'errConf'              : 'වලංගු නොවන Backend සැකැස්මකි.',
 			'errJSON'              : 'PHP JSON මොඩියුලය ස්ථාපනය කර නැත.',
@@ -57,11 +57,11 @@
 			'errTrgFolderNotFound' : 'ඉලක්කගත ෆෝල්ඩරය "$1" හමු නොවිනි.',
 			'errPopup'             : 'බ්‍රවුසරය උත්පතන කවුළුව විවෘත කිරීම වළක්වයි. ගොනු විවෘත කිරීම සඳහා බ්‍රවුසරයේ විකල්ප තුළ එය සක්රිය කරන්න.',
 			'errMkdir'             : '"$1" ෆෝල්ඩරය සෑදීමට නොහැකිය.',
-			'errMkfile'            : '"$1" ගොනුව සෑදිය නොහැක..',
+			'errMkfile'            : '"$1" ගොනුව සෑදිය නොහැක.',
 			'errRename'            : '"$1" නැවත නම් කිරීමට නොහැකි විය.',
 			'errCopyFrom'          : '"$1" volume යෙන් ගොනු පිටපත් කිරීම තහනම්ය.',
 			'errCopyTo'            : '"$1" volume යට ගොනු පිටපත් කිරීම තහනම්ය.',
-			'errMkOutLink'         : 'volume root යෙන් පිටත link නිර්මාණය කිරීමට නොහැකි විය.', // from v2.1 added 03.10.2015
+			'errMkOutLink'         : 'volume root යෙන් පිටතට සබැඳිය(link) නිර්මාණය කිරීමට නොහැකි විය.', // from v2.1 added 03.10.2015
 			'errUpload'            : 'උඩුගත(upload) කිරීමේ දෝෂයකි.',  // old name - errUploadCommon
 			'errUploadFile'        : '"$1" උඩුගත(upload) කිරීමට නොහැකි විය.', // old name - errUpload
 			'errUploadNoFiles'     : 'උඩුගත(upload) කිරීම සඳහා ගොනු කිසිවක් සොයාගත නොහැකි විය.',
@@ -117,45 +117,45 @@
 			'errEmpty'             : '"$1" ෆෝල්ඩරය හිස් කිරීමට නොහැක.', // from v2.1.25 added 22.6.2017
 
 			/******************************* commands names ********************************/
-			'cmdarchive'   : 'Create archive',
-			'cmdback'      : 'Back',
-			'cmdcopy'      : 'Copy',
-			'cmdcut'       : 'Cut',
-			'cmddownload'  : 'Download',
-			'cmdduplicate' : 'Duplicate',
-			'cmdedit'      : 'Edit file',
-			'cmdextract'   : 'Extract files from archive',
-			'cmdforward'   : 'Forward',
-			'cmdgetfile'   : 'Select files',
-			'cmdhelp'      : 'About this software',
+			'cmdarchive'   : 'සංරක්ෂිතය(archive) නිර්මාණය කරන්න',
+			'cmdback'      : 'ආපසු',
+			'cmdcopy'      : 'පිටපත් කරන්න',
+			'cmdcut'       : 'මුළුමනින්ම පිටපත් කරන්න(Cut)',
+			'cmddownload'  : 'බාගත කිරන්න(Download)',
+			'cmdduplicate' : 'අනුපිටපත් කරන්න(Duplicate)',
+			'cmdedit'      : 'ගොනුව සංස්කරණය කරන්න',
+			'cmdextract'   : 'සංරක්ෂිතයේ ගොනු දිගහරින්න(Extract)',
+			'cmdforward'   : 'ඉදිරියට',
+			'cmdgetfile'   : 'ගොනු තෝරන්න',
+			'cmdhelp'      : 'මෙම මෘදුකාංගය ගැන',
 			'cmdhome'      : 'Home',
-			'cmdinfo'      : 'Get info',
-			'cmdmkdir'     : 'New folder',
-			'cmdmkdirin'   : 'Into New Folder', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'New text file',
-			'cmdopen'      : 'Open',
+			'cmdinfo'      : 'තොරතුරු ලබාගන්න',
+			'cmdmkdir'     : 'නව ෆෝල්ඩරය',
+			'cmdmkdirin'   : 'නව ෆෝල්ඩරයක් තුළට', // from v2.1.7 added 19.2.2016
+			'cmdmkfile'    : 'නව ලිඛිත(text) ගොනුවක්',
+			'cmdopen'      : 'විවෘත කරන්න',
 			'cmdpaste'     : 'Paste',
-			'cmdquicklook' : 'Preview',
+			'cmdquicklook' : 'පූර්ව දර්ශනයක්(Preview)',
 			'cmdreload'    : 'Reload',
-			'cmdrename'    : 'Rename',
-			'cmdrm'        : 'Delete',
-			'cmdtrash'     : 'Into trash', //from v2.1.24 added 29.4.2017
+			'cmdrename'    : 'නම වෙනස් කරන්න',
+			'cmdrm'        : 'මකන්න',
+			'cmdtrash'     : 'කුණු කූඩයට', //from v2.1.24 added 29.4.2017
 			'cmdrestore'   : 'Restore', //from v2.1.24 added 3.5.2017
-			'cmdsearch'    : 'Find files',
-			'cmdup'        : 'Go to parent directory',
-			'cmdupload'    : 'Upload files',
-			'cmdview'      : 'View',
-			'cmdresize'    : 'Resize & Rotate',
-			'cmdsort'      : 'Sort',
-			'cmdnetmount'  : 'Mount network volume', // added 18.04.2012
-			'cmdnetunmount': 'Unmount', // from v2.1 added 30.04.2012
+			'cmdsearch'    : 'ගොනු සොයන්න',
+			'cmdup'        : 'ප්‍ර්‍රධාන නාමාවලිය(parent directory) වෙත යන්න',
+			'cmdupload'    : 'ගොනු උඩුගත(Upload) කරන්න',
+			'cmdview'      : 'දර්ශනය(View)',
+			'cmdresize'    : 'ප්‍රථිප්‍රමාණය සහ භ්‍රමණය',
+			'cmdsort'      : 'වර්ගීකරණය කරන්න',
+			'cmdnetmount'  : 'ජාල එ්කකයක්(network volume) සවි(mount) කරන්න', // added 18.04.2012
+			'cmdnetunmount': 'ගලවන්න(Unmount)', // from v2.1 added 30.04.2012
 			'cmdplaces'    : 'To Places', // added 28.12.2014
 			'cmdchmod'     : 'Change mode', // from v2.1 added 20.6.2015
-			'cmdopendir'   : 'Open a folder', // from v2.1 added 13.1.2016
-			'cmdcolwidth'  : 'Reset column width', // from v2.1.13 added 12.06.2016
-			'cmdfullscreen': 'Full Screen', // from v2.1.15 added 03.08.2016
+			'cmdopendir'   : 'ෆෝල්ඩරය විවෘත කරන්න', // from v2.1 added 13.1.2016
+			'cmdcolwidth'  : 'නැවත තීරු පළල පිහිටුවන්න', // from v2.1.13 added 12.06.2016
+			'cmdfullscreen': 'පුළුල් තිරය', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : 'Move', // from v2.1.15 added 21.08.2016
-			'cmdempty'     : 'Empty the folder', // from v2.1.25 added 22.06.2017
+			'cmdempty'     : 'ෆෝල්ඩරය හිස් කරන්න', // from v2.1.25 added 22.06.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
