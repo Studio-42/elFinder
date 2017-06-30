@@ -1,153 +1,161 @@
 /**
- * English translation
+ * Sinhala translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @version 2017-06-28
+ * @author CodeLyokoXtEAM <XcodeLyokoTEAM@gmail.com>
+ * @version 2017-06-29
  */
-// elfinder.en.js is integrated into elfinder.(full|min).js by jake build
-if (typeof elFinder === 'function' && elFinder.prototype.i18) {
-	elFinder.prototype.i18.en = {
-		translator : 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;',
-		language   : 'English',
+(function(root, factory) {
+	if (typeof define === 'function' && define.amd) {
+		define(['elfinder'], factory);
+	} else if (typeof exports !== 'undefined') {
+		module.exports = factory(require('elfinder'));
+	} else {
+		factory(root.elFinder);
+	}
+}(this, function(elFinder) {
+	elFinder.prototype.i18.si = {
+		translator : 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;, CodeLyokoXtEAM &lt;XcodeLyokoTEAM@gmail.com&gt;',
+		language   : 'Sinhala',
 		direction  : 'ltr',
-		dateFormat : 'M d, Y h:i A', // Mar 13, 2012 05:27 PM
-		fancyDateFormat : '$1 h:i A', // will produce smth like: Today 12:25 PM,
-		nonameDateFormat : 'ymd-His', // to apply if upload file is noname: 120513172700
+		dateFormat : 'Y.m.d h:i A', // Mar 13, 2012 05:27 PM
+		fancyDateFormat : '$1 h:i A', // will produce smth like: Today 12:25 PM
+		nonameDateFormat : 'Ymd-His', // to apply if upload file is noname: 120513172700
 		messages   : {
 
 			/********************************** errors **********************************/
-			'error'                : 'Error',
-			'errUnknown'           : 'Unknown error.',
-			'errUnknownCmd'        : 'Unknown command.',
-			'errJqui'              : 'Invalid jQuery UI configuration. Selectable, draggable and droppable components must be included.',
-			'errNode'              : 'elFinder requires DOM Element to be created.',
-			'errURL'               : 'Invalid elFinder configuration! URL option is not set.',
-			'errAccess'            : 'Access denied.',
-			'errConnect'           : 'Unable to connect to backend.',
-			'errAbort'             : 'Connection aborted.',
-			'errTimeout'           : 'Connection timeout.',
-			'errNotFound'          : 'Backend not found.',
-			'errResponse'          : 'Invalid backend response.',
-			'errConf'              : 'Invalid backend configuration.',
-			'errJSON'              : 'PHP JSON module not installed.',
-			'errNoVolumes'         : 'Readable volumes not available.',
-			'errCmdParams'         : 'Invalid parameters for command "$1".',
-			'errDataNotJSON'       : 'Data is not JSON.',
-			'errDataEmpty'         : 'Data is empty.',
-			'errCmdReq'            : 'Backend request requires command name.',
-			'errOpen'              : 'Unable to open "$1".',
-			'errNotFolder'         : 'Object is not a folder.',
-			'errNotFile'           : 'Object is not a file.',
-			'errRead'              : 'Unable to read "$1".',
-			'errWrite'             : 'Unable to write into "$1".',
-			'errPerm'              : 'Permission denied.',
-			'errLocked'            : '"$1" is locked and can not be renamed, moved or removed.',
-			'errExists'            : 'File named "$1" already exists.',
-			'errInvName'           : 'Invalid file name.',
-			'errInvDirname'        : 'Invalid folder name.',  // from v2.1.24 added 12.4.2017
-			'errFolderNotFound'    : 'Folder not found.',
-			'errFileNotFound'      : 'File not found.',
-			'errTrgFolderNotFound' : 'Target folder "$1" not found.',
-			'errPopup'             : 'Browser prevented opening popup window. To open file enable it in browser options.',
-			'errMkdir'             : 'Unable to create folder "$1".',
-			'errMkfile'            : 'Unable to create file "$1".',
-			'errRename'            : 'Unable to rename "$1".',
-			'errCopyFrom'          : 'Copying files from volume "$1" not allowed.',
-			'errCopyTo'            : 'Copying files to volume "$1" not allowed.',
-			'errMkOutLink'         : 'Unable to create a link to outside the volume root.', // from v2.1 added 03.10.2015
-			'errUpload'            : 'Upload error.',  // old name - errUploadCommon
-			'errUploadFile'        : 'Unable to upload "$1".', // old name - errUpload
-			'errUploadNoFiles'     : 'No files found for upload.',
-			'errUploadTotalSize'   : 'Data exceeds the maximum allowed size.', // old name - errMaxSize
-			'errUploadFileSize'    : 'File exceeds maximum allowed size.', //  old name - errFileMaxSize
-			'errUploadMime'        : 'File type not allowed.',
-			'errUploadTransfer'    : '"$1" transfer error.',
-			'errUploadTemp'        : 'Unable to make temporary file for upload.', // from v2.1 added 26.09.2015
-			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.', // new
-			'errReplace'           : 'Unable to replace "$1".',
-			'errSave'              : 'Unable to save "$1".',
-			'errCopy'              : 'Unable to copy "$1".',
-			'errMove'              : 'Unable to move "$1".',
-			'errCopyInItself'      : 'Unable to copy "$1" into itself.',
-			'errRm'                : 'Unable to remove "$1".',
-			'errTrash'             : 'Unable into trash.', // from v2.1.24 added 30.4.2017
-			'errRmSrc'             : 'Unable remove source file(s).',
-			'errExtract'           : 'Unable to extract files from "$1".',
-			'errArchive'           : 'Unable to create archive.',
-			'errArcType'           : 'Unsupported archive type.',
-			'errNoArchive'         : 'File is not archive or has unsupported archive type.',
-			'errCmdNoSupport'      : 'Backend does not support this command.',
-			'errReplByChild'       : 'The folder "$1" can\'t be replaced by an item it contains.',
-			'errArcSymlinks'       : 'For security reason denied to unpack archives contains symlinks or files with not allowed names.', // edited 24.06.2012
-			'errArcMaxSize'        : 'Archive files exceeds maximum allowed size.',
-			'errResize'            : 'Unable to resize "$1".',
-			'errResizeDegree'      : 'Invalid rotate degree.',  // added 7.3.2013
-			'errResizeRotate'      : 'Unable to rotate image.',  // added 7.3.2013
-			'errResizeSize'        : 'Invalid image size.',  // added 7.3.2013
-			'errResizeNoChange'    : 'Image size not changed.',  // added 7.3.2013
-			'errUsupportType'      : 'Unsupported file type.',
-			'errNotUTF8Content'    : 'File "$1" is not in UTF-8 and cannot be edited.',  // added 9.11.2011
-			'errNetMount'          : 'Unable to mount "$1".', // added 17.04.2012
-			'errNetMountNoDriver'  : 'Unsupported protocol.',     // added 17.04.2012
-			'errNetMountFailed'    : 'Mount failed.',         // added 17.04.2012
-			'errNetMountHostReq'   : 'Host required.', // added 18.04.2012
-			'errSessionExpires'    : 'Your session has expired due to inactivity.',
-			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
-			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
-			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
-			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
-			'errArchiveExec'       : 'Error while archiving files: "$1"',
-			'errExtractExec'       : 'Error while extracting files: "$1"',
-			'errNetUnMount'        : 'Unable to unmount.', // from v2.1 added 30.04.2012
-			'errConvUTF8'          : 'Not convertible to UTF-8', // from v2.1 added 08.04.2014
-			'errFolderUpload'      : 'Try the modern browser, If you\'d like to upload the folder.', // from v2.1 added 26.6.2015
-			'errSearchTimeout'     : 'Timed out while searching "$1". Search result is partial.', // from v2.1 added 12.1.2016
-			'errReauthRequire'     : 'Re-authorization is required.', // from v2.1.10 added 24.3.2016
-			'errMaxTargets'        : 'Max number of selectable items is $1.', // from v2.1.17 added 17.10.2016
-			'errRestore'           : 'Unable to restore from the trash. Can\'t identify the restore destination.', // from v2.1.24 added 3.5.2017
-			'errEditorNotFound'    : 'Editor not found to this file type.', // from v2.1.25 added 23.5.2017
-			'errServerError'       : 'Error occurred on the server side.', // from v2.1.25 added 16.6.2017
-			'errEmpty'             : 'Unable to empty folder "$1".', // from v2.1.25 added 22.6.2017
+			'error'                : 'දෝෂයකි.',
+			'errUnknown'           : 'නොදන්නා දෝෂයකි.',
+			'errUnknownCmd'        : 'නොදන්නා විධානයකි.',
+			'errJqui'              : 'වලංගු නොවන jQuery UI සැකැස්මකි. තේරිය හැකි, ඇදගෙන යාම සහ ඇද දැමිය හැකි කොටස් ඇතුළත් කළ යුතුය.',
+			'errNode'              : 'ElFinder විසින් DOM Element නිර්මාණය කිරීමට අවශ්‍යව අැත.',
+			'errURL'               : 'වලංගු නොවන elFinder සැකැස්මකි! URL විකල්පය සැකසා නැත.',
+			'errAccess'            : 'භාවිතය අත්හිටුවා ඇත.',
+			'errConnect'           : 'Backend වෙත සම්බන්ධ වීමට නොහැකිය.',
+			'errAbort'             : 'සම්බන්ධතාවය වසාදමා ඇත.',
+			'errTimeout'           : 'සම්බන්ධතා කල් ඉකුත්වී ඇත.',
+			'errNotFound'          : 'පසුබිම(Backend) සොයාගත නොහැකි විය.',
+			'errResponse'          : 'වලංගු නොවන පසුබිම(Backend) ප්‍රතිචාරය.',
+			'errConf'              : 'වලංගු නොවන Backend සැකැස්මකි.',
+			'errJSON'              : 'PHP JSON මොඩියුලය ස්ථාපනය කර නැත.',
+			'errNoVolumes'         : 'කියවිය හැකි එ්කක(volumes) නොමැත.',
+			'errCmdParams'         : '"$1" නම් විධානය වලංගු නොවන පරාමිතියකි.',
+			'errDataNotJSON'       : 'JSON දත්ත නොවේ.',
+			'errDataEmpty'         : 'හිස් දත්තයකි.',
+			'errCmdReq'            : 'Backend සඳහා ඉල්ලන ලද විධානයේ නම අවශ්‍ය වේ.',
+			'errOpen'              : '"$1" විවෘත කළ නොහැක.',
+			'errNotFolder'         : 'අායිත්තම(object) ෆොල්ඩරයක් නොවේ.',
+			'errNotFile'           : 'අායිත්තම(object) ගොනුවක් නොවේ.',
+			'errRead'              : '"$1" කියවීමට නොහැක.',
+			'errWrite'             : '"$1" තුල ලිවීමට නොහැකිය.',
+			'errPerm'              : 'අවසරය නොමැත.',
+			'errLocked'            : '"$1" අගුළු දමා ඇති අතර එය නැවත නම් කිරීම, සම්පූර්ණයෙන් විස්ථාපනය කිරීම හෝ ඉවත් කිරීම කළ නොහැක.',
+			'errExists'            : '"$1" නම් ගොනුව දැනටමත් පවතී.',
+			'errInvName'           : 'ගොනු නම වලංගු නොවේ.',
+			'errInvDirname'        : 'ෆෝල්ඩර් නම වලංගු නොවේ.',  // from v2.1.24 added 12.4.2017
+			'errFolderNotFound'    : 'ෆෝල්ඩරය හමු නොවිණි.',
+			'errFileNotFound'      : 'ගොනුව හමු නොවිණි.',
+			'errTrgFolderNotFound' : 'ඉලක්කගත ෆෝල්ඩරය "$1" හමු නොවිනි.',
+			'errPopup'             : 'බ්‍රවුසරය උත්පතන කවුළුව විවෘත කිරීම වළක්වයි. ගොනු විවෘත කිරීම සඳහා බ්‍රවුසරයේ විකල්ප තුළ එය සක්රිය කරන්න.',
+			'errMkdir'             : '"$1" ෆෝල්ඩරය සෑදීමට නොහැකිය.',
+			'errMkfile'            : '"$1" ගොනුව සෑදිය නොහැක.',
+			'errRename'            : '"$1" නැවත නම් කිරීමට නොහැකි විය.',
+			'errCopyFrom'          : '"$1" volume යෙන් ගොනු පිටපත් කිරීම තහනම්ය.',
+			'errCopyTo'            : '"$1" volume යට ගොනු පිටපත් කිරීම තහනම්ය.',
+			'errMkOutLink'         : 'volume root යෙන් පිටතට සබැඳිය(link) නිර්මාණය කිරීමට නොහැකි විය.', // from v2.1 added 03.10.2015
+			'errUpload'            : 'උඩුගත(upload) කිරීමේ දෝෂයකි.',  // old name - errUploadCommon
+			'errUploadFile'        : '"$1" උඩුගත(upload) කිරීමට නොහැකි විය.', // old name - errUpload
+			'errUploadNoFiles'     : 'උඩුගත(upload) කිරීම සඳහා ගොනු කිසිවක් සොයාගත නොහැකි විය.',
+			'errUploadTotalSize'   : 'දත්ත අවසර දී අැති උපරිම ප්‍රමාණය ඉක්මවා ඇත.', // old name - errMaxSize
+			'errUploadFileSize'    : 'ගොනු අවසර දී අැති උපරිම ප්‍රමාණය ඉක්මවා ඇත.', //  old name - errFileMaxSize
+			'errUploadMime'        : 'ගොනු වර්ගයට අවසර නැත.',
+			'errUploadTransfer'    : '"$1" ව මාරු කිරීමේ දෝෂයකි.',
+			'errUploadTemp'        : 'upload කිරීම සඳහා තාවකාලික ගොනුව සෑදිය නොහැක.', // from v2.1 added 26.09.2015
+			'errNotReplace'        : '"$1" අායිත්තම(object) දැනටමත් මෙම ස්ථානයේ පවතී, වෙනත් වර්ගයකිනි ප්‍රතිස්ථාපනය කළ නොහැක.', // new
+			'errReplace'           : '"$1" ප්‍රතිස්ථාපනය කළ නොහැක.',
+			'errSave'              : '"$1" සුරැකීමට නොහැක.',
+			'errCopy'              : '"$1" පිටපත් කිරීමට නොහැක.',
+			'errMove'              : '"$1" සම්පූර්ණයෙන් විස්ථාපනය කිරීමට නොහැක.',
+			'errCopyInItself'      : '"$1" තුලට පිටපත් කිරීමට නොහැක.',
+			'errRm'                : '"$1" ඉවත් කිරීමට නොහැකි විය.',
+			'errTrash'             : 'කුණු-කූඩය තුලට දැමීමට නොහැක.', // from v2.1.24 added 30.4.2017
+			'errRmSrc'             : 'ප්‍රභව ගොනු(ව) ඉවත් කළ නොහැක.',
+			'errExtract'           : '"$1" වෙතින් ගොනු දිග හැරීමට නොහැක.',
+			'errArchive'           : 'සංරක්ෂිතය සෑදීමට නොහැකි විය.',
+			'errArcType'           : 'නොගැලපෙන සංරක්ෂණ වර්ගයකි.',
+			'errNoArchive'         : 'ගොනුව නොගැලපෙන සංරක්ෂණ වර්ගයක් හෝ සංරක්ෂිතයක් නොවේ.',
+			'errCmdNoSupport'      : 'පසුබිම(Backend) මෙම විධානය නොදනී.',
+			'errReplByChild'       : '"$1" ෆෝල්ඩරය එහිම අඩංගු අයිතමයක් මගින් ප්‍රතිස්ථාපනය කළ නොහැක.',
+			'errArcSymlinks'       : 'ආරක්ෂිත හේතුව නිසා අනුමත නොකෙරෙන සබැඳි සම්බන්දතා හෝ ලිපිගොනු නම් අඩංගු බැවින් සංරක්ෂිතය දිග හැරීම කිරීමට ඉඩ නොදෙන.', // edited 24.06.2012
+			'errArcMaxSize'        : 'සංරක්ෂිතය ලිපිගොනු උපරිම ප්‍රමාණය ඉක්මවා ඇත.',
+			'errResize'            : 'ප්‍රතිප්‍රමාණය කිරීමට නොහැකි විය.',
+			'errResizeDegree'      : 'වලංගු නොවන භ්‍රමණ කෝණයකි.',  // added 7.3.2013
+			'errResizeRotate'      : 'රූපය භ්‍රමණය කිරීමට නොහැකි විය.',  // added 7.3.2013
+			'errResizeSize'        : 'රූපයේ ප්‍රමාණය වලංගු නොවේ.',  // added 7.3.2013
+			'errResizeNoChange'    : 'රූපයේ ප්‍රමාණය වෙනස් නොවුණි.',  // added 7.3.2013
+			'errUsupportType'      : 'නොගැලපෙන ගොනු වර්ගයකි.',
+			'errNotUTF8Content'    : '"$1" ගොනුව UTF-8 හි නොමැති අතර සංස්කරණය කළ නොහැක.',  // added 9.11.2011
+			'errNetMount'          : '"$1" සවි කිරීමට(mount කිරීමට) නොහැක.', // added 17.04.2012
+			'errNetMountNoDriver'  : 'protocol නොගැලපේ.',     // added 17.04.2012
+			'errNetMountFailed'    : 'සවි කිරීම(mount කිරීම) අසාර්ථක විය.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'ධාරකය(Host) අවශ්‍ය වේ.', // added 18.04.2012
+			'errSessionExpires'    : 'ඔබේ අක්‍රියතාව හේතුවෙන් සැසිය(session) කල් ඉකුත් වී ඇත.',
+			'errCreatingTempDir'   : 'තාවකාලික ඩිරෙක්ටරයක්(directory) ​​සෑදිය නොහැක: "$1"',
+			'errFtpDownloadFile'   : 'FTP වලින් ගොනුව බාගත(download) කිරීමට නොහැකි විය: "$1"',
+			'errFtpUploadFile'     : 'ගොනුව FTP වෙත උඩුගත(upload) කිරීමට නොහැකි විය: "$1"',
+			'errFtpMkdir'          : 'FTP මත දුරස්ථ නාමාවලියක්(remote directory) නිර්මාණය කිරීමට නොහැකි විය: "$1"',
+			'errArchiveExec'       : 'ගොනු සංරක්ෂණය(archiving) කිරීමේදී දෝෂයක් ඇතිවිය: "$1"',
+			'errExtractExec'       : 'ගොනු දිගහැරීමේදී(extracting) දෝෂයක් ඇතිවිය: "$1"',
+			'errNetUnMount'        : 'විසන්ධි කිරීමට(unmount) නොහැක.', // from v2.1 added 30.04.2012
+			'errConvUTF8'          : 'UTF-8 වෙත පරිවර්තනය කළ නොහැක.', // from v2.1 added 08.04.2014
+			'errFolderUpload'      : 'ඔබ ෆෝල්ඩරය උඩුගත(upload) කිරීමට කැමති නම් නවීන බ්‍රවුසරයකින් උත්සාහ කරන්න. ', // from v2.1 added 26.6.2015
+			'errSearchTimeout'     : '"$1" සෙවීම කල් ඉකුත්වී ඇත. සෙවුම් ප්‍රතිඵල අර්ධ වශයෙන් දිස්වේ.', // from v2.1 added 12.1.2016
+			'errReauthRequire'     : 'නැවත බලය(Re-authorization) ලබා දීම අවශ්‍ය වේ.', // from v2.1.10 added 24.3.2016
+			'errMaxTargets'        : 'තෝරා ගත හැකි උපරිම අයිතම සංඛ්‍යාව $1 ක් වේ.', // from v2.1.17 added 17.10.2016
+			'errRestore'           : 'කුණු කූඩයෙන් නැවත ලබා ගත නොහැක. යළි පිහිටුවීමේ ගමනාන්තය(restore destination) හඳුනාගත නොහැක.', // from v2.1.24 added 3.5.2017
+			'errEditorNotFound'    : 'මෙම ගොනු වර්ගයේ සංස්කාරකය හමු නොවිණි.', // from v2.1.25 added 23.5.2017
+			'errServerError'       : 'සේවාදායකයේ පැත්තෙන්(server side) දෝශයක් ඇතිවිය.', // from v2.1.25 added 16.6.2017
+			'errEmpty'             : '"$1" ෆෝල්ඩරය හිස් කිරීමට නොහැක.', // from v2.1.25 added 22.6.2017
 
 			/******************************* commands names ********************************/
-			'cmdarchive'   : 'Create archive',
-			'cmdback'      : 'Back',
-			'cmdcopy'      : 'Copy',
-			'cmdcut'       : 'Cut',
-			'cmddownload'  : 'Download',
-			'cmdduplicate' : 'Duplicate',
-			'cmdedit'      : 'Edit file',
-			'cmdextract'   : 'Extract files from archive',
-			'cmdforward'   : 'Forward',
-			'cmdgetfile'   : 'Select files',
-			'cmdhelp'      : 'About this software',
+			'cmdarchive'   : 'සංරක්ෂිතය(archive) නිර්මාණය කරන්න',
+			'cmdback'      : 'ආපසු',
+			'cmdcopy'      : 'පිටපත් කරන්න',
+			'cmdcut'       : 'මුළුමනින්ම පිටපත් කරන්න(Cut)',
+			'cmddownload'  : 'බාගත කිරන්න(Download)',
+			'cmdduplicate' : 'අනුපිටපත් කරන්න(Duplicate)',
+			'cmdedit'      : 'ගොනුව සංස්කරණය කරන්න',
+			'cmdextract'   : 'සංරක්ෂිතයේ ගොනු දිගහරින්න(Extract)',
+			'cmdforward'   : 'ඉදිරියට',
+			'cmdgetfile'   : 'ගොනු තෝරන්න',
+			'cmdhelp'      : 'මෙම මෘදුකාංගය ගැන',
 			'cmdhome'      : 'Home',
-			'cmdinfo'      : 'Get info',
-			'cmdmkdir'     : 'New folder',
-			'cmdmkdirin'   : 'Into New Folder', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'New text file',
-			'cmdopen'      : 'Open',
+			'cmdinfo'      : 'තොරතුරු ලබාගන්න',
+			'cmdmkdir'     : 'නව ෆෝල්ඩරය',
+			'cmdmkdirin'   : 'නව ෆෝල්ඩරයක් තුළට', // from v2.1.7 added 19.2.2016
+			'cmdmkfile'    : 'නව ලිඛිත(text) ගොනුවක්',
+			'cmdopen'      : 'විවෘත කරන්න',
 			'cmdpaste'     : 'Paste',
-			'cmdquicklook' : 'Preview',
+			'cmdquicklook' : 'පූර්ව දර්ශනයක්(Preview)',
 			'cmdreload'    : 'Reload',
-			'cmdrename'    : 'Rename',
-			'cmdrm'        : 'Delete',
-			'cmdtrash'     : 'Into trash', //from v2.1.24 added 29.4.2017
+			'cmdrename'    : 'නම වෙනස් කරන්න',
+			'cmdrm'        : 'මකන්න',
+			'cmdtrash'     : 'කුණු කූඩයට', //from v2.1.24 added 29.4.2017
 			'cmdrestore'   : 'Restore', //from v2.1.24 added 3.5.2017
-			'cmdsearch'    : 'Find files',
-			'cmdup'        : 'Go to parent directory',
-			'cmdupload'    : 'Upload files',
-			'cmdview'      : 'View',
-			'cmdresize'    : 'Resize & Rotate',
-			'cmdsort'      : 'Sort',
-			'cmdnetmount'  : 'Mount network volume', // added 18.04.2012
-			'cmdnetunmount': 'Unmount', // from v2.1 added 30.04.2012
+			'cmdsearch'    : 'ගොනු සොයන්න',
+			'cmdup'        : 'ප්‍ර්‍රධාන නාමාවලිය(parent directory) වෙත යන්න',
+			'cmdupload'    : 'ගොනු උඩුගත(Upload) කරන්න',
+			'cmdview'      : 'දර්ශනය(View)',
+			'cmdresize'    : 'ප්‍රථිප්‍රමාණය සහ භ්‍රමණය',
+			'cmdsort'      : 'වර්ගීකරණය කරන්න',
+			'cmdnetmount'  : 'ජාල එ්කකයක්(network volume) සවි(mount) කරන්න', // added 18.04.2012
+			'cmdnetunmount': 'ගලවන්න(Unmount)', // from v2.1 added 30.04.2012
 			'cmdplaces'    : 'To Places', // added 28.12.2014
 			'cmdchmod'     : 'Change mode', // from v2.1 added 20.6.2015
-			'cmdopendir'   : 'Open a folder', // from v2.1 added 13.1.2016
-			'cmdcolwidth'  : 'Reset column width', // from v2.1.13 added 12.06.2016
-			'cmdfullscreen': 'Full Screen', // from v2.1.15 added 03.08.2016
+			'cmdopendir'   : 'ෆෝල්ඩරය විවෘත කරන්න', // from v2.1 added 13.1.2016
+			'cmdcolwidth'  : 'නැවත තීරු පළල පිහිටුවන්න', // from v2.1.13 added 12.06.2016
+			'cmdfullscreen': 'පුළුල් තිරය', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : 'Move', // from v2.1.15 added 21.08.2016
-			'cmdempty'     : 'Empty the folder', // from v2.1.25 added 22.06.2017
+			'cmdempty'     : 'ෆෝල්ඩරය හිස් කරන්න', // from v2.1.25 added 22.06.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
@@ -496,5 +504,5 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'kindVideoOGG'    : 'Ogg movie'
 		}
 	};
-}
+}));
 
