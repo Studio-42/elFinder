@@ -3940,7 +3940,7 @@ var elFinder = function(node, opts, bootCallback) {
 					helper.data('autoScrTm') && clearInterval(helper.data('autoScrTm'));
 				},
 				helper     : function(e, ui) {
-					var element = self.id ? $(this) : $(this).parents('[id]:first'),
+					var element = this.id ? $(this) : $(this).parents('[id]:first'),
 						helper  = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-status"/></div>'),
 						icon    = function(f) {
 							var mime = f.mime, i, tmb = self.tmb(f);
