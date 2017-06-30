@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.25 (2.1-src Nightly: 776b6b3) (2017-06-30)
+ * Version 2.1.25 (2.1-src Nightly: 8cc6ff5) (2017-06-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -3233,7 +3233,8 @@ var elFinder = function(node, opts, bootCallback) {
 				.addClass(cls)
 				.css(self.getMaximizeCss());
 			$('body').css('overflow', 'hidden');
-			$(window).on('resize.' + namespace, {elm: elm}, resize).trigger('resize');
+			$(window).on('resize.' + namespace, {elm: elm}, resize);
+			elm.trigger('resize', {maximize: 'on'});
 		};
 		
 		/**
@@ -3970,7 +3971,7 @@ var elFinder = function(node, opts, bootCallback) {
 					helper.data('autoScrTm') && clearInterval(helper.data('autoScrTm'));
 				},
 				helper     : function(e, ui) {
-					var element = self.id ? $(this) : $(this).parents('[id]:first'),
+					var element = this.id ? $(this) : $(this).parents('[id]:first'),
 						helper  = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-status"/></div>'),
 						icon    = function(f) {
 							var mime = f.mime, i, tmb = self.tmb(f);
@@ -7991,7 +7992,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.25 (2.1-src Nightly: 776b6b3)';
+elFinder.prototype.version = '2.1.25 (2.1-src Nightly: 8cc6ff5)';
 
 
 
@@ -14256,7 +14257,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 									dialog.children('.ui-widget-content:first').slideUp(200, function() {
 										dialog.children('.ui-widget-content').hide().end()
 											.trigger('resize', { minimize: 'on' })
-											.attr('style', '').css({ maxWidth: w})
+											.attr('style', '').css({ maxWidth: w })
 											.addClass('elfinder-dialog-minimized')
 											.one('mousedown.minimize', function(e) {
 												$this.trigger('mousedown');
@@ -14277,8 +14278,17 @@ $.fn.elfinderdialog = function(opts, fm) {
 				.appendTo(elfNode)
 				.draggable({
 					handle : '.ui-dialog-titlebar',
-					containment : 'document',
-					stop : function(e, ui){
+					drag : function(e, ui) {
+						var top = ui.offset.top,
+							left = ui.offset.left;
+						if (top < 0) {
+							ui.position.top = ui.position.top - top;
+						}
+						if (left < 0) {
+							ui.position.left = ui.position.left - left;
+						}
+					},
+					stop : function(e, ui) {
 						dialog.css({height : opts.height});
 						self.data('draged', true);
 					}
@@ -14299,11 +14309,17 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 				})
 				.on('open', function() {
-					var d           = $(this),
-						maxWinWidth = (d.outerWidth() > elfNode.width()-10)? elfNode.width()-10 : null;
-					
-					maxWinWidth && d.css({width: maxWinWidth, left: '5px'});
+					var d = $(this);
 
+					if (syncSize.enabled) {
+						if (!syncSize.defaultSize) {
+							syncSize.defaultSize = { width: self.width(), height: self.height() };
+						}
+						fitSize(dialog);
+						dialog.trigger('resize').trigger('posinit');
+						$(window).on('resize.'+fm.namespace, dialog, syncFunc);
+					}
+					
 					if (!dialog.hasClass(clnotify)) {
 						elfNode.children('.'+cldialog+':visible:not(.'+clnotify+')').each(function() {
 							var d     = $(this),
@@ -14315,8 +14331,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 
 							if (d[0] != dialog[0] && (top == _top || left == _left)) {
 								dialog.css({
-									top  : (top+(maxWinWidth? 15 : 10))+'px',
-									left : (maxWinWidth? 5 : left+10)+'px'
+									top  : (top + 10)+'px',
+									left : (left + 10)+'px'
 								});
 							}
 						});
@@ -14325,15 +14341,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 					if (dialog.data('modal')) {
 						dialog.addClass(clmodal);
 						fm.getUI('overlay').elfinderoverlay('show');
-					}
-					
-					if (syncSize.enabled) {
-						if (!syncSize.defaultSize) {
-							syncSize.defaultSize = { width: self.width(), height: self.height() };
-						}
-						fitSize(dialog);
-						dialog.trigger('resize').trigger('posinit');
-						$(window).on('resize.'+fm.namespace, dialog, syncFunc);
 					}
 					
 					dialog.trigger('totop');
@@ -14399,15 +14406,40 @@ $.fn.elfinderdialog = function(opts, fm) {
 				})
 				.on('posinit', function() {
 					var css = opts.position,
-						nodeOffset, minTop, minLeft;
+						nodeOffset, minTop, minLeft, outerSize, win, winSize;
+					if (dialog.hasClass('elfinder-maximized')) {
+						return;
+					}
 					if (! css && ! dialog.data('resizing')) {
+						win = $(window);
 						nodeOffset = elfNode.offset();
-						minTop = nodeOffset.top * -1 + $(window).scrollTop();
-						minLeft = nodeOffset.left * -1 + $(window).scrollLeft();
-						css = {
-							top  : Math.max(minTop, parseInt((elfNode.height() - dialog.outerHeight())/2 - 42))+'px',
-							left : Math.max(minLeft, parseInt((elfNode.width() - dialog.outerWidth())/2))+'px'
+						outerSize = {
+							width : dialog.outerWidth(true),
+							height: dialog.outerHeight(true)
 						};
+						outerSize.right = nodeOffset.left + outerSize.width;
+						outerSize.bottom = nodeOffset.top + outerSize.height;
+						winSize = {
+							scrLeft: win.scrollLeft(),
+							scrTop : win.scrollTop(),
+							width  : win.width(),
+							height : win.height()
+						}
+						winSize.left = winSize.scrLeft + winSize.width;
+						winSize.bottom = winSize.scrTop + winSize.height;
+						
+						minTop = nodeOffset.top * -1 + winSize.scrTop;
+						minLeft = nodeOffset.left * -1 + winSize.scrLeft;
+						css = {
+							top  : outerSize.height >= winSize.height? minTop  : Math.max(minTop, parseInt((elfNode.height() - outerSize.height)/2 - 42)),
+							left : outerSize.width  >= winSize.width ? minLeft : Math.max(minLeft, parseInt((elfNode.width() - outerSize.width)/2))
+						};
+						if (outerSize.left + css.left > winSize.left) {
+							css.left = Math.max(minLeft, winSize.left - outerSize.left);
+						}
+						if (outerSize.bottom + css.top > winSize.bottom) {
+							css.top = Math.max(minTop, winSize.bottom - outerSize.bottom);
+						}
 					}
 					if (opts.absolute) {
 						css.position = 'absolute';
@@ -14416,12 +14448,15 @@ $.fn.elfinderdialog = function(opts, fm) {
 				})
 				.on('resize', function(e, data) {
 					var oh = 0, h, minH;
+					if ((data && (data.minimize || data.maxmize)) || dialog.hasClass('elfinder-dialog-minimized')) {
+						return;
+					}
 					e.stopPropagation();
 					e.preventDefault();
 					dialog.children('.ui-widget-header,.ui-dialog-buttonpane').each(function() {
 						oh += $(this).outerHeight(true);
 					});
-					if (syncSize.enabled && !e.originalEvent) {
+					if (syncSize.enabled && !e.originalEvent && !dialog.hasClass('elfinder-maximized')) {
 						h = Math.min(syncSize.defaultSize.height, Math.max(parseInt(dialog.css('max-height')), parseInt(dialog.css('min-height'))) - oh - dialog.data('margin-y'));
 					} else {
 						h = dialog.height() - oh - dialog.data('margin-y');
