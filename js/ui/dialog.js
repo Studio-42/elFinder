@@ -6,11 +6,21 @@
  **/
 $.fn.elfinderdialog = function(opts, fm) {
 	var platformWin = (window.navigator.platform.indexOf('Win') != -1),
-		bodyMargin  = {
-			width : parseInt($('body').css('margin-left')) + parseInt($('body').css('margin-right')),
-			height: parseInt($('body').css('margin-top')) + parseInt($('body').css('margin-bottom'))
+		delta       = {},
+		syncSize    = { enabled: false, width: false, height: false, defaultSize: null },
+		fitSize     = function(dialog) {
+			var opts;
+			if (syncSize.enabled) {
+				opts = {
+					maxWidth : syncSize.width?  $(window).width() - delta.width  : null,
+					maxHeight: syncSize.height? $(window).height() - delta.height : null
+				};
+				dialog.css(opts).trigger('resize');
+				if (dialog.data('hasResizable') && (dialog.resizable('option', 'maxWidth') < opts.maxWidth || dialog.resizable('option', 'maxHeight') < opts.maxHeight)) {
+					dialog.resizable('option', opts);
+				}
+			}
 		},
-		syncSize    = { enabled: false, width: false, height: false, defaultSize: {} },
 		syncFunc    = function(e) {
 			var dialog = e.data;
 			syncTm && clearTimeout(syncTm);
@@ -18,18 +28,11 @@ $.fn.elfinderdialog = function(opts, fm) {
 				var opts, prevH, offset;
 				if (syncSize.enabled) {
 					prevH = dialog.height();
-					opts = {
-						maxWidth : syncSize.width?  $(window).width() - bodyMargin.width  : null,
-						maxHeight: syncSize.height? $(window).height() - bodyMargin.height : null
-					};
 					if (prevH !== dialog.height()) {
 						offset = dialog.offset();
 						window.scrollTo(offset.top, offset.left);
 					}
-					dialog.css(opts).trigger('resize');
-					if (dialog.data('hasResizable') && (dialog.resizable('option', 'maxWidth') < opts.maxWidth || dialog.resizable('option', 'maxHeight') < opts.maxHeight)) {
-						dialog.resizable('option', opts);
-					}
+					fitSize(dialog);
 				}
 			}, 50);
 		},
@@ -51,7 +54,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 					dialog.trigger('open');
 				});
 			} else if (opts == 'close' || opts == 'destroy') {
-				$(window).off('resize.'+fm.namespace, syncFunc);
 				dialog.stop(true);
 				(dialog.is(':visible') || elfNode.is(':hidden')) && dialog.hide().trigger('close');
 				opts == 'destroy' && dialog.remove();
@@ -86,12 +88,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 	syncSize.height = (opts.maxHeight === 'window');
 	if (syncSize.width || syncSize.height) {
 		syncSize.enabled = true;
-	}
-	if (syncSize.width) {
-		opts.maxWidth = $(window).width() - bodyMargin.width;
-	}
-	if (syncSize.height) {
-		opts.maxHeight = $(window).height() - bodyMargin.height;
 	}
 	
 	this.filter(':not(.ui-dialog-content)').each(function() {
@@ -331,8 +327,12 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 					
 					if (syncSize.enabled) {
-						syncSize.defaultSize = { width: self.width(), height: self.height() };
+						if (!syncSize.defaultSize) {
+							syncSize.defaultSize = { width: self.width(), height: self.height() };
+						}
+						fitSize(dialog);
 						dialog.trigger('resize').trigger('posinit');
+						$(window).on('resize.'+fm.namespace, dialog, syncFunc);
 					}
 					
 					dialog.trigger('totop');
@@ -351,6 +351,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 				})
 				.on('close', function() {
 					var dialogs;
+					
+					syncSize.enabled && $(window).off('resize.'+fm.namespace, syncFunc);
 					
 					if (opts.closeOnEscape) {
 						$(document).off('keyup.'+id);
@@ -395,11 +397,15 @@ $.fn.elfinderdialog = function(opts, fm) {
 					! fm.UA.Mobile && tabstopNext().focus();
 				})
 				.on('posinit', function() {
-					var css = opts.position;
+					var css = opts.position,
+						nodeOffset, minTop, minLeft;
 					if (! css && ! dialog.data('resizing')) {
+						nodeOffset = elfNode.offset();
+						minTop = nodeOffset.top * -1 + $(window).scrollTop();
+						minLeft = nodeOffset.left * -1 + $(window).scrollLeft();
 						css = {
-							top  : Math.max(0, parseInt((elfNode.height() - dialog.outerHeight())/2 - 42))+'px',
-							left : Math.max(0, parseInt((elfNode.width() - dialog.outerWidth())/2))+'px'
+							top  : Math.max(minTop, parseInt((elfNode.height() - dialog.outerHeight())/2 - 42))+'px',
+							left : Math.max(minLeft, parseInt((elfNode.width() - dialog.outerWidth())/2))+'px'
 						};
 					}
 					if (opts.absolute) {
@@ -518,11 +524,12 @@ $.fn.elfinderdialog = function(opts, fm) {
 			}
 		}
 		
-		dialog.trigger('posinit').data('margin-y', self.outerHeight(true) - self.height());
-		
 		if (syncSize.enabled) {
-			$(window).on('resize.'+fm.namespace, dialog, syncFunc);
+			delta.width = dialog.outerWidth(true) - dialog.width() + ((dialog.outerWidth() - dialog.width()) / 2);
+			delta.height = dialog.outerHeight(true) - dialog.height() + ((dialog.outerHeight() - dialog.height()) / 2);
 		}
+		
+		dialog.trigger('posinit').data('margin-y', self.outerHeight(true) - self.height());
 		
 		if (opts.resizable && $.fn.resizable) {
 			dialog.resizable({
@@ -546,7 +553,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 				}
 			}).data('hasResizable', true);
 		} 
-			
+		
 		typeof(opts.create) == 'function' && $.proxy(opts.create, this)();
 			
 		tabstopsInit();
