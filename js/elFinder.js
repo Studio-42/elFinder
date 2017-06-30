@@ -3202,7 +3202,8 @@ var elFinder = function(node, opts, bootCallback) {
 				.addClass(cls)
 				.css(self.getMaximizeCss());
 			$('body').css('overflow', 'hidden');
-			$(window).on('resize.' + namespace, {elm: elm}, resize).trigger('resize');
+			$(window).on('resize.' + namespace, {elm: elm}, resize);
+			elm.trigger('resize', {maximize: 'on'});
 		};
 		
 		/**
