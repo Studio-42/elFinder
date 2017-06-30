@@ -1,6 +1,5 @@
 /**
  * Sinhala translation
- * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author CodeLyokoXtEAM <XcodeLyokoTEAM@gmail.com>
  * @version 2017-06-29
  */
@@ -14,7 +13,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.si = {
-		translator : 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;, CodeLyokoXtEAM &lt;XcodeLyokoTEAM@gmail.com&gt;',
+		translator : 'CodeLyokoXtEAM &lt;XcodeLyokoTEAM@gmail.com&gt;',
 		language   : 'Sinhala',
 		direction  : 'ltr',
 		dateFormat : 'Y.m.d h:i A', // Mar 13, 2012 05:27 PM
