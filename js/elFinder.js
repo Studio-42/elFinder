@@ -3619,9 +3619,6 @@ var elFinder = function(node, opts, bootCallback) {
 		soundPath = this.options.soundPath.replace(/\/+$/, '') + '/';
 	}
 	
-	// update size	
-	self.resize(width, height);
-	
 	// attach events to document
 	$(document)
 		// disable elfinder on click outside elfinder
@@ -4069,6 +4066,9 @@ var elFinder = function(node, opts, bootCallback) {
 			}
 		});
 		
+		// update size	
+		self.resize(width, height);
+
 		(function() {
 			var navbar = self.getUI('navbar'),
 				cwd    = self.getUI('cwd').parent();
