@@ -34,17 +34,17 @@
 			'errAbort'             : 'සම්බන්ධතාවය වසාදමා ඇත.',
 			'errTimeout'           : 'සම්බන්ධතා කල් ඉකුත්වී ඇත.',
 			'errNotFound'          : 'Backend සොයාගත නොහැකි විය.',
-			'errResponse'          : 'වලංගු නොවන Backend ප්‍රතිචාරය.',
+			'errResponse'          : 'වලංගු නොවන පසුබිම(Backend) ප්‍රතිචාරය.',
 			'errConf'              : 'වලංගු නොවන Backend සැකැස්මකි.',
 			'errJSON'              : 'PHP JSON මොඩියුලය ස්ථාපනය කර නැත.',
-			'errNoVolumes'         : ' කියවිය හැකි volumes නොමැත.',
+			'errNoVolumes'         : 'කියවිය හැකි එ්කක(volumes) නොමැත.',
 			'errCmdParams'         : '"$1" නම් විධානය වලංගු නොවන පරාමිතියකි.',
 			'errDataNotJSON'       : 'JSON දත්ත නොවේ.',
 			'errDataEmpty'         : 'හිස් දත්තයකි.',
 			'errCmdReq'            : 'Backend සඳහා ඉල්ලන ලද විධානයේ නම අවශ්‍ය වේ.',
 			'errOpen'              : '"$1" විවෘත කළ නොහැක.',
-			'errNotFolder'         : 'Object ෆොල්ඩරයක් නොවේ.',
-			'errNotFile'           : 'Object ගොනුවක් නොවේ.',
+			'errNotFolder'         : 'අායිත්තම(object) ෆොල්ඩරයක් නොවේ.',
+			'errNotFile'           : 'අායිත්තම(object) ගොනුවක් නොවේ.',
 			'errRead'              : '"$1" කියවීමට නොහැක.',
 			'errWrite'             : '"$1" තුල ලිවීමට නොහැකිය.',
 			'errPerm'              : 'අවසරය නොමැත.',
@@ -62,15 +62,15 @@
 			'errCopyFrom'          : '"$1" volume යෙන් ගොනු පිටපත් කිරීම තහනම්ය.',
 			'errCopyTo'            : '"$1" volume යට ගොනු පිටපත් කිරීම තහනම්ය.',
 			'errMkOutLink'         : 'volume root යෙන් පිටත link නිර්මාණය කිරීමට නොහැකි විය.', // from v2.1 added 03.10.2015
-			'errUpload'            : 'Upload කිරීමේ දෝෂයකි.',  // old name - errUploadCommon
-			'errUploadFile'        : '"$1" Upload කිරීමට නොහැකි විය.', // old name - errUpload
-			'errUploadNoFiles'     : 'Upload කිරීම සඳහා ගොනු කිසිවක් සොයාගත නොහැකි විය.',
+			'errUpload'            : 'උඩුගත(upload) කිරීමේ දෝෂයකි.',  // old name - errUploadCommon
+			'errUploadFile'        : '"$1" උඩුගත(upload) කිරීමට නොහැකි විය.', // old name - errUpload
+			'errUploadNoFiles'     : 'උඩුගත(upload) කිරීම සඳහා ගොනු කිසිවක් සොයාගත නොහැකි විය.',
 			'errUploadTotalSize'   : 'දත්ත අවසර දී අැති උපරිම ප්‍රමාණය ඉක්මවා ඇත.', // old name - errMaxSize
 			'errUploadFileSize'    : 'ගොනු අවසර දී අැති උපරිම ප්‍රමාණය ඉක්මවා ඇත.', //  old name - errFileMaxSize
 			'errUploadMime'        : 'ගොනු වර්ගයට අවසර නැත.',
 			'errUploadTransfer'    : '"$1" ව මාරු කිරීමේ දෝෂයකි.',
 			'errUploadTemp'        : 'upload කිරීම සඳහා තාවකාලික ගොනුව සෑදිය නොහැක.', // from v2.1 added 26.09.2015
-			'errNotReplace'        : '"$1" දැනටමත් මෙම ස්ථානයේ පවතී, වෙනත් වර්ගයකිනි ප්‍රතිස්ථාපනය කළ නොහැක.', // new
+			'errNotReplace'        : '"$1" අායිත්තම(object) දැනටමත් මෙම ස්ථානයේ පවතී, වෙනත් වර්ගයකිනි ප්‍රතිස්ථාපනය කළ නොහැක.', // new
 			'errReplace'           : '"$1" ප්‍රතිස්ථාපනය කළ නොහැක.',
 			'errSave'              : '"$1" සුරැකීමට නොහැක.',
 			'errCopy'              : '"$1" පිටපත් කිරීමට නොහැක.',
@@ -83,7 +83,7 @@
 			'errArchive'           : 'සංරක්ෂිතය සෑදීමට නොහැකි විය.',
 			'errArcType'           : 'නොගැලපෙන සංරක්ෂණ වර්ගයකි.',
 			'errNoArchive'         : 'ගොනුව නොගැලපෙන සංරක්ෂණ වර්ගයක් හෝ සංරක්ෂිතයක් නොවේ.',
-			'errCmdNoSupport'      : 'Backend මෙම විධානය නොදනී.',
+			'errCmdNoSupport'      : 'පසුබිම(Backend) මෙම විධානය නොදනී.',
 			'errReplByChild'       : '"$1" ෆෝල්ඩරය එහිම අඩංගු අයිතමයක් මගින් ප්‍රතිස්ථාපනය කළ නොහැක.',
 			'errArcSymlinks'       : 'ආරක්ෂිත හේතුව නිසා අනුමත නොකෙරෙන සබැඳි සම්බන්දතා හෝ ලිපිගොනු නම් අඩංගු බැවින් සංරක්ෂිතය දිග හැරීම කිරීමට ඉඩ නොදෙන.', // edited 24.06.2012
 			'errArcMaxSize'        : 'සංරක්ෂිතය ලිපිගොනු උපරිම ප්‍රමාණය ඉක්මවා ඇත.',
@@ -98,23 +98,23 @@
 			'errNetMountNoDriver'  : 'protocol නොගැලපේ.',     // added 17.04.2012
 			'errNetMountFailed'    : 'සවි කිරීම(mount කිරීම) අසාර්ථක විය.',         // added 17.04.2012
 			'errNetMountHostReq'   : 'ධාරකය(Host) අවශ්‍ය වේ.', // added 18.04.2012
-			'errSessionExpires'    : 'Your session has expired due to inactivity.',
-			'errCreatingTempDir'   : 'Unable to create temporary directory: "$1"',
-			'errFtpDownloadFile'   : 'Unable to download file from FTP: "$1"',
-			'errFtpUploadFile'     : 'Unable to upload file to FTP: "$1"',
-			'errFtpMkdir'          : 'Unable to create remote directory on FTP: "$1"',
-			'errArchiveExec'       : 'Error while archiving files: "$1"',
-			'errExtractExec'       : 'Error while extracting files: "$1"',
-			'errNetUnMount'        : 'Unable to unmount.', // from v2.1 added 30.04.2012
-			'errConvUTF8'          : 'Not convertible to UTF-8', // from v2.1 added 08.04.2014
-			'errFolderUpload'      : 'Try the modern browser, If you\'d like to upload the folder.', // from v2.1 added 26.6.2015
-			'errSearchTimeout'     : 'Timed out while searching "$1". Search result is partial.', // from v2.1 added 12.1.2016
-			'errReauthRequire'     : 'Re-authorization is required.', // from v2.1.10 added 24.3.2016
-			'errMaxTargets'        : 'Max number of selectable items is $1.', // from v2.1.17 added 17.10.2016
-			'errRestore'           : 'Unable to restore from the trash. Can\'t identify the restore destination.', // from v2.1.24 added 3.5.2017
-			'errEditorNotFound'    : 'Editor not found to this file type.', // from v2.1.25 added 23.5.2017
-			'errServerError'       : 'Error occurred on the server side.', // from v2.1.25 added 16.6.2017
-			'errEmpty'             : 'Unable to empty folder "$1".', // from v2.1.25 added 22.6.2017
+			'errSessionExpires'    : 'ඔබේ අක්‍රියතාව හේතුවෙන් සැසිය(session) කල් ඉකුත් වී ඇත.',
+			'errCreatingTempDir'   : 'තාවකාලික ඩිරෙක්ටරයක්(directory) ​​සෑදිය නොහැක: "$1"',
+			'errFtpDownloadFile'   : 'FTP වලින් ගොනුව බාගත(download) කිරීමට නොහැකි විය: "$1"',
+			'errFtpUploadFile'     : 'ගොනුව FTP වෙත උඩුගත(upload) කිරීමට නොහැකි විය: "$1"',
+			'errFtpMkdir'          : 'FTP මත දුරස්ථ නාමාවලියක්(remote directory) නිර්මාණය කිරීමට නොහැකි විය: "$1"',
+			'errArchiveExec'       : 'ගොනු සංරක්ෂණය(archiving) කිරීමේදී දෝෂයක් ඇතිවිය: "$1"',
+			'errExtractExec'       : 'ගොනු දිගහැරීමේදී(extracting) දෝෂයක් ඇතිවිය: "$1"',
+			'errNetUnMount'        : 'විසන්ධි කිරීමට(unmount) නොහැක.', // from v2.1 added 30.04.2012
+			'errConvUTF8'          : 'UTF-8 වෙත පරිවර්තනය කළ නොහැක.', // from v2.1 added 08.04.2014
+			'errFolderUpload'      : 'ඔබ ෆෝල්ඩරය උඩුගත(upload) කිරීමට කැමති නම් නවීන බ්‍රවුසරයකින් උත්සාහ කරන්න. ', // from v2.1 added 26.6.2015
+			'errSearchTimeout'     : '"$1" සෙවීම කල් ඉකුත්වී ඇත. සෙවුම් ප්‍රතිඵල අර්ධ වශයෙන් දිස්වේ.', // from v2.1 added 12.1.2016
+			'errReauthRequire'     : 'නැවත බලය(Re-authorization) ලබා දීම අවශ්‍ය වේ.', // from v2.1.10 added 24.3.2016
+			'errMaxTargets'        : 'තෝරා ගත හැකි උපරිම අයිතම සංඛ්‍යාව $1 ක් වේ.', // from v2.1.17 added 17.10.2016
+			'errRestore'           : 'කුණු කූඩයෙන් නැවත ලබා ගත නොහැක. යළි පිහිටුවීමේ ගමනාන්තය(restore destination) හඳුනාගත නොහැක.', // from v2.1.24 added 3.5.2017
+			'errEditorNotFound'    : 'මෙම ගොනු වර්ගයේ සංස්කාරකය හමු නොවිණි.', // from v2.1.25 added 23.5.2017
+			'errServerError'       : 'සේවාදායකයේ පැත්තෙන්(server side) දෝශයක් ඇතිවිය.', // from v2.1.25 added 16.6.2017
+			'errEmpty'             : '"$1" ෆෝල්ඩරය හිස් කිරීමට නොහැක.', // from v2.1.25 added 22.6.2017
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Create archive',
