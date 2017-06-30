@@ -264,12 +264,10 @@ var elFinder = function(node, opts, bootCallback) {
 				rmClass, hashes, calc, gc, collapsed, prevcwd;
 			
 			if (self.api >= 2.1) {
-				if (data.options.uiCmdMap) {
-					// support volume driver option `uiCmdMap`
-					self.commandMap = (data.options.uiCmdMap && Object.keys(data.options.uiCmdMap).length)? data.options.uiCmdMap : {};
-					if (uiCmdMapPrev !== JSON.stringify(self.commandMap)) {
-						uiCmdMapPrev = JSON.stringify(self.commandMap);
-					}
+				// support volume driver option `uiCmdMap`
+				self.commandMap = (data.options.uiCmdMap && Object.keys(data.options.uiCmdMap).length)? data.options.uiCmdMap : {};
+				if (uiCmdMapPrev !== JSON.stringify(self.commandMap)) {
+					uiCmdMapPrev = JSON.stringify(self.commandMap);
 				}
 			} else {
 				self.options.sync = 0;
@@ -3619,9 +3617,6 @@ var elFinder = function(node, opts, bootCallback) {
 		soundPath = this.options.soundPath.replace(/\/+$/, '') + '/';
 	}
 	
-	// update size	
-	self.resize(width, height);
-	
 	// attach events to document
 	$(document)
 		// disable elfinder on click outside elfinder
@@ -4069,6 +4064,9 @@ var elFinder = function(node, opts, bootCallback) {
 			}
 		});
 		
+		// update size	
+		self.resize(width, height);
+
 		(function() {
 			var navbar = self.getUI('navbar'),
 				cwd    = self.getUI('cwd').parent();
