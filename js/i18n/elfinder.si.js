@@ -29,7 +29,7 @@
 			'errNode'              : 'ElFinder විසින් DOM Element නිර්මාණය කිරීමට අවශ්‍යව අැත.',
 			'errURL'               : 'වලංගු නොවන elFinder සැකැස්මකි! URL විකල්පය සැකසා නැත.',
 			'errAccess'            : 'භාවිතය අත්හිටුවා ඇත.',
-			'errConnect'           : 'Backend වෙත සම්බන්ධ වීමට නොහැකිය.',
+			'errConnect'           : 'පසුබිම(Backend) වෙත සම්බන්ධ වීමට නොහැකිය.',
 			'errAbort'             : 'සම්බන්ධතාවය වසාදමා ඇත.',
 			'errTimeout'           : 'සම්බන්ධතා කල් ඉකුත්වී ඇත.',
 			'errNotFound'          : 'පසුබිම(Backend) සොයාගත නොහැකි විය.',
@@ -93,8 +93,8 @@
 			'errResizeNoChange'    : 'රූපයේ ප්‍රමාණය වෙනස් නොවුණි.',  // added 7.3.2013
 			'errUsupportType'      : 'නොගැලපෙන ගොනු වර්ගයකි.',
 			'errNotUTF8Content'    : '"$1" ගොනුව UTF-8 හි නොමැති අතර සංස්කරණය කළ නොහැක.',  // added 9.11.2011
-			'errNetMount'          : '"$1" සවි කිරීමට(mount කිරීමට) නොහැක.', // added 17.04.2012
-			'errNetMountNoDriver'  : 'protocol නොගැලපේ.',     // added 17.04.2012
+			'errNetMount'          : '"$1" සවි(mount) කිරීමට නොහැක.', // added 17.04.2012
+			'errNetMountNoDriver'  : 'ප්‍රොටොකෝලය(protocol) නොගැලපේ.',     // added 17.04.2012
 			'errNetMountFailed'    : 'සවි කිරීම(mount කිරීම) අසාර්ථක විය.',         // added 17.04.2012
 			'errNetMountHostReq'   : 'ධාරකය(Host) අවශ්‍ය වේ.', // added 18.04.2012
 			'errSessionExpires'    : 'ඔබේ අක්‍රියතාව හේතුවෙන් සැසිය(session) කල් ඉකුත් වී ඇත.',
@@ -106,7 +106,7 @@
 			'errExtractExec'       : 'ගොනු දිගහැරීමේදී(extracting) දෝෂයක් ඇතිවිය: "$1"',
 			'errNetUnMount'        : 'විසන්ධි කිරීමට(unmount) නොහැක.', // from v2.1 added 30.04.2012
 			'errConvUTF8'          : 'UTF-8 වෙත පරිවර්තනය කළ නොහැක.', // from v2.1 added 08.04.2014
-			'errFolderUpload'      : 'ඔබ ෆෝල්ඩරය උඩුගත(upload) කිරීමට කැමති නම් නවීන බ්‍රවුසරයකින් උත්සාහ කරන්න. ', // from v2.1 added 26.6.2015
+			'errFolderUpload'      : 'ඔබ ෆෝල්ඩරය උඩුගත(upload) කිරීමට කැමති නම් නවීන බ්‍රවුසරයකින් උත්සාහ කරන්න.', // from v2.1 added 26.6.2015
 			'errSearchTimeout'     : '"$1" සෙවීම කල් ඉකුත්වී ඇත. සෙවුම් ප්‍රතිඵල අර්ධ වශයෙන් දිස්වේ.', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : 'නැවත බලය(Re-authorization) ලබා දීම අවශ්‍ය වේ.', // from v2.1.10 added 24.3.2016
 			'errMaxTargets'        : 'තෝරා ගත හැකි උපරිම අයිතම සංඛ්‍යාව $1 ක් වේ.', // from v2.1.17 added 17.10.2016
@@ -126,20 +126,20 @@
 			'cmdextract'   : 'සංරක්ෂිතයේ ගොනු දිගහරින්න(Extract)',
 			'cmdforward'   : 'ඉදිරියට',
 			'cmdgetfile'   : 'ගොනු තෝරන්න',
-			'cmdhelp'      : 'මෙම මෘදුකාංගය ගැන',
-			'cmdhome'      : 'Home',
+			'cmdhelp'      : 'මෙම මෘදුකාංගය පිළිබඳව',
+			'cmdhome'      : 'නිවහන(Home)',
 			'cmdinfo'      : 'තොරතුරු ලබාගන්න',
-			'cmdmkdir'     : 'නව ෆෝල්ඩරය',
-			'cmdmkdirin'   : 'නව ෆෝල්ඩරයක් තුළට', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'නව ලිඛිත(text) ගොනුවක්',
+			'cmdmkdir'     : 'අළුත් ෆෝල්ඩරයක්',
+			'cmdmkdirin'   : 'අළුත් ෆෝල්ඩරයක් තුළට', // from v2.1.7 added 19.2.2016
+			'cmdmkfile'    : 'අළුත් ලිඛිත(text) ගොනුවක්',
 			'cmdopen'      : 'විවෘත කරන්න',
-			'cmdpaste'     : 'Paste',
+			'cmdpaste'     : 'දමන්න(Paste)',
 			'cmdquicklook' : 'පූර්ව දර්ශනයක්(Preview)',
-			'cmdreload'    : 'Reload',
+			'cmdreload'    : 'නැවත අළුත් කරන්න(Reload)',
 			'cmdrename'    : 'නම වෙනස් කරන්න',
 			'cmdrm'        : 'මකන්න',
-			'cmdtrash'     : 'කුණු කූඩයට', //from v2.1.24 added 29.4.2017
-			'cmdrestore'   : 'Restore', //from v2.1.24 added 3.5.2017
+			'cmdtrash'     : 'කුණු කූඩයට දමන්න', //from v2.1.24 added 29.4.2017
+			'cmdrestore'   : 'යළි පිහිටුවන්න(Restore)', //from v2.1.24 added 3.5.2017
 			'cmdsearch'    : 'ගොනු සොයන්න',
 			'cmdup'        : 'ප්‍ර්‍රධාන නාමාවලිය(parent directory) වෙත යන්න',
 			'cmdupload'    : 'ගොනු උඩුගත(Upload) කරන්න',
@@ -148,59 +148,59 @@
 			'cmdsort'      : 'වර්ගීකරණය කරන්න',
 			'cmdnetmount'  : 'ජාල එ්කකයක්(network volume) සවි(mount) කරන්න', // added 18.04.2012
 			'cmdnetunmount': 'ගලවන්න(Unmount)', // from v2.1 added 30.04.2012
-			'cmdplaces'    : 'To Places', // added 28.12.2014
-			'cmdchmod'     : 'Change mode', // from v2.1 added 20.6.2015
+			'cmdplaces'    : 'පහසු ස්ථානයට(To Places)', // added 28.12.2014
+			'cmdchmod'     : 'ක්‍රමය වෙනස් කරන්න', // from v2.1 added 20.6.2015
 			'cmdopendir'   : 'ෆෝල්ඩරය විවෘත කරන්න', // from v2.1 added 13.1.2016
 			'cmdcolwidth'  : 'නැවත තීරු පළල පිහිටුවන්න', // from v2.1.13 added 12.06.2016
 			'cmdfullscreen': 'පුළුල් තිරය', // from v2.1.15 added 03.08.2016
-			'cmdmove'      : 'Move', // from v2.1.15 added 21.08.2016
+			'cmdmove'      : 'මාරු කරන්න(Move)', // from v2.1.15 added 21.08.2016
 			'cmdempty'     : 'ෆෝල්ඩරය හිස් කරන්න', // from v2.1.25 added 22.06.2017
 
 			/*********************************** buttons ***********************************/
-			'btnClose'  : 'Close',
-			'btnSave'   : 'Save',
-			'btnRm'     : 'Remove',
-			'btnApply'  : 'Apply',
-			'btnCancel' : 'Cancel',
-			'btnNo'     : 'No',
-			'btnYes'    : 'Yes',
-			'btnMount'  : 'Mount',  // added 18.04.2012
-			'btnApprove': 'Goto $1 & approve', // from v2.1 added 26.04.2012
-			'btnUnmount': 'Unmount', // from v2.1 added 30.04.2012
-			'btnConv'   : 'Convert', // from v2.1 added 08.04.2014
-			'btnCwd'    : 'Here',      // from v2.1 added 22.5.2015
-			'btnVolume' : 'Volume',    // from v2.1 added 22.5.2015
-			'btnAll'    : 'All',       // from v2.1 added 22.5.2015
-			'btnMime'   : 'MIME Type', // from v2.1 added 22.5.2015
-			'btnFileName':'Filename',  // from v2.1 added 22.5.2015
-			'btnSaveClose': 'Save & Close', // from v2.1 added 12.6.2015
-			'btnBackup' : 'Backup', // fromv2.1 added 28.11.2015
-			'btnRename'    : 'Rename',      // from v2.1.24 added 6.4.2017
-			'btnRenameAll' : 'Rename(All)', // from v2.1.24 added 6.4.2017
-			'btnPrevious' : 'Prev ($1/$2)', // from v2.1.24 added 11.5.2017
-			'btnNext'     : 'Next ($1/$2)', // from v2.1.24 added 11.5.2017
-			'btnSaveAs'   : 'Save As', // from v2.1.25 added 24.5.2017
+			'btnClose'  : 'වසන්න',
+			'btnSave'   : 'සුරකින්න',
+			'btnRm'     : 'ඉවත් කරන්න',
+			'btnApply'  : 'යොදන්න(Apply)',
+			'btnCancel' : 'අවලංගු කරන්න',
+			'btnNo'     : 'නැත',
+			'btnYes'    : 'ඔව්',
+			'btnMount'  : 'සවිකිරීම(Mount)',  // added 18.04.2012
+			'btnApprove': 'කරුණාකර $1 අනුමත කරන්න', // from v2.1 added 26.04.2012
+			'btnUnmount': 'ගලවන්න(Unmount)', // from v2.1 added 30.04.2012
+			'btnConv'   : 'පරිවර්තනය කරන්න', // from v2.1 added 08.04.2014
+			'btnCwd'    : 'මෙතන',      // from v2.1 added 22.5.2015
+			'btnVolume' : 'එ්කකය(Volume)',    // from v2.1 added 22.5.2015
+			'btnAll'    : 'සියල්ල',       // from v2.1 added 22.5.2015
+			'btnMime'   : 'MIME වර්ගය', // from v2.1 added 22.5.2015
+			'btnFileName':'ගොනුවේ නම',  // from v2.1 added 22.5.2015
+			'btnSaveClose': 'සුරකින්න සහ වසන්න', // from v2.1 added 12.6.2015
+			'btnBackup' : 'උපස්ථ(Backup) කරන්න', // fromv2.1 added 28.11.2015
+			'btnRename'    : 'නම වෙනස් කරන්න',      // from v2.1.24 added 6.4.2017
+			'btnRenameAll' : 'නම වෙනස් කරන්න(සියල්ල)', // from v2.1.24 added 6.4.2017
+			'btnPrevious' : 'පෙර ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnNext'     : 'ඊළඟ ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnSaveAs'   : 'වෙනත් නමකින් සුරකින්න(Save As)', // from v2.1.25 added 24.5.2017
 
 			/******************************** notifications ********************************/
-			'ntfopen'     : 'Open folder',
-			'ntffile'     : 'Open file',
-			'ntfreload'   : 'Reload folder content',
-			'ntfmkdir'    : 'Creating folder',
-			'ntfmkfile'   : 'Creating files',
-			'ntfrm'       : 'Delete files',
-			'ntfcopy'     : 'Copy files',
-			'ntfmove'     : 'Move files',
-			'ntfprepare'  : 'Checking existing items',
-			'ntfrename'   : 'Rename files',
-			'ntfupload'   : 'Uploading files',
-			'ntfdownload' : 'Downloading files',
-			'ntfsave'     : 'Save files',
-			'ntfarchive'  : 'Creating archive',
-			'ntfextract'  : 'Extracting files from archive',
-			'ntfsearch'   : 'Searching files',
-			'ntfresize'   : 'Resizing images',
-			'ntfsmth'     : 'Doing something',
-			'ntfloadimg'  : 'Loading image',
+			'ntfopen'     : 'ෆෝල්ඩරය විවෘත කරන්න',
+			'ntffile'     : 'ගොනුව විවෘත කරන්න',
+			'ntfreload'   : 'ෆෝල්ඩර් අන්තර්ගතය නැවත අළුත් කරන්න(Reload)',
+			'ntfmkdir'    : 'ෆෝල්ඩරයක් නිර්මාණය කිරීමින්',
+			'ntfmkfile'   : 'ගොනුව නිර්මාණය කිරීමින්',
+			'ntfrm'       : 'ගොනු මකන්න',
+			'ntfcopy'     : 'ගොනු පිටපත් කරන්න',
+			'ntfmove'     : 'ගොනු මාරු කරන්න',
+			'ntfprepare'  : 'පවතින අයිතම පිරික්සීම',
+			'ntfrename'   : 'ගොනු නැවත නම් කරන්න',
+			'ntfupload'   : 'ගොනු උඩුගත(uploading) කරමින්',
+			'ntfdownload' : 'ගොනු බාගත(downloading) කරමින්',
+			'ntfsave'     : 'ගොනු සුරකින්න',
+			'ntfarchive'  : 'සංරක්ෂණය(archive) සෑදීම',
+			'ntfextract'  : 'සංරක්ෂණයෙන්(archive) ගොනු දිගහරිමින්(Extracting)',
+			'ntfsearch'   : 'ගොනු සොයමින්',
+			'ntfresize'   : 'රූප ප්‍රමාණය වෙනස් කරමින්',
+			'ntfsmth'     : 'දෙයක් කරමින්',
+			'ntfloadimg'  : 'පින්තූරය Loading',
 			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
 			'ntfnetunmount': 'Unmounting network volume', // from v2.1 added 30.04.2012
 			'ntfdim'      : 'Acquiring image dimension', // added 20.05.2013
