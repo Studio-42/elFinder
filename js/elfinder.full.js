@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.25 (2.1-src Nightly: 777bd7f) (2017-07-01)
+ * Version 2.1.25 (2.1-src Nightly: 611dded) (2017-07-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2845,6 +2845,7 @@ var elFinder = function(node, opts, bootCallback) {
 	 **/
 	this.destroy = function() {
 		if (node && node[0].elfinder) {
+			node.hasClass('elfinder-fullscreen') && self.toggleFullscreen(node);
 			this.options.syncStart = false;
 			this.autoSync('forcestop');
 			this.trigger('destroy').disable();
@@ -7992,7 +7993,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.25 (2.1-src Nightly: 777bd7f)';
+elFinder.prototype.version = '2.1.25 (2.1-src Nightly: 611dded)';
 
 
 
@@ -25729,10 +25730,6 @@ elFinder.prototype.commands.rm = function() {
 			return thash;
 		};
 	
-	fm.bind('contextmenu', function(e) {
-		self.update(void(0), getTHash(e.data.targets)? 'trash' : 'rm');
-	});
-	
 	this.syncTitleOnChange = true;
 	this.updateOnSelect = true;
 	this.shortcuts = [{
@@ -25741,6 +25738,11 @@ elFinder.prototype.commands.rm = function() {
 	this.handlers = {
 		'open' : function() {
 			self.update(void(0), fm.i18n(self.fm.option('trashHash')? 'trash' : 'rm'));
+		},
+		'select' : function(e) {
+			if (e.data && e.data.selected && e.data.selected.length) {
+				self.update(void(0), getTHash(e.data.selected)? 'trash' : 'rm');
+			}
 		}
 	}
 	
