@@ -996,6 +996,7 @@ elFinder.prototype.commands.resize = function() {
 													data : {
 														cmd     : 'put',
 														target  : hash,
+														encoding: 'scheme', 
 														content : fm.convAbsUrl(url)
 													},
 													notify : {type : 'save', cnt : 1},
