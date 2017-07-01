@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.25 (2.1-src Nightly: 7656121) (2017-07-01)
+ * Version 2.1.25 (2.1-src Nightly: 777bd7f) (2017-07-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7992,7 +7992,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.25 (2.1-src Nightly: 7656121)';
+elFinder.prototype.version = '2.1.25 (2.1-src Nightly: 777bd7f)';
 
 
 
@@ -14300,6 +14300,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 					minHeight : opts.minHeight,
 					maxWidth  : opts.maxWidth,
 					maxHeight : opts.maxHeight
+				})
+				.on('touchstart touchmove touchend', function(e) {
+					// stopPropagation of touch events
+					e.stopPropagation();
 				})
 				.on('mousedown', function(e) {
 					if (! dialog.hasClass('ui-front')) {
