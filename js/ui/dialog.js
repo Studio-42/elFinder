@@ -299,6 +299,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 					maxWidth  : opts.maxWidth,
 					maxHeight : opts.maxHeight
 				})
+				.on('touchstart touchmove touchend', function(e) {
+					// stopPropagation of touch events
+					e.stopPropagation();
+				})
 				.on('mousedown', function(e) {
 					if (! dialog.hasClass('ui-front')) {
 						setTimeout(function() {
