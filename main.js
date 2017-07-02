@@ -85,6 +85,7 @@
 								}
 							);
 						}
+						fm.getUI().css('background-image', 'none');
 					});
 					// for example set document.title dynamically.
 					var title = document.title;
