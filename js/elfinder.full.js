@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.25 (2.1-src Nightly: 52464ef) (2017-07-02)
+ * Version 2.1.25 (2.1-src Nightly: 4c23ae9) (2017-07-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7993,7 +7993,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.25 (2.1-src Nightly: 52464ef)';
+elFinder.prototype.version = '2.1.25 (2.1-src Nightly: 4c23ae9)';
 
 
 
@@ -14331,13 +14331,13 @@ $.fn.elfinderdialog = function(opts, fm) {
 								top   = parseInt(d.css('top')),
 								left  = parseInt(d.css('left')),
 								_top  = parseInt(dialog.css('top')),
-								_left = parseInt(dialog.css('left'))
-								;
+								_left = parseInt(dialog.css('left')),
+								ct, cl;
 
-							if (d[0] != dialog[0] && (top == _top || left == _left)) {
+							if (d[0] != dialog[0] && ((ct = Math.abs(top - _top) < 10) || (cl = Math.abs(left - _left) < 10))) {
 								dialog.css({
-									top  : (top + 10)+'px',
-									left : (left + 10)+'px'
+									top  : ct ? (top + 10) : _top,
+									left : cl ? (left + 10) : _left
 								});
 							}
 						});
@@ -21309,7 +21309,7 @@ elFinder.prototype.commands.netmount = function() {
 					});
 
 					if (!data.host) {
-						return fm.trigger('error', {error : 'errNetMountHostReq'});
+						return fm.trigger('error', {error : 'errNetMountHostReq', opts : {modal: true}});
 					}
 
 					fm.request({data : data, notify : {type : 'netmount', cnt : 1, hideCnt : true}})
@@ -25736,13 +25736,14 @@ elFinder.prototype.commands.rm = function() {
 			}
 		}
 	}
+	this.value = 'rm';
 	
 	this.init = function() {
 		self.change(function() {
 			delete self.extra;
 			self.title = fm.i18n('cmd' + self.value);
 			self.className = self.value;
-			self.button.children('span.elfinder-button-icon')[self.value === 'trash'? 'addClass' : 'removeClass']('elfinder-button-icon-trash');
+			self.button && self.button.children('span.elfinder-button-icon')[self.value === 'trash'? 'addClass' : 'removeClass']('elfinder-button-icon-trash');
 			if (self.value === 'trash') {
 				self.extra = {
 					icon: 'rm',
