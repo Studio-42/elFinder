@@ -315,13 +315,14 @@ elFinder.prototype.commands.rm = function() {
 			}
 		}
 	}
+	this.value = 'rm';
 	
 	this.init = function() {
 		self.change(function() {
 			delete self.extra;
 			self.title = fm.i18n('cmd' + self.value);
 			self.className = self.value;
-			self.button.children('span.elfinder-button-icon')[self.value === 'trash'? 'addClass' : 'removeClass']('elfinder-button-icon-trash');
+			self.button && self.button.children('span.elfinder-button-icon')[self.value === 'trash'? 'addClass' : 'removeClass']('elfinder-button-icon-trash');
 			if (self.value === 'trash') {
 				self.extra = {
 					icon: 'rm',
