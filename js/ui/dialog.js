@@ -328,13 +328,13 @@ $.fn.elfinderdialog = function(opts, fm) {
 								top   = parseInt(d.css('top')),
 								left  = parseInt(d.css('left')),
 								_top  = parseInt(dialog.css('top')),
-								_left = parseInt(dialog.css('left'))
-								;
+								_left = parseInt(dialog.css('left')),
+								ct, cl;
 
-							if (d[0] != dialog[0] && (top == _top || left == _left)) {
+							if (d[0] != dialog[0] && ((ct = Math.abs(top - _top) < 10) || (cl = Math.abs(left - _left) < 10))) {
 								dialog.css({
-									top  : (top + 10)+'px',
-									left : (left + 10)+'px'
+									top  : ct ? (top + 10) : _top,
+									left : cl ? (left + 10) : _left
 								});
 							}
 						});
