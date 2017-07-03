@@ -315,6 +315,7 @@ elFinder.prototype.commands.rm = function() {
 			}
 		}
 	}
+	this.value = 'rm';
 	
 	this.init = function() {
 		self.change(function() {
