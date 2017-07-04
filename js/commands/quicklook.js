@@ -115,6 +115,8 @@
 			return value && value !== '' && value != 'no';
 		},
 		
+		platformWin = (window.navigator.platform.indexOf('Win') != -1),
+		
 		/**
 		 * Opened window width (from config)
 		 *
@@ -363,7 +365,7 @@
 			$('<div class="elfinder-quicklook-titlebar"/>')
 			.append(
 				title,
-				$('<span class="ui-icon ui-icon-circle-close"/>').mousedown(function(e) {
+				$('<span class="ui-icon ui-icon-circle-close'+(platformWin? ' elfinder-platformWin' : '')+'"/>').mousedown(function(e) {
 					e.stopPropagation();
 					self.window.trigger('close');
 				})),
