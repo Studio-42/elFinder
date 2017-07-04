@@ -186,7 +186,8 @@ class elFinderConnector {
 			
 			$toEnd = true;
 			$fp = $data['pointer'];
-			if (($this->reqMethod === 'GET' || $this->reqMethod === 'HEAD')
+			$isHEAD = ($this->reqMethod === 'HEAD');
+			if (($this->reqMethod === 'GET' || $isHEAD)
 					&& elFinder::isSeekableStream($fp)
 					&& (array_search('Accept-Ranges: none', headers_list()) === false)) {
 				header('Accept-Ranges: bytes');
@@ -215,11 +216,11 @@ class elFinderConnector {
 							header('Content-Length: ' . $psize);
 							header('Content-Range: bytes ' . $start . '-' . $end . '/' . $size);
 							
-							fseek($fp, $start);
+							!$isHEAD && fseek($fp, $start);
 						}
 					}
 				}
-				if (is_null($psize)){
+				if (!$isHEAD && is_null($psize)){
 					elFinder::rewind($fp);
 				}
 			} else {
@@ -233,7 +234,7 @@ class elFinderConnector {
 				}
 			}
 
-			if ($reqMethod !== 'HEAD') {
+			if (!$isHEAD) {
 				if ($toEnd) {
 					fpassthru($fp);
 				} else {

@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.25 (2.1-src Nightly: 4c23ae9) (2017-07-03)
+ * Version 2.1.25 (2.1-src Nightly: 99c8cdd) (2017-07-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2394,7 +2394,11 @@ button.elfinder-info-button {
 	margin-top:-8px;
 	width:16px;
 	height:16px;
-	cursor:default;
+	cursor:pointer;
+}
+.elfinder-quicklook-titlebar .ui-icon.elfinder-platformWin {
+	left : auto;
+	right : 4px;
 }
 
 .elfinder-touch .elfinder-quicklook-titlebar .ui-icon {

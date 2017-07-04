@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.25 (2.1-src Nightly: 4c23ae9) (2017-07-03)
+ * Version 2.1.25 (2.1-src Nightly: 99c8cdd) (2017-07-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7993,7 +7993,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.25 (2.1-src Nightly: 4c23ae9)';
+elFinder.prototype.version = '2.1.25 (2.1-src Nightly: 99c8cdd)';
 
 
 
@@ -14332,9 +14332,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 								left  = parseInt(d.css('left')),
 								_top  = parseInt(dialog.css('top')),
 								_left = parseInt(dialog.css('left')),
-								ct, cl;
+								ct    = Math.abs(top - _top) < 10,
+								cl    = Math.abs(left - _left) < 10;
 
-							if (d[0] != dialog[0] && ((ct = Math.abs(top - _top) < 10) || (cl = Math.abs(left - _left) < 10))) {
+							if (d[0] != dialog[0] && (ct || cl)) {
 								dialog.css({
 									top  : ct ? (top + 10) : _top,
 									left : cl ? (left + 10) : _left
@@ -22199,6 +22200,8 @@ elFinder.prototype.commands.places = function() {
 			return value && value !== '' && value != 'no';
 		},
 		
+		platformWin = (window.navigator.platform.indexOf('Win') != -1),
+		
 		/**
 		 * Opened window width (from config)
 		 *
@@ -22447,7 +22450,7 @@ elFinder.prototype.commands.places = function() {
 			$('<div class="elfinder-quicklook-titlebar"/>')
 			.append(
 				title,
-				$('<span class="ui-icon ui-icon-circle-close"/>').mousedown(function(e) {
+				$('<span class="ui-icon ui-icon-circle-close'+(platformWin? ' elfinder-platformWin' : '')+'"/>').mousedown(function(e) {
 					e.stopPropagation();
 					self.window.trigger('close');
 				})),
