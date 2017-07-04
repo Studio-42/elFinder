@@ -329,9 +329,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 								left  = parseInt(d.css('left')),
 								_top  = parseInt(dialog.css('top')),
 								_left = parseInt(dialog.css('left')),
-								ct, cl;
+								ct    = Math.abs(top - _top) < 10,
+								cl    = Math.abs(left - _left) < 10;
 
-							if (d[0] != dialog[0] && ((ct = Math.abs(top - _top) < 10) || (cl = Math.abs(left - _left) < 10))) {
+							if (d[0] != dialog[0] && (ct || cl)) {
 								dialog.css({
 									top  : ct ? (top + 10) : _top,
 									left : cl ? (left + 10) : _left
