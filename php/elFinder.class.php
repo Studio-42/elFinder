@@ -1526,7 +1526,13 @@ class elFinder {
 				'Connection: close'
 			)
 		);
-		if (isset($file['url']) && $file['url'] && $file['url'] != 1) {
+
+
+		$xsendfile = $volume->options($target)['xsendfile'];
+		$realpath = $volume->realpath($target);
+		if ($xsendfile !== '' && $realpath !== false) {
+			$result['header'][] = $xsendfile . ': ' . $realpath;
+		} else if (isset($file['url']) && $file['url'] && $file['url'] != 1) {
 			$result['header'][] = 'Content-Location: '.$file['url'];
 		}
 		return $result;
