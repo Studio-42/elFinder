@@ -105,7 +105,11 @@
 	margin-top:-8px;
 	width:16px;
 	height:16px;
-	cursor:default;
+	cursor:pointer;
+}
+.elfinder-quicklook-titlebar .ui-icon.elfinder-platformWin {
+	left : auto;
+	right : 4px;
 }
 
 .elfinder-touch .elfinder-quicklook-titlebar .ui-icon {
