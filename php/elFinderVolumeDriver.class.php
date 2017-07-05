@@ -1606,8 +1606,7 @@ abstract class elFinderVolumeDriver {
 			'syncChkAsTs'     => intval($this->options['syncChkAsTs']),
 			'syncMinMs'       => intval($this->options['syncMinMs']),
 			'i18nFolderName'  => intval($this->options['i18nFolderName']),
-			'tmbCrop'         => intval($this->options['tmbCrop']),
-			'xsendfile'       => $this->options['xsendfile']
+			'tmbCrop'         => intval($this->options['tmbCrop'])
 		);
 		if (! empty($this->options['trashHash'])) {
 			$opts['trashHash'] = $this->options['trashHash'];
