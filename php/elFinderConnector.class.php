@@ -216,18 +216,20 @@ class elFinderConnector {
 							header('Content-Length: ' . $psize);
 							header('Content-Range: bytes ' . $start . '-' . $end . '/' . $size);
 							
+							// Apache mod_xsendfile dose not support range request
+							if (isset($data['info']['xsendfile']) && strtolower($data['info']['xsendfile']) === 'x-sendfile') {
+								if (function_exists('header_remove')) {
+									header_remove($data['info']['xsendfile']);
+								} else {
+									header($data['info']['xsendfile'] . ':');
+								}
+								unset($data['info']['xsendfile']);
+								if ($this->reqMethod !== 'HEAD') {
+									$sendData = true;
+								}
+							}
+							
 							$sendData && fseek($fp, $start);
-						}
-					}
-					if (isset($data['info']['xsendfile']) && strtolower($data['info']['xsendfile']) === 'x-sendfile') {
-						if (function_exists('header_remove')) {
-							header_remove($data['info']['xsendfile']);
-						} else {
-							header($data['info']['xsendfile'] . ':');
-						}
-						unset($data['info']['xsendfile']);
-						if ($this->reqMethod !== 'HEAD') {
-							$sendData = true;
 						}
 					}
 				}
@@ -246,6 +248,7 @@ class elFinderConnector {
 			}
 
 			if ($sendData) {
+				debug('send data by PHP');
 				if ($toEnd) {
 					fpassthru($fp);
 				} else {
