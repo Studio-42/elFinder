@@ -248,7 +248,6 @@ class elFinderConnector {
 			}
 
 			if ($sendData) {
-				debug('send data by PHP');
 				if ($toEnd) {
 					fpassthru($fp);
 				} else {
