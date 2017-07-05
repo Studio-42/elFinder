@@ -1526,6 +1526,20 @@ class elFinder {
 				'Connection: close'
 			)
 		);
+		
+		// check 'xsendfile'
+		$xsendfile = $volume->getOption('xsendfile');
+		$path = null;
+		if ($xsendfile) {
+			$info = stream_get_meta_data($fp);
+			$path = empty($info["uri"])? null : $info["uri"];
+		}
+		if ($path) {
+			$result['header'][] = $xsendfile . ': ' . $path;
+			$result['info']['xsendfile'] = $xsendfile;
+		}
+		
+		// add "Content-Location" if file has url data
 		if (isset($file['url']) && $file['url'] && $file['url'] != 1) {
 			$result['header'][] = 'Content-Location: '.$file['url'];
 		}
