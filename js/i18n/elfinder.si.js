@@ -1,7 +1,7 @@
 /**
  * Sinhala translation
  * @author CodeLyokoXtEAM <XcodeLyokoTEAM@gmail.com>
- * @version 2017-06-29
+ * @version 2017-07-06
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -204,73 +204,73 @@
 			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
 			'ntfnetunmount': 'Unmounting network volume', // from v2.1 added 30.04.2012
 			'ntfdim'      : 'Acquiring image dimension', // added 20.05.2013
-			'ntfreaddir'  : 'Reading folder infomation', // from v2.1 added 01.07.2013
+			'ntfreaddir'  : 'ෆෝල්ඩරයේ තොරතුරු කියවමින්', // from v2.1 added 01.07.2013
 			'ntfurl'      : 'Getting URL of link', // from v2.1 added 11.03.2014
-			'ntfchmod'    : 'Changing file mode', // from v2.1 added 20.6.2015
-			'ntfpreupload': 'Verifying upload file name', // from v2.1 added 31.11.2015
-			'ntfzipdl'    : 'Creating a file for download', // from v2.1.7 added 23.1.2016
-			'ntfparents'  : 'Getting path infomation', // from v2.1.17 added 2.11.2016
+			'ntfchmod'    : 'ගොනු ආකරය වෙනස් කරමින්', // from v2.1 added 20.6.2015
+			'ntfpreupload': 'උඩුගත(upload) කරන ලද ගොනු නාමය සත්‍යාපනය කරමින්(Verifying)', // from v2.1 added 31.11.2015
+			'ntfzipdl'    : 'බාගත කරගැනීම(download) සඳහා ගොනුවක් නිර්මාණය කරමින්', // from v2.1.7 added 23.1.2016
+			'ntfparents'  : 'මාර්ග(path) තොරතුරු ලබා ගනිමින්', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'Processing the uploaded file', // from v2.1.17 added 2.11.2016
 			'ntftrash'    : 'Doing throw in the trash', // from v2.1.24 added 2.5.2017
 			'ntfrestore'  : 'Doing restore from tha trash', // from v2.1.24 added 3.5.2017
-			'ntfchkdir'   : 'Checking destination folder', // from v2.1.24 added 3.5.2017
+			'ntfchkdir'   : 'ගමනාන්ත(destination) ෆෝල්ඩරය පරීක්ෂා කරමින්', // from v2.1.24 added 3.5.2017
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : 'Trash', //from v2.1.24 added 29.4.2017
 
 			/************************************ dates **********************************/
-			'dateUnknown' : 'unknown',
-			'Today'       : 'Today',
-			'Yesterday'   : 'Yesterday',
-			'msJan'       : 'Jan',
-			'msFeb'       : 'Feb',
-			'msMar'       : 'Mar',
-			'msApr'       : 'Apr',
-			'msMay'       : 'May',
-			'msJun'       : 'Jun',
-			'msJul'       : 'Jul',
-			'msAug'       : 'Aug',
-			'msSep'       : 'Sep',
-			'msOct'       : 'Oct',
-			'msNov'       : 'Nov',
-			'msDec'       : 'Dec',
-			'January'     : 'January',
-			'February'    : 'February',
-			'March'       : 'March',
-			'April'       : 'April',
-			'May'         : 'May',
-			'June'        : 'June',
-			'July'        : 'July',
-			'August'      : 'August',
-			'September'   : 'September',
-			'October'     : 'October',
-			'November'    : 'November',
-			'December'    : 'December',
-			'Sunday'      : 'Sunday',
-			'Monday'      : 'Monday',
-			'Tuesday'     : 'Tuesday',
-			'Wednesday'   : 'Wednesday',
-			'Thursday'    : 'Thursday',
-			'Friday'      : 'Friday',
-			'Saturday'    : 'Saturday',
-			'Sun'         : 'Sun',
-			'Mon'         : 'Mon',
-			'Tue'         : 'Tue',
-			'Wed'         : 'Wed',
-			'Thu'         : 'Thu',
-			'Fri'         : 'Fri',
-			'Sat'         : 'Sat',
+			'dateUnknown' : 'නොහඳුනයි',
+			'Today'       : 'අද',
+			'Yesterday'   : 'ඊයේ',
+			'msJan'       : 'ජනවා.',
+			'msFeb'       : 'පෙබ.',
+			'msMar'       : 'මාර්.',
+			'msApr'       : 'අප්‍රේ.',
+			'msMay'       : 'මැයි',
+			'msJun'       : 'ජූනි',
+			'msJul'       : 'ජුලි',
+			'msAug'       : 'අගෝ.',
+			'msSep'       : 'සැප්.',
+			'msOct'       : 'ඔක්තෝ.',
+			'msNov'       : 'නොවැ.',
+			'msDec'       : 'දෙසැ.',
+			'January'     : 'ජනවාරි',
+			'February'    : 'පෙබරවාරි',
+			'March'       : 'මාර්තු',
+			'April'       : 'අප්‍රේල්',
+			'May'         : 'මැයි',
+			'June'        : 'ජූනි',
+			'July'        : 'ජුලි',
+			'August'      : 'අගෝස්තු',
+			'September'   : 'සැප්තැම්බර්',
+			'October'     : 'ඔක්තෝම්බර්',
+			'November'    : 'නොවැම්බර්',
+			'December'    : 'දෙසැම්බර්',
+			'Sunday'      : 'ඉරිදා',
+			'Monday'      : 'සඳුදා',
+			'Tuesday'     : 'අඟහරුවාදා',
+			'Wednesday'   : 'බදාදා',
+			'Thursday'    : 'බ්‍රහස්පතින්දා',
+			'Friday'      : 'සිකුරාදා',
+			'Saturday'    : 'සෙනසුරාදා',
+			'Sun'         : 'ඉරිදා',
+			'Mon'         : 'සඳු.',
+			'Tue'         : 'අඟහ.',
+			'Wed'         : 'බදාදා',
+			'Thu'         : 'බ්‍රහස්.',
+			'Fri'         : 'සිකු.',
+			'Sat'         : 'සෙන.',
 
 			/******************************** sort variants ********************************/
-			'sortname'          : 'by name',
-			'sortkind'          : 'by kind',
-			'sortsize'          : 'by size',
-			'sortdate'          : 'by date',
-			'sortFoldersFirst'  : 'Folders first',
-			'sortperm'          : 'by permission', // from v2.1.13 added 13.06.2016
-			'sortmode'          : 'by mode',       // from v2.1.13 added 13.06.2016
-			'sortowner'         : 'by owner',      // from v2.1.13 added 13.06.2016
-			'sortgroup'         : 'by group',      // from v2.1.13 added 13.06.2016
+			'sortname'          : 'නම අනුව',
+			'sortkind'          : 'වර්ගය අනුව',
+			'sortsize'          : 'ප්‍රමාණය අනුව',
+			'sortdate'          : 'දිනය අනුව',
+			'sortFoldersFirst'  : 'ෆෝල්ඩර වලට පළමු තැන',
+			'sortperm'          : 'අවසරය අනුව', // from v2.1.13 added 13.06.2016
+			'sortmode'          : 'අාකාරය අනුව',       // from v2.1.13 added 13.06.2016
+			'sortowner'         : 'හිමිකරු අනුව',      // from v2.1.13 added 13.06.2016
+			'sortgroup'         : 'කණ්ඩායම අනුව',      // from v2.1.13 added 13.06.2016
 			'sortAlsoTreeview'  : 'Also Treeview',  // from v2.1.15 added 01.08.2016
 
 			/********************************** new items **********************************/
@@ -473,25 +473,25 @@
 			'kindDOCBOOK'     : 'Docbook XML document',
 			'kindMarkdown'    : 'Markdown text', // added 20.7.2015
 			// images
-			'kindImage'       : 'Image',
-			'kindBMP'         : 'BMP image',
-			'kindJPEG'        : 'JPEG image',
-			'kindGIF'         : 'GIF Image',
-			'kindPNG'         : 'PNG Image',
-			'kindTIFF'        : 'TIFF image',
-			'kindTGA'         : 'TGA image',
-			'kindPSD'         : 'Adobe Photoshop image',
-			'kindXBITMAP'     : 'X bitmap image',
-			'kindPXM'         : 'Pixelmator image',
+			'kindImage'       : 'පින්තූරය',
+			'kindBMP'         : 'BMP පින්තූරය',
+			'kindJPEG'        : 'JPEG පින්තූරය',
+			'kindGIF'         : 'GIF පින්තූරය',
+			'kindPNG'         : 'PNG පින්තූරය',
+			'kindTIFF'        : 'TIFF පින්තූරය',
+			'kindTGA'         : 'TGA පින්තූරය',
+			'kindPSD'         : 'Adobe Photoshop පින්තූරය',
+			'kindXBITMAP'     : 'X bitmap පින්තූරය',
+			'kindPXM'         : 'Pixelmator පින්තූරය',
 			// media
-			'kindAudio'       : 'Audio media',
-			'kindAudioMPEG'   : 'MPEG audio',
-			'kindAudioMPEG4'  : 'MPEG-4 audio',
-			'kindAudioMIDI'   : 'MIDI audio',
-			'kindAudioOGG'    : 'Ogg Vorbis audio',
-			'kindAudioWAV'    : 'WAV audio',
+			'kindAudio'       : 'ශබ්ධ මාධ්‍ය',
+			'kindAudioMPEG'   : 'MPEG ශබ්ධපටය',
+			'kindAudioMPEG4'  : 'MPEG-4 ශබ්ධපටය',
+			'kindAudioMIDI'   : 'MIDI ශබ්ධපටය',
+			'kindAudioOGG'    : 'Ogg Vorbis ශබ්ධපටය',
+			'kindAudioWAV'    : 'WAV ශබ්ධපටය',
 			'AudioPlaylist'   : 'MP3 playlist',
-			'kindVideo'       : 'Video media',
+			'kindVideo'       : 'Video මාධ්‍ය',
 			'kindVideoDV'     : 'DV movie',
 			'kindVideoMPEG'   : 'MPEG movie',
 			'kindVideoMPEG4'  : 'MPEG-4 movie',
