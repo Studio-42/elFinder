@@ -409,7 +409,9 @@ abstract class elFinderVolumeDriver {
 		'utf8patterns' => array("\u0438\u0306", "\u0435\u0308", "\u0418\u0306", "\u0415\u0308", "\u00d8A", "\u030a"),
 		'utf8replace'  => array("\u0439",        "\u0451",       "\u0419",       "\u0401",       "\u00d8", "\u00c5"),
 		// Header to use to accelerate sending local files to clients (e.g. 'X-Sendfile', 'X-Accel-Redirect')
-		'xsendfile'    => ''
+		'xsendfile'    => '',
+		// Root path to xsendfile target. Probably, this is required for 'X-Accel-Redirect' on Nginx.
+		'xsendfilePath'=> ''
 	);
 
 	/**
@@ -1525,6 +1527,16 @@ abstract class elFinderVolumeDriver {
 	 **/
 	public function root() {
 		return $this->encode($this->root);
+	}
+
+	/**
+	 * Return root path
+	 *
+	 * @return string
+	 * @author Naoki Sawada
+	 **/
+	public function getRootPath() {
+		return $this->root;
 	}
 
 	/**
