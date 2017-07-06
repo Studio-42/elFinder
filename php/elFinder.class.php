@@ -1532,7 +1532,17 @@ class elFinder {
 		$path = null;
 		if ($xsendfile) {
 			$info = stream_get_meta_data($fp);
-			$path = empty($info["uri"])? null : $info["uri"];
+			if ($path = empty($info['uri'])? null : $info['uri']) {
+				$basePath = rtrim($volume->getOption('xsendfilePath'), DIRECTORY_SEPARATOR);
+				if ($basePath) {
+					$root = rtrim($volume->getRootPath(), DIRECTORY_SEPARATOR);
+					if (strpos($path, $root) === 0) {
+						$path = $basePath . substr($path, strlen($root));
+					} else {
+						$path = null;
+					}
+				}
+			}
 		}
 		if ($path) {
 			$result['header'][] = $xsendfile . ': ' . $path;
