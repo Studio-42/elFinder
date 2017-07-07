@@ -1273,7 +1273,7 @@ class elFinder {
 		}
 		
 		if (!empty($args['init'])) {
-			$result['api'] = self::$version + (self::$revision / 10000);
+			$result['api'] = (float)self::$version + (self::$revision / 10000);
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');
 			$result['uplMaxFile'] = ini_get('max_file_uploads');
 			$result['netDrivers'] = array_keys(self::$netDrivers);
