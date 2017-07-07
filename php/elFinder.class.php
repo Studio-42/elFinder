@@ -16,14 +16,14 @@ class elFinder {
 	 *
 	 * @var string
 	 **/
-	protected $version = '2.1';
+	protected static $version = '2.1';
 	
 	/**
 	 * API revision that this connector supports all functions
 	 * 
 	 * @var integer
 	 */
-	protected $revision = 25;
+	protected static $revision = 25;
 	
 	/**
 	 * Storages (root dirs)
@@ -627,7 +627,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function version() {
-		return $this->version;
+		return self::$version;
 	}
 	
 	/**
@@ -637,7 +637,7 @@ class elFinder {
 	 * @author Naoki Sawada
 	 **/
 	public function revision() {
-		return $this->revision;
+		return self::$revision;
 	}
 	
 	/**
@@ -1273,7 +1273,7 @@ class elFinder {
 		}
 		
 		if (!empty($args['init'])) {
-			$result['api'] = $this->version + ($this->revision / 10000);
+			$result['api'] = self::$version + (self::$revision / 10000);
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');
 			$result['uplMaxFile'] = ini_get('max_file_uploads');
 			$result['netDrivers'] = array_keys(self::$netDrivers);
@@ -3430,7 +3430,7 @@ class elFinder {
 	 * @return string
 	 */
 	public static function getApiFullVersion() {
-		return $this->version . '.' . $this->revision;
+		return self::$version . '.' . self::$revision;
 	}
 	
 	/**
