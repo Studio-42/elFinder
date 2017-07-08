@@ -2,7 +2,7 @@
  * Русский язык translation
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
- * @version 2016-06-01
+ * @version 2017-07-08
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -19,6 +19,7 @@
 		direction  : 'ltr',
 		dateFormat : 'd M Y H:i', // Mar 13, 2012 05:27 PM
 		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
+		nonameDateFormat : 'ymd-His', // to apply if upload file is noname: 120513172700
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -50,6 +51,7 @@
 			'errLocked'            : '"$1" защищен и не может быть переименован, перемещен или удален.',
 			'errExists'            : 'В папке уже существует файл с именем "$1".',
 			'errInvName'           : 'Недопустимое имя файла.',
+			'errInvDirname'        : 'Недопустимое имя папки.',  // from v2.1.24 added 12.4.2017
 			'errFolderNotFound'    : 'Папка не найдена.',
 			'errFileNotFound'      : 'Файл не найден.',
 			'errTrgFolderNotFound' : 'Целевая папка "$1" не найдена.',
@@ -75,6 +77,7 @@
 			'errMove'              : 'Невозможно переместить "$1".',
 			'errCopyInItself'      : 'Невозможно скопировать "$1" в самого себя.',
 			'errRm'                : 'Невозможно удалить "$1".',
+			'errTrash'             : 'Невозможно переместить в корзину.', // from v2.1.24 added 30.4.2017
 			'errRmSrc'             : 'Невозможно удалить файлы источника.',
 			'errExtract'           : 'Невозможно извлечь фалы из "$1".',
 			'errArchive'           : 'Невозможно создать архив.',
@@ -106,7 +109,12 @@
 			'errConvUTF8'          : 'Не конвертируется в UTF-8', // from v2.1 added 08.04.2014
 			'errFolderUpload'      : 'Если вы хотите загружать папки, попробуйте Google Chrome.', // from v2.1 added 26.6.2015
 			'errSearchTimeout'     : 'Превышено время ожидания при поиске "$1". Результаты поиска частичные.', // from v2.1 added 12.1.2016
-			'errReauthRequire'     : 'Требуется повторная авторизация.', // from v2.1.10 added 3.24.2016
+			'errReauthRequire'     : 'Требуется повторная авторизация.', // from v2.1.10 added 24.3.2016
+			'errMaxTargets'        : 'Максимальное число выбираемых файлов: $1.', // from v2.1.17 added 17.10.2016
+			'errRestore'           : 'Невозможно восстановить из корзины. Не удалось определить путь для восстановления.', // from v2.1.24 added 3.5.2017
+			'errEditorNotFound'    : 'Не найден редактор для этого типа файлов.', // from v2.1.25 added 23.5.2017
+			'errServerError'       : 'Возникла ошибка на стороне сервера.', // from v2.1.25 added 16.6.2017
+			'errEmpty'             : 'Невозможно очистить папку "$1".', // from v2.1.25 added 22.6.2017
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Создать архив',
@@ -131,6 +139,8 @@
 			'cmdreload'    : 'Обновить',
 			'cmdrename'    : 'Переименовать',
 			'cmdrm'        : 'Удалить',
+			'cmdtrash'     : 'Переместить в корзину', //from v2.1.24 added 29.4.2017
+			'cmdrestore'   : 'Восстановить', //from v2.1.24 added 3.5.2017
 			'cmdsearch'    : 'Поиск файлов',
 			'cmdup'        : 'Наверх',
 			'cmdupload'    : 'Загрузить файлы',
@@ -142,6 +152,10 @@
 			'cmdplaces'    : 'В избранное', // added 28.12.2014
 			'cmdchmod'     : 'Изменить права доступа', // from v2.1 added 20.6.2015
 			'cmdopendir'   : 'Открыть папку', // from v2.1 added 13.1.2016
+			'cmdcolwidth'  : 'Сбросить ширину колонок', // from v2.1.13 added 12.06.2016
+			'cmdfullscreen': 'Полный экран', // from v2.1.15 added 03.08.2016
+			'cmdmove'      : 'Переместить', // from v2.1.15 added 21.08.2016
+			'cmdempty'     : 'Очистить папку', // from v2.1.25 added 22.06.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Закрыть',
@@ -162,6 +176,11 @@
 			'btnFileName':'Имя файла',  // from v2.1 added 22.5.2015
 			'btnSaveClose': 'Сохранить и закрыть', // from v2.1 added 12.6.2015
 			'btnBackup' : 'Резервная копия', // fromv2.1 added 28.11.2015
+			'btnRename'    : 'Переименовать',      // from v2.1.24 added 6.4.2017
+			'btnRenameAll' : 'Переименовать (все)', // from v2.1.24 added 6.4.2017
+			'btnPrevious' : 'Пред. ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnNext'     : 'След. ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnSaveAs'   : 'Сохранить как', // from v2.1.25 added 24.5.2017
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Открыть папку',
@@ -191,6 +210,14 @@
 			'ntfchmod'    : 'Изменение прав доступа к файлу', // from v2.1 added 20.6.2015
 			'ntfpreupload': 'Проверка измени загруженного файла', // from v2.1 added 31.11.2015
 			'ntfzipdl'    : 'Создание файла для скачки', // from v2.1.7 added 23.1.2016
+			'ntfparents'  : 'Получение информации о пути', // from v2.1.17 added 2.11.2016
+			'ntfchunkmerge': 'Обработка загруженного файла', // from v2.1.17 added 2.11.2016
+			'ntftrash'    : 'Перемещение в корзину', // from v2.1.24 added 2.5.2017
+			'ntfrestore'  : 'Восстановление из корзины', // from v2.1.24 added 3.5.2017
+			'ntfchkdir'   : 'Проверка папки назначения', // from v2.1.24 added 3.5.2017
+
+			/*********************************** volumes *********************************/
+			'volume_Trash' : 'Корзина', //from v2.1.24 added 29.4.2017
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'неизвестно',
@@ -241,6 +268,11 @@
 			'sortsize'          : 'по размеру',
 			'sortdate'          : 'по дате',
 			'sortFoldersFirst'  : 'Папки в начале',
+			'sortperm'          : 'по разрешениям', // from v2.1.13 added 13.06.2016
+			'sortmode'          : 'по режиму',       // from v2.1.13 added 13.06.2016
+			'sortowner'         : 'по владельцу',      // from v2.1.13 added 13.06.2016
+			'sortgroup'         : 'по группе',      // from v2.1.13 added 13.06.2016
+			'sortAlsoTreeview'  : 'Также и дерево каталогов',  // from v2.1.15 added 01.08.2016
 
 			/********************************** new items **********************************/
 			'untitled file.txt' : 'НовыйФайл.txt', // added 10.11.2015
@@ -251,8 +283,11 @@
 			'confirmReq'      : 'Необходимо подтверждение',
 			'confirmRm'       : 'Вы уверены, что хотите удалить файлы?<br>Действие необратимо!',
 			'confirmRepl'     : 'Заменить старый файл новым?',
+			'confirmRest'     : 'Заменить существующий файл файлом из корзины?', // fromv2.1.24 added 5.5.2017
 			'confirmConvUTF8' : 'Не UTF-8<br/>Сконвертировать в UTF-8?<br/>Данные станут UTF-8 при сохранении после конвертации.', // from v2.1 added 08.04.2014
+			'confirmNonUTF8'  : 'Невозможно определить кодировку файла. Необходима предварительная конвертация файла в UTF-8 для дальнейшего редактирования.<br/>Выберите кодировку файла.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'Произошли изменения.<br/>Если не сохраните изменения, то потеряете их.', // from v2.1 added 15.7.2015
+			'confirmTrash'    : 'Вы уверены, что хотите переместить файлы в корзину?', //from v2.1.24 added 29.4.2017
 			'apllyAll'        : 'Применить для всех',
 			'name'            : 'Имя',
 			'size'            : 'Размер',
@@ -309,6 +344,7 @@
 			'selectForUpload' : 'Выбрать файлы для загрузки',
 			'moveFiles'       : 'Переместить файлы',
 			'copyFiles'       : 'Скопировать файлы',
+			'restoreFiles'    : 'Восстановить файлы', // from v2.1.24 added 5.5.2017
 			'rmFromPlaces'    : 'Удалить из избранного',
 			'aspectRatio'     : 'Соотношение сторон',
 			'scale'           : 'Масштаб',
@@ -354,9 +390,41 @@
 			'openMulti'       : 'Открыть несколько файлов', // from v2.1.12 added 5.14.2016
 			'openMultiConfirm': 'Вы пытаетесь открыть $1 файл(а/ов). Вы уверены, что хотите открыть их в браузере?', // from v2.1.12 added 5.14.2016
 			'emptySearch'     : 'Ничего не найдено', // from v2.1.12 added 5.16.2016
+			'editingFile'     : 'Это редактируемый файл.', // from v2.1.13 added 6.3.2016
+			'hasSelected'     : 'Вы выбрали $1 файл(-ов).', // from v2.1.13 added 6.3.2016
+			'hasClipboard'    : 'У вас $1 файл(-ов) в буфере обмена.', // from v2.1.13 added 6.3.2016
+			'incSearchOnly'   : 'Инкрементный поиск возможен только из текущего вида.', // from v2.1.13 added 6.30.2016
+			'reinstate'       : 'Восстановить', // from v2.1.15 added 3.8.2016
+			'complete'        : '$1 завершен', // from v2.1.15 added 21.8.2016
+			'contextmenu'     : 'Контекстное меню', // from v2.1.15 added 9.9.2016
+			'pageTurning'     : 'Переключение страницы', // from v2.1.15 added 10.9.2016
+			'volumeRoots'     : 'Корни томов', // from v2.1.16 added 16.9.2016
+			'reset'           : 'Сбросить', // from v2.1.16 added 1.10.2016
+			'bgcolor'         : 'Фоновый цвет', // from v2.1.16 added 1.10.2016
+			'colorPicker'     : 'Выбор цвета', // from v2.1.16 added 1.10.2016
+			'8pxgrid'         : '8px сетка', // from v2.1.16 added 4.10.2016
+			'enabled'         : 'Включено', // from v2.1.16 added 4.10.2016
+			'disabled'        : 'Отключено', // from v2.1.16 added 4.10.2016
+			'emptyIncSearch'  : 'Ничего не найдено в текущем виде.\\AНажмите [Enter] для развертывания цели поиска.', // from v2.1.16 added 5.10.2016
+			'emptyLetSearch'  : 'Поиск по первому символу не дал результатов в текущем виде.', // from v2.1.23 added 24.3.2017
+			'textLabel'       : 'Текстовая метка', // from v2.1.17 added 13.10.2016
+			'minsLeft'        : '$1 минут осталось', // from v2.1.17 added 13.11.2016
+			'openAsEncoding'  : 'Переоткрыть с выбранной кодировкой', // from v2.1.19 added 2.12.2016
+			'saveAsEncoding'  : 'Сохранить с выбранной кодировкой', // from v2.1.19 added 2.12.2016
+			'selectFolder'    : 'Выбрать папку', // from v2.1.20 added 13.12.2016
+			'firstLetterSearch': 'Поиск по первому символу', // from v2.1.23 added 24.3.2017
+			'presets'         : 'Пресеты', // from v2.1.25 added 26.5.2017
+			'tooManyToTrash'  : 'Слишком много файлов для перемещения в корзину.', // from v2.1.25 added 9.6.2017
+			'TextArea'        : 'Текстовая область', // from v2.1.25 added 14.6.2017
+			'folderToEmpty'   : 'Очистить папку "$1".', // from v2.1.25 added 22.6.2017
+			'filderIsEmpty'   : 'Нет файлов в паке "$1".', // from v2.1.25 added 22.6.2017
+			'preference'      : 'Настройки', // from v2.1.26 added 28.6.2017
+			'language'        : 'Настройки языка', // from v2.1.26 added 28.6.2017
+			'clearBrowserData': 'Инициализировать настройки, сохраненные в этом браузере', // from v2.1.26 added 28.6.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
+			'kindRoot'        : 'Корень тома', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'Папка',
 			'kindAlias'       : 'Ссылка',
 			'kindAliasBroken' : 'Битая ссылка',
@@ -394,7 +462,7 @@
 			'kindCHeader'     : 'Заголовочный файл C',
 			'kindCPP'         : 'Исходник C++',
 			'kindCPPHeader'   : 'Заголовочный файл C++',
-			'kindShell'       : 'Unix shell script',
+			'kindShell'       : 'Скрипт Unix shell',
 			'kindPython'      : 'Исходник Python',
 			'kindJava'        : 'Исходник Java',
 			'kindRuby'        : 'Исходник Ruby',
@@ -404,7 +472,7 @@
 			'kindAWK'         : 'Исходник AWK',
 			'kindCSV'         : 'Текст с разделителями',
 			'kindDOCBOOK'     : 'Документ Docbook XML',
-			'kindMarkdown'    : 'Markdown text', // added 20.7.2015
+			'kindMarkdown'    : 'Текст Markdown', // added 20.7.2015
 			// images
 			'kindImage'       : 'Изображение',
 			'kindBMP'         : 'Изображение BMP',
