@@ -14,16 +14,24 @@ class elFinder {
 	/**
 	 * API version number
 	 *
+	 * @var float
+	 **/
+	protected static $ApiVersion = 2.1;
+	
+	/**
+	 * API version number
+	 *
+	 * @deprecated
 	 * @var string
 	 **/
-	protected static $version = '2.1';
+	protected $version;
 	
 	/**
 	 * API revision that this connector supports all functions
 	 * 
 	 * @var integer
 	 */
-	protected static $revision = 25;
+	protected static $ApiRevision = 25;
 	
 	/**
 	 * Storages (root dirs)
@@ -383,6 +391,9 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 */
 	public function __construct($opts) {
+		// for backward compat
+		$this->version = (string)self::$ApiVersion;
+		
 		// set error handler of WARNING, NOTICE
 		$errLevel = E_WARNING | E_NOTICE | E_USER_WARNING | E_USER_NOTICE | E_STRICT | E_RECOVERABLE_ERROR;
 		if (defined('E_DEPRECATED')) {
@@ -627,7 +638,7 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function version() {
-		return self::$version;
+		return self::$ApiVersion;
 	}
 	
 	/**
@@ -637,7 +648,7 @@ class elFinder {
 	 * @author Naoki Sawada
 	 **/
 	public function revision() {
-		return self::$revision;
+		return self::$ApiRevision;
 	}
 	
 	/**
@@ -1273,7 +1284,7 @@ class elFinder {
 		}
 		
 		if (!empty($args['init'])) {
-			$result['api'] = (float)self::$version + (self::$revision / 10000);
+			$result['api'] = self::$ApiVersion + (self::$ApiRevision / 10000);
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');
 			$result['uplMaxFile'] = ini_get('max_file_uploads');
 			$result['netDrivers'] = array_keys(self::$netDrivers);
@@ -3430,7 +3441,7 @@ class elFinder {
 	 * @return string
 	 */
 	public static function getApiFullVersion() {
-		return self::$version . '.' . self::$revision;
+		return (string)self::$ApiVersion . '.' . (string)self::$ApiRevision;
 	}
 	
 	/**
