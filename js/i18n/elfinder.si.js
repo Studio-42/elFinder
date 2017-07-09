@@ -1,7 +1,7 @@
 /**
  * Sinhala translation
  * @author CodeLyokoXtEAM <XcodeLyokoTEAM@gmail.com>
- * @version 2017-07-06
+ * @version 2017-07-08
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -120,7 +120,7 @@
 			'cmdback'      : 'ආපසු',
 			'cmdcopy'      : 'පිටපත් කරන්න',
 			'cmdcut'       : 'මුළුමනින්ම පිටපත් කරන්න(Cut)',
-			'cmddownload'  : 'බාගත කිරන්න(Download)',
+			'cmddownload'  : 'බාගත කරන්න(Download)',
 			'cmdduplicate' : 'අනුපිටපත් කරන්න(Duplicate)',
 			'cmdedit'      : 'ගොනුව සංස්කරණය කරන්න',
 			'cmdextract'   : 'සංරක්ෂිතයේ ගොනු දිගහරින්න(Extract)',
@@ -219,7 +219,7 @@
 			'volume_Trash' : 'Trash', //from v2.1.24 added 29.4.2017
 
 			/************************************ dates **********************************/
-			'dateUnknown' : 'නොහඳුනයි',
+			'dateUnknown' : 'නොදනී',
 			'Today'       : 'අද',
 			'Yesterday'   : 'ඊයේ',
 			'msJan'       : 'ජනවා.',
@@ -279,76 +279,76 @@
 			'Archive'           : 'NewArchive',  // from v2.1 added 10.11.2015
 
 			/********************************** messages **********************************/
-			'confirmReq'      : 'Confirmation required',
-			'confirmRm'       : 'Are you sure you want to permanently remove items?<br/>This cannot be undone!',
-			'confirmRepl'     : 'Replace old item with new one?',
-			'confirmRest'     : 'Replace existing item with the item in trash?', // fromv2.1.24 added 5.5.2017
-			'confirmConvUTF8' : 'Not in UTF-8<br/>Convert to UTF-8?<br/>Contents become UTF-8 by saving after conversion.', // from v2.1 added 08.04.2014
-			'confirmNonUTF8'  : 'Character encoding of this file couldn\'t be detected. It need to temporarily convert to UTF-8 for editting.<br/>Please select character encoding of this file.', // from v2.1.19 added 28.11.2016
-			'confirmNotSave'  : 'It has been modified.<br/>Losing work if you do not save changes.', // from v2.1 added 15.7.2015
-			'confirmTrash'    : 'Are you sure you want to move items to trash bin?', //from v2.1.24 added 29.4.2017
+			'confirmReq'      : 'තහවුරු කිරීම අවශ්‍යයි',
+			'confirmRm'       : 'අයිතමයන් සදහටම ඉවත් කිරීමට අවශ්‍ය බව ඔබට විශ්වාසද?<br/>මෙය අාපසු හැරවිය නොහැකිය!',
+			'confirmRepl'     : 'පැරණි අයිතමය(item) නව එකක මගින් ප්‍රතිස්ථාපනය කරන්නද?',
+			'confirmRest'     : 'දැනට පවතින අයිතමය(item) කුණු කූඩය තුළ පවතින අයිතමය(item) මගින් ප්‍රතිස්ථාපනය කරන්නද?', // fromv2.1.24 added 5.5.2017
+			'confirmConvUTF8' : 'UTF-8 හි නොවේ<br/> UTF-8 වෙත පරිවර්තනය කරන්න ද?<br/>සුරැකීමෙන් පසු අන්තර්ගතය UTF-8 බවට පරිවර්තනය වේ.', // from v2.1 added 08.04.2014
+			'confirmNonUTF8'  : 'මෙම ගොනුවෙහි කේතන කේත(Character encoding) හඳුනාගත නොහැකි විය. සංස්කරණ කිරීමට එය තාවකාලිකව UTF-8 වෙත පරිවර්තනය කිරීම අවශ්‍ය වේ.<br/>කරුණාකර මෙම ගොනුවෙහි අක්ෂර කේතන කේත(character encoding) තෝරන්න.', // from v2.1.19 added 28.11.2016
+			'confirmNotSave'  : 'මෙය වෙනස් කර ඇත.<br/>ඔබට වෙනස්කම් සුරැකීමට නොහැකි නම් සිදු කරනු ලැබූ වෙනස්කම් අහිමි වේ.', // from v2.1 added 15.7.2015
+			'confirmTrash'    : 'කුණු කූඩය තුලට අයිතමය(item) යැවීමට ඔබට අවශ්‍ය ද?', //from v2.1.24 added 29.4.2017
 			'apllyAll'        : 'Apply to all',
-			'name'            : 'Name',
-			'size'            : 'Size',
-			'perms'           : 'Permissions',
-			'modify'          : 'Modified',
+			'name'            : 'නම',
+			'size'            : 'ප්‍රමාණය',
+			'perms'           : 'අවසරය',
+			'modify'          : 'නවීකරණය කෙරුණ ලද්දේ',
 			'kind'            : 'Kind',
-			'read'            : 'read',
-			'write'           : 'write',
-			'noaccess'        : 'no access',
-			'and'             : 'and',
-			'unknown'         : 'unknown',
-			'selectall'       : 'Select all files',
-			'selectfiles'     : 'Select file(s)',
-			'selectffile'     : 'Select first file',
-			'selectlfile'     : 'Select last file',
-			'viewlist'        : 'List view',
-			'viewicons'       : 'Icons view',
+			'read'            : 'කියවන්න',
+			'write'           : 'ලියන්න',
+			'noaccess'        : 'ප්‍රවේශයක් නොමැත',
+			'and'             : 'සහ',
+			'unknown'         : 'නොහඳුනයි',
+			'selectall'       : 'සියලු ගොනු තෝරන්න',
+			'selectfiles'     : 'ගොනු(ව) තෝරන්න',
+			'selectffile'     : 'පළමු ගොනුව තෝරන්න',
+			'selectlfile'     : 'අවසාන ගොනුව තෝරන්න',
+			'viewlist'        : 'ලැයිස්තු අාකාරය',
+			'viewicons'       : 'අයිකන අාකාරය',
 			'places'          : 'Places',
-			'calc'            : 'Calculate',
-			'path'            : 'Path',
+			'calc'            : 'ගණනය කරන්න',
+			'path'            : 'මාර්ගය',
 			'aliasfor'        : 'Alias for',
-			'locked'          : 'Locked',
-			'dim'             : 'Dimensions',
-			'files'           : 'Files',
-			'folders'         : 'Folders',
-			'items'           : 'Items',
-			'yes'             : 'yes',
-			'no'              : 'no',
+			'locked'          : 'අගුළු දමා ඇත',
+			'dim'             : 'මාන(Dimensions)',
+			'files'           : 'ගොනු',
+			'folders'         : 'ෆෝල්ඩර',
+			'items'           : 'අයිතම(Items)',
+			'yes'             : 'ඔව්',
+			'no'              : 'නැත',
 			'link'            : 'Link',
-			'searcresult'     : 'Search results',
-			'selected'        : 'selected items',
-			'about'           : 'About',
-			'shortcuts'       : 'Shortcuts',
-			'help'            : 'Help',
-			'webfm'           : 'Web file manager',
+			'searcresult'     : 'සෙවුම් ප්‍රතිඵල',
+			'selected'        : 'තෝරාගත් අයිතම(items)',
+			'about'           : 'මේ ගැන',
+			'shortcuts'       : 'කෙටිමං',
+			'help'            : 'උදව්',
+			'webfm'           : 'වෙබ් ගොනු කළමනාකරු',
 			'ver'             : 'Version',
 			'protocolver'     : 'protocol version',
 			'homepage'        : 'Project home',
-			'docs'            : 'Documentation',
+			'docs'            : 'ලේඛනගත කිරීම',
 			'github'          : 'Fork us on Github',
 			'twitter'         : 'Follow us on twitter',
 			'facebook'        : 'Join us on facebook',
-			'team'            : 'Team',
-			'chiefdev'        : 'chief developer',
-			'developer'       : 'developer',
-			'contributor'     : 'contributor',
-			'maintainer'      : 'maintainer',
-			'translator'      : 'translator',
+			'team'            : 'කණ්ඩායම',
+			'chiefdev'        : 'ප්‍රධාන සංවර්ධකයා(chief developer)',
+			'developer'       : 'සංවර්ධකයා(developer)',
+			'contributor'     : 'දායකයා(contributor)',
+			'maintainer'      : 'නඩත්තු කරන්නා(maintainer)',
+			'translator'      : 'පරිවර්තකය',
 			'icons'           : 'Icons',
 			'dontforget'      : 'and don\'t forget to take your towel',
-			'shortcutsof'     : 'Shortcuts disabled',
-			'dropFiles'       : 'Drop files here',
-			'or'              : 'or',
-			'selectForUpload' : 'Select files',
+			'shortcutsof'     : 'කෙටිමං අක්‍රීය කර ඇත',
+			'dropFiles'       : 'ගොනු මෙතැනට ඇද දමන්න',
+			'or'              : 'හෝ',
+			'selectForUpload' : 'ගොනු තෝරන්න',
 			'moveFiles'       : 'Move items',
 			'copyFiles'       : 'Copy items',
 			'restoreFiles'    : 'Restore items', // from v2.1.24 added 5.5.2017
 			'rmFromPlaces'    : 'Remove from places',
 			'aspectRatio'     : 'Aspect ratio',
-			'scale'           : 'Scale',
-			'width'           : 'Width',
-			'height'          : 'Height',
+			'scale'           : 'පරිමාණය',
+			'width'           : 'පළල',
+			'height'          : 'උස',
 			'resize'          : 'Resize',
 			'crop'            : 'Crop',
 			'rotate'          : 'Rotate',
@@ -359,22 +359,22 @@
 			'protocol'            : 'Protocol', // added 18.04.2012
 			'host'                : 'Host', // added 18.04.2012
 			'port'                : 'Port', // added 18.04.2012
-			'user'                : 'User', // added 18.04.2012
-			'pass'                : 'Password', // added 18.04.2012
+			'user'                : 'පරිශීලක', // added 18.04.2012
+			'pass'                : 'මුරපදය', // added 18.04.2012
 			'confirmUnmount'      : 'Are you unmount $1?',  // from v2.1 added 30.04.2012
 			'dropFilesBrowser': 'Drop or Paste files from browser', // from v2.1 added 30.05.2012
 			'dropPasteFiles'  : 'Drop files, Paste URLs or images(clipboard) here', // from v2.1 added 07.04.2014
 			'encoding'        : 'Encoding', // from v2.1 added 19.12.2014
 			'locale'          : 'Locale',   // from v2.1 added 19.12.2014
-			'searchTarget'    : 'Target: $1',                // from v2.1 added 22.5.2015
+			'searchTarget'    : 'ඉලක්කය: $1',                // from v2.1 added 22.5.2015
 			'searchMime'      : 'Search by input MIME Type', // from v2.1 added 22.5.2015
-			'owner'           : 'Owner', // from v2.1 added 20.6.2015
-			'group'           : 'Group', // from v2.1 added 20.6.2015
-			'other'           : 'Other', // from v2.1 added 20.6.2015
-			'execute'         : 'Execute', // from v2.1 added 20.6.2015
-			'perm'            : 'Permission', // from v2.1 added 20.6.2015
+			'owner'           : 'හිමිකරු', // from v2.1 added 20.6.2015
+			'group'           : 'සමූහය', // from v2.1 added 20.6.2015
+			'other'           : 'වෙනත්', // from v2.1 added 20.6.2015
+			'execute'         : 'ක්‍රයාත්මක කරන්න', // from v2.1 added 20.6.2015
+			'perm'            : 'අවසරය', // from v2.1 added 20.6.2015
 			'mode'            : 'Mode', // from v2.1 added 20.6.2015
-			'emptyFolder'     : 'Folder is empty', // from v2.1.6 added 30.12.2015
+			'emptyFolder'     : 'ෆෝල්ඩරය හිස්', // from v2.1.6 added 30.12.2015
 			'emptyFolderDrop' : 'Folder is empty\\A Drop to add items', // from v2.1.6 added 30.12.2015
 			'emptyFolderLTap' : 'Folder is empty\\A Long tap to add items', // from v2.1.6 added 30.12.2015
 			'quality'         : 'Quality', // from v2.1.6 added 5.1.2016
