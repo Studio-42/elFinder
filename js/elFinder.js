@@ -7759,6 +7759,7 @@ elFinder.prototype = {
 					(--cnt < 1) && success(void(0), scripts[url]._error);
 				} else {
 					script = document.createElement('script');
+					script.charset = opts.charset || 'UTF-8';
 					$('head').append(script);
 					script.onload = script.onreadystatechange = function() {
 						if ( !done && (!this.readyState ||
