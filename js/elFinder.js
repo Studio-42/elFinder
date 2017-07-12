@@ -662,19 +662,21 @@ var elFinder = function(node, opts, bootCallback) {
 	 **/
 	this.options = $.extend(true, {}, this._options, opts||{});
 	
-	// set dispInlineRegex
-	cwdOptionsDefault['dispInlineRegex'] = this.options.dispInlineRegex;
-	
-	// auto load required CSS
-	if (this.options.cssAutoLoad) {
-		(function(fm) {
-			var myTag = $('head > script[src$="js/elfinder.min.js"],script[src$="js/elfinder.full.js"]:first'),
-				base, baseUrl, hide, fi, cnt;
+	// set fm.baseUrl
+	this.baseUrl = (function() {
+		var myTag, myCss, base, baseUrl;
+		
+		if (self.options.baseUrl) {
+			return self.options.baseUrl;
+		} else {
+			baseUrl = '';
+			myTag = $('head > script[src$="js/elfinder.min.js"],script[src$="js/elfinder.full.js"]:first');
 			if (myTag.length) {
-				// hide elFinder node while css loading
-				hide = $('<style>.elfinder{visibility:hidden;overflow:hidden}</style>');
-				
-				$('head').append(hide);
+				myCss = $('head > link[href$="css/elfinder.min.css"],link[href$="css/elfinder.full.css"]:first').length;
+				if (! myCss) {
+					// to request CSS auto loading
+					self.cssloaded = null;
+				}
 				baseUrl = myTag.attr('src').replace(/js\/[^\/]+$/, '');
 				if (! baseUrl.match(/^(https?\/\/|\/)/)) {
 					// check <base> tag
@@ -682,13 +684,38 @@ var elFinder = function(node, opts, bootCallback) {
 						baseUrl = base.replace(/\/$/, '') + '/' + baseUrl; 
 					}
 				}
-				fm.loadCss([baseUrl+'css/elfinder.min.css', baseUrl+'css/theme.css']);
+			}
+			if (baseUrl !== '') {
+				self.options.baseUrl = baseUrl;
+			} else {
+				if (! self.options.baseUrl) {
+					self.options.baseUrl = './';
+				}
+				baseUrl = self.options.baseUrl;
+			}
+			return baseUrl;
+		}
+	})();
+	
+	// set dispInlineRegex
+	cwdOptionsDefault['dispInlineRegex'] = this.options.dispInlineRegex;
+	
+	// auto load required CSS
+	if (this.options.cssAutoLoad) {
+		(function(fm) {
+			var baseUrl = self.baseUrl,
+				hide, fi, cnt;
+			
+			if (self.cssloaded === null) {
+				// hide elFinder node while css loading
+				hide = $('<style>.elfinder{visibility:hidden;overflow:hidden}</style>');
 				
-				fm.baseUrl = baseUrl;
+				$('head').append(hide);
+				self.loadCss([baseUrl+'css/elfinder.min.css', baseUrl+'css/theme.css']);
 				
 				// additional CSS files
-				if (Array.isArray(fm.options.cssAutoLoad)) {
-					fm.loadCss(fm.options.cssAutoLoad);
+				if (Array.isArray(self.options.cssAutoLoad)) {
+					self.loadCss(self.options.cssAutoLoad);
 				}
 				
 				// check css loaded and remove hide
@@ -697,14 +724,13 @@ var elFinder = function(node, opts, bootCallback) {
 					if (--cnt < 0 || node.css('visibility') !== 'hidden') {
 						clearInterval(fi);
 						hide.remove();
-						fm.cssloaded = true;
-						fm.trigger('cssloaded');
+						self.cssloaded = true;
+						self.trigger('cssloaded');
 					}
 				}, 10);
-			} else {
-				fm.options.cssAutoLoad = false;
 			}
-		})(this);
+			self.options.cssAutoLoad = false;
+		})();
 	}
 	
 	/**
@@ -4335,7 +4361,7 @@ var elFinder = function(node, opts, bootCallback) {
 		}
 
 		// trigger event cssloaded if cddAutoLoad disabled
-		if (! self.options.cssAutoLoad) {
+		if (self.cssloaded === false) {
 			self.cssloaded = true;
 			self.trigger('cssloaded');
 		}
