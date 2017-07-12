@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.25 (2.1-src Nightly: 804b9d4) (2017-07-12)
+ * Version 2.1.25 (2.1-src Nightly: 654f66e) (2017-07-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8020,7 +8020,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.25 (2.1-src Nightly: 804b9d4)';
+elFinder.prototype.version = '2.1.25 (2.1-src Nightly: 654f66e)';
 
 
 
@@ -8911,7 +8911,7 @@ elFinder.prototype._options = {
 			// The tree of directories with children exceeding this number will be split
 			subTreeMax : 100,
 			// Numbar of max connctions of subdirs request
-			subdirsMaxConn : 3,
+			subdirsMaxConn : 2,
 			// Number of max simultaneous processing directory of subdirs
 			subdirsAtOnce : 5
 			// ,
@@ -12606,7 +12606,7 @@ $.fn.elfindercwd = function(fm, options) {
 							} else {
 								if (reload) {
 									loadThumbnails([hash]);
-								} else {
+								} else if (! bufferExt.tmbLoading[hash]) {
 									bufferExt.getTmbs.push(hash);
 								}
 							}
@@ -12616,7 +12616,7 @@ $.fn.elfindercwd = function(fm, options) {
 				if ($.isPlainObject(tmbs) && Object.keys(tmbs).length) {
 					Object.assign(bufferExt.attachTmbs, tmbs);
 					$.each(tmbs, chk);
-					if (! reload && bufferExt.getTmbs.length) {
+					if (! reload && bufferExt.getTmbs.length && ! Object.keys(bufferExt.tmbLoading).length) {
 						loadThumbnails();
 					}
 				}
@@ -12656,6 +12656,9 @@ $.fn.elfindercwd = function(fm, options) {
 				}
 				if (tmbs.length) {
 					if (reload || inViewHashes[tmbs[0]] || inViewHashes[tmbs[tmbs.length-1]]) {
+						$.each(tmbs, function(i, h) {
+							bufferExt.tmbLoading[h] = true;
+						});
 						fm.request({
 							data : {cmd : 'tmb', targets : tmbs},
 							preventFail : true
@@ -12690,6 +12693,7 @@ $.fn.elfindercwd = function(fm, options) {
 							}
 						})
 						.always(function() {
+							bufferExt.tmbLoading = {};
 							if (! reload && bufferExt.getTmbs.length) {
 								loadThumbnails();
 							}
@@ -13076,6 +13080,7 @@ $.fn.elfindercwd = function(fm, options) {
 						renderd: 0,
 						attachTmbs: {},
 						getTmbs: [],
+						tmbLoading: {},
 						lazyOpts: { tm : 0 }
 					};
 					
@@ -13655,6 +13660,9 @@ $.fn.elfindercwd = function(fm, options) {
 			})
 			.bind('enable', function() {
 				resize();
+			})
+			.bind('request.open', function() {
+				bufferExt.getTmbs = [];
 			})
 			.bind('open add remove searchend', function() {
 				var phash = fm.cwd().hash,
