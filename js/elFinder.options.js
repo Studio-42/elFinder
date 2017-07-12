@@ -148,12 +148,12 @@ elFinder.prototype._options = {
 
 	/**
 	 * Base URL of elfFinder library starting from Manager HTML
-	 * Auto detect when cssAutoLoad is `true`
+	 * Auto detect when empty value`
 	 * 
 	 * @type String
-	 * @default "./"
+	 * @default ""
 	 */
-	baseUrl : './',
+	baseUrl : '',
 	
 	/**
 	 * Auto load required CSS
