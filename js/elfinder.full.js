@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.25 (2.1-src Nightly: 03c4ffe) (2017-07-13)
+ * Version 2.1.25 (2.1-src Nightly: ee1e7de) (2017-07-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8020,7 +8020,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.25 (2.1-src Nightly: 03c4ffe)';
+elFinder.prototype.version = '2.1.25 (2.1-src Nightly: ee1e7de)';
 
 
 
@@ -18849,7 +18849,7 @@ elFinder.prototype.commands.download = function() {
 			}
 		}
 	}).one('open', function() {
-		if (fm.api > 2) {
+		if (fm.api >= 2.1012) {
 			czipdl = fm.getCommand('zipdl');
 		}
 	});
