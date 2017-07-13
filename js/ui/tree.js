@@ -934,12 +934,15 @@ $.fn.elfindertree = function(fm, opts) {
 					},
 					done= function(res, dfrd) {
 						var open = function() {
-								checkSubdirs();
 								if (openRoot && baseNode) {
 									findSubtree(baseNode.hash).show().prev(selNavdir).addClass(expanded);
 									openRoot = false;
 								}
-								autoScr && autoScroll();
+								if (autoScr) {
+									autoScroll().done(checkSubdirs);
+								} else {
+									checkSubdirs();
+								}
 							},
 							current;
 						
