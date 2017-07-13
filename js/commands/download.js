@@ -171,7 +171,7 @@ elFinder.prototype.commands.download = function() {
 			}
 		}
 	}).one('open', function() {
-		if (fm.api > 2) {
+		if (fm.api >= 2.1012) {
 			czipdl = fm.getCommand('zipdl');
 		}
 	});
