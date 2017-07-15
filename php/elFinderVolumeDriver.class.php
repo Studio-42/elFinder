@@ -846,8 +846,11 @@ abstract class elFinderVolumeDriver {
 		}
 		if (! isset($this->imgConverter['video'])) {
 			$videoLibCache = 'videoLib';
+			if (! defined('ELFINDER_FFMPEG_PATH')) {
+				define('ELFINDER_FFMPEG_PATH', 'ffmpeg');
+			}
 			if (($videoLibCmd = $this->session->get($videoLibCache, false)) === false) {
-				$videoLibCmd = ($this->procExec('ffmpeg -version') === 0)? 'ffmpeg' : '';
+				$videoLibCmd = ($this->procExec(ELFINDER_FFMPEG_PATH . ' -version') === 0)? 'ffmpeg' : '';
 				$this->session->set($videoLibCache, $videoLibCmd);
 			}
 			if ($videoLibCmd) {
@@ -3122,8 +3125,8 @@ abstract class elFinderVolumeDriver {
 			} else {
 				$ss = $this->options['tmbVideoConvSec'];
 			}
-			$cmd = sprintf('ffmpeg -i %s -ss 00:00:%.3f -vframes 1 -f image2 %s', escapeshellarg($tmp), $ss, escapeshellarg($file));
-			$r = $this->procExec($cmd);
+			$cmd = sprintf(ELFINDER_FFMPEG_PATH . ' -i %s -ss 00:00:%.3f -vframes 1 -f image2 %s', escapeshellarg($tmp), $ss, escapeshellarg($file));
+			$r = $this->procExec($cmd, $ou, $re, $er);
 			unlink($tmp);
 			return ($r === 0);
 		}

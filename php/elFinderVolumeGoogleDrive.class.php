@@ -1909,8 +1909,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $chunkSizeBytes = 100 * 1024 * 1024;
             if ($size > 0) {
                 $memory = elFinder::getIniBytes('memory_limit');
-                if ($memory) {
-                    $chunkSizeBytes = min([$chunkSizeBytes, (intval($memory / 4 / 256) * 256)]);
+                if ($memory > 0) {
+                    $chunkSizeBytes = max(262144, min([$chunkSizeBytes, (intval($memory / 4 / 256) * 256)]));
                 }
             }
 
