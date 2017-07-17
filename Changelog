@@ -1,3 +1,22 @@
+2017-07-17  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.26):
+		- [php:core] Fixed #2069 add static method `elFinder::getApiFullVersion()`
+		- [js:core] Fixed #2073 auto loading of language files implemented in core
+		- [cmd:help] Fixed #2074 add the Preference tab
+		- [js:core] Fixed #2079 lost binded user functions with node.elfinder('reload')
+		- [cmd:help] Fixed #2076 problem of content area height synchronization
+		- [js:core] Fixed #2081 problem that updating of `uiCmdMap`
+		- [cmd:resize] Fixed #2085 "Save As" dose not work in 2.1.25
+		- [cmd:rm] Fixed #2086 problem of cmd mode sync on the item selected
+		- [js:core] Fixed #2076 cancel full screen mode on `destroy`
+		- [cmd:rm] Fixed #2087 JavaScript error when hide `rm` icon in toolbar
+		- [cmd:netmount] Fixed #2088 problem of shows error dialog behind this dialog
+		- [cmd:rm] Fixed #2087 button icon label is wrong until boot up
+		- [php:connector] Supports X-Sendfile and similar file-download accelerators
+		- And some minor bug fixes
+
+
 2017-06-23  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.25):
