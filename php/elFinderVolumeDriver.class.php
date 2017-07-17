@@ -3113,25 +3113,37 @@ abstract class elFinderVolumeDriver {
 	 * 
 	 * @param  $file video source file path
 	 * @param  $stat file stat array
+	 * @param  $self volume driver object
+	 * @param  $ss   start seconds
 	 * @return bool
 	 * @author Naoki Sawada
 	 */
-	public function ffmpegToImg($file, $stat) {
+	public function ffmpegToImg($file, $stat, $self, $ss = null) {
 		$name = basename($file);
 		$path = dirname($file);
 		$tmp = $path . DIRECTORY_SEPARATOR . md5($name);
 		$GLOBALS['elFinderTempFiles'][] = $tmp; // regist to remove at the end
 		if (rename($file, $tmp)) {
-			// specific start time by file name (xxx^[sec].[extention] - video^3.mp4)
-			if (preg_match('/\^(\d+(?:\.\d+)?)\.[^.]+$/', $stat['name'], $_m)) {
-				$ss = $_m[1];
-			} else {
-				$ss = $this->options['tmbVideoConvSec'];
+			if ($ss === null) {
+				// specific start time by file name (xxx^[sec].[extention] - video^3.mp4)
+				if (preg_match('/\^(\d+(?:\.\d+)?)\.[^.]+$/', $stat['name'], $_m)) {
+					$ss = $_m[1];
+				} else {
+					$ss = $this->options['tmbVideoConvSec'];
+				}
 			}
 			$cmd = sprintf(ELFINDER_FFMPEG_PATH . ' -i %s -ss 00:00:%.3f -vframes 1 -f image2 %s', escapeshellarg($tmp), $ss, escapeshellarg($file));
-			$r = $this->procExec($cmd, $ou, $re, $er);
-			unlink($tmp);
-			return ($r === 0);
+			$r = ($this->procExec($cmd) === 0);
+			clearstatcache();
+			if ($r && $ss > 0 && ! file_exists($file)) {
+				// Retry by half of $ss
+				$ss = max(intval($ss / 2), 0);
+				rename($tmp, $file);
+				$r = $this->ffmpegToImg($file, $stat, $self, $ss);
+			} else {
+				unlink($tmp);
+			}
+			return $r;
 		}
 		return false;
 	}
