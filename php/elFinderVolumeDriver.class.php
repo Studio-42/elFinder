@@ -2171,7 +2171,7 @@ abstract class elFinderVolumeDriver {
 		$isDir = ($file['mime'] === 'directory');
 		
 		if (!$this->nameAccepted($name, $isDir)) {
-			return $this->setError(elFinder::ERROR_INVALID_DIRNAME);
+			return $this->setError($isDir? elFinder::ERROR_INVALID_DIRNAME : elFinder::ERROR_INVALID_NAME);
 		}
 		
 		if (! $isDir) {
