@@ -1284,7 +1284,7 @@ class elFinder {
 		}
 		
 		if (!empty($args['init'])) {
-			$result['api'] = self::$ApiVersion + (self::$ApiRevision / 10000);
+			$result['api'] = sprintf('%.1f%03d', self::$ApiVersion, self::$ApiRevision);
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');
 			$result['uplMaxFile'] = ini_get('max_file_uploads');
 			$result['netDrivers'] = array_keys(self::$netDrivers);
@@ -3623,6 +3623,7 @@ class elFinder {
 		}
 		$val = trim($val, "bB \t\n\r\0\x0B");
 		$last = strtolower($val[strlen($val) - 1]);
+		$val = (int)$val;
 		switch($last) {
 			case 't':
 				$val *= 1024;
@@ -3633,7 +3634,7 @@ class elFinder {
 			case 'k':
 				$val *= 1024;
 		}
-		return (int)$val;
+		return $val;
 	}
 
 	/**
