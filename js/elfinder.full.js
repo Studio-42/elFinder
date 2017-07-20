@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.26 (2.1-src Nightly: e4ef5e1) (2017-07-18)
+ * Version 2.1.26 (2.1-src Nightly: b0a67b5) (2017-07-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8020,7 +8020,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.26 (2.1-src Nightly: e4ef5e1)';
+elFinder.prototype.version = '2.1.26 (2.1-src Nightly: b0a67b5)';
 
 
 
@@ -8584,7 +8584,10 @@ elFinder.prototype._options = {
 		},
 		// "download" command options.
 		download : {
-			maxRequests : 10
+			// max request to download files when zipdl disabled
+			maxRequests : 10,
+			// minimum count of files to use zipdl
+			minFilesZipdl : 2
 		},
 		// "quicklook" command options.
 		quicklook : {
@@ -18883,7 +18886,7 @@ elFinder.prototype.commands.download = function() {
 							dfd.resolve();
 						} else if (e.zipdl) {
 							zipdl = e.zipdl;
-							if (linkdl || (!html5dl && fm.UA.Mobile)) {
+							if (html5dl || linkdl) {
 								url = fm.options.url + (fm.options.url.indexOf('?') === -1 ? '?' : '&')
 								+ 'cmd=zipdl&download=1';
 								$.each([hashes[0], zipdl.file, zipdl.name, zipdl.mime], function(key, val) {
@@ -18899,21 +18902,26 @@ elFinder.prototype.commands.download = function() {
 									.attr('target', '_blank')
 									.on('click', function() {
 										dfd.resolve();
+										dialog && dialog.elfinderdialog('destroy');
+									});
+								if (linkdl) {
+									dllink.append('<span class="elfinder-button-icon elfinder-button-icon-download"></span>'+fm.escape(zipdl.name));
+									btn[fm.i18n('btnCancel')] = function() {
 										dialog.elfinderdialog('destroy');
-									})
-									.append('<span class="elfinder-button-icon elfinder-button-icon-download"></span>'+fm.escape(zipdl.name));
-								btn[fm.i18n('btnCancel')] = function() {
-									dialog.elfinderdialog('destroy');
-								};
-								dialog = fm.dialog(dllink, {
-									title: fm.i18n('link'),
-									buttons: btn,
-									width: '200px',
-									destroyOnClose: true,
-									close: function() {
-										(dfd.state() !== 'resolved') && dfd.resolve();
-									}
-								});
+									};
+									dialog = fm.dialog(dllink, {
+										title: fm.i18n('link'),
+										buttons: btn,
+										width: '200px',
+										destroyOnClose: true,
+										close: function() {
+											(dfd.state() !== 'resolved') && dfd.resolve();
+										}
+									});
+								} else {
+									dllink.hide().appendTo('body').get(0).click();
+									dllink.remove();
+								}
 							} else {
 								form = $('<form action="'+fm.options.url+'" method="post" target="'+uniq+'" style="display:none"/>')
 								.append('<input type="hidden" name="cmd" value="zipdl"/>')
@@ -18943,19 +18951,20 @@ elFinder.prototype.commands.download = function() {
 					return dfd.promise();
 				};
 			},
-			link, html5dl;
+			link, html5dl, fileCnt;
 			
 		if (!files.length) {
 			return dfrd.reject();
 		}
 		
-		link = $('<a>').hide().appendTo($('body'));
+		fileCnt = $.map(files, function(f) { return f.mime === 'directory'? null : true; }).length;
+		link = $('<a>').hide().appendTo('body');
 		html5dl = (typeof link.get(0).download === 'string');
 		
-		if (zipOn && (files.length > 1 || files[0].mime === 'directory')) {
+		if (zipOn && (fileCnt !== files.length || fileCnt >= (this.options.minFilesZipdl || 1))) {
 			link.remove();
+			linkdl = (!html5dl && fm.UA.Mobile);
 			if (mixed) {
-				linkdl = fm.UA.Mobile;
 				targets = {};
 				$.each(files, function(i, f) {
 					var p = f.hash.split('_', 2);
@@ -18965,6 +18974,9 @@ elFinder.prototype.commands.download = function() {
 						targets[p[0]].push(f.hash);
 					}
 				});
+				if (!linkdl && fm.UA.Mobile && Object.keys(targets).length > 1) {
+					linkdl = true;
+				}
 			} else {
 				targets = [ $.map(files, function(f) { return f.hash; }) ];
 			}
