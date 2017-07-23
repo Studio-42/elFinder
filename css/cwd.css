@@ -352,7 +352,10 @@
 .elfinder-cwd-icon-audio             { background-position:0 -300px; }
 
 .elfinder-cwd-icon-video,
-.elfinder-cwd-icon-flash-video       { background-position:0 -350px; }
+.elfinder-cwd-icon-flash-video,
+.elfinder-cwd-icon-dash-xml,
+.elfinder-cwd-icon-vnd-apple-mpegURL,
+.elfinder-cwd-icon-x-mpegURL         { background-position:0 -350px; }
 
 .elfinder-cwd-icon-rtf:after, 
 .elfinder-cwd-icon-rtfd:after,
