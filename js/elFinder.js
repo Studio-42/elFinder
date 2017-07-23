@@ -7747,68 +7747,75 @@ elFinder.prototype = {
 			},
 			success = null,
 			cnt, scripts = {};
-		if ($.isFunction(callback)) {
-			success = function(d, status) {
-				if (!status || status === 'success' || status === 'notmodified') {
-					if (check) {
-						if (typeof check.obj[check.name] === 'undefined') {
-							var cnt = check.timeout? (check.timeout / 10) : 1;
-							var fi = setInterval(function() {
-								if (--cnt < 0 || typeof check.obj[check.name] !== 'undefined') {
-									clearInterval(fi);
-									callback();
-								}
-							}, 10);
+		
+		opts = opts || {};
+		if (opts.tryRequire && typeof define === 'function' && define.amd) {
+			require(urls, callback, opts.error);
+		} else {
+			if ($.isFunction(callback)) {
+				success = function(d, status) {
+					if (!status || status === 'success' || status === 'notmodified') {
+						if (check) {
+							if (typeof check.obj[check.name] === 'undefined') {
+								var cnt = check.timeout? (check.timeout / 10) : 1;
+								var fi = setInterval(function() {
+									if (--cnt < 0 || typeof check.obj[check.name] !== 'undefined') {
+										clearInterval(fi);
+										callback();
+									}
+								}, 10);
+							} else {
+								callback();
+							}
 						} else {
 							callback();
 						}
 					} else {
-						callback();
-					}
-				} else {
-					if (opts && opts.error && $.isFunction(opts.error)) {
-						opts.error();
+						if (opts.error && $.isFunction(opts.error)) {
+							opts.error();
+						}
 					}
 				}
 			}
-		}
-		if (opts && opts.loadType === 'tag') {
-			$('head > script').each(function() {
-				scripts[this.src] = this;
-			});
-			cnt = urls.length;
-			$.each(urls, function(i, url) {
-				var done = false,
-					script;
-				
-				if (scripts[url]) {
-					(--cnt < 1) && success(void(0), scripts[url]._error);
-				} else {
-					script = document.createElement('script');
-					script.charset = opts.charset || 'UTF-8';
-					$('head').append(script);
-					script.onload = script.onreadystatechange = function() {
-						if ( !done && (!this.readyState ||
-								this.readyState === 'loaded' || this.readyState === 'complete') ) {
-							done = true;
-							(--cnt < 1) && success();
+
+			if (opts.loadType === 'tag') {
+				$('head > script').each(function() {
+					scripts[this.src] = this;
+				});
+				cnt = urls.length;
+				$.each(urls, function(i, url) {
+					var done = false,
+						script;
+					
+					if (scripts[url]) {
+						(--cnt < 1) && success(void(0), scripts[url]._error);
+					} else {
+						script = document.createElement('script');
+						script.charset = opts.charset || 'UTF-8';
+						$('head').append(script);
+						script.onload = script.onreadystatechange = function() {
+							if ( !done && (!this.readyState ||
+									this.readyState === 'loaded' || this.readyState === 'complete') ) {
+								done = true;
+								(--cnt < 1) && success();
+							}
+						};
+						script.onerror = function(err) {
+							script._error = (err && err.type)? err.type : 'error';
+							(--cnt < 1) && success(void(0), script._error);
 						}
-					};
-					script.onerror = function(err) {
-						script._error = (err && err.type)? err.type : 'error';
-						(--cnt < 1) && success(void(0), script._error);
+						script.src = url;
 					}
-					script.src = url;
-				}
-			});
-		} else {
-			opts = $.isPlainObject(opts)? Object.assign(defOpts, opts) : defOpts;
-			(function appendScript() {
-				$.ajax(Object.assign(opts, {
-					url: urls.shift(),
-					success: urls.length? appendScript : success
-				}));
-			})();
+				});
+			} else {
+				opts = $.isPlainObject(opts)? Object.assign(defOpts, opts) : defOpts;
+				(function appendScript() {
+					$.ajax(Object.assign(opts, {
+						url: urls.shift(),
+						success: urls.length? appendScript : success
+					}));
+				})();
+			}
 		}
 		return this;
 	},
