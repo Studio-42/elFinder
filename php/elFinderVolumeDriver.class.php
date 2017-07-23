@@ -279,7 +279,10 @@ abstract class elFinderVolumeDriver {
 			'm4a:video/mp4'                => 'audio/mp4',
 			'oga:application/ogg'          => 'audio/ogg',
 			'ogv:application/ogg'          => 'video/ogg',
-			'zip:application/x-zip'        => 'application/zip'
+			'zip:application/x-zip'        => 'application/zip',
+			'm3u8:text/plain'              => 'application/x-mpegURL',
+			'mpd:text/plain'               => 'application/dash+xml',
+			'mpd:application/xml'          => 'application/dash+xml'
 		),
 		// An option to add MimeMap to the `mimeMap` option
 		// Array '[ext]:[detected mime type]' => '[normalized mime]'
@@ -287,7 +290,7 @@ abstract class elFinderVolumeDriver {
 		// MIME regex of send HTTP header "Content-Disposition: inline" or allow preview in quicklook
 		// '.' is allow inline of all of MIME types
 		// '$^' is not allow inline of all of MIME types
-		'dispInlineRegex' => '^(?:(?:image|video|audio)|(?:text/plain|application/pdf)$)',
+		'dispInlineRegex' => '^(?:(?:image|video|audio)|application/(?:x-mpegURL|dash\+xml)|(?:text/plain|application/pdf)$)',
 		// temporary content URL's base path
 		'tmpLinkPath'     => '',
 		// temporary content URL's base URL
@@ -641,8 +644,10 @@ abstract class elFinderVolumeDriver {
 		'ogm'   => 'video/ogg',
 		'm2ts'  => 'video/MP2T',
 		'mts'   => 'video/MP2T',
-		'ts'    => 'video/MP2T'
-		);
+		'ts'    => 'video/MP2T',
+		'm3u8'  => 'application/x-mpegURL',
+		'mpd'   => 'application/dash+xml'
+	);
 	
 	/**
 	 * Directory separator - required by client

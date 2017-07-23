@@ -254,7 +254,11 @@ elFinder.prototype._options = {
 			height   : 300,
 			// MIME types to use Google Docs online viewer
 			// Example ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
-			googleDocsMimes : []
+			googleDocsMimes : [],
+			// URL of hls.js
+			hlsJsUrl : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.7.11/hls.min.js',
+			// URL of dash.mediaplayer.js
+			dashJsUrl : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.5.0/dash.mediaplayer.min.js'
 		},
 		// "quicklook" command options.
 		edit : {
@@ -666,7 +670,7 @@ elFinder.prototype._options = {
 	 *  dispInlineRegex : '.',  // is allow inline of all of MIME types
 	 *  dispInlineRegex : '$^', // is not allow inline of all of MIME types
 	 */
-	dispInlineRegex : '^(?:(?:image|video|audio)|(?:text/plain|application/pdf)$)',
+	dispInlineRegex : '^(?:(?:image|video|audio)|application/(?:x-mpegURL|dash\+xml)|(?:text/plain|application/pdf)$)',
 
 	/**
 	 * Display only required files by types
