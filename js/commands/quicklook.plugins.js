@@ -401,8 +401,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 						} else {
 							fm.loadScript(
 								[ ql.options.dashJsUrl ],
-								function(res) { 
-									cDash = res || window.dashjs;
+								function() { 
+									cDash = window.dashjs;
 									loadDash();
 								},
 								{tryRequire: true}
