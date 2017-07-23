@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.26 (2.1-src Nightly: 001b7a5) (2017-07-23)
+ * Version 2.1.26 (2.1-src Nightly: 01f6dcf) (2017-07-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8027,7 +8027,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 001b7a5)';
+elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 01f6dcf)';
 
 
 
@@ -8606,8 +8606,8 @@ elFinder.prototype._options = {
 			googleDocsMimes : [],
 			// URL of hls.js
 			hlsJsUrl : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.7.11/hls.min.js',
-			// URL of dash.mediaplayer.js
-			dashJsUrl : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.5.0/dash.mediaplayer.min.js'
+			// URL of dash.all.js
+			dashJsUrl : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.5.0/dash.all.min.js'
 		},
 		// "quicklook" command options.
 		edit : {
@@ -23183,8 +23183,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 						} else {
 							fm.loadScript(
 								[ ql.options.dashJsUrl ],
-								function(res) { 
-									cDash = res || window.dashjs;
+								function() { 
+									cDash = window.dashjs;
 									loadDash();
 								},
 								{tryRequire: true}
