@@ -1,11 +1,10 @@
 /**
- * Polski translation
+ * Polish translation
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Wojciech Jabłoński <www.jablonski@gmail.com>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2017-04-05
- */
+ * @version 2017-07-23
+*/
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
 		define(['elfinder'], factory);
@@ -16,11 +15,12 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.pl = {
-		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Wojciech Jabłoński &lt;www.jablonski@gmail.com&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;',
+		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Wojciech Jabłoński &lt;www.jablonski@gmail.com&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;',
 		language   : 'Polski',
 		direction  : 'ltr',
-		dateFormat : 'd M Y H:i', // Mar 13, 2012 05:27 PM
+		dateFormat : 'd.m.Y H:i', // Mar 13, 2012 05:27 PM
 		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
+		nonameDateFormat : 'ymd-His', // to apply if upload file is noname: 120513172700
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -52,7 +52,8 @@
 			'errLocked'            : '"$1" jest zablokowany i nie może zostać zmieniony, przeniesiony lub usunięty.',
 			'errExists'            : 'Plik "$1" już istnieje.',
 			'errInvName'           : 'Nieprawidłowa nazwa pliku.',
-			'errFolderNotFound'    : 'Katalog nie został znaleziony.',
+			'errInvDirname'        : 'Nieprawidłowa nazwa folderu.',  // from v2.1.24 added 12.4.2017			'errFolderNotFound'    : 'Katalog nie został znaleziony.',
+			'errFolderNotFound'    : 'Nie znaleziono folderu.',
 			'errFileNotFound'      : 'Plik nie został znaleziony.',
 			'errTrgFolderNotFound' : 'Katalog docelowy "$1" nie został znaleziony.',
 			'errPopup'             : 'Przeglądarka zablokowała otwarcie nowego okna. Aby otworzyć plik, zmień ustawienia przeglądarki.',
@@ -77,6 +78,7 @@
 			'errMove'              : 'Nie można przenieść "$1".',
 			'errCopyInItself'      : 'Nie można skopiować "$1" w miejsce jego samego.',
 			'errRm'                : 'Nie można usunąć "$1".',
+			'errTrash'             : 'Nie można do kosza.', // from v2.1.24 added 30.4.2017
 			'errRmSrc'             : 'Nie należy usunąć pliku(s) źródłowy.',
 			'errExtract'           : 'Nie można wypakować plików z "$1".',
 			'errArchive'           : 'Nie można utworzyć archiwum.',
@@ -110,6 +112,10 @@
 			'errSearchTimeout'     : 'Upłynął limit czasu podczas wyszukiwania "$1". Wynik wyszukiwania jest częściowy.', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : 'Wymagana jest ponowna autoryzacja.', // from v2.1.10 added 24.3.2016
 			'errMaxTargets'        : 'Maks. liczba elementów do wyboru to $1.', // from v2.1.17 added 17.10.2016
+			'errRestore'           : 'Nie można przywrócić z kosza. Nie można zidentyfikować przywrócić docelowego.', // from v2.1.24 added 3.5.2017
+			'errEditorNotFound'    : 'Nie znaleziono edytora tego typu pliku.', // from v2.1.25 added 23.5.2017
+			'errServerError'       : 'Wystąpił błąd po stronie serwera .', // from v2.1.25 added 16.6.2017
+			'errEmpty'             : 'Nie można do pustego folderu "$1".', // from v2.1.25 added 22.6.2017
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Utwórz archiwum',
@@ -134,6 +140,8 @@
 			'cmdreload'    : 'Odśwież',
 			'cmdrename'    : 'Zmień nazwę',
 			'cmdrm'        : 'Usuń',
+			'cmdtrash'     : 'Do kosza', //from v2.1.24 added 29.4.2017
+			'cmdrestore'   : 'Przywróć', //from v2.1.24 added 3.5.2017
 			'cmdsearch'    : 'Wyszukaj pliki',
 			'cmdup'        : 'Przejdź do katalogu nadrzędnego',
 			'cmdupload'    : 'Wyślij pliki',
@@ -148,6 +156,7 @@
 			'cmdcolwidth'  : 'Resetuj szerokość kolumny', // from v2.1.13 added 12.06.2016
 			'cmdfullscreen': 'Pełny ekran', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : 'Przenieś', // from v2.1.15 added 21.08.2016
+			'cmdempty'     : 'Opróżnij folder', // from v2.1.25 added 22.06.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zamknij',
@@ -157,7 +166,7 @@
 			'btnCancel' : 'Anuluj',
 			'btnNo'     : 'Nie',
 			'btnYes'    : 'Tak',
-			'btnMount'  : 'Montaż',  // added 18.04.2012
+			'btnMount'  : 'Montuj',  // added 18.04.2012
 			'btnApprove': 'Idź do $1 & zatwierdź', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Odmontuj', // from v2.1 added 30.04.2012
 			'btnConv'   : 'Konwertuj', // from v2.1 added 08.04.2014
@@ -168,6 +177,11 @@
 			'btnFileName':'Nazwa pliku',  // from v2.1 added 22.5.2015
 			'btnSaveClose': 'Zapisz & Zamknij', // from v2.1 added 12.6.2015
 			'btnBackup' : 'Kopia zapasowa', // fromv2.1 added 28.11.2015
+			'btnRename'    : 'Zmień nazwę',      // from v2.1.24 added 6.4.2017
+			'btnRenameAll' : 'Zmień nazwę(Wszystkie)', // from v2.1.24 added 6.4.2017
+			'btnPrevious' : 'Poprz ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnNext'     : 'Nast ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnSaveAs'   : 'Zapisz Jako', // from v2.1.25 added 24.5.2017
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Otwórz katalog',
@@ -199,6 +213,12 @@
 			'ntfzipdl'    : 'Tworzenie pliku do pobrania', // from v2.1.7 added 23.1.2016
 			'ntfparents'  : 'Uzyskiwanie informacji o ścieżce', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'Przetwarzanie przesłanego pliku', // from v2.1.17 added 2.11.2016
+			'ntftrash'    : 'Wykonuje wrzucanie do kosza', // from v2.1.24 added 2.5.2017
+			'ntfrestore'  : 'Wykonuje przywracanie z kosza', // from v2.1.24 added 3.5.2017
+			'ntfchkdir'   : 'Sprawdzanie folderu docelowego', // from v2.1.24 added 3.5.2017
+
+			/*********************************** volumes *********************************/
+			'volume_Trash' : 'Śmieci', //from v2.1.24 added 29.4.2017
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'nieznana',
@@ -256,17 +276,19 @@
 			'sortAlsoTreeview'  : 'Również drzewa katalogów',  // from v2.1.15 added 01.08.2016
 
 			/********************************** new items **********************************/
-			'untitled file.txt' : 'NewFile.txt', // added 10.11.2015
-			'untitled folder'   : 'NewFolder',   // added 10.11.2015
-			'Archive'           : 'NewArchive',  // from v2.1 added 10.11.2015
+			'untitled file.txt' : 'NowyPlik.txt', // added 10.11.2015
+			'untitled folder'   : 'NowyFolder',   // added 10.11.2015
+			'Archive'           : 'NoweArchiwum',  // from v2.1 added 10.11.2015
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Wymagane potwierdzenie',
 			'confirmRm'       : 'Czy na pewno chcesz usunąć pliki?<br/>Tej operacji nie można cofnąć!',
 			'confirmRepl'     : 'Zastąpić stary plik nowym?',
+			'confirmRest'     : 'Zamienić istniejący element na pozycję w koszu?', // fromv2.1.24 added 5.5.2017
 			'confirmConvUTF8' : 'Nie w UTF-8<br/>Konwertować na UTF-8?<br/>Zawartość stanie się  UTF-8 poprzez zapisanie po konwersji.', // from v2.1 added 08.04.2014
 			'confirmNonUTF8'  : 'Nie można wykryć kodowania tego pliku. Musi być tymczasowo przekształcony do UTF-8. <br/> Proszę wybrać kodowanie znaków tego pliku.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'Został zmodyfikowany.<br/>Utracisz pracę, jeśli nie zapiszesz zmian.', // from v2.1 added 15.7.2015
+			'confirmTrash'    : 'Czy na pewno chcesz przenieść elementy do kosza?', //from v2.1.24 added 29.4.2017
 			'apllyAll'        : 'Zastosuj do wszystkich',
 			'name'            : 'Nazwa',
 			'size'            : 'Rozmiar',
@@ -290,9 +312,9 @@
 			'aliasfor'        : 'Alias do',
 			'locked'          : 'Zablokowany',
 			'dim'             : 'Wymiary',
-			'files'           : 'Pliki',
+			'files'           : 'Plik(ów)',
 			'folders'         : 'Katalogi',
-			'items'           : 'Elementy',
+			'items'           : 'Element(ów)',
 			'yes'             : 'tak',
 			'no'              : 'nie',
 			'link'            : 'Odnośnik',
@@ -323,6 +345,7 @@
 			'selectForUpload' : 'Wybierz pliki',
 			'moveFiles'       : 'Przenieś pliki',
 			'copyFiles'       : 'Kopiuj pliki',
+			'restoreFiles'    : 'Przywróć elementy', // from v2.1.24 added 5.5.2017
 			'rmFromPlaces'    : 'Usuń z miejsc',
 			'aspectRatio'     : 'Zachowaj proporcje',
 			'scale'           : 'Skala',
@@ -372,8 +395,8 @@
 			'hasSelected'     : 'Masz wybranych $1 pozycji.', // from v2.1.13 added 6.3.2016
 			'hasClipboard'    : 'Masz $1 pozycji w schowku.', // from v2.1.13 added 6.3.2016
 			'incSearchOnly'   : 'Wyszukiwanie przyrostowe jest wyłącznie z bieżącego widoku.', // from v2.1.13 added 6.30.2016
-			'reinstate'       : 'Przywróć', // from v2.1.15 added 3.8.2016
-			'complete'        : '$1 zakończono', // from v2.1.15 added 21.8.2016
+			'reinstate'       : 'Przywracanie', // from v2.1.15 added 3.8.2016
+			'complete'        : '$1 zakończone', // from v2.1.15 added 21.8.2016
 			'contextmenu'     : 'Menu kontekstowe', // from v2.1.15 added 9.9.2016
 			'pageTurning'     : 'Obracanie strony', // from v2.1.15 added 10.9.2016
 			'volumeRoots'     : 'Wolumin główny', // from v2.1.16 added 16.9.2016
@@ -382,7 +405,7 @@
 			'colorPicker'     : 'Wybierania kolorów', // from v2.1.16 added 1.10.2016
 			'8pxgrid'         : '8px Kratka', // from v2.1.16 added 4.10.2016
 			'enabled'         : 'Włączone', // from v2.1.16 added 4.10.2016
-			'disabled'        : 'Wyłaczone', // from v2.1.16 added 4.10.2016
+			'disabled'        : 'Wyłączone', // from v2.1.16 added 4.10.2016
 			'emptyIncSearch'  : 'Wyniki wyszukiwania są puste w bieżącym widoku.\\AWciśnij [Enter] aby poszerzyć zakres wyszukiwania.', // from v2.1.16 added 5.10.2016
 			'emptyLetSearch'  : 'Wyszukiwanie pierwszej litery brak wyników w bieżącym widoku.', // from v2.1.23 added 24.3.2017
 			'textLabel'       : 'Etykieta tekstowa', // from v2.1.17 added 13.10.2016
@@ -391,6 +414,14 @@
 			'saveAsEncoding'  : 'Zapisz z wybranym kodowaniem', // from v2.1.19 added 2.12.2016
 			'selectFolder'    : 'Wybierz katalog', // from v2.1.20 added 13.12.2016
 			'firstLetterSearch': 'Wyszukiwanie pierwszej litery', // from v2.1.23 added 24.3.2017
+			'presets'         : 'Wstępnie ustalone', // from v2.1.25 added 26.5.2017
+			'tooManyToTrash'  : 'To zbyt wiele rzeczy, więc nie mogą być w koszu.', // from v2.1.25 added 9.6.2017
+			'TextArea'        : 'TextArea', // from v2.1.25 added 14.6.2017
+			'folderToEmpty'   : 'Opróżnij folder "$1".', // from v2.1.25 added 22.6.2017
+			'filderIsEmpty'   : 'Brak elementów w folderze "$1".', // from v2.1.25 added 22.6.2017
+			'preference'      : 'Preferencje', // from v2.1.26 added 28.6.2017
+			'language'        : 'Ustawienie języka', // from v2.1.26 added 28.6.2017
+			'clearBrowserData': 'Zainicjuj ustawienia zapisane w tej przeglądarce', // from v2.1.26 added 28.6.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',
