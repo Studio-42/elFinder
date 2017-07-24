@@ -4,11 +4,6 @@
  * @author Wojciech Jabłoński <www.jablonski@gmail.com>
  * @author Bogusław Zięba <bobi@poczta.fm>
  * @version 2017-07-23
- 
-
-
-
- 
 */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
