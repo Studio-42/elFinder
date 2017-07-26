@@ -378,7 +378,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			if (ql.dispInlineRegex.test(file.mime) && (type === 'm3u8' || type === 'mpd' || ql.support.video[type])) {
 				e.stopImmediatePropagation();
 
-				if (fm.UA.Safari && ql.support.video[type]) {
+				if (ql.support.video[type] && (type !== 'm3u8' || fm.UA.Safari)) {
 					render({ src: fm.openUrl(file.hash) });
 					autoplay && node[0].play();
 				} else {
