@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.26 (2.1-src Nightly: 7cc6ae9) (2017-07-24)
+ * Version 2.1.26 (2.1-src Nightly: 25b70be) (2017-07-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8027,7 +8027,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 7cc6ae9)';
+elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 25b70be)';
 
 
 
@@ -20525,38 +20525,38 @@ elFinder.prototype.commands.fullscreen = function() {
 					optTags = [],
 					langs = self.options.langs || {
 						ar: 'اللغة العربية',
-						bg: 'български език',
+						bg: 'Български',
 						ca: 'Català',
-						cs: 'čeština',
-						da: 'dansk',
+						cs: 'Čeština',
+						da: 'Dansk',
 						de: 'Deutsch',
 						el: 'Ελληνικά',
 						en: 'English',
-						es: 'español',
+						es: 'Español',
 						fa: 'فارسی‌‎, پارسی‌',
 						fo: 'Føroyskt',
 						fr: 'Français',
 						he: 'עברית‎',
 						hr: 'Hrvatski',
-						hu: 'magyar',
+						hu: 'Magyar',
 						id: 'Bahasa Indonesia',
 						it: 'Italiano',
 						jp: '日本語',
 						ko: '한국어',
 						nl: 'Nederlands',
-						no: 'norsk',
-						pl: 'język polski',
+						no: 'Norsk',
+						pl: 'Polski',
 						pt_BR: 'Português',
 						ro: 'Română',
-						ru: 'русский язык',
+						ru: 'Pусский',
 						si: 'සිංහල',
-						sk: 'slovenský jazyk',
-						sl: 'slovenščina',
-						sr: 'српски језик',
-						sv: 'svenska',
+						sk: 'Slovenský',
+						sl: 'Slovenščina',
+						sr: 'Srpski',
+						sv: 'Svenska',
 						tr: 'Türkçe',
 						ug_CN: 'ئۇيغۇرچە',
-						uk: 'Українська мова',
+						uk: 'Український',
 						vi: 'Tiếng Việt',
 						zh_CN: '简体中文',
 						zh_TW: '正體中文'
@@ -20601,7 +20601,7 @@ elFinder.prototype.commands.fullscreen = function() {
 		$.inArray('about', parts) !== -1 && about();
 		$.inArray('shortcuts', parts) !== -1 && shortcuts();
 		if ($.inArray('help', parts) !== -1) {
-			helpSource = fm.baseUrl+'js/i18n/help/%s.html';
+			helpSource = fm.baseUrl+'js/i18n/help/%s.html.js';
 			help();
 		}
 		$.inArray('preference', parts) !== -1 && preference();
@@ -21615,7 +21615,7 @@ elFinder.prototype.commands.netunmount = function() {
 			var wnd, target;
 			
 			try {
-				reg = new RegExp(fm.option('dispInlineRegex'));
+				reg = new RegExp(fm.option('dispInlineRegex'), 'i');
 			} catch(e) {
 				reg = false;
 			}
@@ -22712,10 +22712,10 @@ elFinder.prototype.commands.places = function() {
 						self.dispInlineRegex = cwdDispInlineRegex;
 						if (serach || fm.optionsByHashes[hash]) {
 							try {
-								self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', hash));
+								self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', hash), 'i');
 							} catch(e) {
 								try {
-									self.dispInlineRegex = new RegExp(!fm.isRoot(file)? fm.option('dispInlineRegex', file.phash) : fm.options.dispInlineRegex);
+									self.dispInlineRegex = new RegExp(!fm.isRoot(file)? fm.option('dispInlineRegex', file.phash) : fm.options.dispInlineRegex, 'i');
 								} catch(e) {
 									self.dispInlineRegex = /^$/;
 								}
@@ -22748,7 +22748,7 @@ elFinder.prototype.commands.places = function() {
 			
 			// set current volume dispInlineRegex
 			try {
-				cwdDispInlineRegex = new RegExp(fm.option('dispInlineRegex'));
+				cwdDispInlineRegex = new RegExp(fm.option('dispInlineRegex'), 'i');
 			} catch(e) {
 				cwdDispInlineRegex = /^$/;
 			}
