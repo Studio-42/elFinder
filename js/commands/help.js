@@ -261,7 +261,7 @@
 		$.inArray('about', parts) !== -1 && about();
 		$.inArray('shortcuts', parts) !== -1 && shortcuts();
 		if ($.inArray('help', parts) !== -1) {
-			helpSource = fm.baseUrl+'js/i18n/help/%s.html';
+			helpSource = fm.baseUrl+'js/i18n/help/%s.html.js';
 			help();
 		}
 		$.inArray('preference', parts) !== -1 && preference();
