@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.26 (2.1-src Nightly: 25b70be) (2017-07-26)
+ * Version 2.1.26 (2.1-src Nightly: b37bf2d) (2017-07-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8027,7 +8027,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 25b70be)';
+elFinder.prototype.version = '2.1.26 (2.1-src Nightly: b37bf2d)';
 
 
 
@@ -23160,7 +23160,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			if (ql.dispInlineRegex.test(file.mime) && (type === 'm3u8' || type === 'mpd' || ql.support.video[type])) {
 				e.stopImmediatePropagation();
 
-				if (fm.UA.Safari && ql.support.video[type]) {
+				if (ql.support.video[type] && (type !== 'm3u8' || fm.UA.Safari)) {
 					render({ src: fm.openUrl(file.hash) });
 					autoplay && node[0].play();
 				} else {
