@@ -40,7 +40,7 @@ var dirmode = 0755,
 		'sounds':	grep(path.join(src, 'sounds'), '\\.wav'),
 
 		'i18n': grep(path.join(src, 'js', 'i18n'), '\\.js', 'elfinder.en.js')
-				.concat(grep(path.join(src, 'js', 'i18n', 'help'), '\\.html')),
+				.concat(grep(path.join(src, 'js', 'i18n', 'help'), '\\.js')),
 
 		'php':
 			[

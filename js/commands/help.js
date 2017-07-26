@@ -185,38 +185,38 @@
 					optTags = [],
 					langs = self.options.langs || {
 						ar: 'اللغة العربية',
-						bg: 'български език',
+						bg: 'Български',
 						ca: 'Català',
-						cs: 'čeština',
-						da: 'dansk',
+						cs: 'Čeština',
+						da: 'Dansk',
 						de: 'Deutsch',
 						el: 'Ελληνικά',
 						en: 'English',
-						es: 'español',
+						es: 'Español',
 						fa: 'فارسی‌‎, پارسی‌',
 						fo: 'Føroyskt',
 						fr: 'Français',
 						he: 'עברית‎',
 						hr: 'Hrvatski',
-						hu: 'magyar',
+						hu: 'Magyar',
 						id: 'Bahasa Indonesia',
 						it: 'Italiano',
 						jp: '日本語',
 						ko: '한국어',
 						nl: 'Nederlands',
-						no: 'norsk',
-						pl: 'język polski',
+						no: 'Norsk',
+						pl: 'Polski',
 						pt_BR: 'Português',
 						ro: 'Română',
-						ru: 'русский язык',
+						ru: 'Pусский',
 						si: 'සිංහල',
-						sk: 'slovenský jazyk',
-						sl: 'slovenščina',
-						sr: 'српски језик',
-						sv: 'svenska',
+						sk: 'Slovenský',
+						sl: 'Slovenščina',
+						sr: 'Srpski',
+						sv: 'Svenska',
 						tr: 'Türkçe',
 						ug_CN: 'ئۇيغۇرچە',
-						uk: 'Українська мова',
+						uk: 'Український',
 						vi: 'Tiếng Việt',
 						zh_CN: '简体中文',
 						zh_TW: '正體中文'
@@ -261,7 +261,7 @@
 		$.inArray('about', parts) !== -1 && about();
 		$.inArray('shortcuts', parts) !== -1 && shortcuts();
 		if ($.inArray('help', parts) !== -1) {
-			helpSource = fm.baseUrl+'js/i18n/help/%s.html';
+			helpSource = fm.baseUrl+'js/i18n/help/%s.html.js';
 			help();
 		}
 		$.inArray('preference', parts) !== -1 && preference();

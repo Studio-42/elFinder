@@ -547,10 +547,10 @@
 						self.dispInlineRegex = cwdDispInlineRegex;
 						if (serach || fm.optionsByHashes[hash]) {
 							try {
-								self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', hash));
+								self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', hash), 'i');
 							} catch(e) {
 								try {
-									self.dispInlineRegex = new RegExp(!fm.isRoot(file)? fm.option('dispInlineRegex', file.phash) : fm.options.dispInlineRegex);
+									self.dispInlineRegex = new RegExp(!fm.isRoot(file)? fm.option('dispInlineRegex', file.phash) : fm.options.dispInlineRegex, 'i');
 								} catch(e) {
 									self.dispInlineRegex = /^$/;
 								}
@@ -583,7 +583,7 @@
 			
 			// set current volume dispInlineRegex
 			try {
-				cwdDispInlineRegex = new RegExp(fm.option('dispInlineRegex'));
+				cwdDispInlineRegex = new RegExp(fm.option('dispInlineRegex'), 'i');
 			} catch(e) {
 				cwdDispInlineRegex = /^$/;
 			}
