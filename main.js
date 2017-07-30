@@ -108,10 +108,10 @@
 			require(
 				[
 					'elfinder'
-					, 'extras/editors.default'
+					, 'extras/editors.default.min'
 					, 'i18nfmsg'
 					, 'extOpts'
-					, 'extras/quicklook.googledocs'                    // optional GoogleDocs preview
+					, 'extras/quicklook.googledocs.min'                    // optional GoogleDocs preview
 					, 'elfinderBasicAuth'
 					, xdr
 				],
