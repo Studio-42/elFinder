@@ -91,9 +91,9 @@
 			require(
 				[
 					'elfinder'
-					, 'extras/editors.default'                   // load text, image editors
+					, 'extras/editors.default.min'               // load text, image editors
 					, 'elFinderConfig'
-				//	, 'extras/quicklook.googledocs'              // optional preview for GoogleApps contents on the GoogleDrive volume
+				//	, 'extras/quicklook.googledocs.min'          // optional preview for GoogleApps contents on the GoogleDrive volume
 				],
 				start,
 				function(error) {
