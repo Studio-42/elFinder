@@ -1,3 +1,5 @@
+"use strict";
+
 (function(editors, elFinder) {
 	if (typeof define === 'function' && define.amd) {
 		define(['elfinder'], editors);
@@ -101,7 +103,7 @@
 				}
 				ifm.remove();
 			}
-		};
+		},
 		pixlrSetup = function(opts, fm) {
 			if (!hasFlash) {
 				this.disabled = true;
