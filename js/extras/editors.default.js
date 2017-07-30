@@ -12,9 +12,9 @@
 		getfile = window.location.search.match(/getfile=([a-z]+)/),
 		// cdns location
 		cdns = {
-			ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.7',
-			codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.27.2',
-			ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.7.0',
+			ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.8',
+			codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.28.0',
+			ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.7.1',
 			tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.6.4',
 			simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2'
 		},
