@@ -61,11 +61,12 @@
 			
 			return dfd.promise();
 		},
-		restore = function(dfrd, files, targets) {
+		restore = function(dfrd, files, targets, opts) {
 			var rHashes = {},
 				others = [],
 				found = false,
 				dirs = [],
+				opts = opts || {},
 				tm;
 			
 			fm.lockfiles({files : targets});
@@ -174,7 +175,7 @@
 													if (files.length) {
 														if (fm.file(hashes[dir])) {
 															fm.clipboard(files, true);
-															cmdPaste.exec([ hashes[dir] ], {_cmd : 'restore', noToast : dir !== dirTop})
+															cmdPaste.exec([ hashes[dir] ], {_cmd : 'restore', noToast : (opts.noToast || dir !== dirTop)})
 															.done(function(data) {
 																if (data && (data.error || data.warning)) {
 																	hasErr = true;
@@ -188,7 +189,7 @@
 																	dfrd[hasErr? 'reject' : 'resolve']();
 																	if (others.length) {
 																		// Restore items of other trash
-																		fm.exec('restore', others);
+																		self.exec(others);
 																	}
 																}
 															});
@@ -200,7 +201,7 @@
 															dfrd.resolve();
 															if (others.length) {
 																// Restore items of other trash
-																fm.exec('restore', others);
+																self.exec(others);
 															}
 														}
 													}
@@ -237,7 +238,7 @@
 			? 0 : -1;
 	}
 	
-	this.exec = function(hashes) {
+	this.exec = function(hashes, opts) {
 		var dfrd   = $.Deferred()
 				.fail(function(error) {
 					error && fm.error(error);
@@ -258,7 +259,7 @@
 		});
 
 		if (dfrd.state() === 'pending') {
-			restore(dfrd, files, hashes);
+			restore(dfrd, files, hashes, opts);
 		}
 			
 		return dfrd;
