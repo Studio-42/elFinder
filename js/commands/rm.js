@@ -173,11 +173,15 @@ elFinder.prototype.commands.rm = function() {
 								}
 								if (data.added && data.added.length) {
 									undo = function() {
-										var targets = $.map(data.added, function(f) { return f.hash; });
-										return fm.request({
-											data   : {cmd : 'paste', dst : phash, targets : targets, cut : 1},
-											notify : {type : 'undo', cnt : targets.length}
+										var targets = [],
+											restore = fm.getCommand('restore'),
+											dirs    = $.map(data.added, function(f) { return f.mime === 'directory'? f.hash : null; });
+										$.each(data.added, function(i, f) {
+											if ($.inArray(f.phash, dirs) === -1) {
+												targets.push(f.hash);
+											}
 										});
+										return restore.exec(targets, {noToast: true});
 									};
 									redo = function() {
 										return fm.request({

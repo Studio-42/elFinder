@@ -2907,7 +2907,7 @@ var elFinder = function(node, opts, bootCallback) {
 					syncInterval && clearTimeout(syncInterval);
 					syncInterval = setTimeout(function() {
 						var dosync = true, hash = cwd, cts;
-						if (cwdOptions.syncChkAsTs && (cts = files[hash].ts)) {
+						if (cwdOptions.syncChkAsTs && files[hash] && (cts = files[hash].ts)) {
 							self.request({
 								data           : {cmd : 'info', targets : [hash], compare : cts, reload : 1},
 								preventDefault : true
