@@ -157,7 +157,8 @@ elFinder.prototype.commands.rm = function() {
 						fm.unlockfiles({files : targets});
 					})
 					.done(function(data) {
-						var margeRes = function(data) {
+						var margeRes = function(data, phash, reqData) {
+								var undo, prevUndo, redo, prevRedo;
 								$.each(data, function(k, v) {
 									if (Array.isArray(v)) {
 										if (res[k]) {
@@ -169,6 +170,39 @@ elFinder.prototype.commands.rm = function() {
 								});
 								if (data.sync) {
 									res.sync = 1;
+								}
+								if (data.added && data.added.length) {
+									undo = function() {
+										var targets = $.map(data.added, function(f) { return f.hash; });
+										return fm.request({
+											data   : {cmd : 'paste', dst : phash, targets : targets, cut : 1},
+											notify : {type : 'undo', cnt : targets.length}
+										});
+									};
+									redo = function() {
+										return fm.request({
+											data   : reqData,
+											notify : {type : 'redo', cnt : targets.length}
+										});
+									};
+									if (res.undo) {
+										prevUndo = res.undo;
+										res.undo = function() {
+											undo();
+											prevUndo();
+										};
+									} else {
+										res.undo = undo;
+									}
+									if (res.redo) {
+										prevRedo = res.redo;
+										res.redo = function() {
+											redo();
+											prevRedo();
+										};
+									} else {
+										res.redo = redo;
+									}
 								}
 							},
 							err = ['errTrash'],
@@ -185,9 +219,11 @@ elFinder.prototype.commands.rm = function() {
 								fm.notify({type : 'trash', cnt : 1, hideCnt : true, progress : prgSt});
 							}, fm.notifyDelay);
 							$.each(dsts, function(dir, files) {
+								var reqData;
 								if (hashes[dir]) {
+									reqData = {cmd : 'paste', dst : hashes[dir], targets : files, cut : 1};
 									fm.request({
-										data   : {cmd : 'paste', dst : hashes[dir], targets : files, cut : 1},
+										data : reqData,
 										preventDefault : true
 									})
 									.fail(function(error) {
@@ -196,9 +232,10 @@ elFinder.prototype.commands.rm = function() {
 										}
 									})
 									.done(function(data) {
+										var phash = fm.file(files[0]).phash;
 										data = fm.normalize(data);
 										fm.updateCache(data);
-										margeRes(data);
+										margeRes(data, phash, reqData);
 										if (data.warning) {
 											err = err.concat(data.warning);
 											delete data.warning;
@@ -242,6 +279,16 @@ elFinder.prototype.commands.rm = function() {
 													}
 												}
 												res._noSound = true;
+												if (res.undo && res.redo) {
+													res.undo = {
+														cmd : 'trash',
+														callback : res.undo,
+													};
+													res.redo = {
+														cmd : 'trash',
+														callback : res.redo
+													};
+												}
 												dfrd.resolve(res);
 											} else {
 												dfrd.reject(err);
@@ -334,7 +381,7 @@ elFinder.prototype.commands.rm = function() {
 							}
 							e.stopPropagation();
 							e.preventDefault();
-							self.exec(void(0), {forceRm : true});
+							fm.exec('rm', void(0), {_userAction: true, forceRm : true});
 						})
 				};
 			}

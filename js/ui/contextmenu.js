@@ -436,12 +436,17 @@ $.fn.elfindercontextmenu = function(fm) {
 										menu.hide();
 										$this = $(this);
 										opts = $this.data('exec');
-										if ($.isPlainObject(opts)) {
+										if (typeof opts === 'undefined') {
+											opts = {};
+										}
+										if (typeof opts === 'object' || typeof opts === 'string') {
+											opts._userAction = true;
 											opts._currentType = type;
 											opts._currentNode = $this;
 										}
 										close();
-										cmd.exec(targets, opts);
+										//cmd.exec(targets, opts);
+										fm.exec(cmd.name, targets, opts);
 									}
 								})
 								.on('touchend', function(e) {
@@ -490,7 +495,8 @@ $.fn.elfindercontextmenu = function(fm) {
 							node = item(cmd.title, cmd.className? cmd.className : cmd.name, function() {
 								if (! menu.data('draged')) {
 									close();
-									cmd.exec(targets, {_currentType: type, _currentNode: node});
+									//cmd.exec(targets, {_currentType: type, _currentNode: node});
+									fm.exec(cmd.name, targets, {_userAction: true, _currentType: type, _currentNode: node});
 								}
 							});
 							if (cmd.extra && cmd.extra.node) {
