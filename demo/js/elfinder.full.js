@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.26 (2.1-src Nightly: 7bcd94c) (2017-08-01)
+ * Version 2.1.26 (2.1-src Nightly: e7a7335) (2017-08-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2938,7 +2938,7 @@ var elFinder = function(node, opts, bootCallback) {
 					syncInterval && clearTimeout(syncInterval);
 					syncInterval = setTimeout(function() {
 						var dosync = true, hash = cwd, cts;
-						if (cwdOptions.syncChkAsTs && (cts = files[hash].ts)) {
+						if (cwdOptions.syncChkAsTs && files[hash] && (cts = files[hash].ts)) {
 							self.request({
 								data           : {cmd : 'info', targets : [hash], compare : cts, reload : 1},
 								preventDefault : true
@@ -8032,7 +8032,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 7bcd94c)';
+elFinder.prototype.version = '2.1.26 (2.1-src Nightly: e7a7335)';
 
 
 
@@ -25501,11 +25501,12 @@ elFinder.prototype.commands.resize = function() {
 			
 			return dfd.promise();
 		},
-		restore = function(dfrd, files, targets) {
+		restore = function(dfrd, files, targets, opts) {
 			var rHashes = {},
 				others = [],
 				found = false,
 				dirs = [],
+				opts = opts || {},
 				tm;
 			
 			fm.lockfiles({files : targets});
@@ -25614,7 +25615,7 @@ elFinder.prototype.commands.resize = function() {
 													if (files.length) {
 														if (fm.file(hashes[dir])) {
 															fm.clipboard(files, true);
-															cmdPaste.exec([ hashes[dir] ], {_cmd : 'restore', noToast : dir !== dirTop})
+															cmdPaste.exec([ hashes[dir] ], {_cmd : 'restore', noToast : (opts.noToast || dir !== dirTop)})
 															.done(function(data) {
 																if (data && (data.error || data.warning)) {
 																	hasErr = true;
@@ -25628,7 +25629,7 @@ elFinder.prototype.commands.resize = function() {
 																	dfrd[hasErr? 'reject' : 'resolve']();
 																	if (others.length) {
 																		// Restore items of other trash
-																		fm.exec('restore', others);
+																		self.exec(others);
 																	}
 																}
 															});
@@ -25640,7 +25641,7 @@ elFinder.prototype.commands.resize = function() {
 															dfrd.resolve();
 															if (others.length) {
 																// Restore items of other trash
-																fm.exec('restore', others);
+																self.exec(others);
 															}
 														}
 													}
@@ -25677,7 +25678,7 @@ elFinder.prototype.commands.resize = function() {
 			? 0 : -1;
 	}
 	
-	this.exec = function(hashes) {
+	this.exec = function(hashes, opts) {
 		var dfrd   = $.Deferred()
 				.fail(function(error) {
 					error && fm.error(error);
@@ -25698,7 +25699,7 @@ elFinder.prototype.commands.resize = function() {
 		});
 
 		if (dfrd.state() === 'pending') {
-			restore(dfrd, files, hashes);
+			restore(dfrd, files, hashes, opts);
 		}
 			
 		return dfrd;
@@ -25885,11 +25886,15 @@ elFinder.prototype.commands.rm = function() {
 								}
 								if (data.added && data.added.length) {
 									undo = function() {
-										var targets = $.map(data.added, function(f) { return f.hash; });
-										return fm.request({
-											data   : {cmd : 'paste', dst : phash, targets : targets, cut : 1},
-											notify : {type : 'undo', cnt : targets.length}
+										var targets = [],
+											restore = fm.getCommand('restore'),
+											dirs    = $.map(data.added, function(f) { return f.mime === 'directory'? f.hash : null; });
+										$.each(data.added, function(i, f) {
+											if ($.inArray(f.phash, dirs) === -1) {
+												targets.push(f.hash);
+											}
 										});
+										return restore.exec(targets, {noToast: true});
 									};
 									redo = function() {
 										return fm.request({
