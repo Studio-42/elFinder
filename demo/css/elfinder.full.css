@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.26 (2.1-src Nightly: 44f77d5) (2017-07-30)
+ * Version 2.1.26 (2.1-src Nightly: 7bcd94c) (2017-08-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2957,6 +2957,8 @@ embed.elfinder-quicklook-preview-audio {
 .elfinder-button-icon-fullscreen  { background-position: 0 -784px; }
 .elfinder-button-icon-unfullscreen{ background-position: 0 -800px; }
 .elfinder-button-icon-empty     { background-position: 0 -848px; }
+.elfinder-button-icon-undo      { background-position: 0 -864px; }
+.elfinder-button-icon-redo      { background-position: 0 -880px; }
 
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton { overflow:visible; }
