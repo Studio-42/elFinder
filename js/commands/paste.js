@@ -219,8 +219,8 @@ elFinder.prototype.commands.paste = function() {
 							.done(function(data) {
 								var dsts = {},
 									added = data.added && data.added.length? data.added : null;
-								if (cut && added /*&& (!data.removed || data.removed.length === 0)*/) {
-									// undo
+								if (cut && added) {
+									// undo/redo
 									$.each(files, function(i, f) {
 										var phash = f.phash,
 											srcHash = function(name) {
