@@ -2,7 +2,7 @@
  * Slovak translation
  * @author Jakub Ďuraš <jkblmr@gmail.com>
  * @author RobiNN <kelcakrobo@gmail.com>
- * @version 2017-06-23
+ * @version 2017-07-30
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -415,9 +415,12 @@
 			'firstLetterSearch': 'Hľadanie prvého listu', // from v2.1.23 added 24.3.2017
 			'presets'         : 'Presety', // from v2.1.25 added 26.5.2017
 			'tooManyToTrash'  : 'Je to príliš veľa položiek, takže sa nemôže dostať do koša.', // from v2.1.25 added 9.6.2017
-			'TextArea'        : 'TextArea', // from v2.1.25 added 14.6.2017
+			'TextArea'        : 'Textarea', // from v2.1.25 added 14.6.2017
 			'folderToEmpty'   : 'Vyprázdniť priečinok "$1".', // from v2.1.25 added 22.6.2017
 			'filderIsEmpty'   : 'V priečinku "$1" nie sú žiadne položky.', // from v2.1.25 added 22.6.2017
+			'preference'      : 'Preferencie', // from v2.1.26 added 28.6.2017
+			'language'        : 'Nastavenie jazyka', // from v2.1.26 added 28.6.2017
+			'clearBrowserData': 'Inicializujte nastavenia uložené v tomto prehliadači', // from v2.1.26 added 28.6.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',

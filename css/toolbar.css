@@ -158,6 +158,8 @@
 .elfinder-button-icon-fullscreen  { background-position: 0 -784px; }
 .elfinder-button-icon-unfullscreen{ background-position: 0 -800px; }
 .elfinder-button-icon-empty     { background-position: 0 -848px; }
+.elfinder-button-icon-undo      { background-position: 0 -864px; }
+.elfinder-button-icon-redo      { background-position: 0 -880px; }
 
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton { overflow:visible; }
