@@ -274,6 +274,11 @@
 			parts = self.options.view || ['about', 'shortcuts', 'help', 'preference', 'debug'],
 			tabDebug, i, helpSource, tabBase, tabNav, tabs, delta;
 		
+		// force enable 'preference' tab
+		if ($.inArray('preference') === -1) {
+			parts.push('preference');
+		}
+		
 		// debug tab require jQueryUI Tabs Widget
 		if (! $.fn.tabs) {
 			if ((i = $.inArray(parts, 'debug')) !== false) {
@@ -396,3 +401,17 @@
 	};
 
 }).prototype = { forceLoad : true }; // this is required command
+
+elFinder.prototype.commands.preference = function() {
+	
+	this.linkedCmds = ['help'];
+	this.alwaysEnabled  = true;
+	
+	this.getstate = function() {
+		return 0;
+	};
+	
+	this.exec = function() {
+		this.fm.exec('help', void(0), {tab: 'preference'});
+	};};
+
