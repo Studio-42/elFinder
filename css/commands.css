@@ -451,7 +451,6 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	clear: left;
 	float: left;
 	max-width: 50%;
-	margin-bottom: 1em;
 }
 .elfinder-rtl .elfinder-help-preference dt {
 	clear: right;
@@ -459,6 +458,12 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 }
 .elfinder-help-preference dd {
 	margin-bottom: 1em;
+}
+.elfinder-help-preference dd label,
+.elfinder-help-preference dd input[type=checkbox] {
+	white-space: nowrap;
+	display: inline-block;
+	cursor: pointer;
 }
 
 /********************** COMMAND "INFO" ****************************/
