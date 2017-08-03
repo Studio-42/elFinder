@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-08-02
+ * @version 2017-08-03
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -158,6 +158,7 @@
 			'cmdempty'     : 'フォルダーを空に', // from v2.1.25 added 22.06.2017
 			'cmdundo'      : '元に戻す', // from v2.1.27 added 31.07.2017
 			'cmdredo'      : 'やり直し', // from v2.1.27 added 31.07.2017
+			'cmdpreference': '環境設定', // from v2.1.27 added 03.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : '閉じる',
