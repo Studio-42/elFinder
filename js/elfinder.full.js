@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.26 (2.1-src Nightly: 2ef879d) (2017-08-03)
+ * Version 2.1.26 (2.1-src Nightly: 508e120) (2017-08-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8032,7 +8032,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 2ef879d)';
+elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 508e120)';
 
 
 
@@ -10319,7 +10319,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-08-02
+ * @version 2017-08-03
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -10468,6 +10468,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'cmdempty'     : 'Empty the folder', // from v2.1.25 added 22.06.2017
 			'cmdundo'      : 'Undo', // from v2.1.27 added 31.07.2017
 			'cmdredo'      : 'Redo', // from v2.1.27 added 31.07.2017
+			'cmdpreference': 'Preferences', // from v2.1.27 added 03.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
@@ -16383,6 +16384,18 @@ $.fn.elfindertoolbar = function(fm, opts) {
 					}
 				}
 				
+				if (!self.children().length) {
+					panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>');
+					name = 'preference';
+					if (cmd = commands[name]) {
+						button = 'elfinder'+cmd.options.ui;
+						buttons[name] = $('<div/>')[button](cmd);
+						textLabel && buttons[name].find('.elfinder-button-text').show();
+						panel.prepend(buttons[name]);
+						self.prepend(panel);
+					}
+				}
+				
 				(! self.data('swipeClose') && self.children().length)? self.show() : self.hide();
 				fm.trigger('toolbarload').trigger('uiresize');
 			},
@@ -16415,7 +16428,11 @@ $.fn.elfindertoolbar = function(fm, opts) {
 						},
 					},{
 						label    : fm.i18n('toolbarPref'),
+<<<<<<< HEAD
 						icon     : 'pref',
+=======
+						icon     : 'preference',
+>>>>>>> master
 						callback : function() {
 							fm.exec('help', void(0), {tab: 'preference'});
 						}
@@ -20689,6 +20706,11 @@ elFinder.prototype.commands.fullscreen = function() {
 			parts = self.options.view || ['about', 'shortcuts', 'help', 'preference', 'debug'],
 			tabDebug, i, helpSource, tabBase, tabNav, tabs, delta;
 		
+		// force enable 'preference' tab
+		if ($.inArray('preference') === -1) {
+			parts.push('preference');
+		}
+		
 		// debug tab require jQueryUI Tabs Widget
 		if (! $.fn.tabs) {
 			if ((i = $.inArray(parts, 'debug')) !== false) {
@@ -20811,6 +20833,20 @@ elFinder.prototype.commands.fullscreen = function() {
 	};
 
 }).prototype = { forceLoad : true }; // this is required command
+
+elFinder.prototype.commands.preference = function() {
+	
+	this.linkedCmds = ['help'];
+	this.alwaysEnabled  = true;
+	
+	this.getstate = function() {
+		return 0;
+	};
+	
+	this.exec = function() {
+		this.fm.exec('help', void(0), {tab: 'preference'});
+	};};
+
 
 
 /*
