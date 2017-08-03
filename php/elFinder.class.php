@@ -2682,6 +2682,10 @@ class elFinder {
 				$result['warning'] = array_merge($result['warning'], $this->error($dstVolume->error()));
 				continue;
 			}
+			
+			if ($error = $dstVolume->error()) {
+				$result['warning'] = array_merge($result['warning'], $this->error($error));
+			}
 
 			$dirChange = ! empty($file['dirChange']);
 			unset($file['dirChange']);
@@ -2696,6 +2700,8 @@ class elFinder {
 		}
 		if (count($result['warning']) < 1) {
 			unset($result['warning']);
+		} else {
+			$result['sync'] = true;
 		}
 		
 		return $result;

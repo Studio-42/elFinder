@@ -685,7 +685,22 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
         return true;
     }
-
+    
+    /**
+     * Return debug info for client.
+     *
+     * @return array
+     **/
+    public function debug()
+    {
+        $res = parent::debug();
+        if (! empty($this->options['accessToken'])) {
+            $res['accessToken'] = $this->options['accessToken'];
+        }
+    
+        return $res;
+    }
+    
     /*********************************************************************/
     /*                        INIT AND CONFIGURE                         */
     /*********************************************************************/
