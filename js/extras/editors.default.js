@@ -81,8 +81,8 @@
 				return;
 			}
 			var pixlr = window.location.search.match(/[?&]pixlr=([^&]+)/),
-			image = window.location.search.match(/[?&]image=([^&]+)/),
-			p, ifm, url, node;
+				image = window.location.search.match(/[?&]image=([^&]+)/),
+				p, ifm, url, node;
 			if (pixlr) {
 				// case of redirected from pixlr.com
 				p = window.parent
@@ -97,6 +97,7 @@
 							node.data('loading')(true);
 						})
 						.attr('src', url)
+						.data('type', type)
 						.data('loading')();
 				} else {
 					node.data('loading')(true);
@@ -133,10 +134,11 @@
 				launch = function() {
 					errtm = setTimeout(error, 10000);
 					myurl += (myurl.indexOf('?') === -1? '?' : '&') + 'pixlr='+node.attr('id');
-					src += '&referrer=elFinder&locktitle=true&locktype=true';
+					src += '&referrer=elFinder&locktitle=true';
 					src += '&exit='+encodeURIComponent(myurl+'&image=0');
 					src += '&target='+encodeURIComponent(myurl);
 					src += '&title='+encodeURIComponent(file.name);
+					src += '&locktype='+encodeURIComponent(file.mime === 'image/png'? 'png' : 'jpg');
 					src += '&image='+encodeURIComponent(node.attr('src'));
 					container
 						.attr('id', node.attr('id')+'iframe')
@@ -223,10 +225,7 @@
 				pixlrLoad.call(this, 'editor', base);
 			},
 			save : function(base) {},
-			// unbind resize event function
-			close : function(base) {
-				//$(window).off('resize.'+$(base).children('img:first').attr('id'));
-			}
+			close : function(base) {}
 		},
 		{
 			// Pixlr Express
@@ -238,7 +237,7 @@
 				single: true
 			},
 			// MIME types to accept
-			mimes : ['image/jpeg', 'image/png'],
+			mimes : ['image/jpeg'],
 			// HTML of this editor
 			html : '<div style="width:100%;height:300px;max-height:100%;text-align:center;"><img/></div>',
 			// called on initialization of elFinder cmd edit (this: this editor's config object)
@@ -257,10 +256,7 @@
 				pixlrLoad.call(this, 'express', base);
 			},
 			save : function(base) {},
-			// unbind resize event function
-			close : function(base) {
-				//$(window).off('resize.'+$(base).children('img:first').attr('id'));
-			}
+			close : function(base) {}
 		},
 		{
 			// Adobe Creative SDK Creative Tools Image Editor UI
