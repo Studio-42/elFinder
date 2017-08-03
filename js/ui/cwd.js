@@ -2356,6 +2356,7 @@ $.fn.elfindercwd = function(fm, options) {
 				}
 				
 				if (added) {
+					fm.trigger('cwdhasheschange', cwdHashes);
 					list && resize();
 					wrapper.trigger(scrollEvent);
 				}
