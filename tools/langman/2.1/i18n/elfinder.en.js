@@ -2,7 +2,7 @@
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-08-02
+ * @version 2017-08-03
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -151,6 +151,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'cmdempty'     : 'Empty the folder', // from v2.1.25 added 22.06.2017
 			'cmdundo'      : 'Undo', // from v2.1.27 added 31.07.2017
 			'cmdredo'      : 'Redo', // from v2.1.27 added 31.07.2017
+			'cmdpreference': 'Preferences', // from v2.1.27 added 03.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
