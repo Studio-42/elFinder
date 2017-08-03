@@ -53,6 +53,18 @@ $.fn.elfindertoolbar = function(fm, opts) {
 					}
 				}
 				
+				if (!self.children().length) {
+					panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>');
+					name = 'preference';
+					if (cmd = commands[name]) {
+						button = 'elfinder'+cmd.options.ui;
+						buttons[name] = $('<div/>')[button](cmd);
+						textLabel && buttons[name].find('.elfinder-button-text').show();
+						panel.prepend(buttons[name]);
+						self.prepend(panel);
+					}
+				}
+				
 				(! self.data('swipeClose') && self.children().length)? self.show() : self.hide();
 				fm.trigger('toolbarload').trigger('uiresize');
 			},
@@ -85,7 +97,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 						},
 					},{
 						label    : fm.i18n('toolbarPref'),
-						icon     : 'pref',
+						icon     : 'preference',
 						callback : function() {
 							fm.exec('help', void(0), {tab: 'preference'});
 						}
