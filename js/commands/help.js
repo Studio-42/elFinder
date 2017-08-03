@@ -275,7 +275,7 @@
 			tabDebug, i, helpSource, tabBase, tabNav, tabs, delta;
 		
 		// force enable 'preference' tab
-		if ($.inArray('preference') === -1) {
+		if ($.inArray('preference', parts) === -1) {
 			parts.push('preference');
 		}
 		
