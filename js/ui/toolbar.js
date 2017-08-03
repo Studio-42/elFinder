@@ -97,11 +97,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 						},
 					},{
 						label    : fm.i18n('toolbarPref'),
-<<<<<<< HEAD
-						icon     : 'pref',
-=======
 						icon     : 'preference',
->>>>>>> master
 						callback : function() {
 							fm.exec('help', void(0), {tab: 'preference'});
 						}
