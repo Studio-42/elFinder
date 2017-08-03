@@ -82,6 +82,12 @@ $.fn.elfindertoolbar = function(fm, opts) {
 							textLabel = ! textLabel;
 							self.height('').find('.elfinder-button-text')[textLabel? 'show':'hide']();
 							fm.trigger('uiresize').storage('toolbarTextLabel', textLabel? '1' : '0');
+						},
+					},{
+						label    : fm.i18n('toolbarPref'),
+						icon     : 'pref',
+						callback : function() {
+							fm.exec('help', void(0), {tab: 'preference'});
 						}
 					}],
 					x: e.pageX,
@@ -127,8 +133,9 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		
 		render();
 		
-		fm.bind('open sync select', function() {
-			var disabled = fm.option('disabled'),
+		fm.bind('open sync select toolbarpref', function() {
+			var disabled = Object.assign([], fm.option('disabled')),
+				userHides = fm.storage('toolbarhides') || {},
 				doRender, sel;
 			
 			if (this.type === 'select') {
@@ -140,6 +147,12 @@ $.fn.elfindertoolbar = function(fm, opts) {
 					disabled = fm.getDisabledCmds(sel);
 				}
 			}
+			
+			$.each(userHides, function(n) {
+				if ($.inArray(n, disabled) === -1) {
+					disabled.push(n);
+				}
+			});
 			
 			if (Object.keys(fm.commandMap).length) {
 				$.each(fm.commandMap, function(from, to){

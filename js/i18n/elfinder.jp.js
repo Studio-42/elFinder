@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-07-31
+ * @version 2017-08-02
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -425,6 +425,7 @@
 			'preference'      : '環境設定', // from v2.1.26 added 28.6.2017
 			'language'        : '言語設定', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': 'ブラウザに保存された設定を初期化する', // from v2.1.26 added 28.6.2017
+			'toolbarPref'     : 'ツールバー設定', // from v2.1.27 added 2.8.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',

@@ -221,13 +221,42 @@
 						zh_CN: '简体中文',
 						zh_TW: '正體中文'
 					},
-					forms = { language: '', clearBrowserData: '' },
+					forms = { language: '', toolbarPref: '', clearBrowserData: '' },
 					dls = $();
 				
 				$.each(langs, function(lang, name) {
 					optTags.push('<option value="'+lang+'">'+name+'</option>');
 				});
 				forms.language = langSel.append(optTags.join(''));
+				
+				forms.toolbarPref = (function() {
+					var pnls = $.map(fm.options.uiOptions.toolbar, function(v) {
+							return $.isArray(v)? v : null
+						}),
+						tags = [],
+						hides = fm.storage('toolbarhides') || {},
+						node;
+					$.each(pnls, function() {
+						var cmd = this,
+							name = fm.i18n('cmd'+cmd);
+						if (name === 'cmd'+cmd) {
+							name = cmd;
+						}
+						tags.push('<span class="elfinder-help-toolbar-item"><label><input type="checkbox" value="'+cmd+'" '+(hides[cmd]? '' : 'checked')+'/>'+name+'</label></span>');
+					});
+					node = $(tags.join(' ')).on('change', 'input', function() {
+						var v = $(this).val(),
+							o = $(this).is(':checked');
+						if (!o && !hides[v]) {
+							hides[v] = true;
+						} else if (o && hides[v]) {
+							delete hides[v];
+						}
+						fm.storage('toolbarhides', hides);
+						fm.trigger('toolbarpref');
+					});
+					return node;
+				})();
 				
 				forms.clearBrowserData = $('<button/>').text(fm.i18n('reset')).button().on('click', function(e) {
 					e.preventDefault();
@@ -236,7 +265,7 @@
 				});
 				
 				$.each(forms, function(n, f) {
-					dls = dls.add($('<dt>'+fm.i18n(n)+'</dt>')).add($('<dd/>').append(f));
+					dls = dls.add($('<dt>'+fm.i18n(n)+'</dt>')).add($('<dd class="elfinder-help-'+n+'"/>').append(f));
 				});
 				
 				tab.append($('<dl/>').append(dls));
@@ -361,8 +390,9 @@
 		return 0;
 	};
 	
-	this.exec = function() {
-		this.dialog.trigger('initContents').elfinderdialog('open').find('.ui-tabs-nav li a:first').click();
+	this.exec = function(sel, opts) {
+		var tab = opts? opts.tab : void(0);
+		this.dialog.trigger('initContents').elfinderdialog('open').find((tab? '.elfinder-help-tab-'+tab : '.ui-tabs-nav li') + ' a:first').click();
 	};
 
 }).prototype = { forceLoad : true }; // this is required command
