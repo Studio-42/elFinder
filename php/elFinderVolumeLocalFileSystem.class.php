@@ -866,7 +866,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _unlink($path) {
-		$ret = unlink($path);
+		$ret = is_file($path) && unlink($path);
 		$ret && clearstatcache();
 		return $ret;
 	}
@@ -900,7 +900,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 
 		$meta = stream_get_meta_data($fp);
 		$uri = isset($meta['uri'])? $meta['uri'] : '';
-		if ($uri && ! preg_match('#^[a-zA-Z0-9]+://#', $uri)) {
+		if ($uri && ! preg_match('#^[a-zA-Z0-9]+://#', $uri) && !is_link($uri)) {
 			fclose($fp);
 			$mtime = filemtime($uri);
 			$isCmdPaste = ($this->ARGS['cmd'] === 'paste');
@@ -912,17 +912,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			if ($mtime && $this->ARGS['cmd'] === 'upload') {
 				touch($path, isset($this->options['keepTimestamp']['upload'])? $mtime : time());
 			}
-			// re-create the source file for remove processing of paste command
-			$isCmdPaste && !$isCmdCopy && touch($uri);
 		} else {
 			if (file_put_contents($path, $fp, LOCK_EX) === false) {
 				return false;
 			}
-		}
-		
-		if (is_link($path)) {
-			unlink($path);
-			return $this->setError(elFinder::ERROR_SAVE, $name);
 		}
 		
 		chmod($path, $this->options['fileMode']);

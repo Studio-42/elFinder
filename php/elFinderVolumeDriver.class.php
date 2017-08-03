@@ -2469,13 +2469,18 @@ abstract class elFinderVolumeDriver {
 				return $this->setError(elFinder::ERROR_COPY, $errpath, elFinder::ERROR_PERM_DENIED);
 			}
 			
+			$this->error = array();
 			if (($path = $this->copyFrom($volume, $src, $destination, $name)) == false) {
 				return false;
 			}
 			
-			if ($rmSrc) {
+			if ($rmSrc && !$this->error()) {
 				if (!$volume->rm($src)) {
-					return $this->setError(elFinder::ERROR_MOVE, $errpath, elFinder::ERROR_RM_SRC);
+					if ($volume->file($src)) {
+						$this->addError(elFinder::ERROR_RM_SRC);
+					} else {
+						$this->removed[] = $file;
+					}
 				}
 			}
 			$res = $this->stat($path);
@@ -4628,7 +4633,7 @@ abstract class elFinderVolumeDriver {
 		elFinder::extendTimeLimit();
 		
 		if (($source = $volume->file($src)) == false) {
-			return $this->setError(elFinder::ERROR_COPY, '#'.$src, $volume->error());
+			return $this->addError(elFinder::ERROR_COPY, '#'.$src, $volume->error());
 		}
 		
 		$srcIsDir = ($source['mime'] === 'directory');
@@ -4636,11 +4641,11 @@ abstract class elFinderVolumeDriver {
 		$errpath = $volume->path($source['hash']);
 		
 		if (!$this->nameAccepted($source['name'], $srcIsDir)) {
-			return $this->setError(elFinder::ERROR_COPY, $errpath, $srcIsDir? elFinder::ERROR_INVALID_DIRNAME : elFinder::ERROR_INVALID_NAME);
+			return $this->addError(elFinder::ERROR_COPY, $errpath, $srcIsDir? elFinder::ERROR_INVALID_DIRNAME : elFinder::ERROR_INVALID_NAME);
 		}
-				
+		
 		if (!$source['read']) {
-			return $this->setError(elFinder::ERROR_COPY, $errpath, elFinder::ERROR_PERM_DENIED);
+			return $this->addError(elFinder::ERROR_COPY, $errpath, elFinder::ERROR_PERM_DENIED);
 		}
 		
 		if ($srcIsDir) {
@@ -4648,17 +4653,14 @@ abstract class elFinderVolumeDriver {
 			$this->clearcache();
 
 			if (($test && $test['mime'] != 'directory') || (! $test && ! $test = $this->mkdir($this->encode($destination), $name))) {
-				return $this->setError(elFinder::ERROR_COPY, $errpath);
+				return $this->addError(elFinder::ERROR_COPY, $errpath);
 			}
 			
 			//$path = $this->joinPathCE($destination, $name);
 			$path = $this->decode($test['hash']);
 			
 			foreach ($volume->scandir($src) as $entr) {
-				if (!$this->copyFrom($volume, $entr['hash'], $path, $entr['name'])) {
-					$this->remove($path, true); // fall back
-					return $this->setError($this->error, elFinder::ERROR_COPY, $errpath);
-				}
+				$this->copyFrom($volume, $entr['hash'], $path, $entr['name']);
 			}
 			
 			$this->added[] = $test;
@@ -4669,7 +4671,7 @@ abstract class elFinderVolumeDriver {
 				$mimeByName = '';
 			}
 			if (!$this->allowPutMime($source['mime']) || ($mimeByName && !$this->allowPutMime($mimeByName))) {
-				return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $errpath);
+				return $this->addError(elFinder::ERROR_UPLOAD_FILE_MIME, $errpath);
 			}
 			
 			if (strpos($source['mime'], 'image') === 0 && ($dim = $volume->dimensions($src))) {
@@ -4681,7 +4683,7 @@ abstract class elFinderVolumeDriver {
 			if (($fp = $volume->open($src)) == false
 			|| ($path = $this->saveCE($fp, $destination, $name, $source)) == false) {
 				$fp && $volume->close($fp, $src);
-				return $this->setError(elFinder::ERROR_COPY, $errpath);
+				return $this->addError(elFinder::ERROR_COPY, $errpath);
 			}
 			$volume->close($fp, $src);
 

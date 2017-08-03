@@ -240,9 +240,6 @@ elFinder.prototype.commands.paste = function() {
 											} else {
 												dsts[phash] = [ shash ];
 											}
-										} else {
-											dsts = {};
-											return false;
 										}
 									});
 									if (Object.keys(dsts).length) {
