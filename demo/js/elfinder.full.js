@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.26 (2.1-src Nightly: 028cf36) (2017-08-04)
+ * Version 2.1.26 (2.1-src Nightly: 4a7c553) (2017-08-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -3041,7 +3041,9 @@ var elFinder = function(node, opts, bootCallback) {
 			left    : 0,
 			display : 'block',
 			position: 'fixed',
-			zIndex  : Math.max(self.zIndex? (self.zIndex + 1) : 0 , 1000)
+			zIndex  : Math.max(self.zIndex? (self.zIndex + 1) : 0 , 1000),
+			maxWidth : '',
+			maxHeight: ''
 		};
 	};
 	
@@ -8032,7 +8034,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 028cf36)';
+elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 4a7c553)';
 
 
 
@@ -14269,7 +14271,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 				maximize: function() {
 					if (opts.allowMaximize) {
 						dialog.on('resize', function(e, data) {
-							var full, elm;
+							var full, elm, pos;
 							e.preventDefault();
 							e.stopPropagation();
 							if (data && data.maximize) {
@@ -14291,6 +14293,11 @@ $.fn.elfinderdialog = function(opts, fm) {
 								} else {
 									self.attr('style', elm.data('style'));
 									elm.removeData('style');
+									if (fm.getUI().hasClass('elfinder-fullscreen')) {
+										pos = dialog.position();
+										dialog.css('top', Math.max(pos.top, 0));
+										dialog.css('left', Math.max(pos.left, 0));
+									}
 									try {
 										dialog.hasClass('ui-draggable') && dialog.draggable('enable');
 										dialog.hasClass('ui-resizable') && dialog.resizable('enable');
@@ -14328,6 +14335,11 @@ $.fn.elfinderdialog = function(opts, fm) {
 										.attr('style', $this.data('style'))
 										.removeClass('elfinder-dialog-minimized')
 										.off('mousedown.minimize');
+									if (fm.getUI().hasClass('elfinder-fullscreen')) {
+										pos = dialog.position();
+										dialog.css('top', Math.max(pos.top, 0));
+										dialog.css('left', Math.max(pos.left, 0));
+									}
 									$this.removeData('style').show();
 									titlebar.children('.elfinder-titlebar-full').show();
 									dialog.children('.ui-widget-content').slideDown('fast', function() {
