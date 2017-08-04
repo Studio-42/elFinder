@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.26 (2.1-src Nightly: 4a7c553) (2017-08-04)
+ * Version 2.1.26 (2.1-src Nightly: 9770cc1) (2017-08-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8034,7 +8034,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 4a7c553)';
+elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 9770cc1)';
 
 
 
@@ -8917,7 +8917,10 @@ elFinder.prototype._options = {
 			// Exclude `displayTextLabel` setting UA type
 			labelExcludeUA: ['Mobile'],
 			// auto hide on initial open
-			autoHideUA: ['Mobile']
+			autoHideUA: ['Mobile'],
+			// show Preference button ('none', 'auto', 'always')
+			// If you do not include 'preference' in the context menu you should specify 'auto' or 'always'
+			showPreferenceButton: 'none'
 		},
 		// directories tree options
 		tree : {
@@ -9296,7 +9299,7 @@ elFinder.prototype._options = {
 		// navbarfolder menu
 		navbar : ['open', 'download', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', 'empty', '|', 'rename', '|', 'archive', '|', 'places', 'info', 'chmod', 'netunmount'],
 		// current directory menu
-		cwd    : ['undo', 'redo', '|', 'reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'empty', '|', 'view', 'sort', 'colwidth', '|', 'info', '|', 'fullscreen'],
+		cwd    : ['undo', 'redo', '|', 'reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'empty', '|', 'view', 'sort', 'colwidth', '|', 'info', '|', 'fullscreen', '|', 'preference'],
 		// current directory file menu
 		files  : ['getfile', '|' ,'open', 'download', 'opendir', 'quicklook', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', 'empty', '|', 'rename', 'edit', 'resize', '|', 'archive', 'extract', '|', 'places', 'info', 'chmod', 'netunmount']
 	},
@@ -16356,7 +16359,8 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				// default options
 				displayTextLabel: false,
 				labelExcludeUA: ['Mobile'],
-				autoHideUA: ['Mobile']
+				autoHideUA: ['Mobile'],
+				showPreferenceButton: 'none'
 			},
 			filter   = function(opts) {
 				return $.map(opts, function(v) {
@@ -16368,7 +16372,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				});
 			},
 			render = function(disabled){
-				var name;
+				var name,cmdPref;
 				
 				$.each(buttons, function(i, b) { b.detach(); });
 				self.empty();
@@ -16397,15 +16401,17 @@ $.fn.elfindertoolbar = function(fm, opts) {
 					}
 				}
 				
-				if (!self.children().length) {
-					panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>');
-					name = 'preference';
-					if (cmd = commands[name]) {
+				if (cmdPref = commands['preference']) {
+					//cmdPref.state = !self.children().length? 0 : -1;
+					if (options.showPreferenceButton === 'always' || (!self.children().length && options.showPreferenceButton === 'auto')) {
+						//cmdPref.state = 0;
+						panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>');
+						name = 'preference';
 						button = 'elfinder'+cmd.options.ui;
-						buttons[name] = $('<div/>')[button](cmd);
+						buttons[name] = $('<div/>')[button](cmdPref);
 						textLabel && buttons[name].find('.elfinder-button-text').show();
 						panel.prepend(buttons[name]);
-						self.prepend(panel);
+						self.append(panel);
 					}
 				}
 				
@@ -16417,6 +16423,9 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			dispre   = null,
 			uiCmdMapPrev = '',
 			l, i, cmd, panel, button, swipeHandle, autoHide, textLabel;
+		
+		// normalize options
+		options.showPreferenceButton = options.showPreferenceButton.toLowerCase();
 		
 		// correction of options.displayTextLabel
 		textLabel = fm.storage('toolbarTextLabel');
