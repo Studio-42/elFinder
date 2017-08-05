@@ -352,18 +352,14 @@ elFinder.prototype.commands.rm = function() {
 		};
 	
 	this.syncTitleOnChange = true;
-	this.updateOnSelect = true;
+	this.updateOnSelect = false;
 	this.shortcuts = [{
 		pattern     : 'delete ctrl+backspace shift+delete'
 	}];
 	this.handlers = {
-		'open' : function() {
-			self.update(void(0), fm.i18n(self.fm.option('trashHash')? 'trash' : 'rm'));
-		},
 		'select' : function(e) {
-			if (e.data && e.data.selected && e.data.selected.length) {
-				self.update(void(0), getTHash(e.data.selected)? 'trash' : 'rm');
-			}
+			var targets = e.data && e.data.selected && e.data.selected.length? e.data.selected : null;
+			self.update(void(0), (targets? getTHash(targets) : fm.option('trashHash'))? 'trash' : 'rm');
 		}
 	}
 	this.value = 'rm';
@@ -393,19 +389,10 @@ elFinder.prototype.commands.rm = function() {
 	}
 	
 	this.getstate = function(sel) {
-		var state;
+		var sel   = this.hashes(sel);
 		
-		sel = sel || fm.selected();
-		state = sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
+		return sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
 			? 0 : -1;
-		
-		if (sel && sel.length && fm.searchStatus.state > 1) {
-			setTimeout(function() {
-				self.update(state, getTHash(sel)? 'trash' : 'rm');
-			}, 0);
-		}
-		
-		return state;
 	}
 	
 	this.exec = function(hashes, opts) {
