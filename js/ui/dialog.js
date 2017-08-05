@@ -165,7 +165,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 				maximize: function() {
 					if (opts.allowMaximize) {
 						dialog.on('resize', function(e, data) {
-							var full, elm, pos;
+							var full, elm;
 							e.preventDefault();
 							e.stopPropagation();
 							if (data && data.maximize) {
@@ -187,11 +187,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 								} else {
 									self.attr('style', elm.data('style'));
 									elm.removeData('style');
-									if (fm.getUI().hasClass('elfinder-fullscreen')) {
-										pos = dialog.position();
-										dialog.css('top', Math.max(pos.top, 0));
-										dialog.css('left', Math.max(pos.left, 0));
-									}
+									posCheck();
 									try {
 										dialog.hasClass('ui-draggable') && dialog.draggable('enable');
 										dialog.hasClass('ui-resizable') && dialog.resizable('enable');
@@ -218,7 +214,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 							.prepend($('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-minimize"><span class="ui-icon ui-icon-minusthick"/></span>')
 							.on('mousedown', function(e) {
 								var $this = $(this),
-									pos, w;
+									w;
 								
 								e.preventDefault();
 								e.stopPropagation();
@@ -229,11 +225,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 										.attr('style', $this.data('style'))
 										.removeClass('elfinder-dialog-minimized')
 										.off('mousedown.minimize');
-									if (fm.getUI().hasClass('elfinder-fullscreen')) {
-										pos = dialog.position();
-										dialog.css('top', Math.max(pos.top, 0));
-										dialog.css('left', Math.max(pos.left, 0));
-									}
+									posCheck();
 									$this.removeData('style').show();
 									titlebar.children('.elfinder-titlebar-full').show();
 									dialog.children('.ui-widget-content').slideDown('fast', function() {
@@ -475,6 +467,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 						h = dialog.height() - oh - dialog.data('margin-y');
 					}
 					self.height(h);
+					posCheck();
 					setTimeout(function() { // Firefox need setTimeout to get new height value
 						minH = self.height();
 						minH = (h < minH)? (minH + oh + dialog.data('margin-y')) : opts.minHeight;
@@ -538,8 +531,16 @@ $.fn.elfinderdialog = function(opts, fm) {
 						}
 					}
 				})
-				.data({modal: opts.modal})
-			;
+				.data({modal: opts.modal}),
+			posCheck = function() {
+				var node = fm.getUI(),
+					pos;
+				if (node.hasClass('elfinder-fullscreen')) {
+					pos = dialog.position();
+					dialog.css('top', Math.max(Math.min(Math.max(pos.top, 0), node.height() - 100), 0));
+					dialog.css('left', Math.max(Math.min(Math.max(pos.left, 0), node.width() - 100), 0));
+				}
+			};
 		
 		dialog.prepend(titlebar);
 
