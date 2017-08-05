@@ -1,3 +1,21 @@
+2017-08-xx  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.27):
+		= [php:core] Fixed #2104 notice error in `getIniBytes()` with php 7.1
+		- [cmd:download] Fixed #2106 add an option `commandOptions.download.minFilesZipdl`
+		- [VD:abstract] enable to specify the path of server commands as constant
+		- [cmd:quicklook] Fixed #2108 support HLS, DASH video preview
+		- [cmd:open,quicklook] MIME type determination to case incentive
+		- [cmd:undo,redo] Fixed #2115 implement the Undo/Redo command
+		- [VD] Fixed #2120 item copy between volumes is incomplete
+		- [VD:Box,OneDrive] Fixed #2122 to be able to know the access token in debug mode
+		- [VD:abstract] Fixed #2107 do clearstatcache() in abstract class
+		- [cmd:help] Fixed #2118 controling to show/hide toolbar icons in preference tab
+		- [ui:dialog] Fixed #2123 problem in maximaize on fullscreen mode
+		- [ui:toolbar] add an option `showPreferenceButton`
+		- And some minor bug fixes
+
+
 2017-07-17  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.26):
