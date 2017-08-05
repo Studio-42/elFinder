@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.26 (2.1-src Nightly: 9770cc1) (2017-08-04)
+ * Version 2.1.26 (2.1-src Nightly: 6820001) (2017-08-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8034,7 +8034,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 9770cc1)';
+elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 6820001)';
 
 
 
@@ -14274,7 +14274,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 				maximize: function() {
 					if (opts.allowMaximize) {
 						dialog.on('resize', function(e, data) {
-							var full, elm, pos;
+							var full, elm;
 							e.preventDefault();
 							e.stopPropagation();
 							if (data && data.maximize) {
@@ -14296,11 +14296,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 								} else {
 									self.attr('style', elm.data('style'));
 									elm.removeData('style');
-									if (fm.getUI().hasClass('elfinder-fullscreen')) {
-										pos = dialog.position();
-										dialog.css('top', Math.max(pos.top, 0));
-										dialog.css('left', Math.max(pos.left, 0));
-									}
+									posCheck();
 									try {
 										dialog.hasClass('ui-draggable') && dialog.draggable('enable');
 										dialog.hasClass('ui-resizable') && dialog.resizable('enable');
@@ -14327,7 +14323,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 							.prepend($('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-minimize"><span class="ui-icon ui-icon-minusthick"/></span>')
 							.on('mousedown', function(e) {
 								var $this = $(this),
-									pos, w;
+									w;
 								
 								e.preventDefault();
 								e.stopPropagation();
@@ -14338,11 +14334,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 										.attr('style', $this.data('style'))
 										.removeClass('elfinder-dialog-minimized')
 										.off('mousedown.minimize');
-									if (fm.getUI().hasClass('elfinder-fullscreen')) {
-										pos = dialog.position();
-										dialog.css('top', Math.max(pos.top, 0));
-										dialog.css('left', Math.max(pos.left, 0));
-									}
+									posCheck();
 									$this.removeData('style').show();
 									titlebar.children('.elfinder-titlebar-full').show();
 									dialog.children('.ui-widget-content').slideDown('fast', function() {
@@ -14584,6 +14576,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 						h = dialog.height() - oh - dialog.data('margin-y');
 					}
 					self.height(h);
+					posCheck();
 					setTimeout(function() { // Firefox need setTimeout to get new height value
 						minH = self.height();
 						minH = (h < minH)? (minH + oh + dialog.data('margin-y')) : opts.minHeight;
@@ -14647,8 +14640,16 @@ $.fn.elfinderdialog = function(opts, fm) {
 						}
 					}
 				})
-				.data({modal: opts.modal})
-			;
+				.data({modal: opts.modal}),
+			posCheck = function() {
+				var node = fm.getUI(),
+					pos;
+				if (node.hasClass('elfinder-fullscreen')) {
+					pos = dialog.position();
+					dialog.css('top', Math.max(Math.min(Math.max(pos.top, 0), node.height() - 100), 0));
+					dialog.css('left', Math.max(Math.min(Math.max(pos.left, 0), node.width() - 100), 0));
+				}
+			};
 		
 		dialog.prepend(titlebar);
 
@@ -26160,18 +26161,14 @@ elFinder.prototype.commands.rm = function() {
 		};
 	
 	this.syncTitleOnChange = true;
-	this.updateOnSelect = true;
+	this.updateOnSelect = false;
 	this.shortcuts = [{
 		pattern     : 'delete ctrl+backspace shift+delete'
 	}];
 	this.handlers = {
-		'open' : function() {
-			self.update(void(0), fm.i18n(self.fm.option('trashHash')? 'trash' : 'rm'));
-		},
 		'select' : function(e) {
-			if (e.data && e.data.selected && e.data.selected.length) {
-				self.update(void(0), getTHash(e.data.selected)? 'trash' : 'rm');
-			}
+			var targets = e.data && e.data.selected && e.data.selected.length? e.data.selected : null;
+			self.update(void(0), (targets? getTHash(targets) : fm.option('trashHash'))? 'trash' : 'rm');
 		}
 	}
 	this.value = 'rm';
@@ -26201,19 +26198,10 @@ elFinder.prototype.commands.rm = function() {
 	}
 	
 	this.getstate = function(sel) {
-		var state;
+		var sel   = this.hashes(sel);
 		
-		sel = sel || fm.selected();
-		state = sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
+		return sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
 			? 0 : -1;
-		
-		if (sel && sel.length && fm.searchStatus.state > 1) {
-			setTimeout(function() {
-				self.update(state, getTHash(sel)? 'trash' : 'rm');
-			}, 0);
-		}
-		
-		return state;
 	}
 	
 	this.exec = function(hashes, opts) {
