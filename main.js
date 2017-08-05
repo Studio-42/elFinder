@@ -29,9 +29,12 @@
 		// https://github.com/Studio-42/elFinder/wiki/Client-configuration-options
 		opts = {
 			url : '//hypweb.net/elFinder-nightly/demo/2.1/php/connector.minimal.php',
-			soundPath: './demo/sounds',
-			sync: 5000,
-			ui	: ['toolbar', 'places', 'tree', 'path', 'stat'],
+			soundPath : './demo/sounds',
+			sync : 5000,
+			sortType : 'date',
+			sortOrder : 'desc',
+			sortStickFolders : false,
+			ui : ['toolbar', 'places', 'tree', 'path', 'stat'],
 			commandsOptions : {
 				edit : {
 					extraOptions : {
