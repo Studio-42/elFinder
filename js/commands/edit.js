@@ -38,18 +38,27 @@ elFinder.prototype.commands.edit = function() {
 		 **/
 		filter = function(files) {
 			var cnt = files.length,
-				mime, ext;
+				mime, ext, skip;
 			
 			if (cnt > 1) {
 				mime = files[0].mime;
 				ext = files[0].name.replace(/^.*(\.[^.]+)$/, '$1');
 			}
 			return $.map(files, function(file) {
-				return (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, texts) !== -1 || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
+				var res;
+				if (skip) {
+					return null;
+				}
+				res = (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, texts) !== -1 || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
 					&& file.mime.indexOf('text/rtf')
 					&& (!self.onlyMimes.length || $.inArray(file.mime, self.onlyMimes) !== -1)
 					&& file.read && file.write
-					&& (cnt === 1 || (file.mime === mime && file.name.substr(ext.length * -1) === ext))? file : null;
+					&& (cnt === 1 || (file.mime === mime && file.name.substr(ext.length * -1) === ext))
+					&& fm.uploadMimeCheck(file.mime, file.phash)? file : null;
+				if (!res) {
+					skip = true;
+				}
+				return res;
 			});
 		},
 		
