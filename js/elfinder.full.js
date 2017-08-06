@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.26 (2.1-src Nightly: 177443f) (2017-08-06)
+ * Version 2.1.26 (2.1-src Nightly: 000df13) (2017-08-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8034,7 +8034,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 177443f)';
+elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 000df13)';
 
 
 
@@ -19249,18 +19249,27 @@ elFinder.prototype.commands.edit = function() {
 		 **/
 		filter = function(files) {
 			var cnt = files.length,
-				mime, ext;
+				mime, ext, skip;
 			
 			if (cnt > 1) {
 				mime = files[0].mime;
 				ext = files[0].name.replace(/^.*(\.[^.]+)$/, '$1');
 			}
 			return $.map(files, function(file) {
-				return (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, texts) !== -1 || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
+				var res;
+				if (skip) {
+					return null;
+				}
+				res = (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, texts) !== -1 || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
 					&& file.mime.indexOf('text/rtf')
 					&& (!self.onlyMimes.length || $.inArray(file.mime, self.onlyMimes) !== -1)
 					&& file.read && file.write
-					&& (cnt === 1 || (file.mime === mime && file.name.substr(ext.length * -1) === ext))? file : null;
+					&& (cnt === 1 || (file.mime === mime && file.name.substr(ext.length * -1) === ext))
+					&& fm.uploadMimeCheck(file.mime, file.phash)? file : null;
+				if (!res) {
+					skip = true;
+				}
+				return res;
 			});
 		},
 		
@@ -24675,10 +24684,11 @@ elFinder.prototype.commands.resize = function() {
 							uitype[ctrgrup]('enable');
 							inputFirst = control.find('input,select').prop('disabled', false)
 								.filter(':text').on('keydown', function(e) {
+									var cOpts;
 									if (e.keyCode == $.ui.keyCode.ENTER) {
 										e.stopPropagation();
 										e.preventDefault();
-										fm.confirm({
+										cOpts = {
 											title  : $('input:checked', uitype).val(),
 											text   : 'confirmReq',
 											accept : {
@@ -24692,14 +24702,18 @@ elFinder.prototype.commands.resize = function() {
 												callback : function(){
 													$(this).focus();
 												}
-											},
-											buttons : [{
+											}
+										};
+											
+										if (useSaveAs) {
+											cOpts['buttons'] = [{
 												label    : 'btnSaveAs',
 												callback : function() {
 													setTimeout(saveAs, 10);
 												}
-											}]
-										});
+											}];
+										}
+										fm.confirm(cOpts);
 										return;
 									}
 								})
@@ -25201,6 +25215,7 @@ elFinder.prototype.commands.resize = function() {
 						}
 					})(),
 					presetc = preset.clone(true),
+					useSaveAs = fm.uploadMimeCheck(file.mime, file.phash),
 					dMinBtn, base;
 				
 				if (fm.isCORS) {
@@ -25302,7 +25317,9 @@ elFinder.prototype.commands.resize = function() {
 				dialog.append(preview, control);
 				
 				buttons[fm.i18n('btnApply')] = save;
-				buttons[fm.i18n('btnSaveAs')] = function() { setTimeout(saveAs, 10); };
+				if (useSaveAs) {
+					buttons[fm.i18n('btnSaveAs')] = function() { setTimeout(saveAs, 10); };
+				}
 				buttons[fm.i18n('btnCancel')] = function() { dialog.elfinderdialog('close'); };
 				
 				dialog.find('input,button').addClass('elfinder-tabstop');
