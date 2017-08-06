@@ -82,7 +82,7 @@ elFinder.prototype.commands.empty = function() {
 							targets.push(f.hash);
 						});
 						if (targets.length) {
-							fm.exec('rm', targets, { addTexts : [ fm.i18n('folderToEmpty', dir.name) ] })
+							fm.exec('rm', targets, { _userAction : true, addTexts : [ fm.i18n('folderToEmpty', dir.name) ] })
 							.fail(function(error) {
 								fm.trigger('unselectfiles', {files: fm.selected()});
 								done(error || '');
