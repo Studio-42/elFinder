@@ -256,7 +256,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 				'audio/aac'     : 'm4a',
 				'audio/mp4'     : 'm4a',
 				'audio/x-mp4'   : 'm4a',
-				'audio/ogg'     : 'ogg'
+				'audio/ogg'     : 'ogg',
+				'audio/flac'    : 'flac',
+				'audio/x-flac'  : 'flac'
 			},
 			node,
 			win  = ql.window,

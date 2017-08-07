@@ -439,7 +439,7 @@ $.fn.elfindercontextmenu = function(fm) {
 										if (typeof opts === 'undefined') {
 											opts = {};
 										}
-										if (typeof opts === 'object' || typeof opts === 'string') {
+										if (typeof opts === 'object') {
 											opts._userAction = true;
 											opts._currentType = type;
 											opts._currentNode = $this;
