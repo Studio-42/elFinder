@@ -446,10 +446,11 @@
 	
 	this.support = {
 		audio : {
-			ogg : support('audio/ogg; codecs="vorbis"'),
+			ogg : support('audio/ogg; codecs="vorbis"') || support('audio/ogg; codecs="flac"'),
 			mp3 : support('audio/mpeg;'),
 			wav : support('audio/wav; codecs="1"'),
-			m4a : support('audio/mp4;') || support('audio/x-m4a;') || support('audio/aac;')
+			m4a : support('audio/mp4;') || support('audio/x-m4a;') || support('audio/aac;'),
+			flac: support('audio/flac;')
 		},
 		video : {
 			ogg  : support('video/ogg; codecs="theora"'),
