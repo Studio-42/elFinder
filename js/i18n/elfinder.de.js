@@ -4,7 +4,8 @@
  * @author tora60 from pragmaMx.org
  * @author Timo-Linde <info@timo-linde.de>
  * @author osworx.net
- * @version 2017-02-05
+ * @author Maximilian Schwarz <info@deefuse.de>
+ * @version 2017-08-07
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -16,11 +17,12 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.de = {
-		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt;, tora60 from pragmaMx.org, Timo-Linde &lt;info@timo-linde.de&gt;, osworx.net',
+		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt;, tora60 from pragmaMx.org, Timo-Linde &lt;info@timo-linde.de&gt;, osworx.net, Maximilian Schwarz &lt;info@deefuse.de&gt;',
 		language   : 'Deutsch',
 		direction  : 'ltr',
 		dateFormat : 'd. M Y H:i', // Mar 13, 2012 05:27 PM
 		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
+		nonameDateFormat : 'ymd-His', // to apply if upload file is noname: 120513172700
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -52,6 +54,7 @@
 			'errLocked'            : '"$1" ist gesperrt und kann nicht umbenannt, verschoben oder gelöscht werden.',
 			'errExists'            : 'Die Datei "$1" existiert bereits.',
 			'errInvName'           : 'Ungültiger Dateiname.',
+			'errInvDirname'        : 'Ungültiger Ordnername.',  // from v2.1.24 added 12.4.2017
 			'errFolderNotFound'    : 'Ordner nicht gefunden.',
 			'errFileNotFound'      : 'Datei nicht gefunden.',
 			'errTrgFolderNotFound' : 'Zielordner "$1" nicht gefunden.',
@@ -77,6 +80,7 @@
 			'errMove'              : 'Kann "$1" nicht verschieben.',
 			'errCopyInItself'      : '"$1" kann sich nicht in sich selbst kopieren.',
 			'errRm'                : 'Kann "$1" nicht entfernen.',
+			'errTrash'             : 'Kann Objekt nicht in Mülleimer legen.', // from v2.1.24 added 30.4.2017
 			'errRmSrc'             : 'Kann Quelldatei(en) nicht entfernen.',
 			'errExtract'           : 'Kann "$1" nicht entpacken.',
 			'errArchive'           : 'Archiv konnte nicht erstellt werden.',
@@ -109,7 +113,11 @@
 			'errFolderUpload'      : 'Versuchen Sie es mit Google Chrome, wenn Sie einen Ordner hochladen möchten.', // from v2.1 added 26.6.2015
 			'errSearchTimeout'     : 'Zeitüberschreitung während der Suche nach "$1". Suchergebnis ist unvollständig.', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : 'Erneutes Anmelden ist erforderlich.', // from v2.1.10 added 24.3.2016
-			'errMaxTargets'        : 'Max number of selectable items is $1.', // from v2.1.17 added 17.10.2016
+			'errMaxTargets'        : 'Die maximale Anzahl auswählbarer Elemente ist $1', // from v2.1.17 added 17.10.2016
+			'errRestore'           : 'Konnte nicht von Mülleimer wiederherstellen. Konnte Ziel für wiederherstellung nicht finden.', // from v2.1.24 added 3.5.2017
+			'errEditorNotFound'    : 'Kein Editor für diesen Dateityp gefunden.', // from v2.1.25 added 23.5.2017
+			'errServerError'       : 'Ein Serverseitiger Fehler trat auf.', // from v2.1.25 added 16.6.2017
+			'errEmpty'             : 'Konnte Ordner "$1" nicht Leeren.', // from v2.1.25 added 22.6.2017
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Archiv erstellen',
@@ -134,6 +142,8 @@
 			'cmdreload'    : 'Aktualisieren',
 			'cmdrename'    : 'Umbenennen',
 			'cmdrm'        : 'Löschen',
+			'cmdtrash'     : 'In den Mülleimer legen', //from v2.1.24 added 29.4.2017
+			'cmdrestore'   : 'Wiederherstellen', //from v2.1.24 added 3.5.2017
 			'cmdsearch'    : 'Suchen',
 			'cmdup'        : 'In übergeordneten Ordner wechseln',
 			'cmdupload'    : 'Datei hochladen',
@@ -148,6 +158,10 @@
 			'cmdcolwidth'  : 'Spaltenbreite zurücksetzen', // from v2.1.13 added 12.06.2016
 			'cmdfullscreen': 'Vollbild', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : 'Verschieben', // from v2.1.15 added 21.08.2016
+			'cmdempty'     : 'Ordner Leeren', // from v2.1.25 added 22.06.2017
+			'cmdundo'      : 'Zückgängig', // from v2.1.27 added 31.07.2017
+			'cmdredo'      : 'Wiederholen', // from v2.1.27 added 31.07.2017
+			'cmdpreference': 'Einstellungen', // from v2.1.27 added 03.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Schließen',
@@ -167,7 +181,12 @@
 			'btnMime'   : 'MIME-Typ', // from v2.1 added 22.5.2015
 			'btnFileName':'Dateiname',  // from v2.1 added 22.5.2015
 			'btnSaveClose': 'Speichern & Schließen', // from v2.1 added 12.6.2015
-			'btnBackup' : 'Backup', // fromv2.1 added 28.11.2015
+			'btnBackup' : 'Sicherung', // fromv2.1 added 28.11.2015
+			'btnRename'    : 'Umbenennen',      // from v2.1.24 added 6.4.2017
+			'btnRenameAll' : 'Alle Umbenennen', // from v2.1.24 added 6.4.2017
+			'btnPrevious' : 'Zurück ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnNext'     : 'Weiter ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnSaveAs'   : 'Speichern als', // from v2.1.25 added 24.5.2017
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Öffne Ordner',
@@ -199,6 +218,14 @@
 			'ntfzipdl'    : 'Erstelle Datei zum Download', // from v2.1.7 added 23.1.2016
 			'ntfparents'  : 'Beziehe Pfad Informationen', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'Upload läuft', // from v2.1.17 added 2.11.2016
+			'ntftrash'    : 'Bewege in den Mülleimer', // from v2.1.24 added 2.5.2017
+			'ntfrestore'  : 'Stelle von Mülleimer wieder her', // from v2.1.24 added 3.5.2017
+			'ntfchkdir'   : 'Prüfe Zielordner', // from v2.1.24 added 3.5.2017
+			'ntfundo'     : 'Vorherige Operation rückgängig machen', // from v2.1.27 added 31.07.2017
+			'ntfredo'     : 'Wiederherstellen', // from v2.1.27 added 31.07.2017
+
+			/*********************************** volumes *********************************/
+			'volume_Trash' : 'Mülleimer', //from v2.1.24 added 29.4.2017
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'unbekannt',
@@ -264,9 +291,11 @@
 			'confirmReq'      : 'Bestätigung benötigt',
 			'confirmRm'       : 'Sollen die Dateien gelöscht werden?<br/>Dies kann nicht rückgängig gemacht werden!',
 			'confirmRepl'     : 'Datei ersetzen?',
+			'confirmRest'     : 'Replace existing item with the item in trash?', // fromv2.1.24 added 5.5.2017
 			'confirmConvUTF8' : 'Nicht in UTF-8<br/>Zu UTF-8 konvertieren?<br/>Inhalte werden zu UTF-8 konvertiert, wenn Sie speichern.', // from v2.1 added 08.04.2014
 			'confirmNonUTF8'  : 'Die Zeichencodierung dieser Datei konnte nicht erkannt werden. Es muss vorübergehend in UTF-8 zur Bearbeitung konvertiert werden. <br/> Bitte wähle eine Zeichenkodierung dieser Datei aus.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'Die Datei wurde geändert.<br/>Sie werden die Änderungen verlieren, wenn Sie nicht speichern.', // from v2.1 added 15.7.2015
+			'confirmTrash'    : 'Sind Sie sicher, dass sie die Elemente in den Mülleimer bewegen wollen?', //from v2.1.24 added 29.4.2017
 			'apllyAll'        : 'Alles bestätigen',
 			'name'            : 'Name',
 			'size'            : 'Größe',
@@ -323,6 +352,7 @@
 			'selectForUpload' : 'Dateien zum Upload auswählen',
 			'moveFiles'       : 'Dateien verschieben',
 			'copyFiles'       : 'Dateien kopieren',
+			'restoreFiles'    : 'Elemente wiederherstellen', // from v2.1.24 added 5.5.2017
 			'rmFromPlaces'    : 'Lösche von Orten',
 			'aspectRatio'     : 'Seitenverhältnis',
 			'scale'           : 'Maßstab',
@@ -380,19 +410,30 @@
 			'reset'           : 'Neustart', // from v2.1.16 added 1.10.2016
 			'bgcolor'         : 'Hintergrund Farbe', // from v2.1.16 added 1.10.2016
 			'colorPicker'     : 'Farbauswahl', // from v2.1.16 added 1.10.2016
-			'8pxgrid'         : '8px Grid', // from v2.1.16 added 4.10.2016
+			'8pxgrid'         : '8px Raster', // from v2.1.16 added 4.10.2016
 			'enabled'         : 'Ein', // from v2.1.16 added 4.10.2016
 			'disabled'        : 'Aus', // from v2.1.16 added 4.10.2016
 			'emptyIncSearch'  : 'Keine Ergebnisse in der aktuellen Anzeige', // from v2.1.16 added 5.10.2016
+			'emptyLetSearch'  : 'First letter search results is empty in current view.', // from v2.1.23 added 24.3.2017
 			'textLabel'       : 'Text label', // from v2.1.17 added 13.10.2016
 			'minsLeft'        : '$1 min linke´s', // from v2.1.17 added 13.11.2016
 			'openAsEncoding'  : 'Reopen with selected encoding', // from v2.1.19 added 2.12.2016
 			'saveAsEncoding'  : 'Save with the selected encoding', // from v2.1.19 added 2.12.2016
 			'selectFolder'    : 'Verzeichnis auswählen', // from v2.1.20 added 13.12.2016
+			'firstLetterSearch': 'Erster Buchstabe suche', // from v2.1.23 added 24.3.2017
+			'presets'         : 'Voreinstellungen', // from v2.1.25 added 26.5.2017
+			'tooManyToTrash'  : 'It\'s too many items so it can\'t into trash.', // from v2.1.25 added 9.6.2017
+			'TextArea'        : 'TextArea', // from v2.1.25 added 14.6.2017
+			'folderToEmpty'   : 'Leere den Ordner "$1".', // from v2.1.25 added 22.6.2017
+			'filderIsEmpty'   : 'There are no items in a folder "$1".', // from v2.1.25 added 22.6.2017
+			'preference'      : 'Einstellungen', // from v2.1.26 added 28.6.2017
+			'language'        : 'Spracheinstellungen', // from v2.1.26 added 28.6.2017
+			'clearBrowserData': 'Initialisiere die Einstellungen, welche in diesem Browser gespeichert sind', // from v2.1.26 added 28.6.2017
+			'toolbarPref'     : 'Toolbar einstellung', // from v2.1.27 added 2.8.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unbekannt',
-			'kindRoot'        : 'Volume Root', // from v2.1.16 added 16.10.2016
+			'kindRoot'        : 'Wurzelverzeichnis', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'Ordner',
 			'kindAlias'       : 'Verknüpfung',
 			'kindAliasBroken' : 'Defekte Verknüpfung',
