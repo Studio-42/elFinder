@@ -3,7 +3,7 @@
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Wojciech Jabłoński <www.jablonski@gmail.com>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2017-07-23
+ * @version 2017-08-06
 */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -52,7 +52,7 @@
 			'errLocked'            : '"$1" jest zablokowany i nie może zostać zmieniony, przeniesiony lub usunięty.',
 			'errExists'            : 'Plik "$1" już istnieje.',
 			'errInvName'           : 'Nieprawidłowa nazwa pliku.',
-			'errInvDirname'        : 'Nieprawidłowa nazwa folderu.',  // from v2.1.24 added 12.4.2017			'errFolderNotFound'    : 'Katalog nie został znaleziony.',
+			'errInvDirname'        : 'Nieprawidłowa nazwa folderu.',  // from v2.1.24 added 12.4.2017
 			'errFolderNotFound'    : 'Nie znaleziono folderu.',
 			'errFileNotFound'      : 'Plik nie został znaleziony.',
 			'errTrgFolderNotFound' : 'Katalog docelowy "$1" nie został znaleziony.',
@@ -157,6 +157,9 @@
 			'cmdfullscreen': 'Pełny ekran', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : 'Przenieś', // from v2.1.15 added 21.08.2016
 			'cmdempty'     : 'Opróżnij folder', // from v2.1.25 added 22.06.2017
+			'cmdundo'      : 'Cofnij', // from v2.1.27 added 31.07.2017
+			'cmdredo'      : 'Ponów', // from v2.1.27 added 31.07.2017
+			'cmdpreference': 'Preferencje', // from v2.1.27 added 03.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zamknij',
@@ -184,7 +187,7 @@
 			'btnSaveAs'   : 'Zapisz Jako', // from v2.1.25 added 24.5.2017
 
 			/******************************** notifications ********************************/
-			'ntfopen'     : 'Otwórz katalog',
+			'ntfopen'     : 'Otwieranie katalogu',
 			'ntffile'     : 'Otwórz plik',
 			'ntfreload'   : 'Odśwież zawartość katalogu',
 			'ntfmkdir'    : 'Tworzenie katalogu',
@@ -216,6 +219,8 @@
 			'ntftrash'    : 'Wykonuje wrzucanie do kosza', // from v2.1.24 added 2.5.2017
 			'ntfrestore'  : 'Wykonuje przywracanie z kosza', // from v2.1.24 added 3.5.2017
 			'ntfchkdir'   : 'Sprawdzanie folderu docelowego', // from v2.1.24 added 3.5.2017
+			'ntfundo'     : 'Cofanie poprzedniej operacji', // from v2.1.27 added 31.07.2017
+			'ntfredo'     : 'Ponownie poprzednio cofnięte', // from v2.1.27 added 31.07.2017
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : 'Śmieci', //from v2.1.24 added 29.4.2017
@@ -422,6 +427,7 @@
 			'preference'      : 'Preferencje', // from v2.1.26 added 28.6.2017
 			'language'        : 'Ustawienie języka', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': 'Zainicjuj ustawienia zapisane w tej przeglądarce', // from v2.1.26 added 28.6.2017
+			'toolbarPref'     : 'Ustawienia paska narzędzi', // from v2.1.27 added 2.8.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',
