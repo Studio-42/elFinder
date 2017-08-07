@@ -538,7 +538,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 				if (node.hasClass('elfinder-fullscreen')) {
 					pos = dialog.position();
 					dialog.css('top', Math.max(Math.min(Math.max(pos.top, 0), node.height() - 100), 0));
-					dialog.css('left', Math.max(Math.min(Math.max(pos.left, 0), node.width() - 100), 0));
+					dialog.css('left', Math.max(Math.min(Math.max(pos.left, 0), node.width() - 200), 0));
 				}
 			};
 		
