@@ -13,13 +13,17 @@ elFinder.prototype.commands.empty = function() {
 	
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
-			cnt = sel.length;
+			cnt;
 		
-		return cnt && $.map(sel, function(f) { return f.write && f.mime === 'directory' ? f : null  }).length == cnt ? 0 : -1;
+		if (!sel.length) {
+			sel = [ this.fm.cwd() ];
+		}
+		cnt = sel.length;
+		return $.map(sel, function(f) { return f.write && f.mime === 'directory' ? f : null  }).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
-		var dirs = this.files(hashes),
+		var dirs = this.files(hashes || this.fm.cwd().hash),
 			cnt  = dirs.length,
 			dfrd = $.Deferred()
 				.done(function() {
