@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.26 (2.1-src Nightly: ce4a147) (2017-08-08)
+ * Version 2.1.26 (2.1-src Nightly: aa28b3a) (2017-08-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8034,7 +8034,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.26 (2.1-src Nightly: ce4a147)';
+elFinder.prototype.version = '2.1.26 (2.1-src Nightly: aa28b3a)';
 
 
 
@@ -19915,13 +19915,17 @@ elFinder.prototype.commands.empty = function() {
 	
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
-			cnt = sel.length;
+			cnt;
 		
-		return cnt && $.map(sel, function(f) { return f.write && f.mime === 'directory' ? f : null  }).length == cnt ? 0 : -1;
+		if (!sel.length) {
+			sel = [ this.fm.cwd() ];
+		}
+		cnt = sel.length;
+		return $.map(sel, function(f) { return f.write && f.mime === 'directory' ? f : null  }).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
-		var dirs = this.files(hashes),
+		var dirs = this.files(hashes || this.fm.cwd().hash),
 			cnt  = dirs.length,
 			dfrd = $.Deferred()
 				.done(function() {
@@ -22337,7 +22341,7 @@ elFinder.prototype.commands.paste = function() {
 			paste(fpaste)
 		)
 		.done(function(cr, pr) {
-			dfrd.resolve(pr.undo? pr : void(0));
+			dfrd.resolve(pr && pr.undo? pr : void(0));
 		})
 		.fail(function() {
 			dfrd.reject();
