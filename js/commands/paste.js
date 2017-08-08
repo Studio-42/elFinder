@@ -364,7 +364,7 @@ elFinder.prototype.commands.paste = function() {
 			paste(fpaste)
 		)
 		.done(function(cr, pr) {
-			dfrd.resolve(pr.undo? pr : void(0));
+			dfrd.resolve(pr && pr.undo? pr : void(0));
 		})
 		.fail(function() {
 			dfrd.reject();
