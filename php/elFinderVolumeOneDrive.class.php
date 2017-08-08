@@ -1469,31 +1469,28 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             $result = curl_exec($curl);
             curl_close($curl);
 
-            $res = false;
+            $res = new stdClass;
             if (preg_match('/Location: (.+)/', $result, $m)) {
                 $monUrl = trim($m[1]);
-                while (!$res) {
+                while ($res) {
                     usleep(200000);
                     $curl = $this->_od_prepareCurl($monUrl);
-                    $state = json_decode(curl_exec($curl));
+                    $res = json_decode(curl_exec($curl));
                     curl_close($curl);
-                    if (isset($state->status)) {
-                        if ($state->status === 'failed') {
+                    if (isset($res->status)) {
+                        if ($res->status === 'completed' || $res->status === 'failed') {
                             break;
-                        } else {
-                            continue;
                         }
                     }
-                    $res = $state;
-                }
+                 }
             }
 
-            if ($res && isset($res->id)) {
+            if ($res && isset($res->resourceId)) {
                 if (isset($res->folder) && isset($this->sessionCache['subdirs'])) {
                     $this->sessionCache['subdirs'][$targetDir] = true;
                 }
 
-                return $this->_joinPath($targetDir, $res->id);
+                return $this->_joinPath($targetDir, $res->resourceId);
             }
 
             return false;
