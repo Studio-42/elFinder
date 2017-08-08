@@ -1,7 +1,7 @@
 2017-08-xx  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.27):
-		= [php:core] Fixed #2104 notice error in `getIniBytes()` with php 7.1
+		- [php:core] Fixed #2104 notice error in `getIniBytes()` with php 7.1
 		- [cmd:download] Fixed #2106 add an option `commandOptions.download.minFilesZipdl`
 		- [VD:abstract] enable to specify the path of server commands as constant
 		- [cmd:quicklook] Fixed #2108 support HLS, DASH video preview
@@ -16,6 +16,7 @@
 		- [cmd:rm] Fixed #2087 rm command not disable on unselect items
 		- [ui:dialog] Fixed #2124 missing dialog on fullscreen mode
 		- [cmd:resize] Fixed #2127 don't show "SaveAs" if new image saving is not allowed
+		- [VD:OneDrive] Fixed #2131 causes an infinite loop at the copy command
 		- And some minor bug fixes
 
 
