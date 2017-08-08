@@ -13,6 +13,9 @@
 		- [cmd:help] Fixed #2118 controling to show/hide toolbar icons in preference tab
 		- [ui:dialog] Fixed #2123 problem in maximaize on fullscreen mode
 		- [ui:toolbar] add an option `showPreferenceButton`
+		- [cmd:rm] Fixed #2087 rm command not disable on unselect items
+		- [ui:dialog] Fixed #2124 missing dialog on fullscreen mode
+		- [cmd:resize] Fixed #2127 don't show "SaveAs" if new image saving is not allowed
 		- And some minor bug fixes
 
 
