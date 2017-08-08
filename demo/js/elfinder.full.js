@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.26 (2.1-src Nightly: b1e10e8) (2017-08-08)
+ * Version 2.1.26 (2.1-src Nightly: 97362ce) (2017-08-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8034,7 +8034,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.26 (2.1-src Nightly: b1e10e8)';
+elFinder.prototype.version = '2.1.26 (2.1-src Nightly: 97362ce)';
 
 
 
@@ -19909,23 +19909,28 @@ elFinder.prototype.commands.edit = function() {
  * @author  Naoki Sawada
  */
 elFinder.prototype.commands.empty = function() {
-	var fm = this.fm;
+	var fm = this.fm,
+		self = this,
+		selFiles = function(sel) {
+			var sel = self.files(sel);
+			if (!sel.length) {
+				sel = [ fm.cwd() ];
+			}
+			return sel;
+		};
 	
 	this.linkedCmds = ['rm'];
 	
 	this.getstate = function(sel) {
-		var sel = this.files(sel),
+		var sel = selFiles(sel),
 			cnt;
 		
-		if (!sel.length) {
-			sel = [ this.fm.cwd() ];
-		}
 		cnt = sel.length;
 		return $.map(sel, function(f) { return f.write && f.mime === 'directory' ? f : null  }).length == cnt ? 0 : -1;
 	}
 	
 	this.exec = function(hashes) {
-		var dirs = this.files(hashes || this.fm.cwd().hash),
+		var dirs = selFiles(hashes),
 			cnt  = dirs.length,
 			dfrd = $.Deferred()
 				.done(function() {
