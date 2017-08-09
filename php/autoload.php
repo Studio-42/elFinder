@@ -16,7 +16,7 @@ function elFinderAutoloader($name) {
 		'elFinderSession' => ELFINDER_PHP_ROOT_PATH . '/elFinderSession.php',
 		'elFinderSessionInterface' => ELFINDER_PHP_ROOT_PATH . '/elFinderSessionInterface.php',
 		'elFinderVolumeDriver' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeDriver.class.php',
-		'elFinderVolumeDropbox' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeDropbox.class.php',
+		'elFinderVolumeDropbox2' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeDropbox2.class.php',
 		'elFinderVolumeFTP' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeFTP.class.php',
 		'elFinderVolumeFlysystemGoogleDriveCache' => ELFINDER_PHP_ROOT_PATH . '/elFinderFlysystemGoogleDriveNetmount.php',
 		'elFinderVolumeFlysystemGoogleDriveNetmount' => ELFINDER_PHP_ROOT_PATH . '/elFinderFlysystemGoogleDriveNetmount.php',
