@@ -1,7 +1,7 @@
 /**
  * Sinhala translation
  * @author CodeLyokoXtEAM <XcodeLyokoTEAM@gmail.com>
- * @version 2017-07-08
+ * @version 2017-08-08
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -146,7 +146,7 @@
 			'cmdview'      : 'දර්ශනය(View)',
 			'cmdresize'    : 'ප්‍රථිප්‍රමාණය සහ භ්‍රමණය',
 			'cmdsort'      : 'වර්ගීකරණය කරන්න',
-			'cmdnetmount'  : 'ජාල එ්කකයක්(network volume) සවි(mount) කරන්න', // added 18.04.2012
+			'cmdnetmount'  : 'ජාල එ්කකයක් සවි කරන්න(Mount network volume)', // added 18.04.2012
 			'cmdnetunmount': 'ගලවන්න(Unmount)', // from v2.1 added 30.04.2012
 			'cmdplaces'    : 'පහසු ස්ථානයට(To Places)', // added 28.12.2014
 			'cmdchmod'     : 'ක්‍රමය වෙනස් කරන්න', // from v2.1 added 20.6.2015
@@ -155,6 +155,9 @@
 			'cmdfullscreen': 'පුළුල් තිරය', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : 'මාරු කරන්න(Move)', // from v2.1.15 added 21.08.2016
 			'cmdempty'     : 'ෆෝල්ඩරය හිස් කරන්න', // from v2.1.25 added 22.06.2017
+			'cmdundo'      : 'නිෂ්ප්‍රභ කරන්න', // from v2.1.27 added 31.07.2017
+			'cmdredo'      : 'නැවත කරන්න', // from v2.1.27 added 31.07.2017
+			'cmdpreference': 'Preferences', // from v2.1.27 added 03.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'වසන්න',
@@ -179,44 +182,46 @@
 			'btnRenameAll' : 'නම වෙනස් කරන්න(සියල්ල)', // from v2.1.24 added 6.4.2017
 			'btnPrevious' : 'පෙර ($1/$2)', // from v2.1.24 added 11.5.2017
 			'btnNext'     : 'ඊළඟ ($1/$2)', // from v2.1.24 added 11.5.2017
-			'btnSaveAs'   : 'වෙනත් නමකින් සුරකින්න(Save As)', // from v2.1.25 added 24.5.2017
+			'btnSaveAs'   : 'වෙනත් නමකින් සුරකිමින්(Save As)', // from v2.1.25 added 24.5.2017
 
 			/******************************** notifications ********************************/
-			'ntfopen'     : 'ෆෝල්ඩරය විවෘත කරන්න',
-			'ntffile'     : 'ගොනුව විවෘත කරන්න',
-			'ntfreload'   : 'ෆෝල්ඩර් අන්තර්ගතය නැවත අළුත් කරන්න(Reload)',
-			'ntfmkdir'    : 'ෆෝල්ඩරයක් නිර්මාණය කිරීමින්',
-			'ntfmkfile'   : 'ගොනුව නිර්මාණය කිරීමින්',
-			'ntfrm'       : 'ගොනු මකන්න',
-			'ntfcopy'     : 'ගොනු පිටපත් කරන්න',
-			'ntfmove'     : 'ගොනු මාරු කරන්න',
-			'ntfprepare'  : 'පවතින අයිතම පිරික්සීම',
-			'ntfrename'   : 'ගොනු නැවත නම් කරන්න',
+			'ntfopen'     : 'ෆෝල්ඩරය විවෘත කරමින්',
+			'ntffile'     : 'ගොනුව විවෘත කරමින්',
+			'ntfreload'   : 'ෆෝල්ඩර් අන්තර්ගතය නැවත අළුත් කරමින්(Reloading)',
+			'ntfmkdir'    : 'ෆෝල්ඩරයක් නිර්මාණය කරමින්',
+			'ntfmkfile'   : 'ගොනුව නිර්මාණය කරමින්',
+			'ntfrm'       : 'ගොනු මකමින්',
+			'ntfcopy'     : 'ගොනු පිටපත් කරමින්',
+			'ntfmove'     : 'ගොනු මාරු කරමින්',
+			'ntfprepare'  : 'පවතින අයිතම පිරික්සමින්',
+			'ntfrename'   : 'ගොනු නැවත නම් කරමින්',
 			'ntfupload'   : 'ගොනු උඩුගත(uploading) කරමින්',
 			'ntfdownload' : 'ගොනු බාගත(downloading) කරමින්',
-			'ntfsave'     : 'ගොනු සුරකින්න',
-			'ntfarchive'  : 'සංරක්ෂණය(archive) සෑදීම',
+			'ntfsave'     : 'ගොනු සුරකිමින්',
+			'ntfarchive'  : 'සංරක්ෂණය(archive) සාදමින්',
 			'ntfextract'  : 'සංරක්ෂණයෙන්(archive) ගොනු දිගහරිමින්(Extracting)',
 			'ntfsearch'   : 'ගොනු සොයමින්',
 			'ntfresize'   : 'රූප ප්‍රමාණය වෙනස් කරමින්',
 			'ntfsmth'     : 'දෙයක් කරමින්',
-			'ntfloadimg'  : 'පින්තූරය Loading',
-			'ntfnetmount' : 'Mounting network volume', // added 18.04.2012
-			'ntfnetunmount': 'Unmounting network volume', // from v2.1 added 30.04.2012
-			'ntfdim'      : 'Acquiring image dimension', // added 20.05.2013
+			'ntfloadimg'  : 'පින්තූරය පූරණය කරමින්(Loading)',
+			'ntfnetmount' : 'ජාල එ්කකයක් සවිකරමින්(Mounting network volume)', // added 18.04.2012
+			'ntfnetunmount': 'ජාල එ්කකයක් ගලවමින්(Unmounting network volume)', // from v2.1 added 30.04.2012
+			'ntfdim'      : 'පිංතූරයේ මානය(dimension) ලබාගනිමින්', // added 20.05.2013
 			'ntfreaddir'  : 'ෆෝල්ඩරයේ තොරතුරු කියවමින්', // from v2.1 added 01.07.2013
 			'ntfurl'      : 'Getting URL of link', // from v2.1 added 11.03.2014
 			'ntfchmod'    : 'ගොනු ආකරය වෙනස් කරමින්', // from v2.1 added 20.6.2015
 			'ntfpreupload': 'උඩුගත(upload) කරන ලද ගොනු නාමය සත්‍යාපනය කරමින්(Verifying)', // from v2.1 added 31.11.2015
 			'ntfzipdl'    : 'බාගත කරගැනීම(download) සඳහා ගොනුවක් නිර්මාණය කරමින්', // from v2.1.7 added 23.1.2016
 			'ntfparents'  : 'මාර්ග(path) තොරතුරු ලබා ගනිමින්', // from v2.1.17 added 2.11.2016
-			'ntfchunkmerge': 'Processing the uploaded file', // from v2.1.17 added 2.11.2016
+			'ntfchunkmerge': 'උඩුගත කරන ලද(uploaded) ගොනුව සකසමින්', // from v2.1.17 added 2.11.2016
 			'ntftrash'    : 'Doing throw in the trash', // from v2.1.24 added 2.5.2017
 			'ntfrestore'  : 'Doing restore from tha trash', // from v2.1.24 added 3.5.2017
 			'ntfchkdir'   : 'ගමනාන්ත(destination) ෆෝල්ඩරය පරීක්ෂා කරමින්', // from v2.1.24 added 3.5.2017
+			'ntfundo'     : 'Undoing previous operation', // from v2.1.27 added 31.07.2017
+			'ntfredo'     : 'Redoing previous undone', // from v2.1.27 added 31.07.2017
 
 			/*********************************** volumes *********************************/
-			'volume_Trash' : 'Trash', //from v2.1.24 added 29.4.2017
+			'volume_Trash' : 'කුණු කූඩය', //from v2.1.24 added 29.4.2017
 
 			/************************************ dates **********************************/
 			'dateUnknown' : 'නොදනී',
@@ -287,12 +292,12 @@
 			'confirmNonUTF8'  : 'මෙම ගොනුවෙහි කේතන කේත(Character encoding) හඳුනාගත නොහැකි විය. සංස්කරණ කිරීමට එය තාවකාලිකව UTF-8 වෙත පරිවර්තනය කිරීම අවශ්‍ය වේ.<br/>කරුණාකර මෙම ගොනුවෙහි අක්ෂර කේතන කේත(character encoding) තෝරන්න.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'මෙය වෙනස් කර ඇත.<br/>ඔබට වෙනස්කම් සුරැකීමට නොහැකි නම් සිදු කරනු ලැබූ වෙනස්කම් අහිමි වේ.', // from v2.1 added 15.7.2015
 			'confirmTrash'    : 'කුණු කූඩය තුලට අයිතමය(item) යැවීමට ඔබට අවශ්‍ය ද?', //from v2.1.24 added 29.4.2017
-			'apllyAll'        : 'Apply to all',
+			'apllyAll'        : 'සියල්ලටම යොදන්න',
 			'name'            : 'නම',
 			'size'            : 'ප්‍රමාණය',
 			'perms'           : 'අවසරය',
 			'modify'          : 'නවීකරණය කෙරුණ ලද්දේ',
-			'kind'            : 'Kind',
+			'kind'            : 'ජාතිය',
 			'read'            : 'කියවන්න',
 			'write'           : 'ලියන්න',
 			'noaccess'        : 'ප්‍රවේශයක් නොමැත',
@@ -322,19 +327,19 @@
 			'shortcuts'       : 'කෙටිමං',
 			'help'            : 'උදව්',
 			'webfm'           : 'වෙබ් ගොනු කළමනාකරු',
-			'ver'             : 'Version',
-			'protocolver'     : 'protocol version',
+			'ver'             : 'අනුවාදය(version)',
+			'protocolver'     : 'ප්‍රොටොකෝලය අනුවාදය(protocol version)',
 			'homepage'        : 'Project home',
 			'docs'            : 'ලේඛනගත කිරීම',
 			'github'          : 'Fork us on Github',
 			'twitter'         : 'Follow us on twitter',
 			'facebook'        : 'Join us on facebook',
 			'team'            : 'කණ්ඩායම',
-			'chiefdev'        : 'ප්‍රධාන සංවර්ධකයා(chief developer)',
-			'developer'       : 'සංවර්ධකයා(developer)',
+			'chiefdev'        : 'ප්‍රධාන සංස්කරු(chief developer)',
+			'developer'       : 'සංස්කරු(developer)',
 			'contributor'     : 'දායකයා(contributor)',
 			'maintainer'      : 'නඩත්තු කරන්නා(maintainer)',
-			'translator'      : 'පරිවර්තකය',
+			'translator'      : 'පරිවර්තකයා',
 			'icons'           : 'Icons',
 			'dontforget'      : 'and don\'t forget to take your towel',
 			'shortcutsof'     : 'කෙටිමං අක්‍රීය කර ඇත',
@@ -345,13 +350,13 @@
 			'copyFiles'       : 'Copy items',
 			'restoreFiles'    : 'Restore items', // from v2.1.24 added 5.5.2017
 			'rmFromPlaces'    : 'Remove from places',
-			'aspectRatio'     : 'Aspect ratio',
+			'aspectRatio'     : 'දර්ශන අනුපාතය(Aspect ratio)',
 			'scale'           : 'පරිමාණය',
 			'width'           : 'පළල',
 			'height'          : 'උස',
-			'resize'          : 'Resize',
+			'resize'          : 'ප්‍රතිප්‍රමානණය',
 			'crop'            : 'Crop',
-			'rotate'          : 'Rotate',
+			'rotate'          : 'කැරකැවීම',
 			'rotate-cw'       : 'Rotate 90 degrees CW',
 			'rotate-ccw'      : 'Rotate 90 degrees CCW',
 			'degree'          : '°',
@@ -377,7 +382,7 @@
 			'emptyFolder'     : 'ෆෝල්ඩරය හිස්', // from v2.1.6 added 30.12.2015
 			'emptyFolderDrop' : 'Folder is empty\\A Drop to add items', // from v2.1.6 added 30.12.2015
 			'emptyFolderLTap' : 'Folder is empty\\A Long tap to add items', // from v2.1.6 added 30.12.2015
-			'quality'         : 'Quality', // from v2.1.6 added 5.1.2016
+			'quality'         : 'ගුණාත්මකභාවය', // from v2.1.6 added 5.1.2016
 			'autoSync'        : 'Auto sync',  // from v2.1.6 added 10.1.2016
 			'moveUp'          : 'Move up',  // from v2.1.6 added 18.1.2016
 			'getLink'         : 'Get URL link', // from v2.1.7 added 9.2.2016
@@ -393,25 +398,25 @@
 			'hasSelected'     : 'You have selected $1 items.', // from v2.1.13 added 6.3.2016
 			'hasClipboard'    : 'You have $1 items in the clipboard.', // from v2.1.13 added 6.3.2016
 			'incSearchOnly'   : 'Incremental search is only from the current view.', // from v2.1.13 added 6.30.2016
-			'reinstate'       : 'Reinstate', // from v2.1.15 added 3.8.2016
-			'complete'        : '$1 complete', // from v2.1.15 added 21.8.2016
+			'reinstate'       : 'යථා තත්ත්වයට පත් කරන්න', // from v2.1.15 added 3.8.2016
+			'complete'        : '$1 සම්පූර්ණයි', // from v2.1.15 added 21.8.2016
 			'contextmenu'     : 'Context menu', // from v2.1.15 added 9.9.2016
 			'pageTurning'     : 'Page turning', // from v2.1.15 added 10.9.2016
 			'volumeRoots'     : 'Volume roots', // from v2.1.16 added 16.9.2016
-			'reset'           : 'Reset', // from v2.1.16 added 1.10.2016
-			'bgcolor'         : 'Background color', // from v2.1.16 added 1.10.2016
+			'reset'           : 'යළි පිහිටුවන්න(Reset)', // from v2.1.16 added 1.10.2016
+			'bgcolor'         : 'පසුබිම් වර්ණය', // from v2.1.16 added 1.10.2016
 			'colorPicker'     : 'Color picker', // from v2.1.16 added 1.10.2016
 			'8pxgrid'         : '8px Grid', // from v2.1.16 added 4.10.2016
-			'enabled'         : 'Enabled', // from v2.1.16 added 4.10.2016
-			'disabled'        : 'Disabled', // from v2.1.16 added 4.10.2016
+			'enabled'         : 'සක්‍රීයයි', // from v2.1.16 added 4.10.2016
+			'disabled'        : 'අක්‍රීයයි', // from v2.1.16 added 4.10.2016
 			'emptyIncSearch'  : 'Search results is empty in current view.\\APress [Enter] to expand search target.', // from v2.1.16 added 5.10.2016
 			'emptyLetSearch'  : 'First letter search results is empty in current view.', // from v2.1.23 added 24.3.2017
 			'textLabel'       : 'Text label', // from v2.1.17 added 13.10.2016
 			'minsLeft'        : '$1 mins left', // from v2.1.17 added 13.11.2016
 			'openAsEncoding'  : 'Reopen with selected encoding', // from v2.1.19 added 2.12.2016
 			'saveAsEncoding'  : 'Save with the selected encoding', // from v2.1.19 added 2.12.2016
-			'selectFolder'    : 'Select folder', // from v2.1.20 added 13.12.2016
-			'firstLetterSearch': 'First letter search', // from v2.1.23 added 24.3.2017
+			'selectFolder'    : 'ෆෝල්ඩරය තෝරන්න', // from v2.1.20 added 13.12.2016
+			'firstLetterSearch': 'පළමු අකුරෙන් සෙවීම', // from v2.1.23 added 24.3.2017
 			'presets'         : 'Presets', // from v2.1.25 added 26.5.2017
 			'tooManyToTrash'  : 'It\'s too many items so it can\'t into trash.', // from v2.1.25 added 9.6.2017
 			'TextArea'        : 'TextArea', // from v2.1.25 added 14.6.2017
@@ -420,11 +425,12 @@
 			'preference'      : 'Preference', // from v2.1.26 added 28.6.2017
 			'language'        : 'Language setting', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': 'Initialize the settings saved in this browser', // from v2.1.26 added 28.6.2017
+			'toolbarPref'     : 'Toolbar setting', // from v2.1.27 added 2.8.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
 			'kindRoot'        : 'Volume Root', // from v2.1.16 added 16.10.2016
-			'kindFolder'      : 'Folder',
+			'kindFolder'      : 'ෆෝල්ඩරය',
 			'kindAlias'       : 'Alias',
 			'kindAliasBroken' : 'Broken alias',
 			// applications
