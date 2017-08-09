@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.26 (2.1-src Nightly: b7e4df5) (2017-08-09)
+ * Version 2.1.26 (2.1-src Nightly: b4287c6) (2017-08-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8043,7 +8043,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.26 (2.1-src Nightly: b7e4df5)';
+elFinder.prototype.version = '2.1.26 (2.1-src Nightly: b4287c6)';
 
 
 
@@ -14775,9 +14775,7 @@ $.fn.elfinderfullscreenbutton = function(cmd) {
 		cmd.change(function() {
 			var fullscreen = cmd.value;
 			icon.toggleClass('elfinder-button-icon-unfullscreen', fullscreen);
-			button.attr('title', fullscreen? cmd.fm.i18n('reinstate') : cmd.fm.i18n('cmdfullscreen'));
 			cmd.className = fullscreen? 'unfullscreen' : '';
-			cmd.title = cmd.fm.i18n(fullscreen ? 'reinstate' : 'cmdfullscreen');
 		});
 	});
 };
@@ -20290,6 +20288,7 @@ elFinder.prototype.commands.fullscreen = function() {
 
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
+	this.syncTitleOnChange = true;
 	this.value = false;
 
 	this.options = {
@@ -20302,8 +20301,9 @@ elFinder.prototype.commands.fullscreen = function() {
 	
 	this.exec = function() {
 		var node = fm.getUI().get(0),
-			fullNode = fm.toggleFullscreen(node);
-		self.update(void(0), (fullNode === node));
+			full = (node === fm.toggleFullscreen(node));
+		self.title = fm.i18n(full ? 'reinstate' : 'cmdfullscreen');
+		self.update(void(0), full);
 	};
 	
 	fm.bind('init', function() {
