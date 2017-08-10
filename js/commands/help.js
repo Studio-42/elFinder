@@ -381,7 +381,10 @@
 				}).done(function(source) {
 					$('#'+fm.namespace+'-help-help').html(source);
 				}).fail(function() {
-					$.get(helpSource.replace('%s', 'en'), function(source) {
+					$.ajax({
+						url: helpSource.replace('%s', 'en'),
+						dataType: 'html'
+					}).done(function(source) {
 						$('#'+fm.namespace+'-help-help').html(source);
 					});
 				});
