@@ -820,21 +820,6 @@ abstract class elFinderVolumeDriver {
 			$this->options['resourcePath'] = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'resources';
 		}
 
-		// define accept constant of server commands path
-		! defined('ELFINDER_TAR_PATH')      && define('ELFINDER_TAR_PATH',      'tar');
-		! defined('ELFINDER_GZIP_PATH')     && define('ELFINDER_GZIP_PATH',     'gzip');
-		! defined('ELFINDER_BZIP2_PATH')    && define('ELFINDER_BZIP2_PATH',    'bzip2');
-		! defined('ELFINDER_XZ_PATH')       && define('ELFINDER_XZ_PATH',       'xz');
-		! defined('ELFINDER_ZIP_PATH')      && define('ELFINDER_ZIP_PATH',      'zip');
-		! defined('ELFINDER_UNZIP_PATH')    && define('ELFINDER_UNZIP_PATH',    'unzip');
-		! defined('ELFINDER_RAR_PATH')      && define('ELFINDER_RAR_PATH',      'rar');
-		! defined('ELFINDER_UNRAR_PATH')    && define('ELFINDER_UNRAR_PATH',    'unrar');
-		! defined('ELFINDER_7Z_PATH')       && define('ELFINDER_7Z_PATH', (substr(PHP_OS, 0, 3) === 'WIN')? '7z' : '7za');
-		! defined('ELFINDER_CONVERT_PATH')  && define('ELFINDER_CONVERT_PATH',  'convert');
-		! defined('ELFINDER_EXIFTRAN_PATH') && define('ELFINDER_EXIFTRAN_PATH', 'exiftran');
-		! defined('ELFINDER_JPEGTRAN_PATH') && define('ELFINDER_JPEGTRAN_PATH', 'jpegtran');
-		! defined('ELFINDER_FFMPEG_PATH')   && define('ELFINDER_FFMPEG_PATH',   'ffmpeg');
-		
 		// set image manipulation library
 		$type = preg_match('/^(imagick|gd|convert|auto)$/i', $this->options['imgLib'])
 			? strtolower($this->options['imgLib'])
