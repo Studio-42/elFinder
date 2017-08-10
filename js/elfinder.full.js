@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.27 (2.1-src Nightly: 1d372fe) (2017-08-10)
+ * Version 2.1.27 (2.1-src Nightly: 5b93626) (2017-08-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8043,7 +8043,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.27 (2.1-src Nightly: 1d372fe)';
+elFinder.prototype.version = '2.1.27 (2.1-src Nightly: 5b93626)';
 
 
 
@@ -16397,7 +16397,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 									buttons[name] = $('<div/>')[button](cmd);
 								}
 								if (buttons[name]) {
-									textLabel && buttons[name].find('.elfinder-button-text').show();
+									buttons[name].children('.elfinder-button-text')[textLabel? 'show' : 'hide']();
 									panel.prepend(buttons[name]);
 								}
 							}
@@ -16417,7 +16417,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 						name = 'preference';
 						button = 'elfinder'+cmd.options.ui;
 						buttons[name] = $('<div/>')[button](cmdPref);
-						textLabel && buttons[name].find('.elfinder-button-text').show();
+						buttons[name].children('.elfinder-button-text')[textLabel? 'show' : 'hide']();
 						panel.prepend(buttons[name]);
 						self.append(panel);
 					}
@@ -16563,7 +16563,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 								if (! buttons[to] && $.fn[button]) {
 									buttons[to] = $('<div/>')[button](fm._commands[to]);
 									if (buttons[to]) {
-										textLabel && buttons[to].find('.elfinder-button-text').show();
+										buttons[to].children('.elfinder-button-text')[textLabel? 'show' : 'hide']();
 										if (cmd.extendsCmd) {
 											buttons[to].children('span.elfinder-button-icon').addClass('elfinder-button-icon-' + cmd.extendsCmd)
 										};
