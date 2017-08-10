@@ -258,7 +258,7 @@
 .elfinder-cwd .elfinder-navbar-root-network.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd-view-list .elfinder-navbar-root-network td .elfinder-cwd-icon  {
 	background-image:url("../img/toolbar.png");
-	background-position: 0 81.1%; /* Don't forget change % when toolbar.png edited */
+	background-position: 0 76.8%; /* Don't forget change % when toolbar.png edited */
 	background-size: cover;
 }
 .elfinder-cwd .elfinder-navbar-root-network.elfinder-droppable-active .elfinder-cwd-icon {
