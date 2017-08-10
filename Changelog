@@ -1,4 +1,4 @@
-2017-08-xx  Naoki Sawada  <hypweb@gmail.com>
+2017-08-10  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.27):
 		- [php:core] Fixed #2104 notice error in `getIniBytes()` with php 7.1
