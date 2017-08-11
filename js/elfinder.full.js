@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.27 (2.1-src Nightly: 98a9d8a) (2017-08-11)
+ * Version 2.1.27 (2.1-src Nightly: 2069b26) (2017-08-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8043,7 +8043,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.27 (2.1-src Nightly: 98a9d8a)';
+elFinder.prototype.version = '2.1.27 (2.1-src Nightly: 2069b26)';
 
 
 
@@ -10866,13 +10866,12 @@ $.fn.elfinderbutton = function(cmd) {
 				.hover(function(e) { !button.hasClass(disabled) && button[e.type == 'mouseleave' ? 'removeClass' : 'addClass'](hover) /**button.toggleClass(hover);*/ })
 				.click(function(e) { 
 					if (!button.hasClass(disabled)) {
-						if (menu && cmd.variants.length > 1) {
+						if (menu && cmd.variants.length >= 1) {
 							// close other menus
 							menu.is(':hidden') && cmd.fm.getUI().click();
 							e.stopPropagation();
 							menu.slideToggle(100);
 						} else {
-							//cmd.exec(void(0), { _currentType: 'toolbar', _currentNode: button });
 							fm.exec(cmd.name, void(0), {_userAction: true, _currentType: 'toolbar', _currentNode: button });
 						}
 						
@@ -10901,11 +10900,10 @@ $.fn.elfinderbutton = function(cmd) {
 					e.stopPropagation();
 					button.removeClass(hover);
 					menu.hide();
-					//cmd.exec(cmd.fm.selected(), $(this).data('value'));
 					if (typeof opts === 'undefined') {
 						opts = {};
 					}
-					if (typeof opts === 'object' || typeof opts === 'string') {
+					if (typeof opts === 'object') {
 						opts._userAction = true;
 					}
 					fm.exec(cmd.name, fm.selected(), opts);
@@ -18278,7 +18276,7 @@ elFinder.prototype.commands.archive = function() {
 	fm.bind('open reload', function() {
 		self.variants = [];
 		$.each((mimes = fm.option('archivers')['create'] || []), function(i, mime) {
-			self.variants.push([mime, fm.mime2kind(mime)])
+			self.variants.push([mime, fm.mime2kind(mime)]);
 		});
 		self.change();
 	});
