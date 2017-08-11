@@ -1248,7 +1248,10 @@ $.fn.elfindercwd = function(fm, options) {
 						}
 					}
 	
-					setColwidth();
+					if (list) {
+						setColwidth();
+						fixTableHeader({fitWidth: ! colWidth});
+					}
 					bottomMarkerShow(place);
 					if (Object.keys(atmb).length) {
 						Object.assign(bufferExt.attachTmbs, atmb);
@@ -1303,7 +1306,10 @@ $.fn.elfindercwd = function(fm, options) {
 				
 				inSearch && fm.trigger('cwdhasheschange', cwdHashes);
 				
-				setColwidth();
+				if (list) {
+					setColwidth();
+					fixTableHeader({fitWidth: ! colWidth});
+				}
 			},
 			
 			msg = {
