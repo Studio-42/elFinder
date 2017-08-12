@@ -30,15 +30,21 @@ elFinder.prototype.commands.mkdir = function() {
 
 	this.init = function() {
 		if (this.options.intoNewFolderToolbtn) {
-			this.options.ui = 'mkdirbutton';
+			this.syncTitleOnChange = true;
 		}
 	}
 	
 	fm.bind('select', function(e) {
 		var sel = (e.data && e.data.selected)? e.data.selected : [];
-			
+		
+		self.className = 'mkdir';
 		curOrg = sel.length? (e.data.origin || '') : '';
-		self.title = (sel.length && (curOrg !== 'navbar'))? fm.i18n('cmdmkdirin') : fm.i18n('cmdmkdir');
+		if (sel.length && (curOrg !== 'navbar')) {
+			self.title = fm.i18n('cmdmkdirin');
+			self.className += ' elfinder-button-icon-mkdirin';
+		} else {
+			self.title = fm.i18n('cmdmkdir');
+		}
 		self.update(void(0), self.title);
 	});
 	

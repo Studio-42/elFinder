@@ -161,6 +161,7 @@
 .elfinder-button-icon-undo      { background-position: 0 -864px; }
 .elfinder-button-icon-redo      { background-position: 0 -880px; }
 .elfinder-button-icon-preference { background-position: 0 -896px; }
+.elfinder-button-icon-mkdirin   { background-position: 0 -912px; }
 
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton { overflow:visible; }
