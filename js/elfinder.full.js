@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.27 (2.1-src Nightly: 2069b26) (2017-08-12)
+ * Version 2.1.27 (2.1-src Nightly: 3157d1a) (2017-08-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8043,7 +8043,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.27 (2.1-src Nightly: 2069b26)';
+elFinder.prototype.version = '2.1.27 (2.1-src Nightly: 3157d1a)';
 
 
 
@@ -14786,26 +14786,6 @@ $.fn.elfinderfullscreenbutton = function(cmd) {
 
 
 /*
- * File: /js/ui/mkdirbutton.js
- */
-
-/**
- * @class  elFinder toolbar button to switch mkdir mode.
- *
- * @author Naoki Sawada
- **/
-$.fn.elfindermkdirbutton = function(cmd) {
-	return this.each(function() {
-		var button = $(this).elfinderbutton(cmd);
-
-		cmd.change(function() {
-			button.attr('title', cmd.value);
-		});
-	});
-};
-
-
-/*
  * File: /js/ui/navbar.js
  */
 
@@ -21411,15 +21391,21 @@ elFinder.prototype.commands.mkdir = function() {
 
 	this.init = function() {
 		if (this.options.intoNewFolderToolbtn) {
-			this.options.ui = 'mkdirbutton';
+			this.syncTitleOnChange = true;
 		}
 	}
 	
 	fm.bind('select', function(e) {
 		var sel = (e.data && e.data.selected)? e.data.selected : [];
-			
+		
+		self.className = 'mkdir';
 		curOrg = sel.length? (e.data.origin || '') : '';
-		self.title = (sel.length && (curOrg !== 'navbar'))? fm.i18n('cmdmkdirin') : fm.i18n('cmdmkdir');
+		if (sel.length && (curOrg !== 'navbar')) {
+			self.title = fm.i18n('cmdmkdirin');
+			self.className += ' elfinder-button-icon-mkdirin';
+		} else {
+			self.title = fm.i18n('cmdmkdir');
+		}
 		self.update(void(0), self.title);
 	});
 	
