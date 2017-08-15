@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.27 (2.1-src Nightly: 56e751c) (2017-08-15)
+ * Version 2.1.27 (2.1-src Nightly: 86deac7) (2017-08-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8043,7 +8043,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.27 (2.1-src Nightly: 56e751c)';
+elFinder.prototype.version = '2.1.27 (2.1-src Nightly: 86deac7)';
 
 
 
@@ -14888,19 +14888,17 @@ $.fn.elfindernavbar = function(fm, opts) {
 					duration = (data && data.duration)? data.duration : 'fast',
 					handleW = (data && data.handleW)? data.handleW : Math.max(50, fm.getUI().width() / 10);
 				nav.stop(true, true)[mode](duration, function() {
-					setTimeout(function() {
-						if (mode === 'show') {
-							swipeHandle && swipeHandle.stop(true, true).hide();
-						} else {
-							if (swipeHandle) {
-								swipeHandle.width(handleW? handleW : '');
-								fm.resources.blink(swipeHandle, 'slowonce');
-							}
+					if (mode === 'show') {
+						swipeHandle && swipeHandle.stop(true, true).hide();
+					} else {
+						if (swipeHandle) {
+							swipeHandle.width(handleW? handleW : '');
+							fm.resources.blink(swipeHandle, 'slowonce');
 						}
-						fm.trigger('navbar'+ mode).getUI('cwd').trigger('resize');
-						data.init && fm.trigger('uiautohide');
-						setWzRect();
-					}, 0);
+					}
+					fm.trigger('navbar'+ mode);
+					data.init && fm.trigger('uiautohide');
+					setWzRect();
 				});
 				autoHide.navbar = (mode !== 'show');
 				fm.storage('autoHide', Object.assign(fm.storage('autoHide'), {navbar: autoHide.navbar}));
@@ -15210,14 +15208,12 @@ $.fn.elfinderpath = function(fm) {
 			.bind('navbarshow navbarhide', function() {
 				var wz = fm.getUI('workzone');
 				if (this.type === 'navbarshow') {
-					wz.height(wz.height() + wzbase.outerHeight());
+					fm.unbind('open', toWorkzone);
 					path.prependTo(fm.getUI('statusbar'));
 					wzbase.detach();
 					place = 'statusbar';
-					fm.unbind('open', toWorkzone);
 				} else {
 					wzbase.append(path).insertBefore(wz);
-					wz.height(wz.height() - wzbase.outerHeight());
 					place = 'workzone';
 					toWorkzone();
 					fm.bind('open', toWorkzone);
@@ -18258,7 +18254,7 @@ $.fn.elfinderworkzone = function(fm) {
 				fitsize();
 			};
 			
-		parent.add(window).on('resize.' + fm.namespace, fitsize);
+		parent.on('resize.' + fm.namespace, fitsize);
 		if (fm.cssloaded) {
 			cssloaded();
 		} else {
