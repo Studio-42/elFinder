@@ -163,7 +163,18 @@
 			}
 		},
 		content = '',
-		debugDIV, debugUL;
+		initCallbacks = [],
+		init = function(fn) {
+			if (fn && typeof fn === 'function') {
+				initCallbacks.push(fn);
+			} else if (initCallbacks.length) {
+				$.each(initCallbacks, function() {
+					this.call(self);
+				});
+				initCallbacks = [];
+			}
+		},
+		loaded, debugDIV, debugUL;
 	
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
@@ -174,86 +185,94 @@
 		description : this.title
 	}];
 	
-	fm.one('load', function() {
+	fm.bind('load', function() {
 		var setupPref = function() {
 				var tab = content.find('.elfinder-help-preference'),
-					langSel = $('<select/>').on('change', function() {
-						var lang = $(this).val();
-						fm.storage('lang', lang);
-						$('#'+fm.id).elfinder('reload');
-					}),
-					optTags = [],
-					langs = self.options.langs || {
-						ar: 'اللغة العربية',
-						bg: 'Български',
-						ca: 'Català',
-						cs: 'Čeština',
-						da: 'Dansk',
-						de: 'Deutsch',
-						el: 'Ελληνικά',
-						en: 'English',
-						es: 'Español',
-						fa: 'فارسی‌‎, پارسی‌',
-						fo: 'Føroyskt',
-						fr: 'Français',
-						he: 'עברית‎',
-						hr: 'Hrvatski',
-						hu: 'Magyar',
-						id: 'Bahasa Indonesia',
-						it: 'Italiano',
-						jp: '日本語',
-						ko: '한국어',
-						nl: 'Nederlands',
-						no: 'Norsk',
-						pl: 'Polski',
-						pt_BR: 'Português',
-						ro: 'Română',
-						ru: 'Pусский',
-						si: 'සිංහල',
-						sk: 'Slovenský',
-						sl: 'Slovenščina',
-						sr: 'Srpski',
-						sv: 'Svenska',
-						tr: 'Türkçe',
-						ug_CN: 'ئۇيغۇرچە',
-						uk: 'Український',
-						vi: 'Tiếng Việt',
-						zh_CN: '简体中文',
-						zh_TW: '正體中文'
-					},
 					forms = { language: '', toolbarPref: '', clearBrowserData: '' },
 					dls = $();
 				
-				$.each(langs, function(lang, name) {
-					optTags.push('<option value="'+lang+'">'+name+'</option>');
-				});
-				forms.language = langSel.append(optTags.join(''));
+				forms.language = (function() {
+					var node = $('<div/>');
+					init(function() {
+						var langSel = $('<select/>').on('change', function() {
+								var lang = $(this).val();
+								fm.storage('lang', lang);
+								$('#'+fm.id).elfinder('reload');
+							}),
+							optTags = [],
+							langs = self.options.langs || {
+								ar: 'اللغة العربية',
+								bg: 'Български',
+								ca: 'Català',
+								cs: 'Čeština',
+								da: 'Dansk',
+								de: 'Deutsch',
+								el: 'Ελληνικά',
+								en: 'English',
+								es: 'Español',
+								fa: 'فارسی‌‎, پارسی‌',
+								fo: 'Føroyskt',
+								fr: 'Français',
+								he: 'עברית‎',
+								hr: 'Hrvatski',
+								hu: 'Magyar',
+								id: 'Bahasa Indonesia',
+								it: 'Italiano',
+								jp: '日本語',
+								ko: '한국어',
+								nl: 'Nederlands',
+								no: 'Norsk',
+								pl: 'Polski',
+								pt_BR: 'Português',
+								ro: 'Română',
+								ru: 'Pусский',
+								si: 'සිංහල',
+								sk: 'Slovenský',
+								sl: 'Slovenščina',
+								sr: 'Srpski',
+								sv: 'Svenska',
+								tr: 'Türkçe',
+								ug_CN: 'ئۇيغۇرچە',
+								uk: 'Український',
+								vi: 'Tiếng Việt',
+								zh_CN: '简体中文',
+								zh_TW: '正體中文'
+							};
+						$.each(langs, function(lang, name) {
+							optTags.push('<option value="'+lang+'">'+name+'</option>');
+						});
+						node.replaceWith(langSel.append(optTags.join('')).val(fm.lang));
+					});
+					return node;
+				})();
 				
 				forms.toolbarPref = (function() {
-					var pnls = $.map(fm.options.uiOptions.toolbar, function(v) {
-							return $.isArray(v)? v : null
-						}),
-						tags = [],
-						hides = fm.storage('toolbarhides') || {},
-						node;
-					$.each(pnls, function() {
-						var cmd = this,
-							name = fm.i18n('cmd'+cmd);
-						if (name === 'cmd'+cmd) {
-							name = cmd;
-						}
-						tags.push('<span class="elfinder-help-toolbar-item"><label><input type="checkbox" value="'+cmd+'" '+(hides[cmd]? '' : 'checked')+'/>'+name+'</label></span>');
-					});
-					node = $(tags.join(' ')).on('change', 'input', function() {
-						var v = $(this).val(),
-							o = $(this).is(':checked');
-						if (!o && !hides[v]) {
-							hides[v] = true;
-						} else if (o && hides[v]) {
-							delete hides[v];
-						}
-						fm.storage('toolbarhides', hides);
-						fm.trigger('toolbarpref');
+					var node = $('<div/>');
+					init(function() {
+						var pnls = $.map(fm.options.uiOptions.toolbar, function(v) {
+								return $.isArray(v)? v : null
+							}),
+							tags = [],
+							hides = fm.storage('toolbarhides') || {};
+						$.each(pnls, function() {
+							var cmd = this,
+								name = fm.i18n('cmd'+cmd);
+							if (name === 'cmd'+cmd) {
+								name = cmd;
+							}
+							tags.push('<span class="elfinder-help-toolbar-item"><label><input type="checkbox" value="'+cmd+'" '+(hides[cmd]? '' : 'checked')+'/>'+name+'</label></span>');
+						});
+						node.replaceWith($(tags.join(' ')).on('change', 'input', function() {
+							var v = $(this).val(),
+								o = $(this).is(':checked');
+							if (!o && !hides[v]) {
+								hides[v] = true;
+							} else if (o && hides[v]) {
+								delete hides[v];
+							}
+							fm.storage('toolbarhides', hides);
+							fm.trigger('toolbarpref');
+						}));
 					});
 					return node;
 				})();
@@ -269,7 +288,6 @@
 				});
 				
 				tab.append($('<dl/>').append(dls));
-				langSel.val(fm.lang);
 			},
 			parts = self.options.view || ['about', 'shortcuts', 'help', 'preference', 'debug'],
 			tabDebug, i, helpSource, tabBase, tabNav, tabs, delta;
@@ -400,6 +418,10 @@
 	
 	this.exec = function(sel, opts) {
 		var tab = opts? opts.tab : void(0);
+		if (! loaded) {
+			loaded = true;
+			fm.lazy(init);
+		}
 		this.dialog.trigger('initContents').elfinderdialog('open').find((tab? '.elfinder-help-tab-'+tab : '.ui-tabs-nav li') + ' a:first').click();
 	};
 

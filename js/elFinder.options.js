@@ -561,6 +561,8 @@ elFinder.prototype._options = {
 			labelExcludeUA: ['Mobile'],
 			// auto hide on initial open
 			autoHideUA: ['Mobile'],
+			// Initial setting value of hide button in toolbar setting
+			defaultHides: ['home', 'reload'],
 			// show Preference button ('none', 'auto', 'always')
 			// If you do not include 'preference' in the context menu you should specify 'auto' or 'always'
 			showPreferenceButton: 'none'
