@@ -60,19 +60,17 @@ $.fn.elfindernavbar = function(fm, opts) {
 					duration = (data && data.duration)? data.duration : 'fast',
 					handleW = (data && data.handleW)? data.handleW : Math.max(50, fm.getUI().width() / 10);
 				nav.stop(true, true)[mode](duration, function() {
-					setTimeout(function() {
-						if (mode === 'show') {
-							swipeHandle && swipeHandle.stop(true, true).hide();
-						} else {
-							if (swipeHandle) {
-								swipeHandle.width(handleW? handleW : '');
-								fm.resources.blink(swipeHandle, 'slowonce');
-							}
+					if (mode === 'show') {
+						swipeHandle && swipeHandle.stop(true, true).hide();
+					} else {
+						if (swipeHandle) {
+							swipeHandle.width(handleW? handleW : '');
+							fm.resources.blink(swipeHandle, 'slowonce');
 						}
-						fm.trigger('navbar'+ mode).getUI('cwd').trigger('resize');
-						data.init && fm.trigger('uiautohide');
-						setWzRect();
-					}, 0);
+					}
+					fm.trigger('navbar'+ mode);
+					data.init && fm.trigger('uiautohide');
+					setWzRect();
 				});
 				autoHide.navbar = (mode !== 'show');
 				fm.storage('autoHide', Object.assign(fm.storage('autoHide'), {navbar: autoHide.navbar}));

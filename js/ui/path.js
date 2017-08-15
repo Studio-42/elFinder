@@ -149,14 +149,12 @@ $.fn.elfinderpath = function(fm) {
 			.bind('navbarshow navbarhide', function() {
 				var wz = fm.getUI('workzone');
 				if (this.type === 'navbarshow') {
-					wz.height(wz.height() + wzbase.outerHeight());
+					fm.unbind('open', toWorkzone);
 					path.prependTo(fm.getUI('statusbar'));
 					wzbase.detach();
 					place = 'statusbar';
-					fm.unbind('open', toWorkzone);
 				} else {
 					wzbase.append(path).insertBefore(wz);
-					wz.height(wz.height() - wzbase.outerHeight());
 					place = 'workzone';
 					toWorkzone();
 					fm.bind('open', toWorkzone);
