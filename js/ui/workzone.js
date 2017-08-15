@@ -43,7 +43,7 @@ $.fn.elfinderworkzone = function(fm) {
 				fitsize();
 			};
 			
-		parent.add(window).on('resize.' + fm.namespace, fitsize);
+		parent.on('resize.' + fm.namespace, fitsize);
 		if (fm.cssloaded) {
 			cssloaded();
 		} else {
