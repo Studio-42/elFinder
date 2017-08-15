@@ -153,9 +153,16 @@ $.fn.elfindertoolbar = function(fm, opts) {
 		
 		fm.bind('open sync select toolbarpref', function() {
 			var disabled = Object.assign([], fm.option('disabled')),
-				userHides = fm.storage('toolbarhides') || {},
+				userHides = fm.storage('toolbarhides'),
 				doRender, sel;
 			
+			if (! userHides && Array.isArray(options.defaultHides)) {
+				userHides = {};
+				$.each(options.defaultHides, function() {
+					userHides[this] = true;
+				});
+				fm.storage('toolbarhides', userHides);
+			}
 			if (this.type === 'select') {
 				if (fm.searchStatus.state < 2) {
 					return;
