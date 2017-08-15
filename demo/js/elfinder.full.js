@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.27 (2.1-src Nightly: 3157d1a) (2017-08-13)
+ * Version 2.1.27 (2.1-src Nightly: 8375be0) (2017-08-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8043,7 +8043,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.27 (2.1-src Nightly: 3157d1a)';
+elFinder.prototype.version = '2.1.27 (2.1-src Nightly: 8375be0)';
 
 
 
@@ -8903,15 +8903,14 @@ elFinder.prototype._options = {
 	uiOptions : {
 		// toolbar configuration
 		toolbar : [
-			['back', 'forward'],
+			['home', 'back', 'forward', 'up', 'reload'],
 			['netmount'],
-			// ['reload'],
-			// ['home', 'up'],
 			['mkdir', 'mkfile', 'upload'],
 			['open', 'download', 'getfile'],
 			['undo', 'redo'],
 			['copy', 'cut', 'paste', 'rm', 'empty'],
 			['duplicate', 'rename', 'edit', 'resize', 'chmod'],
+			['selectall', 'selectnone', 'selectinvert'],
 			['quicklook', 'info'],
 			['extract', 'archive'],
 			['search'],
@@ -9308,9 +9307,9 @@ elFinder.prototype._options = {
 		// navbarfolder menu
 		navbar : ['open', 'download', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', 'empty', '|', 'rename', '|', 'archive', '|', 'places', 'info', 'chmod', 'netunmount'],
 		// current directory menu
-		cwd    : ['undo', 'redo', '|', 'reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'empty', '|', 'view', 'sort', 'colwidth', '|', 'info', '|', 'fullscreen', '|', 'preference'],
+		cwd    : ['undo', 'redo', '|', 'back', 'up', 'reload', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'empty', '|', 'view', 'sort', 'selectall', 'colwidth', '|', 'info', '|', 'fullscreen', '|', 'preference'],
 		// current directory file menu
-		files  : ['getfile', '|' ,'open', 'download', 'opendir', 'quicklook', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', 'empty', '|', 'rename', 'edit', 'resize', '|', 'archive', 'extract', '|', 'places', 'info', 'chmod', 'netunmount']
+		files  : ['getfile', '|' ,'open', 'download', 'opendir', 'quicklook', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', 'empty', '|', 'rename', 'edit', 'resize', '|', 'archive', 'extract', '|', 'selectall', 'selectinvert', '|', 'places', 'info', 'chmod', 'netunmount']
 	},
 
 	/**
@@ -10333,7 +10332,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-08-03
+ * @version 2017-08-15
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -10452,7 +10451,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'cmdforward'   : 'Forward',
 			'cmdgetfile'   : 'Select files',
 			'cmdhelp'      : 'About this software',
-			'cmdhome'      : 'Home',
+			'cmdhome'      : 'Root',
 			'cmdinfo'      : 'Get info',
 			'cmdmkdir'     : 'New folder',
 			'cmdmkdirin'   : 'Into New Folder', // from v2.1.7 added 19.2.2016
@@ -10483,6 +10482,9 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'cmdundo'      : 'Undo', // from v2.1.27 added 31.07.2017
 			'cmdredo'      : 'Redo', // from v2.1.27 added 31.07.2017
 			'cmdpreference': 'Preferences', // from v2.1.27 added 03.08.2017
+			'cmdselectall' : 'Select all', // from v2.1.28 added 15.08.2017
+			'cmdselectnone': 'Select none', // from v2.1.28 added 15.08.2017
+			'cmdselectinvert': 'Invert selection', // from v2.1.28 added 15.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
@@ -11987,6 +11989,8 @@ $.fn.elfindercwd = function(fm, options) {
 				$('#'+fm.cwdHash2Id(hash)).trigger(evtSelect);
 			},
 			
+			allSelected = false,
+			
 			selectAll = function() {
 				var phash = fm.cwd().hash;
 
@@ -12018,12 +12022,31 @@ $.fn.elfindercwd = function(fm, options) {
 					selectedFiles = [];
 					cwd.find('[id].'+clSelected).trigger(evtUnselect);
 					selectCheckbox && cwd.find('input:checkbox').prop('checked', false);
-				} else {
-					fm.select({selected: []});
 				}
 				trigger();
 				selectCheckbox && selectAllCheckbox.data('pending', false);
 				cwd.removeClass('elfinder-cwd-allselected');
+			},
+			
+			selectInvert = function() {
+				var allHashes, selHashes = {};
+				if (allSelected) {
+					unselectAll();
+				} else if (!selectedFiles.length) {
+					selectAll();
+				} else {
+					allHashes = (incHashes || cwdHashes).concat();
+					$.each(selectedFiles, function() {
+						selHashes[this] = true;
+					});
+					selectedFiles = $.map(allHashes, function(h) {
+						var itemNode = $('#'+fm.cwdHash2Id(h)),
+							sel = selHashes[h]? null : h;
+						itemNode.length && itemNode.trigger(sel? evtSelect : evtUnselect);
+						return sel;
+					});
+					trigger();
+				}
 			},
 			
 			/**
@@ -12048,12 +12071,19 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			trigger = function() {
+				var opts = { selected : selectedFiles };
+				
+				allSelected = selectedFiles.length && (selectedFiles.length === (incHashes || cwdHashes).length) && (!fm.maxTargets || selectedFiles.length <= fm.maxTargets);
 				if (selectCheckbox) {
-					var all = (selectedFiles.length === cwdHashes.length);
-					selectAllCheckbox.find('input').prop('checked', all);
-					cwd[all? 'addClass' : 'removeClass']('elfinder-cwd-allselected');
+					selectAllCheckbox.find('input').prop('checked', allSelected);
+					cwd[allSelected? 'addClass' : 'removeClass']('elfinder-cwd-allselected');
 				}
-				fm.trigger('select', {selected : selectedFiles});
+				if (allSelected) {
+					opts.selectall = true;
+				} else if (! selectedFiles.length) {
+					opts.unselectall = true;
+				}
+				fm.trigger('select', opts);
 			},
 			
 			/**
@@ -14056,6 +14086,11 @@ $.fn.elfindercwd = function(fm, options) {
 				pattern     :'ctrl+a', 
 				description : 'selectall',
 				callback    : selectAll
+			})
+			.shortcut({
+				pattern     :'ctrl+shift+i', 
+				description : 'selectinvert',
+				callback    : selectInvert
 			})
 			.shortcut({
 				pattern     : 'left right up down shift+left shift+right shift+up shift+down',
@@ -26437,6 +26472,125 @@ elFinder.prototype.commands.search = function() {
 		return $.Deferred().reject();
 	}
 
+};
+
+
+/*
+ * File: /js/commands/selectall.js
+ */
+
+/**
+ * @class  elFinder command "selectall"
+ * Select ALL of cwd items
+ *
+ * @author Naoki Sawada
+ **/
+elFinder.prototype.commands.selectall = function() {
+	var self = this,
+		state = 0;
+	
+	this.fm.bind('select', function(e) {
+		state = (e.data && e.data.selectall)? -1 : 0;
+	});
+	
+	this.state = 0;
+	this.updateOnSelect = false;
+	
+	this.getstate = function() {
+		return state;
+	}
+	
+	this.exec = function() {
+		$(document).trigger($.Event('keydown', { keyCode: 65, ctrlKey : true, shiftKey : false, altKey : false, metaKey : false }));
+		return $.Deferred().resolve();
+	}
+};
+
+
+/*
+ * File: /js/commands/selectinvert.js
+ */
+
+/**
+ * @class  elFinder command "selectinvert"
+ * Invert Selection of cwd items
+ *
+ * @author Naoki Sawada
+ **/
+elFinder.prototype.commands.selectinvert = function() {
+	var self = this,
+		fm = this.fm;
+	
+	/*fm.bind('select', function(e, data) {
+		var value, name;
+		if (e.data) {
+			if (e.data.selectall) {
+				value = true;
+			} else if (e.data.unselectall) {
+				value = false;
+			}
+		}
+		if (self.value !== value) {
+			//this.value = value;
+			name = value? 'unselectall' : 'selectall';
+			self.title = fm.i18n('cmd' + name);
+			self.className = name;
+			if (self.button){
+				self.button.children('span.elfinder-button-icon')
+					.removeClass('elfinder-button-icon-unselectall elfinder-button-icon-selectall')
+					.addClass('elfinder-button-icon-' + name);
+			}
+			self.update(void(0), value);
+		}
+	});*/
+	
+	this.alwaysEnabled = true;
+	this.updateOnSelect = false;
+	//this.syncTitleOnChange = true;
+	//this.value = false;
+	
+	this.getstate = function() {
+		return 0;
+	}
+	
+	this.exec = function() {
+		$(document).trigger($.Event('keydown', { keyCode: 73, ctrlKey : true, shiftKey : true, altKey : false, metaKey : false }));
+		return $.Deferred().resolve();
+	}
+
+};
+
+
+/*
+ * File: /js/commands/selectnone.js
+ */
+
+/**
+ * @class  elFinder command "selectnone"
+ * Unselect ALL of cwd items
+ *
+ * @author Naoki Sawada
+ **/
+elFinder.prototype.commands.selectnone = function() {
+	var self = this,
+		fm = this.fm,
+		state = -1;
+	
+	fm.bind('select', function(e) {
+		state = (e.data && e.data.unselectall)? -1 : 0;
+	});
+	
+	this.state = -1;
+	this.updateOnSelect = false;
+	
+	this.getstate = function() {
+		return state;
+	}
+	
+	this.exec = function() {
+		fm.getUI('cwd').click();
+		return $.Deferred().resolve();
+	}
 };
 
 
