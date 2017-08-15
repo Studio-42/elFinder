@@ -375,7 +375,13 @@ elFinder.prototype.commands.upload = function() {
 			title          : this.title + '<span class="elfinder-upload-target">' + (targetDir? ' - ' + fm.escape(targetDir.i18 || targetDir.name) : '') + '</span>',
 			modal          : true,
 			resizable      : false,
-			destroyOnClose : true
+			destroyOnClose : true,
+			close          : function() {
+				var cm = fm.getUI('contextmenu');
+				if (cm.is(':visible')) {
+					cm.click();
+				}
+			}
 		});
 		
 		return dfrd;
