@@ -134,7 +134,7 @@
 			'cmdforward'   : 'Forward',
 			'cmdgetfile'   : 'Select files',
 			'cmdhelp'      : 'About this software',
-			'cmdhome'      : 'Home',
+			'cmdhome'      : 'Root',
 			'cmdinfo'      : 'Get info',
 			'cmdmkdir'     : 'New folder',
 			'cmdmkdirin'   : 'Into New Folder', // from v2.1.7 added 19.2.2016
@@ -165,6 +165,9 @@
 			'cmdundo'      : 'Undo', // from v2.1.27 added 31.07.2017
 			'cmdredo'      : 'Redo', // from v2.1.27 added 31.07.2017
 			'cmdpreference': 'Preferences', // from v2.1.27 added 03.08.2017
+			'cmdselectall' : 'Select all', // from v2.1.28 added 15.08.2017
+			'cmdselectnone': 'Select none', // from v2.1.28 added 15.08.2017
+			'cmdselectinvert': 'Invert selection', // from v2.1.28 added 15.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
