@@ -2,7 +2,7 @@
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-08-03
+ * @version 2017-08-15
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -121,7 +121,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'cmdforward'   : 'Forward',
 			'cmdgetfile'   : 'Select files',
 			'cmdhelp'      : 'About this software',
-			'cmdhome'      : 'Home',
+			'cmdhome'      : 'Root',
 			'cmdinfo'      : 'Get info',
 			'cmdmkdir'     : 'New folder',
 			'cmdmkdirin'   : 'Into New Folder', // from v2.1.7 added 19.2.2016
@@ -152,6 +152,9 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'cmdundo'      : 'Undo', // from v2.1.27 added 31.07.2017
 			'cmdredo'      : 'Redo', // from v2.1.27 added 31.07.2017
 			'cmdpreference': 'Preferences', // from v2.1.27 added 03.08.2017
+			'cmdselectall' : 'Select all', // from v2.1.28 added 15.08.2017
+			'cmdselectnone': 'Select none', // from v2.1.28 added 15.08.2017
+			'cmdselectinvert': 'Invert selection', // from v2.1.28 added 15.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',

@@ -538,15 +538,14 @@ elFinder.prototype._options = {
 	uiOptions : {
 		// toolbar configuration
 		toolbar : [
-			['back', 'forward'],
+			['home', 'back', 'forward', 'up', 'reload'],
 			['netmount'],
-			// ['reload'],
-			// ['home', 'up'],
 			['mkdir', 'mkfile', 'upload'],
 			['open', 'download', 'getfile'],
 			['undo', 'redo'],
 			['copy', 'cut', 'paste', 'rm', 'empty'],
 			['duplicate', 'rename', 'edit', 'resize', 'chmod'],
+			['selectall', 'selectnone', 'selectinvert'],
 			['quicklook', 'info'],
 			['extract', 'archive'],
 			['search'],
@@ -943,9 +942,9 @@ elFinder.prototype._options = {
 		// navbarfolder menu
 		navbar : ['open', 'download', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', 'empty', '|', 'rename', '|', 'archive', '|', 'places', 'info', 'chmod', 'netunmount'],
 		// current directory menu
-		cwd    : ['undo', 'redo', '|', 'reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'empty', '|', 'view', 'sort', 'colwidth', '|', 'info', '|', 'fullscreen', '|', 'preference'],
+		cwd    : ['undo', 'redo', '|', 'back', 'up', 'reload', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'empty', '|', 'view', 'sort', 'selectall', 'colwidth', '|', 'info', '|', 'fullscreen', '|', 'preference'],
 		// current directory file menu
-		files  : ['getfile', '|' ,'open', 'download', 'opendir', 'quicklook', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', 'empty', '|', 'rename', 'edit', 'resize', '|', 'archive', 'extract', '|', 'places', 'info', 'chmod', 'netunmount']
+		files  : ['getfile', '|' ,'open', 'download', 'opendir', 'quicklook', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', 'empty', '|', 'rename', 'edit', 'resize', '|', 'archive', 'extract', '|', 'selectall', 'selectinvert', '|', 'places', 'info', 'chmod', 'netunmount']
 	},
 
 	/**
