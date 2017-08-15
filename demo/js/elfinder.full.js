@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.27 (2.1-src Nightly: e8440d2) (2017-08-15)
+ * Version 2.1.27 (2.1-src Nightly: 56e751c) (2017-08-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8043,7 +8043,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.27 (2.1-src Nightly: e8440d2)';
+elFinder.prototype.version = '2.1.27 (2.1-src Nightly: 56e751c)';
 
 
 
@@ -11510,7 +11510,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					css = {},
 					prevNode;
 
-				if (!data.type || data.type !== 'files') {
+				if (data.type && data.type !== 'files') {
 					cwd.trigger('unselectall');
 				}
 				close();
@@ -26549,36 +26549,7 @@ elFinder.prototype.commands.selectall = function() {
  * @author Naoki Sawada
  **/
 elFinder.prototype.commands.selectinvert = function() {
-	var self = this,
-		fm = this.fm;
-	
-	/*fm.bind('select', function(e, data) {
-		var value, name;
-		if (e.data) {
-			if (e.data.selectall) {
-				value = true;
-			} else if (e.data.unselectall) {
-				value = false;
-			}
-		}
-		if (self.value !== value) {
-			//this.value = value;
-			name = value? 'unselectall' : 'selectall';
-			self.title = fm.i18n('cmd' + name);
-			self.className = name;
-			if (self.button){
-				self.button.children('span.elfinder-button-icon')
-					.removeClass('elfinder-button-icon-unselectall elfinder-button-icon-selectall')
-					.addClass('elfinder-button-icon-' + name);
-			}
-			self.update(void(0), value);
-		}
-	});*/
-	
-	this.alwaysEnabled = true;
 	this.updateOnSelect = false;
-	//this.syncTitleOnChange = true;
-	//this.value = false;
 	
 	this.getstate = function() {
 		return 0;
@@ -27357,7 +27328,13 @@ elFinder.prototype.commands.upload = function() {
 			title          : this.title + '<span class="elfinder-upload-target">' + (targetDir? ' - ' + fm.escape(targetDir.i18 || targetDir.name) : '') + '</span>',
 			modal          : true,
 			resizable      : false,
-			destroyOnClose : true
+			destroyOnClose : true,
+			close          : function() {
+				var cm = fm.getUI('contextmenu');
+				if (cm.is(':visible')) {
+					cm.click();
+				}
+			}
 		});
 		
 		return dfrd;
