@@ -162,6 +162,9 @@
 .elfinder-button-icon-redo      { background-position: 0 -880px; }
 .elfinder-button-icon-preference { background-position: 0 -896px; }
 .elfinder-button-icon-mkdirin   { background-position: 0 -912px; }
+.elfinder-button-icon-selectall { background-position: 0 -928px; }
+.elfinder-button-icon-selectnone { background-position: 0 -944px; }
+.elfinder-button-icon-selectinvert { background-position: 0 -960px; }
 
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton { overflow:visible; }
