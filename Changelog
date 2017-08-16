@@ -1,3 +1,12 @@
+2017-08-16  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.28):
+		- [ui:cwd] Fixed #2140 sync problem of col-width of table header when item add/remove
+		- [cmd] Fixed #2144 add cmds `select(all|none|invert)`
+		- [php:core] Fixed #2143 locale dependent version number problem
+		- And some minor bug fixes
+
+
 2017-08-10  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.27):
