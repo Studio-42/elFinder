@@ -1299,7 +1299,7 @@ class elFinder {
 		}
 		
 		if (!empty($args['init'])) {
-			$result['api'] = sprintf('%.1f%03d', self::$ApiVersion, self::$ApiRevision);
+			$result['api'] = sprintf('%.1F%03d', self::$ApiVersion, self::$ApiRevision);
 			$result['uplMaxSize'] = ini_get('upload_max_filesize');
 			$result['uplMaxFile'] = ini_get('max_file_uploads');
 			$result['netDrivers'] = array_keys(self::$netDrivers);
