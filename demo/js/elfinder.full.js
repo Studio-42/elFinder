@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2017-08-17)
+ * Version 2.1.28 (2.1-src Nightly: b447911) (2017-08-17)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8043,7 +8043,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: b447911)';
 
 
 
@@ -22993,7 +22993,10 @@ elFinder.prototype.commands.places = function() {
 				if (self.opened()) {
 					setTimeout(function() {
 						if (self.value) {
-							preview.trigger($.Event('update', {file : self.value}))
+							if (self.value.tmb && self.value.tmb == 1) {
+								self.value = Object.assign({}, fm.file(self.value.hash));
+							}
+							preview.trigger($.Event('update', {file : self.value}));
 						} else {
 							navtrigger(rightKey);
 							setTimeout(function() {
@@ -23241,7 +23244,12 @@ elFinder.prototype.commands.quicklook.plugins = [
 					preventDefault : true
 				})
 				.done(function(data) {
+					var reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i'),
+						m;
 					ql.hideinfo();
+					if (window.atob && (m = data.content.match(reg))) {
+						data.content = atob(data.content.substr(m[1].length));
+					}
 					$('<div class="elfinder-quicklook-preview-text-wrapper"><pre class="elfinder-quicklook-preview-text">'+fm.escape(data.content)+'</pre></div>').appendTo(preview);
 				})
 				.always(function() {
