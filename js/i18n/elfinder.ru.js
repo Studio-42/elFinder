@@ -2,7 +2,7 @@
  * Русский язык translation
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
- * @version 2017-07-08
+ * @version 2017-08-14
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -156,6 +156,9 @@
 			'cmdfullscreen': 'Полный экран', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : 'Переместить', // from v2.1.15 added 21.08.2016
 			'cmdempty'     : 'Очистить папку', // from v2.1.25 added 22.06.2017
+			'cmdundo'      : 'Отменить', // from v2.1.27 added 31.07.2017
+			'cmdredo'      : 'Вернуть', // from v2.1.27 added 31.07.2017
+			'cmdpreference': 'Предпочтения', // from v2.1.27 added 03.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Закрыть',
@@ -215,6 +218,8 @@
 			'ntftrash'    : 'Перемещение в корзину', // from v2.1.24 added 2.5.2017
 			'ntfrestore'  : 'Восстановление из корзины', // from v2.1.24 added 3.5.2017
 			'ntfchkdir'   : 'Проверка папки назначения', // from v2.1.24 added 3.5.2017
+			'ntfundo'     : 'Отмена предыдущей операции', // from v2.1.27 added 31.07.2017
+			'ntfredo'     : 'Восстановление предыдущей операции', // from v2.1.27 added 31.07.2017
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : 'Корзина', //from v2.1.24 added 29.4.2017
@@ -322,7 +327,7 @@
 			'about'           : 'О программе',
 			'shortcuts'       : 'Горячие клавиши',
 			'help'            : 'Помощь',
-			'webfm'           : 'Файловый менеджер для web',
+			'webfm'           : 'Файловый менеджер для Web',
 			'ver'             : 'Версия',
 			'protocolver'     : 'версия протокола',
 			'homepage'        : 'Сайт проекта',
@@ -419,8 +424,9 @@
 			'folderToEmpty'   : 'Очистить папку "$1".', // from v2.1.25 added 22.6.2017
 			'filderIsEmpty'   : 'Нет файлов в паке "$1".', // from v2.1.25 added 22.6.2017
 			'preference'      : 'Настройки', // from v2.1.26 added 28.6.2017
-			'language'        : 'Настройки языка', // from v2.1.26 added 28.6.2017
-			'clearBrowserData': 'Инициализировать настройки, сохраненные в этом браузере', // from v2.1.26 added 28.6.2017
+			'language'        : 'Язык', // from v2.1.26 added 28.6.2017
+			'clearBrowserData': 'Сбросить настройки, измененные в этом браузере', // from v2.1.26 added 28.6.2017
+			'toolbarPref'     : 'Настройки панели', // from v2.1.27 added 2.8.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
