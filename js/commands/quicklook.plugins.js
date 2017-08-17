@@ -156,7 +156,12 @@ elFinder.prototype.commands.quicklook.plugins = [
 					preventDefault : true
 				})
 				.done(function(data) {
+					var reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i'),
+						m;
 					ql.hideinfo();
+					if (window.atob && (m = data.content.match(reg))) {
+						data.content = atob(data.content.substr(m[1].length));
+					}
 					$('<div class="elfinder-quicklook-preview-text-wrapper"><pre class="elfinder-quicklook-preview-text">'+fm.escape(data.content)+'</pre></div>').appendTo(preview);
 				})
 				.always(function() {

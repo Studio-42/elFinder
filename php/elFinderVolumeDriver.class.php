@@ -282,7 +282,8 @@ abstract class elFinderVolumeDriver {
 			'zip:application/x-zip'        => 'application/zip',
 			'm3u8:text/plain'              => 'application/x-mpegURL',
 			'mpd:text/plain'               => 'application/dash+xml',
-			'mpd:application/xml'          => 'application/dash+xml'
+			'mpd:application/xml'          => 'application/dash+xml',
+			'xml:application/xml'          => 'text/xml'
 		),
 		// An option to add MimeMap to the `mimeMap` option
 		// Array '[ext]:[detected mime type]' => '[normalized mime]'
@@ -598,7 +599,7 @@ abstract class elFinderVolumeDriver {
 		'rb'    => 'text/x-ruby',
 		'sh'    => 'text/x-shellscript',
 		'pl'    => 'text/x-perl',
-		//'xml'   => 'text/xml',
+		'xml'   => 'text/xml',
 		'sql'   => 'text/x-sql',
 		'c'     => 'text/x-csrc',
 		'h'     => 'text/x-chdr',
