@@ -526,7 +526,10 @@
 				if (self.opened()) {
 					setTimeout(function() {
 						if (self.value) {
-							preview.trigger($.Event('update', {file : self.value}))
+							if (self.value.tmb && self.value.tmb == 1) {
+								self.value = Object.assign({}, fm.file(self.value.hash));
+							}
+							preview.trigger($.Event('update', {file : self.value}));
 						} else {
 							navtrigger(rightKey);
 							setTimeout(function() {
