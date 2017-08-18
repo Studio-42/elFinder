@@ -135,7 +135,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'cmdtrash'     : 'Into trash', //from v2.1.24 added 29.4.2017
 			'cmdrestore'   : 'Restore', //from v2.1.24 added 3.5.2017
 			'cmdsearch'    : 'Find files',
-			'cmdup'        : 'Go to parent directory',
+			'cmdup'        : 'Go to parent folder',
 			'cmdupload'    : 'Upload files',
 			'cmdview'      : 'View',
 			'cmdresize'    : 'Resize & Rotate',
