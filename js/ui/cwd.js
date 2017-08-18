@@ -857,17 +857,10 @@ $.fn.elfindercwd = function(fm, options) {
 					return;
 				}
 				var setPos = function() {
-					var val, pos;
-					
-					if (fm.direction === 'ltr') {
-						val = wrapper.scrollLeft() * -1;
-						pos = 'left';
-					} else {
-						val = wrapper.scrollLeft();
-						pos = 'right';
-					}
-					if (base.css(pos) !== val) {
-						base.css(pos, val);
+					var val;
+					val = (fm.direction === 'ltr')? wrapper.scrollLeft() * -1 : table.outerWidth(true) - wrapper.width() - wrapper.scrollLeft();
+					if (base.css('left') !== val) {
+						base.css('left', val);
 					}
 				},
 				opts = opts || {},
@@ -888,10 +881,10 @@ $.fn.elfindercwd = function(fm, options) {
 						tableHeader = $('<div/>').addClass(wrapper.attr('class') + ' elfinder-cwd-fixheader')
 							.removeClass('ui-droppable native-droppable')
 							.css(wrapper.position())
-							.css('height', hheight)
+							.css({ height: hheight, width: cwd.outerWidth() })
 							.append(base);
 						if (fm.direction === 'rtl') {
-							tableHeader.css('right', (fm.getUI().width() - wrapper.width()) + 'px');
+							tableHeader.css('left', (wrapper.data('width') - wrapper.width()) + 'px');
 						}
 						setPos();
 						wrapper.after(tableHeader)
@@ -899,6 +892,7 @@ $.fn.elfindercwd = function(fm, options) {
 								setPos();
 								if (e.type === 'resize') {
 									e.stopPropagation();
+									wrapper.data('width', wrapper.css('overflow', 'hidden').width());
 									fixTableHeader();
 								}
 							});
@@ -928,10 +922,10 @@ $.fn.elfindercwd = function(fm, options) {
 					tableHeader.data('widthTimer') && clearTimeout(tableHeader.data('widthTimer'));
 					tableHeader.data('widthTimer', setTimeout(function() {
 						if (tableHeader) {
+							tableHeader.css('width', cwd.outerWidth() + 'px');
 							if (fm.direction === 'rtl') {
-								tableHeader.css('right', (fm.getUI().width() - wrapper.width()) + 'px');
+								tableHeader.css('left', (wrapper.data('width') - wrapper.width()) + 'px');
 							}
-							tableHeader.css(wrapper.position()).css('width', cwd.outerWidth() + 'px');
 						}
 					}, 10));
 				}
@@ -2060,9 +2054,9 @@ $.fn.elfindercwd = function(fm, options) {
 					if (cwdoh < wph) {
 						cwd.height(wph);
 					}
-				}, 20);
+				}, 10);
 				
-				list && ! colResizing && fixTableHeader();
+				list && ! colResizing && (init? wrapper.trigger('resize.fixheader') : fixTableHeader());
 				
 				wrapperRepaint();
 			},
