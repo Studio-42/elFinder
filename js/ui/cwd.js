@@ -893,6 +893,7 @@ $.fn.elfindercwd = function(fm, options) {
 								if (e.type === 'resize') {
 									e.stopPropagation();
 									wrapper.data('width', wrapper.css('overflow', 'hidden').width());
+									wrapper.css('overflow', 'auto');
 									fixTableHeader();
 								}
 							});
