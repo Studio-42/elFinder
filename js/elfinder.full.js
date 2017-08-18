@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 18b024e) (2017-08-18)
+ * Version 2.1.28 (2.1-src Nightly: 11316c5) (2017-08-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8043,7 +8043,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 18b024e)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 11316c5)';
 
 
 
@@ -8357,6 +8357,18 @@ $.fn.elfUiWidgetInstance = function(name) {
 		return null;
 	}
 };
+
+// function scrollRight
+if (! $.fn.scrollRight) {
+	$.fn.extend({
+		scrollRight: function (val) {
+			if (val === undefined) {
+				return this[0].scrollWidth - (this[0].scrollLeft + this[0].clientWidth) + 1;
+			}
+			return this.scrollLeft(this[0].scrollWidth - this[0].clientWidth - val);
+		}
+	});
+}
 
 
 /*
@@ -14919,9 +14931,9 @@ $.fn.elfindernavbar = function(fm, opts) {
 					clearTimeout($(this).data('posinit'));
 					$(this).data('posinit', setTimeout(function() {
 						var offset = (fm.UA.Opera && nav.scrollLeft())? 20 : 2;
-						handle.css({
+						handle.css('top', 0).css({
 							top  : parseInt(nav.scrollTop())+'px',
-							left : ltr ? 'auto' : parseInt(nav.scrollLeft() + offset),
+							left : ltr ? 'auto' : parseInt(nav.scrollRight() -  offset) * -1,
 							right: ltr ? parseInt(nav.scrollLeft() - offset) * -1 : 'auto'
 						});
 						if (e.type === 'resize') {
@@ -14929,12 +14941,10 @@ $.fn.elfindernavbar = function(fm, opts) {
 						}
 					}, 50));
 				})
-				.find('.ui-resizable-handle').addClass('ui-front');
+				.children('.ui-resizable-handle').addClass('ui-front');
 
-			fm.one('open', function() {
-				setTimeout(function() {
-					nav.trigger('resize');
-				}, 150);
+			fm.one('opendone', function() {
+				handle.trigger('resize');
 			});
 		}
 
@@ -18025,7 +18035,7 @@ $.fn.elfindertree = function(fm, opts) {
 		.remove(function(e) {
 			var dirs = e.data.removed,
 				l    = dirs.length,
-				node, stree;
+				node, stree, removed;
 			
 			$.each(hasMoreDirs, function(h, node) {
 				node.trigger('update.'+fm.namespace, { removed : dirs });
@@ -18034,6 +18044,7 @@ $.fn.elfindertree = function(fm, opts) {
 
 			while (l--) {
 				if ((node = $('#'+fm.navHash2Id(dirs[l]))).length) {
+					removed = true;
 					stree = node.closest('.'+subtree);
 					node.parent().detach();
 					if (!stree.children().length) {
@@ -18041,6 +18052,8 @@ $.fn.elfindertree = function(fm, opts) {
 					}
 				}
 			}
+			
+			removed && fm.getUI('navbar').children('.ui-resizable-handle').trigger('resize');
 			
 			$.each(hasMoreDirs, function(h, node) {
 				node.trigger('update.'+fm.namespace, { change: 'done' });
