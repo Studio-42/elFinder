@@ -96,9 +96,9 @@ $.fn.elfindernavbar = function(fm, opts) {
 					clearTimeout($(this).data('posinit'));
 					$(this).data('posinit', setTimeout(function() {
 						var offset = (fm.UA.Opera && nav.scrollLeft())? 20 : 2;
-						handle.css({
+						handle.css('top', 0).css({
 							top  : parseInt(nav.scrollTop())+'px',
-							left : ltr ? 'auto' : parseInt(nav.scrollLeft() + offset),
+							left : ltr ? 'auto' : parseInt(nav.scrollRight() -  offset) * -1,
 							right: ltr ? parseInt(nav.scrollLeft() - offset) * -1 : 'auto'
 						});
 						if (e.type === 'resize') {
@@ -106,12 +106,10 @@ $.fn.elfindernavbar = function(fm, opts) {
 						}
 					}, 50));
 				})
-				.find('.ui-resizable-handle').addClass('ui-front');
+				.children('.ui-resizable-handle').addClass('ui-front');
 
-			fm.one('open', function() {
-				setTimeout(function() {
-					nav.trigger('resize');
-				}, 150);
+			fm.one('opendone', function() {
+				handle.trigger('resize');
 			});
 		}
 

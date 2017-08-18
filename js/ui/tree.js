@@ -1363,7 +1363,7 @@ $.fn.elfindertree = function(fm, opts) {
 		.remove(function(e) {
 			var dirs = e.data.removed,
 				l    = dirs.length,
-				node, stree;
+				node, stree, removed;
 			
 			$.each(hasMoreDirs, function(h, node) {
 				node.trigger('update.'+fm.namespace, { removed : dirs });
@@ -1372,6 +1372,7 @@ $.fn.elfindertree = function(fm, opts) {
 
 			while (l--) {
 				if ((node = $('#'+fm.navHash2Id(dirs[l]))).length) {
+					removed = true;
 					stree = node.closest('.'+subtree);
 					node.parent().detach();
 					if (!stree.children().length) {
@@ -1379,6 +1380,8 @@ $.fn.elfindertree = function(fm, opts) {
 					}
 				}
 			}
+			
+			removed && fm.getUI('navbar').children('.ui-resizable-handle').trigger('resize');
 			
 			$.each(hasMoreDirs, function(h, node) {
 				node.trigger('update.'+fm.namespace, { change: 'done' });
