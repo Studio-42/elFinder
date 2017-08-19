@@ -3,7 +3,7 @@
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Wojciech Jabłoński <www.jablonski@gmail.com>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2017-08-06
+ * @version 2.1.28 2017-08-16
 */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -129,7 +129,7 @@
 			'cmdforward'   : 'Dalej',
 			'cmdgetfile'   : 'Wybierz pliki',
 			'cmdhelp'      : 'Informacje o programie',
-			'cmdhome'      : 'Katalog główny',
+			'cmdhome'      : 'Główny',
 			'cmdinfo'      : 'Właściwości',
 			'cmdmkdir'     : 'Nowy katalog',
 			'cmdmkdirin'   : 'Do nowego katalogu', // from v2.1.7 added 19.2.2016
@@ -160,7 +160,9 @@
 			'cmdundo'      : 'Cofnij', // from v2.1.27 added 31.07.2017
 			'cmdredo'      : 'Ponów', // from v2.1.27 added 31.07.2017
 			'cmdpreference': 'Preferencje', // from v2.1.27 added 03.08.2017
-
+			'cmdselectall' : 'Zaznacz wszystko', // from v2.1.28 added 15.08.2017
+			'cmdselectnone': 'Odznacz wszystko', // from v2.1.28 added 15.08.2017
+			'cmdselectinvert': 'Odwróć wybór', // from v2.1.28 added 15.08.2017
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zamknij',
 			'btnSave'   : 'Zapisz',
