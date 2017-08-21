@@ -24,7 +24,7 @@
 			try {
 				hasFlash = !!(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
 			} catch (e) {
-				hasFlash = !!(navigator && navigator.mimeTypes["application/x-shockwave-flash"]);
+				hasFlash = !!(! window.orientation || (navigator && navigator.mimeTypes["application/x-shockwave-flash"]));
 			}
 			return hasFlash;
 		})(),
