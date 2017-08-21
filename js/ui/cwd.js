@@ -281,12 +281,59 @@ $.fn.elfindercwd = function(fm, options) {
 			},
 			
 			/**
+			 * Type badge CSS added flag
+			 * 
+			 * @type Object
+			 */
+			addedBadges = {},
+			
+			/**
+			 * Type badge style sheet element
+			 * 
+			 * @type Object
+			 */
+			addBadgeStyleSheet,
+			
+			/**
+			 * Add type badge CSS into 'head'
+			 * 
+			 * @type Fundtion
+			 */
+			addBadgeStyle = function(mime, name) {
+				var sel, ext, type;
+				if (! addedBadges[mime]) {
+					if (typeof addBadgeStyleSheet === 'undefined') {
+						if ($('#elfinderAddBadgeStyle'+fm.namespace).length) {
+							$('#elfinderAddBadgeStyle'+fm.namespace).remove();
+						}
+						addBadgeStyleSheet = $('<style id="addBadgeStyle'+fm.namespace+'"/>').insertBefore($('head').children(':first')).get(0).sheet || null;
+					}
+					if (addBadgeStyleSheet) {
+						mime = mime.toLowerCase();
+						type = mime.split('/');
+						ext = fm.escape(fm.mimeTypes[mime] || (name.replace(/.bac?k$/i, '').match(/\.([^.]+)$/) || ['',''])[1]);
+						if (ext) {
+							sel = '.elfinder-cwd-view-icons .elfinder-cwd-icon-' + type[0].replace(/(\.|\+)/g, '-');
+							if (typeof type[1] !== 'undefined') {
+								sel += '.elfinder-cwd-icon-' + type[1].replace(/(\.|\+)/g, '-');
+							}
+							try {
+								addBadgeStyleSheet.insertRule(sel + ':before{content:"' + ext.toLowerCase() + '"}', 0);
+							} catch(e) {}
+						}
+						addedBadges[mime] = true;
+					}
+				}
+			},
+			
+			/**
 			 * Return file html
 			 *
 			 * @param  Object  file info
 			 * @return String
 			 **/
 			itemhtml = function(f) {
+				f.mime && f.mime !== 'directory' && !addedBadges[f.mime] && addBadgeStyle(f.mime, f.name);
 				return templates[list ? 'row' : 'icon']
 						.replace(/\{([a-z0-9_]+)\}/g, function(s, e) { 
 							return replacement[e] ? replacement[e](f, fm) : (f[e] ? f[e] : ''); 

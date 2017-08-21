@@ -4684,6 +4684,14 @@ elFinder.prototype = {
 		},
 	
 	/**
+	 * File mimetype to file extention mapping
+	 * 
+	 * @type  Object
+	 * @see   elFinder.mimetypes.js
+	 */
+	mimeTypes : {},
+	
+	/**
 	 * Ajax request data validation rules
 	 * 
 	 * @type  Object
@@ -7079,7 +7087,7 @@ elFinder.prototype = {
 		
 		mime = mime.split('/');
 		
-		return prefix + mime[0] + (mime[1] ? ' ' + prefix+mime[1].replace(/(\.|\+)/g, '-') : '');
+		return prefix + mime[0].toLowerCase() + (mime[1] ? ' ' + prefix+mime[1].toLowerCase().replace(/(\.|\+)/g, '-') : '');
 	},
 	
 	/**

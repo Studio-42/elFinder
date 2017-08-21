@@ -31,8 +31,19 @@
 .elfinder-cwd-wrapper.elfinder-cwd-wrapper-trash {
 	background-color: #f0efef;
 }
+
 /* selected file in "icons" view */
 .elfinder-cwd-view-icons .elfinder-cwd-file .ui-state-hover { background:#ccc; }
+
+/* type badge in "icons" view */
+.elfinder-cwd-view-icons .elfinder-cwd-icon:before { 
+	color: white;
+	background-color: #798da7;
+}
+.elfinder-cwd-view-icons .elfinder-cwd-icon-text:before  { background-color: #6f99e6 }
+.elfinder-cwd-view-icons .elfinder-cwd-icon-image:before { background-color: #2ea26c }
+.elfinder-cwd-view-icons .elfinder-cwd-icon-audio:before { background-color: #7bad2a }
+.elfinder-cwd-view-icons .elfinder-cwd-icon-video:before { background-color: #322aad }
 
 /* list view*/
 .elfinder-cwd table thead td.ui-state-hover { background:#ddd; }

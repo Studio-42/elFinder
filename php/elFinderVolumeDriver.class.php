@@ -274,8 +274,9 @@ abstract class elFinderVolumeDriver {
 			'md:text/plain'                => 'text/x-markdown',
 			'markdown:text/plain'          => 'text/x-markdown',
 			'css:text/x-asm'               => 'text/css',
-			'ico:image/vnd.microsoft.icon' => 'image/x-icon',
 			'csv:text/plain'               => 'text/csv',
+			'json:text/plain'              => 'text/x-json',
+			'ico:image/vnd.microsoft.icon' => 'image/x-icon',
 			'm4a:video/mp4'                => 'audio/mp4',
 			'oga:application/ogg'          => 'audio/ogg',
 			'ogv:application/ogg'          => 'video/ogg',
@@ -283,7 +284,8 @@ abstract class elFinderVolumeDriver {
 			'm3u8:text/plain'              => 'application/x-mpegURL',
 			'mpd:text/plain'               => 'application/dash+xml',
 			'mpd:application/xml'          => 'application/dash+xml',
-			'xml:application/xml'          => 'text/xml'
+			'xml:application/xml'          => 'text/xml',
+			'*:application/x-dosexec'      => 'application/x-executable'
 		),
 		// An option to add MimeMap to the `mimeMap` option
 		// Array '[ext]:[detected mime type]' => '[normalized mime]'
@@ -4195,6 +4197,11 @@ abstract class elFinderVolumeDriver {
 			$_checkKey = strtolower($ext.':*');
 			if (isset($this->options['mimeMap'][$_checkKey])) {
 				$type = $this->options['mimeMap'][$_checkKey];
+			} else {
+				$_checkKey = strtolower('*:'.$type);
+				if (isset($this->options['mimeMap'][$_checkKey])) {
+					$type = $this->options['mimeMap'][$_checkKey];
+				}
 			}
 		}
 		

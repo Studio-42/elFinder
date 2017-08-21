@@ -408,7 +408,7 @@ elFinder.prototype.commands.edit = function() {
 			}
 			
 			req.done(function(data) {
-				var selEncoding;
+				var selEncoding, reg, m;
 				if (data.doconv) {
 					fm.confirm({
 						title  : self.title,
@@ -439,6 +439,12 @@ elFinder.prototype.commands.edit = function() {
 						}
 					});
 				} else {
+					if (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, texts) !== -1) {
+						reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i');
+						if (window.atob && (m = data.content.match(reg))) {
+							data.content = atob(data.content.substr(m[1].length));
+						}
+					}
 					dialog(id, file, data.content, data.encoding, editor)
 						.done(function(data) {
 							dfrd.resolve(data);
