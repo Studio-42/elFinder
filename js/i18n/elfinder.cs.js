@@ -2,7 +2,7 @@
  * Czech translation
  * @author Jay Gridley <gridley.jay@hotmail.com>
  * @author RobiNN <kelcakrobo@gmail.com>
- * @version 2017-06-23
+ * @version 2017-08-23
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -107,7 +107,7 @@
 			'errExtractExec'       : 'Chyba při extrahování souboru: "$1"',
 			'errNetUnMount'        : 'Nepodařilo se odpojit', // from v2.1 added 30.04.2012
 			'errConvUTF8'          : 'Nelze převést na UTF-8', // from v2.1 added 08.04.2014
-			'errFolderUpload'      : 'Pokud chcete nahrát do složky, zkuste použít prohlížeč Google Chrome.', // from v2.1 added 26.6.2015
+			'errFolderUpload'      : 'Chcete-li nahrát složku, zkuste moderní prohlížeč.', // from v2.1 added 26.6.2015
 			'errSearchTimeout'     : 'Vypršení časového limitu při hledání "$1". Je částečně výsledkem hledání.', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : 'Opětovné povolení je nutné.', // from v2.1.10 added 24.3.2016
 			'errMaxTargets'        : 'Maximální počet volitelných předmětů je $1.', // from v2.1.17 added 17.10.2016
@@ -156,6 +156,12 @@
 			'cmdfullscreen': 'Celá obrazovka', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : 'Posouvat', // from v2.1.15 added 21.08.2016
 			'cmdempty'     : 'Vyprázdnit složku', // from v2.1.25 added 22.06.2017
+			'cmdundo'      : 'Krok zpět', // from v2.1.27 added 31.07.2017
+			'cmdredo'      : 'Udělat to znovu', // from v2.1.27 added 31.07.2017
+			'cmdpreference': 'Preference', // from v2.1.27 added 03.08.2017
+			'cmdselectall' : 'Vyberat vše', // from v2.1.28 added 15.08.2017
+			'cmdselectnone': 'Nic nevyberať', // from v2.1.28 added 15.08.2017
+			'cmdselectinvert': 'Invertovat výběr', // from v2.1.28 added 15.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zavřít',
@@ -215,6 +221,8 @@
 			'ntftrash'    : 'Hodit do koše', // from v2.1.24 added 2.5.2017
 			'ntfrestore'  : 'Obnova z koše', // from v2.1.24 added 3.5.2017
 			'ntfchkdir'   : 'Kontrola cílové složky', // from v2.1.24 added 3.5.2017
+			'ntfundo'     : 'Zrušit  předchozí operaci', // from v2.1.27 added 31.07.2017
+			'ntfredo'     : 'Obnovit předchozí zrušení', // from v2.1.27 added 31.07.2017
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : 'Koš', //from v2.1.24 added 29.4.2017
@@ -415,9 +423,13 @@
 			'firstLetterSearch': 'Hledání prvního listu', // from v2.1.23 added 24.3.2017
 			'presets'         : 'Předvolby', // from v2.1.25 added 26.5.2017
 			'tooManyToTrash'  : 'Je to příliš mnoho položek, takže se nemohou dostat do koše.', // from v2.1.25 added 9.6.2017
-			'TextArea'        : 'TextArea', // from v2.1.25 added 14.6.2017
+			'TextArea'        : 'Textarea', // from v2.1.25 added 14.6.2017
 			'folderToEmpty'   : 'Vyprázdnit složku "$1".', // from v2.1.25 added 22.6.2017
 			'filderIsEmpty'   : 'Ve složce "$1" nejsou žádné položky.', // from v2.1.25 added 22.6.2017
+			'preference'      : 'Preference', // from v2.1.26 added 28.6.2017
+			'language'        : 'Nastavte jazyk', // from v2.1.26 added 28.6.2017
+			'clearBrowserData': 'Inicializujte nastavení uložená v tomto prohlížeči', // from v2.1.26 added 28.6.2017
+			'toolbarPref'     : 'Nastavení panelu nástrojů', // from v2.1.27 added 2.8.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámý',
