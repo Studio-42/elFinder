@@ -313,7 +313,7 @@ $.fn.elfindercwd = function(fm, options) {
 						type = mime.split('/');
 						ext = fm.escape(fm.mimeTypes[mime] || (name.replace(/.bac?k$/i, '').match(/\.([^.]+)$/) || ['',''])[1]);
 						if (ext) {
-							sel = '.elfinder-cwd-view-icons .elfinder-cwd-icon-' + type[0].replace(/(\.|\+)/g, '-');
+							sel = '.elfinder-cwd-icon-' + type[0].replace(/(\.|\+)/g, '-');
 							if (typeof type[1] !== 'undefined') {
 								sel += '.elfinder-cwd-icon-' + type[1].replace(/(\.|\+)/g, '-');
 							}
