@@ -189,19 +189,19 @@
 			'btnSaveAs'   : 'Uložiť ako', // from v2.1.25 added 24.5.2017
 
 			/******************************** notifications ********************************/
-			'ntfopen'     : 'Otvoriť priečinok',
-			'ntffile'     : 'Otvoriť súbor',
-			'ntfreload'   : 'Znova načítať obsah priečinka',
+			'ntfopen'     : 'Otváranie priečinka',
+			'ntffile'     : 'Otváranie súboru',
+			'ntfreload'   : 'Znovu-načítanie obsahu priečinka',
 			'ntfmkdir'    : 'Vytváranie priečinka',
 			'ntfmkfile'   : 'Vytváranie súborov',
-			'ntfrm'       : 'Odstrániť súbory',
-			'ntfcopy'     : 'Kopírovať súbory',
-			'ntfmove'     : 'Presunúť súbory',
-			'ntfprepare'  : 'Kontrola existujúcich položiek',
-			'ntfrename'   : 'Premenovať súbory',
+			'ntfrm'       : 'Vymazanie súborov',
+			'ntfcopy'     : 'Kopírovanie súborov',
+			'ntfmove'     : 'Premiestnenie súborov',
+			'ntfprepare'  : 'Príprava na kopírovanie súborov',
+			'ntfrename'   : 'Premenovanie súborov',
 			'ntfupload'   : 'Nahrávanie súborov',
 			'ntfdownload' : 'Sťahovanie súborov',
-			'ntfsave'     : 'Uložiť súbory',
+			'ntfsave'     : 'Uloženie súborov',
 			'ntfarchive'  : 'Vytváranie archívu',
 			'ntfextract'  : 'Extrahovanie súborov z archívu',
 			'ntfsearch'   : 'Vyhľadávanie súborov',
@@ -221,7 +221,7 @@
 			'ntftrash'    : 'Vhadzovanie do koša', // from v2.1.24 added 2.5.2017
 			'ntfrestore'  : 'Vykonávanie obnovy z koša', // from v2.1.24 added 3.5.2017
 			'ntfchkdir'   : 'Kontrola cieľového priečinka', // from v2.1.24 added 3.5.2017
-			'ntfundo'     : 'Odvolanie predchádzajúcej operácie', // from v2.1.27 added 31.07.2017
+			'ntfundo'     : 'Zrušiť predchádzajúcu operáciu', // from v2.1.27 added 31.07.2017
 			'ntfredo'     : 'Obnovenie predchádzajúceho zrušenia', // from v2.1.27 added 31.07.2017
 
 			/*********************************** volumes *********************************/
