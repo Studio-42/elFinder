@@ -3515,6 +3515,32 @@ class elFinder {
 	}
 
 	/**
+	 * Return Is Animation Png
+	 *
+	 * @param  string $path server local path of target image
+	 * @return bool
+	 */
+	public static function isAnimationPng($path) {
+		list($width, $height, $type, $attr) = getimagesize($path);
+		switch ($type) {
+			case IMAGETYPE_PNG:
+				break;
+			default:
+				return false;
+		}
+		
+		$fp = fopen($path, 'rb');
+		$img_bytes = fread($fp, 1024);
+		fclose($fp);
+		if ($img_bytes) {
+			if (strpos(substr($img_bytes, 0, strpos($img_bytes, 'IDAT')), 'acTL') !== false) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Return Is seekable stream resource
 	 * 
 	 * @param resource $resource
