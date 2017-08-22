@@ -2160,6 +2160,7 @@ var elFinder = function(node, opts, bootCallback) {
 			added     = [],
 			removed   = [],
 			changed   = [],
+			excludes  = null,
 			isChanged = function(hash) {
 				var l = changed.length;
 
@@ -2169,11 +2170,19 @@ var elFinder = function(node, opts, bootCallback) {
 					}
 				}
 			};
-			
+		
 		$.each(incoming, function(i, f) {
 			raw[f.hash] = f;
 		});
-			
+		
+		// make excludes object
+		if (excludeProps && excludeProps.length) {
+			excludes = {};
+			$.each(excludeProps, function() {
+				excludes[this] = true;
+			});
+		}
+		
 		// find removed
 		$.each(files, function(hash, f) {
 			if (! raw[hash] && (! onlydir || f.phash === onlydir)) {
@@ -2183,19 +2192,38 @@ var elFinder = function(node, opts, bootCallback) {
 		
 		// compare files
 		$.each(raw, function(hash, file) {
-			var origin = files[hash];
+			var origin  = files[hash],
+				orgKeys = {},
+				chkKeyLen;
 
 			if (!origin) {
 				added.push(file);
 			} else {
+				// make orgKeys object
+				$.each(Object.keys(origin), function() {
+					orgKeys[this] = true;
+				});
 				$.each(file, function(prop) {
-					if (! excludeProps || $.inArray(prop, excludeProps) === -1) {
+					delete orgKeys[prop];
+					if (! excludes || ! excludes[prop]) {
 						if (file[prop] !== origin[prop]) {
-							changed.push(file)
+							changed.push(file);
+							orgKeys = {};
 							return false;
 						}
 					}
 				});
+				chkKeyLen = Object.keys(orgKeys).length;
+				if (chkKeyLen !== 0) {
+					if (excludes) {
+						$.each(orgKeys, function(prop) {
+							if (excludes[prop]) {
+								--chkKeyLen;
+							}
+						});
+					}
+					(chkKeyLen !== 0) && changed.push(file);
+				}
 			}
 		});
 		
