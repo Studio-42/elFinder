@@ -1770,6 +1770,9 @@ abstract class elFinderVolumeDriver {
 					if ($item['phash'] !== '') {
 						$parent = $this->decode($item['phash']);
 						unset($this->cache[$parent]);
+						if ($this->root === $parent) {
+							$this->sessionCache['rootstat'] = array();
+						}
 						if ($unsetSubdir) {
 							unset($this->sessionCache['subdirs'][$parent]);
 						}
