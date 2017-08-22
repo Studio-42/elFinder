@@ -2798,6 +2798,10 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 
+		if (elFinder::isAnimationPng($work_path)) {
+			return $this->setError(elFinder::ERROR_UNSUPPORT_TYPE);
+		}
+
 		switch($mode) {
 			
 			case 'propresize':
@@ -3099,6 +3103,17 @@ abstract class elFinderVolumeDriver {
 		// check 'width' ,'height'
 		if (in_array($mode, array('resize', 'propresize', 'crop', 'fitsquare'))) {
 			if (empty($options['width']) || empty($options['height'])) {
+				return false;
+			}
+		}
+		
+		if (! empty($options['checkAnimated'])) {
+			if ($this->imgLib !== 'imagick' && $this->imgLib !== 'convert') {
+				if (elFinder::isAnimationGif($work_path)) {
+					return false;
+				}
+			}
+			if (elFinder::isAnimationPng($work_path)) {
 				return false;
 			}
 		}

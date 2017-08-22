@@ -140,8 +140,11 @@
 }
 
 /* file info */
-.elfinder-quicklook-info {
+.elfinder-ltr .elfinder-quicklook-info {
 	padding: 0 12px 0 112px;
+}
+.elfinder-rtl .elfinder-quicklook-info {
+	padding: 0 112px 0 12px;
 }
 
 /* file name in info */
@@ -157,13 +160,33 @@
 	color:#fff;
 }
 
-
 /* file icon */
 .elfinder-quicklook .elfinder-cwd-icon {
 	position:absolute;
 	left:32px;
 	top:50%;
 	margin-top:-20px;
+}
+.elfinder-rtl .elfinder-quicklook .elfinder-cwd-icon {
+	left: auto;
+	right: 32px;
+}
+.elfinder-quicklook .elfinder-cwd-icon:before {
+	top: -10px;
+}
+.elfinder-ltr .elfinder-quicklook .elfinder-cwd-icon:before {
+	left: -20px;
+}
+.elfinder-ltr .elfinder-quicklook .elfinder-cwd-icon:after {
+	left: -15px;
+}
+.elfinder-rtl .elfinder-quicklook .elfinder-cwd-icon:before {
+	left: auto;
+	right: 40px;
+}
+.elfinder-rtl .elfinder-quicklook .elfinder-cwd-icon:after {
+	left: auto;
+	right: 40px;
 }
 
 /* image in preview */

@@ -105,7 +105,8 @@ class elFinderPluginAutoRotate extends elFinderPlugin {
 		}
 		$opts = array(
 			'degree' => $degree,
-			'jpgQuality' => $quality
+			'jpgQuality' => $quality,
+			'checkAnimated' => true
 		);
 		return $volume->imageUtil('rotate', $src, $opts);
 	}
