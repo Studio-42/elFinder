@@ -100,7 +100,10 @@ class elFinderPluginWatermark extends elFinderPlugin {
 		if (elFinder::isAnimationGif($src)) {
 			return false;
 		}
-		
+		// check Animation Png
+		if (elFinder::isAnimationPng($src)) {
+			return false;
+		}
 		// check water mark image
 		if (! file_exists($opts['source'])) {
 			$opts['source'] = dirname(__FILE__) . "/" . $opts['source'];

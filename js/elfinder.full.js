@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 84c1eb4) (2017-08-21)
+ * Version 2.1.28 (2.1-src Nightly: 0dec6e0) (2017-08-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8051,7 +8051,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 84c1eb4)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 0dec6e0)';
 
 
 
@@ -11932,7 +11932,7 @@ $.fn.elfindercwd = function(fm, options) {
 						type = mime.split('/');
 						ext = fm.escape(fm.mimeTypes[mime] || (name.replace(/.bac?k$/i, '').match(/\.([^.]+)$/) || ['',''])[1]);
 						if (ext) {
-							sel = '.elfinder-cwd-view-icons .elfinder-cwd-icon-' + type[0].replace(/(\.|\+)/g, '-');
+							sel = '.elfinder-cwd-icon-' + type[0].replace(/(\.|\+)/g, '-');
 							if (typeof type[1] !== 'undefined') {
 								sel += '.elfinder-cwd-icon-' + type[1].replace(/(\.|\+)/g, '-');
 							}

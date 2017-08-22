@@ -115,7 +115,8 @@ class elFinderPluginAutoResize extends elFinderPlugin {
 		$width = round($srcImgInfo[0] * $zoom);
 		$height = round($srcImgInfo[1] * $zoom);
 		$unenlarge = true;
+		$checkAnimated = true;
 		
-		return $volume->imageUtil('resize', $src, compact('width', 'height', 'jpgQuality', 'preserveExif', 'unenlarge'));
+		return $volume->imageUtil('resize', $src, compact('width', 'height', 'jpgQuality', 'preserveExif', 'unenlarge', 'checkAnimated'));
 	}
 }

@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 84c1eb4) (2017-08-21)
+ * Version 2.1.28 (2.1-src Nightly: 0dec6e0) (2017-08-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -483,6 +483,10 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-info-title .elfinder-cwd-icon-video:after {
 	left: -7px;
 }
+.elfinder-rtl .elfinder-info-title .elfinder-cwd-icon:before {
+	right: 33px;
+    left: auto;
+}
 
 /********************** COMMAND "UPLOAD" ****************************/
 .elfinder-upload-dialog-wrapper .elfinder-upload-dirselect {
@@ -502,6 +506,14 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	right: 2px;
 }
 
+/********************** COMMAND "RM" ****************************/
+.elfinder-ltr .elfinder-rm-title .elfinder-cwd-icon:before {
+	left: 38px;
+}
+.elfinder-rtl .elfinder-rm-title .elfinder-cwd-icon:before {
+	right: 86px;
+    left: auto;
+}
 /* File: /css/common.css */
 /*********************************************/
 /*            COMMON ELFINDER STUFFS         */
@@ -1112,51 +1124,51 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	-o-transform: scale(0.9);
 	transform: scale(0.9);
 }
-.elfinder-cwd-icon.elfinder-cwd-bgurl:before {
+.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-bgurl:before {
 	left: -10px;
 }
 
 /* icon image has type */
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-empty:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-plain:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-rtf:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-rtfd:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-pdf:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-html:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-css:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-javascript:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-javascript:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-perl:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-python:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-ruby:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-sh:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-shellscript:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-c:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-csrc:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-chdr:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-c--:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-c--src:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-c--hdr:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-java:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-java-source:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-php:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-xml:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-zip:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-zip:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-xz:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-7z-compressed:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-gzip:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-tar:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-bzip:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-bzip2:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-rar:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-rar-compressed:before,
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-shockwave-flash:before { content: none }
+.elfinder-cwd-icon.elfinder-cwd-icon-x-empty:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-plain:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-rtf:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-rtfd:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-pdf:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-html:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-css:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-javascript:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-javascript:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-perl:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-python:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-ruby:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-sh:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-shellscript:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-c:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-csrc:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-chdr:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-c--:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-c--src:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-c--hdr:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-java:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-java-source:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-php:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-xml:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-zip:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-zip:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-xz:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-7z-compressed:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-gzip:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-tar:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-bzip:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-bzip2:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-rar:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-rar-compressed:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-x-shockwave-flash:before { content: none }
 
 /* addtional type badge name */
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-mp2t:before { content: 'ts' }
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-dash-xml:before { content: 'dash' }
-.elfinder-cwd-view-icons .elfinder-cwd-icon.elfinder-cwd-icon-x-mpegurl:before { content: 'hls' }
+.elfinder-cwd-icon.elfinder-cwd-icon-mp2t:before { content: 'ts' }
+.elfinder-cwd-icon.elfinder-cwd-icon-dash-xml:before { content: 'dash' }
+.elfinder-cwd-icon.elfinder-cwd-icon-x-mpegurl:before { content: 'hls' }
 
 /* thumbnail image */
 .elfinder-cwd-icon.elfinder-cwd-bgurl {
@@ -1201,11 +1213,11 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	transform: scale(.6);
 }
 /* thumbnail image overlay none */
-.elfinder-cwd-view-icons .elfinder-cwd-icon-image:after {
+.elfinder-cwd-icon-image.elfinder-cwd-bgurl:after {
 	content: none;
 }
 /* thumbnail image video overlay */
-.elfinder-cwd-view-icons .elfinder-cwd-icon-video:after {
+.elfinder-cwd-icon-video:after {
 	top: 32px;
 	left: -26px;
 	height: 25px;
@@ -1602,8 +1614,9 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 .elfinder-ltr .elfinder-cwd-view-list .elfinder-cwd-icon { left:0;  }
 .elfinder-rtl .elfinder-cwd-view-list .elfinder-cwd-icon { right:0; }
 
-/* thumbnail image video overlay */
-.elfinder-cwd-view-list .elfinder-cwd-icon.elfinder-cwd-icon-video.elfinder-cwd-bgurl:after {
+/* type badge, thumbnail image overlay */
+.elfinder-cwd-view-list .elfinder-cwd-icon:before,
+.elfinder-cwd-view-list .elfinder-cwd-icon:after {
 	content: none;
 }
 
@@ -2507,8 +2520,11 @@ button.elfinder-info-button {
 }
 
 /* file info */
-.elfinder-quicklook-info {
+.elfinder-ltr .elfinder-quicklook-info {
 	padding: 0 12px 0 112px;
+}
+.elfinder-rtl .elfinder-quicklook-info {
+	padding: 0 112px 0 12px;
 }
 
 /* file name in info */
@@ -2524,13 +2540,33 @@ button.elfinder-info-button {
 	color:#fff;
 }
 
-
 /* file icon */
 .elfinder-quicklook .elfinder-cwd-icon {
 	position:absolute;
 	left:32px;
 	top:50%;
 	margin-top:-20px;
+}
+.elfinder-rtl .elfinder-quicklook .elfinder-cwd-icon {
+	left: auto;
+	right: 32px;
+}
+.elfinder-quicklook .elfinder-cwd-icon:before {
+	top: -10px;
+}
+.elfinder-ltr .elfinder-quicklook .elfinder-cwd-icon:before {
+	left: -20px;
+}
+.elfinder-ltr .elfinder-quicklook .elfinder-cwd-icon:after {
+	left: -15px;
+}
+.elfinder-rtl .elfinder-quicklook .elfinder-cwd-icon:before {
+	left: auto;
+	right: 40px;
+}
+.elfinder-rtl .elfinder-quicklook .elfinder-cwd-icon:after {
+	left: auto;
+	right: 40px;
 }
 
 /* image in preview */
