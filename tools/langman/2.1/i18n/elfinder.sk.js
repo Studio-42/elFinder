@@ -2,7 +2,7 @@
  * Slovak translation
  * @author Jakub Ďuraš <jkblmr@gmail.com>
  * @author RobiNN <kelcakrobo@gmail.com>
- * @version 2017-07-30
+ * @version 2017-08-23
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -27,44 +27,44 @@
 			'errUnknown'           : 'Neznáma chyba.',
 			'errUnknownCmd'        : 'Neznámy príkaz.',
 			'errJqui'              : 'Nesprávna jQuery UI konfigurácia. Selectable, draggable a droppable musia byť načítané.',
-			'errNode'              : 'elFinder vyžaduje vytvorenie DOM Elementu.',
+			'errNode'              : 'elFinder vyžaduje vytvorenie DOM elementu.',
 			'errURL'               : 'Nesprávna elFinder konfigurácia! URL nie je definovaná.',
 			'errAccess'            : 'Prístup zamietnutý.',
 			'errConnect'           : 'Nepodarilo sa pripojiť do backendu.',
-			'errAbort'             : 'Pripojenie zrušené.',
-			'errTimeout'           : 'Vypršal limit pripojenia.',
+			'errAbort'             : 'Spojenie bolo prerušené.',
+			'errTimeout'           : 'Časový limit vypršal.',
 			'errNotFound'          : 'Backend nenájdený.',
 			'errResponse'          : 'Nesprávna backend odpoveď.',
 			'errConf'              : 'Nesprávna backend konfigurácia.',
 			'errJSON'              : 'Požadovaný PHP JSON modul nie je nainštalovaný.',
-			'errNoVolumes'         : 'Nie je dostupné žiadne čitateľné médium.',
+			'errNoVolumes'         : 'Nie sú dostupné žiadne čitateľné média.',
 			'errCmdParams'         : 'Nesprávne parametre pre príkaz "$1".',
 			'errDataNotJSON'       : 'Dáta nie sú formátu JSON.',
 			'errDataEmpty'         : 'Prázdne dáta.',
-			'errCmdReq'            : 'Backend požiadavka požaduje meno príkazu.',
-			'errOpen'              : 'Nie je možné otvoriť súbor "$1".',
+			'errCmdReq'            : 'Backend požiadavka požaduje názov príkazu.',
+			'errOpen'              : 'Nie je možné otvoriť "$1".',
 			'errNotFolder'         : 'Objekt nie je priečinok.',
 			'errNotFile'           : 'Objekt nie je súbor.',
-			'errRead'              : 'Nie je možné prečítať súbor "$1".',
-			'errWrite'             : 'Nie je možné písať do súboru "$1".',
-			'errPerm'              : 'Nepovolený prístup.',
-			'errLocked'            : '"$1" je uzamknutý, a nemôže byť premenovaný, presunutý alebo odstránený.',
+			'errRead'              : 'Nie je možné prečítať "$1".',
+			'errWrite'             : 'Nie je možné písať do "$1".',
+			'errPerm'              : 'Prístup zamietnutý.',
+			'errLocked'            : '"$1" je uzamknutý a nemôže byť premenovaný, presunutý alebo odstránený.',
 			'errExists'            : 'Súbor s názvom "$1" už existuje.',
-			'errInvName'           : 'Nesprávný názov súboru.',
-			'errInvDirname'        : 'Neplatný názov adresára.',  // from v2.1.24 added 12.4.2017
-			'errFolderNotFound'    : 'Priečinok nenájdený.',
+			'errInvName'           : 'Neplatný názov súboru.',
+			'errInvDirname'        : 'Neplatný názov priečinka.',  // from v2.1.24 added 12.4.2017
+			'errFolderNotFound'    : 'Priečinok nebol nájdený.',
 			'errFileNotFound'      : 'Súbor nenájdený.',
-			'errTrgFolderNotFound' : 'Zvolený priečinok "$1" nenájdený.',
-			'errPopup'             : 'Prehliadač zablokoval otvorenie vyskakovacieho okna. Pre otvorenie súboru povoľte vyskakovacie okná.',
+			'errTrgFolderNotFound' : 'Cieľový priečinok "$1" sa nenašiel.',
+			'errPopup'             : 'Prehliadač zabránil otvoreniu vyskakovacieho okna. Pre otvorenie súboru povoľte vyskakovacie okná.',
 			'errMkdir'             : 'Nie je možné vytvoriť priečinok "$1".',
 			'errMkfile'            : 'Nie je možné vytvoriť súbor "$1".',
 			'errRename'            : 'Nie je možné premenovať "$1".',
 			'errCopyFrom'          : 'Kopírovanie súborov z média "$1" nie je povolené.',
 			'errCopyTo'            : 'Kopírovanie súborov na médium "$1" nie je povolené.',
 			'errMkOutLink'         : 'Nie je možné vytvoriť odkaz mimo koreňového zväzku.', // from v2.1 added 03.10.2015
-			'errUpload'            : 'Problém s nahrávaním.',  // old name - errUploadCommon
+			'errUpload'            : 'Chyba pri nahrávaní.',  // old name - errUploadCommon
 			'errUploadFile'        : 'Nie je možné nahrať "$1".', // old name - errUpload
-			'errUploadNoFiles'     : 'Žiadne súbory neboli nájdené na nahranie.',
+			'errUploadNoFiles'     : 'Neboli nájdené žiadne súbory na nahranie.',
 			'errUploadTotalSize'   : 'Dáta prekračujú maximálnu povolenú veľkosť.', // old name - errMaxSize
 			'errUploadFileSize'    : 'Súbor prekračuje maximálnu povolenú veľkosť.', //  old name - errFileMaxSize
 			'errUploadMime'        : 'Nepovolený typ súboru.',
@@ -78,39 +78,39 @@
 			'errCopyInItself'      : 'Nie je možné kopírovať "$1" do seba.',
 			'errRm'                : 'Nie je možné vymazať "$1".',
 			'errTrash'             : 'Nie je možné presunúť do koša.', // from v2.1.24 added 30.4.2017
-			'errRmSrc'             : 'Nie je možné odstrániť zdrojové súbor(y).',
+			'errRmSrc'             : 'Nie je možné odstrániť zdrojový/é súbor/y.',
 			'errExtract'           : 'Nie je možné extrahovať súbory z "$1".',
 			'errArchive'           : 'Nie je možné vytvoriť archív.',
 			'errArcType'           : 'Nepodporovaný typ archívu.',
 			'errNoArchive'         : 'Súbor nie je archív alebo má nepodporovaný typ archívu.',
 			'errCmdNoSupport'      : 'Backend nepodporuje tento príkaz.',
 			'errReplByChild'       : 'Priečinok "$1" nemôže byť nahradený položkou, ktorú už obsahuje.',
-			'errArcSymlinks'       : 'Z bezpečnostných dôvodov bolo zakázané extrahovanie archívov obsahujúcich symlinky, alebo súborov s nepovolenými menami.', // edited 24.06.2012
+			'errArcSymlinks'       : 'Z bezpečnostných dôvodov bolo zakázané extrahovanie archívov obsahujúcich symlinky, alebo súborov s nepovolenými názvami.', // edited 24.06.2012
 			'errArcMaxSize'        : 'Súbory archívu prekračujú maximálnu povolenú veľkosť.',
-			'errResize'            : 'Nie je možné zmeniť veľkost "$1".',
+			'errResize'            : 'Nie je možné zmeniť veľkosť "$1".',
 			'errResizeDegree'      : 'Neplatný stupeň otočenia.',  // added 7.3.2013
 			'errResizeRotate'      : 'Nie je možné otočiť obrázok.',  // added 7.3.2013
 			'errResizeSize'        : 'Neplatná veľkosť obrázka.',  // added 7.3.2013
-			'errResizeNoChange'    : 'Veľkosť obrázka sa nezmení.',  // added 7.3.2013
+			'errResizeNoChange'    : 'Veľkosť obrázku sa nezmenila.',  // added 7.3.2013
 			'errUsupportType'      : 'Nepodporovaný typ súboru.',
-			'errNotUTF8Content'    : 'Súbor "$1" nemá obsah kódovaný v UTF-8, a nemôže byť upravený.',  // added 9.11.2011
+			'errNotUTF8Content'    : 'Súbor "$1" nie je v UTF-8 a nemôže byť upravený.',  // added 9.11.2011
 			'errNetMount'          : 'Nie je možné pripojiť "$1".', // added 17.04.2012
 			'errNetMountNoDriver'  : 'Nepodporovaný protokol.',     // added 17.04.2012
 			'errNetMountFailed'    : 'Pripájanie zlyhalo.',         // added 17.04.2012
 			'errNetMountHostReq'   : 'Hosť je požadovaný.', // added 18.04.2012
-			'errSessionExpires'    : 'Platnosť relácie uplynula z dôvodu nečinnosti.',
-			'errCreatingTempDir'   : 'Nedá sa vytvoriť dočasný adresár: "$1"',
+			'errSessionExpires'    : 'Vaša relácia vypršala kvôli nečinnosti.',
+			'errCreatingTempDir'   : 'Nepodarilo sa vytvoriť dočasný adresár: "$1"',
 			'errFtpDownloadFile'   : 'Nie je možné stiahnuť súbor z FTP: "$1"',
 			'errFtpUploadFile'     : 'Nie je možné nahrať súbor na FTP: "$1"',
 			'errFtpMkdir'          : 'Nedá sa vytvoriť vzdialený adresár na FTP: "$1"',
 			'errArchiveExec'       : 'Chyba pri archivácii súborov: "$1"',
 			'errExtractExec'       : 'Chyba pri extrahovaní súborov: "$1"',
 			'errNetUnMount'        : 'Nepodarilo sa odpojiť', // from v2.1 added 30.04.2012
-			'errConvUTF8'          : 'Nedá sa previesť do UTF-8', // from v2.1 added 08.04.2014
-			'errFolderUpload'      : 'Ak by ste chceli nahrať zložku, skúste prehliadač Google Chrome.', // from v2.1 added 26.6.2015
+			'errConvUTF8'          : 'Nie je prevoditeľný na UTF-8', // from v2.1 added 08.04.2014
+			'errFolderUpload'      : 'Vyskúšajte moderný prehliadač, ak chcete nahrať priečinok.', // from v2.1 added 26.6.2015
 			'errSearchTimeout'     : 'Vypršal časový limit pri hľadaní "$1". Výsledok vyhľadávania je čiastočný.', // from v2.1 added 12.1.2016
-			'errReauthRequire'     : 'Opätovné povolenie je nutné.', // from v2.1.10 added 24.3.2016
-			'errMaxTargets'        : 'Maximálny počet voliteľných predmetov je $1.', // from v2.1.17 added 17.10.2016
+			'errReauthRequire'     : 'Opätovné povolenie je potrebné.', // from v2.1.10 added 24.3.2016
+			'errMaxTargets'        : 'Maximálny počet voliteľných položiek je $1.', // from v2.1.17 added 17.10.2016
 			'errRestore'           : 'Nepodarilo sa obnoviť z koša. Cieľ obnovenia nie je možné identifikovať.', // from v2.1.24 added 3.5.2017
 			'errEditorNotFound'    : 'Editor tohto typu súboru nebol nájdený.', // from v2.1.25 added 23.5.2017
 			'errServerError'       : 'Vyskytla sa chyba na strane servera.', // from v2.1.25 added 16.6.2017
@@ -126,7 +126,7 @@
 			'cmdedit'      : 'Upraviť súbor',
 			'cmdextract'   : 'Extrahovať súbory z archívu',
 			'cmdforward'   : 'Ďalej',
-			'cmdgetfile'   : 'Zvoliť súbory',
+			'cmdgetfile'   : 'Vybrať súbory',
 			'cmdhelp'      : 'O tomto softvéri',
 			'cmdhome'      : 'Domov',
 			'cmdinfo'      : 'Získať info',
@@ -156,6 +156,12 @@
 			'cmdfullscreen': 'Celá obrazovka', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : 'Posúvať', // from v2.1.15 added 21.08.2016
 			'cmdempty'     : 'Vyprázdniť priečinok', // from v2.1.25 added 22.06.2017
+			'cmdundo'      : 'Krok späť', // from v2.1.27 added 31.07.2017
+			'cmdredo'      : 'Vykonať znova', // from v2.1.27 added 31.07.2017
+			'cmdpreference': 'Preferencie', // from v2.1.27 added 03.08.2017
+			'cmdselectall' : 'Vybrať všetko', // from v2.1.28 added 15.08.2017
+			'cmdselectnone': 'Nič nevyberať', // from v2.1.28 added 15.08.2017
+			'cmdselectinvert': 'Invertovať výber', // from v2.1.28 added 15.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zavrieť',
@@ -210,11 +216,13 @@
 			'ntfchmod'    : 'Zmena súboru', // from v2.1 added 20.6.2015
 			'ntfpreupload': 'Overenie názvu nahravaného súboru', // from v2.1 added 31.11.2015
 			'ntfzipdl'    : 'Vytvorenie súboru na stiahnutie', // from v2.1.7 added 23.1.2016
-			'ntfparents'  : 'Získanie informácie o ceste', // from v2.1.17 added 2.11.2016
+			'ntfparents'  : 'Získanie informácií o ceste', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'Spracovanie nahraného súboru', // from v2.1.17 added 2.11.2016
 			'ntftrash'    : 'Vhadzovanie do koša', // from v2.1.24 added 2.5.2017
 			'ntfrestore'  : 'Vykonávanie obnovy z koša', // from v2.1.24 added 3.5.2017
 			'ntfchkdir'   : 'Kontrola cieľového priečinka', // from v2.1.24 added 3.5.2017
+			'ntfundo'     : 'Zrušiť predchádzajúcu operáciu', // from v2.1.27 added 31.07.2017
+			'ntfredo'     : 'Obnovenie predchádzajúceho zrušenia', // from v2.1.27 added 31.07.2017
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : 'Kôš', //from v2.1.24 added 29.4.2017
@@ -267,7 +275,7 @@
 			'sortkind'          : 'podľa druhu',
 			'sortsize'          : 'podľa veľkosti',
 			'sortdate'          : 'podľa dátumu',
-			'sortFoldersFirst'  : 'Najskôr Priečinky',
+			'sortFoldersFirst'  : 'Najskôr priečinky',
 			'sortperm'          : 'podľa povolenia', // from v2.1.13 added 13.06.2016
 			'sortmode'          : 'podľa módu',       // from v2.1.13 added 13.06.2016
 			'sortowner'         : 'podľa majiteľa',      // from v2.1.13 added 13.06.2016
@@ -284,7 +292,7 @@
 			'confirmRm'       : 'Určite chcete vymazať súbory?<br/>Nebude sa to dať vrátiť späť!',
 			'confirmRepl'     : 'Nahradiť starý súbor novým?',
 			'confirmRest'     : 'Nahradiť existujúcu položku s položkou v koši?', // fromv2.1.24 added 5.5.2017
-			'confirmConvUTF8' : 'Nie je v UTF-8<br/>Previesť na UTF-8?<br/>Obsah sa stane UTF-8 uložením po konverzii.', // from v2.1 added 08.04.2014
+			'confirmConvUTF8' : 'Nie je v UTF-8<br/>Previesť na UTF-8?<br/>Obsah sa stane UTF-8 po uložení konverzie.', // from v2.1 added 08.04.2014
 			'confirmNonUTF8'  : 'Kódovanie tohto súboru nemoholo byť detekované. Pre editáciu dočasne potrebujete previesť na UTF-8 .<br/>Prosím, vyberte kódovanie znakov tohto súboru.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'Bol upravený.<br/>Ak zmeny neuložíte, stratíte vykonanú prácu.', // from v2.1 added 15.7.2015
 			'confirmTrash'    : 'Naozaj chcete presunúť položky do koša?', //from v2.1.24 added 29.4.2017
@@ -421,6 +429,7 @@
 			'preference'      : 'Preferencie', // from v2.1.26 added 28.6.2017
 			'language'        : 'Nastavenie jazyka', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': 'Inicializujte nastavenia uložené v tomto prehliadači', // from v2.1.26 added 28.6.2017
+			'toolbarPref'     : 'Nastavenie panela s nástrojmi', // from v2.1.27 added 2.8.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
