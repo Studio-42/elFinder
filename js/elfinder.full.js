@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: deca2e0) (2017-08-23)
+ * Version 2.1.28 (2.1-src Nightly: c681c00) (2017-08-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -271,6 +271,13 @@ var elFinder = function(node, opts, bootCallback) {
 		 * @default null | $(window) (if height is percentage)
 		 **/
 		heightBase = null,
+		
+		/**
+		 * MIME type list(Associative array) handled as a text file
+		 * 
+		 * @type Object|null
+		 */
+		textMimes = null,
 		
 		/**
 		 * elfinder path for sound played on remove
@@ -1856,6 +1863,12 @@ var elFinder = function(node, opts, bootCallback) {
 							});
 						}
 					},
+					setTextMimes = function() {
+						self.textMimes = {};
+						$.each(self.resources.mimes.text, function() {
+							self.textMimes[this] = true;
+						});
+					},
 					actionTarget;
 					
 					if (isOpen) {
@@ -1878,6 +1891,12 @@ var elFinder = function(node, opts, bootCallback) {
 						self.newAPI = self.api >= 2;
 						self.oldAPI = !self.newAPI;
 					}
+					
+					if (response.textMimes && Array.isArray(response.textMimes)) {
+						self.resources.mimes.text = response.textMimes;
+						setTextMimes();
+					}
+					!self.textMimes && setTextMimes();
 					
 					if (response.options) {
 						cwdOptions = Object.assign({}, cwdOptionsDefault, response.options);
@@ -7142,11 +7161,16 @@ elFinder.prototype = {
 	 * @return String
 	 */
 	mime2class : function(mime) {
-		var prefix = 'elfinder-cwd-icon-';
+		var prefix = 'elfinder-cwd-icon-',
+			mime   = mime.toLowerCase(),
+			isText = this.textMimes[mime];
 		
 		mime = mime.split('/');
+		if (isText) {
+			mime[0] += ' ' + prefix + 'text';
+		}
 		
-		return prefix + mime[0].toLowerCase() + (mime[1] ? ' ' + prefix+mime[1].toLowerCase().replace(/(\.|\+)/g, '-') : '');
+		return prefix + mime[0] + (mime[1] ? ' ' + prefix + mime[1].replace(/(\.|\+)/g, '-') : '');
 	},
 	
 	/**
@@ -8079,7 +8103,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: deca2e0)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: c681c00)';
 
 
 
@@ -9992,7 +10016,8 @@ elFinder.prototype.resources = {
 		placedir   : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}" title="{title}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon" {style}/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree" style="display:none"/></div>'
 		
 	},
-	
+	// mimes.text will be overwritten with connector config if `textMimes` is included in initial response
+	// @see php/elFInder.class.php `public static $textMimes`
 	mimes : {
 		text : [
 			'application/x-empty',
@@ -10007,7 +10032,8 @@ elFinder.prototype.resources = {
 			'application/x-awk',
 			'application/x-config',
 			'application/x-csh',
-			'application/xml'
+			'application/xml',
+			'application/sql'
 		]
 	},
 	
@@ -19350,7 +19376,7 @@ elFinder.prototype.commands.edit = function() {
 	var self  = this,
 		fm    = this.fm,
 		dlcls = 'elfinder-dialog-edit',
-		texts = fm.res('mimes', 'text') || [],
+		texts = [],
 		mimesSingle = [],
 		mimes = [],
 		rtrim = function(str){
@@ -19390,7 +19416,7 @@ elFinder.prototype.commands.edit = function() {
 				if (skip) {
 					return null;
 				}
-				res = (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, texts) !== -1 || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
+				res = (fm.textMimes[file.mime] || file.mime.indexOf('text/') === 0 || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
 					&& file.mime.indexOf('text/rtf')
 					&& (!self.onlyMimes.length || $.inArray(file.mime, self.onlyMimes) !== -1)
 					&& file.read && file.write
@@ -19590,7 +19616,7 @@ elFinder.prototype.commands.edit = function() {
 			}
 			
 			if (!ta) {
-				if (file.mime.indexOf('text/') !== 0 && $.inArray(file.mime, texts) === -1) {
+				if (file.mime.indexOf('text/') !== 0 && !fm.textMimes[file.mime]) {
 					return dfrd.reject('errEditorNotFound');
 				}
 				(function() {
@@ -19780,7 +19806,7 @@ elFinder.prototype.commands.edit = function() {
 						}
 					});
 				} else {
-					if (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, texts) !== -1) {
+					if (fm.textMimes[file.mime] || file.mime.indexOf('text/') === 0) {
 						reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i');
 						if (window.atob && (m = data.content.match(reg))) {
 							data.content = atob(data.content.substr(m[1].length));
@@ -19931,7 +19957,10 @@ elFinder.prototype.commands.edit = function() {
 			});
 		}
 		
-		fm.bind('select', function() {
+		fm.one('open', function() {
+			texts = fm.res('mimes', 'text') || [];
+		})
+		.bind('select', function() {
 			if (self.enabled()) {
 				setEditors(fm.file(fm.selected()[0]), fm.selected().length);
 				if (Object.keys(editors).length > 1) {

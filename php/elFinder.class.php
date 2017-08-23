@@ -92,6 +92,29 @@ class elFinder {
 	 * @var integer
 	 */
 	public static $tmpLinkLifeTime = 3600;
+	
+	/**
+	 * MIME type list handled as a text file
+	 *
+	 * @var array
+	 */
+	public static $textMimes = array(
+		'application/x-empty',
+		'application/javascript',
+		'application/json',
+		'application/xhtml+xml',
+		'audio/x-mp3-playlist',
+		'application/x-web-config',
+		'application/docbook+xml',
+		'application/x-php',
+		'application/x-perl',
+		'application/x-awk',
+		'application/x-config',
+		'application/x-csh',
+		'application/xml',
+		'application/sql'
+	);
+	
 	/**
 	 * elFinder session wrapper object
 	 * 
@@ -504,6 +527,9 @@ class elFinder {
 		}
 		if (! empty($opts['tmpLinkLifeTime'])) {
 			elFinder::$tmpLinkLifeTime = $opts['tmpLinkLifeTime'];
+		}
+		if (! empty($opts['textMimes']) && is_array($opts['textMimes'])) {
+			elfinder::$textMimes = $opts['textMimes'];
 		}
 		$this->maxArcFilesSize = isset($opts['maxArcFilesSize'])? intval($opts['maxArcFilesSize']) : 0;
 		$this->optionsNetVolumes = (isset($opts['optionsNetVolumes']) && is_array($opts['optionsNetVolumes']))? $opts['optionsNetVolumes'] : array();
@@ -1306,6 +1332,9 @@ class elFinder {
 			$result['maxTargets'] = $this->maxTargets;
 			if ($volume) {
 				$result['cwd']['root'] = $volume->root();
+			}
+			if (elfinder::$textMimes) {
+				$result['textMimes'] = elfinder::$textMimes;
 			}
 		}
 		
@@ -2501,7 +2530,7 @@ class elFinder {
 			}
 			
 			$tmpname = $files['tmp_name'][$i];
-			$thash = ($paths && isset($paths[$i]))? $paths[$i] : '';
+			$thash = ($paths && isset($paths[$i]))? $paths[$i] : $target;
 			$mtime = isset($mtimes[$i])? $mtimes[$i] : 0;
 			if ($name === 'blob') {
 				if ($chunk) {
