@@ -242,6 +242,13 @@ var elFinder = function(node, opts, bootCallback) {
 		heightBase = null,
 		
 		/**
+		 * MIME type list(Associative array) handled as a text file
+		 * 
+		 * @type Object|null
+		 */
+		textMimes = null,
+		
+		/**
 		 * elfinder path for sound played on remove
 		 * @type String
 		 * @default ./sounds/
@@ -1825,6 +1832,12 @@ var elFinder = function(node, opts, bootCallback) {
 							});
 						}
 					},
+					setTextMimes = function() {
+						self.textMimes = {};
+						$.each(self.resources.mimes.text, function() {
+							self.textMimes[this] = true;
+						});
+					},
 					actionTarget;
 					
 					if (isOpen) {
@@ -1847,6 +1860,12 @@ var elFinder = function(node, opts, bootCallback) {
 						self.newAPI = self.api >= 2;
 						self.oldAPI = !self.newAPI;
 					}
+					
+					if (response.textMimes && Array.isArray(response.textMimes)) {
+						self.resources.mimes.text = response.textMimes;
+						setTextMimes();
+					}
+					!self.textMimes && setTextMimes();
 					
 					if (response.options) {
 						cwdOptions = Object.assign({}, cwdOptionsDefault, response.options);
@@ -7111,11 +7130,16 @@ elFinder.prototype = {
 	 * @return String
 	 */
 	mime2class : function(mime) {
-		var prefix = 'elfinder-cwd-icon-';
+		var prefix = 'elfinder-cwd-icon-',
+			mime   = mime.toLowerCase(),
+			isText = this.textMimes[mime];
 		
 		mime = mime.split('/');
+		if (isText) {
+			mime[0] += ' ' + prefix + 'text';
+		}
 		
-		return prefix + mime[0].toLowerCase() + (mime[1] ? ' ' + prefix+mime[1].toLowerCase().replace(/(\.|\+)/g, '-') : '');
+		return prefix + mime[0] + (mime[1] ? ' ' + prefix + mime[1].replace(/(\.|\+)/g, '-') : '');
 	},
 	
 	/**

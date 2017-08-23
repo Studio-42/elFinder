@@ -275,7 +275,8 @@ abstract class elFinderVolumeDriver {
 			'markdown:text/plain'          => 'text/x-markdown',
 			'css:text/x-asm'               => 'text/css',
 			'csv:text/plain'               => 'text/csv',
-			'json:text/plain'              => 'text/x-json',
+			'json:text/plain'              => 'application/json',
+			'sql:text/plain'               => 'application/sql',
 			'ico:image/vnd.microsoft.icon' => 'image/x-icon',
 			'm4a:video/mp4'                => 'audio/mp4',
 			'oga:application/ogg'          => 'audio/ogg',
@@ -650,6 +651,28 @@ abstract class elFinderVolumeDriver {
 		'ts'    => 'video/MP2T',
 		'm3u8'  => 'application/x-mpegURL',
 		'mpd'   => 'application/dash+xml'
+	);
+	
+	/**
+	 * MIME type list handled as a text file
+	 * 
+	 * @var array
+	 */
+	protected $textMimes = array(
+		'application/x-empty',
+		'application/javascript',
+		'application/json',
+		'application/xhtml+xml',
+		'audio/x-mp3-playlist',
+		'application/x-web-config',
+		'application/docbook+xml',
+		'application/x-php',
+		'application/x-perl',
+		'application/x-awk',
+		'application/x-config',
+		'application/x-csh',
+		'application/xml',
+		'application/sql'
 	);
 	
 	/**
