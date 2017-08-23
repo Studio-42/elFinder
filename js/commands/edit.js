@@ -9,7 +9,7 @@ elFinder.prototype.commands.edit = function() {
 	var self  = this,
 		fm    = this.fm,
 		dlcls = 'elfinder-dialog-edit',
-		texts = fm.res('mimes', 'text') || [],
+		texts = [],
 		mimesSingle = [],
 		mimes = [],
 		rtrim = function(str){
@@ -49,7 +49,7 @@ elFinder.prototype.commands.edit = function() {
 				if (skip) {
 					return null;
 				}
-				res = (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, texts) !== -1 || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
+				res = (fm.textMimes[file.mime] || file.mime.indexOf('text/') === 0 || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
 					&& file.mime.indexOf('text/rtf')
 					&& (!self.onlyMimes.length || $.inArray(file.mime, self.onlyMimes) !== -1)
 					&& file.read && file.write
@@ -249,7 +249,7 @@ elFinder.prototype.commands.edit = function() {
 			}
 			
 			if (!ta) {
-				if (file.mime.indexOf('text/') !== 0 && $.inArray(file.mime, texts) === -1) {
+				if (file.mime.indexOf('text/') !== 0 && !fm.textMimes[file.mime]) {
 					return dfrd.reject('errEditorNotFound');
 				}
 				(function() {
@@ -439,7 +439,7 @@ elFinder.prototype.commands.edit = function() {
 						}
 					});
 				} else {
-					if (file.mime.indexOf('text/') === 0 || $.inArray(file.mime, texts) !== -1) {
+					if (fm.textMimes[file.mime] || file.mime.indexOf('text/') === 0) {
 						reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i');
 						if (window.atob && (m = data.content.match(reg))) {
 							data.content = atob(data.content.substr(m[1].length));
@@ -590,7 +590,10 @@ elFinder.prototype.commands.edit = function() {
 			});
 		}
 		
-		fm.bind('select', function() {
+		fm.one('open', function() {
+			texts = fm.res('mimes', 'text') || [];
+		})
+		.bind('select', function() {
 			if (self.enabled()) {
 				setEditors(fm.file(fm.selected()[0]), fm.selected().length);
 				if (Object.keys(editors).length > 1) {

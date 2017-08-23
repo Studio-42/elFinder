@@ -39,7 +39,8 @@ elFinder.prototype.resources = {
 		placedir   : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}" title="{title}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon" {style}/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree" style="display:none"/></div>'
 		
 	},
-	
+	// mimes.text will be overwritten with connector config if `textMimes` is included in initial response
+	// @see php/elFInder.class.php `public static $textMimes`
 	mimes : {
 		text : [
 			'application/x-empty',
@@ -54,7 +55,8 @@ elFinder.prototype.resources = {
 			'application/x-awk',
 			'application/x-config',
 			'application/x-csh',
-			'application/xml'
+			'application/xml',
+			'application/sql'
 		]
 	},
 	
