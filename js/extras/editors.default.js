@@ -97,7 +97,6 @@
 							node.data('loading')(true);
 						})
 						.attr('src', url)
-						.data('type', type)
 						.data('loading')();
 				} else {
 					node.data('loading')(true);
