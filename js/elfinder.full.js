@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 5176020) (2017-08-24)
+ * Version 2.1.28 (2.1-src Nightly: 157a159) (2017-08-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -762,8 +762,9 @@ var elFinder = function(node, opts, bootCallback) {
 					if (--cnt < 0 || node.css('visibility') !== 'hidden') {
 						clearInterval(fi);
 						hide.remove();
-						self.cssloaded = true;
-						self.trigger('cssloaded');
+						self.cssloaded = false;
+						//self.trigger('cssloaded');
+						self.trigger('cssautoloaded');
 					}
 				}, 10);
 			}
@@ -4455,7 +4456,12 @@ var elFinder = function(node, opts, bootCallback) {
 		}
 
 		// trigger event cssloaded if cddAutoLoad disabled
-		if (self.cssloaded === false) {
+		if (self.cssloaded === null) {
+			self.bind('cssautoloaded', function() {
+				self.cssloaded = true;
+				self.trigger('cssloaded');
+			});
+		} else {
 			self.cssloaded = true;
 			self.trigger('cssloaded');
 		}
@@ -8103,7 +8109,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 5176020)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 157a159)';
 
 
 
@@ -14963,10 +14969,6 @@ $.fn.elfindernavbar = function(fm, opts) {
 			delta  = nav.outerHeight() - nav.height(),
 			ltr    = fm.direction == 'ltr',
 			handle, swipeHandle, autoHide, setWidth,
-			cssloaded = function() {
-				delta = nav.outerHeight() - nav.height();
-			},
-			cssloadedMobile,
 			setWzRect = function() {
 				var cwd = fm.getUI('cwd'),
 					wz  = fm.getUI('workzone'),
@@ -14975,13 +14977,9 @@ $.fn.elfindernavbar = function(fm, opts) {
 				wz.data('rectangle', Object.assign(wzRect, { cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width() }));
 			};
 
-			if (fm.cssloaded) {
-				cssloaded();
-			} else {
-				fm.one('cssloaded', cssloaded);
-			}
-			
-			fm.bind('wzresize', function() {
+			fm.one('cssloaded', function() {
+				delta = nav.outerHeight() - nav.height();
+			}).bind('wzresize', function() {
 				nav.height(wz.height() - delta);
 			});
 		
@@ -15068,7 +15066,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 			nav.width(setWidth);
 		} else {
 			if (fm.UA.Mobile) {
-				cssloadedMobile = function() {
+				fm.one('cssloaded', function() {
 					var set = function() {
 						setWidth = nav.parent().width() / 2;
 						if (nav.data('defWidth') > setWidth) {
@@ -15080,13 +15078,8 @@ $.fn.elfindernavbar = function(fm, opts) {
 					}
 					nav.data('defWidth', nav.width());
 					$(window).on('resize.' + fm.namespace, set);
-					fm.one('resize', set);
-				};
-				if (fm.cssloaded) {
-					cssloadedMobile();
-				} else {
-					fm.one('cssloaded', cssloadedMobile);
-				}
+					set();
+				});
 			}
 		}
 
@@ -18379,12 +18372,7 @@ $.fn.elfinderworkzone = function(fm) {
 			};
 			
 		parent.on('resize.' + fm.namespace, fitsize);
-		if (fm.cssloaded) {
-			cssloaded();
-		} else {
-			fm.one('cssloaded', cssloaded);
-		}
-		fm.bind('uiresize', fitsize);
+		fm.one('cssloaded', cssloaded).bind('uiresize', fitsize);
 	});
 	return this;
 };
