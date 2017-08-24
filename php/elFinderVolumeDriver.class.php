@@ -276,7 +276,7 @@ abstract class elFinderVolumeDriver {
 			'css:text/x-asm'               => 'text/css',
 			'csv:text/plain'               => 'text/csv',
 			'json:text/plain'              => 'application/json',
-			'sql:text/plain'               => 'application/sql',
+			'sql:text/plain'               => 'text/x-sql',
 			'ico:image/vnd.microsoft.icon' => 'image/x-icon',
 			'm4a:video/mp4'                => 'audio/mp4',
 			'oga:application/ogg'          => 'audio/ogg',
@@ -1526,9 +1526,9 @@ abstract class elFinderVolumeDriver {
 		
 		if (is_null($extTable)) {
 			$extTable = array_flip(array_unique($this->getMimeTable()));
-			foreach(array_keys($this->options['mimeMap']) as $pair) {
-				list($ext, $_mime) = explode(':', $pair);
-				if ($_mime !== '*' && ! isset($extTable[$_mime])) {
+			foreach($this->options['mimeMap'] as $pair => $_mime) {
+				list($ext) = explode(':', $pair);
+				if ($ext !== '*' && ! isset($extTable[$_mime])) {
 					$extTable[$_mime] = $ext;
 				}
 			}
