@@ -2772,7 +2772,7 @@ class elFinder {
 		}
 		
 		$mime = isset($file['mime'])? $file['mime'] : '';
-		if ($mime && strtolower(substr($mime, 0, 4)) === 'text') {
+		if ($mime && (strtolower(substr($mime, 0, 4)) === 'text' || in_array(strtolower($mime), self::$textMimes))) {
 			$enc = '';
 			if ($content !== '') {
 				if (! $args['conv'] || $args['conv'] == '1') {
