@@ -129,7 +129,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 					}
 					nav.data('defWidth', nav.width());
 					$(window).on('resize.' + fm.namespace, set);
-					set();
+					fm.one('resize', set);
 				};
 				if (fm.cssloaded) {
 					cssloadedMobile();
