@@ -731,8 +731,9 @@ var elFinder = function(node, opts, bootCallback) {
 					if (--cnt < 0 || node.css('visibility') !== 'hidden') {
 						clearInterval(fi);
 						hide.remove();
-						self.cssloaded = true;
-						self.trigger('cssloaded');
+						self.cssloaded = false;
+						//self.trigger('cssloaded');
+						self.trigger('cssautoloaded');
 					}
 				}, 10);
 			}
@@ -4424,7 +4425,12 @@ var elFinder = function(node, opts, bootCallback) {
 		}
 
 		// trigger event cssloaded if cddAutoLoad disabled
-		if (self.cssloaded === false) {
+		if (self.cssloaded === null) {
+			self.bind('cssautoloaded', function() {
+				self.cssloaded = true;
+				self.trigger('cssloaded');
+			});
+		} else {
 			self.cssloaded = true;
 			self.trigger('cssloaded');
 		}
