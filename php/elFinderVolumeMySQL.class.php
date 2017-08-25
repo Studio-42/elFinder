@@ -208,8 +208,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function make($path, $name, $mime) {
-		$sql = 'INSERT INTO %s (`parent_id`, `name`, `size`, `mtime`, `mime`, `content`, `read`, `write`) VALUES (\'%s\', \'%s\', 0, %d, \'%s\', \'\', \'%d\', \'%d\')';
-		$sql = sprintf($sql, $this->tbf, $path, $this->db->real_escape_string($name), time(), $mime, $this->defaults['read'], $this->defaults['write']);
+		$sql = 'INSERT INTO %s (`parent_id`, `name`, `size`, `mtime`, `mime`, `content`, `read`, `write`, `locked`, `hidden`, `width`, `height`) VALUES (\'%s\', \'%s\', 0, %d, \'%s\', \'\', \'%d\', \'%d\', \'%d\', \'%d\', 0, 0)';
+		$sql = sprintf($sql, $this->tbf, $path, $this->db->real_escape_string($name), time(), $mime, $this->defaults['read'], $this->defaults['write'], $this->defaults['locked'], $this->defaults['hidden']);
 		// echo $sql;
 		return $this->query($sql) && $this->db->affected_rows > 0;
 	}
@@ -232,7 +232,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				FROM '.$this->tbf.' AS f 
 				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id AND ch.mime=\'directory\'
 				WHERE f.parent_id=\''.$path.'\'
-				GROUP BY f.id';
+				GROUP BY f.id, ch.id';
 				
 		$res = $this->query($sql);
 		if ($res) {
@@ -526,10 +526,9 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected function _stat($path) {
 		$sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime AS ts, f.mime, f.read, f.write, f.locked, f.hidden, f.width, f.height, IF(ch.id, 1, 0) AS dirs
 				FROM '.$this->tbf.' AS f 
-				LEFT JOIN '.$this->tbf.' AS p ON p.id=f.parent_id
 				LEFT JOIN '.$this->tbf.' AS ch ON ch.parent_id=f.id AND ch.mime=\'directory\'
 				WHERE f.id=\''.$path.'\'
-				GROUP BY f.id';
+				GROUP BY f.id, ch.id';
 
 		$res = $this->query($sql);
 		
