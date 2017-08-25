@@ -3645,18 +3645,6 @@ var elFinder = function(node, opts, bootCallback) {
 		}
 	});
 
-	// make node resizable
-	this.options.resizable 
-	&& $.fn.resizable 
-	&& node.resizable({
-		resize    : function(e, ui) {
-			self.resize(ui.size.width, ui.size.height);
-		},
-		handles   : 'se',
-		minWidth  : 300,
-		minHeight : 200
-	});
-
 	if (this.options.width) {
 		width = this.options.width;
 	}
@@ -4146,6 +4134,21 @@ var elFinder = function(node, opts, bootCallback) {
 		
 		// update size	
 		self.resize(width, height);
+		
+		// make node resizable
+		if (self.options.resizable && $.fn.resizable) {
+			node.resizable({
+				resize    : function(e, ui) {
+					self.resize(ui.size.width, ui.size.height);
+				},
+				handles   : 'se',
+				minWidth  : 300,
+				minHeight : 200
+			});
+			if (self.UA.Touch) {
+				node.addClass('touch-punch');
+			}
+		}
 
 		(function() {
 			var navbar = self.getUI('navbar'),
