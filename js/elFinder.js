@@ -6397,6 +6397,17 @@ elFinder.prototype = {
 						file.mime = 'text/plain';
 					}
 
+                    if (file.mime !== 'directory' && self.options.filenameFilter) {
+                        try {
+                            if (!self.options.filenameFilter.test(file.name)) {
+                                return null;
+                            }
+                        } catch (e) {
+                            // invalid filename filter or filter is not a RegExp
+                            return null
+                        }
+                    }
+
 					if (file.options) {
 						self.optionsByHashes[file.hash] = normalizeOptions(file.options);
 					}
