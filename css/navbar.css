@@ -13,6 +13,19 @@
 	position:relative;
 }
 
+.elfinder .elfinder-navdock {
+	box-sizing: border-box;
+	width: 230px;
+	height: auto;
+	position: absolute;
+	bottom: 0;
+	overflow: auto;
+}
+
+.elfinder-navdock .ui-resizable-n {
+	top: 0;
+	height: 20px;
+}
 
 /* ltr/rtl enviroment */
 .elfinder-ltr .elfinder-navbar { float:left;  border-left:0 solid; }

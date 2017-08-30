@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-08-15
+ * @version 2017-08-29
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -435,6 +435,7 @@
 			'kindUnknown'     : '不明',
 			'kindRoot'        : 'ボリュームルート', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'フォルダ',
+			'kindSelects'     : '複数選択', // from v2.1.29 added 29.8.2017
 			'kindAlias'       : '別名',
 			'kindAliasBroken' : '宛先不明の別名',
 			// applications

@@ -252,6 +252,10 @@ elFinder.prototype._options = {
 			autoplay : true,
 			width    : 450,
 			height   : 300,
+			// preview window into NavDock
+			docked   : false,
+			// Docked preview height ('auto' or Number of pixel) 'auto' is setted to the Navbar width
+			dockHeight : 'auto',
 			// MIME types to use Google Docs online viewer
 			// Example ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
 			googleDocsMimes : [],
@@ -601,6 +605,14 @@ elFinder.prototype._options = {
 			maxWidth : 500,
 			// auto hide on initial open
 			autoHideUA: [] // e.g. ['Mobile']
+		},
+		navdock : {
+			// disabled navdock ui
+			disabled : false,
+			// percentage of initial maximum height to work zone
+			initMaxHeight : '50%',
+			// percentage of maximum height to work zone by user resize action
+			maxHeight : '90%'
 		},
 		cwd : {
 			// display parent folder with ".." name :)

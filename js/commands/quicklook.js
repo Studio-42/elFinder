@@ -27,6 +27,12 @@
 		 **/
 		opened     = 2,
 		/**
+		 * window docked state
+		 *
+		 * @type Number
+		 **/
+		docked     = 3,
+		/**
 		 * window state
 		 *
 		 * @type Number
@@ -130,6 +136,12 @@
 		 **/
 		height, 
 		/**
+		 * Previous style before docked
+		 *
+		 * @type String
+		 **/
+		prevStyle,
+		/**
 		 * elFinder node
 		 *
 		 * @type jQuery
@@ -141,6 +153,13 @@
 		 * @type jQuery
 		 **/
 		cwd, 
+		/**
+		 * Current directory hash
+		 *
+		 * @type String
+		 **/
+		cwdHash,
+		dockEnabled = false,
 		navdrag = false,
 		navmove = false,
 		navtm   = null,
@@ -248,7 +267,48 @@
 				$.fn.resizable && collection.resizable(full ? 'enable' : 'disable').removeClass('ui-state-disabled');
 
 				win.trigger('viewchange');
-			}),
+			}
+		),
+		
+		updateOnSel = function() {
+			self.update(void(0), (function() {
+				var fm = self.fm,
+					files = fm.selectedFiles(),
+					cnt = files.length,
+					inDock = self.docked(),
+					getInfo = function() {
+						var size = 0, ts = 0;
+						$.each(files, function(i, f) {
+							var s = parseInt(f.size),
+								t = parseInt(f.ts);
+							if (f.mime !== 'directory' && s >= 0 && size >= 0) {
+								size += s;
+							} else {
+								size = 'unknown';
+							}
+							if (ts >= 0) {
+								if (t > ts) {
+									ts = t;
+								}
+							} else {
+								ts = 'unknown';
+							}
+						});
+						return {
+							hash : cwdHash,
+							name : fm.i18n('items') + ': ' + cnt,
+							mime : 'group',
+							size : size,
+							ts   : ts
+						};
+					};
+				if (! cnt && inDock) {
+					cnt = 1;
+					files = [fm.cwd()];
+				}
+				return (!inDock || cnt === 1)? files[0] : getInfo();
+			})());
+		},
 		
 		navShow = function() {
 			if (self.window.hasClass(fullscreen)) {
@@ -276,7 +336,21 @@
 			.append('<div class="elfinder-quicklook-navbar-separator"/>')
 			.append($('<div class="'+navicon+' '+navicon+'-close"/>').on('click touchstart', function(e) { ! navmove && self.window.trigger('close'); return false; }))
 		,
-		navStyle = '';
+		titleClose = $('<span class="ui-front ui-icon elfinder-icon-close ui-icon-closethick"/>').mousedown(function(e) {
+			e.stopPropagation();
+			self.window.trigger('close');
+		}),
+		titleDock = $('<span class="ui-front ui-icon elfinder-icon-minimize ui-icon-minusthick"/>').mousedown(function(e) {
+			e.stopPropagation();
+			if (! self.docked()) {
+				self.window.trigger('navdockin');
+			} else {
+				self.window.trigger('navdockout');
+			}
+		}),
+		navStyle = '',
+		init = true,
+		dockHeight;
 
 	(this.navbar = navbar)._show = navShow;
 	this.resize = 'resize.'+fm.namespace;
@@ -289,6 +363,7 @@
 		.on('change', function() {
 			navShow();
 			navbar.attr('style', navStyle);
+			self.docked() && navbar.hide();
 			self.preview.attr('style', '').removeClass('elfinder-overflow-auto');
 			self.info.attr('style', '').hide();
 			icon.removeAttr('class').attr('style', '');
@@ -302,7 +377,7 @@
 				tpl     = '<div class="elfinder-quicklook-info-data">{value}</div>',
 				tmb, name;
 
-			if (file && (e.forceUpdate || self.window.data('hash') !== file.hash)) {
+			if (file && (e.forceUpdate || file.hash === cwdHash || self.window.data('hash') !== file.hash)) {
 				name = fm.escape(file.i18 || file.name);
 				!file.read && e.stopImmediatePropagation();
 				self.window.data('hash', file.hash);
@@ -353,9 +428,6 @@
 				e.stopImmediatePropagation();
 			}
 		});
-		
-
-	
 
 	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook touch-punch" style="position:absolute"/>')
 		.hide()
@@ -365,22 +437,22 @@
 			$('<div class="elfinder-quicklook-titlebar"/>')
 			.append(
 				title,
-				$('<span class="ui-icon ui-icon-circle-close'+(platformWin? ' elfinder-platformWin' : '')+'"/>').mousedown(function(e) {
-					e.stopPropagation();
-					self.window.trigger('close');
-				})),
-				this.preview,
-				self.info.hide(),
-				cover.hide(),
-				navbar
-			)
+				$('<span class="elfinder-quicklook-titlebar-icon'+(platformWin? ' elfinder-platformWin' : '')+'"/>').append(
+					titleClose, titleDock
+				)
+			),
+			this.preview,
+			self.info.hide(),
+			cover.hide(),
+			navbar
+		)
 		.draggable({handle : 'div.elfinder-quicklook-titlebar'})
 		.on('open', function(e) {
 			var win  = self.window, 
 				file = self.value,
-				node;
+				node = fm.getUI('cwd');
 
-			if (self.closed() && file && (node = $('#'+fm.cwdHash2Id(file.hash))).length) {
+			if (self.closed() && file && (file.hash === cwdHash || (node = $('#'+fm.cwdHash2Id(file.hash))).length)) {
 				navStyle = '';
 				navbar.attr('style', '');
 				state = animated;
@@ -391,11 +463,12 @@
 					.animate(openedCss(), 550, function() {
 						state = opened;
 						self.update(1, self.value);
+						self.change();
 						navShow();
 					});
 			}
 		})
-		.on('close', function(e) {
+		.on('close', function(e, dfd) {
 			var win     = self.window,
 				preview = self.preview.trigger('change'),
 				file    = self.value,
@@ -405,18 +478,75 @@
 					win.hide();
 					preview.children().remove();
 					self.update(0, self.value);
-					
+					dfd && dfd.resolve();
 				},
 				node;
 				
-			win.data('hash', '');
-			if (self.opened()) {
-				state = animated;
-				win.hasClass(fullscreen) && fsicon.click();
-				(hash && (node = cwd.find('#'+hash)).length)
-					? win.animate(closedCss(node), 500, close)
-					: close();
+			if (! self.docked()) {
+				win.data('hash', '');
+				if (self.opened()) {
+					state = animated;
+					win.hasClass(fullscreen) && fsicon.click();
+					(hash && (node = cwd.find('#'+hash)).length)
+						? win.animate(closedCss(node), 500, close)
+						: close();
+				}
 			}
+		})
+		.on('navdockin', function(e, data) {
+			var w      = self.window,
+				box    = fm.getUI('navdock'),
+				height = dockHeight || box.width(),
+				opts   = data || {};
+			
+			if (init) {
+				opts.init = true;
+				init = false;
+			}
+			state = docked;
+			prevStyle = w.attr('style');
+			w.removeClass('ui-widget').draggable('disable').resizable('disable').removeAttr('style').css({
+				width: '100%',
+				height: height,
+				boxSizing: 'border-box',
+				paddingBottom: 0,
+				zIndex: 'unset'
+			});
+			navbar.hide();
+			titleClose.hide();
+			titleDock.toggleClass('ui-icon-plusthick ui-icon-minusthick elfinder-icon-full elfinder-icon-minimize');
+			
+			box.data('addNode')(w, opts);
+			
+			self.preview.trigger('changesize');
+			
+			fm.storage('previewDocked', '1');
+		})
+		.on('navdockout', function(e) {
+			var w   = self.window,
+				box = fm.getUI('navdock'),
+				dfd = $.Deferred();
+			
+			state = opened;
+			
+			box.data('removeNode')(w.attr('id'), fm.getUI());
+			
+			dockHeight = w.outerHeight();
+			w.addClass('ui-widget').draggable('enable').resizable('enable').attr('style', prevStyle);
+			navbar.show();
+			titleClose.show();
+			titleDock.toggleClass('ui-icon-plusthick ui-icon-minusthick elfinder-icon-full elfinder-icon-minimize');
+			
+			w.data('hash', '');
+			w.trigger('close', dfd);
+			dfd.done(function() {
+				w.trigger('open');
+			});
+			
+			fm.storage('previewDocked', '0');
+		})
+		.on('resize.' + fm.namespace, function() {
+			self.preview.trigger('changesize'); 
 		});
 
 	/**
@@ -435,9 +565,15 @@
 	
 	this.handlers = {
 		// save selected file
-		select : function() { this.update(void(0), this.fm.selectedFiles()[0]); },
+		select : function() { this.opened() && updateOnSel(); },
 		error  : function() { self.window.is(':visible') && self.window.data('hash', '').trigger('close'); },
-		'searchshow searchhide' : function() { this.opened() && this.window.trigger('close'); }
+		'searchshow searchhide' : function() { this.opened() && this.window.trigger('close'); },
+		navbarshow : function() {
+			setTimeout(function() {
+				self.docked() && self.preview.trigger('changesize');
+			}, 0);
+		},
+		destroy : function() { self.window.remove(); }
 	};
 	
 	this.shortcuts = [{
@@ -462,7 +598,7 @@
 	};
 	
 	/**
-	 * Return true if quickLoock window is visible and not animated
+	 * Return true if quickLoock window is hiddenReturn true if quickLoock window is visible and not animated
 	 *
 	 * @return Boolean
 	 **/
@@ -471,12 +607,21 @@
 	};
 	
 	/**
-	 * Return true if quickLoock window is hidden
+	 * Return true if quickLoock window is visible and not animated
 	 *
 	 * @return Boolean
 	 **/
 	this.opened = function() {
-		return state == opened;
+		return state == opened || state == docked;
+	};
+	
+	/**
+	 * Return true if quickLoock window is in NavDock
+	 *
+	 * @return Boolean
+	 **/
+	this.docked = function() {
+		return state == docked;
 	};
 	
 	/**
@@ -489,12 +634,23 @@
 		var o       = this.options, 
 			win     = this.window,
 			preview = this.preview,
-			i, p, curCwd, cwdDispInlineRegex;
+			i, p, cwdDispInlineRegex;
 		
 		width  = o.width  > 0 ? parseInt(o.width)  : 450;	
 		height = o.height > 0 ? parseInt(o.height) : 300;
+		if (o.dockHeight !== 'auto') {
+			dockHeight = parseInt(o.dockHeight);
+			if (! dockHeight) {
+				dockHeight = void(0);
+			}
+		}
 
 		fm.one('load', function() {
+			
+			dockEnabled = fm.getUI('navdock').data('dockEnabled');
+			
+			! dockEnabled && titleDock.hide();
+			
 			parent = fm.getUI();
 			cwd    = fm.getUI('cwd');
 
@@ -506,8 +662,8 @@
 			
 			// close window on escape
 			$(document).on('keydown.'+fm.namespace, function(e) {
-				e.keyCode == $.ui.keyCode.ESCAPE && self.opened() && win.trigger('close')
-			})
+				e.keyCode == $.ui.keyCode.ESCAPE && self.opened() && ! self.docked() && win.trigger('close');
+			});
 			
 			if ($.fn.resizable) {
 				win.resizable({ 
@@ -527,14 +683,17 @@
 					setTimeout(function() {
 						if (self.value) {
 							if (self.value.tmb && self.value.tmb == 1) {
+								// try re-get file object
 								self.value = Object.assign({}, fm.file(self.value.hash));
 							}
 							preview.trigger($.Event('update', {file : self.value}));
 						} else {
-							navtrigger(rightKey);
-							setTimeout(function() {
-								! self.value && win.trigger('close');
-							}, 10);
+							if (state != docked) {
+								navtrigger(rightKey);
+								setTimeout(function() {
+									! self.value && win.trigger('close');
+								}, 10);
+							}
 						}
 					}, 10);
 				}
@@ -564,6 +723,8 @@
 						//  do not preview of file that size = 0
 						e.stopImmediatePropagation();
 					}
+				} else {
+					self.dispInlineRegex = /^$/;
 				}
 				
 				self.info.show();
@@ -574,16 +735,23 @@
 					new plugin(self)
 				}
 			});
-		});
-		
-		fm.bind('open',function() {
-			var prevCwd = curCwd;
+		}).one('open', function() {
+			var dock = fm.storage('previewDocked') || (o.docked? 1 : 0);
+			if (dockEnabled && dock >= 1) {
+				self.exec();
+				self.window.trigger('navdockin', { init : true });
+				self.update(void(0), fm.cwd());
+			}
+		}).bind('open', function() {
+			var prevCwd = cwdHash;
 			
 			// change cwd
-			curCwd = fm.cwd().hash;
-			if (self.opened() && prevCwd !== curCwd) {
+			cwdHash = fm.cwd().hash;
+			if (self.opened() && state != docked && prevCwd !== cwdHash) {
 				win.trigger('close');
 			}
+			
+			self.value = fm.cwd();
 			
 			// set current volume dispInlineRegex
 			try {
@@ -592,21 +760,20 @@
 				cwdDispInlineRegex = /^$/;
 			}
 		});
-		
-		fm.bind('destroy', function() {
-			self.window.remove();
-		});
 	};
 	
 	this.getstate = function() {
 		var fm  = this.fm,
 			sel = fm.selected(),
 			chk = sel.length === 1 && $('#'+fm.cwdHash2Id(sel[0])).length;
-		return chk? state == opened ? 1 : 0 : -1;
+		return chk? (self.opened()? 1 : 0) : -1;
 	};
 	
 	this.exec = function() {
-		this.enabled() && this.window.trigger(this.opened() ? 'close' : 'open');
+		if (state != docked) {
+			this.closed() && updateOnSel();
+			this.enabled() && this.window.trigger(this.opened() ? 'close' : 'open');
+		}
 	};
 
 	this.hideinfo = function() {

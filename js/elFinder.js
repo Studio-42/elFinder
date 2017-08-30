@@ -4095,6 +4095,8 @@ var elFinder = function(node, opts, bootCallback) {
 			workzone : $('<div/>').appendTo(node).elfinderworkzone(self),
 			// container for folders tree / places
 			navbar : $('<div/>').appendTo(node).elfindernavbar(self, self.options.uiOptions.navbar || {}),
+			// container for for preview etc at below the navbar
+			navdock : $('<div/>').appendTo(node).elfindernavdock(self, self.options.uiOptions.navdock || {}),
 			// contextmenu
 			contextmenu : $('<div/>').appendTo(node).elfindercontextmenu(self),
 			// overlay
@@ -4626,6 +4628,7 @@ elFinder.prototype = {
 	kinds : 	{
 			'unknown'                       : 'Unknown',
 			'directory'                     : 'Folder',
+			'group'                         : 'Selects',
 			'symlink'                       : 'Alias',
 			'symlink-broken'                : 'AliasBroken',
 			'application/x-empty'           : 'TextPlain',
