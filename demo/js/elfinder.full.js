@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 9be3ac4) (2017-08-30)
+ * Version 2.1.28 (2.1-src Nightly: 8e620c6) (2017-08-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7313,6 +7313,24 @@ elFinder.prototype = {
 	},
 	
 	/**
+	 * Return localized number string
+	 * 
+	 * @param  Number
+	 * @return String
+	 */
+	toLocaleString : function(num) {
+		var v = new Number(num);
+		if (v) {
+			if (v.toLocaleString) {
+				return v.toLocaleString();
+			} else {
+				return String(num).replace( /(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
+			}
+		}
+		return num;
+	},
+	
+	/**
 	 * Return css class marks file permissions
 	 * 
 	 * @param  Object  file 
@@ -8120,7 +8138,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 9be3ac4)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 8e620c6)';
 
 
 
@@ -8712,17 +8730,23 @@ elFinder.prototype._options = {
 			autoplay : true,
 			width    : 450,
 			height   : 300,
+			// Maximum characters length to preview
+			textMaxlen : 2000,
 			// preview window into NavDock
 			docked   : false,
 			// Docked preview height ('auto' or Number of pixel) 'auto' is setted to the Navbar width
 			dockHeight : 'auto',
+			// media auto play when docked
+			dockAutoplay : false,
 			// MIME types to use Google Docs online viewer
 			// Example ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
 			googleDocsMimes : [],
 			// URL of hls.js
 			hlsJsUrl : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.7.11/hls.min.js',
 			// URL of dash.all.js
-			dashJsUrl : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.5.0/dash.all.min.js'
+			dashJsUrl : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.5.0/dash.all.min.js',
+			// URL of run_prettify.js
+			prettifyUrl : '//cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js'
 		},
 		// "quicklook" command options.
 		edit : {
@@ -10444,7 +10468,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-08-29
+ * @version 2017-08-30
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -10865,6 +10889,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'language'        : 'Language setting', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': 'Initialize the settings saved in this browser', // from v2.1.26 added 28.6.2017
 			'toolbarPref'     : 'Toolbar setting', // from v2.1.27 added 2.8.2017
+			'charsLeft'       : '... $1 chars left.',  // from v2.1.29 added 30.8.2017
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -23110,7 +23135,12 @@ elFinder.prototype.commands.places = function() {
 	this.info = $('<div/>').addClass(infocls)
 		.append(icon)
 		.append(info);
-		
+	this.autoPlay = function() {
+		if (self.opened()) {
+			return !! self.options[self.docked()? 'dockAutoplay' : 'autoplay'];
+		}
+		return false;
+	};
 	this.preview = $('<div class="elfinder-quicklook-preview ui-helper-clearfix"/>')
 		// clean info/icon
 		.on('change', function() {
@@ -23674,9 +23704,30 @@ elFinder.prototype.commands.quicklook.plugins = [
 	function(ql) {
 		var fm      = ql.fm,
 			mimes   = fm.res('mimes', 'text'),
-			preview = ql.preview;
-				
-			
+			preview = ql.preview,
+			textMaxlen = parseInt(ql.options.textMaxlen) || 2000,
+			prettify = function() {
+				if (ql.options.prettifyUrl) {
+					fm.loadScript([ql.options.prettifyUrl + (ql.options.prettifyUrl.match(/\?/)? '&' : '?') + 'autorun=false']);
+					prettify = function() { return true; };
+				} else {
+					prettify = function() { return false; };
+				}
+			},
+			PRcheck = function(node, cnt) {
+				if (prettify()) {
+					if (typeof PR === 'undefined' && cnt--) {
+						setTimeout(function() { PRcheck(node, cnt); }, 100);
+					} else {
+						if (typeof PR === 'object') {
+							PR.prettyPrint && PR.prettyPrint(null, node.get(0));
+						} else {
+							prettify = function() { return false; };
+						}
+					}
+				}
+			};
+		
 		preview.on('update', function(e) {
 			var file = e.file,
 				mime = file.mime,
@@ -23684,6 +23735,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 			
 			if (mime.indexOf('text/') === 0 || $.inArray(mime, mimes) !== -1) {
 				e.stopImmediatePropagation();
+				
+				(typeof PR === 'undefined') && prettify();
 				
 				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 
@@ -23698,12 +23751,29 @@ elFinder.prototype.commands.quicklook.plugins = [
 				})
 				.done(function(data) {
 					var reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i'),
-						m;
+						text = data.content,
+						more, node, m;
 					ql.hideinfo();
-					if (window.atob && (m = data.content.match(reg))) {
-						data.content = atob(data.content.substr(m[1].length));
+					if (window.atob && (m = text.match(reg))) {
+						text = atob(text.substr(m[1].length));
 					}
-					$('<div class="elfinder-quicklook-preview-text-wrapper"><pre class="elfinder-quicklook-preview-text">'+fm.escape(data.content)+'</pre></div>').appendTo(preview);
+					
+					more = text.length - textMaxlen;
+					if (more > 100) {
+						text = text.substr(0, textMaxlen) + '...';
+					} else {
+						more = 0;
+					}
+					
+					node = $('<div class="elfinder-quicklook-preview-text-wrapper"><pre class="elfinder-quicklook-preview-text prettyprint">'+fm.escape(text)+'</pre></div>');
+					
+					if (more) {
+						node.append('<div class="elfinder-quicklook-preview-charsleft"><hr/><span>' + fm.i18n('charsLeft', fm.toLocaleString(more)) + '</span></div>');
+					}
+					
+					node.appendTo(preview);
+					
+					PRcheck(node, 100);
 				})
 				.always(function() {
 					loading.remove();
@@ -23789,7 +23859,6 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 **/
 	function(ql) {
 		var preview  = ql.preview,
-			autoplay = !!ql.options['autoplay'],
 			mimes    = {
 				'audio/mpeg'    : 'mp3',
 				'audio/mpeg3'   : 'mp3',
@@ -23813,6 +23882,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on('update', function(e) {
 			var file = e.file,
 				type = mimes[file.mime],
+				autoplay = ql.autoPlay(),
 				setNavi = function() {
 					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
 				};
@@ -23854,7 +23924,6 @@ elFinder.prototype.commands.quicklook.plugins = [
 	function(ql) {
 		var fm       = ql.fm,
 			preview  = ql.preview,
-			autoplay = !!ql.options['autoplay'],
 			mimes    = {
 				'video/mp4'       : 'mp4',
 				'video/x-m4v'     : 'mp4',
@@ -23873,6 +23942,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 
 		preview.on('update', function(e) {
 			var file = e.file,
+				autoplay = ql.autoPlay(),
 				type = mimes[file.mime.toLowerCase()],
 				setNavi = function() {
 					if (fm.UA.iOS) {
