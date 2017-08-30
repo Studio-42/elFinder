@@ -14,6 +14,31 @@
 
 /* dialogs */
 .std42-dialog, .std42-dialog .ui-widget-content { background-color:#ededed; background-image:none; background-clip: content-box; }
+.elfinder-quicklook-titlebar-icon .ui-icon {
+	background-color: #d4d4d4;
+	border-color: #8a8a8a;
+}
+.std42-dialog .ui-dialog-titlebar .ui-dialog-titlebar-close:hover .ui-icon,
+.elfinder-mobile .std42-dialog .ui-dialog-titlebar .ui-dialog-titlebar-close .ui-icon,
+.elfinder-quicklook-titlebar-icon .ui-icon.elfinder-icon-close:hover,
+.elfinder-mobile .elfinder-quicklook-titlebar-icon .ui-icon.elfinder-icon-close {
+	background-color: #ff6252;
+	border-color: #e5695d;
+}
+.std42-dialog .ui-dialog-titlebar .elfinder-titlebar-minimize:hover .ui-icon,
+.elfinder-mobile .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-minimize .ui-icon,
+.elfinder-quicklook-titlebar-icon .ui-icon.elfinder-icon-minimize:hover,
+.elfinder-mobile .elfinder-quicklook-titlebar-icon .ui-icon.elfinder-icon-minimize {
+	background-color: #ffbc00;
+	border-color: #e3a40b;
+}
+.std42-dialog .ui-dialog-titlebar .elfinder-titlebar-full:hover .ui-icon,
+.elfinder-mobile .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-full .ui-icon,
+.elfinder-quicklook-titlebar-icon .ui-icon.elfinder-icon-full:hover,
+.elfinder-mobile .elfinder-quicklook-titlebar-icon .ui-icon.elfinder-icon-full {
+	background-color: #26c82f;
+	border-color: #13ae10;
+}
 
 /* navbar */
 .elfinder .elfinder-navbar { background:#dde4eb; }
