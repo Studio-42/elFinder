@@ -7282,6 +7282,24 @@ elFinder.prototype = {
 	},
 	
 	/**
+	 * Return localized number string
+	 * 
+	 * @param  Number
+	 * @return String
+	 */
+	toLocaleString : function(num) {
+		var v = new Number(num);
+		if (v) {
+			if (v.toLocaleString) {
+				return v.toLocaleString();
+			} else {
+				return String(num).replace( /(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
+			}
+		}
+		return num;
+	},
+	
+	/**
 	 * Return css class marks file permissions
 	 * 
 	 * @param  Object  file 

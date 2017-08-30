@@ -344,14 +344,22 @@
 }
 
 /* text preview */
-pre.elfinder-quicklook-preview-text {
+pre.elfinder-quicklook-preview-text,
+pre.elfinder-quicklook-preview-text.prettyprint {
 	width: auto;
 	height: auto;
 	margin:0;
 	padding:3px 9px;
 	border: none;
 }
-
+.elfinder-quicklook-preview-charsleft hr {
+	border:none;
+	border-top:dashed 1px;
+}
+.elfinder-quicklook-preview-charsleft span {
+	font-size: 90%;
+	font-style: italic;
+}
 /* html/pdf preview */
 .elfinder-quicklook-preview-html,
 .elfinder-quicklook-preview-pdf,
