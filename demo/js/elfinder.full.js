@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 7c583b4) (2017-08-30)
+ * Version 2.1.28 (2.1-src Nightly: 9be3ac4) (2017-08-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -4018,7 +4018,7 @@ var elFinder = function(node, opts, bootCallback) {
 						helper  = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-status"/></div>'),
 						icon    = function(f) {
 							var mime = f.mime, i, tmb = self.tmb(f);
-							i = '<div class="elfinder-cwd-icon '+self.mime2class(mime)+' ui-corner-all"/>';
+							i = '<div class="elfinder-cwd-icon elfinder-cwd-icon-drag '+self.mime2class(mime)+' ui-corner-all"/>';
 							if (tmb) {
 								i = $(i).addClass(tmb.className).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
 							}
@@ -8120,7 +8120,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 7c583b4)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 9be3ac4)';
 
 
 
@@ -13527,7 +13527,7 @@ $.fn.elfindercwd = function(fm, options) {
 									files = [],
 									icon  = function(f) {
 										var mime = f.mime, i, tmb = fm.tmb(f);
-										i = '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"/>';
+										i = '<div class="elfinder-cwd-icon elfinder-cwd-icon-drag '+fm.mime2class(mime)+' ui-corner-all"/>';
 										if (tmb) {
 											i = $(i).addClass(tmb.className).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
 										}
