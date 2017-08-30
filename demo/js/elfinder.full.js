@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 91e3b45) (2017-08-29)
+ * Version 2.1.28 (2.1-src Nightly: 7c583b4) (2017-08-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -4126,6 +4126,8 @@ var elFinder = function(node, opts, bootCallback) {
 			workzone : $('<div/>').appendTo(node).elfinderworkzone(self),
 			// container for folders tree / places
 			navbar : $('<div/>').appendTo(node).elfindernavbar(self, self.options.uiOptions.navbar || {}),
+			// container for for preview etc at below the navbar
+			navdock : $('<div/>').appendTo(node).elfindernavdock(self, self.options.uiOptions.navdock || {}),
 			// contextmenu
 			contextmenu : $('<div/>').appendTo(node).elfindercontextmenu(self),
 			// overlay
@@ -4657,6 +4659,7 @@ elFinder.prototype = {
 	kinds : 	{
 			'unknown'                       : 'Unknown',
 			'directory'                     : 'Folder',
+			'group'                         : 'Selects',
 			'symlink'                       : 'Alias',
 			'symlink-broken'                : 'AliasBroken',
 			'application/x-empty'           : 'TextPlain',
@@ -8117,7 +8120,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 91e3b45)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 7c583b4)';
 
 
 
@@ -8709,6 +8712,10 @@ elFinder.prototype._options = {
 			autoplay : true,
 			width    : 450,
 			height   : 300,
+			// preview window into NavDock
+			docked   : false,
+			// Docked preview height ('auto' or Number of pixel) 'auto' is setted to the Navbar width
+			dockHeight : 'auto',
 			// MIME types to use Google Docs online viewer
 			// Example ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
 			googleDocsMimes : [],
@@ -9058,6 +9065,14 @@ elFinder.prototype._options = {
 			maxWidth : 500,
 			// auto hide on initial open
 			autoHideUA: [] // e.g. ['Mobile']
+		},
+		navdock : {
+			// disabled navdock ui
+			disabled : false,
+			// percentage of initial maximum height to work zone
+			initMaxHeight : '50%',
+			// percentage of maximum height to work zone by user resize action
+			maxHeight : '90%'
 		},
 		cwd : {
 			// display parent folder with ".." name :)
@@ -10429,7 +10444,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-08-15
+ * @version 2017-08-29
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -10855,6 +10870,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'kindUnknown'     : 'Unknown',
 			'kindRoot'        : 'Volume Root', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'Folder',
+			'kindSelects'     : 'Selections', // from v2.1.29 added 29.8.2017
 			'kindAlias'       : 'Alias',
 			'kindAliasBroken' : 'Broken alias',
 			// applications
@@ -14976,7 +14992,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
 			ltr    = fm.direction == 'ltr',
-			handle, swipeHandle, autoHide, setWidth,
+			handle, swipeHandle, autoHide, setWidth, navdock,
 			setWzRect = function() {
 				var cwd = fm.getUI('cwd'),
 					wz  = fm.getUI('workzone'),
@@ -14988,7 +15004,15 @@ $.fn.elfindernavbar = function(fm, opts) {
 			fm.one('cssloaded', function() {
 				delta = nav.outerHeight() - nav.height();
 			}).bind('wzresize', function() {
-				nav.height(wz.height() - delta);
+				var navdockH = 0;
+				if (! navdock) {
+					navdock =fm.getUI('navdock');
+				}
+				navdock.width(nav.get(0).offsetWidth - 2);
+				if (navdock.children().length > 1) {
+					navdockH = navdock.outerHeight(true);
+				}
+				nav.height(wz.height() - navdockH - delta);
 			});
 		
 		if (fm.UA.Touch) {
@@ -15016,18 +15040,24 @@ $.fn.elfindernavbar = function(fm, opts) {
 				var mode     = (e.type === 'navshow')? 'show' : 'hide',
 					duration = (data && data.duration)? data.duration : 'fast',
 					handleW = (data && data.handleW)? data.handleW : Math.max(50, fm.getUI().width() / 10);
-				nav.stop(true, true)[mode](duration, function() {
-					if (mode === 'show') {
-						swipeHandle && swipeHandle.stop(true, true).hide();
-					} else {
+				nav.stop(true, true)[mode]({
+					duration: duration,
+					step    : function() {
+						fm.trigger('wzresize');
+					},
+					complete: function() {
 						if (swipeHandle) {
-							swipeHandle.width(handleW? handleW : '');
-							fm.resources.blink(swipeHandle, 'slowonce');
+							if (mode === 'show') {
+								swipeHandle.stop(true, true).hide();
+							} else {
+								swipeHandle.width(handleW? handleW : '');
+								fm.resources.blink(swipeHandle, 'slowonce');
+							}
 						}
+						fm.trigger('navbar'+ mode);
+						data.init && fm.trigger('uiautohide');
+						setWzRect();
 					}
-					fm.trigger('navbar'+ mode);
-					data.init && fm.trigger('uiautohide');
-					setWzRect();
 				});
 				autoHide.navbar = (mode !== 'show');
 				fm.storage('autoHide', Object.assign(fm.storage('autoHide'), {navbar: autoHide.navbar}));
@@ -15039,6 +15069,9 @@ $.fn.elfindernavbar = function(fm, opts) {
 					handles : ltr ? 'e' : 'w',
 					minWidth : opts.minWidth || 150,
 					maxWidth : opts.maxWidth || 500,
+					resize : function() {
+						fm.trigger('wzresize');
+					},
 					stop : function(e, ui) {
 						fm.storage('navbarWidth', ui.size.width);
 						setWzRect();
@@ -15083,6 +15116,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 							nav.width(nav.data('defWidth'));
 						}
 						nav.data('width', nav.width());
+						fm.trigger('wzresize');
 					}
 					nav.data('defWidth', nav.width());
 					$(window).on('resize.' + fm.namespace, set);
@@ -15096,6 +15130,129 @@ $.fn.elfindernavbar = function(fm, opts) {
 	return this;
 };
 
+
+/*
+ * File: /js/ui/navdock.js
+ */
+
+/**
+ * @class elfindernavdock - elFinder container for preview etc at below the navbar
+ *
+ * @author Naoki Sawada
+ **/
+$.fn.elfindernavdock = function(fm, opts) {
+	
+	this.not('.elfinder-navdock').each(function() {
+		var self = $(this).hide().addClass('ui-state-default elfinder-navdock touch-punch'),
+			node = self.parent(),
+			wz   = node.children('.elfinder-workzone').append(self),
+			resize = function(to, curH) {
+				var curH = curH || self.height(),
+					diff = to - curH,
+					len  = Object.keys(sizeSyncs).length,
+					calc = len? diff / len : 0,
+					ovf;
+				if (diff) {
+					ovf = self.css('overflow');
+					self.css('overflow', 'hidden');
+					$.each(sizeSyncs, function(id, n) {
+						n.height(n.height() + calc).trigger('resize.' + fm.namespace);
+					});
+					self.height(to);
+					fm.trigger('wzresize');
+					self.css('overflow', ovf);
+				}
+			},
+			handle = $('<div class="ui-front ui-resizable-handle ui-resizable-n"/>').appendTo(self),
+			sizeSyncs = {},
+			resizeFn = [],
+			initMaxHeight = (parseInt(opts.initMaxHeight) || 50) / 100,
+			maxHeight = (parseInt(opts.maxHeight) || 90) / 100;
+		
+		
+		self.data('addNode', function(cNode, opts) {
+			var wzH = fm.getUI('workzone').height(),
+				imaxH = wzH * initMaxHeight,
+				curH, tH, mH;
+			opts = Object.assign({
+				first: false,
+				sizeSync: true,
+				init: false
+			}, opts);
+			if (!cNode.attr('id')) {
+				cNode.attr('id', fm.namespace+'-navdock-' + (+new Date()));
+			}
+			opts.sizeSync && (sizeSyncs[cNode.attr('id')] = cNode);
+			curH = self.height();
+			tH = curH + cNode.outerHeight(true);
+			
+			if (opts.first) {
+				handle.after(cNode);
+			} else {
+				self.append(cNode);
+			}
+			self.height(tH).show();
+			
+			fm.trigger('wzresize');
+			
+			if (opts.init) {
+				mH = fm.storage('navdockHeight');
+				if (mH) {
+					tH = mH;
+				} else {
+					tH = tH > imaxH? imaxH : tH;
+				}
+			}
+			resize(Math.min(tH, wzH * maxHeight));
+			
+			return self;
+		});
+		
+		self.data('removeNode', function(nodeId, appendTo) {
+			var cNode = $('#'+nodeId);
+			delete sizeSyncs[nodeId];
+			self.height(self.height() - $('#'+nodeId).outerHeight(true));
+			if (appendTo) {
+				appendTo.append(cNode);
+				cNode.trigger('resize.' + fm.namespace);
+			} else {
+				cNode.remove();
+			}
+			if (self.children().length <= 1) {
+				self.height(0).hide();
+			}
+			fm.trigger('wzresize');
+		});
+		
+		if (! opts.disabled) {
+			fm.one('init', function() {
+				if (fm.getUI('navbar').children().not('.ui-resizable-handle').length) {
+					self.data('dockEnabled', true);
+					self.resizable({
+						maxHeight: fm.getUI('workzone').height() * maxHeight,
+						handles: { n: handle },
+						resize: function(e, ui) {
+							fm.trigger('wzresize');
+						},
+						stop: function(e, ui) {
+							self.css('top', '');
+							fm.storage('navdockHeight', ui.size.height);
+							resize(ui.size.height, ui.originalSize.height);
+						}
+					});
+					fm.bind('wzresize', function() {
+						var maxH = fm.getUI('workzone').height() * maxHeight;
+						if (self.height() > maxH) {
+							resize(maxH);
+						}
+						self.resizable('option', 'maxHeight', maxH);
+					});
+				}
+			});
+		}
+	});
+	return this;
+};
 
 /*
  * File: /js/ui/overlay.js
@@ -22623,6 +22780,12 @@ elFinder.prototype.commands.places = function() {
 		 **/
 		opened     = 2,
 		/**
+		 * window docked state
+		 *
+		 * @type Number
+		 **/
+		docked     = 3,
+		/**
 		 * window state
 		 *
 		 * @type Number
@@ -22726,6 +22889,12 @@ elFinder.prototype.commands.places = function() {
 		 **/
 		height, 
 		/**
+		 * Previous style before docked
+		 *
+		 * @type String
+		 **/
+		prevStyle,
+		/**
 		 * elFinder node
 		 *
 		 * @type jQuery
@@ -22737,6 +22906,13 @@ elFinder.prototype.commands.places = function() {
 		 * @type jQuery
 		 **/
 		cwd, 
+		/**
+		 * Current directory hash
+		 *
+		 * @type String
+		 **/
+		cwdHash,
+		dockEnabled = false,
 		navdrag = false,
 		navmove = false,
 		navtm   = null,
@@ -22844,7 +23020,48 @@ elFinder.prototype.commands.places = function() {
 				$.fn.resizable && collection.resizable(full ? 'enable' : 'disable').removeClass('ui-state-disabled');
 
 				win.trigger('viewchange');
-			}),
+			}
+		),
+		
+		updateOnSel = function() {
+			self.update(void(0), (function() {
+				var fm = self.fm,
+					files = fm.selectedFiles(),
+					cnt = files.length,
+					inDock = self.docked(),
+					getInfo = function() {
+						var size = 0, ts = 0;
+						$.each(files, function(i, f) {
+							var s = parseInt(f.size),
+								t = parseInt(f.ts);
+							if (f.mime !== 'directory' && s >= 0 && size >= 0) {
+								size += s;
+							} else {
+								size = 'unknown';
+							}
+							if (ts >= 0) {
+								if (t > ts) {
+									ts = t;
+								}
+							} else {
+								ts = 'unknown';
+							}
+						});
+						return {
+							hash : cwdHash,
+							name : fm.i18n('items') + ': ' + cnt,
+							mime : 'group',
+							size : size,
+							ts   : ts
+						};
+					};
+				if (! cnt && inDock) {
+					cnt = 1;
+					files = [fm.cwd()];
+				}
+				return (!inDock || cnt === 1)? files[0] : getInfo();
+			})());
+		},
 		
 		navShow = function() {
 			if (self.window.hasClass(fullscreen)) {
@@ -22872,7 +23089,21 @@ elFinder.prototype.commands.places = function() {
 			.append('<div class="elfinder-quicklook-navbar-separator"/>')
 			.append($('<div class="'+navicon+' '+navicon+'-close"/>').on('click touchstart', function(e) { ! navmove && self.window.trigger('close'); return false; }))
 		,
-		navStyle = '';
+		titleClose = $('<span class="ui-front ui-icon elfinder-icon-close ui-icon-closethick"/>').mousedown(function(e) {
+			e.stopPropagation();
+			self.window.trigger('close');
+		}),
+		titleDock = $('<span class="ui-front ui-icon elfinder-icon-minimize ui-icon-minusthick"/>').mousedown(function(e) {
+			e.stopPropagation();
+			if (! self.docked()) {
+				self.window.trigger('navdockin');
+			} else {
+				self.window.trigger('navdockout');
+			}
+		}),
+		navStyle = '',
+		init = true,
+		dockHeight;
 
 	(this.navbar = navbar)._show = navShow;
 	this.resize = 'resize.'+fm.namespace;
@@ -22885,6 +23116,7 @@ elFinder.prototype.commands.places = function() {
 		.on('change', function() {
 			navShow();
 			navbar.attr('style', navStyle);
+			self.docked() && navbar.hide();
 			self.preview.attr('style', '').removeClass('elfinder-overflow-auto');
 			self.info.attr('style', '').hide();
 			icon.removeAttr('class').attr('style', '');
@@ -22898,7 +23130,7 @@ elFinder.prototype.commands.places = function() {
 				tpl     = '<div class="elfinder-quicklook-info-data">{value}</div>',
 				tmb, name;
 
-			if (file && (e.forceUpdate || self.window.data('hash') !== file.hash)) {
+			if (file && (e.forceUpdate || file.hash === cwdHash || self.window.data('hash') !== file.hash)) {
 				name = fm.escape(file.i18 || file.name);
 				!file.read && e.stopImmediatePropagation();
 				self.window.data('hash', file.hash);
@@ -22949,9 +23181,6 @@ elFinder.prototype.commands.places = function() {
 				e.stopImmediatePropagation();
 			}
 		});
-		
-
-	
 
 	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook touch-punch" style="position:absolute"/>')
 		.hide()
@@ -22961,22 +23190,22 @@ elFinder.prototype.commands.places = function() {
 			$('<div class="elfinder-quicklook-titlebar"/>')
 			.append(
 				title,
-				$('<span class="ui-icon ui-icon-circle-close'+(platformWin? ' elfinder-platformWin' : '')+'"/>').mousedown(function(e) {
-					e.stopPropagation();
-					self.window.trigger('close');
-				})),
-				this.preview,
-				self.info.hide(),
-				cover.hide(),
-				navbar
-			)
+				$('<span class="elfinder-quicklook-titlebar-icon'+(platformWin? ' elfinder-platformWin' : '')+'"/>').append(
+					titleClose, titleDock
+				)
+			),
+			this.preview,
+			self.info.hide(),
+			cover.hide(),
+			navbar
+		)
 		.draggable({handle : 'div.elfinder-quicklook-titlebar'})
 		.on('open', function(e) {
 			var win  = self.window, 
 				file = self.value,
-				node;
+				node = fm.getUI('cwd');
 
-			if (self.closed() && file && (node = $('#'+fm.cwdHash2Id(file.hash))).length) {
+			if (self.closed() && file && (file.hash === cwdHash || (node = $('#'+fm.cwdHash2Id(file.hash))).length)) {
 				navStyle = '';
 				navbar.attr('style', '');
 				state = animated;
@@ -22987,11 +23216,12 @@ elFinder.prototype.commands.places = function() {
 					.animate(openedCss(), 550, function() {
 						state = opened;
 						self.update(1, self.value);
+						self.change();
 						navShow();
 					});
 			}
 		})
-		.on('close', function(e) {
+		.on('close', function(e, dfd) {
 			var win     = self.window,
 				preview = self.preview.trigger('change'),
 				file    = self.value,
@@ -23001,18 +23231,75 @@ elFinder.prototype.commands.places = function() {
 					win.hide();
 					preview.children().remove();
 					self.update(0, self.value);
-					
+					dfd && dfd.resolve();
 				},
 				node;
 				
-			win.data('hash', '');
-			if (self.opened()) {
-				state = animated;
-				win.hasClass(fullscreen) && fsicon.click();
-				(hash && (node = cwd.find('#'+hash)).length)
-					? win.animate(closedCss(node), 500, close)
-					: close();
+			if (! self.docked()) {
+				win.data('hash', '');
+				if (self.opened()) {
+					state = animated;
+					win.hasClass(fullscreen) && fsicon.click();
+					(hash && (node = cwd.find('#'+hash)).length)
+						? win.animate(closedCss(node), 500, close)
+						: close();
+				}
 			}
+		})
+		.on('navdockin', function(e, data) {
+			var w      = self.window,
+				box    = fm.getUI('navdock'),
+				height = dockHeight || box.width(),
+				opts   = data || {};
+			
+			if (init) {
+				opts.init = true;
+				init = false;
+			}
+			state = docked;
+			prevStyle = w.attr('style');
+			w.removeClass('ui-widget').draggable('disable').resizable('disable').removeAttr('style').css({
+				width: '100%',
+				height: height,
+				boxSizing: 'border-box',
+				paddingBottom: 0,
+				zIndex: 'unset'
+			});
+			navbar.hide();
+			titleClose.hide();
+			titleDock.toggleClass('ui-icon-plusthick ui-icon-minusthick elfinder-icon-full elfinder-icon-minimize');
+			
+			box.data('addNode')(w, opts);
+			
+			self.preview.trigger('changesize');
+			
+			fm.storage('previewDocked', '1');
+		})
+		.on('navdockout', function(e) {
+			var w   = self.window,
+				box = fm.getUI('navdock'),
+				dfd = $.Deferred();
+			
+			state = opened;
+			
+			box.data('removeNode')(w.attr('id'), fm.getUI());
+			
+			dockHeight = w.outerHeight();
+			w.addClass('ui-widget').draggable('enable').resizable('enable').attr('style', prevStyle);
+			navbar.show();
+			titleClose.show();
+			titleDock.toggleClass('ui-icon-plusthick ui-icon-minusthick elfinder-icon-full elfinder-icon-minimize');
+			
+			w.data('hash', '');
+			w.trigger('close', dfd);
+			dfd.done(function() {
+				w.trigger('open');
+			});
+			
+			fm.storage('previewDocked', '0');
+		})
+		.on('resize.' + fm.namespace, function() {
+			self.preview.trigger('changesize'); 
 		});
 
 	/**
@@ -23031,9 +23318,15 @@ elFinder.prototype.commands.places = function() {
 	
 	this.handlers = {
 		// save selected file
-		select : function() { this.update(void(0), this.fm.selectedFiles()[0]); },
+		select : function() { this.opened() && updateOnSel(); },
 		error  : function() { self.window.is(':visible') && self.window.data('hash', '').trigger('close'); },
-		'searchshow searchhide' : function() { this.opened() && this.window.trigger('close'); }
+		'searchshow searchhide' : function() { this.opened() && this.window.trigger('close'); },
+		navbarshow : function() {
+			setTimeout(function() {
+				self.docked() && self.preview.trigger('changesize');
+			}, 0);
+		},
+		destroy : function() { self.window.remove(); }
 	};
 	
 	this.shortcuts = [{
@@ -23058,7 +23351,7 @@ elFinder.prototype.commands.places = function() {
 	};
 	
 	/**
-	 * Return true if quickLoock window is visible and not animated
+	 * Return true if quickLoock window is hiddenReturn true if quickLoock window is visible and not animated
 	 *
 	 * @return Boolean
 	 **/
@@ -23067,12 +23360,21 @@ elFinder.prototype.commands.places = function() {
 	};
 	
 	/**
-	 * Return true if quickLoock window is hidden
+	 * Return true if quickLoock window is visible and not animated
 	 *
 	 * @return Boolean
 	 **/
 	this.opened = function() {
-		return state == opened;
+		return state == opened || state == docked;
+	};
+	
+	/**
+	 * Return true if quickLoock window is in NavDock
+	 *
+	 * @return Boolean
+	 **/
+	this.docked = function() {
+		return state == docked;
 	};
 	
 	/**
@@ -23085,12 +23387,23 @@ elFinder.prototype.commands.places = function() {
 		var o       = this.options, 
 			win     = this.window,
 			preview = this.preview,
-			i, p, curCwd, cwdDispInlineRegex;
+			i, p, cwdDispInlineRegex;
 		
 		width  = o.width  > 0 ? parseInt(o.width)  : 450;	
 		height = o.height > 0 ? parseInt(o.height) : 300;
+		if (o.dockHeight !== 'auto') {
+			dockHeight = parseInt(o.dockHeight);
+			if (! dockHeight) {
+				dockHeight = void(0);
+			}
+		}
 
 		fm.one('load', function() {
+			
+			dockEnabled = fm.getUI('navdock').data('dockEnabled');
+			
+			! dockEnabled && titleDock.hide();
+			
 			parent = fm.getUI();
 			cwd    = fm.getUI('cwd');
 
@@ -23102,8 +23415,8 @@ elFinder.prototype.commands.places = function() {
 			
 			// close window on escape
 			$(document).on('keydown.'+fm.namespace, function(e) {
-				e.keyCode == $.ui.keyCode.ESCAPE && self.opened() && win.trigger('close')
-			})
+				e.keyCode == $.ui.keyCode.ESCAPE && self.opened() && ! self.docked() && win.trigger('close');
+			});
 			
 			if ($.fn.resizable) {
 				win.resizable({ 
@@ -23123,14 +23436,17 @@ elFinder.prototype.commands.places = function() {
 					setTimeout(function() {
 						if (self.value) {
 							if (self.value.tmb && self.value.tmb == 1) {
+								// try re-get file object
 								self.value = Object.assign({}, fm.file(self.value.hash));
 							}
 							preview.trigger($.Event('update', {file : self.value}));
 						} else {
-							navtrigger(rightKey);
-							setTimeout(function() {
-								! self.value && win.trigger('close');
-							}, 10);
+							if (state != docked) {
+								navtrigger(rightKey);
+								setTimeout(function() {
+									! self.value && win.trigger('close');
+								}, 10);
+							}
 						}
 					}, 10);
 				}
@@ -23160,6 +23476,8 @@ elFinder.prototype.commands.places = function() {
 						//  do not preview of file that size = 0
 						e.stopImmediatePropagation();
 					}
+				} else {
+					self.dispInlineRegex = /^$/;
 				}
 				
 				self.info.show();
@@ -23170,16 +23488,23 @@ elFinder.prototype.commands.places = function() {
 					new plugin(self)
 				}
 			});
-		});
-		
-		fm.bind('open',function() {
-			var prevCwd = curCwd;
+		}).one('open', function() {
+			var dock = fm.storage('previewDocked') || (o.docked? 1 : 0);
+			if (dockEnabled && dock >= 1) {
+				self.exec();
+				self.window.trigger('navdockin', { init : true });
+				self.update(void(0), fm.cwd());
+			}
+		}).bind('open', function() {
+			var prevCwd = cwdHash;
 			
 			// change cwd
-			curCwd = fm.cwd().hash;
-			if (self.opened() && prevCwd !== curCwd) {
+			cwdHash = fm.cwd().hash;
+			if (self.opened() && state != docked && prevCwd !== cwdHash) {
 				win.trigger('close');
 			}
+			
+			self.value = fm.cwd();
 			
 			// set current volume dispInlineRegex
 			try {
@@ -23188,21 +23513,20 @@ elFinder.prototype.commands.places = function() {
 				cwdDispInlineRegex = /^$/;
 			}
 		});
-		
-		fm.bind('destroy', function() {
-			self.window.remove();
-		});
 	};
 	
 	this.getstate = function() {
 		var fm  = this.fm,
 			sel = fm.selected(),
 			chk = sel.length === 1 && $('#'+fm.cwdHash2Id(sel[0])).length;
-		return chk? state == opened ? 1 : 0 : -1;
+		return chk? (self.opened()? 1 : 0) : -1;
 	};
 	
 	this.exec = function() {
-		this.enabled() && this.window.trigger(this.opened() ? 'close' : 'open');
+		if (state != docked) {
+			this.closed() && updateOnSel();
+			this.enabled() && this.window.trigger(this.opened() ? 'close' : 'open');
+		}
 	};
 
 	this.hideinfo = function() {
