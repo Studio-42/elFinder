@@ -357,7 +357,12 @@
 	this.info = $('<div/>').addClass(infocls)
 		.append(icon)
 		.append(info);
-		
+	this.autoPlay = function() {
+		if (self.opened()) {
+			return !! self.options[self.docked()? 'dockAutoplay' : 'autoplay'];
+		}
+		return false;
+	};
 	this.preview = $('<div class="elfinder-quicklook-preview ui-helper-clearfix"/>')
 		// clean info/icon
 		.on('change', function() {

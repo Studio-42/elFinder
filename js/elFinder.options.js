@@ -256,6 +256,8 @@ elFinder.prototype._options = {
 			docked   : false,
 			// Docked preview height ('auto' or Number of pixel) 'auto' is setted to the Navbar width
 			dockHeight : 'auto',
+			// media auto play when docked
+			dockAutoplay : false,
 			// MIME types to use Google Docs online viewer
 			// Example ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
 			googleDocsMimes : [],

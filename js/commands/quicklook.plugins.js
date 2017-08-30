@@ -248,7 +248,6 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 **/
 	function(ql) {
 		var preview  = ql.preview,
-			autoplay = !!ql.options['autoplay'],
 			mimes    = {
 				'audio/mpeg'    : 'mp3',
 				'audio/mpeg3'   : 'mp3',
@@ -272,6 +271,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on('update', function(e) {
 			var file = e.file,
 				type = mimes[file.mime],
+				autoplay = ql.autoPlay(),
 				setNavi = function() {
 					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
 				};
@@ -313,7 +313,6 @@ elFinder.prototype.commands.quicklook.plugins = [
 	function(ql) {
 		var fm       = ql.fm,
 			preview  = ql.preview,
-			autoplay = !!ql.options['autoplay'],
 			mimes    = {
 				'video/mp4'       : 'mp4',
 				'video/x-m4v'     : 'mp4',
@@ -332,6 +331,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 
 		preview.on('update', function(e) {
 			var file = e.file,
+				autoplay = ql.autoPlay(),
 				type = mimes[file.mime.toLowerCase()],
 				setNavi = function() {
 					if (fm.UA.iOS) {
