@@ -372,7 +372,9 @@
 	transform-origin: 54px -24px;
 	transform: scale(.6);
 }
-/* thumbnail image overlay none */
+/* thumbnail image and draging icon overlay none */
+.elfinder-cwd-icon.elfinder-cwd-icon-drag:before,
+.elfinder-cwd-icon.elfinder-cwd-icon-drag:after,
 .elfinder-cwd-icon-image.elfinder-cwd-bgurl:after {
 	content: none;
 }
