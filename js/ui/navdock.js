@@ -111,6 +111,9 @@ $.fn.elfindernavdock = function(fm, opts) {
 						self.resizable('option', 'maxHeight', maxH);
 					});
 				}
+				fm.bind('navbarshow navbarhide', function(e) {
+					self[e.type === 'navbarshow'? 'show' : 'hide']();
+				});
 			});
 		}
 	});
