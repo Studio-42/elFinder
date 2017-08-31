@@ -22,7 +22,7 @@ elFinder.prototype.commands.selectnone = function() {
 	}
 	
 	this.exec = function() {
-		fm.getUI('cwd').click();
+		fm.getUI('cwd').trigger('unselectall');
 		return $.Deferred().resolve();
 	}
 };
