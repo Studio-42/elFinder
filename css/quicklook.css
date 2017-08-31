@@ -216,6 +216,9 @@
 	left: auto;
 	right: 32px;
 }
+.elfinder-rtl .elfinder-navdock .elfinder-quicklook .elfinder-cwd-icon {
+	right: 6px;
+}
 .elfinder-quicklook .elfinder-cwd-icon:before {
 	top: -10px;
 }

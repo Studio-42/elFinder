@@ -446,8 +446,8 @@
 					titleClose, titleDock
 				)
 			),
-			this.preview,
 			self.info.hide(),
+			this.preview,
 			cover.hide(),
 			navbar
 		)
