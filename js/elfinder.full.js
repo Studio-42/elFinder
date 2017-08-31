@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 3332c1f) (2017-08-31)
+ * Version 2.1.28 (2.1-src Nightly: 704e643) (2017-08-31)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8188,7 +8188,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 3332c1f)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 704e643)';
 
 
 
@@ -15299,9 +15299,7 @@ $.fn.elfindernavdock = function(fm, opts) {
 			resize(Math.min(tH, wzH * maxHeight));
 			
 			return self;
-		});
-		
-		self.data('removeNode', function(nodeId, appendTo) {
+		}).data('removeNode', function(nodeId, appendTo) {
 			var cNode = $('#'+nodeId);
 			delete sizeSyncs[nodeId];
 			self.height(self.height() - $('#'+nodeId).outerHeight(true));
@@ -15315,6 +15313,11 @@ $.fn.elfindernavdock = function(fm, opts) {
 				self.height(0).hide();
 			}
 			fm.trigger('wzresize');
+		}).on('touchmove', function(e) {
+			if (! $(e.target).hasClass('elfinder-quicklook-preview')) {
+				// prevent swipe action on contents preview
+				e.stopPropagation();
+			}
 		});
 		
 		if (! opts.disabled) {
@@ -23293,8 +23296,8 @@ elFinder.prototype.commands.places = function() {
 					titleClose, titleDock
 				)
 			),
-			this.preview,
 			self.info.hide(),
+			this.preview,
 			cover.hide(),
 			navbar
 		)
