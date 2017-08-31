@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 5431c7c) (2017-08-31)
+ * Version 2.1.28 (2.1-src Nightly: 3332c1f) (2017-08-31)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8188,7 +8188,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 5431c7c)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 3332c1f)';
 
 
 
@@ -15938,13 +15938,11 @@ $.fn.elfinderplaces = function(fm, opts) {
 						}
 					},
 					out : function(e, ui) {
-						var helper = ui.helper,
-							ctr    = (e.shiftKey||e.ctrlKey||e.metaKey);
+						var helper = ui.helper;
 						e.stopPropagation();
-						helper.toggleClass('elfinder-drag-helper-move elfinder-drag-helper-plus', helper.data('locked')? true : ctr).data('dropover', Math.max(helper.data('dropover') - 1, 0));
+						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus').data('dropover', Math.max(helper.data('dropover') - 1, 0));
 						$(this).removeData('dropover')
 						       .removeClass(dropover);
-						fm.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : helper.data('files'), helper: helper});
 					},
 					drop       : function(e, ui) {
 						var helper  = ui.helper,
