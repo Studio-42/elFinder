@@ -337,7 +337,7 @@ abstract class elFinderVolumeDriver {
 		'uploadAllow'     => array(),
 		// mimetypes not allowed to upload
 		'uploadDeny'      => array(),
-		// order to proccess uploadAllow and uploadDeny options
+		// order to process uploadAllow and uploadDeny options
 		'uploadOrder'     => array('deny', 'allow'),
 		// maximum upload file size. NOTE - this is size for every uploaded files
 		'uploadMaxSize'   => 0,

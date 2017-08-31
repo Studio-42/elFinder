@@ -939,6 +939,7 @@ $.fn.elfindercwd = function(fm, options) {
 								setPos();
 								if (e.type === 'resize') {
 									e.stopPropagation();
+									tableHeader.css(wrapper.position());
 									wrapper.data('width', wrapper.css('overflow', 'hidden').width());
 									wrapper.css('overflow', 'auto');
 									fixTableHeader();
