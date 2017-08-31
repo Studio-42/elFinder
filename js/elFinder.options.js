@@ -910,6 +910,23 @@ elFinder.prototype._options = {
 	validName : false,
 	
 	/**
+	 * Additional rule to filtering for browsing.
+	 * This setting does not have a sense of security.
+	 * 
+	 * The object `this` is elFinder instance object in this function
+	 *
+	 * @type false|RegExp|function
+	 * @default  false
+	 * @example
+	 *  show only png and jpg files:
+	 *  fileFilter : /.*\.(png|jpg)$/i,
+	 *  
+	 *  show only image type files:
+	 *  fileFilter : function(file) { return file.mime && file.mime.match(/^image\//i); },
+	 */
+	fileFilter : false,
+	
+	/**
 	 * Backup name suffix.
 	 *
 	 * @type String
