@@ -6356,6 +6356,21 @@ elFinder.prototype = {
 	 */
 	normalize : function(data) {
 		var self   = this,
+			fileFilter = (function() {
+				var func, filter;
+				if (filter = self.options.fileFilter) {
+					if (typeof filter === 'function') {
+						func = function(file) {
+							return filter.call(self, file);
+						}
+					} else if (filter instanceof RegExp) {
+						func = function(file) {
+							return filter.test(file.name);
+						}
+					}
+				}
+				return func? func : null;
+			})(),
 			chkCmdMap = function(opts) {
 				// Disable command to replace with other command
 				var disabled;
@@ -6395,10 +6410,6 @@ elFinder.prototype = {
 				if (file && file.hash && file.name && file.mime) {
 					if (file.mime == 'application/x-empty') {
 						file.mime = 'text/plain';
-					}
-
-					if (file.options) {
-						self.optionsByHashes[file.hash] = normalizeOptions(file.options);
 					}
 					
 					isRoot = self.isRoot(file);
@@ -6510,7 +6521,20 @@ elFinder.prototype = {
 						if (self.trashes[file.hash]) {
 							file.locked = true;
 						}
+					} else if (fileFilter) {
+						try {
+							if (! fileFilter(file)) {
+								return null;
+							}
+						} catch(e) {
+							self.debug(e);
+						}
 					}
+					
+					if (file.options) {
+						self.optionsByHashes[file.hash] = normalizeOptions(file.options);
+					}
+					
 					delete file.options;
 					
 					return file;
