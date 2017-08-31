@@ -83,11 +83,6 @@ $.fn.elfindernavdock = function(fm, opts) {
 				self.height(0).hide();
 			}
 			fm.trigger('wzresize');
-		}).on('touchmove', function(e) {
-			if (! $(e.target).hasClass('elfinder-quicklook-preview')) {
-				// prevent swipe action on contents preview
-				e.stopPropagation();
-			}
 		});
 		
 		if (! opts.disabled) {

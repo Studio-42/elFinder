@@ -200,7 +200,12 @@ elFinder.prototype.commands.quicklook.plugins = [
 						node.append('<div class="elfinder-quicklook-preview-charsleft"><hr/><span>' + fm.i18n('charsLeft', fm.toLocaleString(more)) + '</span></div>');
 					}
 					
-					node.appendTo(preview);
+					node.on('touchstart', function(e) {
+						var scrL, scrR;
+						if ((scrL = node.scrollLeft()) || (scrR = node.scrollRight())) {
+							((fm.direction === 'ltr'? scrR : scrL) > 5) && (e.originalEvent._preventSwipe = true);
+						}
+					}).appendTo(preview);
 					
 					PRcheck(node, 100);
 				})
@@ -592,7 +597,14 @@ elFinder.prototype.commands.quicklook.plugins = [
 									filenames.sort();
 									loading.remove();
 									header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>'
-									doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>').appendTo(preview);
+									doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>')
+										.on('touchstart', function(e) {
+											var scrL, scrR;
+											if ((scrL = doc.scrollLeft()) || (scrR = doc.scrollRight())) {
+												((fm.direction === 'ltr'? scrR : scrL) > 5) && (e.originalEvent._preventSwipe = true);
+											}
+										})
+										.appendTo(preview);
 									ql.hideinfo();
 								}
 							}, 70);
