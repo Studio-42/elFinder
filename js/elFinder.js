@@ -4208,7 +4208,7 @@ var elFinder = function(node, opts, bootCallback) {
 					handleW, handleH = 50;
 
 				node.on('touchstart touchmove touchend', function(e) {
-					if (e.type === 'touchend') {
+					if (e.type === 'touchend' || e.originalEvent._preventSwipe) {
 						lastX = false;
 						lastY = false;
 						moveOff();
@@ -4239,11 +4239,10 @@ var elFinder = function(node, opts, bootCallback) {
 								}
 							} else {
 								navbarW = navbar.width();
-								treeWidth = Math.max.apply(Math, $.map(navbar.children('.elfinder-tree'), function(c){return $(c).width();}));
 								if (ltr) {
-									swipeX = (x < nodeOffset.left + navbarW && treeWidth - navbar.scrollLeft() - 5 <= navbarW);
+									swipeX = (x < nodeOffset.left + navbarW);
 								} else {
-									swipeX = (x > nodeOffset.left + nodeWidth - navbarW && treeWidth - navbar.scrollRight() - 5 <= navbarW);
+									swipeX = (x > nodeOffset.left + nodeWidth - navbarW);
 								}
 								if (swipeX) {
 									handleW = Math.max(50, nodeWidth / 10);

@@ -310,7 +310,7 @@ if (! $.fn.scrollRight) {
 	$.fn.extend({
 		scrollRight: function (val) {
 			if (val === undefined) {
-				return this[0].scrollWidth - (this[0].scrollLeft + this[0].clientWidth) + 1;
+				return Math.max(0, this[0].scrollWidth - (this[0].scrollLeft + this[0].clientWidth));
 			}
 			return this.scrollLeft(this[0].scrollWidth - this[0].clientWidth - val);
 		}
