@@ -273,9 +273,9 @@ task('misc', function(){
 	// copyFile(hs, hd);
 
 	// connector
-	var cs = path.join(src, 'php', 'connector.minimal.php-dist');
-	var cd = path.join('php', 'connector.php-dist');
-	copyFile(cs, cd);
+	//var cs = path.join(src, 'php', 'connector.minimal.php-dist');
+	//var cd = path.join('php', 'connector.php-dist');
+	//copyFile(cs, cd);
 });
 
 desc('uglify js/extras');
