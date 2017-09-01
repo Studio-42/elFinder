@@ -201,9 +201,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 					}
 					
 					node.on('touchstart', function(e) {
-						var scrL, scrR;
-						if ((scrL = node.scrollLeft()) || (scrR = node.scrollRight())) {
-							((fm.direction === 'ltr'? scrR : scrL) > 5) && (e.originalEvent._preventSwipe = true);
+						if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
+							e.originalEvent._preventSwipe = true;
 						}
 					}).appendTo(preview);
 					
@@ -599,9 +598,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 									header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>'
 									doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>')
 										.on('touchstart', function(e) {
-											var scrL, scrR;
-											if ((scrL = doc.scrollLeft()) || (scrR = doc.scrollRight())) {
-												((fm.direction === 'ltr'? scrR : scrL) > 5) && (e.originalEvent._preventSwipe = true);
+											if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
+												e.originalEvent._preventSwipe = true;
 											}
 										})
 										.appendTo(preview);
