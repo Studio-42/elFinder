@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: fade28f) (2017-08-31)
+ * Version 2.1.28 (2.1-src Nightly: e9d2b09) (2017-09-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8187,7 +8187,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: fade28f)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: e9d2b09)';
 
 
 
@@ -15154,9 +15154,8 @@ $.fn.elfindernavbar = function(fm, opts) {
 				autoHide.navbar = (mode !== 'show');
 				fm.storage('autoHide', Object.assign(fm.storage('autoHide'), {navbar: autoHide.navbar}));
 			}).on('touchstart', function(e) {
-				var scrL, scrR;
-				if ((scrL = nav.scrollLeft()) || (scrR = nav.scrollRight())) {
-					((fm.direction === 'ltr'? scrR : scrL) > 5) && (e.originalEvent._preventSwipe = true);
+				if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
+					e.originalEvent._preventSwipe = true;
 				}
 			});
 		}
@@ -23843,9 +23842,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 					}
 					
 					node.on('touchstart', function(e) {
-						var scrL, scrR;
-						if ((scrL = node.scrollLeft()) || (scrR = node.scrollRight())) {
-							((fm.direction === 'ltr'? scrR : scrL) > 5) && (e.originalEvent._preventSwipe = true);
+						if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
+							e.originalEvent._preventSwipe = true;
 						}
 					}).appendTo(preview);
 					
@@ -24241,9 +24239,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 									header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>'
 									doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>')
 										.on('touchstart', function(e) {
-											var scrL, scrR;
-											if ((scrL = doc.scrollLeft()) || (scrR = doc.scrollRight())) {
-												((fm.direction === 'ltr'? scrR : scrL) > 5) && (e.originalEvent._preventSwipe = true);
+											if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
+												e.originalEvent._preventSwipe = true;
 											}
 										})
 										.appendTo(preview);
