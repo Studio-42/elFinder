@@ -18,10 +18,10 @@ $.fn.elfindernavdock = function(fm, opts) {
 				if (diff) {
 					ovf = self.css('overflow');
 					self.css('overflow', 'hidden');
+					self.height(to);
 					$.each(sizeSyncs, function(id, n) {
 						n.height(n.height() + calc).trigger('resize.' + fm.namespace);
 					});
-					self.height(to);
 					fm.trigger('wzresize');
 					self.css('overflow', ovf);
 				}
@@ -30,7 +30,8 @@ $.fn.elfindernavdock = function(fm, opts) {
 			sizeSyncs = {},
 			resizeFn = [],
 			initMaxHeight = (parseInt(opts.initMaxHeight) || 50) / 100,
-			maxHeight = (parseInt(opts.maxHeight) || 90) / 100;
+			maxHeight = (parseInt(opts.maxHeight) || 90) / 100,
+			basicHeight;
 		
 		
 		self.data('addNode', function(cNode, opts) {
@@ -65,6 +66,7 @@ $.fn.elfindernavdock = function(fm, opts) {
 				} else {
 					tH = tH > imaxH? imaxH : tH;
 				}
+				basicHeight = tH;
 			}
 			resize(Math.min(tH, wzH * maxHeight));
 			
@@ -93,20 +95,33 @@ $.fn.elfindernavdock = function(fm, opts) {
 						maxHeight: fm.getUI('workzone').height() * maxHeight,
 						handles: { n: handle },
 						resize: function(e, ui) {
-							fm.trigger('wzresize');
+							fm.trigger('wzresize', { inNavdockResize : true });
 						},
 						stop: function(e, ui) {
 							self.css('top', '');
-							fm.storage('navdockHeight', ui.size.height);
-							resize(ui.size.height, ui.originalSize.height);
+							basicHeight = ui.size.height;
+							fm.storage('navdockHeight', basicHeight);
+							resize(basicHeight, ui.originalSize.height);
 						}
 					});
-					fm.bind('wzresize', function() {
-						var maxH = fm.getUI('workzone').height() * maxHeight;
-						if (self.height() > maxH) {
-							resize(maxH);
+					fm.bind('wzresize', function(e) {
+						var minH, maxH, h;
+						if (self.is(':visible')) {
+							maxH = fm.getUI('workzone').height() * maxHeight;
+							if (! e.data || ! e.data.inNavdockResize) {
+								h = self.height();
+								if (maxH < basicHeight) {
+									if (Math.abs(h - maxH) > 1) {
+										resize(maxH);
+									}
+								} else {
+									if (Math.abs(h - basicHeight) > 1) {
+										resize(basicHeight);
+									}
+								}
+							}
+							self.resizable('option', 'maxHeight', maxH);
 						}
-						self.resizable('option', 'maxHeight', maxH);
 					});
 				}
 				fm.bind('navbarshow navbarhide', function(e) {
