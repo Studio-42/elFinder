@@ -764,6 +764,16 @@
 			} catch(e) {
 				cwdDispInlineRegex = /^$/;
 			}
+		}).bind('change', function(e) {
+			if (e.data && e.data.changed && self.opened()) {
+				$.each(e.data.changed, function() {
+					if (self.window.data('hash') === this.hash) {
+						self.window.data('hash', null);
+						self.preview.trigger('update');
+						return false;
+					}
+				});
+			}
 		});
 	};
 	
