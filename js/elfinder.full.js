@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 6494055) (2017-09-02)
+ * Version 2.1.28 (2.1-src Nightly: a490530) (2017-09-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -3347,7 +3347,7 @@ var elFinder = function(node, opts, bootCallback) {
 	/*************  init stuffs  ****************/
 	
 	// check jquery ui
-	if (!($.fn.selectable && $.fn.draggable && $.fn.droppable)) {
+	if (!($.fn.selectable && $.fn.draggable && $.fn.droppable && $.fn.resizable)) {
 		return alert(this.i18n('errJqui'));
 	}
 
@@ -4188,7 +4188,7 @@ var elFinder = function(node, opts, bootCallback) {
 		self.resize(width, height);
 		
 		// make node resizable
-		if (self.options.resizable && $.fn.resizable) {
+		if (self.options.resizable) {
 			node.resizable({
 				resize    : function(e, ui) {
 					self.resize(ui.size.width, ui.size.height);
@@ -8190,7 +8190,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 6494055)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: a490530)';
 
 
 
@@ -13375,41 +13375,39 @@ $.fn.elfindercwd = function(fm, options) {
 						});
 					}
 
-					if ($.fn.resizable) {
-						thtr.find('td').addClass('touch-punch').resizable({
-							handles: fm.direction === 'ltr'? 'e' : 'w',
-							start: function(e, ui) {
-								var target = cwd.find('td.elfinder-col-'
-									+ ui.element.attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '')
-									+ ':first');
-								
-								ui.element
-									.data('resizeTarget', target)
-									.data('targetWidth', target.width());
-								colResizing = true;
-								if (cwd.find('table').css('table-layout') !== 'fixed') {
-									cwd.find('tbody tr:first td').each(function() {
-										$(this).width($(this).width());
-									});
-									cwd.find('table').css('table-layout', 'fixed');
-								}
-							},
-							resize: function(e, ui) {
-								ui.element.data('resizeTarget').width(ui.element.data('targetWidth') - (ui.originalSize.width - ui.size.width));
-							},
-							stop : function() {
-								colResizing = false;
-								fixTableHeader({fitWidth: true});
-								colWidth = {};
+					thtr.find('td').addClass('touch-punch').resizable({
+						handles: fm.direction === 'ltr'? 'e' : 'w',
+						start: function(e, ui) {
+							var target = cwd.find('td.elfinder-col-'
+								+ ui.element.attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '')
+								+ ':first');
+							
+							ui.element
+								.data('resizeTarget', target)
+								.data('targetWidth', target.width());
+							colResizing = true;
+							if (cwd.find('table').css('table-layout') !== 'fixed') {
 								cwd.find('tbody tr:first td').each(function() {
-									var name = $(this).attr('class').split(' ')[0].replace('elfinder-col-', '');
-									colWidth[name] = $(this).width();
+									$(this).width($(this).width());
 								});
-								fm.storage('cwdColWidth', colWidth);
+								cwd.find('table').css('table-layout', 'fixed');
 							}
-						})
-						.find('.ui-resizable-handle').addClass('ui-icon ui-icon-grip-dotted-vertical');
-					}
+						},
+						resize: function(e, ui) {
+							ui.element.data('resizeTarget').width(ui.element.data('targetWidth') - (ui.originalSize.width - ui.size.width));
+						},
+						stop : function() {
+							colResizing = false;
+							fixTableHeader({fitWidth: true});
+							colWidth = {};
+							cwd.find('tbody tr:first td').each(function() {
+								var name = $(this).attr('class').split(' ')[0].replace('elfinder-col-', '');
+								colWidth[name] = $(this).width();
+							});
+							fm.storage('cwdColWidth', colWidth);
+						}
+					})
+					.find('.ui-resizable-handle').addClass('ui-icon ui-icon-grip-dotted-vertical');
 				}
 
 				fm.lazy(function() {
@@ -14986,7 +14984,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 		
 		dialog.trigger('posinit').data('margin-y', self.outerHeight(true) - self.height());
 		
-		if (opts.resizable && $.fn.resizable) {
+		if (opts.resizable) {
 			dialog.resizable({
 				minWidth   : opts.minWidth,
 				minHeight  : opts.minHeight,
@@ -15161,7 +15159,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 			});
 		}
 		
-		if ($.fn.resizable && ! fm.UA.Mobile) {
+		if (! fm.UA.Mobile) {
 			handle = nav.resizable({
 					handles : ltr ? 'e' : 'w',
 					minWidth : opts.minWidth || 150,
@@ -23143,7 +23141,7 @@ elFinder.prototype.commands.places = function() {
 				if (parent.is('.ui-resizable')) {
 					collection = collection.add(parent);
 				};
-				$.fn.resizable && collection.resizable(full ? 'enable' : 'disable').removeClass('ui-state-disabled');
+				collection.resizable(full ? 'enable' : 'disable').removeClass('ui-state-disabled');
 
 				win.trigger('viewchange');
 			}
@@ -23549,18 +23547,16 @@ elFinder.prototype.commands.places = function() {
 				e.keyCode == $.ui.keyCode.ESCAPE && self.opened() && ! self.docked() && win.trigger('close');
 			});
 			
-			if ($.fn.resizable) {
-				win.resizable({ 
-					handles   : 'se', 
-					minWidth  : 350, 
-					minHeight : 120, 
-					resize    : function() { 
-						// use another event to avoid recursion in fullscreen mode
-						// may be there is clever solution, but i cant find it :(
-						preview.trigger('changesize'); 
-					}
-				});
-			}
+			win.resizable({ 
+				handles   : 'se', 
+				minWidth  : 350, 
+				minHeight : 120, 
+				resize    : function() { 
+					// use another event to avoid recursion in fullscreen mode
+					// may be there is clever solution, but i cant find it :(
+					preview.trigger('changesize'); 
+				}
+			});
 			
 			self.change(function() {
 				if (self.opened()) {
@@ -25639,62 +25635,55 @@ elFinder.prototype.commands.resize = function() {
 						}
 					},
 					resizable = function(destroy) {
-						if ($.fn.resizable) {
-							if (destroy) {
-								rhandle.filter(':ui-resizable').resizable('destroy');
-								rhandle.hide();
-							}
-							else {
-								rhandle.show();
-								rhandle.resizable({
-									alsoResize  : img,
-									aspectRatio : cratio,
-									resize      : resize.update,
-									stop        : resize.fixHeight
-								});
-								dinit();
-							}
+						if (destroy) {
+							rhandle.filter(':ui-resizable').resizable('destroy');
+							rhandle.hide();
+						}
+						else {
+							rhandle.show();
+							rhandle.resizable({
+								alsoResize  : img,
+								aspectRatio : cratio,
+								resize      : resize.update,
+								stop        : resize.fixHeight
+							});
+							dinit();
 						}
 					},
 					croppable = function(destroy) {
-						if ($.fn.draggable && $.fn.resizable) {
-							if (destroy) {
-								rhandlec.filter(':ui-resizable').resizable('destroy')
-									.filter(':ui-draggable').draggable('destroy');
-								basec.hide();
-							}
-							else {
-								basec.show();
-								
-								rhandlec
-									.resizable({
-										containment : basec,
-										aspectRatio : cratioc,
-										resize      : crop.resize_update,
-										handles     : 'all'
-									})
-									.draggable({
-										handle      : coverc,
-										containment : imgc,
-										drag        : crop.drag_update,
-										stop        : function() { crop.updateView('xy'); }
-									});
-								
-								dinit();
-								crop.update();
-							}
+						if (destroy) {
+							rhandlec.filter(':ui-resizable').resizable('destroy')
+								.filter(':ui-draggable').draggable('destroy');
+							basec.hide();
+						}
+						else {
+							basec.show();
+							
+							rhandlec
+								.resizable({
+									containment : basec,
+									aspectRatio : cratioc,
+									resize      : crop.resize_update,
+									handles     : 'all'
+								})
+								.draggable({
+									handle      : coverc,
+									containment : imgc,
+									drag        : crop.drag_update,
+									stop        : function() { crop.updateView('xy'); }
+								});
+							
+							dinit();
+							crop.update();
 						}
 					},
 					rotateable = function(destroy) {
-						if ($.fn.draggable && $.fn.resizable) {
-							if (destroy) {
-								imgr.hide();
-							}
-							else {
-								imgr.show();
-								dinit();
-
-							}
+						if (destroy) {
+							imgr.hide();
+						}
+						else {
+							imgr.show();
+							dinit();
 						}
 					},
 					checkVals = function() {
