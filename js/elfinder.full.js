@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 1f3bb85) (2017-09-02)
+ * Version 2.1.28 (2.1-src Nightly: 6494055) (2017-09-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -1575,6 +1575,9 @@ var elFinder = function(node, opts, bootCallback) {
 				url = tmbUrl + file.tmb;
 			}
 			if (url) {
+				if (file.ts) {
+					url += (url.match(/\?/)? '&' : '?') + '_t=' + file.ts;
+				}
 				return { url: url, className: cls };
 			}
 		}
@@ -8187,7 +8190,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 1f3bb85)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 6494055)';
 
 
 
@@ -12929,9 +12932,7 @@ $.fn.elfindercwd = function(fm, options) {
 								}
 								tmbObj = fm.tmb(file);
 								if (reload) {
-									fm.reloadContents(tmbObj.url).done(function() {
-										node.find('.elfinder-cwd-icon').addClass(tmbObj.className).css('background-image', "url('"+tmbObj.url+"')");
-									});
+									node.find('.elfinder-cwd-icon').addClass(tmbObj.className).css('background-image', "url('"+tmbObj.url+"')");
 								} else {
 									attach(node, tmbObj);
 								}
@@ -23642,6 +23643,16 @@ elFinder.prototype.commands.places = function() {
 			} catch(e) {
 				cwdDispInlineRegex = /^$/;
 			}
+		}).bind('change', function(e) {
+			if (e.data && e.data.changed && self.opened()) {
+				$.each(e.data.changed, function() {
+					if (self.window.data('hash') === this.hash) {
+						self.window.data('hash', null);
+						self.preview.trigger('update');
+						return false;
+					}
+				});
+			}
 		});
 	};
 	
@@ -24823,26 +24834,7 @@ elFinder.prototype.commands.resize = function() {
 				data : Object.assign(data, {
 					cmd : 'resize'
 				}),
-				notify : {type : 'resize', cnt : 1},
-				prepare : function(data) {
-					var newfile;
-					if (data) {
-						if (data.added && data.added.length && data.added[0].tmb) {
-							newfile = data.added[0];
-						} else if (data.changed && data.changed.length && data.changed[0].tmb) {
-							newfile = data.changed[0];
-						}
-						if (newfile) {
-							file = newfile;
-							src = fm.openUrl(file.hash);
-							if (file.tmb && file.tmb != '1' && (file.tmb === tmb)) {
-								file.tmb = '';
-								return;
-							}
-						}
-					}
-					tmb = '';
-				}
+				notify : {type : 'resize', cnt : 1}
 			})
 			.fail(function(error) {
 				if (dfrd) {
@@ -24851,15 +24843,6 @@ elFinder.prototype.commands.resize = function() {
 			})
 			.done(function() {
 				var url = (file.url != '1')? fm.url(file.hash) : '';
-				
-				// need tmb reload
-				if (tmb) {
-					fm.one('resizedone', function() {
-						fm.reloadContents(fm.tmb(file).url).done(function() {
-							fm.trigger('tmbreload', {files: [ {hash: file.hash, tmb: tmb} ]});
-						});
-					});
-				}
 				
 				fm.reloadContents(src);
 				if (url && url !== src) {
