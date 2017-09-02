@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 3d37094) (2017-09-02)
+ * Version 2.1.28 (2.1-src Nightly: f18afa5) (2017-09-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8195,7 +8195,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 3d37094)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: f18afa5)';
 
 
 
@@ -25001,6 +25001,7 @@ elFinder.prototype.commands.resize = function() {
 								}
 							})
 						.end(),
+					pickimg,
 					pickcanv,
 					pickctx,
 					pickc = {},
@@ -25133,7 +25134,11 @@ elFinder.prototype.commands.resize = function() {
 						})
 						.button(),
 					setuprimg = function() {
-						var r_scale;
+						var r_scale,
+							fail = function() {
+								bg.parent().hide();
+								pallet.hide();
+							};
 						r_scale = Math.min(pwidth, pheight) / Math.sqrt(Math.pow(owidth, 2) + Math.pow(oheight, 2));
 						rwidth = Math.ceil(owidth * r_scale);
 						rheight = Math.ceil(oheight * r_scale);
@@ -25144,14 +25149,19 @@ elFinder.prototype.commands.resize = function() {
 						if (imgr.is(':visible') && bg.is(':visible')) {
 							if (file.mime !== 'image/png') {
 								preview.css('backgroundColor', bg.val());
-								setTimeout(function() {
+								pickimg = $('<img>');
+								if (fm.isCORS) {
+									pickimg.attr('crossorigin', 'use-credentials');
+								}
+								pickimg.on('load', function() {
 									if (pickcanv && pickcanv.width !== rwidth) {
 										setColorData();
 									}
-								}, 0);
+								})
+								.on('error', fail)
+								.attr('src', fm.openUrl(file.hash, fm.isCORS? true : false));
 							} else {
-								bg.parent().hide();
-								pallet.hide()
+								fail();
 							}
 						}
 					},
@@ -25202,7 +25212,7 @@ elFinder.prototype.commands.resize = function() {
 								h = pickcanv.height = imgr.height();
 								scale = w / owidth;
 								pickctx.scale(scale, scale);
-								pickctx.drawImage(imgr.get(0), 0, 0);
+								pickctx.drawImage(pickimg.get(0), 0, 0);
 			
 								data = pickctx.getImageData(0, 0, w, h).data;
 			
@@ -25807,7 +25817,7 @@ elFinder.prototype.commands.resize = function() {
 					hline   = 'elfinder-resize-handle-hline',
 					vline   = 'elfinder-resize-handle-vline',
 					rpoint  = 'elfinder-resize-handle-point',
-					src     = fm.openUrl(file.hash, fm.isCORS? true : false),
+					src     = fm.openUrl(file.hash),
 					dinit   = function() {
 						if (base.hasClass('elfinder-dialog-minimized')) {
 							return;
@@ -25897,11 +25907,6 @@ elFinder.prototype.commands.resize = function() {
 					useSaveAs = fm.uploadMimeCheck(file.mime, file.phash),
 					dMinBtn, base;
 				
-				if (fm.isCORS) {
-					img.attr('crossorigin', 'use-credentials');
-					imgc.attr('crossorigin', 'use-credentials');
-					imgr.attr('crossorigin', 'use-credentials');
-				}
 				imgr.mousedown( rotate.start );
 				$(document).mouseup( rotate.stop );
 					
