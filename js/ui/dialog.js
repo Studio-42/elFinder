@@ -581,7 +581,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 		
 		dialog.trigger('posinit').data('margin-y', self.outerHeight(true) - self.height());
 		
-		if (opts.resizable && $.fn.resizable) {
+		if (opts.resizable) {
 			dialog.resizable({
 				minWidth   : opts.minWidth,
 				minHeight  : opts.minHeight,

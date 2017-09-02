@@ -1579,41 +1579,39 @@ $.fn.elfindercwd = function(fm, options) {
 						});
 					}
 
-					if ($.fn.resizable) {
-						thtr.find('td').addClass('touch-punch').resizable({
-							handles: fm.direction === 'ltr'? 'e' : 'w',
-							start: function(e, ui) {
-								var target = cwd.find('td.elfinder-col-'
-									+ ui.element.attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '')
-									+ ':first');
-								
-								ui.element
-									.data('resizeTarget', target)
-									.data('targetWidth', target.width());
-								colResizing = true;
-								if (cwd.find('table').css('table-layout') !== 'fixed') {
-									cwd.find('tbody tr:first td').each(function() {
-										$(this).width($(this).width());
-									});
-									cwd.find('table').css('table-layout', 'fixed');
-								}
-							},
-							resize: function(e, ui) {
-								ui.element.data('resizeTarget').width(ui.element.data('targetWidth') - (ui.originalSize.width - ui.size.width));
-							},
-							stop : function() {
-								colResizing = false;
-								fixTableHeader({fitWidth: true});
-								colWidth = {};
+					thtr.find('td').addClass('touch-punch').resizable({
+						handles: fm.direction === 'ltr'? 'e' : 'w',
+						start: function(e, ui) {
+							var target = cwd.find('td.elfinder-col-'
+								+ ui.element.attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '')
+								+ ':first');
+							
+							ui.element
+								.data('resizeTarget', target)
+								.data('targetWidth', target.width());
+							colResizing = true;
+							if (cwd.find('table').css('table-layout') !== 'fixed') {
 								cwd.find('tbody tr:first td').each(function() {
-									var name = $(this).attr('class').split(' ')[0].replace('elfinder-col-', '');
-									colWidth[name] = $(this).width();
+									$(this).width($(this).width());
 								});
-								fm.storage('cwdColWidth', colWidth);
+								cwd.find('table').css('table-layout', 'fixed');
 							}
-						})
-						.find('.ui-resizable-handle').addClass('ui-icon ui-icon-grip-dotted-vertical');
-					}
+						},
+						resize: function(e, ui) {
+							ui.element.data('resizeTarget').width(ui.element.data('targetWidth') - (ui.originalSize.width - ui.size.width));
+						},
+						stop : function() {
+							colResizing = false;
+							fixTableHeader({fitWidth: true});
+							colWidth = {};
+							cwd.find('tbody tr:first td').each(function() {
+								var name = $(this).attr('class').split(' ')[0].replace('elfinder-col-', '');
+								colWidth[name] = $(this).width();
+							});
+							fm.storage('cwdColWidth', colWidth);
+						}
+					})
+					.find('.ui-resizable-handle').addClass('ui-icon ui-icon-grip-dotted-vertical');
 				}
 
 				fm.lazy(function() {

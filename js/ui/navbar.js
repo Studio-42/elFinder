@@ -87,7 +87,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 			});
 		}
 		
-		if ($.fn.resizable && ! fm.UA.Mobile) {
+		if (! fm.UA.Mobile) {
 			handle = nav.resizable({
 					handles : ltr ? 'e' : 'w',
 					minWidth : opts.minWidth || 150,

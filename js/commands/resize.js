@@ -834,62 +834,55 @@ elFinder.prototype.commands.resize = function() {
 						}
 					},
 					resizable = function(destroy) {
-						if ($.fn.resizable) {
-							if (destroy) {
-								rhandle.filter(':ui-resizable').resizable('destroy');
-								rhandle.hide();
-							}
-							else {
-								rhandle.show();
-								rhandle.resizable({
-									alsoResize  : img,
-									aspectRatio : cratio,
-									resize      : resize.update,
-									stop        : resize.fixHeight
-								});
-								dinit();
-							}
+						if (destroy) {
+							rhandle.filter(':ui-resizable').resizable('destroy');
+							rhandle.hide();
+						}
+						else {
+							rhandle.show();
+							rhandle.resizable({
+								alsoResize  : img,
+								aspectRatio : cratio,
+								resize      : resize.update,
+								stop        : resize.fixHeight
+							});
+							dinit();
 						}
 					},
 					croppable = function(destroy) {
-						if ($.fn.draggable && $.fn.resizable) {
-							if (destroy) {
-								rhandlec.filter(':ui-resizable').resizable('destroy')
-									.filter(':ui-draggable').draggable('destroy');
-								basec.hide();
-							}
-							else {
-								basec.show();
-								
-								rhandlec
-									.resizable({
-										containment : basec,
-										aspectRatio : cratioc,
-										resize      : crop.resize_update,
-										handles     : 'all'
-									})
-									.draggable({
-										handle      : coverc,
-										containment : imgc,
-										drag        : crop.drag_update,
-										stop        : function() { crop.updateView('xy'); }
-									});
-								
-								dinit();
-								crop.update();
-							}
+						if (destroy) {
+							rhandlec.filter(':ui-resizable').resizable('destroy')
+								.filter(':ui-draggable').draggable('destroy');
+							basec.hide();
+						}
+						else {
+							basec.show();
+							
+							rhandlec
+								.resizable({
+									containment : basec,
+									aspectRatio : cratioc,
+									resize      : crop.resize_update,
+									handles     : 'all'
+								})
+								.draggable({
+									handle      : coverc,
+									containment : imgc,
+									drag        : crop.drag_update,
+									stop        : function() { crop.updateView('xy'); }
+								});
+							
+							dinit();
+							crop.update();
 						}
 					},
 					rotateable = function(destroy) {
-						if ($.fn.draggable && $.fn.resizable) {
-							if (destroy) {
-								imgr.hide();
-							}
-							else {
-								imgr.show();
-								dinit();
-
-							}
+						if (destroy) {
+							imgr.hide();
+						}
+						else {
+							imgr.show();
+							dinit();
 						}
 					},
 					checkVals = function() {

@@ -264,7 +264,7 @@
 				if (parent.is('.ui-resizable')) {
 					collection = collection.add(parent);
 				};
-				$.fn.resizable && collection.resizable(full ? 'enable' : 'disable').removeClass('ui-state-disabled');
+				collection.resizable(full ? 'enable' : 'disable').removeClass('ui-state-disabled');
 
 				win.trigger('viewchange');
 			}
@@ -670,18 +670,16 @@
 				e.keyCode == $.ui.keyCode.ESCAPE && self.opened() && ! self.docked() && win.trigger('close');
 			});
 			
-			if ($.fn.resizable) {
-				win.resizable({ 
-					handles   : 'se', 
-					minWidth  : 350, 
-					minHeight : 120, 
-					resize    : function() { 
-						// use another event to avoid recursion in fullscreen mode
-						// may be there is clever solution, but i cant find it :(
-						preview.trigger('changesize'); 
-					}
-				});
-			}
+			win.resizable({ 
+				handles   : 'se', 
+				minWidth  : 350, 
+				minHeight : 120, 
+				resize    : function() { 
+					// use another event to avoid recursion in fullscreen mode
+					// may be there is clever solution, but i cant find it :(
+					preview.trigger('changesize'); 
+				}
+			});
 			
 			self.change(function() {
 				if (self.opened()) {

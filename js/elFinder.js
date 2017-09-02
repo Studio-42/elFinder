@@ -3316,7 +3316,7 @@ var elFinder = function(node, opts, bootCallback) {
 	/*************  init stuffs  ****************/
 	
 	// check jquery ui
-	if (!($.fn.selectable && $.fn.draggable && $.fn.droppable)) {
+	if (!($.fn.selectable && $.fn.draggable && $.fn.droppable && $.fn.resizable)) {
 		return alert(this.i18n('errJqui'));
 	}
 
@@ -4157,7 +4157,7 @@ var elFinder = function(node, opts, bootCallback) {
 		self.resize(width, height);
 		
 		// make node resizable
-		if (self.options.resizable && $.fn.resizable) {
+		if (self.options.resizable) {
 			node.resizable({
 				resize    : function(e, ui) {
 					self.resize(ui.size.width, ui.size.height);
