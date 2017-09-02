@@ -1582,6 +1582,11 @@ class elFinder {
 			)
 		);
 		
+		// add cache control headers
+		if ($cacheHeaders = $volume->getOption('cacheHeaders')) {
+			$result['header'] = array_merge($result['header'], $cacheHeaders);
+		}
+		
 		// check 'xsendfile'
 		$xsendfile = $volume->getOption('xsendfile');
 		$path = null;
@@ -2848,7 +2853,18 @@ class elFinder {
 			}
 		}
 		
-		$res = array('content' => $content);
+		$res = array(
+			'header'  => array(
+				'Content-Type: application/json'
+			),
+			'content' => $content
+		);
+		
+		// add cache control headers
+		if ($cacheHeaders = $volume->getOption('cacheHeaders')) {
+			$res['header'] = array_merge($res['header'], $cacheHeaders);
+		}
+		
 		if ($enc) {
 			$res['encoding'] = $enc;
 		}
