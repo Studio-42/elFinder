@@ -510,7 +510,7 @@
 			}
 			state = docked;
 			prevStyle = w.attr('style');
-			w.removeClass('ui-widget').draggable('disable').resizable('disable').removeAttr('style').css({
+			w.toggleClass('ui-front').removeClass('ui-widget').draggable('disable').resizable('disable').removeAttr('style').css({
 				width: '100%',
 				height: height,
 				boxSizing: 'border-box',
@@ -537,7 +537,7 @@
 			box.data('removeNode')(w.attr('id'), fm.getUI());
 			
 			dockHeight = w.outerHeight();
-			w.addClass('ui-widget').draggable('enable').resizable('enable').attr('style', prevStyle);
+			w.toggleClass('ui-front').addClass('ui-widget').draggable('enable').resizable('enable').attr('style', prevStyle);
 			navbar.show();
 			titleClose.show();
 			titleDock.toggleClass('ui-icon-plusthick ui-icon-minusthick elfinder-icon-full elfinder-icon-minimize');

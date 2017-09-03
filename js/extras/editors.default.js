@@ -567,6 +567,12 @@
 		},
 		{
 			// CodeMirror
+			// called on initialization of elFinder cmd edit (this: this editor's config object)
+			setup : function(opts, fm) {
+				if (fm.UA.ltIE10) {
+					this.disabled = true;
+				}
+			},
 			// `mimes` is not set for support everything kind of text file
 			info : {
 				name : 'CodeMirror',
@@ -705,6 +711,12 @@
 		},
 		{
 			// SimpleMDE
+			// called on initialization of elFinder cmd edit (this: this editor's config object)
+			setup : function(opts, fm) {
+				if (fm.UA.ltIE10) {
+					this.disabled = true;
+				}
+			},
 			info : {
 				name : 'SimpleMDE',
 				iconImg : 'img/edit_simplemde.png'
