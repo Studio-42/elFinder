@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: f18afa5) (2017-09-03)
+ * Version 2.1.28 (2.1-src Nightly: c95212b) (2017-09-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -4642,6 +4642,12 @@ elFinder.prototype = {
 			ltIE7   : typeof window.addEventListener == "undefined" && typeof document.querySelectorAll == "undefined",
 			// Browser IE <= IE 8
 			ltIE8   : typeof window.addEventListener == "undefined" && typeof document.getElementsByClassName == "undefined",
+			// Browser IE <= IE 9
+			ltIE9  : document.uniqueID && document.documentMode <= 9,
+			// Browser IE <= IE 10
+			ltIE10  : document.uniqueID && document.documentMode <= 10,
+			// Browser IE >= IE 11
+			gtIE11  : document.uniqueID && document.documentMode >= 11,
 			IE      : document.uniqueID,
 			Firefox : window.sidebar,
 			Opera   : window.opera,
@@ -8183,7 +8189,41 @@ if (!Object.assign) {
 		return jQuery.extend.apply(null, arguments);
 	};
 }
-
+// String.repeat
+if (!String.prototype.repeat) {
+	String.prototype.repeat = function(count) {
+		'use strict';
+		if (this == null) {
+			throw new TypeError('can\'t convert ' + this + ' to object');
+		}
+		var str = '' + this;
+		count = +count;
+		if (count != count) {
+			count = 0;
+		}
+		if (count < 0) {
+			throw new RangeError('repeat count must be non-negative');
+		}
+		if (count == Infinity) {
+			throw new RangeError('repeat count must be less than infinity');
+		}
+		count = Math.floor(count);
+		if (str.length == 0 || count == 0) {
+			return '';
+		}
+		// Ensuring count is a 31-bit integer allows us to heavily optimize the
+		// main part. But anyway, most current (August 2014) browsers can't handle
+		// strings 1 << 28 chars or longer, so:
+		if (str.length * count >= 1 << 28) {
+			throw new RangeError('repeat count must not overflow maximum string size');
+		}
+		var rpt = '';
+		for (var i = 0; i < count; i++) {
+			rpt += str;
+		}
+		return rpt;
+	}
+}
 
 
 /*
@@ -8195,7 +8235,7 @@ if (!Object.assign) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: f18afa5)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: c95212b)';
 
 
 
@@ -15332,6 +15372,7 @@ $.fn.elfindernavdock = function(fm, opts) {
 						maxHeight: fm.getUI('workzone').height() * maxHeight,
 						handles: { n: handle },
 						resize: function(e, ui) {
+							self.css('top', '');
 							fm.trigger('wzresize', { inNavdockResize : true });
 						},
 						stop: function(e, ui) {
@@ -23393,7 +23434,7 @@ elFinder.prototype.commands.places = function() {
 			}
 			state = docked;
 			prevStyle = w.attr('style');
-			w.removeClass('ui-widget').draggable('disable').resizable('disable').removeAttr('style').css({
+			w.toggleClass('ui-front').removeClass('ui-widget').draggable('disable').resizable('disable').removeAttr('style').css({
 				width: '100%',
 				height: height,
 				boxSizing: 'border-box',
@@ -23420,7 +23461,7 @@ elFinder.prototype.commands.places = function() {
 			box.data('removeNode')(w.attr('id'), fm.getUI());
 			
 			dockHeight = w.outerHeight();
-			w.addClass('ui-widget').draggable('enable').resizable('enable').attr('style', prevStyle);
+			w.toggleClass('ui-front').addClass('ui-widget').draggable('enable').resizable('enable').attr('style', prevStyle);
 			navbar.show();
 			titleClose.show();
 			titleDock.toggleClass('ui-icon-plusthick ui-icon-minusthick elfinder-icon-full elfinder-icon-minimize');
@@ -24102,7 +24143,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					player.initialize(node[0], fm.openUrl(file.hash), autoplay);
 				};
 			
-			if (ql.dispInlineRegex.test(file.mime) && (type === 'm3u8' || type === 'mpd' || ql.support.video[type])) {
+			if (ql.dispInlineRegex.test(file.mime) && (((type === 'm3u8' || type === 'mpd') && !fm.UA.ltIE10) || ql.support.video[type])) {
 				e.stopImmediatePropagation();
 
 				if (ql.support.video[type] && (type !== 'm3u8' || fm.UA.Safari)) {
