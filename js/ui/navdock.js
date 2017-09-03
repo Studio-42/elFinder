@@ -95,6 +95,7 @@ $.fn.elfindernavdock = function(fm, opts) {
 						maxHeight: fm.getUI('workzone').height() * maxHeight,
 						handles: { n: handle },
 						resize: function(e, ui) {
+							self.css('top', '');
 							fm.trigger('wzresize', { inNavdockResize : true });
 						},
 						stop: function(e, ui) {
