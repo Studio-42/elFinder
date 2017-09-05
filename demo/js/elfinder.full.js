@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: c95212b) (2017-09-04)
+ * Version 2.1.28 (2.1-src Nightly: 37133bb) (2017-09-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -3828,6 +3828,7 @@ var elFinder = function(node, opts, bootCallback) {
 				if (self.i18[lang]) {
 					self.lang = lang;
 				}
+				self.trigger('i18load');
 				i18n = self.lang === 'en' 
 					? self.i18['en'] 
 					: $.extend(true, {}, self.i18['en'], self.i18[self.lang]);
@@ -8235,7 +8236,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: c95212b)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 37133bb)';
 
 
 
@@ -8829,7 +8830,9 @@ elFinder.prototype._options = {
 			height   : 300,
 			// Maximum characters length to preview
 			textMaxlen : 2000,
-			// preview window into NavDock
+			// quicklook window must be contained in elFinder node on window open (true|false)
+			contain : false,
+			// preview window into NavDock (true|false)
 			docked   : false,
 			// Docked preview height ('auto' or Number of pixel) 'auto' is setted to the Navbar width
 			dockHeight : 'auto',
@@ -10792,7 +10795,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'ntfparents'  : 'Getting path infomation', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'Processing the uploaded file', // from v2.1.17 added 2.11.2016
 			'ntftrash'    : 'Doing throw in the trash', // from v2.1.24 added 2.5.2017
-			'ntfrestore'  : 'Doing restore from tha trash', // from v2.1.24 added 3.5.2017
+			'ntfrestore'  : 'Doing restore from the trash', // from v2.1.24 added 3.5.2017
 			'ntfchkdir'   : 'Checking destination folder', // from v2.1.24 added 3.5.2017
 			'ntfundo'     : 'Undoing previous operation', // from v2.1.27 added 31.07.2017
 			'ntfredo'     : 'Redoing previous undone', // from v2.1.27 added 31.07.2017
@@ -23019,16 +23022,17 @@ elFinder.prototype.commands.places = function() {
 		 * @return void
 		 **/
 		openedCss = function() {
-			var win = $(window);
-			var elf = fm.getUI().offset();
-			var w = Math.min(width, $(window).width()-10);
-			var h = Math.min(height, $(window).height()-80);
+			var contain = self.options.contain,
+				win = contain? fm.getUI() : $(window),
+				elf = fm.getUI().offset(),
+				w = Math.min(width, win.width()-10),
+				h = Math.min(height, win.height()-80);
 			return {
 				opacity : 1,
 				width  : w,
 				height : h,
-				top    : parseInt((win.height() - h - 60) / 2 + win.scrollTop() - elf.top),
-				left   : parseInt((win.width() - w) / 2 + win.scrollLeft() - elf.left)
+				top    : parseInt((win.height() - h - 60) / 2 + (contain? 0 : win.scrollTop() - elf.top)),
+				left   : parseInt((win.width() - w) / 2 + (contain? 0 : win.scrollLeft() - elf.left))
 			}
 		},
 		
