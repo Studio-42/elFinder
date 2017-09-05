@@ -53,7 +53,7 @@ Features
  * High performance server backend and light client UI
  * Multi-root support
  * Local file system, MySQL, FTP volume storage drivers
- * Cloud strage (Box, Dropbox, GoogleDrive and OneDrive) drivers
+ * Cloud storage (Box, Dropbox, GoogleDrive and OneDrive) drivers
  * Background file/folder upload with Drag & Drop HTML5 support
  * Chunked file upload for large file
  * Upload directly to the folder

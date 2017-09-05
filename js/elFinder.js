@@ -3797,6 +3797,7 @@ var elFinder = function(node, opts, bootCallback) {
 				if (self.i18[lang]) {
 					self.lang = lang;
 				}
+				self.trigger('i18load');
 				i18n = self.lang === 'en' 
 					? self.i18['en'] 
 					: $.extend(true, {}, self.i18['en'], self.i18[self.lang]);

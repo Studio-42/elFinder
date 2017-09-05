@@ -1,7 +1,7 @@
 /**
  * Sinhala translation
  * @author CodeLyokoXtEAM <XcodeLyokoTEAM@gmail.com>
- * @version 2017-08-08
+ * @version 2017-09-05
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -77,7 +77,7 @@
 			'errCopyInItself'      : '"$1" තුලට පිටපත් කිරීමට නොහැක.',
 			'errRm'                : '"$1" ඉවත් කිරීමට නොහැකි විය.',
 			'errTrash'             : 'කුණු-කූඩය තුලට දැමීමට නොහැක.', // from v2.1.24 added 30.4.2017
-			'errRmSrc'             : 'ප්‍රභව ගොනු(ව) ඉවත් කළ නොහැක.',
+			'errRmSrc'             : 'මූලාශ්‍රය ගොනු(ව) ඉවත් කළ නොහැක.',
 			'errExtract'           : '"$1" වෙතින් ගොනු දිග හැරීමට නොහැක.',
 			'errArchive'           : 'සංරක්ෂිතය සෑදීමට නොහැකි විය.',
 			'errArcType'           : 'නොගැලපෙන සංරක්ෂණ වර්ගයකි.',
@@ -157,7 +157,10 @@
 			'cmdempty'     : 'ෆෝල්ඩරය හිස් කරන්න', // from v2.1.25 added 22.06.2017
 			'cmdundo'      : 'නිෂ්ප්‍රභ කරන්න', // from v2.1.27 added 31.07.2017
 			'cmdredo'      : 'නැවත කරන්න', // from v2.1.27 added 31.07.2017
-			'cmdpreference': 'Preferences', // from v2.1.27 added 03.08.2017
+			'cmdpreference': 'අභිමතයන් (Preferences)', // from v2.1.27 added 03.08.2017
+			'cmdselectall' : 'සියල්ල තෝරන්න', // from v2.1.28 added 15.08.2017
+			'cmdselectnone': 'කිසිවක් තෝරන්න එපා', // from v2.1.28 added 15.08.2017
+			'cmdselectinvert': 'විරුද්ධ අාකාරයට තෝරන්න', // from v2.1.28 added 15.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'වසන්න',
@@ -214,11 +217,11 @@
 			'ntfzipdl'    : 'බාගත කරගැනීම(download) සඳහා ගොනුවක් නිර්මාණය කරමින්', // from v2.1.7 added 23.1.2016
 			'ntfparents'  : 'මාර්ග(path) තොරතුරු ලබා ගනිමින්', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'උඩුගත කරන ලද(uploaded) ගොනුව සකසමින්', // from v2.1.17 added 2.11.2016
-			'ntftrash'    : 'Doing throw in the trash', // from v2.1.24 added 2.5.2017
-			'ntfrestore'  : 'Doing restore from tha trash', // from v2.1.24 added 3.5.2017
+			'ntftrash'    : 'කුණු කූඩයට දමමින්', // from v2.1.24 added 2.5.2017
+			'ntfrestore'  : 'කුණු කූඩයට දැමීම යළි පිහිටුවමින්(Doing restore)', // from v2.1.24 added 3.5.2017
 			'ntfchkdir'   : 'ගමනාන්ත(destination) ෆෝල්ඩරය පරීක්ෂා කරමින්', // from v2.1.24 added 3.5.2017
-			'ntfundo'     : 'Undoing previous operation', // from v2.1.27 added 31.07.2017
-			'ntfredo'     : 'Redoing previous undone', // from v2.1.27 added 31.07.2017
+			'ntfundo'     : 'පෙර මෙහෙයුම(operation) ඉවත් කරමින්', // from v2.1.27 added 31.07.2017
+			'ntfredo'     : 'පෙර ආපසු හැරවීම යළි සැකසමින්', // from v2.1.27 added 31.07.2017
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : 'කුණු කූඩය', //from v2.1.24 added 29.4.2017
@@ -340,7 +343,7 @@
 			'contributor'     : 'දායකයා(contributor)',
 			'maintainer'      : 'නඩත්තු කරන්නා(maintainer)',
 			'translator'      : 'පරිවර්තකයා',
-			'icons'           : 'Icons',
+			'icons'           : 'අයිකන',
 			'dontforget'      : 'and don\'t forget to take your towel',
 			'shortcutsof'     : 'කෙටිමං අක්‍රීය කර ඇත',
 			'dropFiles'       : 'ගොනු මෙතැනට ඇද දමන්න',
@@ -392,10 +395,10 @@
 			'reAuth'          : 'To re-authenticate', // from v2.1.10 added 3.25.2016
 			'nowLoading'      : 'Now loading...', // from v2.1.12 added 4.26.2016
 			'openMulti'       : 'Open multiple files', // from v2.1.12 added 5.14.2016
-			'openMultiConfirm': 'You are trying to open the $1 files. Are you sure you want to open in browser?', // from v2.1.12 added 5.14.2016
-			'emptySearch'     : 'Search results is empty in search target.', // from v2.1.12 added 5.16.2016
-			'editingFile'     : 'It is editing a file.', // from v2.1.13 added 6.3.2016
-			'hasSelected'     : 'You have selected $1 items.', // from v2.1.13 added 6.3.2016
+			'openMultiConfirm': 'ඔබ $1 ගොනු විවෘත කිරීමට උත්සාහ කරයි. බ්‍රව්සරයෙන් ඔබට විවෘත කිරීමට අවශ්‍ය බව ඔබට විශ්වාසද?', // from v2.1.12 added 5.14.2016
+			'emptySearch'     : 'සෙවුම් ඉලක්කයේ ගවේෂණ ප්‍රතිඵල නොමැත.', // from v2.1.12 added 5.16.2016
+			'editingFile'     : 'එය ගොනුව සංස්කරණය කිරීමකි.', // from v2.1.13 added 6.3.2016
+			'hasSelected'     : 'ඔබ අයිතම $1 ප්‍රමාණයක් තෝරාගෙන ඇත.', // from v2.1.13 added 6.3.2016
 			'hasClipboard'    : 'You have $1 items in the clipboard.', // from v2.1.13 added 6.3.2016
 			'incSearchOnly'   : 'Incremental search is only from the current view.', // from v2.1.13 added 6.30.2016
 			'reinstate'       : 'යථා තත්ත්වයට පත් කරන්න', // from v2.1.15 added 3.8.2016
@@ -426,21 +429,23 @@
 			'language'        : 'Language setting', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': 'Initialize the settings saved in this browser', // from v2.1.26 added 28.6.2017
 			'toolbarPref'     : 'Toolbar setting', // from v2.1.27 added 2.8.2017
+			'charsLeft'       : '... $1 chars left.',  // from v2.1.29 added 30.8.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
 			'kindRoot'        : 'Volume Root', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'ෆෝල්ඩරය',
+			'kindSelects'     : 'Selections', // from v2.1.29 added 29.8.2017
 			'kindAlias'       : 'Alias',
 			'kindAliasBroken' : 'Broken alias',
 			// applications
 			'kindApp'         : 'Application',
-			'kindPostscript'  : 'Postscript document',
-			'kindMsOffice'    : 'Microsoft Office document',
-			'kindMsWord'      : 'Microsoft Word document',
-			'kindMsExcel'     : 'Microsoft Excel document',
+			'kindPostscript'  : 'Postscript ලේඛනය',
+			'kindMsOffice'    : 'Microsoft Office ලේඛනය',
+			'kindMsWord'      : 'Microsoft Word ලේඛනය',
+			'kindMsExcel'     : 'Microsoft Excel ලේඛනය',
 			'kindMsPP'        : 'Microsoft Powerpoint presentation',
-			'kindOO'          : 'Open Office document',
+			'kindOO'          : 'Open Office ලේඛනය',
 			'kindAppFlash'    : 'Flash application',
 			'kindPDF'         : 'Portable Document Format (PDF)',
 			'kindTorrent'     : 'Bittorrent file',
@@ -456,27 +461,27 @@
 			'kindOTF'         : 'Open Type font',
 			'kindRPM'         : 'RPM package',
 			// texts
-			'kindText'        : 'Text document',
+			'kindText'        : 'Text ලේඛනය',
 			'kindTextPlain'   : 'Plain text',
-			'kindPHP'         : 'PHP source',
+			'kindPHP'         : 'PHP මූලාශ්‍රය',
 			'kindCSS'         : 'Cascading style sheet',
-			'kindHTML'        : 'HTML document',
-			'kindJS'          : 'Javascript source',
+			'kindHTML'        : 'HTML ලේඛනය',
+			'kindJS'          : 'Javascript මූලාශ්‍රය',
 			'kindRTF'         : 'Rich Text Format',
-			'kindC'           : 'C source',
-			'kindCHeader'     : 'C header source',
-			'kindCPP'         : 'C++ source',
-			'kindCPPHeader'   : 'C++ header source',
-			'kindShell'       : 'Unix shell script',
-			'kindPython'      : 'Python source',
-			'kindJava'        : 'Java source',
-			'kindRuby'        : 'Ruby source',
-			'kindPerl'        : 'Perl script',
-			'kindSQL'         : 'SQL source',
-			'kindXML'         : 'XML document',
-			'kindAWK'         : 'AWK source',
-			'kindCSV'         : 'Comma separated values',
-			'kindDOCBOOK'     : 'Docbook XML document',
+			'kindC'           : 'C මූලාශ්‍රය',
+			'kindCHeader'     : 'C header මූලාශ්‍රය',
+			'kindCPP'         : 'C++ මූලාශ්‍රය',
+			'kindCPPHeader'   : 'C++ header මූලාශ්‍රය',
+			'kindShell'       : 'Unix shell රචනයකි',
+			'kindPython'      : 'Python මූලාශ්‍රය',
+			'kindJava'        : 'Java මූලාශ්‍රය',
+			'kindRuby'        : 'Ruby මූලාශ්‍රය',
+			'kindPerl'        : 'Perl රචනයකි',
+			'kindSQL'         : 'SQL මූලාශ්‍රය',
+			'kindXML'         : 'XML ලේඛනය',
+			'kindAWK'         : 'AWK මූලාශ්‍රය',
+			'kindCSV'         : 'කොමාවන් වෙන් කළ අගයන්',
+			'kindDOCBOOK'     : 'Docbook XML ලේඛනය',
 			'kindMarkdown'    : 'Markdown text', // added 20.7.2015
 			// images
 			'kindImage'       : 'පින්තූරය',
@@ -498,15 +503,15 @@
 			'kindAudioWAV'    : 'WAV ශබ්ධපටය',
 			'AudioPlaylist'   : 'MP3 playlist',
 			'kindVideo'       : 'Video මාධ්‍ය',
-			'kindVideoDV'     : 'DV movie',
-			'kindVideoMPEG'   : 'MPEG movie',
-			'kindVideoMPEG4'  : 'MPEG-4 movie',
-			'kindVideoAVI'    : 'AVI movie',
-			'kindVideoMOV'    : 'Quick Time movie',
-			'kindVideoWM'     : 'Windows Media movie',
-			'kindVideoFlash'  : 'Flash movie',
-			'kindVideoMKV'    : 'Matroska movie',
-			'kindVideoOGG'    : 'Ogg movie'
+			'kindVideoDV'     : 'DV චිත්‍රපටය',
+			'kindVideoMPEG'   : 'MPEG චිත්‍රපටය',
+			'kindVideoMPEG4'  : 'MPEG-4 චිත්‍රපටය',
+			'kindVideoAVI'    : 'AVI චිත්‍රපටය',
+			'kindVideoMOV'    : 'Quick Time චිත්‍රපටය',
+			'kindVideoWM'     : 'Windows Media චිත්‍රපටය',
+			'kindVideoFlash'  : 'Flash චිත්‍රපටය',
+			'kindVideoMKV'    : 'Matroska චිත්‍රපටය',
+			'kindVideoOGG'    : 'Ogg චිත්‍රපටය'
 		}
 	};
 }));
