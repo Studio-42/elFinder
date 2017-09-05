@@ -254,7 +254,9 @@ elFinder.prototype._options = {
 			height   : 300,
 			// Maximum characters length to preview
 			textMaxlen : 2000,
-			// preview window into NavDock
+			// quicklook window must be contained in elFinder node on window open (true|false)
+			contain : false,
+			// preview window into NavDock (true|false)
 			docked   : false,
 			// Docked preview height ('auto' or Number of pixel) 'auto' is setted to the Navbar width
 			dockHeight : 'auto',

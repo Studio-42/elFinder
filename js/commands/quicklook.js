@@ -95,16 +95,17 @@
 		 * @return void
 		 **/
 		openedCss = function() {
-			var win = $(window);
-			var elf = fm.getUI().offset();
-			var w = Math.min(width, $(window).width()-10);
-			var h = Math.min(height, $(window).height()-80);
+			var contain = self.options.contain,
+				win = contain? fm.getUI() : $(window),
+				elf = fm.getUI().offset(),
+				w = Math.min(width, win.width()-10),
+				h = Math.min(height, win.height()-80);
 			return {
 				opacity : 1,
 				width  : w,
 				height : h,
-				top    : parseInt((win.height() - h - 60) / 2 + win.scrollTop() - elf.top),
-				left   : parseInt((win.width() - w) / 2 + win.scrollLeft() - elf.left)
+				top    : parseInt((win.height() - h - 60) / 2 + (contain? 0 : win.scrollTop() - elf.top)),
+				left   : parseInt((win.width() - w) / 2 + (contain? 0 : win.scrollLeft() - elf.left))
 			}
 		},
 		
