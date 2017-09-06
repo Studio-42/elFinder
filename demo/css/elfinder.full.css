@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 37133bb) (2017-09-05)
+ * Version 2.1.28 (2.1-src Nightly: 9f07b3f) (2017-09-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2859,9 +2859,14 @@ embed.elfinder-quicklook-preview-audio {
 	font-weight: normal;
 	float: none;
 	max-width: none;
-	overflow-x: scroll;
+	overflow: hidden;
+	overflow-x: hidden;
 	text-overflow: initial;
 	-o-text-overflow: initial;
+}
+.elfinder-mobile .elfinder-workzone-path .elfinder-path {
+	overflow: auto;
+	overflow-x: scroll;
 }
 .elfinder-ltr .elfinder-workzone-path .elfinder-path {
 	margin-left: 24px;
