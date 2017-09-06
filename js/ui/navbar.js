@@ -43,15 +43,19 @@ $.fn.elfindernavbar = function(fm, opts) {
 			
 			if (autoHide.navbar) {
 				fm.one('init', function() {
-					fm.uiAutoHide.push(function(){ nav.stop(true, true).trigger('navhide', { duration: 'slow', init: true }); });
+					if (nav.children().length) {
+						fm.uiAutoHide.push(function(){ nav.stop(true, true).trigger('navhide', { duration: 'slow', init: true }); });
+					}
 				});
 			}
 			
 			fm.bind('load', function() {
-				swipeHandle = $('<div class="elfinder-navbar-swipe-handle"/>').hide().appendTo(wz);
-				if (swipeHandle.css('pointer-events') !== 'none') {
-					swipeHandle.remove();
-					swipeHandle = null;
+				if (nav.children().length) {
+					swipeHandle = $('<div class="elfinder-navbar-swipe-handle"/>').hide().appendTo(wz);
+					if (swipeHandle.css('pointer-events') !== 'none') {
+						swipeHandle.remove();
+						swipeHandle = null;
+					}
 				}
 			});
 			

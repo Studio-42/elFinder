@@ -51,9 +51,14 @@
 	font-weight: normal;
 	float: none;
 	max-width: none;
-	overflow-x: scroll;
+	overflow: hidden;
+	overflow-x: hidden;
 	text-overflow: initial;
 	-o-text-overflow: initial;
+}
+.elfinder-mobile .elfinder-workzone-path .elfinder-path {
+	overflow: auto;
+	overflow-x: scroll;
 }
 .elfinder-ltr .elfinder-workzone-path .elfinder-path {
 	margin-left: 24px;
