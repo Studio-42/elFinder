@@ -75,6 +75,80 @@ elFinder.prototype.commands.quicklook.plugins = [
 	},
 	
 	/**
+	 * PSD(Adobe Photoshop data) preview plugin
+	 *
+	 * @param elFinder.commands.quicklook
+	 **/
+	function(ql) {
+		var mimes   = ['image/vnd.adobe.photoshop', 'image/x-photoshop'],
+			preview = ql.preview,
+			load    = function(url, img, loading) {
+				PSD.fromURL(url).then(function(psd) {
+					var prop;
+					img.attr('src', psd.image.toPng().src);
+					setTimeout(function() {
+						prop = (img.width()/img.height()).toFixed(2);
+						preview.on('changesize', function() {
+							var pw = parseInt(preview.width()),
+								ph = parseInt(preview.height()),
+								w, h;
+						
+							if (prop < (pw/ph).toFixed(2)) {
+								h = ph;
+								w = Math.floor(h * prop);
+							} else {
+								w = pw;
+								h = Math.floor(w/prop);
+							}
+							img.width(w).height(h).css('margin-top', h < ph ? Math.floor((ph - h)/2) : 0);
+						}).trigger('changesize');
+						
+						loading.remove();
+						// hide info/icon
+						ql.hideinfo();
+						//show image
+						img.fadeIn(100);
+					}, 1);
+				});
+			},
+			PSD;
+		
+		preview.on('update', function(e) {
+			var fm   = ql.fm,
+				file = e.file,
+				url, img, loading, m,
+				_define, _require;
+
+			if (ql.dispInlineRegex.test(file.mime) && $.inArray(file.mime, mimes) !== -1) {
+				// this is our file - stop event propagation
+				e.stopImmediatePropagation();
+
+				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+				url = fm.openUrl(file.hash);
+				img = $('<img/>').hide().appendTo(preview);
+				
+				if (PSD) {
+					load(url, img, loading);
+				} else {
+					_define = window.define;
+					_require = window.require;
+					window.require = null;
+					window.define = null;
+					fm.loadScript(
+						[ fm.options.cdns.psd ],
+						function() {
+							PSD = require('psd');
+							_define? (window.define = _define) : (delete window.define);
+							_require? (window.require = _require) : (delete window.require);
+							load(url, img, loading);
+						}
+					);
+				}
+			}
+		});
+	},
+	
+	/**
 	 * HTML preview plugin
 	 *
 	 * @param elFinder.commands.quicklook
