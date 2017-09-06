@@ -83,33 +83,41 @@ elFinder.prototype.commands.quicklook.plugins = [
 		var mimes   = ['image/vnd.adobe.photoshop', 'image/x-photoshop'],
 			preview = ql.preview,
 			load    = function(url, img, loading) {
-				PSD.fromURL(url).then(function(psd) {
-					var prop;
-					img.attr('src', psd.image.toPng().src);
-					setTimeout(function() {
-						prop = (img.width()/img.height()).toFixed(2);
-						preview.on('changesize', function() {
-							var pw = parseInt(preview.width()),
-								ph = parseInt(preview.height()),
-								w, h;
-						
-							if (prop < (pw/ph).toFixed(2)) {
-								h = ph;
-								w = Math.floor(h * prop);
-							} else {
-								w = pw;
-								h = Math.floor(w/prop);
-							}
-							img.width(w).height(h).css('margin-top', h < ph ? Math.floor((ph - h)/2) : 0);
-						}).trigger('changesize');
-						
+				try {
+					PSD.fromURL(url).then(function(psd) {
+						var prop;
+						img.attr('src', psd.image.toBase64());
+						setTimeout(function() {
+							prop = (img.width()/img.height()).toFixed(2);
+							preview.on('changesize', function() {
+								var pw = parseInt(preview.width()),
+									ph = parseInt(preview.height()),
+									w, h;
+							
+								if (prop < (pw/ph).toFixed(2)) {
+									h = ph;
+									w = Math.floor(h * prop);
+								} else {
+									w = pw;
+									h = Math.floor(w/prop);
+								}
+								img.width(w).height(h).css('margin-top', h < ph ? Math.floor((ph - h)/2) : 0);
+							}).trigger('changesize');
+							
+							loading.remove();
+							// hide info/icon
+							ql.hideinfo();
+							//show image
+							img.fadeIn(100);
+						}, 1);
+					}, function() {
 						loading.remove();
-						// hide info/icon
-						ql.hideinfo();
-						//show image
-						img.fadeIn(100);
-					}, 1);
-				});
+						img.remove();
+					});
+				} catch(e) {
+					loading.remove();
+					img.remove();
+				}
 			},
 			PSD;
 		
