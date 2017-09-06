@@ -127,8 +127,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 			preview = ql.preview,
 			textMaxlen = parseInt(ql.options.textMaxlen) || 2000,
 			prettify = function() {
-				if (ql.options.prettifyUrl) {
-					fm.loadScript([ql.options.prettifyUrl + (ql.options.prettifyUrl.match(/\?/)? '&' : '?') + 'autorun=false']);
+				if (fm.options.cdns.prettify) {
+					fm.loadScript([fm.options.cdns.prettify + (fm.options.cdns.prettify.match(/\?/)? '&' : '?') + 'autorun=false']);
 					prettify = function() { return true; };
 				} else {
 					prettify = function() { return false; };
@@ -430,7 +430,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							loadHls();
 						} else {
 							fm.loadScript(
-								[ ql.options.hlsJsUrl ],
+								[ fm.options.cdns.hls ],
 								function(res) { 
 									cHls = res || window.Hls;
 									loadHls();
@@ -443,7 +443,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							loadDash();
 						} else {
 							fm.loadScript(
-								[ ql.options.dashJsUrl ],
+								[ fm.options.cdns.dashJs ],
 								function() { 
 									cDash = window.dashjs;
 									loadDash();
