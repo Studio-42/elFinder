@@ -75,6 +75,91 @@ elFinder.prototype.commands.quicklook.plugins = [
 	},
 	
 	/**
+	 * PSD(Adobe Photoshop data) preview plugin
+	 *
+	 * @param elFinder.commands.quicklook
+	 **/
+	function(ql) {
+		var fm      = ql.fm,
+			mimes   = ['image/vnd.adobe.photoshop', 'image/x-photoshop'],
+			preview = ql.preview,
+			load    = function(url, img, loading) {
+				try {
+					fm.replaceXhrSend();
+					PSD.fromURL(url).then(function(psd) {
+						var prop;
+						img.attr('src', psd.image.toBase64());
+						setTimeout(function() {
+							prop = (img.width()/img.height()).toFixed(2);
+							preview.on('changesize', function() {
+								var pw = parseInt(preview.width()),
+									ph = parseInt(preview.height()),
+									w, h;
+							
+								if (prop < (pw/ph).toFixed(2)) {
+									h = ph;
+									w = Math.floor(h * prop);
+								} else {
+									w = pw;
+									h = Math.floor(w/prop);
+								}
+								img.width(w).height(h).css('margin-top', h < ph ? Math.floor((ph - h)/2) : 0);
+							}).trigger('changesize');
+							
+							loading.remove();
+							// hide info/icon
+							ql.hideinfo();
+							//show image
+							img.fadeIn(100);
+						}, 1);
+					}, function() {
+						loading.remove();
+						img.remove();
+					});
+					fm.restoreXhrSend();
+				} catch(e) {
+					fm.restoreXhrSend();
+					loading.remove();
+					img.remove();
+				}
+			},
+			PSD;
+		
+		preview.on('update', function(e) {
+			var file = e.file,
+				url, img, loading, m,
+				_define, _require;
+
+			if (fm.options.cdns.psd && ! fm.UA.ltIE10 && ql.dispInlineRegex.test(file.mime) && $.inArray(file.mime, mimes) !== -1) {
+				// this is our file - stop event propagation
+				e.stopImmediatePropagation();
+
+				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+				url = fm.openUrl(file.hash, fm.isCORS);
+				img = $('<img/>').hide().appendTo(preview);
+				
+				if (PSD) {
+					load(url, img, loading);
+				} else {
+					_define = window.define;
+					_require = window.require;
+					window.require = null;
+					window.define = null;
+					fm.loadScript(
+						[ fm.options.cdns.psd ],
+						function() {
+							PSD = require('psd');
+							_define? (window.define = _define) : (delete window.define);
+							_require? (window.require = _require) : (delete window.require);
+							load(url, img, loading);
+						}
+					);
+				}
+			}
+		});
+	},
+	
+	/**
 	 * HTML preview plugin
 	 *
 	 * @param elFinder.commands.quicklook
@@ -127,8 +212,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 			preview = ql.preview,
 			textMaxlen = parseInt(ql.options.textMaxlen) || 2000,
 			prettify = function() {
-				if (ql.options.prettifyUrl) {
-					fm.loadScript([ql.options.prettifyUrl + (ql.options.prettifyUrl.match(/\?/)? '&' : '?') + 'autorun=false']);
+				if (fm.options.cdns.prettify) {
+					fm.loadScript([fm.options.cdns.prettify + (fm.options.cdns.prettify.match(/\?/)? '&' : '?') + 'autorun=false']);
 					prettify = function() { return true; };
 				} else {
 					prettify = function() { return false; };
@@ -419,18 +504,18 @@ elFinder.prototype.commands.quicklook.plugins = [
 				};
 			
 			if (ql.dispInlineRegex.test(file.mime) && (((type === 'm3u8' || type === 'mpd') && !fm.UA.ltIE10) || ql.support.video[type])) {
-				e.stopImmediatePropagation();
-
 				if (ql.support.video[type] && (type !== 'm3u8' || fm.UA.Safari)) {
+					e.stopImmediatePropagation();
 					render({ src: fm.openUrl(file.hash) });
 					autoplay && node[0].play();
 				} else {
-					if (type === 'm3u8') {
+					if (fm.options.cdns.hls && type === 'm3u8') {
+						e.stopImmediatePropagation();
 						if (cHls) {
 							loadHls();
 						} else {
 							fm.loadScript(
-								[ ql.options.hlsJsUrl ],
+								[ fm.options.cdns.hls ],
 								function(res) { 
 									cHls = res || window.Hls;
 									loadHls();
@@ -438,12 +523,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 								{tryRequire: true}
 							);
 						}
-					} else if (type === 'mpd') {
+					} else if (fm.options.cdns.dash && type === 'mpd') {
+						e.stopImmediatePropagation();
 						if (cDash) {
 							loadDash();
 						} else {
 							fm.loadScript(
-								[ ql.options.dashJsUrl ],
+								[ fm.options.cdns.dash ],
 								function() { 
 									cDash = window.dashjs;
 									loadDash();
@@ -602,23 +688,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 							loading.remove();
 						}
 					}
-					xhr.open('GET', fm.openUrl(file.hash, fm.xhrFields.withCredentials || false), true);
+					xhr.open('GET', fm.openUrl(file.hash, fm.isCORS), true);
 					xhr.responseType = 'arraybuffer';
-					// set request headers
-					if (fm.customHeaders) {
-						$.each(fm.customHeaders, function(key) {
-							xhr.setRequestHeader(key, this);
-						});
-					}
-					// set xhrFields
-					if (fm.xhrFields) {
-						$.each(fm.xhrFields, function(key) {
-							if (key in xhr) {
-								xhr[key] = this;
-							}
-						});
-					}
+					fm.replaceXhrSend();
 					xhr.send();
+					fm.restoreXhrSend();
 				}
 			});
 		}

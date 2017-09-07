@@ -415,7 +415,8 @@
 				}
 			});
 		}
-
+		
+		return $.Deferred().resolve();
 	};
 	
 }).prototype = { forceLoad : true }; // this is required command

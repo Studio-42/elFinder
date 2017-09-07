@@ -423,6 +423,7 @@
 			fm.lazy(init);
 		}
 		this.dialog.trigger('initContents').elfinderdialog('open').find((tab? '.elfinder-help-tab-'+tab : '.ui-tabs-nav li') + ' a:first').click();
+		return $.Deferred().resolve();
 	};
 
 }).prototype = { forceLoad : true }; // this is required command
@@ -437,6 +438,7 @@ elFinder.prototype.commands.preference = function() {
 	};
 	
 	this.exec = function() {
-		this.fm.exec('help', void(0), {tab: 'preference'});
-	};};
+		return this.fm.exec('help', void(0), {tab: 'preference'});
+	};
+};
 

@@ -6,6 +6,25 @@
  */
 elFinder.prototype._options = {
 	/**
+	 * URLs of 3rd party libraries CDN
+	 * 
+	 * @type Object
+	 */
+	cdns : {
+		// for editor etc.
+		ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.8',
+		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.29.0',
+		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.7.2',
+		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.6.6',
+		simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
+		// for quicklook etc.
+		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.7.11/hls.min.js',
+		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.5.0/dash.all.min.js',
+		prettify   : '//cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js',
+		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js'
+	},
+	
+	/**
 	 * Connector url. Required!
 	 *
 	 * @type String
@@ -264,13 +283,7 @@ elFinder.prototype._options = {
 			dockAutoplay : false,
 			// MIME types to use Google Docs online viewer
 			// Example ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
-			googleDocsMimes : [],
-			// URL of hls.js
-			hlsJsUrl : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.7.11/hls.min.js',
-			// URL of dash.all.js
-			dashJsUrl : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.5.0/dash.all.min.js',
-			// URL of run_prettify.js
-			prettifyUrl : '//cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js'
+			googleDocsMimes : []
 		},
 		// "quicklook" command options.
 		edit : {
@@ -680,6 +693,10 @@ elFinder.prototype._options = {
 			//		return info? info + '&#13;' + title : title;
 			//	}
 			//}
+		},
+		path : {
+			// Move to head of work zone without UI navbar
+			toWorkzoneWithoutNavbar : true
 		}
 	},
 

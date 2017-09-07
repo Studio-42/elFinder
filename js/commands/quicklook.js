@@ -303,7 +303,7 @@
 							ts   : ts
 						};
 					};
-				if (! cnt && inDock) {
+				if (! cnt) {
 					cnt = 1;
 					files = [fm.cwd()];
 				}
@@ -684,22 +684,13 @@
 			
 			self.change(function() {
 				if (self.opened()) {
-					setTimeout(function() {
-						if (self.value) {
-							if (self.value.tmb && self.value.tmb == 1) {
-								// try re-get file object
-								self.value = Object.assign({}, fm.file(self.value.hash));
-							}
-							preview.trigger($.Event('update', {file : self.value}));
-						} else {
-							if (state != docked) {
-								navtrigger(rightKey);
-								setTimeout(function() {
-									! self.value && win.trigger('close');
-								}, 10);
-							}
+					if (self.value) {
+						if (self.value.tmb && self.value.tmb == 1) {
+							// try re-get file object
+							self.value = Object.assign({}, fm.file(self.value.hash));
 						}
-					}, 10);
+						preview.trigger($.Event('update', {file : self.value}));
+					}
 				}
 			});
 			
@@ -745,18 +736,11 @@
 				self.exec();
 				self.window.trigger('navdockin', { init : true });
 				self.update(void(0), fm.cwd());
+				self.change();
 			}
 		}).bind('open', function() {
-			var prevCwd = cwdHash;
-			
-			// change cwd
 			cwdHash = fm.cwd().hash;
-			if (self.opened() && state != docked && prevCwd !== cwdHash) {
-				win.trigger('close');
-			}
-			
 			self.value = fm.cwd();
-			
 			// set current volume dispInlineRegex
 			try {
 				cwdDispInlineRegex = new RegExp(fm.option('dispInlineRegex'), 'i');
@@ -788,6 +772,7 @@
 			this.closed() && updateOnSel();
 			this.enabled() && this.window.trigger(this.opened() ? 'close' : 'open');
 		}
+		return $.Deferred().resolve();
 	};
 
 	this.hideinfo = function() {
