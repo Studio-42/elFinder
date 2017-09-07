@@ -130,7 +130,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				url, img, loading, m,
 				_define, _require;
 
-			if (ql.dispInlineRegex.test(file.mime) && $.inArray(file.mime, mimes) !== -1) {
+			if (! fm.UA.ltIE10 && ql.dispInlineRegex.test(file.mime) && $.inArray(file.mime, mimes) !== -1) {
 				// this is our file - stop event propagation
 				e.stopImmediatePropagation();
 
