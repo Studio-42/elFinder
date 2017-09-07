@@ -80,10 +80,12 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
-		var mimes   = ['image/vnd.adobe.photoshop', 'image/x-photoshop'],
+		var fm      = ql.fm,
+			mimes   = ['image/vnd.adobe.photoshop', 'image/x-photoshop'],
 			preview = ql.preview,
 			load    = function(url, img, loading) {
 				try {
+					fm.replaceXhrSend();
 					PSD.fromURL(url).then(function(psd) {
 						var prop;
 						img.attr('src', psd.image.toBase64());
@@ -114,7 +116,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 						loading.remove();
 						img.remove();
 					});
+					fm.restoreXhrSend();
 				} catch(e) {
+					fm.restoreXhrSend();
 					loading.remove();
 					img.remove();
 				}
@@ -122,8 +126,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			PSD;
 		
 		preview.on('update', function(e) {
-			var fm   = ql.fm,
-				file = e.file,
+			var file = e.file,
 				url, img, loading, m,
 				_define, _require;
 
@@ -132,7 +135,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				e.stopImmediatePropagation();
 
 				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
-				url = fm.openUrl(file.hash);
+				url = fm.openUrl(file.hash, fm.isCORS);
 				img = $('<img/>').hide().appendTo(preview);
 				
 				if (PSD) {
@@ -684,23 +687,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 							loading.remove();
 						}
 					}
-					xhr.open('GET', fm.openUrl(file.hash, fm.xhrFields.withCredentials || false), true);
+					xhr.open('GET', fm.openUrl(file.hash, fm.isCORS), true);
 					xhr.responseType = 'arraybuffer';
-					// set request headers
-					if (fm.customHeaders) {
-						$.each(fm.customHeaders, function(key) {
-							xhr.setRequestHeader(key, this);
-						});
-					}
-					// set xhrFields
-					if (fm.xhrFields) {
-						$.each(fm.xhrFields, function(key) {
-							if (key in xhr) {
-								xhr[key] = this;
-							}
-						});
-					}
+					fm.replaceXhrSend();
 					xhr.send();
+					fm.restoreXhrSend();
 				}
 			});
 		}

@@ -598,7 +598,18 @@ var elFinder = function(node, opts, bootCallback) {
 			}
 			return pifm;
 		})(),
-		bootUp;
+		/**
+		 * elFinder boot up function
+		 * 
+		 * @type Function
+		 */
+		bootUp,
+		/**
+		 * Original function of XMLHttpRequest.prototype.send
+		 * 
+		 * @type Function
+		 */
+		savedXhrSend;
 
 	// check opt.bootCallback
 	if (opts.bootCallback && typeof opts.bootCallback === 'function') {
@@ -889,6 +900,44 @@ var elFinder = function(node, opts, bootCallback) {
 	 */
 	this.xhrFields = $.isPlainObject(this.options.xhrFields) ? this.options.xhrFields : {};
 
+	/**
+	 * Replace XMLHttpRequest.prototype.send to extended function for 3rd party libs XHR request etc.
+	 * 
+	 * @type Function
+	 */
+	this.replaceXhrSend = function() {
+		if (! savedXhrSend) {
+			savedXhrSend = XMLHttpRequest.prototype.send;
+		}
+		XMLHttpRequest.prototype.send = function() {
+			var xhr = this;
+			// set request headers
+			if (self.customHeaders) {
+				$.each(self.customHeaders, function(key) {
+					xhr.setRequestHeader(key, this);
+				});
+			}
+			// set xhrFields
+			if (self.xhrFields) {
+				$.each(self.xhrFields, function(key) {
+					if (key in xhr) {
+						xhr[key] = this;
+					}
+				});
+			}
+			return savedXhrSend.apply(this, arguments);
+		}
+	};
+	
+	/**
+	 * Restore saved original XMLHttpRequest.prototype.send
+	 * 
+	 * @type Function
+	 */
+	this.restoreXhrSend = function() {
+		XMLHttpRequest.prototype.send = savedXhrSend;
+	};
+	
 	/**
 	 * command names for into queue for only cwd requests
 	 * these commands aborts before `open` request
