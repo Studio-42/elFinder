@@ -772,6 +772,7 @@
 			this.closed() && updateOnSel();
 			this.enabled() && this.window.trigger(this.opened() ? 'close' : 'open');
 		}
+		return $.Deferred().resolve();
 	};
 
 	this.hideinfo = function() {
