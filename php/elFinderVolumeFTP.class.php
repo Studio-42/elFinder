@@ -725,7 +725,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _inpath($path, $parent) {
-		return $path == $parent || strpos($path, $parent. $this->separator) === 0;
+		return $path == $parent || strpos($path, rtrim($parent, $this->separator) . $this->separator) === 0;
 	}
 	
 	/***************** file stat ********************/
@@ -785,14 +785,20 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				$this->cache[$outPath] = $res;
 				return $res;
 			}
-			$parentSubdirs = null;
-			$outParent = $this->convEncOut($this->_dirname($path));
-			if (isset($this->sessionCache['subdirs']) && isset($this->sessionCache['subdirs'][$outParent])) {
-				$parentSubdirs = $this->sessionCache['subdirs'][$outParent];
-			}
-			$this->cacheDir($outParent);
-			if ($parentSubdirs) {
-				$this->sessionCache['subdirs'][$outParent] = $parentSubdirs;
+			
+			$pPath = $this->_dirname($path);
+			if ($this->_inPath($pPath, $this->root)) {
+				$outPPpath = $this->convEncOut($pPath);
+				if (! isset($this->dirsCache[$outPPpath])) {
+					$parentSubdirs = null;
+					if (isset($this->sessionCache['subdirs']) && isset($this->sessionCache['subdirs'][$outPPpath])) {
+						$parentSubdirs = $this->sessionCache['subdirs'][$outPPpath ];
+					}
+					$this->cacheDir($outPPpath);
+					if ($parentSubdirs) {
+						$this->sessionCache['subdirs'][$outPPpath] = $parentSubdirs;
+					}
+				}
 			}
 			
 			$stat = $this->convEncIn(isset($this->cache[$outPath])? $this->cache[$outPath] : array());
