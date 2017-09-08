@@ -406,11 +406,17 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$stat['owner'] = $info[2];
 			$stat['group'] = $info[3];
 			$stat['perm']  = substr($info[0], 1);
-			$stat['isowner'] = $stat['owner']? ($stat['owner'] == $this->options['user']) : $this->options['owner'];
+			//
+			// if not exists owner in LS ftp ==>                    isowner = true
+			// if is defined as option : 'owner' => true            isowner = true
+			// 
+			// if exist owner in LS ftp  and 'owner' => False       isowner =   result of    owner(file) == user(logged with ftp)
+			//
+			$stat['isowner'] = isset($stat['owner']) ? ($this->options['owner'] ? true : ($stat['owner'] == $this->options['user'])) : true;
 		}
-		$owner = isset($stat['owner'])? $stat['owner'] : '';
-		
-		$perm = $this->parsePermissions($info[0], $owner);
+
+		$owner_computed  = isset($stat['isowner'])? $stat['isowner'] : $this->options['owner'] ;
+ 		$perm = $this->parsePermissions($info[0], $owner_computed );
 		$stat['name']  = $name;
 		$stat['mime']  = substr(strtolower($info[0]), 0, 1) == 'd' ? 'directory' : $this->mimetype($stat['name'], true);
 		$stat['size']  = $stat['mime'] == 'directory' ? 0 : $info[4];
@@ -448,24 +454,32 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	/**
 	 * Parse permissions string. Return array(read => true/false, write => true/false)
 	 *
-	 * @param  string $perm permissions string
-	 * @param string $user
+	 * @param  string $perm permissions string   'rwx' + 'rwx' + 'rwx'
+	 *                                             ^       ^       ^
+	 *                                             |       |       +->   others 
+	 *                                             |       +--------->   group 
+	 *                                             +----------------->   owner
+	 * The isowner parameter is computed by the caller.
+	 * If the owner parameter in the options is true, the user is the actual owner of all objects even if che user used in the ftp Login
+	 * is different from the file owner id.
+	 * If the owner parameter is false to understand if the user is the file owner we compare the ftp user with the file owner id.
+	 * @param Boolean $isowner. Tell if the current user is the owner of the object.
 	 * @return string
 	 * @author Dmitry (dio) Levashov
+	 * @author Ugo Vierucci
 	 */
-	protected function parsePermissions($perm, $user = '') {
+	protected function parsePermissions($perm, $isowner = true) {
 		$res   = array();
 		$parts = array();
-		$owner = $user? ($user == $this->options['user']) : $this->options['owner'];
 		for ($i = 0, $l = strlen($perm); $i < $l; $i++) {
 			$parts[] = substr($perm, $i, 1);
 		}
 
-		$read = ($owner && $parts[1] == 'r') || $parts[4] == 'r' || $parts[7] == 'r';
+		$read = ($isowner && $parts[1] == 'r') || $parts[4] == 'r' || $parts[7] == 'r';
 		
 		return array(
-			'read'  => $parts[0] == 'd' ? $read && (($owner && $parts[3] == 'x') || $parts[6] == 'x' || $parts[9] == 'x') : $read,
-			'write' => ($owner && $parts[2] == 'w') || $parts[5] == 'w' || $parts[8] == 'w'
+			'read'  => $parts[0] == 'd' ? $read && (($isowner && $parts[3] == 'x') || $parts[6] == 'x' || $parts[9] == 'x') : $read,
+			'write' => ($isowner && $parts[2] == 'w') || $parts[5] == 'w' || $parts[8] == 'w'
 		);
 	}
 	
@@ -711,7 +725,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _inpath($path, $parent) {
-		return $path == $parent || strpos($path, $parent. $this->separator) === 0;
+		return $path == $parent || strpos($path, rtrim($parent, $this->separator) . $this->separator) === 0;
 	}
 	
 	/***************** file stat ********************/
@@ -771,14 +785,20 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				$this->cache[$outPath] = $res;
 				return $res;
 			}
-			$parentSubdirs = null;
-			$outParent = $this->convEncOut($this->_dirname($path));
-			if (isset($this->sessionCache['subdirs']) && isset($this->sessionCache['subdirs'][$outParent])) {
-				$parentSubdirs = $this->sessionCache['subdirs'][$outParent];
-			}
-			$this->cacheDir($outParent);
-			if ($parentSubdirs) {
-				$this->sessionCache['subdirs'][$outParent] = $parentSubdirs;
+			
+			$pPath = $this->_dirname($path);
+			if ($this->_inPath($pPath, $this->root)) {
+				$outPPpath = $this->convEncOut($pPath);
+				if (! isset($this->dirsCache[$outPPpath])) {
+					$parentSubdirs = null;
+					if (isset($this->sessionCache['subdirs']) && isset($this->sessionCache['subdirs'][$outPPpath])) {
+						$parentSubdirs = $this->sessionCache['subdirs'][$outPPpath ];
+					}
+					$this->cacheDir($outPPpath);
+					if ($parentSubdirs) {
+						$this->sessionCache['subdirs'][$outPPpath] = $parentSubdirs;
+					}
+				}
 			}
 			
 			$stat = $this->convEncIn(isset($this->cache[$outPath])? $this->cache[$outPath] : array());
@@ -878,15 +898,21 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				}
 				
 				$stat['perm'] = trim($stat['perm']);
+				//
+				// if not exists owner in LS ftp ==>                    isowner = true
+				// if is defined as option : 'owner' => true            isowner = true
+				// 
+				// if exist owner in LS ftp  and 'owner' => False        isowner =   result of    owner(file) == user(logged with ftp)
 
-				$owner = $this->options['owner'];
-				$read = ($owner && $perm[0][0]) || $perm[1][0] || $perm[2][0];
+				$owner_computed = isset($stat['owner']) ? ($this->options['owner'] ? true : ($stat['owner'] == $this->options['user'])) : true;
 
-				$stat['read']  = $stat['mime'] == 'directory' ? $read && (($owner && $perm[0][2]) || $perm[1][2] || $perm[2][2]) : $read;
-				$stat['write'] = ($owner && $perm[0][1]) || $perm[1][1] || $perm[2][1];
+				$read = ($owner_computed && $perm[0][0]) || $perm[1][0] || $perm[2][0];
+
+				$stat['read']  = $stat['mime'] == 'directory' ? $read && (($owner_computed && $perm[0][2]) || $perm[1][2] || $perm[2][2]) : $read;
+				$stat['write'] =  ($owner_computed && $perm[0][1]) || $perm[1][1] || $perm[2][1];
 
 				if ($this->options['statOwner']) {
-					$stat['isowner'] = $owner;
+					$stat['isowner'] = $owner_computed;
 				} else {
 					unset($stat['owner'], $stat['group'], $stat['perm']);
 				}
@@ -1626,4 +1652,3 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	}
 
 } // END class
-
