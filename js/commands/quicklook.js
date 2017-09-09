@@ -307,7 +307,7 @@
 					cnt = 1;
 					files = [fm.cwd()];
 				}
-				return (!inDock || cnt === 1)? files[0] : getInfo();
+				return (cnt === 1)? files[0] : getInfo();
 			})());
 		},
 		
@@ -761,10 +761,7 @@
 	};
 	
 	this.getstate = function() {
-		var fm  = this.fm,
-			sel = fm.selected(),
-			chk = sel.length === 1 && $('#'+fm.cwdHash2Id(sel[0])).length;
-		return chk? (self.opened()? 1 : 0) : -1;
+		return self.opened()? 1 : 0;
 	};
 	
 	this.exec = function() {
