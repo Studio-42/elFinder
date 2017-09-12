@@ -3140,11 +3140,11 @@ abstract class elFinderVolumeDriver {
 		
 		if (! empty($options['checkAnimated'])) {
 			if ($this->imgLib !== 'imagick' && $this->imgLib !== 'convert') {
-				if (elFinder::isAnimationGif($work_path)) {
+				if (elFinder::isAnimationGif($src)) {
 					return false;
 				}
 			}
-			if (elFinder::isAnimationPng($work_path)) {
+			if (elFinder::isAnimationPng($src)) {
 				return false;
 			}
 		}
