@@ -86,22 +86,42 @@ class elFinderPluginWatermark extends elFinderPlugin {
 			return false;
 		}
 		
-		$mime = mime_content_type($src);
-		if (substr($mime, 0, 5) !== 'image') {
-			return false;
+		$imageType = null;
+		$srcImgInfo = null;
+		if (extension_loaded('fileinfo') && function_exists('mime_content_type')) {
+			$mime = mime_content_type($src);
+			if (substr($mime, 0, 5) !== 'image') {
+				return false;
+			}
+		}
+		if (extension_loaded('exif') && function_exists('exif_imagetype')) {
+			$imageType = exif_imagetype($src);
+		} else {
+			$srcImgInfo = getimagesize($src);
+			if ($srcImgInfo === false) {
+				return false;
+			}
+			$imageType = $srcImgInfo[2];
 		}
 		
-		$srcImgInfo = getimagesize($src);
-		if ($srcImgInfo === false) {
+		// check target image type
+		$imgTypes = array(
+				IMAGETYPE_GIF  => IMG_GIF,
+				IMAGETYPE_JPEG => IMG_JPEG,
+				IMAGETYPE_PNG  => IMG_PNG,
+				IMAGETYPE_BMP  => IMG_WBMP,
+				IMAGETYPE_WBMP => IMG_WBMP
+		);
+		if (! isset($imgTypes[$imageType]) || ! ($opts['targetType'] & $imgTypes[$imageType])) {
 			return false;
 		}
 		
 		// check Animation Gif
-		if (elFinder::isAnimationGif($src)) {
+		if ($imageType === IMAGETYPE_GIF && elFinder::isAnimationGif($src)) {
 			return false;
 		}
 		// check Animation Png
-		if (elFinder::isAnimationPng($src)) {
+		if ($imageType === IMAGETYPE_PNG && elFinder::isAnimationPng($src)) {
 			return false;
 		}
 		// check water mark image
@@ -117,24 +137,16 @@ class elFinderPluginWatermark extends elFinderPlugin {
 			return false;
 		}
 		
+		if (! $srcImgInfo) {
+			$srcImgInfo = getimagesize($src);
+		}
+		
 		$watermark = $opts['source'];
 		$marginLeft = $opts['marginRight'];
 		$marginBottom = $opts['marginBottom'];
 		$quality = $opts['quality'];
 		$transparency = $opts['transparency'];
 
-		// check target image type
-		$imgTypes = array(
-			IMAGETYPE_GIF  => IMG_GIF,
-			IMAGETYPE_JPEG => IMG_JPEG,
-			IMAGETYPE_PNG  => IMG_PNG,
-			IMAGETYPE_BMP  => IMG_WBMP,
-			IMAGETYPE_WBMP => IMG_WBMP
-		);
-		if (! isset($imgTypes[$srcImgInfo[2]]) || ! ($opts['targetType'] & $imgTypes[$srcImgInfo[2]])) {
-			return false;
-		}
-		
 		// check target image size
 		if ($opts['targetMinPixel'] > 0 && $opts['targetMinPixel'] > min($srcImgInfo[0], $srcImgInfo[1])) {
 			return false;

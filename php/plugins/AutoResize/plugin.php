@@ -81,14 +81,22 @@ class elFinderPluginAutoResize extends elFinderPlugin {
 			return false;
 		}
 		
-		$mime = mime_content_type($src);
-		if (substr($mime, 0, 5) !== 'image') {
-			return false;
+		$imageType = null;
+		$srcImgInfo = null;
+		if (extension_loaded('fileinfo') && function_exists('mime_content_type')) {
+			$mime = mime_content_type($src);
+			if (substr($mime, 0, 5) !== 'image') {
+				return false;
+			}
 		}
-		
-		$srcImgInfo = getimagesize($src);
-		if ($srcImgInfo === false) {
-			return false;
+		if (extension_loaded('exif') && function_exists('exif_imagetype')) {
+			$imageType = exif_imagetype($src);
+		} else {
+			$srcImgInfo = getimagesize($src);
+			if ($srcImgInfo === false) {
+				return false;
+			}
+			$imageType = $srcImgInfo[2];
 		}
 		
 		// check target image type
@@ -99,8 +107,12 @@ class elFinderPluginAutoResize extends elFinderPlugin {
 			IMAGETYPE_BMP  => IMG_WBMP,
 			IMAGETYPE_WBMP => IMG_WBMP
 		);
-		if (! isset($imgTypes[$srcImgInfo[2]]) || ! ($opts['targetType'] & $imgTypes[$srcImgInfo[2]])) {
+		if (! isset($imgTypes[$imageType]) || ! ($opts['targetType'] & $imgTypes[$imageType])) {
 			return false;
+		}
+		
+		if (! $srcImgInfo) {
+			$srcImgInfo = getimagesize($src);
 		}
 		
 		if ($opts['forceEffect'] || $srcImgInfo[0] > $opts['maxWidth'] || $srcImgInfo[1] > $opts['maxHeight']) {
