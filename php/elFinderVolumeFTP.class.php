@@ -766,7 +766,9 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 					$ts = 0;
 					foreach ($this->ftpRawList($path) as $str) {
 						if (($stat = $this->parseRaw($str, $path))) {
-							$ts = max($ts, $stat['ts']);
+							if (! empty($stat['ts'])) {
+								$ts = max($ts, $stat['ts']);
+							}
 						}
 					}
 					if ($ts) {
