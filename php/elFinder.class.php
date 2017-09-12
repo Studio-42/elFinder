@@ -2826,6 +2826,9 @@ class elFinder {
 							return array('doconv' => $enc);
 						}
 					}
+					if ($args['conv'] == '1') {
+						$args['conv'] = '';
+					}
 				} 
 				if ($args['conv']) {
 					$enc = $args['conv'];
