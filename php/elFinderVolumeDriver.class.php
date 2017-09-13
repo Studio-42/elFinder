@@ -3021,14 +3021,7 @@ abstract class elFinderVolumeDriver {
 			} else if (!empty($options['temporary']) && $this->tmpLinkPath) {
 				$name = 'temp_' . md5($hash);
 				$path = $this->tmpLinkPath . DIRECTORY_SEPARATOR . $name;
-				$contents = $this->getContents($hash);
-				$gc = create_function('$p,$t', 'foreach(glob($p) as $f) { (filemtime($f) < (time() - $t)) && unlink($f); }');
-				/*$gc = function($p,$t) {
-					foreach(glob($p) as $f) {
-						(filemtime($f) < (time() - $t)) && unlink($f);
-					}
-				};*/
-				register_shutdown_function($gc, $this->tmpLinkPath . DIRECTORY_SEPARATOR . 'temp_*', elFinder::$tmpLinkLifeTime);
+				register_shutdown_function(array('elFinder', 'GlobGC'), $this->tmpLinkPath . DIRECTORY_SEPARATOR . 'temp_*', elFinder::$tmpLinkLifeTime);
 				if (file_put_contents($path, $this->getContents($hash))) {
 					return $this->tmpLinkUrl . '/' . $name;
 				}
@@ -3189,7 +3182,8 @@ abstract class elFinderVolumeDriver {
 		$name = basename($file);
 		$path = dirname($file);
 		$tmp = $path . DIRECTORY_SEPARATOR . md5($name);
-		$GLOBALS['elFinderTempFiles'][] = $tmp; // regist to remove at the end
+		// register auto delete on shutdown
+		$GLOBALS['elFinderTempFiles'][$tmp] = true;
 		if (rename($file, $tmp)) {
 			if ($ss === null) {
 				// specific start time by file name (xxx^[sec].[extention] - video^3.mp4)
@@ -3670,14 +3664,12 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		if ($tmpdir = $this->getTempPath()) {
-			if (!$rmfunc) {
-				$rmfunc = create_function('$f', 'is_file($f) && unlink($f);');
-			}
 			$name = tempnam($tmpdir, 'ELF');
 			if ($key) {
 				$cache[$key] = $name;
 			}
-			register_shutdown_function($rmfunc, $name);
+			// register auto delete on shutdown
+			$GLOBALS['elFinderTempFiles'][$name] = true;
 			return $name;
 		}
 		

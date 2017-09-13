@@ -439,6 +439,11 @@ class elFinder {
 		}
 		set_error_handler('elFinder::phpErrorHandler', $errLevel);
 		
+		// Associative array of files to delete at the end of script: ['temp file path' => true]
+		$GLOBALS['elFinderTempFiles'] = array();
+		// regist Shutdown function
+		register_shutdown_function(array('elFinder', 'onShutdown'));
+		
 		// convert PATH_INFO to GET query
 		if (! empty($_SERVER['PATH_INFO'])) {
 			$_ps = explode('/', trim($_SERVER['PATH_INFO'], '/'));
@@ -563,8 +568,7 @@ class elFinder {
 			foreach ($opts['bind'] as $cmd => $handlers) {
 				$doRegist = (strpos($cmd, '*') !== false);
 				if (! $doRegist) {
-					$_getcmd = create_function('$cmd', 'list($ret) = explode(\'.\', $cmd);return trim($ret);');
-					$doRegist = ($_reqCmd && in_array($_reqCmd, array_map($_getcmd, explode(' ', $cmd))));
+					$doRegist = ($_reqCmd && in_array($_reqCmd, array_map('self::getCmdOfBind', explode(' ', $cmd))));
 				}
 				if ($doRegist) {
 					// for backward compatibility
@@ -709,8 +713,8 @@ class elFinder {
 					list(, $sub) = array_pad(explode('.', $_cmd), 2, '');
 					if ($sub) {
 						$sub = str_replace('\'', '\\\'', $sub);
-						$addSub = create_function('$cmd', 'return $cmd . \'.\' . trim(\'' . $sub . '\');');
-						$cmds = array_merge($cmds, array_map($addSub, $allCmds));
+						$subs = array_fill(0, count($allCmds), $sub);
+						$cmds = array_merge($cmds, array_map(array('elFinder', 'addSubToBindName'), $allCmds, $subs));
 					} else {
 						$cmds = array_merge($cmds, $allCmds);
 					}
@@ -1440,7 +1444,7 @@ class elFinder {
 			if (($volume = $this->volume($targets[0])) !== false) {
 				if ($dlres = $volume->zipdl($targets)) {
 					$path = $dlres['path'];
-					register_shutdown_function(create_function('$f', 'connection_status() && is_file($f) && unlink($f);'), $path);
+					register_shutdown_function(array('elFinder', 'rmFileInDisconnected'), $path);
 					if (count($targets) === 1) {
 						$name = basename($volume->path($targets[0]));
 					} else {
@@ -1466,7 +1470,8 @@ class elFinder {
 			}
 			$file = $targets[1];
 			$path = $volume->getTempPath().DIRECTORY_SEPARATOR.$file;
-			register_shutdown_function(create_function('$f', 'is_file($f) && unlink($f);'), $path);
+			// register auto delete on shutdown
+			$GLOBALS['elFinderTempFiles'][$path] = true;
 			if (!is_readable($path)) {
 				return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
 			}
@@ -2419,23 +2424,6 @@ class elFinder {
 		
 		$this->itemLock($target);
 		
-		// regist Shutdown function
-		$GLOBALS['elFinderTempFiles'] = array();
-// 		if (version_compare(PHP_VERSION, '5.3.0', '>=')) {
-// 			$shutdownfunc = function(){ // <- Parse error on PHP < 5.3 ;-(
-// 				foreach(array_keys($GLOBALS['elFinderTempFiles']) as $f){
-// 					unlink($f);
-// 				}
-// 			};
-// 		} else {
-			$shutdownfunc = create_function('', '
-				foreach(array_keys($GLOBALS[\'elFinderTempFiles\']) as $f){
-					is_file($f) && unlink($f);
-				}
-			');
-//		}
-		register_shutdown_function($shutdownfunc);
-		
 		// file extentions table by MIME
 		$extTable = array_flip(array_unique($volume->getMimeTable()));
 		
@@ -2825,6 +2813,9 @@ class elFinder {
 						} else if ($enc === 'unknown') {
 							return array('doconv' => $enc);
 						}
+					}
+					if ($args['conv'] == '1') {
+						$args['conv'] = '';
 					}
 				} 
 				if ($args['conv']) {
@@ -3887,6 +3878,67 @@ class elFinder {
 		curl_close($curl);
 		
 		return $result;
+	}
+	
+	/***************************************************************************/
+	/*                                 callbacks                               */
+	/***************************************************************************/
+	
+	/**
+	 * Get command name of binded "commandName.subName"
+	 * 
+	 * @param string $cmd
+	 * @return string
+	 */
+	protected static function getCmdOfBind($cmd) {
+		list($ret) = explode('.', $cmd);
+		return trim($ret);
+	}
+	
+	/**
+	 * Add subName to commandName
+	 * 
+	 * @param string $cmd
+	 * @param string $sub
+	 * @return string
+	 */
+	protected static function addSubToBindName($cmd, $sub) {
+		return $cmd . '.' . trim($sub);
+	}
+	
+	/**
+	 * Remove a file if connection is disconnected
+	 * 
+	 * @param string $file
+	 */
+	public static function rmFileInDisconnected($file) {
+		(connection_aborted() || connection_status() !== CONNECTION_NORMAL) && is_file($file) && unlink($file);
+	}
+	
+	/**
+	 * Call back function on shutdown
+	 *  - delete files in $GLOBALS['elFinderTempFiles']
+	 * 
+	 */
+	public static function onShutdown() {
+		if (! empty($GLOBALS['elFinderTempFiles'])) {
+			foreach(array_keys($GLOBALS['elFinderTempFiles']) as $f){
+				is_file($f) && unlink($f);
+			}
+		}
+	}
+	
+	/**
+	 * Garbage collection with glob
+	 * 
+	 * @param string $pattern
+	 * @param integer $time
+	 */
+	public static function GlobGC($pattern, $time) {
+		$now = time();
+		foreach(glob($pattern) as $file) {
+			(filemtime($file) < ($now - $time)) && unlink($file);
+		}
 	}
 	
 } // END class
