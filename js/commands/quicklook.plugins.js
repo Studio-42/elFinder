@@ -279,7 +279,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					
 					node.on('touchstart', function(e) {
 						if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
-							e.originalEvent._preventSwipe = true;
+							e.originalEvent._preventSwipeX = true;
 						}
 					}).appendTo(preview);
 					
@@ -677,7 +677,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 									doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>')
 										.on('touchstart', function(e) {
 											if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
-												e.originalEvent._preventSwipe = true;
+												e.originalEvent._preventSwipeX = true;
 											}
 										})
 										.appendTo(preview);
