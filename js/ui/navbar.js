@@ -86,7 +86,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 				fm.storage('autoHide', Object.assign(fm.storage('autoHide'), {navbar: autoHide.navbar}));
 			}).on('touchstart', function(e) {
 				if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
-					e.originalEvent._preventSwipe = true;
+					e.originalEvent._preventSwipeX = true;
 				}
 			});
 		}

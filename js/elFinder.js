@@ -4280,7 +4280,7 @@ var elFinder = function(node, opts, bootCallback) {
 				navbar = navbar.children().length? navbar : null;
 				toolbar = toolbar.length? toolbar : null;
 				node.on('touchstart touchmove touchend', function(e) {
-					if (e.type === 'touchend' || e.originalEvent._preventSwipe) {
+					if (e.type === 'touchend') {
 						lastX = false;
 						lastY = false;
 						moveOff();
@@ -4309,7 +4309,7 @@ var elFinder = function(node, opts, bootCallback) {
 								if ((ltr? (x - nodeOffset.left) : (nodeWidth + nodeOffset.left - x)) < handleW) {
 									lastX = x;
 								}
-							} else {
+							} else if (! e.originalEvent._preventSwipeX) {
 								navbarW = navbar.width();
 								if (ltr) {
 									swipeX = (x < nodeOffset.left + navbarW);
