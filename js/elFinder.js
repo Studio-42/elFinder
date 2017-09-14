@@ -2540,8 +2540,12 @@ var elFinder = function(node, opts, bootCallback) {
 				if (handlers[i].length) {
 					if (!allowModify) {
 						// to avoid data modifications. remember about "sharing" passing arguments in js :) 
-						if (dataIsObj && !jst) {
-							jst = JSON.stringify(data);
+						if (dataIsObj && typeof jst === 'undefined') {
+							try {
+								jst = JSON.stringify(data);
+							} catch(e) {
+								jst = false;
+							}
 						}
 						event.data = jst? JSON.parse(jst) : data;
 					}
@@ -4076,7 +4080,7 @@ var elFinder = function(node, opts, bootCallback) {
 					
 					self.draggingUiHelper && self.draggingUiHelper.stop(true, true);
 					
-					self.trigger('dragstart', {target : element[0], originalEvent : e});
+					self.trigger('dragstart', {target : element[0], originalEvent : e}, true);
 					
 					hashes = element.hasClass(self.res('class', 'cwdfile')) 
 						? self.selected() 
