@@ -152,6 +152,10 @@
 	border-right:1px solid transparent;
 	height:100%;
 }
+.elfinder-navdock .elfinder-quicklook-preview {
+	border-left: 0;
+	border-right: 0;
+}
 .elfinder-quicklook-preview.elfinder-overflow-auto {
 	overflow: auto;
 	-webkit-overflow-scrolling: touch;
@@ -225,8 +229,14 @@
 .elfinder-ltr .elfinder-quicklook .elfinder-cwd-icon:before {
 	left: -20px;
 }
+.elfinder-ltr .elfinder-navdock .elfinder-quicklook .elfinder-cwd-icon:before {
+	left: -14px;
+}
 .elfinder-ltr .elfinder-quicklook .elfinder-cwd-icon:after {
 	left: -15px;
+}
+.elfinder-ltr .elfinder-navdock .elfinder-quicklook .elfinder-cwd-icon:after {
+    left: -12px;
 }
 .elfinder-rtl .elfinder-quicklook .elfinder-cwd-icon:before {
 	left: auto;
