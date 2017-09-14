@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 8328f1b) (2017-09-14)
+ * Version 2.1.28 (2.1-src Nightly: d5cf855) (2017-09-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2571,8 +2571,12 @@ var elFinder = function(node, opts, bootCallback) {
 				if (handlers[i].length) {
 					if (!allowModify) {
 						// to avoid data modifications. remember about "sharing" passing arguments in js :) 
-						if (dataIsObj && !jst) {
-							jst = JSON.stringify(data);
+						if (dataIsObj && typeof jst === 'undefined') {
+							try {
+								jst = JSON.stringify(data);
+							} catch(e) {
+								jst = false;
+							}
 						}
 						event.data = jst? JSON.parse(jst) : data;
 					}
@@ -4107,7 +4111,7 @@ var elFinder = function(node, opts, bootCallback) {
 					
 					self.draggingUiHelper && self.draggingUiHelper.stop(true, true);
 					
-					self.trigger('dragstart', {target : element[0], originalEvent : e});
+					self.trigger('dragstart', {target : element[0], originalEvent : e}, true);
 					
 					hashes = element.hasClass(self.res('class', 'cwdfile')) 
 						? self.selected() 
@@ -8292,7 +8296,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 8328f1b)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: d5cf855)';
 
 
 
@@ -8646,12 +8650,12 @@ elFinder.prototype._options = {
 		// for editor etc.
 		ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.8',
 		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.29.0',
-		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.7.2',
+		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.7.3',
 		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.6.6',
 		simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		// for quicklook etc.
-		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.7.11/hls.min.js',
-		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.5.0/dash.all.min.js',
+		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.8.2/hls.min.js',
+		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.0/dash.all.min.js',
 		prettify   : '//cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js',
 		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js'
 	},
