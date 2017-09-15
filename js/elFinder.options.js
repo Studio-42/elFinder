@@ -865,6 +865,14 @@ elFinder.prototype._options = {
 	notifyDialog : {position: {top : '12px', right : '12px'}, width : 280},
 	
 	/**
+	 * Dialog contained in the elFinder node
+	 * 
+	 * @type Boolean
+	 * @default false
+	 */
+	dialogContained : false,
+	
+	/**
 	 * Allow shortcuts
 	 *
 	 * @type Boolean

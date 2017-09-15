@@ -1002,7 +1002,7 @@ elFinder.prototype.commands.resize = function() {
 							dialogs;
 						
 						if (checkVals()) {
-							dialogs = fm.getUI().children('.'+dlcls).fadeOut();
+							dialogs = fmnode.children('.'+dlcls).fadeOut();
 							base.removeClass(clactive);
 								
 							if (fm.searchStatus.state < 2 && file.phash !== fm.cwd().hash) {
@@ -1028,8 +1028,9 @@ elFinder.prototype.commands.resize = function() {
 						presetc.hide();
 						
 						var dw,
-							winH  = $(window).height(),
-							winW  = $(window).width(),
+							win   = fm.options.dialogContained? fmnode : $(window),
+							winH  = win.height(),
+							winW  = win.width(),
 							ctrW  = dialog.find('div.elfinder-resize-control').width(),
 							prvW  = preview.width(),
 							baseW = base.width(),
@@ -1046,10 +1047,8 @@ elFinder.prototype.commands.resize = function() {
 						
 						dw = dialog.width() - 20;
 						if (prvW > dw) {
-							//presW = 'auto';
 							preview.width(dw);
 						} else if ((dw - prvW) < ctrW) {
-							//presW = 'auto';
 							if (winW > winH) {
 								preview.width(dw - ctrW - 20);
 							} else {
@@ -1262,7 +1261,7 @@ elFinder.prototype.commands.resize = function() {
 		}
 		
 		id = 'resize-'+fm.namespace+'-'+files[0].hash;
-		dialog = fm.getUI().find('#'+id);
+		dialog = fmnode.find('#'+id);
 		
 		if (dialog.length) {
 			dialog.elfinderdialog('toTop');
