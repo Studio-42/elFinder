@@ -2,7 +2,7 @@
  * Slovak translation
  * @author Jakub Ďuraš <jkblmr@gmail.com>
  * @author RobiNN <kelcakrobo@gmail.com>
- * @version 2017-08-23
+ * @version 2017-09-15
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -129,7 +129,7 @@
 			'cmdgetfile'   : 'Vybrať súbory',
 			'cmdhelp'      : 'O tomto softvéri',
 			'cmdhome'      : 'Domov',
-			'cmdinfo'      : 'Získať info',
+			'cmdinfo'      : 'Info',
 			'cmdmkdir'     : 'Nový priečinok',
 			'cmdmkdirin'   : 'Do novej zložky', // from v2.1.7 added 19.2.2016
 			'cmdmkfile'    : 'Nový textový súbor',
@@ -149,7 +149,7 @@
 			'cmdsort'      : 'Zoradiť',
 			'cmdnetmount'  : 'Pripojiť sieťové médium', // added 18.04.2012
 			'cmdnetunmount': 'Odpojiť', // from v2.1 added 30.04.2012
-			'cmdplaces'    : 'Na umiestnenie', // added 28.12.2014
+			'cmdplaces'    : 'Do umiestnení', // added 28.12.2014
 			'cmdchmod'     : 'Zmeniť režim', // from v2.1 added 20.6.2015
 			'cmdopendir'   : 'Otvoriť priečinok', // from v2.1 added 13.1.2016
 			'cmdcolwidth'  : 'Resetovať šírku stĺpca', // from v2.1.13 added 12.06.2016
@@ -271,7 +271,7 @@
 			'Sat'         : 'Sob',
 
 			/******************************** sort variants ********************************/
-			'sortname'          : 'podľa mena',
+			'sortname'          : 'podľa názvu',
 			'sortkind'          : 'podľa druhu',
 			'sortsize'          : 'podľa veľkosti',
 			'sortdate'          : 'podľa dátumu',
@@ -288,7 +288,7 @@
 			'Archive'           : 'Nový archív',  // from v2.1 added 10.11.2015
 
 			/********************************** messages **********************************/
-			'confirmReq'      : 'Očakávam potvrdenie',
+			'confirmReq'      : 'Potrebné potvrdenie',
 			'confirmRm'       : 'Určite chcete vymazať súbory?<br/>Nebude sa to dať vrátiť späť!',
 			'confirmRepl'     : 'Nahradiť starý súbor novým?',
 			'confirmRest'     : 'Nahradiť existujúcu položku s položkou v koši?', // fromv2.1.24 added 5.5.2017
@@ -297,7 +297,7 @@
 			'confirmNotSave'  : 'Bol upravený.<br/>Ak zmeny neuložíte, stratíte vykonanú prácu.', // from v2.1 added 15.7.2015
 			'confirmTrash'    : 'Naozaj chcete presunúť položky do koša?', //from v2.1.24 added 29.4.2017
 			'apllyAll'        : 'Použiť na všetky',
-			'name'            : 'Meno',
+			'name'            : 'Názov',
 			'size'            : 'Veľkosť',
 			'perms'           : 'Povolenia',
 			'modify'          : 'Zmenené',
@@ -321,7 +321,7 @@
 			'dim'             : 'Rozmery',
 			'files'           : 'Súbory',
 			'folders'         : 'Priečinky',
-			'items'           : 'Položky',
+			'items'           : 'Položiek',
 			'yes'             : 'áno',
 			'no'              : 'nie',
 			'link'            : 'Odkaz',
@@ -430,11 +430,13 @@
 			'language'        : 'Nastavenie jazyka', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': 'Inicializujte nastavenia uložené v tomto prehliadači', // from v2.1.26 added 28.6.2017
 			'toolbarPref'     : 'Nastavenie panela s nástrojmi', // from v2.1.27 added 2.8.2017
+			'charsLeft'       : '... $1 znakov vľavo.',  // from v2.1.29 added 30.8.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
 			'kindRoot'        : 'Koreň média', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'Priečinok',
+			'kindSelects'     : 'Výbery', // from v2.1.29 added 29.8.2017
 			'kindAlias'       : 'Alias',
 			'kindAliasBroken' : 'Porušený alias',
 			// applications
