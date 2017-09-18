@@ -2882,7 +2882,7 @@ class elFinder {
 		
 		if ($encoding === 'scheme') {
 			if (preg_match('~^https?://~i', $args['content'])) {
-				$fp = $this->get_remote_contents($args['content'], 30, 5, 'Mozilla/5.0', fopen($volume->getTempFile(), 'wb'));
+				$fp = $this->get_remote_contents($args['content'], 30, 5, 'Mozilla/5.0', $volume->tmpfile());
 				if (! $fp) {
 					return  array('error' => self::ERROR_SAVE, $args['content'], self::ERROR_FILE_NOT_FOUND);
 				}
