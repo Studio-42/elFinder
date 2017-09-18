@@ -1406,7 +1406,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      **/
     protected function _mkfile($path, $name)
     {
-        return $this->_save(tmpfile(), $path, $name, array());
+        return $this->_save(fopen($this->getTempFile(), 'wb'), $path, $name, array());
     }
 
     /**

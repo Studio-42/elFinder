@@ -1495,7 +1495,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      **/
     protected function _mkfile($path, $name)
     {
-        return $this->_save(tmpfile(), $path, $name, array());
+        return $this->_save(fopen($this->getTempFile(), 'wb'), $path, $name, array());
     }
 
     /**
@@ -1677,7 +1677,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             $tmpFilePath = isset($metaDatas['uri']) ? $metaDatas['uri'] : '';
             // remote contents
             if (!$tmpFilePath || empty($metaDatas['seekable'])) {
-                $tmpHandle = tmpfile();
+                $tmpHandle = fopen($this->getTempFile(), 'wb');
                 stream_copy_to_stream($fp, $tmpHandle);
                 $metaDatas = stream_get_meta_data($tmpHandle);
                 $tmpFilePath = $metaDatas['uri'];
