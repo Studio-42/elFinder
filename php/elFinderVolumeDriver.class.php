@@ -2654,9 +2654,7 @@ abstract class elFinderVolumeDriver {
 		$mime = '';
 		$mimeByName = $this->mimetype($name, true);
 		if ($this->mimeDetect !== 'internal') {
-			$tempDir = $this->getTempPath();
-			$tmpfname = $tempDir . DIRECTORY_SEPARATOR . 'tmp_' . md5($name.microtime(true));
-			if ($tp = fopen($tmpfname, 'wb')) {
+			if ($tp = fopen($this->getTempFile(), 'wb')) {
 				fwrite($tp, $content);
 				$info = stream_get_meta_data($tp);
 				$filepath = $info['uri'];
