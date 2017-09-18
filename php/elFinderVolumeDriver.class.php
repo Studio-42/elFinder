@@ -3651,7 +3651,7 @@ abstract class elFinderVolumeDriver {
 	 * @return string|false
 	 * @author Naoki Sawada
 	 */
-	protected function getTempFile($path = '') {
+	public function getTempFile($path = '') {
 		static $cache = array();
 		static $rmfunc;
 		
