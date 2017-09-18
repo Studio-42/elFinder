@@ -2654,7 +2654,7 @@ abstract class elFinderVolumeDriver {
 		$mime = '';
 		$mimeByName = $this->mimetype($name, true);
 		if ($this->mimeDetect !== 'internal') {
-			if ($tp = fopen($this->getTempFile(), 'wb')) {
+			if ($tp = $this->tmpfile()) {
 				fwrite($tp, $content);
 				$info = stream_get_meta_data($tp);
 				$filepath = $info['uri'];
@@ -3210,6 +3210,18 @@ abstract class elFinderVolumeDriver {
 	}
 
 	/**
+	 * Creates a temporary file and return file pointer
+	 * 
+	 * @return resource|boolean
+	 */
+	public function tmpfile() {
+		if ($tmp = $this->getTempFile()) {
+			return fopen($tmp, 'wb');
+		}
+		return false;
+	}
+	
+	/**
 	 * Save error message
 	 *
 	 * @param  array  error 
@@ -3684,16 +3696,14 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 */
 	protected function getWorkFile($path) {
-		if ($work = $this->getTempFile()) {
-			if ($wfp = fopen($work, 'wb')) {
-				if ($fp = $this->_fopen($path)) {
-					while(!feof($fp)) {
-						fwrite($wfp, fread($fp, 8192));
-					}
-					$this->_fclose($fp, $path);
-					fclose($wfp);
-					return $work;
+		if ($wfp = $this->tmpfile()) {
+			if ($fp = $this->_fopen($path)) {
+				while(!feof($fp)) {
+					fwrite($wfp, fread($fp, 8192));
 				}
+				$this->_fclose($fp, $path);
+				fclose($wfp);
+				return $work;
 			}
 		}
 		return false;
