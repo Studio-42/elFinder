@@ -5861,7 +5861,7 @@ elFinder.prototype = {
 					formData.append(key, val);
 				});
 				$.each(self.options.onlyMimes, function(i, mime) {
-					formData.append('mimes['+i+']', mime);
+					formData.append('mimes[]', mime);
 				});
 				
 				$.each(files, function(i, file) {
