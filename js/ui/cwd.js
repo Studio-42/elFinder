@@ -775,7 +775,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			render = function() {
-				if (bufferExt.rendering) {
+				if (bufferExt.rendering || ! buffer.length) {
 					return;
 				}
 				var place = (list ? cwd.children('table').children('tbody') : cwd),
@@ -881,7 +881,8 @@ $.fn.elfindercwd = function(fm, options) {
 					bufferExt.itemH = (list? place.find('tr:first') : place.find('[id]:first')).outerHeight(true);
 					fm.trigger('cwdrender');
 					bufferExt.rendering = false;
-				} else if (! bufferExt.rendering) {
+				}
+				if (! bufferExt.rendering && buffer.length) {
 					// next go()
 					if ((chk = (wrapper.height() + wrapper.scrollTop() + fm.options.showThreshold + bufferExt.row) - (bufferExt.renderd * bufferExt.hpi)) > 0) {
 						bufferExt.rendering = true;
