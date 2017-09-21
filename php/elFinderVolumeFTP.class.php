@@ -258,8 +258,14 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			ftp_raw($this->connect, 'OPTS UTF8 ON' );
 		}
 		
-		// switch off extended passive mode - may be usefull for some servers
-		ftp_raw($this->connect, 'epsv4 off' );
+                $help = ftp_raw($this->connect, 'HELP');
+		$this->isPureFtpd = stripos(implode(' ', $help), 'Pure-FTPd') !== false;
+                
+                if(! $this->isPureFtpd){
+                    // switch off extended passive mode - may be usefull for some servers
+                    // this command, for pure-ftpd, doesn't work and takes a timeout in some pure-ftpd versions
+                    ftp_raw($this->connect, 'epsv4 off' );
+                }
 		// enter passive mode if required
 		$pasv = ($this->options['mode'] == 'passive');
 		if (! ftp_pasv($this->connect, $pasv)) {
@@ -288,9 +294,6 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				break;
 			}
 		}
-		
-		$help = ftp_raw($this->connect, 'HELP');
-		$this->isPureFtpd = stripos(implode(' ', $help), 'Pure-FTPd') !== false;
 		
 		return true;
 	}
