@@ -2,7 +2,8 @@
  * Русский язык translation
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
- * @version 2017-08-14
+ * @author Alex Yashkin <alex@yashkin.by>
+ * @version 2017-09-22
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -14,7 +15,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.ru = {
-		translator : 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;, Andrew Berezovsky &lt;andrew.berezovsky@gmail.com&gt;',
+		translator : 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;, Andrew Berezovsky &lt;andrew.berezovsky@gmail.com&gt;, Alex Yashkin &lt;alex@yashkin.by&gt;',
 		language   : 'Русский язык',
 		direction  : 'ltr',
 		dateFormat : 'd M Y H:i', // Mar 13, 2012 05:27 PM
@@ -159,6 +160,9 @@
 			'cmdundo'      : 'Отменить', // from v2.1.27 added 31.07.2017
 			'cmdredo'      : 'Вернуть', // from v2.1.27 added 31.07.2017
 			'cmdpreference': 'Предпочтения', // from v2.1.27 added 03.08.2017
+			'cmdselectall' : 'Выделить все', // from v2.1.28 added 15.08.2017
+			'cmdselectnone': 'Снять все выделение', // from v2.1.28 added 15.08.2017
+			'cmdselectinvert': 'Инвертировать выделение', // from v2.1.28 added 15.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Закрыть',
@@ -425,13 +429,15 @@
 			'filderIsEmpty'   : 'Нет файлов в паке "$1".', // from v2.1.25 added 22.6.2017
 			'preference'      : 'Настройки', // from v2.1.26 added 28.6.2017
 			'language'        : 'Язык', // from v2.1.26 added 28.6.2017
-			'clearBrowserData': 'Сбросить настройки, измененные в этом браузере', // from v2.1.26 added 28.6.2017
+			'clearBrowserData': 'Сбросить настройки для этого браузера', // from v2.1.26 added 28.6.2017
 			'toolbarPref'     : 'Настройки панели', // from v2.1.27 added 2.8.2017
+			'charsLeft'       : '... еще символов: $1.',  // from v2.1.29 added 30.8.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
 			'kindRoot'        : 'Корень тома', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'Папка',
+			'kindSelects'     : 'Выбор', // from v2.1.29 added 29.8.2017
 			'kindAlias'       : 'Ссылка',
 			'kindAliasBroken' : 'Битая ссылка',
 			// applications

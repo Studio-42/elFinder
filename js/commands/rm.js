@@ -133,8 +133,8 @@ elFinder.prototype.commands.rm = function() {
 				setTimeout(function() {
 					var xhr = (req && req.xhr)? req.xhr : null;
 					if (xhr && xhr.state() == 'pending') {
-						xhr.quiet = true;
-						xhr.abort();
+						req.syncOnFail(false);
+						req.reject();
 						reqDfd.reject();
 					}
 				}, self.options.infoCheckWait * 1000);

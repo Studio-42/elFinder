@@ -242,7 +242,6 @@
 	font-size: 8pt;
 	text-align: center;
 	width: 100%;
-	overflow: hidden;
 }
 
 .elfinder .elfinder-button-search .elfinder-button-menu div {
@@ -260,7 +259,7 @@
 .elfinder-rtl .elfinder-button-search { float:left; margin-left:10px; }
 
 /* search text field */
-.elfinder-button-search input {
+.elfinder-button-search input[type=text] {
 	width:160px;
 	height:22px;
 	padding:0 20px;
