@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: bdd4aeb) (2017-09-19)
+ * Version 2.1.28 (2.1-src Nightly: 26381e7) (2017-09-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -1852,6 +1852,8 @@ var elFinder = function(node, opts, bootCallback) {
 								if (xhr.status == 414 && options.type === 'get') {
 									// retry by POST method
 									options.type = 'post';
+									xhr.abort();
+									xhr = void 0;
 									dfrd.xhr = xhr = self.transport.send(options).fail(error).done(success);
 									return;
 								}
@@ -1884,6 +1886,10 @@ var elFinder = function(node, opts, bootCallback) {
 				}
 				
 				if (raw) {
+					if (xhr) {
+						xhr.abort();
+						xhr = void 0;
+					}
 					response && response.debug && self.debug('backend-debug', response);
 					return dfrd.resolve(response);
 				}
@@ -1894,9 +1900,7 @@ var elFinder = function(node, opts, bootCallback) {
 					return dfrd.reject(['errResponse', 'errDataNotJSON'], xhr, response);
 				} else if (response.error) {
 					return dfrd.reject(response.error, xhr, response);
-				}/* else if (!self.validResponse(cmd, response)) {
-					return dfrd.reject('errResponse', xhr, response);
-				}*/
+				}
 				
 				var resolve = function() {
 					var pushLeafRoots = function(name) {
@@ -2037,7 +2041,10 @@ var elFinder = function(node, opts, bootCallback) {
 					
 					response.debug && self.debug('backend-debug', response);
 				};
-				
+				if (xhr) {
+					xhr.abort();
+					xhr = void 0;
+				}
 				lazy? self.lazy(resolve) : resolve();
 			},
 			xhr, _xhr,
@@ -2045,7 +2052,7 @@ var elFinder = function(node, opts, bootCallback) {
 				if (xhr && xhr.state() === 'pending') {
 					xhr.quiet = true;
 					xhr.abort();
-					if (e && e.type != 'unload' && e.type != 'destroy') {
+					if (!e || (e.type !== 'unload' && e.type !== 'destroy')) {
 						self.autoSync();
 					}
 				}
@@ -2061,7 +2068,18 @@ var elFinder = function(node, opts, bootCallback) {
 				}
 				xhrAbort(e);
 			},
-			request = function() {
+			request = function(mode) {
+				var queueAbort = function() {
+					syncOnFail = false;
+					dfrd.reject();
+				};
+				
+				if (mode) {
+					if (mode === 'cmd') {
+						return cmd;
+					}
+				}
+				
 				if (isOpen) {
 					if (requestQueueSkipOpen) {
 						return dfrd.reject();
@@ -2072,6 +2090,14 @@ var elFinder = function(node, opts, bootCallback) {
 				requestCnt++;
 				
 				dfrd.fail(function(error, xhr, response) {
+					// unset this cmd queue when user canceling
+					if (error === 0) {
+						if (requestQueue.length) {
+							requestQueue = $.map(requestQueue, function(req) {
+								return (req('cmd') === cmd) ? null : req;
+							});
+						}
+					}
 					xhrAbort();
 					self.trigger(cmd + 'fail', response);
 					if (error) {
@@ -2092,37 +2118,14 @@ var elFinder = function(node, opts, bootCallback) {
 
 				defdone && dfrd.done(done);
 				
-				if (notify.type && notify.cnt) {
-					if (cancel) {
-						notify.cancel = dfrd;
-					}
-					timeout = setTimeout(function() {
-						self.notify(notify);
-						dfrd.always(function() {
-							notify.cnt = -(parseInt(notify.cnt)||0);
-							self.notify(notify);
-						})
-					}, self.notifyDelay)
-					
-					dfrd.always(function() {
-						clearTimeout(timeout);
-					});
-				}
-				
 				// quiet abort not completed "open" requests
 				if (isOpen) {
 					while ((_xhr = queue.pop())) {
-						if (_xhr.state() == 'pending') {
-							_xhr.quiet = true;
-							_xhr.abort();
-						}
+						_xhr.queueAbort();
 					}
 					if (cwd !== data.target) {
 						while ((_xhr = cwdQueue.pop())) {
-							if (_xhr.state() == 'pending') {
-								_xhr.quiet = true;
-								_xhr.abort();
-							}
+							_xhr.queueAbort();
 						}
 					}
 				}
@@ -2146,10 +2149,17 @@ var elFinder = function(node, opts, bootCallback) {
 						requestQueue.shift()();
 					} else {
 						requestQueueSkipOpen = false;
-					} 
+					}
 				}).fail(error).done(success);
 				
+				// function for set value of this syncOnFail
+				dfrd.syncOnFail = function(state) {
+					syncOnFail = !!state;
+				}
+				
 				if (isOpen || (data.compare && cmd === 'info')) {
+					// regist function queueAbort
+					xhr.queueAbort = queueAbort;
 					// add autoSync xhr into queue
 					queue.unshift(xhr);
 					// bind abort()
@@ -2160,6 +2170,8 @@ var elFinder = function(node, opts, bootCallback) {
 						ndx !== -1 && queue.splice(ndx, 1);
 					});
 				} else if ($.inArray(cmd, self.abortCmdsOnOpen) !== -1) {
+					// regist function queueAbort
+					xhr.queueAbort = queueAbort;
 					// add "open" xhr, only cwd xhr into queue
 					cwdQueue.unshift(xhr);
 					dfrd.always(function() {
@@ -2177,6 +2189,24 @@ var elFinder = function(node, opts, bootCallback) {
 				return dfrd;
 			},
 			queueingRequest = function() {
+				// show notify
+				if (notify.type && notify.cnt) {
+					if (cancel) {
+						notify.cancel = dfrd;
+					}
+					timeout = setTimeout(function() {
+						self.notify(notify);
+						dfrd.always(function() {
+							notify.cnt = -(parseInt(notify.cnt)||0);
+							self.notify(notify);
+						})
+					}, self.notifyDelay)
+					
+					dfrd.always(function() {
+						clearTimeout(timeout);
+					});
+				}
+				// queueing
 				if (isOpen) {
 					requestQueueSkipOpen = false;
 				}
@@ -5365,7 +5395,6 @@ elFinder.prototype = {
 						error && self.error(error);
 					})
 					.done(function(data) {
-						xhr = null;
 						self.uploads.xhrUploading = false;
 						files = null;
 						if (data) {
@@ -5382,6 +5411,10 @@ elFinder.prototype = {
 						}
 					})
 					.always(function() {
+						if (xhr) {
+							xhr.abort();
+							xhr = void 0;
+						}
 						// unregist fnAbort function
 						node.off('uploadabort', fnAbort);
 						$(window).off('unload', fnAbort);
@@ -5408,6 +5441,7 @@ elFinder.prototype = {
 					if (xhr) {
 						xhr.quiet = true;
 						xhr.abort();
+						xhr = void 0;
 					}
 					if (checkNotify()) {
 						self.notify({type : 'upload', cnt : notifyElm.children('.elfinder-notify-upload').data('cnt') * -1, progress : 0, size : 0});
@@ -7016,11 +7050,7 @@ elFinder.prototype = {
 						e.stopPropagation();
 						close();
 						if (cancel.promise) {
-							if (cancel.xhr) {
-								cancel.xhr.quiet = true;
-								cancel.xhr.abort();
-							}
-							cancel.reject();
+							cancel.reject(0); // 0 is canceling flag
 						} else {
 							cancel(e);
 						}
@@ -7767,7 +7797,8 @@ elFinder.prototype = {
 								}).done(function(data){
 									addFolders.call(self, fm, node, data.folders);
 								}).always(function() {
-									xhr = null;
+									xhr.abort();
+									xhr = void 0;
 									spn.remove();
 								}).xhr;
 							}
@@ -8298,7 +8329,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: bdd4aeb)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 26381e7)';
 
 
 
@@ -12706,7 +12737,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			render = function() {
-				if (bufferExt.rendering) {
+				if (bufferExt.rendering || ! buffer.length) {
 					return;
 				}
 				var place = (list ? cwd.children('table').children('tbody') : cwd),
@@ -12812,7 +12843,8 @@ $.fn.elfindercwd = function(fm, options) {
 					bufferExt.itemH = (list? place.find('tr:first') : place.find('[id]:first')).outerHeight(true);
 					fm.trigger('cwdrender');
 					bufferExt.rendering = false;
-				} else if (! bufferExt.rendering) {
+				}
+				if (! bufferExt.rendering && buffer.length) {
 					// next go()
 					if ((chk = (wrapper.height() + wrapper.scrollTop() + fm.options.showThreshold + bufferExt.row) - (bufferExt.renderd * bufferExt.hpi)) > 0) {
 						bufferExt.rendering = true;
@@ -21694,11 +21726,8 @@ elFinder.prototype.commands.hidden = function() {
 				close : function() {
 					$(this).elfinderdialog('destroy');
 					$.each(reqs, function(i, req) {
-						var xhr = (req && req.xhr)? req.xhr : null;
-						if (xhr && xhr.state() == 'pending') {
-							xhr.quiet = true;
-							xhr.abort();
-						}
+						req.syncOnFail(false);
+						req.reject();
 					});
 				}
 			},
@@ -26904,8 +26933,8 @@ elFinder.prototype.commands.rm = function() {
 				setTimeout(function() {
 					var xhr = (req && req.xhr)? req.xhr : null;
 					if (xhr && xhr.state() == 'pending') {
-						xhr.quiet = true;
-						xhr.abort();
+						req.syncOnFail(false);
+						req.reject();
 						reqDfd.reject();
 					}
 				}, self.options.infoCheckWait * 1000);
