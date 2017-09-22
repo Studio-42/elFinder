@@ -80,11 +80,8 @@
 				close : function() {
 					$(this).elfinderdialog('destroy');
 					$.each(reqs, function(i, req) {
-						var xhr = (req && req.xhr)? req.xhr : null;
-						if (xhr && xhr.state() == 'pending') {
-							xhr.quiet = true;
-							xhr.abort();
-						}
+						req.syncOnFail(false);
+						req.reject();
 					});
 				}
 			},
