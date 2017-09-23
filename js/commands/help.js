@@ -166,7 +166,7 @@
 				
 				debugUL.after(target);
 				
-				debugDIV.tabs('refresh');
+				debugDIV.is(':visible') && debugDIV.tabs('refresh');
 			}
 		},
 		content = '',
@@ -354,7 +354,7 @@
 		// debug
 		if (useDebug) {
 			tabDebug = content.find('.elfinder-help-tab-debug').hide();
-			debugDIV = content.find('#'+fm.namespace+'-help-debug').children('div:first').tabs();
+			debugDIV = content.find('#'+fm.namespace+'-help-debug').children('div:first');
 			debugUL = debugDIV.children('ul:first').on('click', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
@@ -383,6 +383,7 @@
 				destroyOnClose : false,
 				close : function() {
 					tabDebug.hide();
+					debugDIV.tabs('destroy');
 				}
 			})
 			.on('click', function(e) {
@@ -426,16 +427,17 @@
 	};
 	
 	this.exec = function(sel, opts) {
-		var tab = opts? opts.tab : void(0);
-		if (! loaded) {
-			loaded = true;
-			fm.lazy(init).done(function() {
+		var tab = opts? opts.tab : void(0),
+			debugShow = function() {
+				debugDIV.tabs();
 				debugUL.find('a:first').trigger('click');
 				tabDebug.show();
-			});
+			};
+		if (! loaded) {
+			loaded = true;
+			fm.lazy(init).done(debugShow);
 		} else {
-			debugUL.find('a:first').trigger('click');
-			tabDebug.show();
+			debugShow();
 		}
 		this.dialog.trigger('initContents').elfinderdialog('open').find((tab? '.elfinder-help-tab-'+tab : '.ui-tabs-nav li') + ' a:first').click();
 		return $.Deferred().resolve();
