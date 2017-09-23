@@ -150,6 +150,7 @@
 				targetL.on('click.debugrender', function() {
 					var debug = target.data('debug');
 					if (debug) {
+						target.hide();
 						if (debug.debug) {
 							info = $('<fieldset>').append($('<legend/>').text('debug'), render($('<dl/>'), debug.debug));
 							target.append(info);
@@ -158,6 +159,7 @@
 							info = $('<fieldset>').append($('<legend/>').text('options'), render($('<dl/>'), debug.options));
 							target.append(info);
 						}
+						target.show();
 					}
 					targetL.off('click.debugrender');
 				});
@@ -165,7 +167,6 @@
 				debugUL.after(target);
 				
 				debugDIV.tabs('refresh');
-				$('#'+fm.namespace+'-help-debug').is(':hidden')/* && debugUL.find('a:first').trigger('click')*/;
 			}
 		},
 		content = '',
@@ -365,7 +366,7 @@
 				// CAUTION: DO NOT TOUCH `e.data`
 				if (e.data && e.data.debug) {
 					self.debug = { options : e.data.options, debug : Object.assign({ cmd : fm.currentReqCmd }, e.data.debug) };
-					if (self.dialog/* && self.dialog.is(':visible')*/) {
+					if (self.dialog) {
 						debugRender();
 					}
 				}
