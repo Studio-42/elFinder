@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: d7105c3) (2017-09-23)
+ * Version 2.1.28 (2.1-src Nightly: 35689a6) (2017-09-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8329,7 +8329,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: d7105c3)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 35689a6)';
 
 
 
@@ -21314,7 +21314,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				debugUL.after(target);
 				
 				debugDIV.tabs('refresh');
-				$('#'+fm.namespace+'-help-debug').is(':hidden') && debugUL.find('a:first').trigger('click');
+				$('#'+fm.namespace+'-help-debug').is(':hidden')/* && debugUL.find('a:first').trigger('click')*/;
 			}
 		},
 		content = '',
@@ -21578,9 +21578,11 @@ elFinder.prototype.commands.fullscreen = function() {
 		if (! loaded) {
 			loaded = true;
 			fm.lazy(init).done(function() {
+				debugUL.find('a:first').trigger('click');
 				tabDebug.show();
 			});
 		} else {
+			debugUL.find('a:first').trigger('click');
 			tabDebug.show();
 		}
 		this.dialog.trigger('initContents').elfinderdialog('open').find((tab? '.elfinder-help-tab-'+tab : '.ui-tabs-nav li') + ' a:first').click();
