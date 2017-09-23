@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 26381e7) (2017-09-22)
+ * Version 2.1.28 (2.1-src Nightly: d7105c3) (2017-09-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8329,7 +8329,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 26381e7)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: d7105c3)';
 
 
 
@@ -21294,16 +21294,22 @@ elFinder.prototype.commands.fullscreen = function() {
 				
 				tabId = fm.namespace + '-help-debug-' + (+new Date());
 				targetL = $('<li/>').html('<a href="'+selfUrl+'#'+tabId+'">'+self.debug.debug.cmd+'</a>').prependTo(debugUL);
-				target = $('<div id="'+tabId+'"/>');
+				target = $('<div id="'+tabId+'"/>').data('debug', self.debug);
 				
-				if (self.debug.debug) {
-					info = $('<fieldset>').append($('<legend/>').text('debug'), render($('<dl/>'), self.debug.debug));
-					target.append(info);
-				}
-				if (self.debug.options) {
-					info = $('<fieldset>').append($('<legend/>').text('options'), render($('<dl/>'), self.debug.options));
-					target.append(info);
-				}
+				targetL.on('click.debugrender', function() {
+					var debug = target.data('debug');
+					if (debug) {
+						if (debug.debug) {
+							info = $('<fieldset>').append($('<legend/>').text('debug'), render($('<dl/>'), debug.debug));
+							target.append(info);
+						}
+						if (debug.options) {
+							info = $('<fieldset>').append($('<legend/>').text('options'), render($('<dl/>'), debug.options));
+							target.append(info);
+						}
+					}
+					targetL.off('click.debugrender');
+				});
 				
 				debugUL.after(target);
 				
@@ -21323,7 +21329,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				initCallbacks = [];
 			}
 		},
-		loaded, debugDIV, debugUL;
+		loaded, tabDebug, debugDIV, debugUL;
 	
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
@@ -21439,7 +21445,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				tab.append($('<dl/>').append(dls));
 			},
 			parts = self.options.view || ['about', 'shortcuts', 'help', 'preference', 'debug'],
-			tabDebug, i, helpSource, tabBase, tabNav, tabs, delta;
+			i, helpSource, tabBase, tabNav, tabs, delta;
 		
 		// force enable 'preference' tab
 		if ($.inArray('preference', parts) === -1) {
@@ -21507,7 +21513,6 @@ elFinder.prototype.commands.fullscreen = function() {
 			fm.bind('backenddebug', function(e) {
 				// CAUTION: DO NOT TOUCH `e.data`
 				if (e.data && e.data.debug) {
-					tabDebug.show();
 					self.debug = { options : e.data.options, debug : Object.assign({ cmd : fm.currentReqCmd }, e.data.debug) };
 					if (self.dialog/* && self.dialog.is(':visible')*/) {
 						debugRender();
@@ -21523,7 +21528,10 @@ elFinder.prototype.commands.fullscreen = function() {
 				maxWidth: 'window',
 				maxHeight: 'window',
 				autoOpen : false,
-				destroyOnClose : false
+				destroyOnClose : false,
+				close : function() {
+					tabDebug.hide();
+				}
 			})
 			.on('click', function(e) {
 				e.stopPropagation();
@@ -21569,7 +21577,11 @@ elFinder.prototype.commands.fullscreen = function() {
 		var tab = opts? opts.tab : void(0);
 		if (! loaded) {
 			loaded = true;
-			fm.lazy(init);
+			fm.lazy(init).done(function() {
+				tabDebug.show();
+			});
+		} else {
+			tabDebug.show();
 		}
 		this.dialog.trigger('initContents').elfinderdialog('open').find((tab? '.elfinder-help-tab-'+tab : '.ui-tabs-nav li') + ' a:first').click();
 		return $.Deferred().resolve();
