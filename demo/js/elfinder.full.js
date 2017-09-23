@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 35689a6) (2017-09-23)
+ * Version 2.1.28 (2.1-src Nightly: 2bd2630) (2017-09-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8329,7 +8329,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 35689a6)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 2bd2630)';
 
 
 
@@ -21299,6 +21299,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				targetL.on('click.debugrender', function() {
 					var debug = target.data('debug');
 					if (debug) {
+						target.hide();
 						if (debug.debug) {
 							info = $('<fieldset>').append($('<legend/>').text('debug'), render($('<dl/>'), debug.debug));
 							target.append(info);
@@ -21307,6 +21308,7 @@ elFinder.prototype.commands.fullscreen = function() {
 							info = $('<fieldset>').append($('<legend/>').text('options'), render($('<dl/>'), debug.options));
 							target.append(info);
 						}
+						target.show();
 					}
 					targetL.off('click.debugrender');
 				});
@@ -21314,7 +21316,6 @@ elFinder.prototype.commands.fullscreen = function() {
 				debugUL.after(target);
 				
 				debugDIV.tabs('refresh');
-				$('#'+fm.namespace+'-help-debug').is(':hidden')/* && debugUL.find('a:first').trigger('click')*/;
 			}
 		},
 		content = '',
@@ -21514,7 +21515,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				// CAUTION: DO NOT TOUCH `e.data`
 				if (e.data && e.data.debug) {
 					self.debug = { options : e.data.options, debug : Object.assign({ cmd : fm.currentReqCmd }, e.data.debug) };
-					if (self.dialog/* && self.dialog.is(':visible')*/) {
+					if (self.dialog) {
 						debugRender();
 					}
 				}
