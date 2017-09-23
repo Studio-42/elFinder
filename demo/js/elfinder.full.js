@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 2bd2630) (2017-09-23)
+ * Version 2.1.28 (2.1-src Nightly: 1c2b4de) (2017-09-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8329,7 +8329,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 2bd2630)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 1c2b4de)';
 
 
 
@@ -21315,7 +21315,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				
 				debugUL.after(target);
 				
-				debugDIV.tabs('refresh');
+				debugDIV.is(':visible') && debugDIV.tabs('refresh');
 			}
 		},
 		content = '',
@@ -21503,7 +21503,7 @@ elFinder.prototype.commands.fullscreen = function() {
 		// debug
 		if (useDebug) {
 			tabDebug = content.find('.elfinder-help-tab-debug').hide();
-			debugDIV = content.find('#'+fm.namespace+'-help-debug').children('div:first').tabs();
+			debugDIV = content.find('#'+fm.namespace+'-help-debug').children('div:first');
 			debugUL = debugDIV.children('ul:first').on('click', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
@@ -21532,6 +21532,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				destroyOnClose : false,
 				close : function() {
 					tabDebug.hide();
+					debugDIV.tabs('destroy');
 				}
 			})
 			.on('click', function(e) {
@@ -21575,16 +21576,17 @@ elFinder.prototype.commands.fullscreen = function() {
 	};
 	
 	this.exec = function(sel, opts) {
-		var tab = opts? opts.tab : void(0);
-		if (! loaded) {
-			loaded = true;
-			fm.lazy(init).done(function() {
+		var tab = opts? opts.tab : void(0),
+			debugShow = function() {
+				debugDIV.tabs();
 				debugUL.find('a:first').trigger('click');
 				tabDebug.show();
-			});
+			};
+		if (! loaded) {
+			loaded = true;
+			fm.lazy(init).done(debugShow);
 		} else {
-			debugUL.find('a:first').trigger('click');
-			tabDebug.show();
+			debugShow();
 		}
 		this.dialog.trigger('initContents').elfinderdialog('open').find((tab? '.elfinder-help-tab-'+tab : '.ui-tabs-nav li') + ' a:first').click();
 		return $.Deferred().resolve();
