@@ -165,7 +165,7 @@
 				debugUL.after(target);
 				
 				debugDIV.tabs('refresh');
-				$('#'+fm.namespace+'-help-debug').is(':hidden') && debugUL.find('a:first').trigger('click');
+				$('#'+fm.namespace+'-help-debug').is(':hidden')/* && debugUL.find('a:first').trigger('click')*/;
 			}
 		},
 		content = '',
@@ -429,9 +429,11 @@
 		if (! loaded) {
 			loaded = true;
 			fm.lazy(init).done(function() {
+				debugUL.find('a:first').trigger('click');
 				tabDebug.show();
 			});
 		} else {
+			debugUL.find('a:first').trigger('click');
 			tabDebug.show();
 		}
 		this.dialog.trigger('initContents').elfinderdialog('open').find((tab? '.elfinder-help-tab-'+tab : '.ui-tabs-nav li') + ' a:first').click();
