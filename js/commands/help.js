@@ -149,6 +149,7 @@
 				
 				targetL.on('click.debugrender', function() {
 					var debug = target.data('debug');
+					target.removeData('debug');
 					if (debug) {
 						target.hide();
 						if (debug.debug) {
@@ -166,7 +167,7 @@
 				
 				debugUL.after(target);
 				
-				debugDIV.is(':visible') && debugDIV.tabs('refresh');
+				opened && debugDIV.tabs('refresh');
 			}
 		},
 		content = '',
@@ -181,7 +182,7 @@
 				initCallbacks = [];
 			}
 		},
-		loaded, tabDebug, debugDIV, debugUL;
+		loaded, opened, tabDebug, debugDIV, debugUL;
 	
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
@@ -384,6 +385,7 @@
 				close : function() {
 					tabDebug.hide();
 					debugDIV.tabs('destroy');
+					opened = false;
 				}
 			})
 			.on('click', function(e) {
@@ -432,6 +434,7 @@
 				debugDIV.tabs();
 				debugUL.find('a:first').trigger('click');
 				tabDebug.show();
+				opened = true;
 			};
 		if (! loaded) {
 			loaded = true;
