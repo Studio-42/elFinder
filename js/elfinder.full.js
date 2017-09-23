@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 1c2b4de) (2017-09-23)
+ * Version 2.1.28 (2.1-src Nightly: 3d6f850) (2017-09-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8329,7 +8329,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 1c2b4de)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 3d6f850)';
 
 
 
@@ -21298,6 +21298,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				
 				targetL.on('click.debugrender', function() {
 					var debug = target.data('debug');
+					target.removeData('debug');
 					if (debug) {
 						target.hide();
 						if (debug.debug) {
@@ -21315,7 +21316,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				
 				debugUL.after(target);
 				
-				debugDIV.is(':visible') && debugDIV.tabs('refresh');
+				opened && debugDIV.tabs('refresh');
 			}
 		},
 		content = '',
@@ -21330,7 +21331,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				initCallbacks = [];
 			}
 		},
-		loaded, tabDebug, debugDIV, debugUL;
+		loaded, opened, tabDebug, debugDIV, debugUL;
 	
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
@@ -21533,6 +21534,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				close : function() {
 					tabDebug.hide();
 					debugDIV.tabs('destroy');
+					opened = false;
 				}
 			})
 			.on('click', function(e) {
@@ -21581,6 +21583,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				debugDIV.tabs();
 				debugUL.find('a:first').trigger('click');
 				tabDebug.show();
+				opened = true;
 			};
 		if (! loaded) {
 			loaded = true;
