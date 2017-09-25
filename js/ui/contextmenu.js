@@ -291,7 +291,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			close = function() {
 				fm.getUI().off('click.' + fm.namespace, close);
 				$(document).off('keydown.' + fm.namespace, keyEvts);
-				currentType = null;
+				currentType = currentTargets = null;
 				
 				if (menu.is(':visible') || menu.children().length) {
 					menu.removeAttr('style').hide().empty().removeData('submenuKeep');
@@ -327,6 +327,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					cmdMap;
 
 				currentType = type;
+				currentTargets = targets;
 				
 				// get current uiCmdMap option
 				if (!(cmdMap = fm.option('uiCmdMap', isCwd? void(0) : targets[0]))) {
@@ -555,7 +556,8 @@ $.fn.elfindercontextmenu = function(fm) {
 				nodes = menu.children('div.'+cmItem);
 			},
 			
-			currentType = null;
+			currentType = null,
+			currentTargets = null;
 		
 		fm.one('load', function() {
 			base = fm.getUI();
@@ -595,8 +597,8 @@ $.fn.elfindercontextmenu = function(fm) {
 			})
 			.one('destroy', function() { menu.remove(); })
 			.bind('disable', close)
-			.bind('select', function(){
-				(currentType === 'files') && close();
+			.bind('select', function(e){
+				(currentType === 'files' && (!e.data || e.data.selected.toString() !== currentTargets.toString())) && close();
 			});
 		})
 		.shortcut({

@@ -362,9 +362,10 @@ var elFinder = function(node, opts, bootCallback) {
 		 * Store info about files/dirs in "files" object.
 		 *
 		 * @param  Array  files
+		 * @param  String data type
 		 * @return void
 		 **/
-		cache = function(data) {
+		cache = function(data, type) {
 			var defsorter = { name: true, perm: true, date: true,  size: true, kind: true },
 				sorterChk = (self.sorters.length === 0),
 				l         = data.length,
@@ -377,7 +378,9 @@ var elFinder = function(node, opts, bootCallback) {
 						}
 					});
 				},
-				f, i;
+				keeps = ['sizeInfo'],
+				changedParents = {},
+				f, i, keepProp, parents;
 
 			for (i = 0; i < l; i++) {
 				f = Object.assign({}, data[i]);
@@ -406,7 +409,25 @@ var elFinder = function(node, opts, bootCallback) {
 						}
 					}
 					
-					files[f.hash] && deleteCache(files[f.hash], true);
+					if (f.phash && (type === 'add' || type === 'change')) {
+						if (parents = self.parents(f.phash)) {
+							$.each(parents, function() {
+								changedParents[this] = true;
+							});
+						}
+					}
+					
+					if (files[f.hash]) {
+						$.each(keeps, function() {
+							if(files[f.hash][this] && ! f[this]) {
+								f[this] = files[f.hash][this];
+							}
+						});
+						if (f.sizeInfo && !f.size) {
+							f.size = f.sizeInfo.size;
+						}
+						deleteCache(files[f.hash], true);
+					}
 					files[f.hash] = f;
 					if (f.mime === 'directory' && !ownFiles[f.hash]) {
 						ownFiles[f.hash] = {};
@@ -419,6 +440,13 @@ var elFinder = function(node, opts, bootCallback) {
 					}
 				} 
 			}
+			// delete sizeInfo cache
+			$.each(Object.keys(changedParents), function() {
+				var target = files[this];
+				if (target && target.sizeInfo) {
+					delete target.sizeInfo;
+				}
+			});
 			
 			// for empty folder
 			sorterChk && setSorter();
@@ -446,9 +474,18 @@ var elFinder = function(node, opts, bootCallback) {
 								});
 							}
 						}
+						if (file.phash) {
+							if (parents = self.parents(file.phash)) {
+								$.each(parents, function() {
+									changedParents[this] = true;
+								});
+							}
+						}
 						deleteCache(files[hash]);
 					}
-				};
+				},
+				changedParents = {},
+				parents;
 		
 			$.each(self.roots, function(k, v) {
 				roots[v] = k;
@@ -456,6 +493,13 @@ var elFinder = function(node, opts, bootCallback) {
 			while (l--) {
 				rm(removed[l]);
 			}
+			// delete sizeInfo cache
+			$.each(Object.keys(changedParents), function() {
+				var target = files[this];
+				if (target && target.sizeInfo) {
+					delete target.sizeInfo;
+				}
+			});
 		},
 		
 		/**
@@ -2234,11 +2278,11 @@ var elFinder = function(node, opts, bootCallback) {
 	 */
 	this.updateCache = function(data) {
 		if ($.isPlainObject(data)) {
-			data.files && data.files.length && cache(data.files);
-			data.tree && data.tree.length && cache(data.tree);
+			data.files && data.files.length && cache(data.files, 'files');
+			data.tree && data.tree.length && cache(data.tree, 'tree');
 			data.removed && data.removed.length && remove(data.removed);
-			data.added && data.added.length && cache(data.added);
-			data.changed && data.changed.length && change(data.changed);
+			data.added && data.added.length && cache(data.added, 'add');
+			data.changed && data.changed.length && change(data.changed, 'change');
 		}
 	};
 	
@@ -8172,6 +8216,177 @@ elFinder.prototype = {
 		} else {
 			dfrd.reject();
 		}
+		return dfrd;
+	},
+	
+	getSize : function(targets) {
+		var self = this,
+			reqs = [],
+			dfrd = $.Deferred().fail(function() {
+				$.each(reqs, function(i, req) {
+					if (req) {
+						req.syncOnFail(false);
+						req.reject();
+					}
+				});
+			}),
+			getLeafRoots = function(file) {
+				var targets = [];
+				if (file.mime === 'directory') {
+					$.each(self.leafRoots, function(hash, roots) {
+						var phash;
+						if (hash === file.hash) {
+							targets.push.apply(targets, roots);
+						} else {
+							phash = (self.file(hash) || {}).phash;
+							while(phash) {
+								if (phash === file.hash) {
+									targets.push.apply(targets, roots);
+								}
+								phash = (self.file(phash) || {}).phash;
+							}
+						}
+					});
+				}
+				return targets;
+			},
+			checkPhash = function(hash) {
+				var dfd = $.Deferred(),
+					dir = self.file(hash),
+					target = dir? dir.phash : hash;
+				if (target && ! self.file(target)) {
+					self.request({
+						data : {
+							cmd    : 'parents',
+							target : target
+						},
+						preventFail : true
+					}).done(function() {
+						self.one('parentsdone', function() {
+							dfd.resolve();
+						});
+					}).fail(function() {
+						dfd.resolve();
+					});
+				} else {
+					dfd.resolve();
+				}
+				return dfd;
+			},
+			cache = function() {
+				var dfd = $.Deferred(),
+					cnt = Object.keys(self.leafRoots).length;
+				
+				if (cnt > 0) {
+					$.each(self.leafRoots, function(hash) {
+						checkPhash(hash).done(function() {
+							--cnt;
+							if (cnt < 1) {
+								dfd.resolve();
+							}
+						});
+					});
+				} else {
+					dfd.resolve();
+				}
+				return dfd;
+			};
+
+		self.autoSync('stop');
+		cache().done(function() {
+			var files = [], grps = {}, dfds = [], cache = [], singles = {};
+			
+			$.each(targets, function() {
+				files.push.apply(files, getLeafRoots(self.file(this)));
+			});
+			targets.push.apply(targets, files);
+			
+			$.each(targets, function() {
+				var root = self.root(this),
+					file = self.file(this);
+				if (file && file.sizeInfo) {
+					cache.push($.Deferred().resolve(file.sizeInfo));
+				} else {
+					if (! grps[root]) {
+						grps[root] = [ this ];
+					} else {
+						grps[root].push(this);
+					}
+				}
+			});
+			
+			$.each(grps, function() {
+				var idx = dfds.length;
+				if (this.length === 1) {
+					singles[idx] = this[0];
+				}
+				dfds.push(self.request({
+					data : {cmd : 'size', targets : this},
+					preventDefault : true
+				}));
+			});
+			reqs.push.apply(reqs, dfds);
+			dfds.push.apply(dfds, cache);
+			
+			$.when.apply($, dfds).fail(function() {
+				dfrd.reject();
+			}).done(function() {
+				var size = 0,
+					fileCnt = 0,
+					dirCnt = 0,
+					argLen = arguments.length,
+					cnts = [],
+					cntsTxt = '',
+					changed = [],
+					i, cache, file, data;
+				
+				for (i = 0; i < argLen; i++) {
+					data = arguments[i];
+					file = null;
+					if (!data.isCache && singles[i] && (file = self.file(singles[i]))) {
+						file.sizeInfo = { isCache: true };
+						$.each(['size', 'dirCnt', 'fileCnt'], function() {
+							file.sizeInfo[this] = data[this];
+						});
+						file.size = parseInt(file.sizeInfo.size);
+						changed.push(file);
+					}
+					size += parseInt(data.size);
+					if (fileCnt !== false) {
+						if (typeof data.fileCnt === 'undefined') {
+							fileCnt = false;
+						}
+						fileCnt += parseInt(data.fileCnt || 0);
+					}
+					if (dirCnt !== false) {
+						if (typeof data.dirCnt === 'undefined') {
+							dirCnt = false;
+						}
+						dirCnt += parseInt(data.dirCnt || 0);
+					}
+				}
+				changed.length && self.change({changed: changed});
+				
+				if (dirCnt !== false){
+					cnts.push(self.i18n('folders') + ': ' + dirCnt);
+				}
+				if (fileCnt !== false){
+					cnts.push(self.i18n('files') + ': ' + fileCnt);
+				}
+				if (cnts.length) {
+					cntsTxt = '<br>' + cnts.join(', ');
+				}
+				dfrd.resolve({
+					size: size,
+					fileCnt: fileCnt,
+					dirCnt: dirCnt,
+					formated: (size >= 0 ? self.formatSize(size) : self.i18n('unknown')) + cntsTxt
+				});
+			});
+			
+			self.autoSync();
+		});
+		
 		return dfrd;
 	},
 	
