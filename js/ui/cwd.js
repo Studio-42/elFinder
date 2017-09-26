@@ -775,12 +775,18 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			render = function() {
+				var phash;
 				if (bufferExt.rendering || ! buffer.length) {
+					if (! bufferExt.rendering) {
+						phash = fm.cwd().phash;
+						if (options.oldSchool && phash && !query) {
+							oldSchool(phash);
+						}
+					}
 					return;
 				}
 				var place = (list ? cwd.children('table').children('tbody') : cwd),
 					chk,
-					phash,
 					// created document fragment for jQuery >= 1.12, 2.2, 3.0
 					// see Studio-42/elFinder#1544 @ github
 					docFlag = $.htmlPrefilter? true : false,
