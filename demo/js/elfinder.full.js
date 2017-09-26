@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: bb4d2bc) (2017-09-26)
+ * Version 2.1.28 (2.1-src Nightly: 37cf330) (2017-09-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8607,7 +8607,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: bb4d2bc)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 37cf330)';
 
 
 
@@ -13017,12 +13017,18 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			render = function() {
+				var phash;
 				if (bufferExt.rendering || ! buffer.length) {
+					if (! bufferExt.rendering) {
+						phash = fm.cwd().phash;
+						if (options.oldSchool && phash && !query) {
+							oldSchool(phash);
+						}
+					}
 					return;
 				}
 				var place = (list ? cwd.children('table').children('tbody') : cwd),
 					chk,
-					phash,
 					// created document fragment for jQuery >= 1.12, 2.2, 3.0
 					// see Studio-42/elFinder#1544 @ github
 					docFlag = $.htmlPrefilter? true : false,
