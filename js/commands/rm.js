@@ -15,25 +15,23 @@ elFinder.prototype.commands.rm = function() {
 				cwd = fm.cwd().hash,
 				descs = [],
 				spinner = '<span class="elfinder-info-spinner"/>' + fm.i18n('calc'),
-				dialog, text, tmb, size, f, fname, getSize;
+				dialog, text, tmb, size, f, fname;
 			
 			if (cnt > 1) {
-				//if (!$.map(files, function(f) { return f.mime == 'directory' ? 1 : null ; }).length) {
-					size = 0;
-					$.each(files, function(h, f) { 
-						if (f.size && f.size != 'unknown' && f.mime !== 'directory') {
-							var s = parseInt(f.size);
-							if (s >= 0 && size >= 0) {
-								size += s;
-							}
-						} else {
-							size = 'unknown';
-							return false;
+				size = 0;
+				$.each(files, function(h, f) { 
+					if (f.size && f.size != 'unknown' && f.mime !== 'directory') {
+						var s = parseInt(f.size);
+						if (s >= 0 && size >= 0) {
+							size += s;
 						}
-					});
-					getSize = (size === 'unknown');
-					descs.push(fm.i18n('size')+': '+(getSize? spinner : fm.formatSize(size)));
-				//}
+					} else {
+						size = 'unknown';
+						return false;
+					}
+				});
+				getSize = (size === 'unknown');
+				descs.push(fm.i18n('size')+': '+(getSize? spinner : fm.formatSize(size)));
 				text = [$(tpl.replace('{class}', 'elfinder-cwd-icon-group').replace('{title}', '<strong>' + fm.i18n('items')+ ': ' + cnt + '</strong>').replace('{desc}', descs.join('<br>')))];
 			} else {
 				f = files[0];
@@ -90,7 +88,7 @@ elFinder.prototype.commands.rm = function() {
 				}).fail(function() {
 					dialog.find('span.elfinder-info-spinner').parent().html(fm.i18n('size')+': '+fm.i18n('unknown'));
 				}).always(function() {
-					getSize = null;
+					getSize = false;
 				});
 			}
 		},
@@ -360,7 +358,8 @@ elFinder.prototype.commands.rm = function() {
 				}
 			}
 			return thash;
-		};
+		},
+		getSize = false;
 	
 	this.syncTitleOnChange = true;
 	this.updateOnSelect = false;
@@ -409,6 +408,11 @@ elFinder.prototype.commands.rm = function() {
 	this.exec = function(hashes, opts) {
 		var opts   = opts || {},
 			dfrd   = $.Deferred()
+				.always(function() {
+					if (getSize && getSize.state && getSize.state() === 'pending') {
+						getSize.reject();
+					}
+				})
 				.fail(function(error) {
 					error && fm.error(error);
 				}).done(function(data) {
