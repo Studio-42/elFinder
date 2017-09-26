@@ -4998,6 +4998,9 @@ elFinder.prototype = {
 		// xhr muiti uploading flag
 		xhrUploading: false,
 		
+		// Timer of request fail to sync
+		failSyncTm: null,
+		
 		// current chunkfail requesting chunk
 		chunkfailReq: {},
 		
@@ -5400,9 +5403,16 @@ elFinder.prototype = {
 							error = void 0;
 						}
 						if (files && (self.uploads.xhrUploading || userAbort)) {
-							// send chunkfail request
+							// send request om fail
 							getFile(files).done(function(file) {
-								if (file._cid && ! self.uploads.chunkfailReq[file._cid]) {
+								if (! file._cid) {
+									// send sync request
+									self.uploads.failSyncTm && clearTimeout(self.uploads.failSyncTm);
+									self.uploads.failSyncTm = setTimeout(function() {
+										self.sync(target);
+									}, 1000);
+								} else if (! self.uploads.chunkfailReq[file._cid]) {
+									// send chunkfail request
 									self.uploads.chunkfailReq[file._cid] = true;
 									setTimeout(function() {
 										fm.request({
