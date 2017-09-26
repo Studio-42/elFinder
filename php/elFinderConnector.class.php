@@ -152,7 +152,12 @@ class elFinderConnector {
 			$args['FILES'] = $_FILES;
 		}
 		
-		$this->output($this->elFinder->exec($cmd, $args));
+		try {
+			$this->output($this->elFinder->exec($cmd, $args));
+		} catch (elFinderAbortException $e) {
+			// aborted
+			exit();
+		}
 	}
 	
 	/**
