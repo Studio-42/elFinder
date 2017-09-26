@@ -775,17 +775,11 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			render = function() {
-				var phash;
-				if (bufferExt.rendering || ! buffer.length) {
-					if (! bufferExt.rendering) {
-						phash = fm.cwd().phash;
-						if (options.oldSchool && phash && !query) {
-							oldSchool(phash);
-						}
-					}
+				if (bufferExt.rendering || (bufferExt.renderd && ! buffer.length)) {
 					return;
 				}
 				var place = (list ? cwd.children('table').children('tbody') : cwd),
+					phash,
 					chk,
 					// created document fragment for jQuery >= 1.12, 2.2, 3.0
 					// see Studio-42/elFinder#1544 @ github
@@ -2470,7 +2464,7 @@ $.fn.elfindercwd = function(fm, options) {
 				var place = list ? cwd.find('tbody') : cwd;
 				remove(e.data.removed || []);
 				trigger();
-				if (buffer.length < 1 && place.children().length < 1) {
+				if (buffer.length < 1 && place.children(fileSelector).length < 1) {
 					wz.addClass('elfinder-cwd-wrapper-empty');
 					selectCheckbox && selectAllCheckbox.find('input').prop('checked', false);
 					bottomMarker.hide();
