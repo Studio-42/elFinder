@@ -31,7 +31,7 @@ class elFinder {
 	 * 
 	 * @var integer
 	 */
-	protected static $ApiRevision = 28;
+	protected static $ApiRevision = 29;
 	
 	/**
 	 * Storages (root dirs)
@@ -116,6 +116,13 @@ class elFinder {
 	);
 	
 	/**
+	 * Path of current request flag file for abort check
+	 * 
+	 * @var string
+	 */
+	protected static $abortCheckFile = null;
+	
+	/**
 	 * elFinder session wrapper object
 	 * 
 	 * @var elFinderSessionInterface
@@ -191,34 +198,35 @@ class elFinder {
 	 * @var array
 	 **/
 	protected $commands = array(
-		'open'      => array('target' => false, 'tree' => false, 'init' => false, 'mimes' => false, 'compare' => false),
-		'ls'        => array('target' => true, 'mimes' => false, 'intersect' => false),
-		'tree'      => array('target' => true),
-		'parents'   => array('target' => true, 'until' => false),
-		'tmb'       => array('targets' => true),
-		'file'      => array('target' => true, 'download' => false),
-		'zipdl'     => array('targets' => true, 'download' => false),
-		'size'      => array('targets' => true),
-		'mkdir'     => array('target' => true, 'name' => false, 'dirs' => false),
-		'mkfile'    => array('target' => true, 'name' => true, 'mimes' => false),
-		'rm'        => array('targets' => true),
-		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
-		'duplicate' => array('targets' => true, 'suffix' => false),
-		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false, 'renames' => false, 'hashes' => false, 'suffix' => false),
-		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'hashes' => false, 'suffix' => false, 'mtime' => false, 'overwrite' => false),
-		'get'       => array('target' => true, 'conv' => false),
-		'put'       => array('target' => true, 'content' => '', 'mimes' => false, 'encoding' => false),
-		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false, 'name' => false),
-		'extract'   => array('target' => true, 'mimes' => false, 'makedir' => false),
-		'search'    => array('q' => true, 'mimes' => false, 'target' => false),
-		'info'      => array('targets' => true, 'compare' => false),
-		'dim'       => array('target' => true),
-		'resize'    => array('target' => true, 'width' => false, 'height' => false, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false, 'quality' => false, 'bg' => false),
-		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => false, 'pass' => false, 'alias' => false, 'options' => false),
-		'url'       => array('target' => true, 'options' => false),
-		'callback'  => array('node' => true, 'json' => false, 'bind' => false, 'done' => false),
-		'chmod'     => array('targets' => true, 'mode' => true),
-		'subdirs'   => array('targets' => true)
+		'open'      => array('target' => false, 'tree' => false, 'init' => false, 'mimes' => false, 'compare' => false, 'reqid' => false),
+		'ls'        => array('target' => true, 'mimes' => false, 'intersect' => false, 'reqid' => false),
+		'tree'      => array('target' => true, 'reqid' => false),
+		'parents'   => array('target' => true, 'until' => false, 'reqid' => false),
+		'tmb'       => array('targets' => true, 'reqid' => false),
+		'file'      => array('target' => true, 'download' => false, 'reqid' => false),
+		'zipdl'     => array('targets' => true, 'download' => false, 'reqid' => false),
+		'size'      => array('targets' => true, 'reqid' => false),
+		'mkdir'     => array('target' => true, 'name' => false, 'dirs' => false, 'reqid' => false),
+		'mkfile'    => array('target' => true, 'name' => true, 'mimes' => false, 'reqid' => false),
+		'rm'        => array('targets' => true, 'reqid' => false),
+		'rename'    => array('target' => true, 'name' => true, 'mimes' => false, 'reqid' => false),
+		'duplicate' => array('targets' => true, 'suffix' => false, 'reqid' => false),
+		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false, 'renames' => false, 'hashes' => false, 'suffix' => false, 'reqid' => false),
+		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'hashes' => false, 'suffix' => false, 'mtime' => false, 'overwrite' => false, 'reqid' => false),
+		'get'       => array('target' => true, 'conv' => false, 'reqid' => false),
+		'put'       => array('target' => true, 'content' => '', 'mimes' => false, 'encoding' => false, 'reqid' => false),
+		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false, 'name' => false, 'reqid' => false),
+		'extract'   => array('target' => true, 'mimes' => false, 'makedir' => false, 'reqid' => false),
+		'search'    => array('q' => true, 'mimes' => false, 'target' => false, 'reqid' => false),
+		'info'      => array('targets' => true, 'compare' => false, 'reqid' => false),
+		'dim'       => array('target' => true, 'reqid' => false),
+		'resize'    => array('target' => true, 'width' => false, 'height' => false, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false, 'quality' => false, 'bg' => false, 'reqid' => false),
+		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => false, 'pass' => false, 'alias' => false, 'options' => false, 'reqid' => false),
+		'url'       => array('target' => true, 'options' => false, 'reqid' => false),
+		'callback'  => array('node' => true, 'json' => false, 'bind' => false, 'done' => false, 'reqid' => false),
+		'chmod'     => array('targets' => true, 'mode' => true, 'reqid' => false),
+		'subdirs'   => array('targets' => true, 'reqid' => false),
+		'abort'     => array('id' => true, 'reqid' => false)
 	);
 	
 	/**
@@ -830,6 +838,17 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_UNKNOWN_CMD));
 		}
 		
+		// to abort this request
+		if ($cmd === 'abort') {
+			$this->abort($args);
+			return array('error' => 0);
+		}
+		
+		// make flag file and set self::$abortCheckFile
+		if (! empty($args['reqid'])) {
+			$this->abort(array('makeFile' => $args['reqid']));
+		}
+		
 		if (!empty($args['mimes']) && is_array($args['mimes'])) {
 			foreach ($this->volumes as $id => $v) {
 				$this->volumes[$id]->setMimesFilter($args['mimes']);
@@ -898,6 +917,8 @@ class elFinder {
 		if (! is_array($result)) {
 			try {
 				$result = $this->$cmd($args);
+			} catch (elFinderAbortException $e) {
+				throw $e;
 			} catch (Exception $e) {
 				$result = array(
 					'error' => htmlspecialchars($e->getMessage()),
@@ -999,13 +1020,15 @@ class elFinder {
 		// unlock locked items
 		$this->itemAutoUnlock();
 		
+		// remove self::$abortCheckFile
+		$this->abort();
+		
 		if (!empty($result['callback'])) {
 			$result['callback']['json'] = json_encode($result);
 			$this->callback($result['callback']);
 		} else {
 			return $result;
 		}
-	    //TODO: Add return statement here
 	}
 	
 	/**
@@ -1848,6 +1871,25 @@ class elFinder {
 	}
 
 	/**
+	 * Abort current request and make flag file to running check
+	 * 
+	 * @param array $args
+	 * @return void
+	 */
+	protected function abort($args = array()) {
+		$flagFile = elFinder::$commonTempPath . DIRECTORY_SEPARATOR . 'elfreq%s';
+		if (! empty($args['makeFile'])) {
+			self::$abortCheckFile = sprintf($flagFile, $args['makeFile']);
+			touch(self::$abortCheckFile);
+			$GLOBALS['elFinderTempFiles'][self::$abortCheckFile] = true;
+			return;
+		}
+		
+		$file = ! empty($args['id'])? sprintf($flagFile, $args['id']) : self::$abortCheckFile;
+		$file && is_file($file) && unlink($file);
+	}
+	
+	/**
 	* Get remote contents
 	*
 	* @param  string   $url     target url
@@ -1965,7 +2007,7 @@ class elFinder {
 			if ($fp) break;
 			$connect_try_count++;
 			if (connection_aborted()) {
-				exit();
+				throw new elFinderAbortException();
 			}
 			sleep(1); // wait 1sec
 		}
@@ -2262,7 +2304,6 @@ class elFinder {
 			$clast = intval($m[3]);
 			if (is_null($tmpname)) {
 				ignore_user_abort(true);
-				sleep(10); // wait 10 sec
 				// chunked file upload fail
 				foreach(glob($base . '*') as $cf) {
 					unlink($cf);
@@ -2323,6 +2364,17 @@ class elFinder {
 				$writelen = stream_copy_to_stream($src, $fp, $len);
 				fclose($fp);
 				fclose($src);
+				
+				try {
+					// to check connection is aborted
+					elFinder::extendTimeLimit();
+				} catch (elFinderAbortException $e) {
+					unlink($tmpname);
+					is_file($tmp) && unlink($tmp);
+					is_file($base) && unlink($base);
+					throw $e;
+				}
+				
 				if ($writelen != $len) {
 					return array(self::ERROR_UPLOAD_TEMP, false);
 				}
@@ -2450,6 +2502,7 @@ class elFinder {
 					}
 					
 					$tmpfname = $tempDir . DIRECTORY_SEPARATOR . 'ELF_FATCH_' . md5($url.microtime(true));
+					$GLOBALS['elFinderTempFiles'][$tmpfname] = true;
 					
 					$_name = '';
 					// check is data:
@@ -2458,6 +2511,8 @@ class elFinder {
 					} else {
 						$fp = fopen($tmpfname, 'wb');
 						$data = $this->get_remote_contents($url, 30, 5, 'Mozilla/5.0', $fp);
+						// to check connection is aborted
+						elFinder::extendTimeLimit();
 						$_name = preg_replace('~^.*?([^/#?]+)(?:\?.*)?(?:#.*)?$~', '$1', rawurldecode($url));
 						// Check `Content-Disposition` response header
 						if ($data && ($headers = get_headers($url, true)) && !empty($headers['Content-Disposition'])) {
@@ -2579,7 +2634,7 @@ class elFinder {
 				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, self::ERROR_UPLOAD_TRANSFER);
 				$this->uploadDebug = 'Upload error: unable open tmp file';
 				if (! is_uploaded_file($tmpname)) {
-					if ( unlink($tmpname)) unset($GLOBALS['elFinderTempFiles'][$tmpfname]);
+					if (unlink($tmpname)) unset($GLOBALS['elFinderTempFiles'][$tmpfname]);
 					continue;
 				}
 				break;
@@ -2617,7 +2672,7 @@ class elFinder {
 				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, $volume->error());
 				fclose($fp);
 				if (! is_uploaded_file($tmpname)) {
-					if ( unlink($tmpname)) unset($GLOBALS['elFinderTempFiles'][$tmpname]);;
+					if (unlink($tmpname)) unset($GLOBALS['elFinderTempFiles'][$tmpname]);
 					continue;
 				}
 				break;
@@ -2626,7 +2681,7 @@ class elFinder {
 			is_resource($fp) && fclose($fp);
 			if (! is_uploaded_file($tmpname)){
 				clearstatcache();
-				if (!is_file($tmpname) ||  unlink($tmpname)) {
+				if (!is_file($tmpname) || unlink($tmpname)) {
 					unset($GLOBALS['elFinderTempFiles'][$tmpname]);
 				}
 			}
@@ -2637,7 +2692,7 @@ class elFinder {
 		}
 		if ($GLOBALS['elFinderTempFiles']) {
 			foreach(array_keys($GLOBALS['elFinderTempFiles']) as $_temp) {
-				 unlink($_temp);
+				 is_file($_temp) && unlink($_temp);
 			}
 		}
 		$result['removed'] = $volume->removed();
@@ -3204,7 +3259,7 @@ class elFinder {
 			header('Location: ' . $url);
 			
 		}
-		exit();
+		throw new elFinderAbortException();
 	}
 
 	/**
@@ -3674,19 +3729,23 @@ class elFinder {
 	}
 	
 	/**
-	 * Extend PHP execution time limit
+	 * Extend PHP execution time limit and also check connection is aborted
 	 * 
 	 * @param Int $time
 	 * @return void
 	 */
 	public static function extendTimeLimit($time = null) {
 		static $defLimit = null;
-		if (is_null($defLimit)) {
-			$defLimit = ini_get('max_execution_time');
-		}
-		if ($defLimit != 0) {
-			$time = is_null($time)? $defLimit : max($defLimit, $time);
-			set_time_limit($time);
+		if (! self::aborted()) {
+			if (is_null($defLimit)) {
+				$defLimit = ini_get('max_execution_time');
+			}
+			if ($defLimit != 0) {
+				$time = is_null($time)? $defLimit : max($defLimit, $time);
+				set_time_limit($time);
+			}
+		} else {
+			throw new elFinderAbortException();
 		}
 	}
 	
@@ -3880,6 +3939,20 @@ class elFinder {
 		return $result;
 	}
 	
+	/**
+	 * Return bool that current request was aborted by client side
+	 * 
+	 * @return boolean
+	 */
+	public static function aborted() {
+		if ($file = self::$abortCheckFile) {
+			(version_compare(PHP_VERSION, '5.3.0') >= 0) ? clearstatcache(true, $file) : clearstatcache();
+			return ! is_file($file);
+		} else {
+			return false;
+		}
+	}
+	
 	/***************************************************************************/
 	/*                                 callbacks                               */
 	/***************************************************************************/
@@ -3921,6 +3994,7 @@ class elFinder {
 	 * 
 	 */
 	public static function onShutdown() {
+		self::$abortCheckFile = null;
 		if (! empty($GLOBALS['elFinderTempFiles'])) {
 			foreach(array_keys($GLOBALS['elFinderTempFiles']) as $f){
 				is_file($f) && unlink($f);
@@ -3942,3 +4016,9 @@ class elFinder {
 	}
 	
 } // END class
+
+/**
+ * Custom exception class for aborting request
+ *
+ */
+class elFinderAbortException extends Exception {}
