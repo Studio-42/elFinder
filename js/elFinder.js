@@ -8434,7 +8434,7 @@ elFinder.prototype = {
 	 * 
 	 * @return void
 	 */
-	abortXHR(xhr, opts) {
+	abortXHR : function(xhr, opts) {
 		var opts = opts || {};
 		
 		if (xhr) {
