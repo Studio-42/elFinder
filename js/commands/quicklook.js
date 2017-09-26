@@ -80,7 +80,7 @@
 		closedCss = function(node) {
 			var elf = fm.getUI().offset(),
 				base = node.find('.elfinder-cwd-file-wrapper'),
-				baseOffset = base.offset();
+				baseOffset = base.offset() || { top: 0, left: 0 };
 			return {
 				opacity : 0,
 				width   : base.width(),
