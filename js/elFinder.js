@@ -8453,6 +8453,26 @@ elFinder.prototype = {
 		}
 	},
 	
+	/**
+	 * Flip key and value of array or object
+	 * 
+	 * @param  Array | Object  { a: 1, b: 1, c: 2 }
+	 * @param  Mixed           Static value
+	 * @return Object          { 1: "b", 2: "c" }
+	 */
+	arrayFlip : function (trans, val) {
+		var key,
+			tmpArr = {},
+			isArr = $.isArray(trans);
+		for (key in trans) {
+			if (isArr || trans.hasOwnProperty(key)) {
+				tmpArr[trans[key]] = val || key;
+			}
+		}
+		this.log(tmpArr);
+		return tmpArr;
+	},
+	
 	log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
 	
 	debug : function(type, m) {
