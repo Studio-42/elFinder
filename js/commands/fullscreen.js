@@ -35,6 +35,7 @@ elFinder.prototype.commands.fullscreen = function() {
 			full = (node === fm.toggleFullscreen(node));
 		self.title = fm.i18n(full ? 'reinstate' : 'cmdfullscreen');
 		self.update(void(0), full);
+		return $.Deferred().resolve();
 	};
 	
 	fm.bind('init', function() {
