@@ -8469,7 +8469,6 @@ elFinder.prototype = {
 				tmpArr[trans[key]] = val || key;
 			}
 		}
-		this.log(tmpArr);
 		return tmpArr;
 	},
 	
