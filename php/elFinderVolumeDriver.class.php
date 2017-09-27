@@ -4312,12 +4312,13 @@ abstract class elFinderVolumeDriver {
 			return $result;
 		}
 		
-		if ($stat['mime'] != 'directory') {
+		if ($stat['mime'] !== 'directory') {
 			$result['size'] = intval($stat['size']);
 			$result['files'] = 1;
 			return $result;
 		}
 		
+		$result['dirs'] = 1;
 		$subdirs = $this->options['checkSubfolders'];
 		$this->options['checkSubfolders'] = true;
 		foreach ($this->getScandir($path) as $stat) {
