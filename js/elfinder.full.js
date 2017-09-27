@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 9c523f8) (2017-09-27)
+ * Version 2.1.28 (2.1-src Nightly: 3e017c0) (2017-09-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8500,7 +8500,6 @@ elFinder.prototype = {
 				tmpArr[trans[key]] = val || key;
 			}
 		}
-		this.log(tmpArr);
 		return tmpArr;
 	},
 	
@@ -8627,7 +8626,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 9c523f8)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 3e017c0)';
 
 
 
@@ -23832,6 +23831,7 @@ elFinder.prototype.commands.places = function() {
 			if (! self.docked()) {
 				win.data('hash', '');
 				if (self.opened()) {
+					getSize && getSize.state() === 'pending' && getSize.reject();
 					state = animated;
 					win.hasClass(fullscreen) && fsicon.click();
 					(hash && (node = cwd.find('#'+hash)).length)
