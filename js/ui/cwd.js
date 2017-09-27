@@ -1365,6 +1365,9 @@ $.fn.elfindercwd = function(fm, options) {
 					} else if ((ndx = index(hash)) !== -1) {
 						buffer.splice(ndx, 1);
 					}
+					if ((ndx = $.inArray(hash, selectedFiles)) !== -1) {
+						selectedFiles.splice(ndx, 1);
+					}
 					if (inSearch) {
 						if ((ndx = $.inArray(hash, cwdHashes)) !== -1) {
 							cwdHashes.splice(ndx, 1);
@@ -1902,7 +1905,7 @@ $.fn.elfindercwd = function(fm, options) {
 					
 					if (!selectLock && !$this.hasClass(clDisabled)) {
 						lastSelect = '#'+ this.id;
-						$this.addClass(clSelected).children().addClass(clHover).find('input:checkbox').prop('checked', true);;
+						$this.addClass(clSelected).children().addClass(clHover).find('input:checkbox').prop('checked', true);
 						if ($.inArray(id, selectedFiles) === -1) {
 							selectedFiles.push(id);
 						}

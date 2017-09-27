@@ -103,8 +103,7 @@ elFinder.prototype.resources = {
 					.always(function() {
 						rest();
 						cleanup();
-						fm.enable();
-						fm.trigger('resMixinMake');
+						fm.enable().unbind('open', openCallback).trigger('resMixinMake');
 					}),
 				id    = 'tmp_'+parseInt(Math.random()*100000),
 				phash = this.data && this.data.target? this.data.target : (tree? fm.file(sel[0]).hash : fm.cwd().hash),
@@ -129,7 +128,7 @@ elFinder.prototype.resources = {
 				nnode, pnode,
 				overlay = fm.getUI('overlay'),
 				cleanup = function() {
-					fm.unbind('resize', resize);
+					fm.unselectfiles({files : [id]}).unbind('resize', resize);
 					input.remove();
 					if (tree) {
 						node.closest('.elfinder-navbar-wrapper').remove();
@@ -266,6 +265,9 @@ elFinder.prototype.resources = {
 				resize = function() {
 					node.trigger('scrolltoview');
 				},
+				openCallback = function() {
+					dfrd && (dfrd.state() === 'pending') && dfrd.reject();
+				},
 				inError = false,
 				nextAction,
 				// for tree
@@ -315,7 +317,7 @@ elFinder.prototype.resources = {
 				nnode.empty('').append(input.val(file.name));
 			}
 			
-			fm.bind('resize', resize);
+			fm.bind('resize', resize).one('open', openCallback);
 			
 			input.trigger('keyup');
 			select();
