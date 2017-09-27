@@ -934,7 +934,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _filePutContents($path, $content) {
-		return file_put_contents($path, $content, LOCK_EX);
+            if (file_put_contents($path, $content, LOCK_EX) === false) {
+                return false;
+            }
+            return true;
 	}
 
 	/**
