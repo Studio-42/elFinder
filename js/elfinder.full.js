@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 3e017c0) (2017-09-27)
+ * Version 2.1.28 (2.1-src Nightly: 3217675) (2017-09-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8626,7 +8626,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 3e017c0)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 3217675)';
 
 
 
@@ -21272,6 +21272,7 @@ elFinder.prototype.commands.fullscreen = function() {
 			full = (node === fm.toggleFullscreen(node));
 		self.title = fm.i18n(full ? 'reinstate' : 'cmdfullscreen');
 		self.update(void(0), full);
+		return $.Deferred().resolve();
 	};
 	
 	fm.bind('init', function() {
@@ -25352,6 +25353,7 @@ elFinder.prototype.commands.resize = function() {
 				}
 			})
 			.done(function() {
+				fm.storage('jpgQuality', data.quality === fm.option('jpgQuality')? null : data.quality);
 				dfrd && dfrd.resolve();
 			});
 		} else {
@@ -25482,7 +25484,7 @@ elFinder.prototype.commands.resize = function() {
 					offsetX = $(input).change(function(){crop.updateView('w');}),
 					offsetY = $(input).change(function(){crop.updateView('h');}),
 					quality = isJpeg && api2?
-						$(input).val(fm.option('jpgQuality'))
+						$(input).val(fm.storage('jpgQuality') || fm.option('jpgQuality'))
 							.addClass('quality')
 							.on('blur', function(){
 								var q = Math.min(100, Math.max(1, parseInt(this.value)));
