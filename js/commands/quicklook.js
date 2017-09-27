@@ -527,6 +527,7 @@
 			if (! self.docked()) {
 				win.data('hash', '');
 				if (self.opened()) {
+					getSize && getSize.state() === 'pending' && getSize.reject();
 					state = animated;
 					win.hasClass(fullscreen) && fsicon.click();
 					(hash && (node = cwd.find('#'+hash)).length)
