@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: f9aafbe) (2017-09-28)
+ * Version 2.1.28 (2.1-src Nightly: 57fdcb1) (2017-09-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8626,7 +8626,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: f9aafbe)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 57fdcb1)';
 
 
 
@@ -17154,13 +17154,18 @@ $.fn.elfinderstat = function(fm) {
 			titlesel   = fm.i18n('selected'),
 			setstat    = function(files) {
 				var c = 0, 
-					s = 0;
+					s = 0,
+					calc = true;
 
+				if (fm.cwd().size) {
+					s = fm.cwd().size;
+					calc = false;
+				}
 				$.each(files, function(i, file) {
 					c++;
-					s += parseInt(file.size)||0;
-				})
-				size.html(titleitems+': <span class="elfinder-stat-incsearch"></span>'+c+', '+titlesize+': '+fm.formatSize(s));
+					calc && (s += parseInt(file.size) || 0);
+				});
+				size.html(titleitems+': <span class="elfinder-stat-incsearch"></span>'+c+', '+titlesize+': <span class="elfinder-stat-size'+(calc? '' : ' elfinder-stat-size-recursive')+'">'+fm.formatSize(s)+'</span>');
 			},
 			setIncsearchStat = function(data) {
 				size.find('span.elfinder-stat-incsearch').html(data? data.hashes.length + ' / ' : '');
@@ -17171,6 +17176,18 @@ $.fn.elfinderstat = function(fm) {
 		fm
 		.bind('cwdhasheschange', function(e) {
 			setstat($.map(e.data, function(h) { return fm.file(h); }));
+		})
+		.change(function(e) {
+			var files = e.data.changed || [],
+				cwdHash = fm.cwd().hash;
+			$.each(files, function() {
+				if (this.hash === cwdHash) {
+					if (this.size) {
+						size.children('.elfinder-stat-size').addClass('elfinder-stat-size-recursive').text(fm.formatSize(this.size));
+					}
+					return false;
+				}
+			});
 		})
 		.select(function() {
 			var s = 0,

@@ -3042,6 +3042,8 @@ abstract class elFinderVolumeDriver {
 			$tempPath = $this->tmpPath;
 		} else if (isset($this->tmp) && $this->tmp && is_writable($this->tmp)) {
 			$tempPath = $this->tmp;
+		} else if (elFinder::getStaticVar('commonTempPath') && is_writable(elFinder::getStaticVar('commonTempPath'))) {
+			$tempPath = elFinder::getStaticVar('commonTempPath');
 		} else if (function_exists('sys_get_temp_dir')) {
 			$tempPath = sys_get_temp_dir();
 		} else if ($this->tmbPathWritable) {
