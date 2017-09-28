@@ -15,7 +15,7 @@
 }
 
 .elfinder-statusbar span {
-	cursor: pointer;
+	cursor: text;
 	/*display: inline-block;*/
 	vertical-align: bottom;
 	overflow: hidden;
@@ -93,6 +93,7 @@
 }
 /* total/selected size in statusbar */
 .elfinder-stat-size { white-space:nowrap; }
+span.elfinder-stat-size-recursive { text-decoration: underline; }
 .elfinder-ltr .elfinder-stat-size { float:right; }
 .elfinder-rtl .elfinder-stat-size { float:left; }
 
