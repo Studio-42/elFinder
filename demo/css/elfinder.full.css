@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 57fdcb1) (2017-09-28)
+ * Version 2.1.28 (2.1-src Nightly: a5ca469) (2017-09-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2911,7 +2911,6 @@ embed.elfinder-quicklook-preview-audio {
 }
 /* total/selected size in statusbar */
 .elfinder-stat-size { white-space:nowrap; }
-span.elfinder-stat-size-recursive { text-decoration: underline; }
 .elfinder-ltr .elfinder-stat-size { float:right; }
 .elfinder-rtl .elfinder-stat-size { float:left; }
 
