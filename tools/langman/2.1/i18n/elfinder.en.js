@@ -2,7 +2,7 @@
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-08-30
+ * @version 2017-09-28
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -424,6 +424,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'clearBrowserData': 'Initialize the settings saved in this browser', // from v2.1.26 added 28.6.2017
 			'toolbarPref'     : 'Toolbar setting', // from v2.1.27 added 2.8.2017
 			'charsLeft'       : '... $1 chars left.',  // from v2.1.29 added 30.8.2017
+			'sum'             : 'Sum', // from v2.1.29 added 28.9.2017
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
