@@ -14,23 +14,26 @@ $.fn.elfinderstat = function(fm) {
 					e.preventDefault();
 					fm.exec('opendir', [ hash ]);
 				}),
-			titlesize  = fm.i18n('size'),
 			titleitems = fm.i18n('items'),
 			titlesel   = fm.i18n('selected'),
 			setstat    = function(files) {
 				var c = 0, 
 					s = 0,
-					calc = true;
+					calc = true,
+					hasSize = true;
 
 				if (fm.cwd().size) {
 					s = fm.cwd().size;
-					calc = false;
+					calc = false
 				}
 				$.each(files, function(i, file) {
 					c++;
 					calc && (s += parseInt(file.size) || 0);
+					if (hasSize && file.mime === 'directory' && !file.sizeInfo) {
+						hasSize = false;
+					}
 				});
-				size.html(titleitems+': <span class="elfinder-stat-incsearch"></span>'+c+', '+titlesize+': <span class="elfinder-stat-size'+(calc? '' : ' elfinder-stat-size-recursive')+'">'+fm.formatSize(s)+'</span>');
+				size.html(titleitems+': <span class="elfinder-stat-incsearch"></span>'+c+',&nbsp;<span class="elfinder-stat-size'+(hasSize? ' elfinder-stat-size-recursive' : '')+'">'+fm.i18n(hasSize? 'sum' : 'size')+': '+fm.formatSize(s)+'</span>');
 			},
 			setIncsearchStat = function(data) {
 				size.find('span.elfinder-stat-incsearch').html(data? data.hashes.length + ' / ' : '');
@@ -48,7 +51,7 @@ $.fn.elfinderstat = function(fm) {
 			$.each(files, function() {
 				if (this.hash === cwdHash) {
 					if (this.size) {
-						size.children('.elfinder-stat-size').addClass('elfinder-stat-size-recursive').text(fm.formatSize(this.size));
+						size.children('.elfinder-stat-size').addClass('elfinder-stat-size-recursive').html(fm.i18n('sum')+': '+fm.formatSize(this.size));
 					}
 					return false;
 				}
