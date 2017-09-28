@@ -2,7 +2,8 @@
  * Traditional Chinese translation
  * @author Yuwei Chuang <ywchuang.tw@gmail.com>
  * @author Danny Lin <danny0838@gmail.com>
- * @version 2016-12-10
+ * @author TCC <john987john987@gmail.com>
+ * @version 2017-09-28
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -14,13 +15,14 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.zh_TW = {
-		translator : 'Yuwei Chuang &lt;ywchuang.tw@gmail.com&gt;, Danny Lin &lt;danny0838@gmail.com&gt;',
+		translator : 'Yuwei Chuang &lt;ywchuang.tw@gmail.com&gt;, Danny Lin &lt;danny0838@gmail.com&gt;, TCC &lt;john987john987@gmail.com&gt;',
 		language   : '正體中文',
 		direction  : 'ltr',
-		dateFormat : 'Y/m/d H:i', // e.g. 2012/05/13 17:27
-		fancyDateFormat : '$1 H:i', // e.g. Today 17:27
+		dateFormat : 'Y/m/d H:i', // Mar 13, 2012 05:27 PM
+		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
+		nonameDateFormat : 'ymd-His', // to apply if upload file is noname: 120513172700
 		messages   : {
-			
+
 			/********************************** errors **********************************/
 			'error'                : '錯誤',
 			'errUnknown'           : '未知的錯誤.',
@@ -50,6 +52,7 @@
 			'errLocked'            : '"$1" 被鎖定,不能重新命名, 移動或删除.',
 			'errExists'            : '檔案 "$1" 已經存在了.',
 			'errInvName'           : '無效的檔案名稱.',
+			'errInvDirname'        : '無效的資料夾名稱',  // from v2.1.24 added 12.4.2017
 			'errFolderNotFound'    : '未找到資料夾.',
 			'errFileNotFound'      : '未找到檔案.',
 			'errTrgFolderNotFound' : '未找到目標資料夾 "$1".',
@@ -63,8 +66,8 @@
 			'errUpload'            : '上傳錯誤.',  // old name - errUploadCommon
 			'errUploadFile'        : '無法上傳 "$1".', // old name - errUpload
 			'errUploadNoFiles'     : '未找到要上傳的檔案.',
-			'errUploadTotalSize'   : '資料超過了最大允許大小.',
-			'errUploadFileSize'    : '檔案超過了最大允許大小.',
+			'errUploadTotalSize'   : '資料超過了最大允許大小.', // old name - errMaxSize
+			'errUploadFileSize'    : '檔案超過了最大允許大小.', //  old name - errFileMaxSize
 			'errUploadMime'        : '不允許的檔案類型.',
 			'errUploadTransfer'    : '"$1" 傳輸錯誤.',
 			'errUploadTemp'        : '無法建立暫存檔以供上傳.', // from v2.1 added 26.09.2015
@@ -75,6 +78,7 @@
 			'errMove'              : '無法移動 "$1".',
 			'errCopyInItself'      : '無法移動 "$1" 到原有位置.',
 			'errRm'                : '無法删除 "$1".',
+			'errTrash'             : '無法丟入垃圾桶', // from v2.1.24 added 30.4.2017
 			'errRmSrc'             : '無法删除來源檔案.',
 			'errExtract'           : '無法從 "$1" 解壓縮檔案.',
 			'errArchive'           : '無法建立壓縮膽.',
@@ -82,7 +86,7 @@
 			'errNoArchive'         : '檔案不是壓縮檔, 或者不支援該壓缩格式.',
 			'errCmdNoSupport'      : '後端不支援該指令.',
 			'errReplByChild'       : '資料夾 “$1” 不能被它所包含的檔案(資料夾)替换.',
-			'errArcSymlinks'       : '由於安全考量，拒絕解壓縮符號連結或含有不允許檔名的檔案.',
+			'errArcSymlinks'       : '由於安全考量，拒絕解壓縮符號連結或含有不允許檔名的檔案.', // edited 24.06.2012
 			'errArcMaxSize'        : '待壓縮檔案的大小超出上限.',
 			'errResize'            : '無法重新調整大小 "$1".',
 			'errResizeDegree'      : '無效的旋轉角度.',  // added 7.3.2013
@@ -108,7 +112,11 @@
 			'errSearchTimeout'     : '搜尋 "$1" 逾時. 只列出部分搜尋結果.', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : '需要重新驗證權限.', // from v2.1.10 added 24.3.2016
 			'errMaxTargets'        : '最多可選擇 $1 個物件.', // from v2.1.17 added 17.10.2016
-			
+			'errRestore'           : '無法從垃圾桶恢復。 無法識別恢復目的地。', // from v2.1.24 added 3.5.2017
+			'errEditorNotFound'    : '編輯器找不到此文件類型。', // from v2.1.25 added 23.5.2017
+			'errServerError'       : '服務器發生錯誤。', // from v2.1.25 added 16.6.2017
+			'errEmpty'             : '無法清空"$1"文件夾', // from v2.1.25 added 22.6.2017
+
 			/******************************* commands names ********************************/
 			'cmdarchive'   : '建立壓縮檔',
 			'cmdback'      : '後退',
@@ -132,6 +140,8 @@
 			'cmdreload'    : '更新',
 			'cmdrename'    : '重新命名',
 			'cmdrm'        : '删除',
+			'cmdtrash'     : '丟到垃圾桶', //from v2.1.24 added 29.4.2017
+			'cmdrestore'   : '恢復', //from v2.1.24 added 3.5.2017
 			'cmdsearch'    : '搜尋檔案',
 			'cmdup'        : '移到上一層資料夾',
 			'cmdupload'    : '上傳檔案',
@@ -140,14 +150,21 @@
 			'cmdsort'      : '排序',
 			'cmdnetmount'  : '掛載網路磁碟', // added 18.04.2012
 			'cmdnetunmount': '卸載', // from v2.1 added 30.04.2012
-			'cmdplaces'    : 'To Places', // added 28.12.2014
+			'cmdplaces'    : '加到"位置"', // added 28.12.2014
 			'cmdchmod'     : '更改權限', // from v2.1 added 20.6.2015
 			'cmdopendir'   : '開啟資料夾', // from v2.1 added 13.1.2016
 			'cmdcolwidth'  : '重設欄寬', // from v2.1.13 added 12.06.2016
 			'cmdfullscreen': '全螢幕', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : '移動', // from v2.1.15 added 21.08.2016
-			
-			/*********************************** buttons ***********************************/ 
+			'cmdempty'     : '清空資料夾', // from v2.1.25 added 22.06.2017
+			'cmdundo'      : '上一步', // from v2.1.27 added 31.07.2017
+			'cmdredo'      : '下一步', // from v2.1.27 added 31.07.2017
+			'cmdpreference': '優先權', // from v2.1.27 added 03.08.2017
+			'cmdselectall' : '全選', // from v2.1.28 added 15.08.2017
+			'cmdselectnone': '取消選取', // from v2.1.28 added 15.08.2017
+			'cmdselectinvert': '反向選取', // from v2.1.28 added 15.08.2017
+
+			/*********************************** buttons ***********************************/
 			'btnClose'  : '關閉',
 			'btnSave'   : '儲存',
 			'btnRm'     : '删除',
@@ -156,7 +173,7 @@
 			'btnNo'     : '否',
 			'btnYes'    : '是',
 			'btnMount'  : '掛載',  // added 18.04.2012
-			'btnApprove': 'Goto $1 & approve', // from v2.1 added 26.04.2012
+			'btnApprove': '移到 $1 並批准', // from v2.1 added 26.04.2012
 			'btnUnmount': '卸載', // from v2.1 added 30.04.2012
 			'btnConv'   : '轉換', // from v2.1 added 08.04.2014
 			'btnCwd'    : '這裡',      // from v2.1 added 22.5.2015
@@ -166,7 +183,12 @@
 			'btnFileName':'檔名',  // from v2.1 added 22.5.2015
 			'btnSaveClose': '儲存並關閉', // from v2.1 added 12.6.2015
 			'btnBackup' : '備份', // fromv2.1 added 28.11.2015
-			
+			'btnRename'    : '重新命名',      // from v2.1.24 added 6.4.2017
+			'btnRenameAll' : '重新命名全部', // from v2.1.24 added 6.4.2017
+			'btnPrevious' : '上一頁 ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnNext'     : '下一頁 ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnSaveAs'   : '另存新檔', // from v2.1.25 added 24.5.2017
+
 			/******************************** notifications ********************************/
 			'ntfopen'     : '開啟資料夾',
 			'ntffile'     : '開啟檔案',
@@ -189,7 +211,7 @@
 			'ntfloadimg'  : '正在讀取圖片',
 			'ntfnetmount' : '正在掛載網路磁碟', // added 18.04.2012
 			'ntfnetunmount': '正在卸載網路磁碟', // from v2.1 added 30.04.2012
-			'ntfdim'      : '取得圖片大小',
+			'ntfdim'      : '取得圖片大小', // added 20.05.2013
 			'ntfreaddir'  : '正在讀取資料夾資訊', // from v2.1 added 01.07.2013
 			'ntfurl'      : '正在取得連結 URL', // from v2.1 added 11.03.2014
 			'ntfchmod'    : '更改檔案模式', // from v2.1 added 20.6.2015
@@ -197,7 +219,15 @@
 			'ntfzipdl'    : '正在建立縮檔以供下載', // from v2.1.7 added 23.1.2016
 			'ntfparents'  : '正在取得路徑資訊', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': '正在處理上傳的檔案', // from v2.1.17 added 2.11.2016
-			
+			'ntftrash'    : '正在丟到垃圾桶', // from v2.1.24 added 2.5.2017
+			'ntfrestore'  : '正從垃圾桶恢復', // from v2.1.24 added 3.5.2017
+			'ntfchkdir'   : '正在檢查目標資料夾', // from v2.1.24 added 3.5.2017
+			'ntfundo'     : '正在撤銷上一步動作', // from v2.1.27 added 31.07.2017
+			'ntfredo'     : '正在重做上一步動作', // from v2.1.27 added 31.07.2017
+
+			/*********************************** volumes *********************************/
+			'volume_Trash' : '垃圾桶', //from v2.1.24 added 29.4.2017
+
 			/************************************ dates **********************************/
 			'dateUnknown' : '未知',
 			'Today'       : '今天',
@@ -240,10 +270,10 @@
 			'Thu'         : '周四',
 			'Fri'         : '周五',
 			'Sat'         : '周六',
-			
+
 			/******************************** sort variants ********************************/
-			'sortname'          : '按名稱', 
-			'sortkind'          : '按類型', 
+			'sortname'          : '按名稱',
+			'sortkind'          : '按類型',
 			'sortsize'          : '按大小',
 			'sortdate'          : '按日期',
 			'sortFoldersFirst'  : '資料夾置前',
@@ -262,9 +292,11 @@
 			'confirmReq'      : '請確認',
 			'confirmRm'       : '確定要删除檔案嗎?<br/>此操作無法回復!',
 			'confirmRepl'     : '用新檔案取代原檔案?',
+			'confirmRest'     : '用垃圾桶中的項目替換現有項目？', // fromv2.1.24 added 5.5.2017
 			'confirmConvUTF8' : '不是 UTF-8 檔案<br/>轉換為 UTF-8 嗎?<br/>轉換後儲存會把內容變成 UTF-8.', // from v2.1 added 08.04.2014
 			'confirmNonUTF8'  : '無法偵測此檔案的字元編碼, 須暫時轉換為 UTF-8 以供編輯.<br/>請選擇此檔案的字元編碼.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : '此檔案已修改.<br/>若未儲存將遺失目前的工作.', // from v2.1 added 15.7.2015
+			'confirmTrash'    : '確定要將項目丟到垃圾桶嗎？', //from v2.1.24 added 29.4.2017
 			'apllyAll'        : '全部套用',
 			'name'            : '名稱',
 			'size'            : '大小',
@@ -294,7 +326,7 @@
 			'yes'             : '是',
 			'no'              : '否',
 			'link'            : '連結',
-			'searcresult'     : '搜尋结果',  
+			'searcresult'     : '搜尋结果',
 			'selected'        : '選取的項目',
 			'about'           : '關於',
 			'shortcuts'       : '快捷鍵',
@@ -321,7 +353,8 @@
 			'selectForUpload' : '選擇要上傳的檔案',
 			'moveFiles'       : '移動檔案',
 			'copyFiles'       : '複製檔案',
-			'rmFromPlaces'    : '從位置中删除',
+			'restoreFiles'    : '恢復項目', // from v2.1.24 added 5.5.2017
+			'rmFromPlaces'    : '從"位置"中删除',
 			'aspectRatio'     : '保持比例',
 			'scale'           : '寬高比',
 			'width'           : '寬',
@@ -382,15 +415,29 @@
 			'enabled'         : '啟用', // from v2.1.16 added 4.10.2016
 			'disabled'        : '停用', // from v2.1.16 added 4.10.2016
 			'emptyIncSearch'  : '目前視圖的搜尋結果是空的.\\A按 [Enter] 擴大搜尋目標.', // from v2.1.16 added 5.10.2016
+			'emptyLetSearch'  : '目前視圖中的第一個字母的搜索結果是空的。', // from v2.1.23 added 24.3.2017
 			'textLabel'       : '文字標示', // from v2.1.17 added 13.10.2016
 			'minsLeft'        : '剩下 $1 分鐘', // from v2.1.17 added 13.11.2016
 			'openAsEncoding'  : '以選擇的編碼重新開啟', // from v2.1.19 added 2.12.2016
 			'saveAsEncoding'  : '以選擇的編碼儲存', // from v2.1.19 added 2.12.2016
+			'selectFolder'    : '選擇資料夾', // from v2.1.20 added 13.12.2016
+			'firstLetterSearch': '首字母搜索', // from v2.1.23 added 24.3.2017
+			'presets'         : '預置', // from v2.1.25 added 26.5.2017
+			'tooManyToTrash'  : '有太多項目，所以不能丟入垃圾桶。', // from v2.1.25 added 9.6.2017
+			'TextArea'        : '文字區域', // from v2.1.25 added 14.6.2017
+			'folderToEmpty'   : '$1" 資料夾是空的', // from v2.1.25 added 22.6.2017
+			'filderIsEmpty'   : '"$1" 資料夾中沒有任何項目', // from v2.1.25 added 22.6.2017
+			'preference'      : '偏好', // from v2.1.26 added 28.6.2017
+			'language'        : '語言設置', // from v2.1.26 added 28.6.2017
+			'clearBrowserData': '初始化保存在此瀏覽器中的設置', // from v2.1.26 added 28.6.2017
+			'toolbarPref'     : '工具欄設置', // from v2.1.27 added 2.8.2017
+			'charsLeft'       : '... 剩下 $1 個字元',  // from v2.1.29 added 30.8.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '未知',
 			'kindRoot'        : '磁碟根目錄', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : '資料夾',
+			'kindSelects'     : '選擇', // from v2.1.29 added 29.8.2017
 			'kindAlias'       : '别名',
 			'kindAliasBroken' : '毀損的别名',
 			// applications
@@ -470,3 +517,4 @@
 		}
 	};
 }));
+
