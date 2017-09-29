@@ -12,7 +12,7 @@ $.fn.elfinderpanel = function(fm) {
 				e.preventDefault();
 				e.stopPropagation();
 				panel.is(':visible') && panel.css(margin, parseInt(navbar.outerWidth(true)))
-			})
-		})
-	})
+			});
+		});
+	});
 };
