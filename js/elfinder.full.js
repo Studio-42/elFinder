@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: a5ca469) (2017-09-28)
+ * Version 2.1.28 (2.1-src Nightly: 08a2b37) (2017-09-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8626,7 +8626,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: a5ca469)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 08a2b37)';
 
 
 
@@ -19992,7 +19992,7 @@ elFinder.prototype.commands.download = function() {
 								url += '&'+encodeURIComponent(zipdl.name);
 								dllink = $('<a/>')
 									.attr('href', url)
-									.attr('download', encodeURIComponent(zipdl.name))
+									.attr('download', fm.escape(zipdl.name))
 									.attr('target', '_blank')
 									.on('click', function() {
 										dfd.resolve();
@@ -20085,7 +20085,7 @@ elFinder.prototype.commands.download = function() {
 				url = fm.openUrl(files[i].hash, true);
 				if (html5dl) {
 					link.attr('href', url)
-					.attr('download', encodeURIComponent(files[i].name))
+					.attr('download', fm.escape(files[i].name))
 					.attr('target', '_blank')
 					.get(0).click();
 				} else {

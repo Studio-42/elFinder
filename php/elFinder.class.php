@@ -159,8 +159,17 @@ class elFinder {
 	 * elFinder common tempraly path
 	 *
 	 * @var string
+	 * @default "./.tmp" or sys_get_temp_dir()
 	 **/
 	protected static $commonTempPath = '';
+	
+	/**
+	 * Connection flag files path that connection check of current request
+	 * 
+	 * @var string
+	 * @default value of $commonTempPath
+	 */
+	protected static $connectionFlagsPath = '';
 	
 	/**
 	 * Additional volume root options for network mounting volume
@@ -532,6 +541,12 @@ class elFinder {
 				elFinder::$commonTempPath = '';
 			}
 		}
+		if (isset($opts['connectionFlagsPath']) && is_writable($opts['connectionFlagsPath'])) {
+			elFinder::$connectionFlagsPath = $opts['connectionFlagsPath'];
+		} else {
+			elFinder::$connectionFlagsPath = elFinder::$commonTempPath;
+		}
+		
 		if (! empty($opts['tmpLinkPath'])) {
 			elFinder::$tmpLinkPath = $opts['tmpLinkPath'];
 		}
@@ -1877,7 +1892,10 @@ class elFinder {
 	 * @return void
 	 */
 	protected function abort($args = array()) {
-		$flagFile = elFinder::$commonTempPath . DIRECTORY_SEPARATOR . 'elfreq%s';
+		if (! elFinder::$connectionFlagsPath) {
+			return;
+		}
+		$flagFile = elFinder::$connectionFlagsPath . DIRECTORY_SEPARATOR . 'elfreq%s';
 		if (! empty($args['makeFile'])) {
 			self::$abortCheckFile = sprintf($flagFile, $args['makeFile']);
 			touch(self::$abortCheckFile);
