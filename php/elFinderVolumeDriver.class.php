@@ -2564,14 +2564,8 @@ abstract class elFinderVolumeDriver {
 		if ($dir = $this->getItemsInHand($hashes)) {
 			$tmppre = (substr(PHP_OS, 0, 3) === 'WIN')? 'zdl' : 'elfzdl';
 			$pdir = dirname($dir);
-			// garbage collection
-			$ttl = 7200; // expire 2h
-			$time = time();
-			foreach(glob($pdir.DIRECTORY_SEPARATOR.$tmppre.'*') as $_file) {
-				if (filemtime($_file) + $ttl < $time) {
-					unlink($_file);
-				}
-			}
+			// garbage collection (expire 2h)
+			register_shutdown_function(array('elFinder', 'GlobGC'), $pdir.DIRECTORY_SEPARATOR.$tmppre.'*', 7200);
 			$files = self::localScandir($dir);
 			if ($files && ($arc = tempnam($dir, $tmppre))) {
 				unlink($arc);
