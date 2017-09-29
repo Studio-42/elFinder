@@ -5521,7 +5521,7 @@ elFinder.prototype = {
 								xhr.open('POST', self.uploadURL, true);
 								if (self.api >= 2.1029) {
 									reqId = (+ new Date()).toString(16) + Math.floor(1000 * Math.random()).toString(16);
-									formData.delete && formData.delete('reqid');
+									(typeof formData['delete'] === 'function') && formData['delete']('reqid');
 									formData.append('reqid', reqId);
 									xhr._requestId = reqId;
 								}

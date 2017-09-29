@@ -5,6 +5,7 @@
 
 /* statusbar container */
 .elfinder-statusbar { 
+	cursor: default;
 	text-align:center; 
 	font-weight:normal;
 	padding:.2em .5em;
@@ -15,8 +16,6 @@
 }
 
 .elfinder-statusbar span {
-	cursor: text;
-	/*display: inline-block;*/
 	vertical-align: bottom;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -32,6 +31,7 @@
 
 /* path in statusbar */
 .elfinder-path {
+	cursor: pointer;
 	max-width:30%;
 	white-space:nowrap;
 	overflow:hidden;
@@ -92,7 +92,10 @@
 	right: 0;
 }
 /* total/selected size in statusbar */
-.elfinder-stat-size { white-space:nowrap; }
+.elfinder-stat-size { 
+	overflow: hidden;
+	text-wrap: none;
+}
 .elfinder-ltr .elfinder-stat-size { float:right; }
 .elfinder-rtl .elfinder-stat-size { float:left; }
 
