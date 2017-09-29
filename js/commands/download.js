@@ -217,7 +217,7 @@ elFinder.prototype.commands.download = function() {
 								url += '&'+encodeURIComponent(zipdl.name);
 								dllink = $('<a/>')
 									.attr('href', url)
-									.attr('download', encodeURIComponent(zipdl.name))
+									.attr('download', fm.escape(zipdl.name))
 									.attr('target', '_blank')
 									.on('click', function() {
 										dfd.resolve();
@@ -310,7 +310,7 @@ elFinder.prototype.commands.download = function() {
 				url = fm.openUrl(files[i].hash, true);
 				if (html5dl) {
 					link.attr('href', url)
-					.attr('download', encodeURIComponent(files[i].name))
+					.attr('download', fm.escape(files[i].name))
 					.attr('target', '_blank')
 					.get(0).click();
 				} else {
