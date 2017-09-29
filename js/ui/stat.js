@@ -16,6 +16,7 @@ $.fn.elfinderstat = function(fm) {
 				}),
 			titleitems = fm.i18n('items'),
 			titlesel   = fm.i18n('selected'),
+			titlesize  = fm.i18n('size'),
 			setstat    = function(files) {
 				var c = 0, 
 					s = 0,
@@ -62,26 +63,25 @@ $.fn.elfinderstat = function(fm) {
 				c = 0,
 				files = fm.selectedFiles(),
 				dirs = [],
-				file;
+				path, file;
 
-			if (files.length == 1) {
+			if (files.length === 1) {
 				file = files[0];
 				s = file.size;
 				if (fm.searchStatus.state === 2) {
-					dirs.push('<a href="#elf_'+file.phash+'" data-hash="'+file.hash+'">'+(file.path? file.path.replace(/\/[^\/]*$/, '') : '..')+'</a>');
+					path = fm.escape(file.path? file.path.replace(/\/[^\/]*$/, '') : '..');
+					dirs.push('<a href="#elf_'+file.phash+'" data-hash="'+file.hash+'" title="'+path+'">'+path+'</a>');
 				}
 				dirs.push(fm.escape(file.i18 || file.name));
 				sel.html(dirs.join('/') + (s > 0 ? ', '+fm.formatSize(s) : ''));
-				
-				return;
+			} else {
+				$.each(files, function(i, file) {
+					c++;
+					s += parseInt(file.size)||0;
+				});
+				sel.html(c ? titlesel+': '+c+', '+titlesize+': '+fm.formatSize(s) : '&nbsp;');
 			}
-
-			$.each(files, function(i, file) {
-				c++;
-				s += parseInt(file.size)||0;
-			});
-
-			sel.html(c ? titlesel+': '+c+', '+titlesize+': '+fm.formatSize(s) : '&nbsp;');
+			sel.attr('title', sel.text()); 
 		})
 		.bind('incsearch', function(e) {
 			setIncsearchStat(e.data);
@@ -90,5 +90,5 @@ $.fn.elfinderstat = function(fm) {
 			setIncsearchStat();
 		})
 		;
-	})
+	});
 };
