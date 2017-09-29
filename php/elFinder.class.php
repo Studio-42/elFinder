@@ -3965,10 +3965,14 @@ class elFinder {
 	public static function aborted() {
 		if ($file = self::$abortCheckFile) {
 			(version_compare(PHP_VERSION, '5.3.0') >= 0) ? clearstatcache(true, $file) : clearstatcache();
-			return ! is_file($file);
-		} else {
-			return false;
+			if (! is_file($file)) {
+				// GC (expire 12h)
+				list($ptn) = explode('elfreq', $file);
+				self::GlobGC($ptn . 'elfreq*', 43200);
+				return true;
+			}
 		}
+		return false;
 	}
 	
 	/***************************************************************************/
