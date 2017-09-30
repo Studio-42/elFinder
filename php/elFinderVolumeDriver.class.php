@@ -2316,7 +2316,7 @@ abstract class elFinderVolumeDriver {
 		}
 
 		if (!$this->allowPutMime($mime) || ($mimeByName && !$this->allowPutMime($mimeByName))) {
-			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME);
+			return $this->setError(elFinder::ERROR_UPLOAD_FILE_MIME, $mime);
 		}
 
 		$tmpsize = sprintf('%u', filesize($tmpname));
