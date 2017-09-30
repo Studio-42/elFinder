@@ -183,3 +183,9 @@
 .elfinder.elfinder-rtl div.elfinder-bottomtray {
 	right: 0;
 }
+
+/* tooltip */
+.elfinder-ui-tooltip {
+	font-size: 0.78em;
+	padding: 2px;
+}

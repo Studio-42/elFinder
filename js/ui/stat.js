@@ -34,13 +34,24 @@ $.fn.elfinderstat = function(fm) {
 						hasSize = false;
 					}
 				});
-				size.html(titleitems+': <span class="elfinder-stat-incsearch"></span>'+c+',&nbsp;<span class="elfinder-stat-size'+(hasSize? ' elfinder-stat-size-recursive' : '')+'">'+fm.i18n(hasSize? 'sum' : 'size')+': '+fm.formatSize(s)+'</span>');
+				size.html(titleitems+': <span class="elfinder-stat-incsearch"></span>'+c+',&nbsp;<span class="elfinder-stat-size'+(hasSize? ' elfinder-stat-size-recursive' : '')+'">'+fm.i18n(hasSize? 'sum' : 'size')+': '+fm.formatSize(s)+'</span>')
+					.attr('title', size.text());
 			},
 			setIncsearchStat = function(data) {
 				size.find('span.elfinder-stat-incsearch').html(data? data.hashes.length + ' / ' : '');
+				size.attr('title', size.text());
 			};
 
 		fm.getUI('statusbar').prepend(size).append(sel).show();
+		if (fm.UA.Mobile && $.fn.tooltip) {
+			fm.getUI('statusbar').tooltip({
+				classes: {
+					'ui-tooltip': 'elfinder-ui-tooltip ui-widget-shadow'
+				},
+				tooltipClass: 'elfinder-ui-tooltip ui-widget-shadow',
+				track: true
+			});
+		}
 		
 		fm
 		.bind('cwdhasheschange', function(e) {
@@ -53,6 +64,7 @@ $.fn.elfinderstat = function(fm) {
 				if (this.hash === cwdHash) {
 					if (this.size) {
 						size.children('.elfinder-stat-size').addClass('elfinder-stat-size-recursive').html(fm.i18n('sum')+': '+fm.formatSize(this.size));
+						size.attr('title', size.text());
 					}
 					return false;
 				}
@@ -74,12 +86,14 @@ $.fn.elfinderstat = function(fm) {
 				}
 				dirs.push(fm.escape(file.i18 || file.name));
 				sel.html(dirs.join('/') + (s > 0 ? ', '+fm.formatSize(s) : ''));
-			} else {
+			} else if (files.length) {
 				$.each(files, function(i, file) {
 					c++;
 					s += parseInt(file.size)||0;
 				});
 				sel.html(c ? titlesel+': '+c+', '+titlesize+': '+fm.formatSize(s) : '&nbsp;');
+			} else {
+				sel.html('');
 			}
 			sel.attr('title', sel.text()); 
 		})
