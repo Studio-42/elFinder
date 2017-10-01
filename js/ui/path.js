@@ -56,12 +56,14 @@ $.fn.elfinderpath = function(fm, options) {
 				});
 			}).append('<span class="elfinder-button-icon elfinder-button-icon-menu" />').appendTo(wzbase),
 			render = function(cwd) {
-				var dirs = [];
+				var dirs = [],
+					names = [];
 				$.each(fm.parents(cwd), function(i, hash) {
 					var c = (cwd === hash)? 'elfinder-path-dir elfinder-path-cwd' : 'elfinder-path-dir',
 						f = fm.file(hash),
 						name = fm.escape(f.i18 || f.name);
-					dirs.push('<span id="'+prefix+hash+'" class="'+c+'" title="'+name+'">'+name+'</span>');
+					names.push(name);
+					dirs.push('<span id="'+prefix+hash+'" class="'+c+'" title="'+names.join(fm.option('separator'))+'">'+name+'</span>');
 				});
 				return dirs.join('<span class="elfinder-path-other">'+fm.option('separator')+'</span>');
 			},
