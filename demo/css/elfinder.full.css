@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: db81b3b) (2017-09-29)
+ * Version 2.1.28 (2.1-src Nightly: 5f40842) (2017-10-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -699,6 +699,12 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 }
 .elfinder.elfinder-rtl div.elfinder-bottomtray {
 	right: 0;
+}
+
+/* tooltip */
+.elfinder-ui-tooltip {
+	font-size: 0.78em;
+	padding: 2px;
 }
 
 /* File: /css/contextmenu.css */
