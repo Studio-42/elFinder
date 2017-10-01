@@ -106,3 +106,8 @@
 	background-image: none;
 	background-color: inherit;
 }
+
+/* tooltip */
+.elfinder-ui-tooltip.ui-widget-shadow {
+	box-shadow: 2px 6px 4px -4px #cecdcd;
+}
