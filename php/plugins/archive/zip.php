@@ -3,7 +3,7 @@
 //request data
 $zip_path='C:/wamp64/www/files/files.zip';//zip file path
 $pass='123';//user password. Its can only use for extract ZipCrypto Encryption zip
-$cmd='extract';//'get','rename','delete','open','create','add', 'extract'
+$cmd='get';//'get','rename','delete','open','create','add', 'extract'
 $index=array('12' => 'files/New folder/') ;//calling indexs as array(as 'index' => 'selected index file or folder path including name that selected') if it not defineded index leave it as 'null'. also if You reffering folder path, You must end path using '/' 
 $c_dir_path='.trash/159/';//path to create folder includng that wanted to create folder's name
 $a_files_path = array('New folder/'=>'C:/wamp64/www/files/New folder/');//give you wanted to add files or folders path list to zip (as path inside zip => real path to file)
