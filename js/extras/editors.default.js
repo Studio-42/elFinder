@@ -97,7 +97,7 @@
 			}
 		},
 		pixlrSetup = function(opts, fm) {
-			if (!hasFlash) {
+			if (!hasFlash || fm.UA.ltIE8) {
 				this.disabled = true;
 			}
 		},
@@ -374,6 +374,12 @@
 		},
 		{
 			// ACE Editor
+			// called on initialization of elFinder cmd edit (this: this editor's config object)
+			setup : function(opts, fm) {
+				if (fm.UA.ltIE8) {
+					this.disabled = true;
+				}
+			},
 			// `mimes` is not set for support everything kind of text file
 			info : {
 				name : 'ACE Editor',
