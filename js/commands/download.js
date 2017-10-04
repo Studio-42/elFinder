@@ -238,7 +238,7 @@ elFinder.prototype.commands.download = function() {
 										}
 									});
 								} else {
-									dllink.hide().appendTo('body').get(0).click();
+									click(dllink.hide().appendTo('body').get(0));
 									dllink.remove();
 								}
 							} else {
@@ -270,7 +270,18 @@ elFinder.prototype.commands.download = function() {
 					return dfd.promise();
 				};
 			},
-			link, html5dl, fileCnt;
+			// use MouseEvent to click element for Safari etc
+			click = function(a) {
+				var clickEv;
+				if (typeof MouseEvent === 'function') {
+					clickEv = new MouseEvent('click');
+				} else {
+					clickEv = document.createEvent('MouseEvents');
+					clickEv.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+				}
+				a.dispatchEvent(clickEv);
+			},
+			link, html5dl, fileCnt, clickEv;
 			
 		if (!files.length) {
 			return dfrd.reject();
@@ -309,10 +320,11 @@ elFinder.prototype.commands.download = function() {
 			for (i = 0; i < files.length; i++) {
 				url = fm.openUrl(files[i].hash, true);
 				if (html5dl) {
-					link.attr('href', url)
-					.attr('download', fm.escape(files[i].name))
-					.attr('target', '_blank')
-					.get(0).click();
+					click(link.attr('href', url)
+						.attr('download', fm.escape(files[i].name))
+						.attr('target', '_blank')
+						.get(0)
+					);
 				} else {
 					if (fm.UA.Mobile) {
 						setTimeout(function(){
