@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 422275c) (2017-10-04)
+ * Version 2.1.28 (2.1-src Nightly: 8253341) (2017-10-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8626,7 +8626,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 422275c)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 8253341)';
 
 
 
@@ -17158,18 +17158,21 @@ $.fn.elfinderstat = function(fm) {
 			setstat    = function(files) {
 				var c = 0, 
 					s = 0,
+					cwd = fm.cwd(),
 					calc = true,
 					hasSize = true;
 
-				if (fm.cwd().size) {
-					s = fm.cwd().size;
-					calc = false
+				if (cwd.sizeInfo || cwd.size) {
+					s = cwd.size;
+					calc = false;
 				}
 				$.each(files, function(i, file) {
 					c++;
-					calc && (s += parseInt(file.size) || 0);
-					if (hasSize && file.mime === 'directory' && !file.sizeInfo) {
-						hasSize = false;
+					if (calc) {
+						s += parseInt(file.size) || 0;
+						if (hasSize === true && file.mime === 'directory' && !file.sizeInfo) {
+							hasSize = false;
+						}
 					}
 				});
 				size.html(titleitems+': <span class="elfinder-stat-incsearch"></span>'+c+',&nbsp;<span class="elfinder-stat-size'+(hasSize? ' elfinder-stat-size-recursive' : '')+'">'+fm.i18n(hasSize? 'sum' : 'size')+': '+fm.formatSize(s)+'</span>')
