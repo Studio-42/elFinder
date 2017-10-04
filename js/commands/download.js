@@ -192,39 +192,48 @@ elFinder.prototype.commands.download = function() {
 					var dfd = $.Deferred(),
 						root = fm.file(fm.root(hashes[0])),
 						single = (hashes.length === 1),
-						volName = root? ' ('+(root.i18 || root.name)+')' : '';
+						volName = root? (root.i18 || root.name) : null,
+						dir, dlName, phash;
+					if (single) {
+						if (dir = fm.file(hashes[0])) {
+							dlName = (dir.i18 || dir.name);
+						}
+					} else {
+						$.each(hashes, function() {
+							var d = fm.file(this);
+							if (d && (!phash || phash === d.phash)) {
+								phash = d.phash;
+							} else {
+								phash = null;
+								return false;
+							}
+						});
+						if (phash && (dir = fm.file(phash))) {
+							dlName = (dir.i18 || dir.name);
+						}
+					}
+					if (dlName) {
+						volName = dlName;
+					}
+					volName && (volName = ' (' + volName + ')');
 					fm.request({
 						data : {cmd : 'zipdl', targets : hashes},
 						notify : {type : 'zipdl', cnt : 1, hideCnt : true, msg : fm.i18n('ntfzipdl') + volName},
 						cancel : true,
 						preventDefault : true
 					}).done(function(e) {
-						var zipdl, dialog, btn = {}, dllink, form, iframe, dir, dlName, phash,
+						var zipdl, dialog, btn = {}, dllink, form, iframe,
 							uniq = 'dlw' + (+new Date());
 						if (e.error) {
 							fm.error(e.error);
 							dfd.resolve();
 						} else if (e.zipdl) {
 							zipdl = e.zipdl;
-							if (single) {
-								if (dir = fm.file(hashes[0])) {
-									dlName = (dir.i18 || dir.name) + '.zip';
-								}
+							if (dlName) {
+								dlName += '.zip';
 							} else {
-								$.each(hashes, function() {
-									var d = fm.file(this);
-									if (d && (!phash || phash === d.phash)) {
-										phash = d.phash;
-									} else {
-										phash = null;
-										return false;
-									}
-								});
-								if (phash && (dir = fm.file(phash))) {
-									dlName = (dir.i18 || dir.name) + '.zip';
-								}
+								dlName = zipdl.name;
 							}
-							! dlName && (dlName = zipdl.name);
 							if (html5dl || linkdl) {
 								url = fm.options.url + (fm.options.url.indexOf('?') === -1 ? '?' : '&')
 								+ 'cmd=zipdl&download=1';
