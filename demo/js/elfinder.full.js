@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 13c8786) (2017-10-03)
+ * Version 2.1.28 (2.1-src Nightly: 422275c) (2017-10-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8626,7 +8626,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 13c8786)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 422275c)';
 
 
 
@@ -20029,7 +20029,7 @@ elFinder.prototype.commands.download = function() {
 										}
 									});
 								} else {
-									dllink.hide().appendTo('body').get(0).click();
+									click(dllink.hide().appendTo('body').get(0));
 									dllink.remove();
 								}
 							} else {
@@ -20061,7 +20061,18 @@ elFinder.prototype.commands.download = function() {
 					return dfd.promise();
 				};
 			},
-			link, html5dl, fileCnt;
+			// use MouseEvent to click element for Safari etc
+			click = function(a) {
+				var clickEv;
+				if (typeof MouseEvent === 'function') {
+					clickEv = new MouseEvent('click');
+				} else {
+					clickEv = document.createEvent('MouseEvents');
+					clickEv.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+				}
+				a.dispatchEvent(clickEv);
+			},
+			link, html5dl, fileCnt, clickEv;
 			
 		if (!files.length) {
 			return dfrd.reject();
@@ -20100,10 +20111,11 @@ elFinder.prototype.commands.download = function() {
 			for (i = 0; i < files.length; i++) {
 				url = fm.openUrl(files[i].hash, true);
 				if (html5dl) {
-					link.attr('href', url)
-					.attr('download', fm.escape(files[i].name))
-					.attr('target', '_blank')
-					.get(0).click();
+					click(link.attr('href', url)
+						.attr('download', fm.escape(files[i].name))
+						.attr('target', '_blank')
+						.get(0)
+					);
 				} else {
 					if (fm.UA.Mobile) {
 						setTimeout(function(){
