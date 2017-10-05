@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.28 (2.1-src Nightly: 5dfea06) (2017-10-05)
+ * Version 2.1.28 (2.1-src Nightly: 3493ca5) (2017-10-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8626,7 +8626,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 5dfea06)';
+elFinder.prototype.version = '2.1.28 (2.1-src Nightly: 3493ca5)';
 
 
 
@@ -15781,7 +15781,7 @@ $.fn.elfindernavdock = function(fm, opts) {
 			resizeFn = [],
 			initMaxHeight = (parseInt(opts.initMaxHeight) || 50) / 100,
 			maxHeight = (parseInt(opts.maxHeight) || 90) / 100,
-			basicHeight;
+			basicHeight, hasNode;
 		
 		
 		self.data('addNode', function(cNode, opts) {
@@ -15805,7 +15805,8 @@ $.fn.elfindernavdock = function(fm, opts) {
 			} else {
 				self.append(cNode);
 			}
-			self.height(tH).show();
+			hasNode = true;
+			self.resizable('enable').height(tH).show();
 			
 			fm.trigger('wzresize');
 			
@@ -15832,7 +15833,8 @@ $.fn.elfindernavdock = function(fm, opts) {
 				cNode.remove();
 			}
 			if (self.children().length <= 1) {
-				self.height(0).hide();
+				hasNode = false;
+				self.resizable('disable').height(0).hide();
 			}
 			fm.trigger('wzresize');
 		});
@@ -15880,7 +15882,7 @@ $.fn.elfindernavdock = function(fm, opts) {
 					});
 				}
 				fm.bind('navbarshow navbarhide', function(e) {
-					self[e.type === 'navbarshow'? 'show' : 'hide']();
+					self[hasNode && e.type === 'navbarshow'? 'show' : 'hide']();
 				});
 			});
 		}
@@ -20003,7 +20005,7 @@ elFinder.prototype.commands.download = function() {
 							}
 						});
 						if (phash && (dir = fm.file(phash))) {
-							dlName = (dir.i18 || dir.name);
+							dlName = (dir.i18 || dir.name) + '-' + hashes.length;
 						}
 					}
 					if (dlName) {
