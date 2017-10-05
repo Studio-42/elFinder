@@ -209,7 +209,7 @@ elFinder.prototype.commands.download = function() {
 							}
 						});
 						if (phash && (dir = fm.file(phash))) {
-							dlName = (dir.i18 || dir.name);
+							dlName = (dir.i18 || dir.name) + '-' + hashes.length;
 						}
 					}
 					if (dlName) {
