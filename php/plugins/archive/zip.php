@@ -1,10 +1,38 @@
 <?php
 
 //request data
-$zip_path='C:/wamp64/www/files/files.zip';//zip file path
+//$zip_path='';//zip file path
+
+if (isset($_GET["zip"])) {
+	$zip_path=$_GET["zip"];
+}
+else {
+	echo 'Zip Path Not Given';
+	die();
+};
 $pass='123';//user password. Its can only use for extract ZipCrypto Encryption zip
-$cmd='get';//'get','rename','delete','open','create','add', 'extract'
-$index=array('12' => 'files/New folder/') ;//calling indexs as array(as 'index' => 'selected index file or folder path including name that selected') if it not defineded index leave it as 'null'. also if You reffering folder path, You must end path using '/' 
+//'get','rename','delete','open','create','add', 'extract'
+
+if (isset($_GET["index"])) {
+	$index=$_GET["index"];
+}
+else {
+	$index='null';
+};
+if (isset($_GET["path"])) {
+	$path=$_GET["path"];
+}
+else {
+	$path='.';
+};
+
+if (isset($_GET["cmd"])) {
+	$cmd=$_GET["cmd"];
+}
+else {
+	$cmd='get';
+};
+ //calling indexs as array(as 'index' => 'selected index file or folder path including name that selected') if it not defineded index leave it as 'null'. also if You reffering folder path, You must end path using '/' 
 $c_dir_path='.trash/159/';//path to create folder includng that wanted to create folder's name
 $a_files_path = array('New folder/'=>'C:/wamp64/www/files/New folder/');//give you wanted to add files or folders path list to zip (as path inside zip => real path to file)
 $rname='Newfolder';//as ('New Name'). Folder rename immposible directly. so I implemented diffeent method. 
@@ -16,27 +44,11 @@ if($zip->open($zip_path) == 'TRUE') {
 
 	$zip->setPassword($pass);
 
+
 	
-
-	if ($cmd=='get') {
-		for ($i=0; !empty($zip->statIndex($i)['name']); $i++) {//generating list (including identification index, name or path, size, crc, mtime, compares_Size, comp_method)of folders and files inside the zip
-			echo 'index: '.$i.' | ';
-			if(substr($zip->statIndex($i)['name'], -1)=='/') {
-				echo 'dirpath: ';
-			} 
-			else {
-				echo 'Filepath: ';
-			};
-			echo $zip->statIndex($i)['name'].' | Size: '.$zip->statIndex($i)['size'].' bytes'.' | crc: '.$zip->statIndex($i)['crc'].' | mtime: '.$zip->statIndex($i)['mtime'].' | compares_Size: '.$zip->statIndex($i)['comp_size'].' | comp_method: '.$zip->statIndex($i)['comp_method'].'<br>';
-		};
-	};
-
-
-
 	function ZipAddFileFolders($zip_p,$file_p,$real_p) {// this is not compleated
 			$zip_p->add($real_p,$file_p);
 	};
-	
 	
 	function ZipExtract($zip_p,$indx,$path,$extpath) {
 		$od=pathinfo($path,PATHINFO_DIRNAME);
@@ -291,6 +303,78 @@ if($zip->open($zip_path) == 'TRUE') {
 		};
 	};
 	
+	function ZipGetList($zip_p,$pathinzip,$zip) {
+			$dir_list=array();
+			$file_list=array();
+			$file_index=array();
+		for ($i=0; isset($zip_p->statIndex($i)['name']); $i++) {
+	
+			if ($pathinzip=='.') {
+				$path=preg_replace('|/|', '/|', $zip_p->statIndex($i)['name']);
+				$dirs=explode('|', $path);
+				$dirs=$dirs[0];
+				$path=$zip_p->statIndex($i)['name'];
+				
+				if(substr($dirs, -1) == '/'){
+					if(!in_array($dirs, $dir_list)) {
+						$dir_list[]=$dirs;
+					};
+				}
+					else {
+						$file_index[]=$zip_p->statIndex($i)['index'];
+						$file_list[]=$dirs;
+					};
+			
+			}
+				else {
+					if (strpos(($zip_p->statIndex($i)['name']),$pathinzip) === 0) {
+						$path=preg_replace('|'.$pathinzip.'|', '', $zip_p->statIndex($i)['name'],1);
+						$path=preg_replace('|/|', '/|', $path);
+						$dirs=explode('|', $path);
+						$dirs=$dirs[0];
+						$path=$zip_p->statIndex($i)['name'];
+	
+						if(substr($dirs, -1) == '/' && $dirs!='') {
+							if(!in_array($dirs, $dir_list)) {
+								$dir_list[]=$dirs;
+							};	
+						}
+						else {
+							if ($dirs != '') {
+								$file_list[]=($dirs);
+								$file_index[]=$zip_p->statIndex($i)['index'];
+							};
+						};
+					};
+				
+				};
+
+
+		};
+		
+		if($pathinzip=='.') ($pathinzip='');
+			
+					echo (
+	'<html>
+	<head></head>
+	<body>'
+); 
+
+			for ($i=0; isset($dir_list[$i]); $i++) {		
+			//	print_r($path_list[$i]);
+				echo ('<a href="'.$_SERVER['PHP_SELF'].'?path='.$pathinzip.$dir_list[$i].'&zip='.$zip.'">'.$dir_list[$i].'</a> <br>');
+			};
+			for ($i=0; isset($file_list[$i]); $i++) {		
+				//print_r($file_list);
+				echo ('<a href="'.$_SERVER['PHP_SELF'].'?path='.$pathinzip.$file_list[$i].'&index='.$file_index[$i].'&zip='.$zip.'&cmd=open">'.$file_list[$i].'</a> <br>');
+			};
+
+echo (
+	'</body>
+</html>'
+);
+	};
+	
 	switch($cmd) {
 		case 'extract':
 			foreach ($index as $value => $key) {
@@ -312,9 +396,7 @@ if($zip->open($zip_path) == 'TRUE') {
 			break;
 			
 		case 'open':
-			foreach ($index as $value => $key) {
-				echo ZipOpenFile($zip,$value);
-			};
+				echo ZipOpenFile($zip,$index);
 			break;
 			
 		case 'add':
@@ -323,8 +405,12 @@ if($zip->open($zip_path) == 'TRUE') {
 			};
 			break;
 			
+		case 'get':
+			ZipGetList($zip,$path,$zip_path);
+		break;
 	};
 
+					
 }
 else {
 	switch($zip->open($ZipFileName)) {
@@ -361,12 +447,14 @@ else {
 			break;
             
 		default: 
-			$ErrMsg = 'Unknow_(Code:'.$rOpen.')';
+			$ErrMsg = 'Unknow_(Code:)';
 			break;
 	}
 	die( 'ZipArchive_Error:'.$ErrMsg);
 };
 
-$zip->close();
 
 ?>
+
+
+
