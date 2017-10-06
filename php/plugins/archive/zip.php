@@ -328,11 +328,24 @@ if($zip->open($zip_path) == 'TRUE') {
 			}
 				else {
 					if (strpos(($zip_p->statIndex($i)['name']),$pathinzip) === 0) {
-						$path=preg_replace('|'.$pathinzip.'|', '', $zip_p->statIndex($i)['name'],1);
+						$pathinzip= str_ireplace('(','<',$pathinzip);
+						$pathinzip= str_ireplace(')','>',$pathinzip);
+						
+						$currantfile=$zip_p->statIndex($i)['name'];
+						$currantfile= str_ireplace('(','<',$currantfile);
+						$currantfile= str_ireplace(')','>',$currantfile);
+						
+						$path=preg_replace('|'.$pathinzip.'|', '', $currantfile,1);
 						$path=preg_replace('|/|', '/|', $path);
+						$pathinzip= str_ireplace('<','(',$pathinzip);
+						$pathinzip= str_ireplace('>',')',$pathinzip);
+						$path= str_ireplace('<','(',$path);
+						$path= str_ireplace('>',')',$path);
+						
 						$dirs=explode('|', $path);
 						$dirs=$dirs[0];
 						$path=$zip_p->statIndex($i)['name'];
+						
 	
 						if(substr($dirs, -1) == '/' && $dirs!='') {
 							if(!in_array($dirs, $dir_list)) {
@@ -456,6 +469,3 @@ else {
 $zip->close();
 
 ?>
-
-
-
