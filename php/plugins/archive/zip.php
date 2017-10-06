@@ -453,6 +453,7 @@ else {
 	die( 'ZipArchive_Error:'.$ErrMsg);
 };
 
+$zip->close();
 
 ?>
 
