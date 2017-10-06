@@ -5019,11 +5019,12 @@ elFinder.prototype = {
 				},
 				check = function() {
 					var existed = [], exists = [], i, c,
+						pathStr = target !== fm.cwd().hash? fm.path(target, true) + fm.option('separator', target) : '',
 						confirm = function(ndx) {
 							var last = ndx == exists.length-1,
 								opts = {
 									title  : fm.i18n('cmdupload'),
-									text   : ['errExists', exists[ndx].name, 'confirmRepl'], 
+									text   : ['errExists', pathStr + exists[ndx].name, 'confirmRepl'], 
 									all    : !last,
 									accept : {
 										label    : 'btnYes',
