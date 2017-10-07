@@ -1,3 +1,43 @@
+2017-10-07  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.29):
+		- [cmd:quicklook.plugins] Fixed #2149 support Data URI scheme contents of the text file
+		- [cmd:quicklook] Fixed #2151 tmb icon don't appear at file addition
+		- [ui:cwd] Fixed #2152 table header position unmatch in the rtl language
+		- [jquery.elfinder] add jQuery function `$.fn.scrollRight()`
+		- [ui:navbar] correction position of navbar resize handle in 
+		- [js:core] Fixed #2153 correction of `mime2class()`  also give sub-type of "image/*"
+		- [ui:cwd] Fixed #2158 add file type badge in icons view with CSS
+		- [VD:abstract,plugin] Fixed #2160 animation of apng is lost
+		- [php:core] bugfix of passing tagetHash to callback 'upload.presave'
+		- [api] configurable MIME-types to handle as text on the connector side
+		- [VD:MySQL] Fixed #2164, Fixed #2166 problem with MySQL > 5.6
+		- [ui:navbar,cmd:quicklook] Fixed #2171 allow to display the preview on the navbar
+		- [js:options] add an option `fileFilter` cf. #2176, #2178
+		- [ui:contextmenu] Fixed #2183 problem of selecting submenu on touch devices
+		- [js:core] add a unique query param to thumbnail url
+		- [cmd:quicklook] Fixed #2191 add an option `commandsOptions.quicklook.contain`
+		- [cmd:quicklook] Fixed #2192 show cwd info when unselect item
+		- [cmd:quicklook] add PSD preview plugin
+		- [VD:FTP] Fixed the permissions when the ftp deamon uses a Virtual User that it isn't a passwd user
+		- [php:plugins] Fixed #2198 AutoResize/AutoRotate/Watermark fail if php fileinfo module not loaded
+		- [php:core,VD:abstarct] Fixed #2199 remove `create_function()` for PHP>=7.2
+		- [js:core] Fixed #2201 bugfix that language setting of options stores in browser
+		- [ui:dialog] Fixed #2203 option `dialogContained` to contained in the elFinder node
+		- [js:core] Fixed #2210 send `mimes` as Array (not Object) on upload
+		- [VD:FTP] Fixed Using epsv4 off with Pure-ftpd servers creates a timeout
+		- [js:core] Fixed #2216 to destruction completely of used XHR objects
+		- [cmd:quicklook,rm] Fixed #2221 show folder size info into the each
+		- [api] Fixed #2222 abort on the client side then notify it to the connector side
+		- [js:cwd] Fixed #2224 problems that cause discrepancies on displaying
+		- [VD:LocalFileSystem] Fixed #2226 problem on save empty file
+		- [i18n:LANG] add "Sum" for the caption of recursive folder size
+		- [cmd:download] bugfix of non-alphabetic characters in download filename
+		- [php:core] add a main option `connectionFlagsPath`
+		- [i18n:LANG] add "Sum" for the caption of recursive folder size
+		- [js:core] Fixed #2236 show target path in upload confirm dialog at non-cwd
+		- And some minor bug fixes
+
 2017-08-16  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.28):
