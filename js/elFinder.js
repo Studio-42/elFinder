@@ -5996,9 +5996,14 @@ elFinder.prototype = {
 								data.overwrite = 0;
 								formData.append('name[]', fm.date(fm.nonameDateFormat) + '.png');
 							}
-							if (fm.UA.iOS && file.name === 'image.jpg') {
-								data.overwrite = 0;
-								formData.append('name[]', fm.date(fm.nonameDateFormat) + '.jpg');
+							if (fm.UA.iOS) {
+								if (file.name.match(/^image\.jpe?g$/i)) {
+									data.overwrite = 0;
+									formData.append('name[]', fm.date(fm.nonameDateFormat) + '.jpg');
+								} else if (file.name.match(/^capturedvideo\.mov$/i)) {
+									data.overwrite = 0;
+									formData.append('name[]', fm.date(fm.nonameDateFormat) + '.mov');
+								}
 							}
 						}
 						if (file._chunk) {
