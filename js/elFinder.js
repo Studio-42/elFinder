@@ -7120,7 +7120,7 @@ elFinder.prototype = {
 			}
 			
 			!opts.hideCnt && notify.children('.elfinder-notify-cnt').text('('+cnt+')');
-			ndialog.is(':hidden') && ndialog.elfinderdialog('open', this);
+			ndialog.is(':hidden') && ndialog.elfinderdialog('open', this).height('auto');
 			notify.data('cnt', cnt);
 			
 			if ((progress != null)
