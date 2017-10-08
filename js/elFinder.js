@@ -5183,22 +5183,20 @@ elFinder.prototype = {
 				processing = 0,
 				items,
 				mkdirs = [],
-				
-				readEntries = function(dirReader) {
-					var toArray = function(list) {
-						return Array.prototype.slice.call(list || []);
-					};
+				cancel = false,
+				toArray = function(list) {
+					return Array.prototype.slice.call(list || [], 0);
 				},
-				
 				doScan = function(items) {
-					var dirReader, entry, length,
-					entries = [],
-					toArray = function(list) {
-						return Array.prototype.slice.call(list || [], 0);
-					},
-					excludes = fm.options.folderUploadExclude[fm.OS] || null;
-					length = items.length;
+					var dirReader, entry, readEntries,
+						entries = [],
+						excludes = fm.options.folderUploadExclude[fm.OS] || null,
+						length = items.length;
+					
 					for (var i = 0; i < length; i++) {
+						if (cancel) {
+							break;
+						}
 						entry = items[i];
 						if (entry) {
 							if (entry.isFile) {
@@ -5215,12 +5213,15 @@ elFinder.prototype = {
 									processing++;
 									mkdirs.push(entry.fullPath);
 									dirReader = entry.createReader();
-									var entries = [];
+									entries = [];
 									// Call the reader.readEntries() until no more results are returned.
-									var readEntries = function() {
-										 dirReader.readEntries (function(results) {
-											if (!results.length) {
+									readEntries = function() {
+										dirReader.readEntries(function(results) {
+											if (cancel || !results.length) {
 												for (var i = 0; i < entries.length; i++) {
+													if (cancel) {
+														break;
+													}
 													doScan([entries[i]]);
 												}
 												processing--;
@@ -5250,7 +5251,7 @@ elFinder.prototype = {
 				});
 				if (items.length > 0) {
 					fm.uploads.checkExists(items, target, fm, hasDirs).done(function(renames, hashes){
-						var notifyto, dfds = [];
+						var dfds = [];
 						if (fm.options.overwriteUploadConfirm && fm.option('uploadOverwrite', target)) {
 							if (renames === null) {
 								data.overwrite = 0;
@@ -5291,20 +5292,27 @@ elFinder.prototype = {
 							});
 						}
 						$.when.apply($, dfds).done(function(){
-							if (items.length > 0) {
-								notifyto = setTimeout(function() {
-									fm.notify({type : 'readdir', cnt : 1, hideCnt: true});
-								}, fm.options.notifyDelay);
-								doScan(items);
-								setTimeout(function wait() {
-									if (processing > 0) {
-										setTimeout(wait, 10);
+							var notifyto, wait = function() {
+								if (!cancel && processing > 0) {
+									setTimeout(wait, 10);
+								} else {
+									notifyto && clearTimeout(notifyto);
+									fm.notify({type : 'readdir', cnt : -1});
+									if (cancel) {
+										dfrd.reject();
 									} else {
-										notifyto && clearTimeout(notifyto);
-										fm.notify({type : 'readdir', cnt : -1});
 										dfrd.resolve([files, paths, renames, hashes, mkdirs]);
 									}
-								}, 10);
+								}
+							};
+							if (items.length > 0) {
+								notifyto = setTimeout(function() {
+									fm.notify({type : 'readdir', cnt : 1, hideCnt: true, cancel: function() {
+										cancel = true;
+									}});
+								}, fm.options.notifyDelay);
+								doScan(items);
+								setTimeout(wait, 10);
 							} else {
 								dfrd.reject();
 							}
