@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 996263c) (2017-10-08)
+ * Version 2.1.29 (2.1-src Nightly: ab67e98) (2017-10-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2185,6 +2185,11 @@ var elFinder = function(node, opts, bootCallback) {
 					Object.assign(options.data, { reqid : reqId });
 				}
 				
+				// function for set value of this syncOnFail
+				dfrd.syncOnFail = function(state) {
+					syncOnFail = !!state;
+				}
+				
 				dfrd.xhr = xhr = self.transport.send(options).always(function() {
 					--requestCnt;
 					if (requestQueue.length) {
@@ -2196,11 +2201,6 @@ var elFinder = function(node, opts, bootCallback) {
 				
 				if (self.api >= 2.1029) {
 					xhr._requestId = reqId;
-				}
-				
-				// function for set value of this syncOnFail
-				dfrd.syncOnFail = function(state) {
-					syncOnFail = !!state;
 				}
 				
 				if (isOpen || (data.compare && cmd === 'info')) {
@@ -2239,6 +2239,7 @@ var elFinder = function(node, opts, bootCallback) {
 				if (notify.type && notify.cnt) {
 					if (cancel) {
 						notify.cancel = dfrd;
+						opts.eachCancel && (notify.id = +new Date());
 					}
 					timeout = setTimeout(function() {
 						self.notify(notify);
@@ -5323,24 +5324,38 @@ elFinder.prototype = {
 							});
 						}
 						$.when.apply($, dfds).done(function(){
-							var notifyto, wait = function() {
-								if (!cancel && processing > 0) {
-									setTimeout(wait, 10);
-								} else {
-									notifyto && clearTimeout(notifyto);
-									fm.notify({type : 'readdir', cnt : -1});
-									if (cancel) {
-										dfrd.reject();
+							var notifyto, msg,
+								id = +new Date(),
+								wait = function() {
+									if (!cancel && processing > 0) {
+										setTimeout(wait, 10);
 									} else {
-										dfrd.resolve([files, paths, renames, hashes, mkdirs]);
+										notifyto && clearTimeout(notifyto);
+										fm.notify({type : 'readdir', id: id, cnt : -1});
+										if (cancel) {
+											dfrd.reject();
+										} else {
+											dfrd.resolve([files, paths, renames, hashes, mkdirs]);
+										}
 									}
-								}
-							};
+								};
+							
 							if (items.length > 0) {
+								msg = fm.escape(items[0].name);
+								if (items.length > 1) {
+									msg += ' ... ' + items.length + fm.i18n('items');
+								}
 								notifyto = setTimeout(function() {
-									fm.notify({type : 'readdir', cnt : 1, hideCnt: true, cancel: function() {
-										cancel = true;
-									}});
+									fm.notify({
+										type : 'readdir',
+										id : id,
+										cnt : 1,
+										hideCnt: true,
+										msg : fm.i18n('ntfreaddir') + ' (' + msg + ')',
+										cancel: function() {
+											cancel = true;
+										}
+									});
 								}, fm.options.notifyDelay);
 								doScan(items);
 								setTimeout(wait, 10);
@@ -7092,11 +7107,12 @@ elFinder.prototype = {
 	 */
 	notify : function(opts) {
 		var type     = opts.type,
+			id       = opts.id? 'elfinder-notify-'+opts.id : '',
 			msg      = this.i18n((typeof opts.msg !== 'undefined')? opts.msg : (this.messages['ntf'+type] ? 'ntf'+type : 'ntfsmth')),
 			ndialog  = this.ui.notify,
-			notify   = ndialog.children('.elfinder-notify-'+type),
+			notify   = ndialog.children('.elfinder-notify-'+type+(id? ('.'+id) : '')),
 			button   = notify.children('div.elfinder-notify-cancel').children('button'),
-			ntpl     = '<div class="elfinder-notify elfinder-notify-{type}"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-progressbar"><div class="elfinder-notify-progress"/></div><div class="elfinder-notify-cancel"/></div>',
+			ntpl     = '<div class="elfinder-notify elfinder-notify-{type}'+(id? (' '+id) : '')+'"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-progressbar"><div class="elfinder-notify-progress"/></div><div class="elfinder-notify-cancel"/></div>',
 			delta    = opts.cnt,
 			size     = (typeof opts.size != 'undefined')? parseInt(opts.size) : null,
 			progress = (typeof opts.progress != 'undefined' && opts.progress >= 0) ? opts.progress : null,
@@ -8640,7 +8656,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 996263c)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: ab67e98)';
 
 
 
@@ -20030,6 +20046,7 @@ elFinder.prototype.commands.download = function() {
 						data : {cmd : 'zipdl', targets : hashes},
 						notify : {type : 'zipdl', cnt : 1, hideCnt : true, msg : fm.i18n('ntfzipdl') + volName},
 						cancel : true,
+						eachCancel : true,
 						preventDefault : true
 					}).done(function(e) {
 						var zipdl, dialog, btn = {}, dllink, form, iframe,
@@ -26866,7 +26883,15 @@ elFinder.prototype.commands.resize = function() {
 				dirs = [],
 				results = [],
 				reqs = [],
-				phashes = [];
+				phashes = [],
+				getFile;
+			
+			dfd._xhrReject = function() {
+				$.each(reqs, function() {
+					this && this.reject && this.reject();
+				});
+				getFile && getFile._xhrReject();
+			};
 			
 			$.each(files, function(i, f) {
 				f.mime === 'directory'? dirs.push(f) : results.push(f);
@@ -26902,7 +26927,7 @@ elFinder.prototype.commands.resize = function() {
 						}
 					});
 					fm.cache(items);
-					getFilesRecursively(items).done(function(res) {
+					getFile = getFilesRecursively(items).done(function(res) {
 						results = results.concat(res);
 						dfd.resolve(results);
 					});
@@ -26911,7 +26936,7 @@ elFinder.prototype.commands.resize = function() {
 				dfd.resolve(results);
 			}
 			
-			return dfd.promise();
+			return dfd;
 		},
 		restore = function(dfrd, files, targets, opts) {
 			var rHashes = {},
@@ -26919,7 +26944,8 @@ elFinder.prototype.commands.resize = function() {
 				found = false,
 				dirs = [],
 				opts = opts || {},
-				tm;
+				id = +new Date(),
+				tm, getFile;
 			
 			fm.lockfiles({files : targets});
 			
@@ -26934,13 +26960,16 @@ elFinder.prototype.commands.resize = function() {
 			});
 			
 			tm = setTimeout(function() {
-				fm.notify({type : 'search', cnt : 1, hideCnt : true});
+				fm.notify({type : 'search', id : id, cnt : 1, hideCnt : true, cancel : function() {
+					getFile && getFile._xhrReject();
+					dfrd.reject();
+				}});
 			}, fm.notifyDelay);
-			
+
 			fakeCnt = 0;
-			getFilesRecursively(files).always(function() {
+			getFile = getFilesRecursively(files).always(function() {
 				tm && clearTimeout(tm);
-				fm.notify({type : 'search', cnt : -1, hideCnt : true});
+				fm.notify({type : 'search', id: id, cnt : -1, hideCnt : true});
 			}).fail(function() {
 				dfrd.reject('errRestore', 'errFileNotFound');
 			}).done(function(res) {
