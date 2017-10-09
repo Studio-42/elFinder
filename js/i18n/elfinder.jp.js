@@ -211,7 +211,7 @@
 			'ntfnetmount' : 'ネットボリュームをマウント中', // added 18.04.2012
 			'ntfnetunmount': 'ネットボリュームをアンマウント中', // from v2.1 added 30.04.2012
 			'ntfdim'      : '画像サイズを取得しています', // added 20.05.2013
-			'ntfreaddir'  : 'ホルダ情報を読み取っています', // from v2.1 added 01.07.2013
+			'ntfreaddir'  : 'フォルダ情報を読み取っています', // from v2.1 added 01.07.2013
 			'ntfurl'      : 'リンクURLを取得しています', // from v2.1 added 11.03.2014
 			'ntfchmod'    : 'ファイル属性を変更しています', // from v2.1 added 20.6.2015
 			'ntfpreupload': 'アップロードファイル名を検証中', // from v2.1 added 31.11.2015
@@ -220,7 +220,7 @@
 			'ntfchunkmerge': 'アップロード済みファイルを処理中', // from v2.1.17 added 2.11.2016
 			'ntftrash'    : 'ごみ箱に入れています', // from v2.1.24 added 2.5.2017
 			'ntfrestore'  : 'ごみ箱から元に戻しています', // from v2.1.24 added 2.5.2017
-			'ntfchkdir'   : '宛先ホルダーを確認しています', // from v2.1.24 added 3.5.2017
+			'ntfchkdir'   : '宛先フォルダを確認しています', // from v2.1.24 added 3.5.2017
 			'ntfundo'     : '前の操作を取り消して元に戻しています', // from v2.1.27 added 31.07.2017
 			'ntfredo'     : '元に戻した操作をやり直しています', // from v2.1.27 added 31.07.2017
 

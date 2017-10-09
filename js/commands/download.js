@@ -220,6 +220,7 @@ elFinder.prototype.commands.download = function() {
 						data : {cmd : 'zipdl', targets : hashes},
 						notify : {type : 'zipdl', cnt : 1, hideCnt : true, msg : fm.i18n('ntfzipdl') + volName},
 						cancel : true,
+						eachCancel : true,
 						preventDefault : true
 					}).done(function(e) {
 						var zipdl, dialog, btn = {}, dllink, form, iframe,
