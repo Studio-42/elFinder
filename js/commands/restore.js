@@ -14,7 +14,15 @@
 				dirs = [],
 				results = [],
 				reqs = [],
-				phashes = [];
+				phashes = [],
+				getFile;
+			
+			dfd._xhrReject = function() {
+				$.each(reqs, function() {
+					this && this.reject && this.reject();
+				});
+				getFile && getFile._xhrReject();
+			};
 			
 			$.each(files, function(i, f) {
 				f.mime === 'directory'? dirs.push(f) : results.push(f);
@@ -50,7 +58,7 @@
 						}
 					});
 					fm.cache(items);
-					getFilesRecursively(items).done(function(res) {
+					getFile = getFilesRecursively(items).done(function(res) {
 						results = results.concat(res);
 						dfd.resolve(results);
 					});
@@ -59,7 +67,7 @@
 				dfd.resolve(results);
 			}
 			
-			return dfd.promise();
+			return dfd;
 		},
 		restore = function(dfrd, files, targets, opts) {
 			var rHashes = {},
@@ -67,7 +75,8 @@
 				found = false,
 				dirs = [],
 				opts = opts || {},
-				tm;
+				id = +new Date(),
+				tm, getFile;
 			
 			fm.lockfiles({files : targets});
 			
@@ -82,13 +91,16 @@
 			});
 			
 			tm = setTimeout(function() {
-				fm.notify({type : 'search', cnt : 1, hideCnt : true});
+				fm.notify({type : 'search', id : id, cnt : 1, hideCnt : true, cancel : function() {
+					getFile && getFile._xhrReject();
+					dfrd.reject();
+				}});
 			}, fm.notifyDelay);
-			
+
 			fakeCnt = 0;
-			getFilesRecursively(files).always(function() {
+			getFile = getFilesRecursively(files).always(function() {
 				tm && clearTimeout(tm);
-				fm.notify({type : 'search', cnt : -1, hideCnt : true});
+				fm.notify({type : 'search', id: id, cnt : -1, hideCnt : true});
 			}).fail(function() {
 				dfrd.reject('errRestore', 'errFileNotFound');
 			}).done(function(res) {
