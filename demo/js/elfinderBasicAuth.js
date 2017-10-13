@@ -92,8 +92,12 @@ elFinder.prototype.commands.login = function() {
 			},
 			btn = {},
 			req = function() {
-				aopt['username'] = user.val();
-				aopt['password'] = pass.val();
+				if (window.btoa) {
+					aopt['headers']['Authorization'] = 'Basic ' + btoa(unescape(encodeURIComponent(user.val()+':'+pass.val())));
+				} else {
+					aopt['username'] = user.val();
+					aopt['password'] = pass.val();
+				}
 				getAjax(aopt).done(function() {
 					dfd.resolve();
 				}).fail(function(e) {
