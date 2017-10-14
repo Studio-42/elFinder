@@ -822,11 +822,18 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			$mode  = '';
 			foreach ($parts as $part) {
 
-				list($key, $val) = explode('=', $part);
+				list($key, $val) = explode('=', $part, 2);
 
 				switch ($key) {
 					case 'type':
-						$stat['mime'] = strpos($val, 'dir') !== false ? 'directory' : $this->mimetype($path);
+						if (strpos($val, 'dir') !== false) {
+							$stat['mime'] = 'directory';
+						} else if (strpos($val, 'link') !== false) {
+							$stat['mime'] = 'symlink';
+							break(2);
+						} else {
+							$stat['mime'] = $this->mimetype($path);
+						}
 						break;
 
 					case 'size':
@@ -860,10 +867,20 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 						break;
 				}
 			}
+			
 			if (empty($stat['mime'])) {
 				return array();
 			}
-			if ($stat['mime'] == 'directory') {
+			
+			// do not use MLST to get stat of symlink
+			if ($stat['mime'] === 'symlink') {
+				$this->MLSTsupprt = false;
+				$res = $this->_stat($path);
+				$this->MLSTsupprt = true;
+				return $res;
+			}
+			
+			if ($stat['mime'] === 'directory') {
 				$stat['size'] = 0;
 			}
 			
@@ -1217,6 +1234,10 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			
 			if (file_put_contents($local, $content, LOCK_EX) !== false
 			&& ($fp = fopen($local, 'rb'))) {
+				$file = $this->stat($this->convEncOut($path, false));
+				if (! empty($file['thash'])) {
+					$path = $this->decode($file['thash']);
+				}
 				clearstatcache();
 				$res  = ftp_fput($this->connect, $path, $fp, $this->ftpMode($path));
 				fclose($fp);
