@@ -6012,7 +6012,7 @@ abstract class elFinderVolumeDriver {
 			if ($arrn[0] !== '.') {
 				array_unshift($arrn, '.');
 			}
-			$arrn[0] = $base;
+			$arrn[0] = rtrim($base, $separator);
 			return join($separator, $arrn);
 		}
 		
