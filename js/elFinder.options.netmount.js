@@ -9,12 +9,12 @@ elFinder.prototype._options.commandsOptions.netmount = {
 		name : 'FTP',
 		inputs: {
 			host     : $('<input type="text"/>'),
-			port     : $('<input type="text" placeholder="21"/>'),
+			port     : $('<input type="text" placeholder="21" class="elfinder-input-optional"/>'),
 			path     : $('<input type="text" value="/"/>'),
 			user     : $('<input type="text"/>'),
 			pass     : $('<input type="password" autocomplete="new-password"/>'),
-			encoding : $('<input type="text" placeholder="Optional"/>'),
-			locale   : $('<input type="text" placeholder="Optional"/>')
+			encoding : $('<input type="text" placeholder="Optional" class="elfinder-input-optional"/>'),
+			locale   : $('<input type="text" placeholder="Optional" class="elfinder-input-optional"/>')
 		}
 	},
 	dropbox: {

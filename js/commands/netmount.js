@@ -72,7 +72,71 @@ elFinder.prototype.commands.netmount = function() {
 						},
 						buttons        : {}
 					},
-					form = $('<form autocomplete="off"/>'),
+					doMount = function() {
+						var protocol = inputs.protocol.val(),
+							data = {cmd : 'netmount', protocol: protocol},
+							cur = o[protocol];
+						$.each(content.find('input.elfinder-netmount-inputs-'+protocol), function(name, input) {
+							var val;
+							if (typeof input.val == 'function') {
+								val = $.trim(input.val());
+							} else {
+								val = $.trim(input.value);
+							}
+							if (val) {
+								data[input.name] = val;
+							}
+						});
+	
+						if (!data.host) {
+							return fm.trigger('error', {error : 'errNetMountHostReq', opts : {modal: true}});
+						}
+	
+						fm.request({data : data, notify : {type : 'netmount', cnt : 1, hideCnt : true}})
+							.done(function(data) {
+								var pdir;
+								if (data.added && data.added.length) {
+									if (data.added[0].phash) {
+										if (pdir = fm.file(data.added[0].phash)) {
+											if (! pdir.dirs) {
+												pdir.dirs = 1;
+												fm.change({ changed: [ pdir ] });
+											}
+										}
+									}
+									fm.one('netmountdone', function() {
+										fm.exec('open', data.added[0].hash);
+									});
+								}
+								dfrd.resolve();
+							})
+							.fail(function(error) {
+								if (cur.fail && typeof cur.fail == 'function') {
+									cur.fail(fm, error);
+								}
+								dfrd.reject(error);
+							});
+	
+						self.dialog.elfinderdialog('close');
+					},
+					form = $('<form autocomplete="off"/>').on('keydown', 'input', function(e) {
+						var comp = true,
+							next;
+						if (e.keyCode === $.ui.keyCode.ENTER) {
+							$.each(form.find('input:visible:not(.elfinder-input-optional)'), function() {
+								if ($(this).val() === '') {
+									comp = false;
+									next = $(this);
+									return false;
+								}
+							});
+							if (comp) {
+								doMount();
+							} else {
+								next.focus();
+							}
+						}
+					}),
 					hidden  = $('<div/>'),
 					dialog;
 
@@ -100,54 +164,7 @@ elFinder.prototype.commands.netmount = function() {
 				
 				content.find('.elfinder-netmount-tr').hide();
 
-				opts.buttons[fm.i18n('btnMount')] = function() {
-					var protocol = inputs.protocol.val(),
-						data = {cmd : 'netmount', protocol: protocol},
-						cur = o[protocol];
-					$.each(content.find('input.elfinder-netmount-inputs-'+protocol), function(name, input) {
-						var val;
-						if (typeof input.val == 'function') {
-							val = $.trim(input.val());
-						} else {
-							val = $.trim(input.value);
-						}
-						if (val) {
-							data[input.name] = val;
-						}
-					});
-
-					if (!data.host) {
-						return fm.trigger('error', {error : 'errNetMountHostReq', opts : {modal: true}});
-					}
-
-					fm.request({data : data, notify : {type : 'netmount', cnt : 1, hideCnt : true}})
-						.done(function(data) {
-							var pdir;
-							if (data.added && data.added.length) {
-								if (data.added[0].phash) {
-									if (pdir = fm.file(data.added[0].phash)) {
-										if (! pdir.dirs) {
-											pdir.dirs = 1;
-											fm.change({ changed: [ pdir ] });
-										}
-									}
-								}
-								fm.one('netmountdone', function() {
-									fm.exec('open', data.added[0].hash);
-								});
-							}
-							dfrd.resolve();
-						})
-						.fail(function(error) {
-							//self.dialog.elfinderdialog('open');
-							if (cur.fail && typeof cur.fail == 'function') {
-								cur.fail(fm, error);
-							}
-							dfrd.reject(error);
-						});
-
-					self.dialog.elfinderdialog('close');
-				};
+				opts.buttons[fm.i18n('btnMount')] = doMount;
 
 				opts.buttons[fm.i18n('btnCancel')] = function() {
 					self.dialog.elfinderdialog('close');
