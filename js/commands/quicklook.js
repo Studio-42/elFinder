@@ -282,7 +282,7 @@
 						$.each(files, function(i, f) {
 							var s = parseInt(f.size),
 								t = parseInt(f.ts);
-							if (f.mime !== 'directory' && s >= 0 && size >= 0) {
+							if ((f.mime !== 'directory' || f.sizeInfo) && s >= 0 && size >= 0) {
 								size += s;
 							} else {
 								size = 'unknown';
@@ -297,7 +297,7 @@
 						});
 						getSize = (size === 'unknown');
 						return {
-							hash : cwdHash,
+							hash : +new Date(),
 							name : fm.i18n('items') + ': ' + cnt,
 							mime : 'group',
 							size : getSize? spinner : size,
@@ -455,17 +455,14 @@
 				},
 				tmb, name, getSizeHashes = [];
 
+			if (file && ! Object.keys(file).length) {
+				file = fm.cwd();
+			}
 			if (file && getSize && getSize.state() === 'pending' && getSize._hash !== file.hash) {
 				getSize.reject();
 			}
-			if (file && (e.forceUpdate || file.hash === cwdHash || self.window.data('hash') !== file.hash)) {
-				tm4cwd && clearTimeout(tm4cwd);
-				if (file.hash === cwdHash) {
-					// wait select any item in cwd
-					tm4cwd = setTimeout(update, 0);
-				} else {
-					update();
-				}
+			if (file && (e.forceUpdate || self.window.data('hash') !== file.hash)) {
+				update();
 			} else { 
 				e.stopImmediatePropagation();
 			}
