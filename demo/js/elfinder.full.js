@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: fe5b3fd) (2017-10-15)
+ * Version 2.1.29 (2.1-src Nightly: 1ea503d) (2017-10-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8656,7 +8656,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: fe5b3fd)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 1ea503d)';
 
 
 
@@ -10072,12 +10072,12 @@ elFinder.prototype._options.commandsOptions.netmount = {
 		name : 'FTP',
 		inputs: {
 			host     : $('<input type="text"/>'),
-			port     : $('<input type="text" placeholder="21"/>'),
+			port     : $('<input type="text" placeholder="21" class="elfinder-input-optional"/>'),
 			path     : $('<input type="text" value="/"/>'),
 			user     : $('<input type="text"/>'),
 			pass     : $('<input type="password" autocomplete="new-password"/>'),
-			encoding : $('<input type="text" placeholder="Optional"/>'),
-			locale   : $('<input type="text" placeholder="Optional"/>')
+			encoding : $('<input type="text" placeholder="Optional" class="elfinder-input-optional"/>'),
+			locale   : $('<input type="text" placeholder="Optional" class="elfinder-input-optional"/>')
 		}
 	},
 	dropbox: {
@@ -22538,7 +22538,71 @@ elFinder.prototype.commands.netmount = function() {
 						},
 						buttons        : {}
 					},
-					form = $('<form autocomplete="off"/>'),
+					doMount = function() {
+						var protocol = inputs.protocol.val(),
+							data = {cmd : 'netmount', protocol: protocol},
+							cur = o[protocol];
+						$.each(content.find('input.elfinder-netmount-inputs-'+protocol), function(name, input) {
+							var val;
+							if (typeof input.val == 'function') {
+								val = $.trim(input.val());
+							} else {
+								val = $.trim(input.value);
+							}
+							if (val) {
+								data[input.name] = val;
+							}
+						});
+	
+						if (!data.host) {
+							return fm.trigger('error', {error : 'errNetMountHostReq', opts : {modal: true}});
+						}
+	
+						fm.request({data : data, notify : {type : 'netmount', cnt : 1, hideCnt : true}})
+							.done(function(data) {
+								var pdir;
+								if (data.added && data.added.length) {
+									if (data.added[0].phash) {
+										if (pdir = fm.file(data.added[0].phash)) {
+											if (! pdir.dirs) {
+												pdir.dirs = 1;
+												fm.change({ changed: [ pdir ] });
+											}
+										}
+									}
+									fm.one('netmountdone', function() {
+										fm.exec('open', data.added[0].hash);
+									});
+								}
+								dfrd.resolve();
+							})
+							.fail(function(error) {
+								if (cur.fail && typeof cur.fail == 'function') {
+									cur.fail(fm, error);
+								}
+								dfrd.reject(error);
+							});
+	
+						self.dialog.elfinderdialog('close');
+					},
+					form = $('<form autocomplete="off"/>').on('keydown', 'input', function(e) {
+						var comp = true,
+							next;
+						if (e.keyCode === $.ui.keyCode.ENTER) {
+							$.each(form.find('input:visible:not(.elfinder-input-optional)'), function() {
+								if ($(this).val() === '') {
+									comp = false;
+									next = $(this);
+									return false;
+								}
+							});
+							if (comp) {
+								doMount();
+							} else {
+								next.focus();
+							}
+						}
+					}),
 					hidden  = $('<div/>'),
 					dialog;
 
@@ -22566,54 +22630,7 @@ elFinder.prototype.commands.netmount = function() {
 				
 				content.find('.elfinder-netmount-tr').hide();
 
-				opts.buttons[fm.i18n('btnMount')] = function() {
-					var protocol = inputs.protocol.val(),
-						data = {cmd : 'netmount', protocol: protocol},
-						cur = o[protocol];
-					$.each(content.find('input.elfinder-netmount-inputs-'+protocol), function(name, input) {
-						var val;
-						if (typeof input.val == 'function') {
-							val = $.trim(input.val());
-						} else {
-							val = $.trim(input.value);
-						}
-						if (val) {
-							data[input.name] = val;
-						}
-					});
-
-					if (!data.host) {
-						return fm.trigger('error', {error : 'errNetMountHostReq', opts : {modal: true}});
-					}
-
-					fm.request({data : data, notify : {type : 'netmount', cnt : 1, hideCnt : true}})
-						.done(function(data) {
-							var pdir;
-							if (data.added && data.added.length) {
-								if (data.added[0].phash) {
-									if (pdir = fm.file(data.added[0].phash)) {
-										if (! pdir.dirs) {
-											pdir.dirs = 1;
-											fm.change({ changed: [ pdir ] });
-										}
-									}
-								}
-								fm.one('netmountdone', function() {
-									fm.exec('open', data.added[0].hash);
-								});
-							}
-							dfrd.resolve();
-						})
-						.fail(function(error) {
-							//self.dialog.elfinderdialog('open');
-							if (cur.fail && typeof cur.fail == 'function') {
-								cur.fail(fm, error);
-							}
-							dfrd.reject(error);
-						});
-
-					self.dialog.elfinderdialog('close');
-				};
+				opts.buttons[fm.i18n('btnMount')] = doMount;
 
 				opts.buttons[fm.i18n('btnCancel')] = function() {
 					self.dialog.elfinderdialog('close');
