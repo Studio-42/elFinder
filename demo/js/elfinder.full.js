@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 1ea503d) (2017-10-15)
+ * Version 2.1.29 (2.1-src Nightly: 3775ab4) (2017-10-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8656,7 +8656,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 1ea503d)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 3775ab4)';
 
 
 
@@ -11653,7 +11653,8 @@ $.fn.elfinderbutton = function(cmd) {
 $.fn.elfindercontextmenu = function(fm) {
 	
 	return this.each(function() {
-		var cmItem = 'elfinder-contextmenu-item',
+		var self   = $(this),
+			cmItem = 'elfinder-contextmenu-item',
 			smItem = 'elfinder-contextsubmenu-item',
 			exIcon = 'elfinder-contextmenu-extra-icon',
 			dragOpt = {
@@ -11937,6 +11938,10 @@ $.fn.elfindercontextmenu = function(fm) {
 			close = function() {
 				fm.getUI().off('click.' + fm.namespace, close);
 				$(document).off('keydown.' + fm.namespace, keyEvts);
+				if (prevSelected) {
+					fm.select({selected: prevSelected});
+					prevSelected = null;
+				}
 				currentType = currentTargets = null;
 				
 				if (menu.is(':visible') || menu.children().length) {
@@ -11985,6 +11990,7 @@ $.fn.elfindercontextmenu = function(fm) {
 				}
 				
 				if (type === 'navbar') {
+					prevSelected = fm.selected();
 					fm.select({selected: targets, origin: 'navbar'});
 				}
 
@@ -12142,7 +12148,6 @@ $.fn.elfindercontextmenu = function(fm) {
 							node = item(cmd.title, cmd.className? cmd.className : cmd.name, function() {
 								if (! menu.data('draged')) {
 									close();
-									//cmd.exec(targets, {_currentType: type, _currentNode: node});
 									fm.exec(cmd.name, targets, {_userAction: true, _currentType: type, _currentNode: node});
 								}
 							});
@@ -12203,7 +12208,8 @@ $.fn.elfindercontextmenu = function(fm) {
 			},
 			
 			currentType = null,
-			currentTargets = null;
+			currentTargets = null,
+			prevSelected = null;
 		
 		fm.one('load', function() {
 			base = fm.getUI();
@@ -23718,7 +23724,7 @@ elFinder.prototype.commands.places = function() {
 						$.each(files, function(i, f) {
 							var s = parseInt(f.size),
 								t = parseInt(f.ts);
-							if (f.mime !== 'directory' && s >= 0 && size >= 0) {
+							if ((f.mime !== 'directory' || f.sizeInfo) && s >= 0 && size >= 0) {
 								size += s;
 							} else {
 								size = 'unknown';
@@ -23733,7 +23739,7 @@ elFinder.prototype.commands.places = function() {
 						});
 						getSize = (size === 'unknown');
 						return {
-							hash : cwdHash,
+							hash : +new Date(),
 							name : fm.i18n('items') + ': ' + cnt,
 							mime : 'group',
 							size : getSize? spinner : size,
@@ -23891,17 +23897,14 @@ elFinder.prototype.commands.places = function() {
 				},
 				tmb, name, getSizeHashes = [];
 
+			if (file && ! Object.keys(file).length) {
+				file = fm.cwd();
+			}
 			if (file && getSize && getSize.state() === 'pending' && getSize._hash !== file.hash) {
 				getSize.reject();
 			}
-			if (file && (e.forceUpdate || file.hash === cwdHash || self.window.data('hash') !== file.hash)) {
-				tm4cwd && clearTimeout(tm4cwd);
-				if (file.hash === cwdHash) {
-					// wait select any item in cwd
-					tm4cwd = setTimeout(update, 0);
-				} else {
-					update();
-				}
+			if (file && (e.forceUpdate || self.window.data('hash') !== file.hash)) {
+				update();
 			} else { 
 				e.stopImmediatePropagation();
 			}
