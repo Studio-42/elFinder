@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 3775ab4) (2017-10-15)
+ * Version 2.1.29 (2.1-src Nightly: b5eaabe) (2017-10-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8656,7 +8656,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 3775ab4)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: b5eaabe)';
 
 
 
@@ -14257,7 +14257,7 @@ $.fn.elfindercwd = function(fm, options) {
 					$(this).toggleClass(clHover, (e.type == 'mouseenter'));
 				})
 				.on('contextmenu.'+fm.namespace, function(e) {
-					var file = $(e.target).closest('.'+clFile);
+					var file = $(e.target).closest(fileSelector);
 					
 					if (file.length && (e.target.nodeName != 'TD' || $.inArray(fm.cwdId2Hash(file.get(0).id), fm.selected()) > -1)) {
 						e.stopPropagation();
@@ -15877,12 +15877,15 @@ $.fn.elfindernavdock = function(fm, opts) {
 		
 		if (! opts.disabled) {
 			fm.one('init', function() {
+				var ovf;
 				if (fm.getUI('navbar').children().not('.ui-resizable-handle').length) {
 					self.data('dockEnabled', true);
 					self.resizable({
 						maxHeight: fm.getUI('workzone').height() * maxHeight,
 						handles: { n: handle },
 						start: function(e, ui) {
+							ovf = self.css('overflow');
+							self.css('overflow', 'hidden');
 							fm.trigger('navdockresizestart', {event: e, ui: ui}, true);
 						},
 						resize: function(e, ui) {
@@ -15895,6 +15898,7 @@ $.fn.elfindernavdock = function(fm, opts) {
 							basicHeight = ui.size.height;
 							fm.storage('navdockHeight', basicHeight);
 							resize(basicHeight, ui.originalSize.height);
+							self.css('overflow', ovf);
 						}
 					});
 					fm.bind('wzresize', function(e) {
