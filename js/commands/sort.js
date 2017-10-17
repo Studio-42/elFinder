@@ -17,17 +17,31 @@ elFinder.prototype.commands.sort = function() {
 					};
 				if ($.inArray(name, fm.sorters) !== -1) {
 					var arr = name == fm.sortType ? (sort.order == 'asc'? 's' : 'n') : '';
-					self.variants.push([sort, (arr? '<span class="ui-icon ui-icon-arrowthick-1-'+arr+'"></span>' : '') + '&nbsp;' + fm.i18n('sort'+name)]);			}
+					self.variants.push([sort, (arr? '<span class="ui-icon ui-icon-arrowthick-1-'+arr+'"></span>' : '') + '&nbsp;' + fm.i18n('sort'+name)]);
+				}
 			});
 			self.variants.push('|');
 			self.variants.push([
 				{
 					type  : fm.sortType,
 					order : fm.sortOrder,
-					stick : !fm.sortStickFolders
+					stick : !fm.sortStickFolders,
+					tree  : fm.sortAlsoTreeview
 				},
 				(fm.sortStickFolders? '<span class="ui-icon ui-icon-check"/>' : '') + '&nbsp;' + fm.i18n('sortFoldersFirst')
 			]);
+			if (fm.ui.tree) {
+				self.variants.push('|');
+				self.variants.push([
+					{
+						type  : fm.sortType,
+						order : fm.sortOrder,
+						stick : fm.sortStickFolders,
+						tree  : !fm.sortAlsoTreeview
+					},
+					(fm.sortAlsoTreeview? '<span class="ui-icon ui-icon-check"/>' : '') + '&nbsp;' + fm.i18n('sortAlsoTreeview')
+				]);
+			}
 		};
 	
 	/**
@@ -87,14 +101,15 @@ elFinder.prototype.commands.sort = function() {
 	
 	this.exec = function(hashes, sortopt) {
 		var fm = this.fm,
-			sort = $.extend({
+			sort = Object.assign({
 				type  : fm.sortType,
 				order : fm.sortOrder,
-				stick : fm.sortStickFolders
+				stick : fm.sortStickFolders,
+				tree  : fm.sortAlsoTreeview
 			}, sortopt);
 
 		return fm.lazy(function() {
-			fm.setSort(sort.type, sort.order, sort.stick);
+			fm.setSort(sort.type, sort.order, sort.stick, sort.tree);
 			this.resolve();
 		});
 	};

@@ -4,7 +4,7 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-elFinder.prototype.commands.reload = function() {
+(elFinder.prototype.commands.reload = function() {
 	var self   = this,
 		search = false;
 	
@@ -20,12 +20,12 @@ elFinder.prototype.commands.reload = function() {
 	};
 	
 	this.init = function() {
-		this.fm.bind('search searchend', function(e) {
-			search = e.type == 'search';
+		this.fm.bind('search searchend', function() {
+			search = this.type == 'search';
 		});
 	};
 	
-	this.fm.bind('contextmenu', function(e){
+	this.fm.bind('contextmenu', function(){
 		var fm = self.fm;
 		if (fm.options.sync >= 1000) {
 			self.extra = {
@@ -68,4 +68,4 @@ elFinder.prototype.commands.reload = function() {
 		}
 	};
 
-};
+}).prototype = { forceLoad : true }; // this is required command

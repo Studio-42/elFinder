@@ -2,11 +2,17 @@
 /*            COMMON ELFINDER STUFFS         */
 /*********************************************/
 
+/* for old jQuery UI */
+.ui-front {
+    z-index: 100;
+}
+
 /* common container */
 .elfinder {
 	padding: 0;
 	position:relative;
 	display:block;
+	visibility: visible;
 	font-size: 18px;
 	font-family: Verdana,Arial,Helvetica,sans-serif;
 }
@@ -75,6 +81,9 @@
 /* write only */
 .elfinder-wo .elfinder-perms { background-position:0 -80px;}
 
+/* volume type group */
+.elfinder-group .elfinder-perms { background-position:0 0px;}
+
 /* locked */
 .elfinder-lock {
 	background-position:0 -656px;
@@ -142,7 +151,6 @@
 	position: absolute;
 	opacity: .2;
 	filter: Alpha(Opacity=20);
-	display: none;
 }
 
 /* panels under/below cwd (for search field etc) */
@@ -157,3 +165,27 @@
 	-khtml-user-drag: element;
 }
 
+/* for place holder to content editable elements */ 
+.elfinder [contentEditable=true]:empty:not(:focus):before {
+	content:attr(data-ph);
+}
+
+/* bottom tray */
+.elfinder div.elfinder-bottomtray {
+	position: fixed;
+	bottom: 0;
+	max-width:100%;
+	opacity: .8;
+}
+.elfinder.elfinder-ltr div.elfinder-bottomtray {
+	left: 0;
+}
+.elfinder.elfinder-rtl div.elfinder-bottomtray {
+	right: 0;
+}
+
+/* tooltip */
+.elfinder-ui-tooltip {
+	font-size: 0.78em;
+	padding: 2px;
+}

@@ -6,14 +6,14 @@
  *
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
-elFinder.prototype.commands.getfile = function() {
+(elFinder.prototype.commands.getfile = function() {
 	var self   = this,
 		fm     = this.fm,
 		filter = function(files) {
 			var o = self.options;
 
 			files = $.map(files, function(file) {
-				return file.mime != 'directory' || o.folders ? file : null;
+				return (file.mime != 'directory' || o.folders) && file.read ? file : null;
 			});
 
 			return o.multiple || files.length == 1 ? files : [];
@@ -39,13 +39,31 @@ elFinder.prototype.commands.getfile = function() {
 			tmb   = fm.option('tmbUrl'),
 			dfrd  = $.Deferred()
 				.done(function(data) {
-					fm.trigger('getfile', {files : data});
-					self.callback(data, fm);
+					var res,
+						done = function() {
+							if (opts.oncomplete == 'close') {
+								fm.hide();
+							} else if (opts.oncomplete == 'destroy') {
+								fm.destroy();
+							}
+						};
 					
-					if (opts.oncomplete == 'close') {
-						fm.hide();
-					} else if (opts.oncomplete == 'destroy') {
-						fm.destroy();
+					fm.trigger('getfile', {files : data});
+					
+					try {
+						res = self.callback(data, fm);
+					} catch(e) {
+						fm.error(['Error in `getFileCallback`.', e.message]);
+						return;
+					}
+					
+					if (typeof res === 'object' && typeof res.done === 'function') {
+						res.done(done)
+						.fail(function(error) {
+							error && fm.error(error);
+						});
+					} else {
+						done();
 					}
 				}),
 			result = function(file) {
@@ -56,10 +74,6 @@ elFinder.prototype.commands.getfile = function() {
 			req = [], 
 			i, file, dim;
 
-		if (this.getstate(hashes) == -1) {
-			return dfrd.reject();
-		}
-			
 		for (i = 0; i < cnt; i++) {
 			file = files[i];
 			if (file.mime == 'directory' && !opts.folders) {
@@ -81,29 +95,50 @@ elFinder.prototype.commands.getfile = function() {
 			} else {
 				file.url = fm.url(file.hash);
 			}
-			file.path    = fm.path(file.hash);
-			if (file.tmb && file.tmb != 1) {
-				file.tmb = tmb + file.tmb;
-			}
-			if (!file.width && !file.height) {
-				if (file.dim) {
-					dim = file.dim.split('x');
-					file.width = dim[0];
-					file.height = dim[1];
-				} else if (opts.getImgSize && file.mime.indexOf('image') !== -1) {
-					req.push(fm.request({
-						data : {cmd : 'dim', target : file.hash},
-						notify : {type : 'dim', cnt : 1, hideCnt : true},
-						preventDefault : true
-					})
-					.done(function(data) {
-						if (data.dim) {
-							var dim = data.dim.split('x');
-							var rfile = fm.file(this.hash);
-							rfile.width = this.width = dim[0];
-							rfile.height = this.height = dim[1];
-						}
-					}.bind(file)));
+			if (! opts.onlyURL) {
+				if (opts.getPath) {
+					file.path = fm.path(file.hash);
+					if (file.path === '' && file.phash) {
+						// get parents
+						(function() {
+							var dfd  = $.Deferred();
+							req.push(dfd);
+							fm.path(file.hash, false, {})
+								.done(function(path) {
+									file.path = path;
+								})
+								.fail(function() {
+									file.path = '';
+								})
+								.always(function() {
+									dfd.resolve();
+								});
+						})();
+					}
+				}
+				if (file.tmb && file.tmb != 1) {
+					file.tmb = tmb + file.tmb;
+				}
+				if (!file.width && !file.height) {
+					if (file.dim) {
+						dim = file.dim.split('x');
+						file.width = dim[0];
+						file.height = dim[1];
+					} else if (opts.getImgSize && file.mime.indexOf('image') !== -1) {
+						req.push(fm.request({
+							data : {cmd : 'dim', target : file.hash},
+							notify : {type : 'dim', cnt : 1, hideCnt : true},
+							preventDefault : true
+						})
+						.done(function(data) {
+							if (data.dim) {
+								var dim = data.dim.split('x');
+								var rfile = fm.file(this.hash);
+								rfile.width = this.width = dim[0];
+								rfile.height = this.height = dim[1];
+							}
+						}.bind(file)));
+					}
 				}
 			}
 		}
@@ -118,4 +153,4 @@ elFinder.prototype.commands.getfile = function() {
 		return dfrd.resolve(result(files));
 	}
 
-};
+}).prototype = { forceLoad : true }; // this is required command

@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 /**
  * @class  elFinder toolbar button to switch current directory view.
  *

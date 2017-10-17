@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 /**
  * @class  elFinder command "extract"
  * Extract files from archive
@@ -23,9 +23,9 @@ elFinder.prototype.commands.extract = function() {
 	fm.bind('open reload', function() {
 		mimes = fm.option('archivers')['extract'] || [];
 		if (fm.api > 2) {
-			self.variants = [['makedir', fm.i18n('cmdmkdir')], ['intohere', fm.i18n('btnCwd')]];
+			self.variants = [[{makedir: true}, fm.i18n('cmdmkdir')], [{}, fm.i18n('btnCwd')]];
 		} else {
-			self.variants = [['intohere', fm.i18n('btnCwd')]];
+			self.variants = [[{}, fm.i18n('btnCwd')]];
 		}
 		self.change();
 	});
@@ -34,14 +34,14 @@ elFinder.prototype.commands.extract = function() {
 		var sel = this.files(sel),
 			cnt = sel.length;
 		
-		return !this._disabled && cnt && this.fm.cwd().write && filter(sel).length == cnt ? 0 : -1;
+		return cnt && this.fm.cwd().write && filter(sel).length == cnt ? 0 : -1;
 	}
 	
-	this.exec = function(hashes, extractTo) {
+	this.exec = function(hashes, opts) {
 		var files    = this.files(hashes),
 			dfrd     = $.Deferred(),
 			cnt      = files.length,
-			makedir  = (extractTo == 'makedir')? 1 : 0,
+			makedir  = opts && opts.makedir ? 1 : 0,
 			i, error,
 			decision;
 
@@ -77,7 +77,15 @@ elFinder.prototype.commands.extract = function() {
 				fm.request({
 					data:{cmd:'extract', target:file.hash, makedir:makedir},
 					notify:{type:'extract', cnt:1},
-					syncOnFail:true
+					syncOnFail:true,
+					navigate:{
+						toast : makedir? {
+							incwd    : {msg: fm.i18n(['complete', fm.i18n('cmdextract')]), action: {cmd: 'open', msg: 'cmdopen'}},
+							inbuffer : {msg: fm.i18n(['complete', fm.i18n('cmdextract')]), action: {cmd: 'open', msg: 'cmdopen'}}
+						} : {
+							inbuffer : {msg: fm.i18n(['complete', fm.i18n('cmdextract')])}
+						}
+					}
 				})
 				.fail(function (error) {
 					if (dfrd.state() != 'rejected') {

@@ -4,9 +4,10 @@
 	<meta charset="utf-8">
 	<title>elFinder 2.1.x source version with PHP connector</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2" />
-	<script src="jquery/jquery-1.12.3.js" type="text/javascript" charset="utf-8"></script>
-	<script src="jquery/jquery-ui-1.11.4.js" type="text/javascript" charset="utf-8"></script>
-	<link rel="stylesheet" href="jquery/jquery-ui-1.11.4.css" type="text/css" media="screen" title="no title" charset="utf-8">
+
+	<!-- Section CSS -->
+	<!-- jQuery UI (REQUIRED) -->
+	<link rel="stylesheet" href="jquery/jquery-ui-1.12.0.css" type="text/css">
 
 	<!-- elfinder css -->
 	<link rel="stylesheet" href="css/commands.css"    type="text/css">
@@ -20,13 +21,21 @@
 	<link rel="stylesheet" href="css/quicklook.css"   type="text/css">
 	<link rel="stylesheet" href="css/statusbar.css"   type="text/css">
 	<link rel="stylesheet" href="css/theme.css"       type="text/css">
+	<link rel="stylesheet" href="css/toast.css"       type="text/css">
 	<link rel="stylesheet" href="css/toolbar.css"     type="text/css">
+
+	<!-- Section JavaScript -->
+	<!-- jQuery and jQuery UI (REQUIRED) -->
+	<script src="jquery/jquery-1.12.4.js" type="text/javascript" charset="utf-8"></script>
+	<script src="jquery/jquery-ui-1.12.0.js" type="text/javascript" charset="utf-8"></script>
 
 	<!-- elfinder core -->
 	<script src="js/elFinder.js"></script>
 	<script src="js/elFinder.version.js"></script>
 	<script src="js/jquery.elfinder.js"></script>
+	<script src="js/elFinder.mimetypes.js"></script>
 	<script src="js/elFinder.options.js"></script>
+	<script src="js/elFinder.options.netmount.js"></script>
 	<script src="js/elFinder.history.js"></script>
 	<script src="js/elFinder.command.js"></script>
 	<script src="js/elFinder.resources.js"></script>
@@ -42,8 +51,9 @@
 	<script src="js/ui/contextmenu.js"></script>
 	<script src="js/ui/cwd.js"></script>
 	<script src="js/ui/dialog.js"></script>
-	<script src="js/ui/mkdirbutton.js"></script>
+	<script src="js/ui/fullscreenbutton.js"></script>
 	<script src="js/ui/navbar.js"></script>
+	<script src="js/ui/navdock.js"></script>
 	<script src="js/ui/overlay.js"></script>
 	<script src="js/ui/panel.js"></script>
 	<script src="js/ui/path.js"></script>
@@ -51,6 +61,7 @@
 	<script src="js/ui/searchbutton.js"></script>
 	<script src="js/ui/sortbutton.js"></script>
 	<script src="js/ui/stat.js"></script>
+	<script src="js/ui/toast.js"></script>
 	<script src="js/ui/toolbar.js"></script>
 	<script src="js/ui/tree.js"></script>
 	<script src="js/ui/uploadButton.js"></script>
@@ -67,10 +78,13 @@
 	<script src="js/commands/download.js"></script>
 	<script src="js/commands/duplicate.js"></script>
 	<script src="js/commands/edit.js"></script>
+	<script src="js/commands/empty.js"></script>
 	<script src="js/commands/extract.js"></script>
 	<script src="js/commands/forward.js"></script>
+	<script src="js/commands/fullscreen.js"></script>
 	<script src="js/commands/getfile.js"></script>
 	<script src="js/commands/help.js"></script>
+	<script src="js/commands/hidden.js"></script>
 	<script src="js/commands/home.js"></script>
 	<script src="js/commands/info.js"></script>
 	<script src="js/commands/mkdir.js"></script>
@@ -85,65 +99,83 @@
 	<script src="js/commands/reload.js"></script>
 	<script src="js/commands/rename.js"></script>
 	<script src="js/commands/resize.js"></script>
+	<script src="js/commands/restore.js"></script>
 	<script src="js/commands/rm.js"></script>
 	<script src="js/commands/search.js"></script>
-	<script src="js/commands/sort.js"></script>	
+	<script src="js/commands/selectall.js"></script>
+	<script src="js/commands/selectinvert.js"></script>
+	<script src="js/commands/selectnone.js"></script>
+	<script src="js/commands/sort.js"></script>
+	<script src="js/commands/undo.js"></script>
 	<script src="js/commands/up.js"></script>
 	<script src="js/commands/upload.js"></script>
 	<script src="js/commands/view.js"></script>
 
-	<!-- elfinder languages -->
-	<script src="js/i18n/elfinder.ar.js"></script>
-	<script src="js/i18n/elfinder.bg.js"></script>
-	<script src="js/i18n/elfinder.ca.js"></script>
-	<script src="js/i18n/elfinder.cs.js"></script>
-	<script src="js/i18n/elfinder.da.js"></script>
-	<script src="js/i18n/elfinder.de.js"></script>
-	<script src="js/i18n/elfinder.el.js"></script>
-	<script src="js/i18n/elfinder.es.js"></script>
-	<script src="js/i18n/elfinder.fa.js"></script>
-	<script src="js/i18n/elfinder.fo.js"></script>
-	<script src="js/i18n/elfinder.fr.js"></script>
-	<script src="js/i18n/elfinder.he.js"></script>
-	<script src="js/i18n/elfinder.hu.js"></script>
-	<script src="js/i18n/elfinder.id.js"></script>
-	<script src="js/i18n/elfinder.it.js"></script>
-	<script src="js/i18n/elfinder.jp.js"></script>
-	<script src="js/i18n/elfinder.ko.js"></script>
-	<script src="js/i18n/elfinder.nl.js"></script>
-	<script src="js/i18n/elfinder.no.js"></script>
-	<script src="js/i18n/elfinder.pl.js"></script>
-	<script src="js/i18n/elfinder.pt_BR.js"></script>
-	<script src="js/i18n/elfinder.ro.js"></script>
-	<script src="js/i18n/elfinder.ru.js"></script>
-	<script src="js/i18n/elfinder.sk.js"></script>
-	<script src="js/i18n/elfinder.sl.js"></script>
-	<script src="js/i18n/elfinder.sr.js"></script>
-	<script src="js/i18n/elfinder.sv.js"></script>
-	<script src="js/i18n/elfinder.tr.js"></script>
-	<script src="js/i18n/elfinder.uk.js"></script>
-	<script src="js/i18n/elfinder.vi.js"></script>
-	<script src="js/i18n/elfinder.zh_CN.js"></script>
-	<script src="js/i18n/elfinder.zh_TW.js"></script>
-
-	<!-- elfinder 1.x connector API support -->
+	<!-- elfinder 1.x connector API support (OPTIONAL) -->
 	<script src="js/proxy/elFinderSupportVer1.js"></script>
 
-	<!-- GoogleDocs Quicklook plugin for GoogleDrive Volume -->
+	<!-- Extra contents editors (OPTIONAL) -->
+	<script src="js/extras/editors.default.js"></script>
+
+	<!-- GoogleDocs Quicklook plugin for GoogleDrive Volume (OPTIONAL) -->
 	<script src="js/extras/quicklook.googledocs.js"></script>
 
 	<!-- elfinder initialization  -->
 	<script>
 		$(function() {
-			$('#elfinder').elfinder({
-				// Connector URL
-				url : 'php/connector.minimal.php',
+			$('#elfinder').elfinder(
+				// 1st Arg - options
+				{
+					// Disable CSS auto loading
+					cssAutoLoad : false,
 
-				// Callback when a file is double-clicked
-				getFileCallback : function(file) {
-					// ...
+					// Base URL to css/*, js/*
+					baseUrl : './',
+
+					// Connector URL
+					url : 'php/connector.minimal.php',
+
+					// Callback when a file is double-clicked
+					getFileCallback : function(file) {
+						// ...
+					},
 				},
-			});
+				
+				// 2nd Arg - before boot up function
+				function(fm, extraObj) {
+					// `init` event callback function
+					fm.bind('init', function() {
+						// Optional for Japanese decoder "extras/encoding-japanese.min"
+						delete fm.options.rawStringDecoder;
+						if (fm.lang === 'jp') {
+							fm.loadScript(
+								[ fm.baseUrl + 'js/extras/encoding-japanese.min.js' ],
+								function() {
+									if (window.Encoding && Encoding.convert) {
+										fm.options.rawStringDecoder = function(s) {
+											return Encoding.convert(s,{to:'UNICODE',type:'string'});
+										};
+									}
+								},
+								{ loadType: 'tag' }
+							);
+						}
+					});
+					
+					// Optional for set document.title dynamically.
+					var title = document.title;
+					fm.bind('open', function() {
+						var path = '',
+							cwd  = fm.cwd();
+						if (cwd) {
+							path = fm.path(cwd.hash) || null;
+						}
+						document.title = path? path + ':' + title : title;
+					}).bind('destroy', function() {
+						document.title = title;
+					});
+				}
+			);
 		});
 	</script>
 </head>

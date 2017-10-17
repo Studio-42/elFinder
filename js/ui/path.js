@@ -6,7 +6,7 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-$.fn.elfinderpath = function(fm) {
+$.fn.elfinderpath = function(fm, options) {
 	return this.each(function() {
 		var query  = '',
 			target = '',
@@ -24,7 +24,7 @@ $.fn.elfinderpath = function(fm) {
 						if (query) {
 							fm.exec('search', query, { target: hash, mime: mimes.join(' ') });
 						} else {
-							fm.exec('open', hash);
+							fm.trigger('select', {selected : [hash]}).exec('open', hash);
 						}
 					}
 				})
@@ -37,12 +37,15 @@ $.fn.elfinderpath = function(fm) {
 				raw = [];
 
 				$.each(roots, function(i, f) {
-					if (fm.root(fm.cwd().hash) !== f.hash) {
+					if (! f.phash && fm.root(fm.cwd().hash, true) !== f.hash) {
 						raw.push({
-							label    : f.name,
+							label    : fm.escape(f.i18 || f.name),
 							icon     : 'home',
-							remain   : true,
-							callback : function() { fm.exec('open', f.hash); }
+							callback : function() { fm.exec('open', f.hash); },
+							options  : {
+								iconClass : f.csscls || '',
+								iconImg   : f.icon   || ''
+							}
 						});
 					}
 				});
@@ -53,11 +56,14 @@ $.fn.elfinderpath = function(fm) {
 				});
 			}).append('<span class="elfinder-button-icon elfinder-button-icon-menu" />').appendTo(wzbase),
 			render = function(cwd) {
-				var dirs = [];
+				var dirs = [],
+					names = [];
 				$.each(fm.parents(cwd), function(i, hash) {
 					var c = (cwd === hash)? 'elfinder-path-dir elfinder-path-cwd' : 'elfinder-path-dir',
-						name = fm.escape(fm.file(hash).name);
-					dirs.push('<span id="'+prefix+hash+'" class="'+c+'" title="'+name+'">'+name+'</span>');
+						f = fm.file(hash),
+						name = fm.escape(f.i18 || f.name);
+					names.push(name);
+					dirs.push('<span id="'+prefix+hash+'" class="'+c+'" title="'+names.join(fm.option('separator'))+'">'+name+'</span>');
 				});
 				return dirs.join('<span class="elfinder-path-other">'+fm.option('separator')+'</span>');
 			},
@@ -104,61 +110,71 @@ $.fn.elfinderpath = function(fm) {
 				} else {
 					dirs.attr('style', '');
 				}
-			};
+			},
+			hasUiTree;
 
-			fm.bind('open searchend parents', function() {
-				var dirs = [];
+		fm.one('init', function() {
+			hasUiTree = fm.getUI('tree').length;
+			if (! hasUiTree && options.toWorkzoneWithoutNavbar) {
+				wzbase.append(path).insertBefore(fm.getUI('workzone'));
+				place = 'workzone';
+				fm.bind('open', toWorkzone)
+				.one('opendone', function() {
+					fm.getUI().trigger('resize');
+				});
+			}
+		})
+		.bind('open searchend parents', function() {
+			var dirs = [];
 
-				query  = '';
-				target = '';
-				mimes  = [];
-				
-				path.html(render(fm.cwd().hash));
-				if (Object.keys(fm.roots).length > 1) {
-					path.css('margin', '');
-					roots.show();
-				} else {
-					path.css('margin', 0);
-					roots.hide();
-				}
-				fit();
-			})
-			.bind('searchstart', function(e) {
-				if (e.data) {
-					query  = e.data.query || '';
-					target = e.data.target || '';
-					mimes  = e.data.mimes || []
-				}
-			})
-			.bind('search', function(e) {
-				var dirs = [],
-					html = '';
-				if (target) {
-					html = render(target);
-				} else {
-					html = fm.i18n('btnAll');
-				}
-				path.html('<span class="elfinder-path-other">'+fm.i18n('searcresult') + ': </span>' + html);
-				fit();
-			})
-			// on swipe to navbar show/hide
-			.bind('navbarshow navbarhide', function(e) {
-				var wz = fm.getUI('workzone');
-				if (e.type === 'navbarshow') {
-					wz.height(wz.height() + wzbase.outerHeight());
-					path.prependTo(fm.getUI('statusbar'));
-					wzbase.detach();
-					place = 'statusbar';
-					fm.unbind('open', toWorkzone);
-				} else {
-					wzbase.append(path).insertBefore(wz);
-					wz.height(wz.height() - wzbase.outerHeight());
-					place = 'workzone';
-					toWorkzone();
-					fm.bind('open', toWorkzone);
-				}
-				setTimeout(function() { fm.trigger('resize'); }, 0);
-			})
-			.bind('resize', fit);
+			query  = '';
+			target = '';
+			mimes  = [];
+			
+			path.html(render(fm.cwd().hash));
+			if (Object.keys(fm.roots).length > 1) {
+				path.css('margin', '');
+				roots.show();
+			} else {
+				path.css('margin', 0);
+				roots.hide();
+			}
+			fit();
+		})
+		.bind('searchstart', function(e) {
+			if (e.data) {
+				query  = e.data.query || '';
+				target = e.data.target || '';
+				mimes  = e.data.mimes || []
+			}
+		})
+		.bind('search', function(e) {
+			var dirs = [],
+				html = '';
+			if (target) {
+				html = render(target);
+			} else {
+				html = fm.i18n('btnAll');
+			}
+			path.html('<span class="elfinder-path-other">'+fm.i18n('searcresult') + ': </span>' + html);
+			fit();
+		})
+		// on swipe to navbar show/hide
+		.bind('navbarshow navbarhide', function() {
+			var wz = fm.getUI('workzone');
+			if (this.type === 'navbarshow') {
+				fm.unbind('open', toWorkzone);
+				path.prependTo(fm.getUI('statusbar'));
+				wzbase.detach();
+				place = 'statusbar';
+			} else {
+				wzbase.append(path).insertBefore(wz);
+				place = 'workzone';
+				toWorkzone();
+				fm.bind('open', toWorkzone);
+			}
+			fm.trigger('uiresize');
+		})
+		.bind('resize', fit);
 	});
 };

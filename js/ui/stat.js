@@ -14,64 +14,91 @@ $.fn.elfinderstat = function(fm) {
 					e.preventDefault();
 					fm.exec('opendir', [ hash ]);
 				}),
-			titlesize  = fm.i18n('size'),
 			titleitems = fm.i18n('items'),
 			titlesel   = fm.i18n('selected'),
-			setstat    = function(files, cwd) {
+			titlesize  = fm.i18n('size'),
+			setstat    = function(files) {
 				var c = 0, 
-					s = 0;
+					s = 0,
+					cwd = fm.cwd(),
+					calc = true,
+					hasSize = true;
 
+				if (cwd.sizeInfo || cwd.size) {
+					s = cwd.size;
+					calc = false;
+				}
 				$.each(files, function(i, file) {
-					if (!cwd || file.phash == cwd) {
-						c++;
-						s += parseInt(file.size)||0;
+					c++;
+					if (calc) {
+						s += parseInt(file.size) || 0;
+						if (hasSize === true && file.mime === 'directory' && !file.sizeInfo) {
+							hasSize = false;
+						}
 					}
-				})
-				size.html(titleitems+': <span class="elfinder-stat-incsearch"></span>'+c+', '+titlesize+': '+fm.formatSize(s));
+				});
+				size.html(titleitems+': <span class="elfinder-stat-incsearch"></span>'+c+',&nbsp;<span class="elfinder-stat-size'+(hasSize? ' elfinder-stat-size-recursive' : '')+'">'+fm.i18n(hasSize? 'sum' : 'size')+': '+fm.formatSize(s)+'</span>')
+					.attr('title', size.text());
 			},
 			setIncsearchStat = function(data) {
 				size.find('span.elfinder-stat-incsearch').html(data? data.hashes.length + ' / ' : '');
-			},
-			search = false;
+				size.attr('title', size.text());
+			};
 
 		fm.getUI('statusbar').prepend(size).append(sel).show();
+		if (fm.UA.Mobile && $.fn.tooltip) {
+			fm.getUI('statusbar').tooltip({
+				classes: {
+					'ui-tooltip': 'elfinder-ui-tooltip ui-widget-shadow'
+				},
+				tooltipClass: 'elfinder-ui-tooltip ui-widget-shadow',
+				track: true
+			});
+		}
 		
 		fm
-		.bind('open reload add remove change searchend', function() {
-			setstat(fm.files(), fm.cwd().hash);
+		.bind('cwdhasheschange', function(e) {
+			setstat($.map(e.data, function(h) { return fm.file(h); }));
 		})
-		.bind('searchend', function() {
-			search = false;
-		})
-		.search(function(e) {
-			search = true;
-			setstat(e.data.files);
+		.change(function(e) {
+			var files = e.data.changed || [],
+				cwdHash = fm.cwd().hash;
+			$.each(files, function() {
+				if (this.hash === cwdHash) {
+					if (this.size) {
+						size.children('.elfinder-stat-size').addClass('elfinder-stat-size-recursive').html(fm.i18n('sum')+': '+fm.formatSize(this.size));
+						size.attr('title', size.text());
+					}
+					return false;
+				}
+			});
 		})
 		.select(function() {
 			var s = 0,
 				c = 0,
 				files = fm.selectedFiles(),
 				dirs = [],
-				file;
+				path, file;
 
-			if (files.length == 1) {
+			if (files.length === 1) {
 				file = files[0];
 				s = file.size;
-				if (search) {
-					dirs.push('<a href="#elf_'+file.phash+'" data-hash="'+file.hash+'">'+(file.path? file.path.replace(/\/[^\/]*$/, '') : '..')+'</a>');
+				if (fm.searchStatus.state === 2) {
+					path = fm.escape(file.path? file.path.replace(/\/[^\/]*$/, '') : '..');
+					dirs.push('<a href="#elf_'+file.phash+'" data-hash="'+file.hash+'" title="'+path+'">'+path+'</a>');
 				}
-				dirs.push(fm.escape(file.name));
+				dirs.push(fm.escape(file.i18 || file.name));
 				sel.html(dirs.join('/') + (s > 0 ? ', '+fm.formatSize(s) : ''));
-				
-				return;
+			} else if (files.length) {
+				$.each(files, function(i, file) {
+					c++;
+					s += parseInt(file.size)||0;
+				});
+				sel.html(c ? titlesel+': '+c+', '+titlesize+': '+fm.formatSize(s) : '&nbsp;');
+			} else {
+				sel.html('');
 			}
-
-			$.each(files, function(i, file) {
-				c++;
-				s += parseInt(file.size)||0;
-			});
-
-			sel.html(c ? titlesel+': '+c+', '+titlesize+': '+fm.formatSize(s) : '&nbsp;');
+			sel.attr('title', sel.text()); 
 		})
 		.bind('incsearch', function(e) {
 			setIncsearchStat(e.data);
@@ -80,5 +107,5 @@ $.fn.elfinderstat = function(fm) {
 			setIncsearchStat();
 		})
 		;
-	})
+	});
 };

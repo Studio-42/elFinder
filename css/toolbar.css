@@ -24,7 +24,7 @@
 
 /* button */
 .elfinder .elfinder-button {
-	width:16px;
+	/*width:16px;*/
 	height:16px;
 	margin:0;
 	padding:4px;
@@ -35,9 +35,11 @@
 	-webkit-box-sizing: content-box;
 	-moz-box-sizing: content-box;
 	box-sizing: content-box;
+	line-height: 1;
+	cursor: default;
 }
 .elfinder-touch .elfinder-button {
-	width:20px;
+	/*width:20px;*/
 	height:20px;
 }
 
@@ -78,7 +80,8 @@
 
 /* change icon opacity^ not button */
 .elfinder .elfinder-button.ui-state-disabled { opacity:1; filter:Alpha(Opacity=100);}
-.elfinder .elfinder-button.ui-state-disabled .elfinder-button-icon { opacity:.4; filter:Alpha(Opacity=40);}
+.elfinder .elfinder-button.ui-state-disabled .elfinder-button-icon,
+.elfinder .elfinder-button.ui-state-disabled .elfinder-button-text { opacity:.4; filter:Alpha(Opacity=40);}
 
 /* rtl enviroment */
 .elfinder-rtl .elfinder-buttonset { float:right; }
@@ -87,8 +90,16 @@
 .elfinder-button-icon {
 	width:16px;
 	height:16px;
-	display:block;
+	/*display:block;*/
+	display:inline-block;
 	background:url('../img/toolbar.png')  no-repeat;
+}
+.elfinder-button-text {
+	position: relative;
+	display: inline-block;
+	top: -4px;
+	margin: 0 2px;
+	font-size: 12px;
 }
 
 .elfinder-touch .elfinder-button-icon {
@@ -96,18 +107,24 @@
 	-moz-transform-origin: top left;
 	-moz-transform: scale(1.25);
 }
+.elfinder-touch .elfinder-button-text {
+	top: -5px;
+}
 
 /* buttons icons */
 .elfinder-button-icon-home      { background-position: 0 0;  }
 .elfinder-button-icon-back      { background-position: 0 -112px; }
 .elfinder-button-icon-forward   { background-position: 0 -128px; }
 .elfinder-button-icon-up        { background-position: 0 -144px; }
+.elfinder-button-icon-dir       { background-position: 0  -16px; }
 .elfinder-button-icon-opendir   { background-position: 0  -32px; }
 .elfinder-button-icon-reload    { background-position: 0 -160px; }
 .elfinder-button-icon-open      { background-position: 0 -176px; } 
 .elfinder-button-icon-mkdir     { background-position: 0 -192px; }
 .elfinder-button-icon-mkfile    { background-position: 0 -208px; }
-.elfinder-button-icon-rm        { background-position: 0 -224px; }
+.elfinder-button-icon-rm        { background-position: 0 -832px; }
+.elfinder-button-icon-trash     { background-position: 0 -224px; }
+.elfinder-button-icon-restore   { background-position: 0 -816px; }
 .elfinder-button-icon-copy      { background-position: 0 -240px; }
 .elfinder-button-icon-cut       { background-position: 0 -256px; }
 .elfinder-button-icon-paste     { background-position: 0 -272px; }
@@ -138,6 +155,16 @@
 .elfinder-button-icon-opendir   { background-position: 0  -32px; }
 .elfinder-button-icon-menu      { background-position: 0 -752px; }
 .elfinder-button-icon-colwidth  { background-position: 0 -768px; }
+.elfinder-button-icon-fullscreen  { background-position: 0 -784px; }
+.elfinder-button-icon-unfullscreen { background-position: 0 -800px; }
+.elfinder-button-icon-empty     { background-position: 0 -848px; }
+.elfinder-button-icon-undo      { background-position: 0 -864px; }
+.elfinder-button-icon-redo      { background-position: 0 -880px; }
+.elfinder-button-icon-preference { background-position: 0 -896px; }
+.elfinder-button-icon-mkdirin   { background-position: 0 -912px; }
+.elfinder-button-icon-selectall { background-position: 0 -928px; }
+.elfinder-button-icon-selectnone { background-position: 0 -944px; }
+.elfinder-button-icon-selectinvert { background-position: 0 -960px; }
 
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton { overflow:visible; }
@@ -232,7 +259,7 @@
 .elfinder-rtl .elfinder-button-search { float:left; margin-left:10px; }
 
 /* search text field */
-.elfinder-button-search input {
+.elfinder-button-search input[type=text] {
 	width:160px;
 	height:22px;
 	padding:0 20px;
@@ -245,11 +272,15 @@
 	outline:0px solid;
 }
 
+.elfinder-button-search input::-ms-clear {
+	display: none;
+}
 .elfinder-touch .elfinder-button-search input {
 	height:28px;
 	line-height: 28px;
 }
 .elfinder-rtl .elfinder-button-search input { direction:rtl; }
+
 
 /* icons */
 .elfinder-button-search .ui-icon {
@@ -277,7 +308,6 @@
 	left: 0px;
 	height: 50px;
 	width: 100%;
-	display: none;
 	pointer-events: none;
 	background: linear-gradient(to bottom,
 		rgba(221,228,235,1) 0,

@@ -4,7 +4,7 @@
  *
  * @author Dmitry (dio) Levashov
  **/
-elFinder.prototype.commands.forward = function() {
+(elFinder.prototype.commands.forward = function() {
 	this.alwaysEnabled = true;
 	this.updateOnSelect = true;
 	this.shortcuts = [{
@@ -19,4 +19,4 @@ elFinder.prototype.commands.forward = function() {
 		return this.fm.history.forward();
 	}
 	
-};
+}).prototype = { forceLoad : true }; // this is required command

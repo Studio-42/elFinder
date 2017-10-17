@@ -2,12 +2,18 @@
 .elfinder-quicklook {
 	position:absolute;
 	background:url("../img/quicklook-bg.png");
-	display:none;
 	overflow:hidden;
-	border-radius:7px;
 	-moz-border-radius:7px;
 	-webkit-border-radius:7px;
+	border-radius:7px;
 	padding:20px 0 40px 0;
+}
+.elfinder-navdock .elfinder-quicklook {
+	-moz-border-radius: 0;
+	-webkit-border-radius: 0;
+	border-radius: 0;
+	font-size: 90%;
+	overflow: auto;
 }
 
 .elfinder-quicklook.elfinder-touch {
@@ -81,7 +87,15 @@
 	border-top-right-radius: 7px;
 	cursor:move;
 }
-
+.elfinder-navdock .elfinder-quicklook-titlebar {
+	-moz-border-radius-topleft: 0;
+	-webkit-border-top-left-radius: 0;
+	border-top-left-radius: 0;
+	-moz-border-radius-topright: 0;
+	-webkit-border-top-right-radius: 0;
+	border-top-right-radius: 0;
+	cursor: default;
+}
 .elfinder-touch .elfinder-quicklook-titlebar {
 	height: 30px;
 }
@@ -99,14 +113,30 @@
 }
 
 /* icon "close" in titlebar */
-.elfinder-quicklook-titlebar .ui-icon { 
-	position:absolute;
+.elfinder-quicklook-titlebar-icon { 
+	position: absolute;
 	left : 4px;
-	top:50%;
-	margin-top:-8px;
-	width:16px;
-	height:16px;
-	cursor:default;
+	top: 50%;
+	margin-top: -9px;
+	height: 16px;
+}
+.elfinder-quicklook-titlebar-icon .ui-icon {
+	position: relative;
+	margin: -9px 6px 0px 0px;
+	cursor: pointer;
+	border-radius: 10px;
+	border: 1px solid;
+}
+.elfinder-touch .elfinder-quicklook-titlebar-icon .ui-icon {
+	margin-top: -3px;
+}
+.elfinder-quicklook-titlebar-icon.elfinder-platformWin {
+	left : auto;
+	right : 4px;
+	direction: rtl;
+}
+.elfinder-quicklook-titlebar-icon.elfinder-platformWin .ui-icon {
+	margin: -9px 0px 0px 6px;
 }
 
 .elfinder-touch .elfinder-quicklook-titlebar .ui-icon {
@@ -115,26 +145,52 @@
 
 /* main part of quicklook window */
 .elfinder-quicklook-preview {
-	overflow:hidden;
+	overflow: hidden;
 	position:relative;
 	border:0 solid;
 	border-left:1px solid transparent;
 	border-right:1px solid transparent;
 	height:100%;
 }
+.elfinder-navdock .elfinder-quicklook-preview {
+	border-left: 0;
+	border-right: 0;
+}
+.elfinder-quicklook-preview.elfinder-overflow-auto {
+	overflow: auto;
+	-webkit-overflow-scrolling: touch;
+}
 
 /* wrapper for file info/icon */
 .elfinder-quicklook-info-wrapper {
-	position:absolute;
-	width:100%;
-	left:0;
-	top:50%;
-	margin-top:-50px;
+	display: table;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	height: calc(100% - 80px);
+	left: 0;
+	top: 20px;
+}
+.elfinder-navdock .elfinder-quicklook-info-wrapper {
+	height: calc(100% - 20px);
 }
 
 /* file info */
 .elfinder-quicklook-info {
+	display: table-cell;
+	vertical-align: middle;
+}
+.elfinder-ltr .elfinder-quicklook-info {
 	padding: 0 12px 0 112px;
+}
+.elfinder-rtl .elfinder-quicklook-info {
+	padding: 0 112px 0 12px;
+}
+.elfinder-ltr .elfinder-navdock .elfinder-quicklook-info {
+	padding: 0 0 0 80px;
+}
+.elfinder-rtl .elfinder-navdock .elfinder-quicklook-info {
+	padding: 0 80px 0 0;
 }
 
 /* file name in info */
@@ -150,13 +206,45 @@
 	color:#fff;
 }
 
-
 /* file icon */
 .elfinder-quicklook .elfinder-cwd-icon {
 	position:absolute;
 	left:32px;
 	top:50%;
 	margin-top:-20px;
+}
+.elfinder-navdock .elfinder-quicklook .elfinder-cwd-icon {
+	left:16px;
+}
+.elfinder-rtl .elfinder-quicklook .elfinder-cwd-icon {
+	left: auto;
+	right: 32px;
+}
+.elfinder-rtl .elfinder-navdock .elfinder-quicklook .elfinder-cwd-icon {
+	right: 6px;
+}
+.elfinder-quicklook .elfinder-cwd-icon:before {
+	top: -10px;
+}
+.elfinder-ltr .elfinder-quicklook .elfinder-cwd-icon:before {
+	left: -20px;
+}
+.elfinder-ltr .elfinder-navdock .elfinder-quicklook .elfinder-cwd-icon:before {
+	left: -14px;
+}
+.elfinder-ltr .elfinder-quicklook .elfinder-cwd-icon:after {
+	left: -15px;
+}
+.elfinder-ltr .elfinder-navdock .elfinder-quicklook .elfinder-cwd-icon:after {
+    left: -12px;
+}
+.elfinder-rtl .elfinder-quicklook .elfinder-cwd-icon:before {
+	left: auto;
+	right: 40px;
+}
+.elfinder-rtl .elfinder-quicklook .elfinder-cwd-icon:after {
+	left: auto;
+	right: 40px;
 }
 
 /* image in preview */
@@ -269,11 +357,22 @@
 }
 
 /* text preview */
-pre.elfinder-quicklook-preview-text {
+pre.elfinder-quicklook-preview-text,
+pre.elfinder-quicklook-preview-text.prettyprint {
+	width: auto;
+	height: auto;
 	margin:0;
 	padding:3px 9px;
+	border: none;
 }
-
+.elfinder-quicklook-preview-charsleft hr {
+	border:none;
+	border-top:dashed 1px;
+}
+.elfinder-quicklook-preview-charsleft span {
+	font-size: 90%;
+	font-style: italic;
+}
 /* html/pdf preview */
 .elfinder-quicklook-preview-html,
 .elfinder-quicklook-preview-pdf,
@@ -281,8 +380,9 @@ pre.elfinder-quicklook-preview-text {
 	width:100%;
 	height:100%;
 	background:#fff;
-	border:0 solid;
 	margin:0;
+	border: none;
+	display: block;
 }
 
 /* swf preview container */
@@ -311,15 +411,11 @@ embed.elfinder-quicklook-preview-audio {
 	height:100%;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
+/* allow user select */
+.elfinder .elfinder-quicklook .elfinder-quicklook-info *,
+.elfinder .elfinder-quicklook .elfinder-quicklook-preview * {
+	-webkit-user-select:  auto;
+	-moz-user-select:     text;
+	-khtml-user-select:   text;
+	user-select:          text;
+}

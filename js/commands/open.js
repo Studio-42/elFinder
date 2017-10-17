@@ -1,15 +1,16 @@
-"use strict"
+"use strict";
 /**
  * @class  elFinder command "open"
  * Enter folder or open files in new windows
  *
  * @author Dmitry (dio) Levashov
  **/  
-elFinder.prototype.commands.open = function() {
+(elFinder.prototype.commands.open = function() {
 	this.alwaysEnabled = true;
+	this.noChangeDirOnRemovedCwd = true;
 	
 	this._handlers = {
-		dblclick : function(e) { e.preventDefault(); this.exec() },
+		dblclick : function(e) { e.preventDefault(); this.exec(e.data && e.data.file? [ e.data.file ]: void(0)) },
 		'select enable disable reload' : function(e) { this.update(e.type == 'disable' ? -1 : void(0));  }
 	}
 	
@@ -22,8 +23,8 @@ elFinder.prototype.commands.open = function() {
 			cnt = sel.length;
 		
 		return cnt == 1 
-			? 0 
-			: (cnt && !this.fm.UA.Mobile) ? ($.map(sel, function(file) { return file.mime == 'directory' ? null : file}).length == cnt ? 0 : -1) : -1
+			? (sel[0].read? 0 : -1) 
+			: (cnt && !this.fm.UA.Mobile) ? ($.map(sel, function(file) { return file.mime == 'directory' || ! file.read ? null : file}).length == cnt ? 0 : -1) : -1
 	}
 	
 	this.exec = function(hashes, opts) {
@@ -32,6 +33,8 @@ elFinder.prototype.commands.open = function() {
 			files = this.files(hashes),
 			cnt   = files.length,
 			thash = (typeof opts == 'object')? opts.thash : false,
+			opts  = this.options,
+			into  = opts.into || 'window',
 			file, url, s, w, imgW, imgH, winW, winH, reg, link, html5dl, inline;
 
 		if (!cnt && !thash) {
@@ -47,7 +50,8 @@ elFinder.prototype.commands.open = function() {
 				: fm.request({
 						data   : {cmd  : 'open', target : thash || file.hash},
 						notify : {type : 'open', cnt : 1, hideCnt : true},
-						syncOnFail : true
+						syncOnFail : true,
+						lazy : false
 					});
 		}
 		
@@ -59,8 +63,10 @@ elFinder.prototype.commands.open = function() {
 		}
 		
 		var doOpen = function() {
+			var wnd, target;
+			
 			try {
-				reg = new RegExp(fm.option('dispInlineRegex'));
+				reg = new RegExp(fm.option('dispInlineRegex'), 'i');
 			} catch(e) {
 				reg = false;
 			}
@@ -70,6 +76,7 @@ elFinder.prototype.commands.open = function() {
 			html5dl  = (typeof link.get(0).download === 'string');
 			cnt = files.length;
 			while (cnt--) {
+				target = 'elf_open_window';
 				file = files[cnt];
 				
 				if (!file.read) {
@@ -91,34 +98,40 @@ elFinder.prototype.commands.open = function() {
 						}
 					}
 				} else {
-					
-					// set window size for image if set
-					imgW = winW = Math.round(2 * $(window).width() / 3);
-					imgH = winH = Math.round(2 * $(window).height() / 3);
-					if (parseInt(file.width) && parseInt(file.height)) {
-						imgW = parseInt(file.width);
-						imgH = parseInt(file.height);
-					} else if (file.dim) {
-						s = file.dim.split('x');
-						imgW = parseInt(s[0]);
-						imgH = parseInt(s[1]);
-					}
-					if (winW >= imgW && winH >= imgH) {
-						winW = imgW;
-						winH = imgH;
-					} else {
-						if ((imgW - winW) > (imgH - winH)) {
-							winH = Math.round(imgH * (winW / imgW));
-						} else {
-							winW = Math.round(imgW * (winH / imgH));
-						}
-					}
-					w = 'width='+winW+',height='+winH;
-		
 					if (url.indexOf(fm.options.url) === 0) {
 						url = '';
 					}
-					var wnd = window.open(url, 'new_window', w + ',top=50,left=50,scrollbars=yes,resizable=yes');
+					if (into === 'window') {
+						// set window size for image if set
+						imgW = winW = Math.round(2 * $(window).width() / 3);
+						imgH = winH = Math.round(2 * $(window).height() / 3);
+						if (parseInt(file.width) && parseInt(file.height)) {
+							imgW = parseInt(file.width);
+							imgH = parseInt(file.height);
+						} else if (file.dim) {
+							s = file.dim.split('x');
+							imgW = parseInt(s[0]);
+							imgH = parseInt(s[1]);
+						}
+						if (winW >= imgW && winH >= imgH) {
+							winW = imgW;
+							winH = imgH;
+						} else {
+							if ((imgW - winW) > (imgH - winH)) {
+								winH = Math.round(imgH * (winW / imgW));
+							} else {
+								winW = Math.round(imgW * (winH / imgH));
+							}
+						}
+						w = 'width='+winW+',height='+winH;
+						wnd = window.open(url, target, w + ',top=50,left=50,scrollbars=yes,resizable=yes');
+					} else {
+						if (into === 'tabs') {
+							target = file.hash;
+						}
+						wnd = window.open('about:blank', target);
+					}
+					
 					if (!wnd) {
 						return dfrd.reject('errPopup');
 					}
@@ -126,12 +139,13 @@ elFinder.prototype.commands.open = function() {
 					if (url === '') {
 						var form = document.createElement("form");
 						form.action = fm.options.url;
-						form.method = 'POST';
-						form.target = 'new_window';
+						form.method = typeof opts.method === 'string' && opts.method.toLowerCase() === 'get'? 'GET' : 'POST';
+						form.target = target;
 						form.style.display = 'none';
-						var params = $.extend({}, fm.options.customData, {
+						var params = Object.assign({}, fm.options.customData, {
 							cmd: 'file',
-							target: file.hash
+							target: file.hash,
+							_t: file.ts || parseInt(+new Date/1000) 
 						});
 						$.each(params, function(key, val)
 						{
@@ -143,6 +157,8 @@ elFinder.prototype.commands.open = function() {
 						
 						document.body.appendChild(form);
 						form.submit();
+					} else if (into !== 'window') {
+						wnd.location = url;
 					}
 					wnd.focus();
 					
@@ -166,7 +182,7 @@ elFinder.prototype.commands.open = function() {
 						dfrd.reject();
 					}
 				},
-				buttons : (fm.command('zipdl') && fm.isCommandEnabled('zipdl', fm.cwd().hash))? [
+				buttons : (fm.getCommand('zipdl') && fm.isCommandEnabled('zipdl', fm.cwd().hash))? [
 					{
 						label : 'cmddownload',
 						callback : function() {
@@ -183,4 +199,4 @@ elFinder.prototype.commands.open = function() {
 		return dfrd;
 	}
 
-};
+}).prototype = { forceLoad : true }; // this is required command

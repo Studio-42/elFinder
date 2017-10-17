@@ -6,7 +6,27 @@
 .elfinder-dialog-resize  { margin-top:.3em; }
 .elfinder-resize-type    { float:left; margin-bottom: .4em; }
 .elfinder-resize-control { float: left; }
-.elfinder-resize-control input[type=text] { border:1px solid #aaa; text-align: right; }
+.elfinder-resize-control input[type=text] {
+	border:1px solid #aaa;
+	text-align: right;
+	width: 4em;
+}
+.elfinder-resize-control input.elfinder-resize-bg { 
+	text-align: center;
+	width: 5em;
+	direction: ltr;
+}
+.elfinder-dialog-resize .elfinder-resize-imgrotate,
+.elfinder-dialog-resize .elfinder-resize-pallet {
+	cursor: pointer;
+}
+.elfinder-dialog-resize .elfinder-resize-picking {
+	cursor: crosshair;
+}
+.elfinder-dialog-resize .elfinder-resize-grid8 + button {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
 .elfinder-resize-preview {
 	width:400px;
 	height:400px;
@@ -16,6 +36,8 @@
 	float:right;
 	position:relative;
 	overflow:hidden;
+	text-align: left;
+	direction: ltr;
 }
 
 .elfinder-resize-handle { position:relative;}
@@ -111,16 +133,20 @@
 	background:url(../img/progress.gif) center bottom repeat-x;
 }
 
-.elfinder-resize-row { margin-bottom:7px; position:relative;}
+.elfinder-resize-row { margin-bottom:9px; position:relative;}
 
 .elfinder-resize-label { float:left; width:80px; padding-top: 3px; }
 
-.elfinder-resize-reset {
-	width:16px;
-	height:16px;
-/*	border:1px solid #111;*/
-	position:absolute;
-	margin-top:-8px;
+.elfinder-resize-checkbox-label { border: 1px solid transparent; }
+
+.elfinder-dialog .elfinder-dialog-resize .elfinder-resize-whctrls {
+	margin: -20px 5px 0 5px;
+}
+.elfinder-ltr .elfinder-dialog .elfinder-dialog-resize .elfinder-resize-whctrls {
+	float: right;
+}
+.elfinder-rtl .elfinder-dialog .elfinder-dialog-resize .elfinder-resize-whctrls {
+	float: left;
 }
 
 .elfinder-dialog .elfinder-dialog-resize .ui-resizable-e,
@@ -180,7 +206,12 @@
 	width: 30px;
 	height: 30px;
 }
-
+.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .elfinder-resize-preview .ui-resizable-se {
+	width: 30px;
+	height: 30px;
+	zoom: 1;
+	margin: 0;
+}
 .elfinder-dialog-resize  .ui-icon-grip-solid-vertical {
 	position:absolute;
 	top:50%;
@@ -196,28 +227,58 @@
 	margin-bottom:-11px;;
 }
 
-.elfinder-resize-row .elfinder-buttonset { float:right; }
+.elfinder-dialog-resize .elfinder-resize-row .ui-buttonset {
+	float:right;
+}
 
-.std42-dialog .ui-widget-content .elfinder-resize-rotate-slider {
-	float: left;
+.elfinder-dialog-resize .elfinder-resize-degree input,
+.elfinder-dialog-resize .elfinder-resize-quality input {
+	width: 2.5em;
+}
+.elfinder-dialog-resize .elfinder-resize-degree button.ui-button {
+	padding: 6px 8px;
+}
+.elfinder-dialog-resize button.ui-button span {
+	padding: 0;
+}
+
+.ui-widget-content .elfinder-dialog-resize .elfinder-resize-rotate-slider {
 	width: 195px;
-	margin: 7px;
+	margin: 10px 7px;
 	background-color: #fafafa;
 }
 
-.elfinder-resize-type span.ui-checkboxradio-icon {
+.elfinder-dialog-resize .elfinder-resize-type span.ui-checkboxradio-icon {
 	display: none;
+}
+
+.elfinder-resize-preset-container {
+	box-sizing: border-box;
+	border-radius: 5px;
 }
 
 /********************** COMMAND "EDIT" ****************************/
 /* edit text file textarea */
 .elfinder-file-edit {
-	width:99%;
+	width:100%;
 	height:99%;
 	margin:0;
 	padding:2px;
 	border:1px solid #ccc;
+	box-sizing: border-box;
+	resize: none;
 }
+.elfinder-touch .elfinder-file-edit {
+	font-size: 16px;
+}
+/* bottom margen for softkeyboard on fullscreen mode */
+.elfinder-touch.elfinder-fullscreen-native textarea.elfinder-file-edit {
+	padding-bottom: 20em;
+	margin-bottom: -20em;
+}
+.std42-dialog .ui-dialog-titlebar select { font-size: 12px; }
+.std42-dialog .ui-dialog-buttonpane .elfinder-dialog-confirm-encoding { font-size: 12px; }
+
 
 /********************** COMMAND "SORT" ****************************/
 /* for list table header sort triangle icon */
@@ -242,14 +303,18 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-help { margin-bottom:.5em; }
 
 /* fix tabs */
-.elfinder-help .ui-tabs-panel { padding:.5em; }
+.elfinder-help .ui-tabs-panel {
+	padding:.5em;
+	overflow: auto;
+	padding: 10px;
+}
 .elfinder-dialog .ui-tabs .ui-tabs-nav li a { padding:.2em 1em;}
 
 .elfinder-help-shortcuts {
-	height:300px;
-	padding:1em;
-	margin:.5em 0;
-	overflow:auto;
+	height: auto;
+	padding: 10px;
+	margin: 0;
+	box-sizing: border-box;
 }
 .elfinder-help-shortcut { white-space:nowrap; clear:both;}
 
@@ -322,9 +387,16 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 }
 
 .elfinder-help-debug {
-	height:300px;
-	padding:1em;
-	margin:.5em 0;
+	height:100%;
+	padding:0;
+	margin:0;
+	overflow:none;
+	border: none;
+}
+
+.elfinder-help-debug .ui-tabs-panel {
+	padding: 0;
+	margin: 0;
 	overflow:auto;
 }
 
@@ -361,4 +433,74 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 
 .elfinder-help-debug dd span {
   /*font-size: 1.2em;*/
+}
+
+.elfinder-help-preference {
+	padding: 10px;
+	height: auto;
+	min-height: 100%;
+	box-sizing: border-box;
+}
+
+.elfinder-help-preference dl {
+	width: 100%;
+}
+.elfinder-help-preference dt {
+	display: block;
+	width: 200px;
+	clear: left;
+	float: left;
+	max-width: 50%;
+}
+.elfinder-rtl .elfinder-help-preference dt {
+	clear: right;
+	float: right;
+}
+.elfinder-help-preference dd {
+	margin-bottom: 1em;
+}
+.elfinder-help-preference dd label,
+.elfinder-help-preference dd input[type=checkbox] {
+	white-space: nowrap;
+	display: inline-block;
+	cursor: pointer;
+}
+
+/********************** COMMAND "INFO" ****************************/
+.elfinder-rtl .elfinder-info-title .elfinder-cwd-icon:before {
+	right: 33px;
+    left: auto;
+}
+.elfinder-info-title .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
+	content: none;
+}
+
+/********************** COMMAND "UPLOAD" ****************************/
+.elfinder-upload-dialog-wrapper .elfinder-upload-dirselect {
+	position: absolute;
+	bottom: 2px;
+	width: 16px;
+	height: 16px;
+	padding: 10px;
+	border: none;
+	overflow: hidden;
+	cursor: pointer; 
+}
+.elfinder-ltr .elfinder-upload-dialog-wrapper .elfinder-upload-dirselect {
+	left: 2px;
+}
+.elfinder-rtl .elfinder-upload-dialog-wrapper .elfinder-upload-dirselect {
+	right: 2px;
+}
+
+/********************** COMMAND "RM" ****************************/
+.elfinder-ltr .elfinder-rm-title .elfinder-cwd-icon:before {
+	left: 38px;
+}
+.elfinder-rtl .elfinder-rm-title .elfinder-cwd-icon:before {
+	right: 86px;
+    left: auto;
+}
+.elfinder-rm-title .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
+	content: none;
 }

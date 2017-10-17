@@ -23,7 +23,7 @@ elFinder.prototype.commands.paste = function() {
 			return -1;
 		}
 		if (dst) {
-			if ($.isArray(dst)) {
+			if (Array.isArray(dst)) {
 				if (dst.length != 1) {
 					return -1;
 				}
@@ -36,14 +36,16 @@ elFinder.prototype.commands.paste = function() {
 		return this.fm.clipboard().length && dst.mime == 'directory' && dst.write ? 0 : -1;
 	}
 	
-	this.exec = function(dst) {
+	this.exec = function(dst, opts) {
 		var self   = this,
 			fm     = self.fm,
+			opts   = opts || {},
 			dst    = dst ? this.files(dst)[0] : fm.cwd(),
 			files  = fm.clipboard(),
 			cnt    = files.length,
 			cut    = cnt ? files[0].cut : false,
-			error  = cut ? 'errMove' : 'errCopy',
+			cmd    = opts._cmd? opts._cmd : (cut? 'move' : 'copy'),
+			error  = 'err' + cmd.charAt(0).toUpperCase() + cmd.substr(1),
 			fpaste = [],
 			fcopy  = [],
 			dfrd   = $.Deferred()
@@ -55,7 +57,7 @@ elFinder.prototype.commands.paste = function() {
 				}),
 			copy  = function(files) {
 				return files.length && fm._commands.duplicate
-					? fm.exec('duplicate', files)
+					? fm.getCommand('duplicate').exec(files)
 					: $.Deferred().resolve();
 			},
 			paste = function(files) {
@@ -81,8 +83,8 @@ elFinder.prototype.commands.paste = function() {
 						}
 
 						fm.confirm({
-							title  : fm.i18n(cut ? 'moveFiles' : 'copyFiles'),
-							text   : ['errExists', file.name, 'confirmRepl'], 
+							title  : fm.i18n(cmd + 'Files'),
+							text   : ['errExists', file.name, cmd === 'restore'? 'confirmRest' : 'confirmRepl'], 
 							all    : !last,
 							accept : {
 								label    : 'btnYes',
@@ -141,7 +143,7 @@ elFinder.prototype.commands.paste = function() {
 					valid     = function(names) {
 						var exists = {}, existedArr;
 						if (names) {
-							if ($.isArray(names)) {
+							if (Array.isArray(names)) {
 								if (names.length) {
 									if (typeof names[0] == 'string') {
 										// elFinder <= 2.1.6 command `is` results
@@ -189,27 +191,86 @@ elFinder.prototype.commands.paste = function() {
 							cnt    = files.length,
 							groups = {},
 							args   = [],
-							src;
+							src, targets, reqData;
 
 						if (!cnt) {
 							return dfrd.resolve();
 						}
 
-						src = files[0].phash;
-						files = $.map(files, function(f) { return f.hash; });
+						//src = files[0].phash;
+						targets = $.map(files, function(f) { return f.hash; });
 						
+						reqData = {cmd : 'paste', dst : dst.hash, targets : targets, cut : cut ? 1 : 0, renames : renames, hashes : hashes, suffix : fm.options.backupSuffix}
 						fm.request({
-								data   : {cmd : 'paste', dst : dst.hash, targets : files, cut : cut ? 1 : 0, src : src, renames : renames, hashes : hashes, suffix : fm.options.backupSuffix},
-								notify : {type : cut ? 'move' : 'copy', cnt : cnt}
-							})
-							.done(function(data) {
-								dfrd.resolve(data);
-								if (data && data.added && data.added[0]) {
-									var newItem = fm.getUI('cwd').find('#'+fm.cwdHash2Id(data.added[0].hash));
-									if (newItem.length) {
-										newItem.trigger('scrolltoview');
+								data   : reqData,
+								notify : {type : cmd, cnt : cnt},
+								navigate : { 
+									toast  : opts.noToast? {} : {
+										inbuffer : {msg: fm.i18n(['complete', fm.i18n('cmd' + cmd)]), action: {
+											cmd: 'open',
+											msg: 'cmdopendir',
+											data: [dst.hash],
+											done: 'select',
+											cwdNot: dst.hash
+										}}
 									}
 								}
+							})
+							.done(function(data) {
+								var dsts = {},
+									added = data.added && data.added.length? data.added : null;
+								if (cut && added) {
+									// undo/redo
+									$.each(files, function(i, f) {
+										var phash = f.phash,
+											srcHash = function(name) {
+												var hash;
+												$.each(added, function(i, f) {
+													if (f.name === name) {
+														hash = f.hash;
+														return false;
+													}
+												});
+												return hash;
+											},
+											shash = srcHash(f.name);
+										if (shash) {
+											if (dsts[phash]) {
+												dsts[phash].push(shash);
+											} else {
+												dsts[phash] = [ shash ];
+											}
+										}
+									});
+									if (Object.keys(dsts).length) {
+										data.undo = {
+											cmd : 'move',
+											callback : function() {
+												var reqs = [];
+												$.each(dsts, function(dst, targets) {
+													reqs.push(fm.request({
+														data : {cmd : 'paste', dst : dst, targets : targets, cut : 1},
+														notify : {type : 'undo', cnt : targets.length}
+													}));
+												});
+												return $.when.apply(null, reqs);
+											}
+										};
+										data.redo = {
+											cmd : 'move',
+											callback : function() {
+												return fm.request({
+													data : reqData,
+													notify : {type : 'redo', cnt : cnt}
+												});
+											}
+										};
+									}
+								}
+								dfrd.resolve(data);
+							})
+							.fail(function() {
+								dfrd.reject();
 							})
 							.always(function() {
 								fm.unlockfiles({files : files});
@@ -221,12 +282,11 @@ elFinder.prototype.commands.paste = function() {
 					return dfrd.resolve();
 				}
 				
-					
 				if (fm.oldAPI) {
 					paste(files);
 				} else {
 					
-					if (!fm.option('copyOverwrite')) {
+					if (!fm.option('copyOverwrite', dst.hash)) {
 						paste(files);
 					} else {
 						internames = $.map(files, function(f) { return f.name});
@@ -260,7 +320,7 @@ elFinder.prototype.commands.paste = function() {
 		
 		$.each(files, function(i, file) {
 			if (!file.read) {
-				return !dfrd.reject([error, files[0].name, 'errPerm']);
+				return !dfrd.reject([error, file.name, 'errPerm']);
 			}
 			
 			if (cut && file.locked) {
@@ -269,6 +329,10 @@ elFinder.prototype.commands.paste = function() {
 			
 			if ($.inArray(file.hash, parents) !== -1) {
 				return !dfrd.reject(['errCopyInItself', file.name]);
+			}
+			
+			if (file.mime && file.mime !== 'directory' && ! fm.uploadMimeCheck(file.mime, dst.hash)) {
+				return !dfrd.reject([error, file.name, 'errUploadMime']);
 			}
 			
 			fparents = fm.parents(file.hash);
@@ -295,12 +359,21 @@ elFinder.prototype.commands.paste = function() {
 			return dfrd;
 		}
 
-		return $.when(
+		$.when(
 			copy(fcopy),
 			paste(fpaste)
-		).always(function() {
+		)
+		.done(function(cr, pr) {
+			dfrd.resolve(pr && pr.undo? pr : void(0));
+		})
+		.fail(function() {
+			dfrd.reject();
+		})
+		.always(function() {
 			cut && fm.clipboard([]);
 		});
+		
+		return dfrd;
 	}
 
 };

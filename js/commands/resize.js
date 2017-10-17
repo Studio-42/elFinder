@@ -14,24 +14,77 @@ elFinder.prototype.commands.resize = function() {
 	
 	this.getstate = function() {
 		var sel = this.fm.selectedFiles();
-		return !this._disabled && sel.length == 1 && sel[0].read && sel[0].write && sel[0].mime.indexOf('image/') !== -1 ? 0 : -1;
+		return sel.length == 1 && sel[0].read && sel[0].write && sel[0].mime.indexOf('image/') !== -1 ? 0 : -1;
 	};
 	
+	this.resizeRequest = function(data, file, dfrd) {
+		var fm   = this.fm,
+			file = file || fm.file(data.target),
+			tmb  = file? file.tmb : null,
+			enabled = fm.isCommandEnabled('resize', data.target);
+		
+		if (enabled && (! file || (file && file.read && file.write && file.mime.indexOf('image/') !== -1 ))) {
+			return fm.request({
+				data : Object.assign(data, {
+					cmd : 'resize'
+				}),
+				notify : {type : 'resize', cnt : 1}
+			})
+			.fail(function(error) {
+				if (dfrd) {
+					dfrd.reject(error);
+				}
+			})
+			.done(function() {
+				fm.storage('jpgQuality', data.quality === fm.option('jpgQuality')? null : data.quality);
+				dfrd && dfrd.resolve();
+			});
+		} else {
+			var error;
+			
+			if (file) {
+				if (file.mime.indexOf('image/') === -1) {
+					error = ['errResize', file.name, 'errUsupportType'];
+				} else {
+					error = ['errResize', file.name, 'errPerm'];
+				}
+			} else {
+				error = ['errResize', data.target, 'errPerm'];
+			}
+			
+			if (dfrd) {
+				dfrd.reject(error);
+			} else {
+				fm.error(error);
+			}
+			return $.Deferred().reject(error);
+		}
+	}
+	
 	this.exec = function(hashes) {
-		var fm    = this.fm,
+		var self  = this,
+			fm    = this.fm,
 			files = this.files(hashes),
 			dfrd  = $.Deferred(),
 			api2  = (fm.api > 1),
 			dialogWidth = 650,
-			
+			fmnode = fm.getUI(),
+			ctrgrup = $().controlgroup? 'controlgroup' : 'buttonset',
+			grid8Def = typeof this.options.grid8px === 'undefind' || this.options.grid8px !== 'disable'? true : false,
+			presetSize = Array.isArray(this.options.presetSize)? this.options.presetSize : [],
+			dlcls = 'elfinder-dialog-resize',
+			clactive = 'elfinder-dialog-active',
 			open = function(file, id) {
 				var isJpeg   = (file.mime === 'image/jpeg'),
 					dialog   = $('<div class="elfinder-dialog-resize '+fm.res('class', 'editing')+'"/>'),
 					input    = '<input type="text" size="5"/>',
 					row      = '<div class="elfinder-resize-row"/>',
 					label    = '<div class="elfinder-resize-label"/>',
-					control  = $('<div class="elfinder-resize-control"/>'),
-					preview  = $('<div class="ui-front elfinder-resize-preview"/>')
+					control  = $('<div class="elfinder-resize-control"/>')
+						.on('focus', 'input[type=text]', function() {
+							$(this).select();
+						}),
+					preview  = $('<div class="elfinder-resize-preview"/>')
 						.on('touchmove', function(e) {
 							e.stopPropagation();
 							e.preventDefault();
@@ -41,59 +94,53 @@ elFinder.prototype.commands.resize = function() {
 					rhandlec = $('<div class="elfinder-resize-handle touch-punch"/>'),
 					uiresize = $('<div class="elfinder-resize-uiresize"/>'),
 					uicrop   = $('<div class="elfinder-resize-uicrop"/>'),
-					uibuttonset = '<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>',
-					uibutton    = '<div class="ui-state-default elfinder-button"/>',
-					uiseparator = '<span class="ui-widget-content elfinder-toolbar-button-separator"/>',
-					uirotate    = $('<div class="elfinder-resize-rotate"/>'),
-					uideg270    = $(uibutton).attr('title',fm.i18n('rotate-cw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-l"/>')
-						.click(function(){
-							rdegree = rdegree - 90;
-							rotate.update(rdegree);
-						})),
-					uideg90     = $(uibutton).attr('title',fm.i18n('rotate-ccw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-r"/>')
-						.click(function(){
-							rdegree = rdegree + 90;
-							rotate.update(rdegree);
-						})),
+					uirotate = $('<div class="elfinder-resize-rotate"/>'),
+					uideg270 = $('<button/>').attr('title',fm.i18n('rotate-cw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-l"/>')),
+					uideg90  = $('<button/>').attr('title',fm.i18n('rotate-ccw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-r"/>')),
 					uiprop   = $('<span />'),
-					reset    = $('<div class="ui-state-default ui-corner-all elfinder-resize-reset"><span class="ui-icon ui-icon-arrowreturnthick-1-w"/></div>'),
+					reset    = $('<button class="elfinder-resize-reset">').text(fm.i18n('reset'))
+						.on('click', function() {
+							resetView();
+						})
+						.button({
+							icons: {
+								primary: 'ui-icon-arrowrefresh-1-n'
+							},
+							text: false
+						}),
 					uitype   = $('<div class="elfinder-resize-type"/>')
 						.append('<input class="" type="radio" name="type" id="'+id+'-resize" value="resize" checked="checked" /><label for="'+id+'-resize">'+fm.i18n('resize')+'</label>',
 						'<input class="api2" type="radio" name="type" id="'+id+'-crop" value="crop" /><label class="api2" for="'+id+'-crop">'+fm.i18n('crop')+'</label>',
 						'<input class="api2" type="radio" name="type" id="'+id+'-rotate" value="rotate" /><label class="api2" for="'+id+'-rotate">'+fm.i18n('rotate')+'</label>'),
-					type     = $('input', uitype).attr('disabled', 'disabled')
+					mode     = 'resize',
+					type     = uitype[ctrgrup]()[ctrgrup]('disable').find('input')
 						.change(function() {
-							var val = $('input:checked', uitype).val();
+							mode = $(this).val();
 							
 							resetView();
 							resizable(true);
 							croppable(true);
 							rotateable(true);
 							
-							if (val == 'resize') {
+							if (mode == 'resize') {
 								uiresize.show();
 								uirotate.hide();
 								uicrop.hide();
 								resizable();
+								isJpeg && grid8px.insertAfter(uiresize.find('.elfinder-resize-grid8'));
 							}
-							else if (val == 'crop') {
+							else if (mode == 'crop') {
 								uirotate.hide();
 								uiresize.hide();
 								uicrop.show();
 								croppable();
-							} else if (val == 'rotate') {
+								isJpeg && grid8px.insertAfter(uicrop.find('.elfinder-resize-grid8'));
+							} else if (mode == 'rotate') {
 								uiresize.hide();
 								uicrop.hide();
 								uirotate.show();
 								rotateable();
 							}
-						}),
-					constr  = $('<input type="checkbox" checked="checked"/>')
-						.change(function() {
-							cratio = !!constr.prop('checked');
-							resize.fixHeight();
-							resizable(true);
-							resizable();
 						}),
 					width   = $(input)
 						.change(function() {
@@ -117,10 +164,10 @@ elFinder.prototype.commands.resize = function() {
 						}),
 					pointX  = $(input).change(function(){crop.updateView();}),
 					pointY  = $(input).change(function(){crop.updateView();}),
-					offsetX = $(input).change(function(){crop.updateView();}),
-					offsetY = $(input).change(function(){crop.updateView();}),
+					offsetX = $(input).change(function(){crop.updateView('w');}),
+					offsetY = $(input).change(function(){crop.updateView('h');}),
 					quality = isJpeg && api2?
-						$(input).val(fm.option('jpgQuality'))
+						$(input).val(fm.storage('jpgQuality') || fm.option('jpgQuality'))
 							.addClass('quality')
 							.on('blur', function(){
 								var q = Math.min(100, Math.max(1, parseInt(this.value)));
@@ -131,8 +178,7 @@ elFinder.prototype.commands.resize = function() {
 						.change(function() {
 							rotate.update();
 						}),
-					uidegslider = $('<div class="elfinder-resize-rotate-slider"/>')
-						.addClass('touch-punch')
+					uidegslider = $('<div class="elfinder-resize-rotate-slider touch-punch"/>')
 						.slider({
 							min: 0,
 							max: 360,
@@ -146,51 +192,370 @@ elFinder.prototype.commands.resize = function() {
 							slide: function(event, ui) {
 								rotate.update(ui.value, false);
 							}
+						}).find('.ui-slider-handle')
+							.addClass('elfinder-tabstop')
+							.off('keydown')
+							.on('keydown', function(e) {
+								if (e.keyCode == $.ui.keyCode.LEFT || e.keyCode == $.ui.keyCode.RIGHT) {
+									e.stopPropagation();
+									e.preventDefault();
+									rotate.update(Number(degree.val()) + (e.keyCode == $.ui.keyCode.RIGHT? 1 : -1), false);
+								}
+							})
+						.end(),
+					pickimg,
+					pickcanv,
+					pickctx,
+					pickc = {},
+					pick = function(e) {
+						var color, r, g, b, h, s, l;
+
+						try {
+							color = pickc[Math.round(e.offsetX)][Math.round(e.offsetY)];
+						} catch(e) {}
+						if (!color) return;
+
+						r = color[0]; g = color[1]; b = color[2];
+						h = color[3]; s = color[4]; l = color[5];
+
+						setbg(r, g, b, (e.type === 'click'));
+					},
+					palpick = function(e) {
+						setbg($(this).css('backgroundColor'), '', '', (e.type === 'click'));
+					},
+					setbg = function(r, g, b, off) {
+						var s, m, cc;
+						if (typeof r === 'string') {
+							g = '';
+							if (r && (s = $('<span>').css('backgroundColor', r).css('backgroundColor')) && (m = s.match(/rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i))) {
+								r = Number(m[1]);
+								g = Number(m[2]);
+								b = Number(m[3]);
+							}
+						}
+						cc = (g === '')? r : '#' + getColorCode(r, g, b);
+						bg.val(cc).css({ backgroundColor: cc, backgroundImage: 'none', color: (r+g+b < 384? '#fff' : '#000') });
+						preview.css('backgroundColor', cc);
+						if (off) {
+							imgr.off('.picker').removeClass('elfinder-resize-picking');
+							pallet.off('.picker').removeClass('elfinder-resize-picking');
+						}
+					},
+					getColorCode = function(r, g, b) {
+						return $.map([r,g,b], function(c){return ('0'+parseInt(c).toString(16)).slice(-2);}).join('');
+					},
+					picker = $('<button>').text(fm.i18n('colorPicker'))
+					.on('click', function() { 
+						imgr.on('mousemove.picker click.picker', pick).addClass('elfinder-resize-picking');
+						pallet.on('mousemove.picker click.picker', 'span', palpick).addClass('elfinder-resize-picking');
+					})
+					.button({
+						icons: {
+							primary: 'ui-icon-pin-s'
+						},
+						text: false
+					}),
+					reseter = $('<button>').text(fm.i18n('reset'))
+						.on('click', function() { 
+							setbg('', '', '', true);
+						})
+						.button({
+							icons: {
+								primary: 'ui-icon-arrowrefresh-1-n'
+							},
+							text: false
 						}),
+					bg = $('<input class="elfinder-resize-bg" type="text">')
+						.on('focus', function() {
+							$(this).attr('style', '');
+						})
+						.on('blur', function() {
+							setbg($(this).val());
+						}),
+					pallet  = $('<div class="elfinder-resize-pallet">').on('click', 'span', function() {
+						setbg($(this).css('backgroundColor'));
+					}),
 					ratio   = 1,
 					prop    = 1,
 					owidth  = 0,
 					oheight = 0,
 					cratio  = true,
+					cratioc = false,
 					pwidth  = 0,
 					pheight = 0,
 					rwidth  = 0,
 					rheight = 0,
 					rdegree = 0,
+					grid8   = isJpeg? grid8Def : false,
+					constr  = $('<button>').html(fm.i18n('aspectRatio'))
+						.on('click', function() {
+							cratio = ! cratio;
+							constr.button('option', {
+								icons : { primary: cratio? 'ui-icon-locked' : 'ui-icon-unlocked'}
+							});
+							resize.fixHeight();
+							rhandle.resizable('option', 'aspectRatio', cratio).data('uiResizable')._aspectRatio = cratio;
+						})
+						.button({
+							icons : {
+								primary: cratio? 'ui-icon-locked' : 'ui-icon-unlocked'
+							},
+							text: false
+						}),
+					constrc = $('<button>').html(fm.i18n('aspectRatio'))
+						.on('click', function() {
+							cratioc = ! cratioc;
+							constrc.button('option', {
+								icons : { primary: cratioc? 'ui-icon-locked' : 'ui-icon-unlocked'}
+							});
+							rhandlec.resizable('option', 'aspectRatio', cratioc).data('uiResizable')._aspectRatio = cratioc;
+						})
+						.button({
+							icons : {
+								primary: cratioc? 'ui-icon-locked' : 'ui-icon-unlocked'
+							},
+							text: false
+						}),
+					grid8px = $('<button>').html(fm.i18n(grid8? 'enabled' : 'disabled')).toggleClass('ui-state-active', grid8)
+						.on('click', function() {
+							grid8 = ! grid8;
+							grid8px.html(fm.i18n(grid8? 'enabled' : 'disabled')).toggleClass('ui-state-active', grid8);
+							if (grid8) {
+								width.val(round(width.val()));
+								height.val(round(height.val()));
+								offsetX.val(round(offsetX.val()));
+								offsetY.val(round(offsetY.val()));
+								pointX.val(round(pointX.val()));
+								pointY.val(round(pointY.val()));
+								if (uiresize.is(':visible')) {
+									resize.updateView(width.val(), height.val());
+								} else if (uicrop.is(':visible')) {
+									crop.updateView();
+								}
+							}
+						})
+						.button(),
 					setuprimg = function() {
-						var r_scale;
+						var r_scale,
+							fail = function() {
+								bg.parent().hide();
+								pallet.hide();
+							};
 						r_scale = Math.min(pwidth, pheight) / Math.sqrt(Math.pow(owidth, 2) + Math.pow(oheight, 2));
-						rwidth = owidth * r_scale;
-						rheight = oheight * r_scale;
+						rwidth = Math.ceil(owidth * r_scale);
+						rheight = Math.ceil(oheight * r_scale);
 						imgr.width(rwidth)
 							.height(rheight)
 							.css('margin-top', (pheight-rheight)/2 + 'px')
 							.css('margin-left', (pwidth-rwidth)/2 + 'px');
+						if (imgr.is(':visible') && bg.is(':visible')) {
+							if (file.mime !== 'image/png') {
+								preview.css('backgroundColor', bg.val());
+								pickimg = $('<img>');
+								if (fm.isCORS) {
+									pickimg.attr('crossorigin', 'use-credentials');
+								}
+								pickimg.on('load', function() {
+									if (pickcanv && pickcanv.width !== rwidth) {
+										setColorData();
+									}
+								})
+								.on('error', fail)
+								.attr('src', fm.openUrl(file.hash, fm.isCORS? true : false));
+							} else {
+								fail();
+							}
+						}
 					},
 					setupimg = function() {
-
 						resize.updateView(owidth, oheight);
-
 						setuprimg();
-
 						basec
 							.width(img.width())
 							.height(img.height());
 						imgc
 							.width(img.width())
 							.height(img.height());
-						coverc
-							.width(img.width())
-							.height(img.height());
-						rhandlec
-							.width(imgc.width())
-							.height(imgc.height())
-							.offset(imgc.offset());
+						crop.updateView();
+					},
+					setColorData = function() {
+						if (pickctx) {
+							var n, w, h, r, g, b, a, s, l, hsl, hue,
+								data, scale, tx1, tx2, ty1, ty2, rgb,
+								domi = {},
+								domic = [],
+								domiv, palc,
+								rgbToHsl = function (r, g, b) {
+									var h, s, l,
+										max = Math.max(Math.max(r, g), b),
+										min = Math.min(Math.min(r, g), b);
+		
+									// Hue, 0 ~ 359
+									if (max === min) {
+										h = 0;
+									} else if (r === max) {
+										h = ((g - b) / (max - min) * 60 + 360) % 360;
+									} else if (g === max) {
+										h = (b - r) / (max - min) * 60 + 120;
+									} else if (b === max) {
+										h = (r - g) / (max - min) * 60 + 240;
+									}
+									// Saturation, 0 ~ 1
+									s = (max - min) / max;
+									// Lightness, 0 ~ 1
+									l = (r *  0.3 + g * 0.59 + b * 0.11) / 255;
+		
+									return [h, s, l, 'hsl'];
+								};
+							
+							calc:
+							try {
+								w = pickcanv.width = imgr.width();
+								h = pickcanv.height = imgr.height();
+								scale = w / owidth;
+								pickctx.scale(scale, scale);
+								pickctx.drawImage(pickimg.get(0), 0, 0);
+			
+								data = pickctx.getImageData(0, 0, w, h).data;
+			
+								// Range to detect the dominant color
+								tx1 = w * .1;
+								tx2 = w * .9;
+								ty1 = h * .1;
+								ty2 = h * .9;
+			
+								for (var y = 0; y < h - 1; y++) {
+									for (var x = 0; x < w - 1; x++) {
+										n = x * 4 + y * w * 4;
+										// RGB
+										r = data[n]; g = data[n + 1]; b = data[n + 2]; a = data[n + 3];
+										// check alpha ch
+										if (a !== 255) {
+											bg.parent().hide();
+											pallet.hide();
+											break calc;
+										}
+										// HSL
+										hsl = rgbToHsl(r, g, b);
+										hue = Math.round(hsl[0]); s = Math.round(hsl[1] * 100); l = Math.round(hsl[2] * 100);
+										if (! pickc[x]) {
+											pickc[x] = {};
+										}
+										// set pickc
+										pickc[x][y] = [r, g, b, hue, s, l];
+										// detect the dominant color
+										if ((x < tx1 || x > tx2) && (y < ty1 || y > ty2)) {
+											rgb = r + ',' + g + ',' + b;
+											if (! domi[rgb]) {
+												domi[rgb] = 1;
+											} else {
+												++domi[rgb];
+											}
+										}
+									}
+								}
+								
+								if (! pallet.children(':first').length) {
+									palc = 1;
+									$.each(domi, function(c, v) {
+										domic.push({c: c, v: v});
+									});
+									$.each(domic.sort(function(a, b) {
+										return (a.v > b.v)? -1 : 1;
+									}), function() {
+										if (this.v < 2 || palc > 10) {
+											return false;
+										}
+										pallet.append($('<span style="width:20px;height:20px;display:inline-block;background-color:rgb('+this.c+');">'));
+										++palc;
+									});
+								}
+							} catch(e) {
+								picker.hide();
+								pallet.hide();
+							}
+						}
+					},
+					setupPicker = function() {
+						try {
+							pickcanv = document.createElement('canvas');
+							pickctx = pickcanv.getContext('2d');
+						} catch(e) {
+							picker.hide();
+							pallet.hide();
+						}
+					},
+					setupPreset = function() {
+						preset.on('click', 'span.elfinder-resize-preset', function() {
+							var btn = $(this),
+								w = btn.data('s')[0],
+								h = btn.data('s')[1],
+								r = owidth / oheight;
+							if (owidth > w || oheight > h) {
+								if (owidth <= w) {
+									w = round(h * r);
+								} else if (oheight <= h) {
+									h = round(w / r);
+								} else {
+									if (owidth - w > oheight - h) {
+										h = round(w / r);
+									} else {
+										w = round(h * r);
+									}
+								}
+							} else {
+								w = owidth;
+								h = oheight;
+							}
+							width.val(w);
+							height.val(h);
+							resize.updateView(w, h);
+						});
+						presetc.on('click', 'span.elfinder-resize-preset', function() {
+							var btn = $(this),
+								w = btn.data('s')[0],
+								h = btn.data('s')[1],
+								x = pointX.val(),
+								y = pointY.val();
+							
+							if (owidth >= w && oheight >= h) {
+								if (owidth - w - x < 0) {
+									x = owidth - w;
+								}
+								if (oheight - h - y < 0) {
+									y = oheight - h;
+								}
+								pointX.val(x);
+								pointY.val(y);
+								offsetX.val(w);
+								offsetY.val(h);
+								crop.updateView();
+							}
+						});
+						presetc.children('span.elfinder-resize-preset').each(function() {
+							var btn = $(this),
+								w = btn.data('s')[0],
+								h = btn.data('s')[1];
+							
+							btn[(owidth >= w && oheight >= h)? 'show' : 'hide']();
+						});
 					},
 					img     = $('<img/>')
 						.on('load', function() {
+							var elm = img.get(0),
+								memSize = elm.naturalWidth? null : {w: img.width(), h: img.height()};
+							
+							memSize && img.removeAttr('width').removeAttr('height');
+							
+							owidth  = elm.naturalWidth || elm.width || img.width();
+							oheight = elm.naturalHeight || elm.height || img.height();
+							
+							memSize && img.width(memSize.w).height(memSize.h);
+							
+							dMinBtn.show();
+
 							var r_scale, inputFirst,
-								imgRatio = img.height() / img.width();
+								imgRatio = oheight / owidth;
 							
 							if (imgRatio < 1 && preview.height() > preview.width() * imgRatio) {
 								preview.height(preview.width() * imgRatio);
@@ -204,43 +569,24 @@ elFinder.prototype.commands.resize = function() {
 							
 							spinner.remove();
 							
-							owidth  = img.width();
-							oheight = img.height();
-							ratio   = owidth/oheight;
+							ratio = owidth/oheight;
 
 							rhandle.append(img.show()).show();
 							width.val(owidth);
 							height.val(oheight);
 
+							setupPicker();
+							setupPreset();
 							setupimg();
 							
-							type.button('enable');
-							inputFirst = control.find('input,select').removeAttr('disabled')
-								.filter(':text').keydown(function(e) {
-									var c = e.keyCode, i;
-
-									e.stopPropagation();
-								
-									if ((c >= 37 && c <= 40) 
-									|| c == $.ui.keyCode.BACKSPACE 
-									|| c == $.ui.keyCode.DELETE 
-									|| (c == 65 && (e.ctrlKey||e.metaKey))
-									|| c == 27) {
-										return;
-									}
-								
-									if (c == 9) {
-										i = $(this).parent()[e.shiftKey ? 'prevAll' : 'nextAll']('div.elfinder-resize-row').children(':text');
-
-										if (i.length) {
-											i[0].focus();
-										} else {
-											$(this).parent().parent().find(':text:' + (e.shiftKey ? 'last' : 'first')).focus();
-										}
-									}
-								
-									if (c == 13) {
-										fm.confirm({
+							uitype[ctrgrup]('enable');
+							inputFirst = control.find('input,select').prop('disabled', false)
+								.filter(':text').on('keydown', function(e) {
+									var cOpts;
+									if (e.keyCode == $.ui.keyCode.ENTER) {
+										e.stopPropagation();
+										e.preventDefault();
+										cOpts = {
 											title  : $('input:checked', uitype).val(),
 											text   : 'confirmReq',
 											accept : {
@@ -251,23 +597,36 @@ elFinder.prototype.commands.resize = function() {
 											},
 											cancel : {
 												label    : 'btnCancel',
-												callback : function(){}
+												callback : function(){
+													$(this).focus();
+												}
 											}
-										});
+										};
+											
+										if (useSaveAs) {
+											cOpts['buttons'] = [{
+												label    : 'btnSaveAs',
+												callback : function() {
+													setTimeout(saveAs, 10);
+												}
+											}];
+										}
+										fm.confirm(cOpts);
 										return;
 									}
-								
-									if (!((c >= 48 && c <= 57) || (c >= 96 && c <= 105))) {
-										e.preventDefault();
+								})
+								.on('keyup', function() {
+									var $this = $(this);
+									if (! $this.hasClass('elfinder-resize-bg')) {
+										setTimeout(function() {
+											$this.val($this.val().replace(/[^0-9]/g, ''));
+										}, 10);
 									}
 								})
 								.filter(':first');
 								
 							!fm.UA.Mobile && inputFirst.focus();
 							resizable();
-							
-							reset.hover(function() { reset.toggleClass('ui-state-hover'); }).click(resetView);
-							
 						})
 						.on('error', function() {
 							spinner.text('Unable to load image').css('background', 'transparent');
@@ -275,14 +634,24 @@ elFinder.prototype.commands.resize = function() {
 					basec = $('<div/>'),
 					imgc = $('<img/>'),
 					coverc = $('<div/>'),
-					imgr = $('<img/>'),
-					round = function(v) {
-						return isJpeg? Math.round(v/8)*8 : Math.round(v);
+					imgr = $('<img class="elfinder-resize-imgrotate" />'),
+					round = function(v, max) {
+						v = grid8? Math.round(v/8)*8 : Math.round(v);
+						v = Math.max(0, v);
+						if (max && v > max) {
+							v = grid8? Math.floor(max/8)*8 : max;
+						}
+						return v;
 					},
 					resetView = function() {
 						width.val(owidth);
 						height.val(oheight);
 						resize.updateView(owidth, oheight);
+						pointX.val(0);
+						pointY.val(0);
+						offsetX.val(owidth);
+						offsetY.val(oheight);
+						crop.updateView();
 					},
 					resize = {
 						update : function() {
@@ -315,40 +684,61 @@ elFinder.prototype.commands.resize = function() {
 							var w, h;
 							if (cratio) {
 								w = width.val();
-								h = Math.round(w/ratio);
+								h = round(w/ratio);
 								resize.updateView(w, h);
 								height.val(h);
 							}
 						}
 					},
 					crop = {
-						update : function() {
-							offsetX.val(round((rhandlec.data('w')||rhandlec.width())/prop));
-							offsetY.val(round((rhandlec.data('h')||rhandlec.height())/prop));
-							pointX.val(Math.round(((rhandlec.data('x')||rhandlec.offset().left)-imgc.offset().left)/prop));
-							pointY.val(Math.round(((rhandlec.data('y')||rhandlec.offset().top)-imgc.offset().top)/prop));
+						update : function(change) {
+							pointX.val(round(((rhandlec.data('x')||rhandlec.position().left))/prop, owidth));
+							pointY.val(round(((rhandlec.data('y')||rhandlec.position().top))/prop, oheight));
+							if (change !== 'xy') {
+								offsetX.val(round((rhandlec.data('w')||rhandlec.width())/prop, owidth - pointX.val()));
+								offsetY.val(round((rhandlec.data('h')||rhandlec.height())/prop, oheight - pointY.val()));
+							}
 						},
-						updateView : function() {
-							var x = parseInt(pointX.val()) * prop + imgc.offset().left;
-							var y = parseInt(pointY.val()) * prop + imgc.offset().top;
-							var w = offsetX.val() * prop;
-							var h = offsetY.val() * prop;
+						updateView : function(change) {
+							var r, x, y, w, h;
+							
+							pointX.val(round(pointX.val(), owidth - (grid8? 8 : 1)));
+							pointY.val(round(pointY.val(), oheight - (grid8? 8 : 1)));
+							offsetX.val(round(offsetX.val(), owidth - pointX.val()));
+							offsetY.val(round(offsetY.val(), oheight - pointY.val()));
+							
+							if (cratioc) {
+								r = coverc.width() / coverc.height();
+								if (change === 'w') {
+									offsetY.val(round(parseInt(offsetX.val()) / r));
+								} else if (change === 'h') {
+									offsetX.val(round(parseInt(offsetY.val()) * r));
+								}
+							}
+							x = Math.round(parseInt(pointX.val()) * prop);
+							y = Math.round(parseInt(pointY.val()) * prop);
+							if (change !== 'xy') {
+								w = Math.round(parseInt(offsetX.val()) * prop);
+								h = Math.round(parseInt(offsetY.val()) * prop);
+							} else {
+								w = rhandlec.data('w');
+								h = rhandlec.data('h');
+							}
 							rhandlec.data({x: x, y: y, w: w, h: h})
-								.width(Math.round(w))
-								.height(Math.round(h))
-								.offset({left: Math.round(x), top: Math.round(y)});
-							coverc.width(rhandlec.width())
-								.height(rhandlec.height());
+								.width(w)
+								.height(h)
+								.css({left: x, top: y});
+							coverc.width(w)
+								.height(h);
 						},
-						resize_update : function() {
-							rhandlec.data({w: null, h: null});
+						resize_update : function(e, ui) {
+							rhandlec.data({x: ui.position.left, y: ui.position.top, w: ui.size.width, h: ui.size.height});
 							crop.update();
-							coverc.width(rhandlec.width())
-								.height(rhandlec.height());
+							crop.updateView();
 						},
-						drag_update : function() {
-							rhandlec.data({x: null, y: null});
-							crop.update();
+						drag_update : function(e, ui) {
+							rhandlec.data({x: ui.position.left, y: ui.position.top});
+							crop.update('xy');
 						}
 					},
 					rotate = {
@@ -447,65 +837,59 @@ elFinder.prototype.commands.resize = function() {
 						}
 					},
 					resizable = function(destroy) {
-						if ($.fn.resizable) {
-							if (destroy) {
-								rhandle.filter(':ui-resizable').resizable('destroy');
-								rhandle.hide();
-							}
-							else {
-								rhandle.show();
-								rhandle.resizable({
-									alsoResize  : img,
-									aspectRatio : cratio,
-									resize      : resize.update,
-									stop        : resize.fixHeight
-								});
-								dinit();
-							}
+						if (destroy) {
+							rhandle.filter(':ui-resizable').resizable('destroy');
+							rhandle.hide();
+						}
+						else {
+							rhandle.show();
+							rhandle.resizable({
+								alsoResize  : img,
+								aspectRatio : cratio,
+								resize      : resize.update,
+								stop        : resize.fixHeight
+							});
+							dinit();
 						}
 					},
 					croppable = function(destroy) {
-						if ($.fn.draggable && $.fn.resizable) {
-							if (destroy) {
-								rhandlec.filter(':ui-resizable').resizable('destroy')
-									.filter(':ui-draggable').draggable('destroy');
-								basec.hide();
-							}
-							else {
-								basec.show();
-								
-								rhandlec
-									.resizable({
-										containment : basec,
-										resize      : crop.resize_update,
-										handles     : 'all'
-									})
-									.draggable({
-										handle      : coverc,
-										containment : imgc,
-										drag        : crop.drag_update
-									});
-								
-								dinit();
-								crop.update();
-							}
+						if (destroy) {
+							rhandlec.filter(':ui-resizable').resizable('destroy')
+								.filter(':ui-draggable').draggable('destroy');
+							basec.hide();
+						}
+						else {
+							basec.show();
+							
+							rhandlec
+								.resizable({
+									containment : basec,
+									aspectRatio : cratioc,
+									resize      : crop.resize_update,
+									handles     : 'all'
+								})
+								.draggable({
+									handle      : coverc,
+									containment : imgc,
+									drag        : crop.drag_update,
+									stop        : function() { crop.updateView('xy'); }
+								});
+							
+							dinit();
+							crop.update();
 						}
 					},
 					rotateable = function(destroy) {
-						if ($.fn.draggable && $.fn.resizable) {
-							if (destroy) {
-								imgr.hide();
-							}
-							else {
-								imgr.show();
-								dinit();
-
-							}
+						if (destroy) {
+							imgr.hide();
+						}
+						else {
+							imgr.show();
+							dinit();
 						}
 					},
-					save = function() {
-						var w, h, x, y, d, q;
-						var mode = $('input:checked', uitype).val();
+					checkVals = function() {
+						var w, h, x, y, d, q, b = '';
 						
 						if (mode == 'resize') {
 							w = parseInt(width.val()) || 0;
@@ -520,71 +904,116 @@ elFinder.prototype.commands.resize = function() {
 							h = oheight;
 							d = parseInt(degree.val()) || 0;
 							if (d < 0 || d > 360) {
-								return fm.error('Invalid rotate degree');
+								fm.error('Invalid rotate degree');
+								return false;
 							}
 							if (d == 0 || d == 360) {
-								return fm.error('Image dose not rotated');
+								fm.error('errResizeNoChange');
+								return false;
 							}
+							b = bg.val();
 						}
 						q = quality? parseInt(quality.val()) : 0;
 						
 						if (mode != 'rotate') {
-
 							if (w <= 0 || h <= 0) {
-								return fm.error('Invalid image size');
+								fm.error('Invalid image size');
+								return false;
 							}
-							
 							if (w == owidth && h == oheight) {
-								return fm.error('Image size not changed');
+								fm.error('errResizeNoChange');
+								return false;
 							}
-
 						}
 						
-						dialog.elfinderdialog('close');
+						return {w: w, h: h, x: x, y: y, d: d, q: q, b: b};
+					},
+					save = function() {
+						var vals;
 						
-						fm.request({
-							data : {
-								cmd    : 'resize',
+						if (vals = checkVals()) {
+							dialog.elfinderdialog('close');
+							self.resizeRequest({
 								target : file.hash,
-								width  : w,
-								height : h,
-								x      : x,
-								y      : y,
-								degree : d,
-								quality: q,
+								width  : vals.w,
+								height : vals.h,
+								x      : vals.x,
+								y      : vals.y,
+								degree : vals.d,
+								quality: vals.q,
+								bg     : vals.b,
 								mode   : mode
+							}, file, dfrd);
+						}
+					},
+					saveAs = function() {
+						var fail = function() {
+								dialogs.fadeIn(function() {
+									base.addClass(clactive);
+								});
 							},
-							notify : {type : 'resize', cnt : 1}
-						})
-						.fail(function(error) {
-							dfrd.reject(error);
-						})
-						.done(function() {
-							var reload = function(url) {
-								var ifm;
-								try {
-									ifm = $('<iframe width="1" height="1" scrolling="no" frameborder="no" style="position:absolute; top:-1px; left:-1px">')
-										.attr('src', url)
-										.one('load', function() {
-											this.contentDocument.location.reload(true);
-											ifm.one('load', function() {
-												ifm.remove();
-											});
-										})
-										.appendTo('body');
-								} catch(e) {
-									ifm && ifm.remove();
-								}
+							make = function() {
+								self.mime = file.mime;
+								self.prefix = file.name.replace(/ \d+(\.[^.]+)?$/, '$1');
+								self.requestCmd = 'mkfile';
+								self.nextAction = {};
+								self.data = {target : file.phash};
+								$.proxy(fm.res('mixin', 'make'), self)()
+									.done(function(data) {
+										var hash;
+										if (data.added && data.added.length) {
+											hash = data.added[0].hash;
+											fm.url(file.hash, { async: true, temporary: true }).done(function(url) {
+												fm.request({
+													options : {type : 'post'},
+													data : {
+														cmd     : 'put',
+														target  : hash,
+														encoding: 'scheme', 
+														content : fm.convAbsUrl(url)
+													},
+													notify : {type : 'save', cnt : 1},
+													syncOnFail : true
+												})
+												.fail(fail)
+												.done(function(data) {
+													data = fm.normalize(data);
+													fm.updateCache(data);
+													file = fm.file(hash);
+													data.changed && data.changed.length && fm.change(data);
+													base.show().find('.elfinder-dialog-title').html(fm.escape(file.name));
+													save();
+													dialogs.fadeIn();
+												});
+											}).fail(fail);
+										} else {
+											fail();
+										}
+									})
+									.fail(fail)
+									.always(function() {
+										delete self.mime;
+										delete self.prefix;
+										delete self.nextAction;
+										delete self.data;
+									});
+								fm.trigger('unselectfiles', { files: [ file.hash ] });
 							},
-							url = fm.url(file.hash);
-							
-							reload(src);
-							if (url !== src) {
-								reload(url);
-							}
-							dfrd.resolve();
-						});
+							reqOpen = null,
+							dialogs;
 						
+						if (checkVals()) {
+							dialogs = fmnode.children('.'+dlcls).fadeOut();
+							base.removeClass(clactive);
+								
+							if (fm.searchStatus.state < 2 && file.phash !== fm.cwd().hash) {
+								reqOpen = fm.exec('open', [file.phash], {thash: file.phash});
+							}
+							
+							$.when([reqOpen]).done(function() {
+								reqOpen? fm.one('cwdrender', make) : make();
+							}).fail(fail);
+						}
 					},
 					buttons = {},
 					hline   = 'elfinder-resize-handle-hline',
@@ -592,12 +1021,21 @@ elFinder.prototype.commands.resize = function() {
 					rpoint  = 'elfinder-resize-handle-point',
 					src     = fm.openUrl(file.hash),
 					dinit   = function() {
+						if (base.hasClass('elfinder-dialog-minimized')) {
+							return;
+						}
+						
+						preset.hide();
+						presetc.hide();
+						
 						var dw,
-							winH  = $(window).height(),
-							winW  = $(window).width(),
+							win   = fm.options.dialogContained? fmnode : $(window),
+							winH  = win.height(),
+							winW  = win.width(),
 							ctrW  = dialog.find('div.elfinder-resize-control').width(),
 							prvW  = preview.width(),
-							baseW = base.width();
+							baseW = base.width(),
+							presW = 'auto';
 						
 						base.width(Math.min(dialogWidth, winW - 30));
 						preview.attr('style', '');
@@ -617,10 +1055,20 @@ elFinder.prototype.commands.resize = function() {
 							} else {
 								preview.css({ float: 'none', marginLeft: 'auto', marginRight: 'auto'});
 							}
+						} else {
+							presW = ctrW;
 						}
 						pwidth  = preview.width()  - (rhandle.outerWidth()  - rhandle.width());
-						winH -= 30;
-						(preview.height() > winH) && preview.height(winH);
+						if (fmnode.hasClass('elfinder-fullscreen')) {
+							if (base.height() > winH) {
+								winH -= 2;
+								preview.height(winH - base.height() + preview.height());
+								base.css('top', 0 - fmnode.offset().top);
+							}
+						} else {
+							winH -= 30;
+							(preview.height() > winH) && preview.height(winH);
+						}
 						pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
 						if (owidth && oheight) {
 							setupimg();
@@ -630,18 +1078,46 @@ elFinder.prototype.commands.resize = function() {
 							pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
 							setuprimg();
 						}
+						
+						preset.css('width', presW).show();
+						presetc.css('width', presW).show();
+						if (!presetc.children('span.elfinder-resize-preset:visible').length) {
+							presetc.hide();
+						}
 					},
-					base;
+					preset = (function() {
+						var sets = $('<fieldset class="elfinder-resize-preset-container">').append($('<legend>').html(fm.i18n('presets'))).hide(),
+							hasC;
+						$.each(presetSize, function(i, s) {
+							if (s.length === 2) {
+								hasC = true;
+								sets.append($('<span class="elfinder-resize-preset"/>')
+									.data('s', s)
+									.text(s[0]+'x'+s[1])
+									.button()
+								);
+							}
+						});
+						if (!hasC) {
+							return $();
+						} else {
+							return sets;
+						}
+					})(),
+					presetc = preset.clone(true),
+					useSaveAs = fm.uploadMimeCheck(file.mime, file.phash),
+					dMinBtn, base;
 				
 				imgr.mousedown( rotate.start );
 				$(document).mouseup( rotate.stop );
 					
 				uiresize.append(
-					$(row).append($(label).text(fm.i18n('width')), width, reset),
-					$(row).append($(label).text(fm.i18n('height')), height),
-					$(row).append($('<label/>').text(fm.i18n('aspectRatio')).prepend(constr)),
+					$(row).append($(label).text(fm.i18n('width')), width),
+					$(row).append($(label).text(fm.i18n('height')), height, $('<div class="elfinder-resize-whctrls">').append(constr, reset)),
 					(quality? $(row).append($(label).text(fm.i18n('quality')), quality, $('<span/>').text(' (1-100)')) : $()),
-					$(row).append($(label).text(fm.i18n('scale')), uiprop)
+					(isJpeg? $(row).append($(label).text(fm.i18n('8pxgrid')).addClass('elfinder-resize-grid8'), grid8px) : $()),
+					$(row).append($(label).text(fm.i18n('scale')), uiprop),
+					$(row).append(preset)
 				);
 
 				if (api2) {
@@ -649,20 +1125,36 @@ elFinder.prototype.commands.resize = function() {
 						$(row).append($(label).text('X'), pointX),
 						$(row).append($(label).text('Y')).append(pointY),
 						$(row).append($(label).text(fm.i18n('width')), offsetX),
-						$(row).append($(label).text(fm.i18n('height')), offsetY),
-						(quality? $(row).append($(label).text(fm.i18n('quality')), quality.clone(true), $('<span/>').text(' (1-100)')) : $())
+						$(row).append($(label).text(fm.i18n('height')), offsetY, $('<div class="elfinder-resize-whctrls">').append(constrc, reset.clone(true))),
+						(quality? $(row).append($(label).text(fm.i18n('quality')), quality.clone(true), $('<span/>').text(' (1-100)')) : $()),
+						(isJpeg? $(row).append($(label).text(fm.i18n('8pxgrid')).addClass('elfinder-resize-grid8')) : $()),
+						$(row).append(presetc)
 					);
 					
 					uirotate.append(
-						$(row).append(
+						$(row).addClass('elfinder-resize-degree').append(
 							$(label).text(fm.i18n('rotate')),
 							degree,
 							$('<span/>').text(fm.i18n('degree')),
-							$(uibuttonset).append(uideg270, $(uiseparator), uideg90)
+							$('<div/>').append(uideg270, uideg90)[ctrgrup]()
 						),
 						$(row).css('height', '20px').append(uidegslider),
-						(quality? $(row).append($(label).text(fm.i18n('quality')), quality.clone(true), $('<span/>').text(' (1-100)')) : $())
+						(quality? $(row).addClass('elfinder-resize-quality').append(
+							$(label).text(fm.i18n('quality')),
+							quality.clone(true),
+							$('<span/>').text(' (1-100)')) : $()
+						),
+						$(row).append($(label).text(fm.i18n('bgcolor')), bg, picker, reseter),
+						$(row).css('height', '20px').append(pallet)
 					);
+					uideg270.on('click', function() {
+						rdegree = rdegree - 90;
+						rotate.update(rdegree);
+					});
+					uideg90.on('click', function(){
+						rdegree = rdegree + 90;
+						rotate.update(rdegree);
+					});
 				}
 				
 				dialog.append(uitype).on('resize', function(e){
@@ -674,7 +1166,6 @@ elFinder.prototype.commands.resize = function() {
 				} else {
 					control.append($(row), uiresize);
 				}
-				control.find('input,select').attr('disabled', 'disabled');
 				
 				rhandle.append('<div class="'+hline+' '+hline+'-top"/>',
 					'<div class="'+hline+' '+hline+'-bottom"/>',
@@ -711,7 +1202,12 @@ elFinder.prototype.commands.resize = function() {
 				dialog.append(preview, control);
 				
 				buttons[fm.i18n('btnApply')] = save;
+				if (useSaveAs) {
+					buttons[fm.i18n('btnSaveAs')] = function() { setTimeout(saveAs, 10); };
+				}
 				buttons[fm.i18n('btnCancel')] = function() { dialog.elfinderdialog('close'); };
+				
+				dialog.find('input,button').addClass('elfinder-tabstop');
 				
 				base = fm.dialog(dialog, {
 					title          : fm.escape(file.name),
@@ -719,23 +1215,27 @@ elFinder.prototype.commands.resize = function() {
 					resizable      : false,
 					buttons        : buttons,
 					open           : function() {
+						dMinBtn = base.find('.ui-dialog-titlebar .elfinder-titlebar-minimize').hide();
 						fm.bind('resize', dinit);
-						img.attr('src', src + (src.indexOf('?') === -1 ? '?' : '&')+'_='+Math.random());
-						imgc.attr('src', img.attr('src'));
-						imgr.attr('src', img.attr('src'));
+						img.attr('src', src);
+						imgc.attr('src', src);
+						imgr.attr('src', src);
 					},
 					close          : function() {
 						fm.unbind('resize', dinit);
-						$(this).hide().remove();
+						$(this).elfinderdialog('destroy');
+					},
+					resize         : function(e, data) {
+						if (data && data.minimize === 'off') {
+							dinit();
+						}
 					}
-				}).attr('id', id).parent();
+				}).attr('id', id).closest('.ui-dialog').addClass(dlcls);
 				
 				// for IE < 9 dialog mising at open second+ time.
 				if (fm.UA.ltIE8) {
 					$('.elfinder-dialog').css('filter', '');
 				}
-				
-				reset.css('left', width.position().left + width.width() + 12);
 				
 				coverc.css({ 'opacity': 0.2, 'background-color': '#fff', 'position': 'absolute'}),
 				rhandlec.css('cursor', 'move');
@@ -745,13 +1245,11 @@ elFinder.prototype.commands.resize = function() {
 					'border-color':'#000'
 				});
 
-				imgr.css('cursor', 'pointer');
-
 				if (! api2) {
 					uitype.find('.api2').remove();
 				}
 				
-				uitype.controlgroup? uitype.controlgroup() : uitype.buttonset();
+				control.find('input,select').prop('disabled', true);
 
 			},
 			
@@ -764,7 +1262,7 @@ elFinder.prototype.commands.resize = function() {
 		}
 		
 		id = 'resize-'+fm.namespace+'-'+files[0].hash;
-		dialog = fm.getUI().find('#'+id);
+		dialog = fmnode.find('#'+id);
 		
 		if (dialog.length) {
 			dialog.elfinderdialog('toTop');
