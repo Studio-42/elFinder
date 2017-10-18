@@ -130,8 +130,8 @@
 	filter:Alpha(Opacity=70);
 }
 .elfinder-mobile .elfinder-quicklook-titlebar-icon .ui-icon {
-	opacity: .5;
-	filter:Alpha(Opacity=50);
+	opacity: .6;
+	filter:Alpha(Opacity=60);
 }
 .elfinder-touch .elfinder-quicklook-titlebar-icon .ui-icon {
 	margin-top: -3px;
@@ -146,7 +146,8 @@
 }
 
 .elfinder-touch .elfinder-quicklook-titlebar .ui-icon {
-	zoom: 1.5;
+	transform: scale(1.2);
+	zoom: 1.2;
 }
 
 /* main part of quicklook window */
