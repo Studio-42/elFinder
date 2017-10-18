@@ -3609,6 +3609,9 @@ class elFinder {
 			$c2 = fread($fp,2);
 			if (bin2hex($c2) == "f904") {
 				$imgcnt++;
+				if ($imgcnt === 2) {
+					break;
+				}
 			}
 	
 			if (feof($fp)) {
