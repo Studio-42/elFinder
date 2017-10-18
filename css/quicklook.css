@@ -126,6 +126,12 @@
 	cursor: pointer;
 	border-radius: 10px;
 	border: 1px solid;
+	opacity: .7;
+	filter:Alpha(Opacity=70);
+}
+.elfinder-mobile .elfinder-quicklook-titlebar-icon .ui-icon {
+	opacity: .5;
+	filter:Alpha(Opacity=50);
 }
 .elfinder-touch .elfinder-quicklook-titlebar-icon .ui-icon {
 	margin-top: -3px;

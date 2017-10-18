@@ -275,8 +275,8 @@ elFinder.prototype._options = {
 			textMaxlen : 2000,
 			// quicklook window must be contained in elFinder node on window open (true|false)
 			contain : false,
-			// preview window into NavDock (true|false)
-			docked   : false,
+			// preview window into NavDock (0 : undocked | 1 : docked(show) | 2 : docked(hide))
+			docked   : 0,
 			// Docked preview height ('auto' or Number of pixel) 'auto' is setted to the Navbar width
 			dockHeight : 'auto',
 			// media auto play when docked

@@ -104,12 +104,15 @@
 	width: 17px;
 	height: 17px;
 	border-width: 1px;
-	border-color: transparent;
 	opacity: .7;
 	filter:Alpha(Opacity=70);
 	-moz-border-radius: 8px; 
 	-webkit-border-radius: 8px; 
 	border-radius: 8px;
+}
+.elfinder-mobile .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-button .ui-icon {
+	opacity: .5;
+	filter:Alpha(Opacity=50);
 }
 .std42-dialog.elfinder-dialog-minimized .ui-dialog-titlebar .elfinder-titlebar-button .ui-icon {
 	opacity: 1;
@@ -117,21 +120,6 @@
 }
 .std42-dialog.elfinder-dialog-minimized .ui-dialog-titlebar select {
 	display: none;
-}
-.std42-dialog .ui-dialog-titlebar .ui-dialog-titlebar-close:hover .ui-icon,
-.elfinder-mobile .std42-dialog .ui-dialog-titlebar .ui-dialog-titlebar-close .ui-icon {
-	background-color: #ff6252;
-	border-color: #e5695d;
-}
-.std42-dialog .ui-dialog-titlebar .elfinder-titlebar-minimize:hover .ui-icon,
-.elfinder-mobile .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-minimize .ui-icon {
-	background-color: #ffbc00;
-	border-color: #e3a40b;
-}
-.std42-dialog .ui-dialog-titlebar .elfinder-titlebar-full:hover .ui-icon,
-.elfinder-mobile .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-full .ui-icon {
-	background-color: #26c82f;
-	border-color: #13ae10;
 }
 
 /* resize handle for touch devices */
