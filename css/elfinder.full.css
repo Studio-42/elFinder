@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 8d7212f) (2017-10-18)
+ * Version 2.1.29 (2.1-src Nightly: 3ebf773) (2017-10-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2519,8 +2519,8 @@ button.elfinder-info-button {
 	filter:Alpha(Opacity=70);
 }
 .elfinder-mobile .elfinder-quicklook-titlebar-icon .ui-icon {
-	opacity: .5;
-	filter:Alpha(Opacity=50);
+	opacity: .6;
+	filter:Alpha(Opacity=60);
 }
 .elfinder-touch .elfinder-quicklook-titlebar-icon .ui-icon {
 	margin-top: -3px;
@@ -2535,7 +2535,8 @@ button.elfinder-info-button {
 }
 
 .elfinder-touch .elfinder-quicklook-titlebar .ui-icon {
-	zoom: 1.5;
+	transform: scale(1.2);
+	zoom: 1.2;
 }
 
 /* main part of quicklook window */

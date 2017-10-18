@@ -24,6 +24,7 @@
 .elfinder-mobile .elfinder-quicklook-titlebar-icon .ui-icon.elfinder-icon-close {
 	background-color: #ff6252;
 	border-color: #e5695d;
+	background-image: url("../img/ui-icons_ffffff_256x240.png");
 }
 .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-minimize:hover .ui-icon,
 .elfinder-mobile .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-minimize .ui-icon,
@@ -31,6 +32,7 @@
 .elfinder-mobile .elfinder-quicklook-titlebar-icon .ui-icon.elfinder-icon-minimize {
 	background-color: #ffbc00;
 	border-color: #e3a40b;
+	background-image: url("../img/ui-icons_ffffff_256x240.png");
 }
 .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-full:hover .ui-icon,
 .elfinder-mobile .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-full .ui-icon,
@@ -38,21 +40,7 @@
 .elfinder-mobile .elfinder-quicklook-titlebar-icon .ui-icon.elfinder-icon-full {
 	background-color: #26c82f;
 	border-color: #13ae10;
-}
-.std42-dialog .ui-dialog-titlebar .ui-dialog-titlebar-close:hover .ui-icon,
-.elfinder-mobile .std42-dialog .ui-dialog-titlebar .ui-dialog-titlebar-close .ui-icon {
-	background-color: #ff6252;
-	border-color: #e5695d;
-}
-.std42-dialog .ui-dialog-titlebar .elfinder-titlebar-minimize:hover .ui-icon,
-.elfinder-mobile .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-minimize .ui-icon {
-	background-color: #ffbc00;
-	border-color: #e3a40b;
-}
-.std42-dialog .ui-dialog-titlebar .elfinder-titlebar-full:hover .ui-icon,
-.elfinder-mobile .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-full .ui-icon {
-	background-color: #26c82f;
-	border-color: #13ae10;
+	background-image: url("../img/ui-icons_ffffff_256x240.png");
 }
 
 /* navbar */
