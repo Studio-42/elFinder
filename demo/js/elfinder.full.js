@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 7b78509) (2017-10-19)
+ * Version 2.1.29 (2.1-src Nightly: 320cd6c) (2017-10-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8401,8 +8401,8 @@ elFinder.prototype = {
 			$.each(targets, function() {
 				var root = self.root(this),
 					file = self.file(this);
-				if (file && file.sizeInfo) {
-					cache.push($.Deferred().resolve(file.sizeInfo));
+				if (file && (file.sizeInfo || file.mime !== 'directory')) {
+					cache.push($.Deferred().resolve(file.sizeInfo? file.sizeInfo : {size: file.size, dirCnt: 0, fileCnt : 1}));
 				} else {
 					if (! grps[root]) {
 						grps[root] = [ this ];
@@ -8428,7 +8428,18 @@ elFinder.prototype = {
 			$.when.apply($, dfds).fail(function() {
 				dfrd.reject();
 			}).done(function() {
-				var size = 0,
+				var cache = function(h, data) {
+						var file;
+						if (file = self.file(h)) {
+							file.sizeInfo = { isCache: true };
+							$.each(['size', 'dirCnt', 'fileCnt'], function() {
+								file.sizeInfo[this] = data[this] || 0;
+							});
+							file.size = parseInt(file.sizeInfo.size);
+							changed.push(file);
+						}
+					},
+					size = 0,
 					fileCnt = 0,
 					dirCnt = 0,
 					argLen = arguments.length,
@@ -8440,13 +8451,14 @@ elFinder.prototype = {
 				for (i = 0; i < argLen; i++) {
 					data = arguments[i];
 					file = null;
-					if (!data.isCache && singles[i] && (file = self.file(singles[i]))) {
-						file.sizeInfo = { isCache: true };
-						$.each(['size', 'dirCnt', 'fileCnt'], function() {
-							file.sizeInfo[this] = data[this];
-						});
-						file.size = parseInt(file.sizeInfo.size);
-						changed.push(file);
+					if (!data.isCache) {
+						if (singles[i] && (file = self.file(singles[i]))) {
+							cache(singles[i], data);
+						} else if (data.sizes && $.isPlainObject(data.sizes)) {
+							$.each(data.sizes, function(h, sizeInfo) {
+								cache(h, sizeInfo);
+							});
+						}
 					}
 					size += parseInt(data.size);
 					if (fileCnt !== false) {
@@ -8656,7 +8668,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 7b78509)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 320cd6c)';
 
 
 
@@ -23737,15 +23749,9 @@ elFinder.prototype.commands.places = function() {
 					cnt = files.length,
 					inDock = self.docked(),
 					getInfo = function() {
-						var size = 0, ts = 0, getSize;
+						var ts = 0;
 						$.each(files, function(i, f) {
-							var s = parseInt(f.size),
-								t = parseInt(f.ts);
-							if ((f.mime !== 'directory' || f.sizeInfo) && s >= 0 && size >= 0) {
-								size += s;
-							} else {
-								size = 'unknown';
-							}
+							var t = parseInt(f.ts);
 							if (ts >= 0) {
 								if (t > ts) {
 									ts = t;
@@ -23754,15 +23760,14 @@ elFinder.prototype.commands.places = function() {
 								ts = 'unknown';
 							}
 						});
-						getSize = (size === 'unknown');
 						return {
-							hash : +new Date(),
+							hash : files[0].hash  + '/' + (+new Date()),
 							name : fm.i18n('items') + ': ' + cnt,
 							mime : 'group',
-							size : getSize? spinner : size,
+							size : spinner,
 							ts   : ts,
 							files : $.map(files, function(f) { return f.hash; }),
-							getSize : getSize
+							getSize : true
 						};
 					};
 				if (! cnt) {
@@ -23961,7 +23966,7 @@ elFinder.prototype.commands.places = function() {
 
 			if (!init && state === closed) {
 				if (file && file.hash !== cwdHash) {
-					node = $('#'+fm.cwdHash2Id(file.hash));
+					node = $('#'+fm.cwdHash2Id(file.hash.split('/', 2)[0]));
 				}
 				navStyle = '';
 				navbar.attr('style', '');
@@ -23985,7 +23990,7 @@ elFinder.prototype.commands.places = function() {
 			var win     = self.window,
 				preview = self.preview.trigger('change'),
 				file    = self.value,
-				hash    = win.data('hash'),
+				hash    = win.data('hash').split('/', 2)[0],
 				close   = function(status, winhide) {
 					state = status;
 					winhide && win.hide();
