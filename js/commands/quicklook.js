@@ -287,15 +287,9 @@
 					cnt = files.length,
 					inDock = self.docked(),
 					getInfo = function() {
-						var size = 0, ts = 0, getSize;
+						var ts = 0;
 						$.each(files, function(i, f) {
-							var s = parseInt(f.size),
-								t = parseInt(f.ts);
-							if ((f.mime !== 'directory' || f.sizeInfo) && s >= 0 && size >= 0) {
-								size += s;
-							} else {
-								size = 'unknown';
-							}
+							var t = parseInt(f.ts);
 							if (ts >= 0) {
 								if (t > ts) {
 									ts = t;
@@ -304,15 +298,14 @@
 								ts = 'unknown';
 							}
 						});
-						getSize = (size === 'unknown');
 						return {
-							hash : +new Date(),
+							hash : files[0].hash  + '/' + (+new Date()),
 							name : fm.i18n('items') + ': ' + cnt,
 							mime : 'group',
-							size : getSize? spinner : size,
+							size : spinner,
 							ts   : ts,
 							files : $.map(files, function(f) { return f.hash; }),
-							getSize : getSize
+							getSize : true
 						};
 					};
 				if (! cnt) {
@@ -511,7 +504,7 @@
 
 			if (!init && state === closed) {
 				if (file && file.hash !== cwdHash) {
-					node = $('#'+fm.cwdHash2Id(file.hash));
+					node = $('#'+fm.cwdHash2Id(file.hash.split('/', 2)[0]));
 				}
 				navStyle = '';
 				navbar.attr('style', '');
@@ -535,7 +528,7 @@
 			var win     = self.window,
 				preview = self.preview.trigger('change'),
 				file    = self.value,
-				hash    = win.data('hash'),
+				hash    = win.data('hash').split('/', 2)[0],
 				close   = function(status, winhide) {
 					state = status;
 					winhide && win.hide();

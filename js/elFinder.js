@@ -8370,8 +8370,8 @@ elFinder.prototype = {
 			$.each(targets, function() {
 				var root = self.root(this),
 					file = self.file(this);
-				if (file && file.sizeInfo) {
-					cache.push($.Deferred().resolve(file.sizeInfo));
+				if (file && (file.sizeInfo || file.mime !== 'directory')) {
+					cache.push($.Deferred().resolve(file.sizeInfo? file.sizeInfo : {size: file.size, dirCnt: 0, fileCnt : 1}));
 				} else {
 					if (! grps[root]) {
 						grps[root] = [ this ];
@@ -8397,7 +8397,18 @@ elFinder.prototype = {
 			$.when.apply($, dfds).fail(function() {
 				dfrd.reject();
 			}).done(function() {
-				var size = 0,
+				var cache = function(h, data) {
+						var file;
+						if (file = self.file(h)) {
+							file.sizeInfo = { isCache: true };
+							$.each(['size', 'dirCnt', 'fileCnt'], function() {
+								file.sizeInfo[this] = data[this] || 0;
+							});
+							file.size = parseInt(file.sizeInfo.size);
+							changed.push(file);
+						}
+					},
+					size = 0,
 					fileCnt = 0,
 					dirCnt = 0,
 					argLen = arguments.length,
@@ -8409,13 +8420,14 @@ elFinder.prototype = {
 				for (i = 0; i < argLen; i++) {
 					data = arguments[i];
 					file = null;
-					if (!data.isCache && singles[i] && (file = self.file(singles[i]))) {
-						file.sizeInfo = { isCache: true };
-						$.each(['size', 'dirCnt', 'fileCnt'], function() {
-							file.sizeInfo[this] = data[this];
-						});
-						file.size = parseInt(file.sizeInfo.size);
-						changed.push(file);
+					if (!data.isCache) {
+						if (singles[i] && (file = self.file(singles[i]))) {
+							cache(singles[i], data);
+						} else if (data.sizes && $.isPlainObject(data.sizes)) {
+							$.each(data.sizes, function(h, sizeInfo) {
+								cache(h, sizeInfo);
+							});
+						}
 					}
 					size += parseInt(data.size);
 					if (fileCnt !== false) {
