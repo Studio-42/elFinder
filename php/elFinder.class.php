@@ -1671,8 +1671,10 @@ class elFinder {
 		$files = 0;
 		$dirs = 0;
 		$itemCount = true;
+		$sizes = array();
 		
 		foreach ($args['targets'] as $target) {
+			elFinder::extendTimeLimit();
 			if (($volume = $this->volume($target)) == false
 			|| ($file = $volume->file($target)) == false
 			|| !$file['read']) {
@@ -1681,24 +1683,29 @@ class elFinder {
 			
 			$volRes = $volume->size($target);
 			if (is_array($volRes)) {
+				$sizeInfo = array('size' => 0, 'fileCnt' => 0, 'dirCnt' => 0);
 				if (! empty($volRes['size'])) {
+					$sizeInfo['size'] = $volRes['size'];
 					$size += $volRes['size'];
 				}
-				if ($itemCount) {
-					if (! empty($volRes['files'])) {
-						$files += $volRes['files'];
-					}
-					if (! empty($volRes['dirs'])) {
-						$dirs += $volRes['dirs'];
-					}
+				if (! empty($volRes['files'])) {
+					$sizeInfo['fileCnt'] = $volRes['files'];
 				}
+				if (! empty($volRes['dirs'])) {
+					$sizeInfo['dirCnt'] = $volRes['dirs'];
+				}
+				if ($itemCount) {
+					$files += $sizeInfo['fileCnt'];
+					$dirs += $sizeInfo['dirCnt'];
+				}
+				$sizes[$target] = $sizeInfo;
 			} else if (is_numeric($volRes)) {
 				$size += $volRes;
 				$files = $dirs = 'unknown';
 				$itemCount = false;
 			}
 		}
-		return array('size' => $size, 'fileCnt' => $files, 'dirCnt' => $dirs);
+		return array('size' => $size, 'fileCnt' => $files, 'dirCnt' => $dirs, 'sizes' => $sizes);
 	}
 	
 	/**
@@ -3118,6 +3125,7 @@ class elFinder {
 			}
 		} else {
 			foreach ($args['targets'] as $hash) {
+				elFinder::extendTimeLimit();
 				if (($volume = $this->volume($hash)) != false
 				&& ($info = $volume->file($hash)) != false) {
 					$info['path'] = $volume->path($hash);
