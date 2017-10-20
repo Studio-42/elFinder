@@ -149,6 +149,17 @@ h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
   a.download-button { color: #ffffff; }
   .download-button span { font-size: 0.6em; color: #eeeeee; line-height: 80%;}
 
+/* donate button */
+#elfinder-donate-select form {
+	margin: 10px;
+}
+#elfinder-donate-select input[type=submit] {
+	cursor: pointer;
+	padding: 5px;
+	font-size: 1.2em;
+	font-weight: bold;
+}
+
 /* misc */
 .text-center { text-align: center; }
 

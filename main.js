@@ -51,6 +51,22 @@
 		
 		// Start elFinder (REQUIRED)
 		start = function(elFinder, editors, i18nfmsg, extOpts) {
+			// donate button
+			$('#elfinder-donate-select').hide().find('form').on('submit', function() {
+				setTimeout(function() {
+					$('#elfinder-donate-select').hide();
+				}, 100);
+			});
+			$('#elfinder-donate').on('click', function(e) {
+				var selbox = $('#elfinder-donate-select');
+				e.preventDefault();
+				if (selbox.is(':hidden')) {
+					selbox.show();
+				} else {
+					selbox.hide();
+				}
+			});
+			
 			// load jQueryUI CSS
 			elFinder.prototype.loadCss('//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/themes/smoothness/jquery-ui.css');
 			
