@@ -122,12 +122,15 @@
 }
 .elfinder-quicklook-titlebar-icon .ui-icon {
 	position: relative;
-	margin: -9px 6px 0px 0px;
+	margin: -9px 3px 0px 0px;
 	cursor: pointer;
 	border-radius: 10px;
 	border: 1px solid;
 	opacity: .7;
 	filter:Alpha(Opacity=70);
+}
+.elfinder-quicklook-titlebar-icon .ui-icon.ui-icon-closethick {
+	padding-left: 1px;
 }
 .elfinder-mobile .elfinder-quicklook-titlebar-icon .ui-icon {
 	opacity: .6;
@@ -142,14 +145,19 @@
 	direction: rtl;
 }
 .elfinder-quicklook-titlebar-icon.elfinder-platformWin .ui-icon {
-	margin: -9px 0px 0px 6px;
+	margin: -9px 0px 0px 3px;
 }
 
 .elfinder-touch .elfinder-quicklook-titlebar .ui-icon {
-	transform: scale(1.2);
-	zoom: 1.2;
+	transform: scale(1.1);
+	zoom: 1.1;
 }
-
+.elfinder-touch .elfinder-quicklook-titlebar-icon .ui-icon {
+	margin-right: 10px;
+}
+.elfinder-touch .elfinder-quicklook-titlebar-icon.elfinder-platformWin .ui-icon {
+	margin-left: 10px;
+}
 /* main part of quicklook window */
 .elfinder-quicklook-preview {
 	overflow: hidden;
