@@ -77,11 +77,11 @@ elFinder.prototype.commands.resize = function() {
 			open = function(file, id) {
 				var isJpeg   = (file.mime === 'image/jpeg'),
 					dialog   = $('<div class="elfinder-dialog-resize '+fm.res('class', 'editing')+'"/>'),
-					input    = '<input type="text" size="5"/>',
+					input    = '<input type="number" class="ui-corner-all"/>',
 					row      = '<div class="elfinder-resize-row"/>',
 					label    = '<div class="elfinder-resize-label"/>',
 					control  = $('<div class="elfinder-resize-control"/>')
-						.on('focus', 'input[type=text]', function() {
+						.on('focus', 'input[type=text],input[type=number]', function() {
 							$(this).select();
 						}),
 					preview  = $('<div class="elfinder-resize-preview"/>')
@@ -109,7 +109,7 @@ elFinder.prototype.commands.resize = function() {
 							text: false
 						}),
 					uitype   = $('<div class="elfinder-resize-type"/>')
-						.append('<input class="" type="radio" name="type" id="'+id+'-resize" value="resize" checked="checked" /><label for="'+id+'-resize">'+fm.i18n('resize')+'</label>',
+						.append('<input type="radio" name="type" id="'+id+'-resize" value="resize" checked="checked" /><label for="'+id+'-resize">'+fm.i18n('resize')+'</label>',
 						'<input class="api2" type="radio" name="type" id="'+id+'-crop" value="crop" /><label class="api2" for="'+id+'-crop">'+fm.i18n('crop')+'</label>',
 						'<input class="api2" type="radio" name="type" id="'+id+'-rotate" value="rotate" /><label class="api2" for="'+id+'-rotate">'+fm.i18n('rotate')+'</label>'),
 					mode     = 'resize',
@@ -168,13 +168,13 @@ elFinder.prototype.commands.resize = function() {
 					offsetY = $(input).change(function(){crop.updateView('h');}),
 					quality = isJpeg && api2?
 						$(input).val(fm.storage('jpgQuality') || fm.option('jpgQuality'))
-							.addClass('quality')
+							.addClass('elfinder-resize-quality')
 							.on('blur', function(){
 								var q = Math.min(100, Math.max(1, parseInt(this.value)));
-								dialog.find('input.quality').val(q);
+								dialog.find('input.elfinder-resize-quality').val(q);
 							})
 						: null,
-					degree = $('<input type="text" size="3" maxlength="3" value="0" />')
+					degree = $('<input type="number" class="ui-corner-all" maxlength="3" value="0" />')
 						.change(function() {
 							rotate.update();
 						}),
@@ -265,7 +265,7 @@ elFinder.prototype.commands.resize = function() {
 							},
 							text: false
 						}),
-					bg = $('<input class="elfinder-resize-bg" type="text">')
+					bg = $('<input class="ui-corner-all elfinder-resize-bg" type="text">')
 						.on('focus', function() {
 							$(this).attr('style', '');
 						})

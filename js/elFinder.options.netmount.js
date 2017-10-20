@@ -9,7 +9,7 @@ elFinder.prototype._options.commandsOptions.netmount = {
 		name : 'FTP',
 		inputs: {
 			host     : $('<input type="text"/>'),
-			port     : $('<input type="text" placeholder="21" class="elfinder-input-optional"/>'),
+			port     : $('<input type="number" placeholder="21" class="elfinder-input-optional"/>'),
 			path     : $('<input type="text" value="/"/>'),
 			user     : $('<input type="text"/>'),
 			pass     : $('<input type="password" autocomplete="new-password"/>'),

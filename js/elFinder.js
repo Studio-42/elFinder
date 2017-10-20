@@ -1771,6 +1771,8 @@ var elFinder = function(node, opts, bootCallback) {
 			navigate = opts.navigate,
 			// open notify dialog timeout
 			timeout,
+			// use browser cache
+			useCache = (opts.options || {}).cache,
 			// request options
 			options = Object.assign({
 				url      : o.url,
@@ -2151,7 +2153,11 @@ var elFinder = function(node, opts, bootCallback) {
 				delete options.preventFail
 
 				if (self.api >= 2.1029) {
-					Object.assign(options.data, { reqid : reqId });
+					if (useCache) {
+						options.headers['X-elFinderReqid'] = reqId;
+					} else {
+						Object.assign(options.data, { reqid : reqId });
+					}
 				}
 				
 				// function for set value of this syncOnFail

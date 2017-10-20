@@ -6,10 +6,10 @@
 .elfinder-dialog-resize  { margin-top:.3em; }
 .elfinder-resize-type    { float:left; margin-bottom: .4em; }
 .elfinder-resize-control { float: left; }
-.elfinder-resize-control input[type=text] {
+.elfinder-resize-control input[type=number] {
 	border:1px solid #aaa;
 	text-align: right;
-	width: 4em;
+	width: 4.5em;
 }
 .elfinder-resize-control input.elfinder-resize-bg { 
 	text-align: center;
@@ -232,8 +232,8 @@
 }
 
 .elfinder-dialog-resize .elfinder-resize-degree input,
-.elfinder-dialog-resize .elfinder-resize-quality input {
-	width: 2.5em;
+.elfinder-dialog-resize input.elfinder-resize-quality {
+	width: 3.5em;
 }
 .elfinder-dialog-resize .elfinder-resize-degree button.ui-button {
 	padding: 6px 8px;

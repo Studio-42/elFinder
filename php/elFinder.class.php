@@ -853,6 +853,9 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_UNKNOWN_CMD));
 		}
 		
+		// check request id
+		$args['reqid'] = preg_replace('[^0-9a-fA-F]', '', ! empty($args['reqid'])? $args['reqid'] : (! empty($_SERVER['HTTP_X_ELFINDERREQID'])? $_SERVER['HTTP_X_ELFINDERREQID'] : ''));
+		
 		// to abort this request
 		if ($cmd === 'abort') {
 			$this->abort($args);
@@ -860,7 +863,7 @@ class elFinder {
 		}
 		
 		// make flag file and set self::$abortCheckFile
-		if (! empty($args['reqid'])) {
+		if ($args['reqid']) {
 			$this->abort(array('makeFile' => $args['reqid']));
 		}
 		
