@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 320cd6c) (2017-10-19)
+ * Version 2.1.29 (2.1-src Nightly: 76b84ce) (2017-10-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -16,10 +16,10 @@
 .elfinder-dialog-resize  { margin-top:.3em; }
 .elfinder-resize-type    { float:left; margin-bottom: .4em; }
 .elfinder-resize-control { float: left; }
-.elfinder-resize-control input[type=text] {
+.elfinder-resize-control input[type=number] {
 	border:1px solid #aaa;
 	text-align: right;
-	width: 4em;
+	width: 4.5em;
 }
 .elfinder-resize-control input.elfinder-resize-bg { 
 	text-align: center;
@@ -242,8 +242,8 @@
 }
 
 .elfinder-dialog-resize .elfinder-resize-degree input,
-.elfinder-dialog-resize .elfinder-resize-quality input {
-	width: 2.5em;
+.elfinder-dialog-resize input.elfinder-resize-quality {
+	width: 3.5em;
 }
 .elfinder-dialog-resize .elfinder-resize-degree button.ui-button {
 	padding: 6px 8px;
@@ -2511,12 +2511,15 @@ button.elfinder-info-button {
 }
 .elfinder-quicklook-titlebar-icon .ui-icon {
 	position: relative;
-	margin: -9px 6px 0px 0px;
+	margin: -9px 3px 0px 0px;
 	cursor: pointer;
 	border-radius: 10px;
 	border: 1px solid;
 	opacity: .7;
 	filter:Alpha(Opacity=70);
+}
+.elfinder-quicklook-titlebar-icon .ui-icon.ui-icon-closethick {
+	padding-left: 1px;
 }
 .elfinder-mobile .elfinder-quicklook-titlebar-icon .ui-icon {
 	opacity: .6;
@@ -2531,14 +2534,19 @@ button.elfinder-info-button {
 	direction: rtl;
 }
 .elfinder-quicklook-titlebar-icon.elfinder-platformWin .ui-icon {
-	margin: -9px 0px 0px 6px;
+	margin: -9px 0px 0px 3px;
 }
 
 .elfinder-touch .elfinder-quicklook-titlebar .ui-icon {
-	transform: scale(1.2);
-	zoom: 1.2;
+	transform: scale(1.1);
+	zoom: 1.1;
 }
-
+.elfinder-touch .elfinder-quicklook-titlebar-icon .ui-icon {
+	margin-right: 10px;
+}
+.elfinder-touch .elfinder-quicklook-titlebar-icon.elfinder-platformWin .ui-icon {
+	margin-left: 10px;
+}
 /* main part of quicklook window */
 .elfinder-quicklook-preview {
 	overflow: hidden;
