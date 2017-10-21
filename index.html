@@ -75,10 +75,19 @@
 						<h4>Which do you want to donate to?</h4>
 
 						<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
-							<input type="hidden" name="cmd" value="_s-xclick">
+							<!--<input type="hidden" name="cmd" value="_s-xclick">
 							<input type="hidden" name="hosted_button_id" value="2ZWHGW37GU342">
 							<input type="submit" value="Current developer (Hypweb.net : nao-pon)" border="0" name="submit" alt="Donate With PayPal">
-							<img alt="" border="0" src="https://www.paypalobjects.com/ja_JP/i/scr/pixel.gif" width="1" height="1">
+							<img alt="" border="0" src="https://www.paypalobjects.com/ja_JP/i/scr/pixel.gif" width="1" height="1">-->
+							<input type="hidden" name="cmd" value="_donations">
+							<input type="hidden" name="business" value="3AAZHSJ6GXVPW">
+							<input type="hidden" name="lc" value="en_US">
+							<input type="hidden" name="item_name" value="Donation to elFinder (nao-pon)">
+							<input type="hidden" name="no_note" value="0">
+							<input type="hidden" name="currency_code" value="USD">
+							<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_LG.gif:NonHostedGuest">
+							<input type="submit" value="Current developer (Hypweb.net : nao-pon)" border="0" name="submit" alt="Donate With PayPal">
+							<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
 						</form>
 
 						<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
