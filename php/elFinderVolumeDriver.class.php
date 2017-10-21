@@ -286,7 +286,8 @@ abstract class elFinderVolumeDriver {
 			'mpd:text/plain'               => 'application/dash+xml',
 			'mpd:application/xml'          => 'application/dash+xml',
 			'xml:application/xml'          => 'text/xml',
-			'*:application/x-dosexec'      => 'application/x-executable'
+			'*:application/x-dosexec'      => 'application/x-executable',
+			'webp:application/octet-stream'=> 'image/webp'
 		),
 		// An option to add MimeMap to the `mimeMap` option
 		// Array '[ext]:[detected mime type]' => '[normalized mime]'
