@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 0fb8a82) (2017-10-21)
+ * Version 2.1.29 (2.1-src Nightly: 8991400) (2017-10-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8674,7 +8674,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 0fb8a82)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 8991400)';
 
 
 
@@ -24314,7 +24314,17 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 **/
 	function(ql) {
 		var mimes   = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp'],
-			preview = ql.preview;
+			preview = ql.preview,
+			WebP;
+		
+		// webp support
+		WebP = new Image();
+		WebP.onload = WebP.onerror = function() {
+			if (WebP.height == 2) {
+				mimes.push('image/webp');
+			}
+		};
+		WebP.src='data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
 		
 		// what kind of images we can display
 		$.each(navigator.mimeTypes, function(i, o) {
