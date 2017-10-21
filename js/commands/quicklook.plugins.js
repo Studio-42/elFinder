@@ -9,7 +9,17 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 **/
 	function(ql) {
 		var mimes   = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp'],
-			preview = ql.preview;
+			preview = ql.preview,
+			WebP;
+		
+		// webp support
+		WebP = new Image();
+		WebP.onload = WebP.onerror = function() {
+			if (WebP.height == 2) {
+				mimes.push('image/webp');
+			}
+		};
+		WebP.src='data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
 		
 		// what kind of images we can display
 		$.each(navigator.mimeTypes, function(i, o) {
