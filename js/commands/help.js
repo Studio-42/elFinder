@@ -365,7 +365,7 @@
 	
 			fm.bind('backenddebug', function(e) {
 				// CAUTION: DO NOT TOUCH `e.data`
-				if (e.data && e.data.debug) {
+				if (useDebug && e.data && e.data.debug) {
 					self.debug = { options : e.data.options, debug : Object.assign({ cmd : fm.currentReqCmd }, e.data.debug) };
 					if (self.dialog) {
 						debugRender();
@@ -383,8 +383,10 @@
 				autoOpen : false,
 				destroyOnClose : false,
 				close : function() {
-					tabDebug.hide();
-					debugDIV.tabs('destroy');
+					if (useDebug) {
+						tabDebug.hide();
+						debugDIV.tabs('destroy');
+					}
 					opened = false;
 				}
 			})
@@ -422,6 +424,20 @@
 		}
 		
 		self.state = 0;
+	}).one('open', function() {
+		var debug = false;
+		fm.one('backenddebug', function() {
+			debug =true;
+		}).one('opendone', function() {
+			setTimeout(function() {
+				if (! debug && useDebug) {
+					useDebug = false;
+					tabDebug.hide();
+					debugDIV.hide();
+					debugUL.hide();
+				}
+			}, 0);
+		});
 	});
 	
 	this.getstate = function() {
@@ -431,10 +447,12 @@
 	this.exec = function(sel, opts) {
 		var tab = opts? opts.tab : void(0),
 			debugShow = function() {
-				debugDIV.tabs();
-				debugUL.find('a:first').trigger('click');
-				tabDebug.show();
-				opened = true;
+				if (useDebug) {
+					debugDIV.tabs();
+					debugUL.find('a:first').trigger('click');
+					tabDebug.show();
+					opened = true;
+				}
 			};
 		if (! loaded) {
 			loaded = true;
