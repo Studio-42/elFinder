@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 76b84ce) (2017-10-21)
+ * Version 2.1.29 (2.1-src Nightly: 1dce15c) (2017-10-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8674,7 +8674,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 76b84ce)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 1dce15c)';
 
 
 
@@ -23996,7 +23996,7 @@ elFinder.prototype.commands.places = function() {
 			var win     = self.window,
 				preview = self.preview.trigger('change'),
 				file    = self.value,
-				hash    = win.data('hash').split('/', 2)[0],
+				hash    = (win.data('hash') || '').split('/', 2)[0],
 				close   = function(status, winhide) {
 					state = status;
 					winhide && win.hide();
