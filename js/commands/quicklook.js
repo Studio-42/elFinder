@@ -528,7 +528,7 @@
 			var win     = self.window,
 				preview = self.preview.trigger('change'),
 				file    = self.value,
-				hash    = win.data('hash').split('/', 2)[0],
+				hash    = (win.data('hash') || '').split('/', 2)[0],
 				close   = function(status, winhide) {
 					state = status;
 					winhide && win.hide();
