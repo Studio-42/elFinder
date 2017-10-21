@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 896f70d) (2017-10-21)
+ * Version 2.1.29 (2.1-src Nightly: d3722c6) (2017-10-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8674,7 +8674,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 896f70d)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: d3722c6)';
 
 
 
@@ -21958,7 +21958,7 @@ elFinder.prototype.commands.fullscreen = function() {
 	
 			fm.bind('backenddebug', function(e) {
 				// CAUTION: DO NOT TOUCH `e.data`
-				if (e.data && e.data.debug) {
+				if (useDebug && e.data && e.data.debug) {
 					self.debug = { options : e.data.options, debug : Object.assign({ cmd : fm.currentReqCmd }, e.data.debug) };
 					if (self.dialog) {
 						debugRender();
@@ -21976,8 +21976,10 @@ elFinder.prototype.commands.fullscreen = function() {
 				autoOpen : false,
 				destroyOnClose : false,
 				close : function() {
-					tabDebug.hide();
-					debugDIV.tabs('destroy');
+					if (useDebug) {
+						tabDebug.hide();
+						debugDIV.tabs('destroy');
+					}
 					opened = false;
 				}
 			})
@@ -22015,6 +22017,20 @@ elFinder.prototype.commands.fullscreen = function() {
 		}
 		
 		self.state = 0;
+	}).one('open', function() {
+		var debug = false;
+		fm.one('backenddebug', function() {
+			debug =true;
+		}).one('opendone', function() {
+			setTimeout(function() {
+				if (! debug && useDebug) {
+					useDebug = false;
+					tabDebug.hide();
+					debugDIV.hide();
+					debugUL.hide();
+				}
+			}, 0);
+		});
 	});
 	
 	this.getstate = function() {
@@ -22024,10 +22040,12 @@ elFinder.prototype.commands.fullscreen = function() {
 	this.exec = function(sel, opts) {
 		var tab = opts? opts.tab : void(0),
 			debugShow = function() {
-				debugDIV.tabs();
-				debugUL.find('a:first').trigger('click');
-				tabDebug.show();
-				opened = true;
+				if (useDebug) {
+					debugDIV.tabs();
+					debugUL.find('a:first').trigger('click');
+					tabDebug.show();
+					opened = true;
+				}
 			};
 		if (! loaded) {
 			loaded = true;
