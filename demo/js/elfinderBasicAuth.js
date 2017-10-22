@@ -35,7 +35,8 @@ elFinder.prototype.commands.login = function() {
 		aopt = {
 			dataType: 'json',
 			headers: fm.options.customHeaders,
-			xhrFields: fm.options.xhrFields
+			xhrFields: fm.options.xhrFields,
+			cache: false
 		};
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
