@@ -379,6 +379,9 @@ pre.elfinder-quicklook-preview-text.prettyprint {
 	margin:0;
 	padding:3px 9px;
 	border: none;
+	-o-tab-size: 4;
+	-moz-tab-size: 4;
+	tab-size: 4;
 }
 .elfinder-quicklook-preview-charsleft hr {
 	border:none;
