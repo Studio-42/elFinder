@@ -3698,9 +3698,11 @@ abstract class elFinderVolumeDriver {
 				while(!feof($fp)) {
 					fwrite($wfp, fread($fp, 8192));
 				}
-				$this->_fclose($fp, $path);
+				$info = stream_get_meta_data($wfp);
 				fclose($wfp);
-				return $work;
+				if ($info && ! empty($info['uri'])) {
+					return $info['uri'];
+				}
 			}
 		}
 		return false;

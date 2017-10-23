@@ -235,7 +235,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 						setTimeout(function() { PRcheck(node, cnt); }, 100);
 					} else {
 						if (typeof window.PR === 'object') {
-							PR.prettyPrint && PR.prettyPrint(null, node.get(0));
+							node.css('cursor', 'wait');
+							setTimeout(function() {
+								PR.prettyPrint && PR.prettyPrint(null, node.get(0));
+								node.css('cursor', '');
+							}, 0);
 						} else {
 							prettify = function() { return false; };
 						}
