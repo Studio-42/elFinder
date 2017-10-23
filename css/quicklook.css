@@ -387,6 +387,7 @@ pre.elfinder-quicklook-preview-text.prettyprint {
 .elfinder-quicklook-preview-charsleft span {
 	font-size: 90%;
 	font-style: italic;
+	cursor: pointer;
 }
 /* html/pdf preview */
 .elfinder-quicklook-preview-html,

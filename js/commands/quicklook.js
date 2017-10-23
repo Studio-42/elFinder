@@ -357,10 +357,7 @@
 		spinner = '<span class="elfinder-info-spinner"/>' + fm.i18n('calc'),
 		navStyle = '',
 		init = true,
-		dockHeight,
-		getSize,
-		tm4cwd,
-		dockedNode;
+		dockHeight,	getSize, tm4cwd, dockedNode, selectTm;
 
 	(this.navbar = navbar)._show = navShow;
 	this.resize = 'resize.'+fm.namespace;
@@ -617,7 +614,16 @@
 	
 	this.handlers = {
 		// save selected file
-		select : function() { this.opened() && updateOnSel(); },
+		select : function(e, d) {
+			selectTm && clearTimeout(selectTm);
+			if (! e.data || ! e.data.selected || ! e.data.selected.length) {
+				selectTm = setTimeout(function() {
+					self.opened() && updateOnSel();
+				}, 0);
+			} else {
+				self.opened() && updateOnSel();
+			}
+		},
 		error  : function() { self.window.is(':visible') && self.window.trigger('close'); },
 		'searchshow searchhide' : function() { this.opened() && this.window.trigger('close'); },
 		navbarshow : function() {
