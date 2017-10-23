@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: d3722c6) (2017-10-21)
+ * Version 2.1.29 (2.1-src Nightly: 0349cd0) (2017-10-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8674,7 +8674,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: d3722c6)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 0349cd0)';
 
 
 
@@ -23843,10 +23843,7 @@ elFinder.prototype.commands.places = function() {
 		spinner = '<span class="elfinder-info-spinner"/>' + fm.i18n('calc'),
 		navStyle = '',
 		init = true,
-		dockHeight,
-		getSize,
-		tm4cwd,
-		dockedNode;
+		dockHeight,	getSize, tm4cwd, dockedNode, selectTm;
 
 	(this.navbar = navbar)._show = navShow;
 	this.resize = 'resize.'+fm.namespace;
@@ -24103,7 +24100,16 @@ elFinder.prototype.commands.places = function() {
 	
 	this.handlers = {
 		// save selected file
-		select : function() { this.opened() && updateOnSel(); },
+		select : function(e, d) {
+			selectTm && clearTimeout(selectTm);
+			if (! e.data || ! e.data.selected || ! e.data.selected.length) {
+				selectTm = setTimeout(function() {
+					self.opened() && updateOnSel();
+				}, 0);
+			} else {
+				self.opened() && updateOnSel();
+			}
+		},
 		error  : function() { self.window.is(':visible') && self.window.trigger('close'); },
 		'searchshow searchhide' : function() { this.opened() && this.window.trigger('close'); },
 		navbarshow : function() {
@@ -24554,10 +24560,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 			},
 			PRcheck = function(node, cnt) {
 				if (prettify()) {
-					if (typeof PR === 'undefined' && cnt--) {
+					if (typeof window.PR === 'undefined' && cnt--) {
 						setTimeout(function() { PRcheck(node, cnt); }, 100);
 					} else {
-						if (typeof PR === 'object') {
+						if (typeof window.PR === 'object') {
 							PR.prettyPrint && PR.prettyPrint(null, node.get(0));
 						} else {
 							prettify = function() { return false; };
@@ -24574,7 +24580,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			if (mime.indexOf('text/') === 0 || $.inArray(mime, mimes) !== -1) {
 				e.stopImmediatePropagation();
 				
-				(typeof PR === 'undefined') && prettify();
+				(typeof window.PR === 'undefined') && prettify();
 				
 				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 
@@ -24591,7 +24597,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				.done(function(data) {
 					var reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i'),
 						text = data.content,
-						more, node, m;
+						part, more, node, m;
 					ql.hideinfo();
 					if (window.atob && (m = text.match(reg))) {
 						text = atob(text.substr(m[1].length));
@@ -24599,16 +24605,24 @@ elFinder.prototype.commands.quicklook.plugins = [
 					
 					more = text.length - textMaxlen;
 					if (more > 100) {
-						text = text.substr(0, textMaxlen) + '...';
+						part = text.substr(0, textMaxlen) + '...';
 					} else {
 						more = 0;
 					}
 					
-					node = $('<div class="elfinder-quicklook-preview-text-wrapper"><pre class="elfinder-quicklook-preview-text prettyprint">'+fm.escape(text)+'</pre></div>');
+					node = $('<div class="elfinder-quicklook-preview-text-wrapper"><pre class="elfinder-quicklook-preview-text prettyprint"></pre></div>');
 					
 					if (more) {
-						node.append('<div class="elfinder-quicklook-preview-charsleft"><hr/><span>' + fm.i18n('charsLeft', fm.toLocaleString(more)) + '</span></div>');
+						node.append($('<div class="elfinder-quicklook-preview-charsleft"><hr/><span>' + fm.i18n('charsLeft', fm.toLocaleString(more)) + '</span></div>')
+							.on('click', function() {
+								var top = node.scrollTop();
+								$(this).remove();
+								node.children('pre').removeClass('prettyprinted').text(text).scrollTop(top);
+								PRcheck(node, 100);
+							})
+						);
 					}
+					node.children('pre').text(part || text);
 					
 					node.on('touchstart', function(e) {
 						if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {

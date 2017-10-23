@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: d3722c6) (2017-10-21)
+ * Version 2.1.29 (2.1-src Nightly: 0349cd0) (2017-10-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2776,6 +2776,7 @@ pre.elfinder-quicklook-preview-text.prettyprint {
 .elfinder-quicklook-preview-charsleft span {
 	font-size: 90%;
 	font-style: italic;
+	cursor: pointer;
 }
 /* html/pdf preview */
 .elfinder-quicklook-preview-html,
