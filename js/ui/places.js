@@ -3,6 +3,7 @@
  * @class elFinder places/favorites ui
  *
  * @author Dmitry (dio) Levashov
+ * @author Naoki Sawada
  **/
 $.fn.elfinderplaces = function(fm, opts) {
 	return this.each(function() {
@@ -17,7 +18,8 @@ $.fn.elfinderplaces = function(fm, opts) {
 			tpl       = fm.res('tpl', 'placedir'),
 			ptpl      = fm.res('tpl', 'perms'),
 			spinner   = $(fm.res('tpl', 'navspinner')),
-			key       = 'places'+(opts.suffix? opts.suffix : ''),
+			suffix    = opts.suffix? opts.suffix : '',
+			key       = 'places' + suffix,
 			menuTimer = null,
 			/**
 			 * Convert places dir node into dir hash
@@ -54,6 +56,68 @@ $.fn.elfinderplaces = function(fm, opts) {
 				}
 				
 				fm.storage(key, data);
+			},
+			/**
+			 * Init dir at places
+			 *
+			 * @return void
+			 **/
+			init = function() {
+				var dat, hashes;
+				key = 'places'+(opts.suffix? opts.suffix : ''),
+				dirs = {};
+				dat = fm.storage(key);
+				if (typeof dat === 'string') {
+					// old data type elFinder <= 2.1.12
+					dat = $.map(dat.split(','), function(hash) { return hash || null;});
+					$.each(dat, function(i, d) {
+						var dir = d.split('#')
+						dirs[dir[0]] = dir[1]? dir[1] : dir[0];
+					});
+				} else if ($.isPlainObject(dat)) {
+					dirs = dat;
+				}
+				// allow modify `dirs`
+				/**
+				 * example for preset places
+				 * 
+				 * elfinderInstance.bind('placesload', function(e, fm) {
+				 * 	//if (fm.storage(e.data.storageKey) === null) { // for first time only
+				 * 	if (!fm.storage(e.data.storageKey)) {           // for empty places
+				 * 		e.data.dirs[targetHash] = fallbackName;     // preset folder
+				 * 	}
+				 * }
+				 **/
+				fm.trigger('placesload', {dirs: dirs, storageKey: key}, true);
+				
+				hashes = Object.keys(dirs);
+				if (hashes.length) {
+					root.prepend(spinner);
+					
+					fm.request({
+						data : {cmd : 'info', targets : hashes},
+						preventDefault : true
+					})
+					.done(function(data) {
+						var exists = {};
+						
+						data.files && data.files.length && fm.cache(data.files);
+						
+						$.each(data.files, function(i, f) {
+							var hash = f.hash;
+							exists[hash] = f;
+						});
+						$.each(dirs, function(h, f) {
+							add(exists[h] || Object.assign({notfound: true}, f));
+						});
+						if (fm.storage('placesState') > 0) {
+							root.click();
+						}
+					})
+					.always(function() {
+						spinner.remove();
+					})
+				}
 			},
 			/**
 			 * Return node for given dir object
@@ -444,60 +508,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			
 			places.show().parent().show();
 
-			dirs = {};
-			dat = fm.storage(key);
-			if (typeof dat === 'string') {
-				// old data type elFinder <= 2.1.12
-				dat = $.map(dat.split(','), function(hash) { return hash || null;});
-				$.each(dat, function(i, d) {
-					var dir = d.split('#')
-					dirs[dir[0]] = dir[1]? dir[1] : dir[0];
-				});
-			} else if ($.isPlainObject(dat)) {
-				dirs = dat;
-			}
-			// allow modify `dirs`
-			/**
-			 * example for preset places
-			 * 
-			 * elfinderInstance.bind('placesload', function(e, fm) {
-			 * 	//if (fm.storage(e.data.storageKey) === null) { // for first time only
-			 * 	if (!fm.storage(e.data.storageKey)) {           // for empty places
-			 * 		e.data.dirs[targetHash] = fallbackName;     // preset folder
-			 * 	}
-			 * }
-			 **/
-			fm.trigger('placesload', {dirs: dirs, storageKey: key}, true);
-			
-			hashes = Object.keys(dirs);
-			if (hashes.length) {
-				root.prepend(spinner);
-				
-				fm.request({
-					data : {cmd : 'info', targets : hashes},
-					preventDefault : true
-				})
-				.done(function(data) {
-					var exists = {};
-					
-					data.files && data.files.length && fm.cache(data.files);
-					
-					$.each(data.files, function(i, f) {
-						var hash = f.hash;
-						exists[hash] = f;
-					});
-					$.each(dirs, function(h, f) {
-						add(exists[h] || Object.assign({notfound: true}, f));
-					});
-					if (fm.storage('placesState') > 0) {
-						root.click();
-					}
-				})
-				.always(function() {
-					spinner.remove();
-				})
-			}
-			
+			init();
 
 			fm.change(function(e) {
 				var changed = false;
@@ -551,8 +562,17 @@ $.fn.elfinderplaces = function(fm, opts) {
 				changed && save();
 			})
 			.bind('sync netmount', function() {
-				var hashes = Object.keys(dirs),
-					ev = this;
+				var ev = this,
+					opSuffix = opts.suffix? opts.suffix : '',
+					hashes;
+				
+				if (suffix !== opSuffix) {
+					suffix = opSuffix;
+					clear();
+					init();
+				}
+				
+				hashes = Object.keys(dirs)
 				if (hashes.length) {
 					root.prepend(spinner);
 
