@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 1f023dd) (2017-10-25)
+ * Version 2.1.29 (2.1-src Nightly: 7571749) (2017-10-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8674,7 +8674,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 1f023dd)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 7571749)';
 
 
 
@@ -16787,10 +16787,14 @@ $.fn.elfinderplaces = function(fm, opts) {
 					opSuffix = opts.suffix? opts.suffix : '',
 					hashes;
 				
-				if (suffix !== opSuffix) {
-					suffix = opSuffix;
-					clear();
-					init();
+				if (ev.type === 'sync') {
+					// check is change of opts.suffix
+					if (suffix !== opSuffix) {
+						suffix = opSuffix;
+						clear();
+						init();
+						return;
+					}
 				}
 				
 				hashes = Object.keys(dirs)
