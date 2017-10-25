@@ -117,10 +117,10 @@
 				file = this.file,
 				src = 'https://pixlr.com/'+mode+'/?s=c',
 				myurl = window.location.href.toString().replace(/#.*$/, ''),
-				error = function() {
+				error = function(error) {
 					container.remove();
 					node.data('loading')(true);
-					fm.error('Can not launch Pixlr.');
+					fm.error(error || 'Can not launch Pixlr.');
 				},
 				launch = function() {
 					errtm = setTimeout(error, 10000);
@@ -146,6 +146,11 @@
 						})
 						.on('load', function() {
 							errtm && clearTimeout(errtm);
+							setTimeout(function() {
+								if (container.is(':hidden')) {
+									error('Please disable your ad blocker.');
+								}
+							}, 1000);
 						})
 						.on('error', error)
 						.appendTo(elfNode.hasClass('elfinder-fullscreen')? elfNode : 'body');
