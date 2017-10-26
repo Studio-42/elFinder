@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: e9d7e60) (2017-10-25)
+ * Version 2.1.29 (2.1-src Nightly: 8557fa7) (2017-10-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8674,7 +8674,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: e9d7e60)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 8557fa7)';
 
 
 
@@ -9483,7 +9483,9 @@ elFinder.prototype._options = {
 			// defalt status of snap to 8px grid of the jpeg image ("enable" or "disable")
 			grid8px : 'enable',
 			// Preset size array [width, height]
-			presetSize : [[320, 240], [400, 400], [640, 480], [800,600]]
+			presetSize : [[320, 240], [400, 400], [640, 480], [800,600]],
+			// File size (byte) threshold when using the dim command for obtain the image size necessary to start editing
+			getDimThreshold : 200000
 		},
 		rm: {
 			// If trash is valid, items moves immediately to the trash holder without confirm.
@@ -25631,11 +25633,12 @@ elFinder.prototype.commands.resize = function() {
 			files = this.files(hashes),
 			dfrd  = $.Deferred(),
 			api2  = (fm.api > 1),
+			options = this.options,
 			dialogWidth = 650,
 			fmnode = fm.getUI(),
 			ctrgrup = $().controlgroup? 'controlgroup' : 'buttonset',
-			grid8Def = typeof this.options.grid8px === 'undefind' || this.options.grid8px !== 'disable'? true : false,
-			presetSize = Array.isArray(this.options.presetSize)? this.options.presetSize : [],
+			grid8Def = typeof options.grid8px === 'undefind' || options.grid8px !== 'disable'? true : false,
+			presetSize = Array.isArray(options.presetSize)? options.presetSize : [],
 			dlcls = 'elfinder-dialog-resize',
 			clactive = 'elfinder-dialog-active',
 			open = function(file, id) {
@@ -26104,94 +26107,114 @@ elFinder.prototype.commands.resize = function() {
 							btn[(owidth >= w && oheight >= h)? 'show' : 'hide']();
 						});
 					},
-					img     = $('<img/>')
-						.on('load', function() {
-							var elm = img.get(0),
-								memSize = elm.naturalWidth? null : {w: img.width(), h: img.height()};
-							
-							memSize && img.removeAttr('width').removeAttr('height');
-							
-							owidth  = elm.naturalWidth || elm.width || img.width();
-							oheight = elm.naturalHeight || elm.height || img.height();
-							
-							memSize && img.width(memSize.w).height(memSize.h);
-							
-							dMinBtn.show();
-
-							var r_scale, inputFirst,
-								imgRatio = oheight / owidth;
-							
-							if (imgRatio < 1 && preview.height() > preview.width() * imgRatio) {
-								preview.height(preview.width() * imgRatio);
-							}
-							
-							if (preview.height() > img.height() + 20) {
-								preview.height(img.height() + 20);
-							}
-							
-							pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
-							
-							spinner.remove();
-							
-							ratio = owidth/oheight;
-
-							rhandle.append(img.show()).show();
-							width.val(owidth);
-							height.val(oheight);
-
-							setupPicker();
-							setupPreset();
-							setupimg();
-							
-							uitype[ctrgrup]('enable');
-							inputFirst = control.find('input,select').prop('disabled', false)
-								.filter(':text').on('keydown', function(e) {
-									var cOpts;
-									if (e.keyCode == $.ui.keyCode.ENTER) {
-										e.stopPropagation();
-										e.preventDefault();
-										cOpts = {
-											title  : $('input:checked', uitype).val(),
-											text   : 'confirmReq',
-											accept : {
-												label    : 'btnApply',
-												callback : function() {  
-													save();
-												}
-											},
-											cancel : {
-												label    : 'btnCancel',
-												callback : function(){
-													$(this).focus();
-												}
+					dimreq  = null,
+					inited  = false,
+					setdim  = function(dim) {
+						var rfile = fm.file(file.hash);
+						rfile.width = dim[0];
+						rfile.height = dim[1];
+					},
+					init    = function() {
+						var elm, memSize, r_scale, inputFirst, imgRatio;
+						
+						if (inited) {
+							return;
+						}
+						inited = true;
+						if (dimreq) {
+							dimreq.reject();
+						}
+						
+						elm = img.get(0);
+						memSize = file.width? {w: file.width, h: file.height} : (elm.naturalWidth? null : {w: img.width(), h: img.height()});
+					
+						memSize && img.removeAttr('width').removeAttr('height');
+						
+						owidth  = file.width || elm.naturalWidth || elm.width || img.width();
+						oheight = file.height || elm.naturalHeight || elm.height || img.height();
+						if (!file.width) {
+							setdim([owidth, oheight]);
+						}
+						
+						memSize && img.width(memSize.w).height(memSize.h);
+						
+						dMinBtn.show();
+	
+						imgRatio = oheight / owidth;
+						
+						if (imgRatio < 1 && preview.height() > preview.width() * imgRatio) {
+							preview.height(preview.width() * imgRatio);
+						}
+						
+						if (preview.height() > img.height() + 20) {
+							preview.height(img.height() + 20);
+						}
+						
+						pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
+						
+						spinner.remove();
+						
+						ratio = owidth/oheight;
+	
+						rhandle.append(img.show()).show();
+						width.val(owidth);
+						height.val(oheight);
+	
+						setupPicker();
+						setupPreset();
+						setupimg();
+						
+						uitype[ctrgrup]('enable');
+						inputFirst = control.find('input,select').prop('disabled', false)
+							.filter(':text').on('keydown', function(e) {
+								var cOpts;
+								if (e.keyCode == $.ui.keyCode.ENTER) {
+									e.stopPropagation();
+									e.preventDefault();
+									cOpts = {
+										title  : $('input:checked', uitype).val(),
+										text   : 'confirmReq',
+										accept : {
+											label    : 'btnApply',
+											callback : function() {  
+												save();
 											}
-										};
-											
-										if (useSaveAs) {
-											cOpts['buttons'] = [{
-												label    : 'btnSaveAs',
-												callback : function() {
-													setTimeout(saveAs, 10);
-												}
-											}];
+										},
+										cancel : {
+											label    : 'btnCancel',
+											callback : function(){
+												$(this).focus();
+											}
 										}
-										fm.confirm(cOpts);
-										return;
+									};
+										
+									if (useSaveAs) {
+										cOpts['buttons'] = [{
+											label    : 'btnSaveAs',
+											callback : function() {
+												setTimeout(saveAs, 10);
+											}
+										}];
 									}
-								})
-								.on('keyup', function() {
-									var $this = $(this);
-									if (! $this.hasClass('elfinder-resize-bg')) {
-										setTimeout(function() {
-											$this.val($this.val().replace(/[^0-9]/g, ''));
-										}, 10);
-									}
-								})
-								.filter(':first');
-								
-							!fm.UA.Mobile && inputFirst.focus();
-							resizable();
-						})
+									fm.confirm(cOpts);
+									return;
+								}
+							})
+							.on('keyup', function() {
+								var $this = $(this);
+								if (! $this.hasClass('elfinder-resize-bg')) {
+									setTimeout(function() {
+										$this.val($this.val().replace(/[^0-9]/g, ''));
+									}, 10);
+								}
+							})
+							.filter(':first');
+							
+						!fm.UA.Mobile && inputFirst.focus();
+						resizable();
+					},
+					img     = $('<img/>')
+						.on('load', init)
 						.on('error', function() {
 							spinner.text('Unable to load image').css('background', 'transparent');
 						}),
@@ -26784,6 +26807,23 @@ elFinder.prototype.commands.resize = function() {
 						img.attr('src', src);
 						imgc.attr('src', src);
 						imgr.attr('src', src);
+						if (file.width && file.height) {
+							init();
+						} else if (file.size > (options.getDimThreshold || 0)) {
+							dimreq = fm.request({
+								data : {cmd : 'dim', target : file.hash},
+								preventDefault : true
+							})
+							.done(function(data) {
+								if (data.dim) {
+									var dim = data.dim.split('x');
+									file.width = dim[0];
+									file.height = dim[1];
+									setdim(dim);
+									init();
+								}
+							})
+						}
 					},
 					close          : function() {
 						fm.unbind('resize', dinit);
