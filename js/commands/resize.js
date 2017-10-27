@@ -555,18 +555,16 @@ elFinder.prototype.commands.resize = function() {
 							return;
 						}
 						inited = true;
-						if (dimreq) {
-							dimreq.reject();
-						}
+						dimreq && dimreq.state && dimreq.state() === 'pending' && dimreq.reject();
 						
 						elm = img.get(0);
-						memSize = file.width? {w: file.width, h: file.height} : (elm.naturalWidth? null : {w: img.width(), h: img.height()});
+						memSize = file.width && file.height? {w: file.width, h: file.height} : (elm.naturalWidth? null : {w: img.width(), h: img.height()});
 					
 						memSize && img.removeAttr('width').removeAttr('height');
 						
 						owidth  = file.width || elm.naturalWidth || elm.width || img.width();
 						oheight = file.height || elm.naturalHeight || elm.height || img.height();
-						if (!file.width) {
+						if (!file.width || !file.height) {
 							setdim([owidth, oheight]);
 						}
 						
