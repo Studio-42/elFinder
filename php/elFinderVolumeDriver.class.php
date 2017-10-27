@@ -328,6 +328,8 @@ abstract class elFinderVolumeDriver {
 		'resourcePath'    => '',
 		// Jpeg image saveing quality
 		'jpgQuality'      => 100,
+		// Save as progressive JPEG on image editing
+		'jpgProgressive'  => true,
 		// on paste file -  if true - old file will be replaced with new one, if false new file get name - original_name-number.ext
 		'copyOverwrite'   => true,
 		// if true - join new and old directories content on paste
@@ -5100,6 +5102,9 @@ abstract class elFinderVolumeDriver {
 								$img->setImageOrientation($orientation);
 							}
 						}
+						if ($this->options['jpgProgressive']) {
+							$img->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+						}
 					}
 					$img->resizeImage($size_w, $size_h, $filter, true);
 					if ($destformat) {
@@ -5119,7 +5124,7 @@ abstract class elFinderVolumeDriver {
 				extract($this->imageMagickConvertPrepare($path, $destformat, $jpgQuality, $s));
 				$filter = ($destformat === 'png' /* createTmb */)? '-filter Box' : '-filter Lanczos';
 				$strip = (isset($options['preserveExif']) && ! $options['preserveExif'])? ' -strip' : '';
-				$cmd = sprintf('%s %s%s%s %s -geometry %dx%d! %s %s', ELFINDER_CONVERT_PATH, $quotedPath, $coalesce, $jpgQuality, $filter, $size_w, $size_h, $deconstruct, $quotedDstPath);
+				$cmd = sprintf('%s %s%s%s%s%s %s -geometry %dx%d! %s %s', ELFINDER_CONVERT_PATH, $quotedPath, $coalesce, $jpgQuality, $strip, $interlace, $filter, $size_w, $size_h, $deconstruct, $quotedDstPath);
 				
 				$result = false;
 				if ($this->procExec($cmd) === 0) {
@@ -5229,7 +5234,7 @@ abstract class elFinderVolumeDriver {
 
 			case 'convert':
 				extract($this->imageMagickConvertPrepare($path, $destformat, $jpgQuality, $s));
-				$cmd = sprintf('%s %s%s%s -crop %dx%d+%d+%d%s %s', ELFINDER_CONVERT_PATH, $quotedPath, $coalesce, $jpgQuality, $width, $height, $x, $y, $deconstruct, $quotedDstPath);
+				$cmd = sprintf('%s %s%s%s%s -crop %dx%d+%d+%d%s %s', ELFINDER_CONVERT_PATH, $quotedPath, $coalesce, $jpgQuality, $interlace, $width, $height, $x, $y, $deconstruct, $quotedDstPath);
 				
 				$result = false;
 				if ($this->procExec($cmd) === 0) {
@@ -5366,7 +5371,7 @@ abstract class elFinderVolumeDriver {
 				if ($bgcolor === 'transparent') {
 					$bgcolor = 'rgba(255, 255, 255, 0.0)';
 				}
-				$cmd = sprintf('%s -size %dx%d "xc:%s" png:- | convert%s%s png:-  %s -geometry +%d+%d -compose over -composite%s %s', ELFINDER_CONVERT_PATH, $width, $height, $bgcolor, $coalesce, $jpgQuality, $quotedPath, $x, $y, $deconstruct, $quotedDstPath);
+				$cmd = sprintf('%s -size %dx%d "xc:%s" png:- | convert%s%s%s png:-  %s -geometry +%d+%d -compose over -composite%s %s', ELFINDER_CONVERT_PATH, $width, $height, $bgcolor, $coalesce, $jpgQuality, $interlace, $quotedPath, $x, $y, $deconstruct, $quotedDstPath);
 				
 				$result = false;
 				if ($this->procExec($cmd) === 0) {
@@ -5492,7 +5497,7 @@ abstract class elFinderVolumeDriver {
 				if ($s[2] === IMAGETYPE_GIF || $s[2] === IMAGETYPE_PNG) {
 					$bgcolor = 'rgba(255, 255, 255, 0.0)';
 				}
-				$cmd = sprintf('%s %s%s%s -background "%s" -rotate %d%s %s', ELFINDER_CONVERT_PATH, $quotedPath, $coalesce, $jpgQuality, $bgcolor, $degree, $deconstruct, $quotedDstPath);
+				$cmd = sprintf('%s %s%s%s%s -background "%s" -rotate %d%s %s', ELFINDER_CONVERT_PATH, $quotedPath, $coalesce, $jpgQuality, $interlace, $bgcolor, $degree, $deconstruct, $quotedDstPath);
 				
 				$result = false;
 				if ($this->procExec($cmd) === 0) {
@@ -5703,6 +5708,9 @@ abstract class elFinderVolumeDriver {
 			case 'image/gif':
 				return imagegif($image, $filename);
 			case 'image/jpeg':
+				if ($this->options['jpgProgressive']) {
+					imageinterlace($image, true);
+				}
 				return imagejpeg($image, $filename, $jpgQuality);
 			case 'image/wbmp':
 				return imagewbmp($image, $filename);
@@ -5740,6 +5748,9 @@ abstract class elFinderVolumeDriver {
 			if (strtoupper($img->getImageFormat()) === 'JPEG') {
 				$img->setImageCompression(imagick::COMPRESSION_JPEG);
 				$img->setImageCompressionQuality($jpgQuality);
+				if ($this->options['jpgProgressive']) {
+					$img->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+				}
 				try {
 					$orientation = $img->getImageOrientation();
 				} catch (ImagickException $e) {
@@ -5801,7 +5812,7 @@ abstract class elFinderVolumeDriver {
 				$ani = false;
 			}
 		}
-		$coalesce = $index = '';
+		$coalesce = $index = $interlace = '';
 		$deconstruct = ' +repage';
 		if ($ani) {
 			if (is_null($destformat)) {
@@ -5823,12 +5834,15 @@ abstract class elFinderVolumeDriver {
 		}
 		if ($imageSize[2] === IMAGETYPE_JPEG || $imageSize[2] === IMAGETYPE_JPEG2000) {
 			$jpgQuality = ' -quality ' . $jpgQuality;
+			if ($this->options['jpgProgressive']) {
+				$interlace = ' -interlace Plane';
+			}
 		} else {
 			$jpgQuality = '';
 		}
 		$quotedPath = escapeshellarg($srcType . $path . $index);
 		$quotedDstPath = escapeshellarg(($destformat? ($destformat . ':') : $srcType) . $path);
-		return compact('ani', 'index', 'coalesce', 'deconstruct', 'jpgQuality', 'quotedPath', 'quotedDstPath');
+		return compact('ani', 'index', 'coalesce', 'deconstruct', 'jpgQuality', 'quotedPath', 'quotedDstPath', 'interlace');
 	}
 
 	/*********************** misc *************************/
