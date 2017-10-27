@@ -33,6 +33,59 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on('update', function(e) {
 			var fm   = ql.fm,
 				file = e.file,
+				showed = false,
+				dimreq = null,
+				setdim  = function(dim) {
+					var rfile = fm.file(file.hash);
+					rfile.width = dim[0];
+					rfile.height = dim[1];
+				},
+				show = function() {
+					var elm, varelm, memSize, width, height, prop;
+					
+					dimreq && dimreq.state && dimreq.state() === 'pending' && dimreq.reject();
+					if (showed) {
+						return;
+					}
+					showed = true;
+					
+					elm = img.get(0);
+					memSize = file.width && file.height? {w: file.width, h: file.height} : (elm.naturalWidth? null : {w: img.width(), h: img.height()});
+				
+					memSize && img.removeAttr('width').removeAttr('height');
+					
+					width  = file.width || elm.naturalWidth || elm.width || img.width();
+					height = file.height || elm.naturalHeight || elm.height || img.height();
+					if (!file.width || !file.height) {
+						setdim([width, height]);
+					}
+					
+					memSize && img.width(memSize.w).height(memSize.h);
+
+					prop = (width/height).toFixed(2);
+					preview.on('changesize', function() {
+						var pw = parseInt(preview.width()),
+							ph = parseInt(preview.height()),
+							w, h;
+					
+						if (prop < (pw/ph).toFixed(2)) {
+							h = ph;
+							w = Math.floor(h * prop);
+						} else {
+							w = pw;
+							h = Math.floor(w/prop);
+						}
+						img.width(w).height(h).css('margin-top', h < ph ? Math.floor((ph - h)/2) : 0);
+					
+					})
+					.trigger('changesize');
+					
+					loading.remove();
+					// hide info/icon
+					ql.hideinfo();
+					//show image
+					img.fadeIn(100);
+				},
 				url, img, loading, m;
 
 			if (ql.dispInlineRegex.test(file.mime) && $.inArray(file.mime, mimes) !== -1) {
@@ -46,39 +99,29 @@ elFinder.prototype.commands.quicklook.plugins = [
 				img = $('<img/>')
 					.hide()
 					.appendTo(preview)
-					.on('load', function() {
-						// timeout - because of strange safari bug - 
-						// sometimes cant get image height 0_o
-						setTimeout(function() {
-							var prop = (img.width()/img.height()).toFixed(2);
-							preview.on('changesize', function() {
-								var pw = parseInt(preview.width()),
-									ph = parseInt(preview.height()),
-									w, h;
-							
-								if (prop < (pw/ph).toFixed(2)) {
-									h = ph;
-									w = Math.floor(h * prop);
-								} else {
-									w = pw;
-									h = Math.floor(w/prop);
-								}
-								img.width(w).height(h).css('margin-top', h < ph ? Math.floor((ph - h)/2) : 0);
-							
-							})
-							.trigger('changesize');
-							
-							loading.remove();
-							// hide info/icon
-							ql.hideinfo();
-							//show image
-							img.fadeIn(100);
-						}, 1)
-					})
+					.on('load', show)
 					.on('error', function() {
 						loading.remove();
 					})
 					.attr('src', url);
+				
+				if (file.width && file.height) {
+					show();
+				} else if (file.size > (ql.options.getDimThreshold || 0)) {
+					dimreq = fm.request({
+						data : {cmd : 'dim', target : file.hash},
+						preventDefault : true
+					})
+					.done(function(data) {
+						if (data.dim) {
+							var dim = data.dim.split('x');
+							file.width = dim[0];
+							file.height = dim[1];
+							setdim(dim);
+							show();
+						}
+					})
+				}
 			}
 			
 		});
