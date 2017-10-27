@@ -22,6 +22,7 @@
  *				'transparency'   => 70,         // Water mark image transparency ( other than PNG )
  *				'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP, // Target image formats ( bit-field )
  *				'targetMinPixel' => 200,        // Target image minimum pixel size
+ *				'interlace'      => IMG_GIF|IMG_JPG, // Set interlacebit image formats ( bit-field )
  *				'offDropWith'    => null        // To disable it if it is dropped with pressing the meta key
  *				                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
  *				                                // In case of using any key, specify it as an array
@@ -43,6 +44,7 @@
  *						'transparency'   => 70,         // Water mark image transparency ( other than PNG )
  *						'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP, // Target image formats ( bit-field )
  *						'targetMinPixel' => 200,        // Target image minimum pixel size
+ *						'interlace'      => IMG_GIF|IMG_JPG, // Set interlacebit image formats ( bit-field )
  *						'offDropWith'    => null        // To disable it if it is dropped with pressing the meta key
  *						                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
  *						                                // In case of using any key, specify it as an array
@@ -70,6 +72,7 @@ class elFinderPluginWatermark extends elFinderPlugin {
 			'transparency'   => 70,         // Water mark image transparency ( other than PNG )
 			'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP, // Target image formats ( bit-field )
 			'targetMinPixel' => 200,        // Target image minimum pixel size
+			'interlace'      => IMG_GIF|IMG_JPG, // Set interlacebit image formats ( bit-field )
 			'offDropWith'    => null        // To disable it if it is dropped with pressing the meta key
 			                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
 			                                // In case of using any key, specify it as an array
@@ -157,14 +160,17 @@ class elFinderPluginWatermark extends elFinderPlugin {
 		$dest_x = $srcImgInfo[0] - $watermark_width - $marginLeft;
 		$dest_y = $srcImgInfo[1] - $watermark_height - $marginBottom;
 		
+		// check interlace
+		$opts['interlace'] = ($opts['interlace'] & $imgTypes[$imageType]);
+		
 		if (class_exists('Imagick', false)) {
-			return $this->watermarkPrint_imagick($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo);
+			return $this->watermarkPrint_imagick($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo, $opts);
 		} else {
-			return $this->watermarkPrint_gd($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo, $srcImgInfo);
+			return $this->watermarkPrint_gd($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo, $srcImgInfo, $opts);
 		}
 	}
 	
-	private function watermarkPrint_imagick($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo) {
+	private function watermarkPrint_imagick($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo, $opts) {
 		
 		try {
 			// Open the original image
@@ -187,6 +193,9 @@ class elFinderPluginWatermark extends elFinderPlugin {
 				$img->setCompressionQuality($quality);
 			}
 			
+			// set interlace
+			$opts['interlace'] && $img->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+			
 			$result = $img->writeImage($src);
 			
 			$img->clear();
@@ -200,7 +209,7 @@ class elFinderPluginWatermark extends elFinderPlugin {
 		}
 	}
 	
-	private function watermarkPrint_gd($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo, $srcImgInfo) {
+	private function watermarkPrint_gd($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo, $srcImgInfo, $opts) {
 		
 		$watermark_width = $watermarkImgInfo[0];
 		$watermark_height = $watermarkImgInfo[1];
@@ -294,6 +303,9 @@ class elFinderPluginWatermark extends elFinderPlugin {
 		} else {
 			imagecopymerge($oSrcImg, $oWatermarkImg, $dest_x, $dest_y, 0, 0, $watermark_width, $watermark_height, $transparency);
 		}
+		
+		// set interlace
+		$opts['interlace'] && imageinterlace($oSrcImg, true);
 		
 		switch ($srcImgInfo['mime']) {
 			case 'image/gif':
