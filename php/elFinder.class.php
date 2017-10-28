@@ -1990,7 +1990,6 @@ class elFinder {
 	 * @author Naoki Sawada
 	 */
 	protected function fsock_get_contents( &$url, $timeout, $redirect_max, $ua, $outfp ) {
-
 		$connect_timeout = 3;
 		$connect_try = 3;
 		$method = 'GET';
@@ -2012,9 +2011,10 @@ class elFinder {
 		// query
 		$arr['query'] = isset($arr['query']) ? '?'.$arr['query'] : '';
 		// port
-		$arr['port'] = isset($arr['port']) ? $arr['port'] : ($ssl? 443 : 80);
+		$port = isset($arr['port']) ? $arr['port'] : '';
+		$arr['port'] = $port? $port : ($ssl? 443 : 80);
 		
-		$url_base = $arr['scheme'].'://'.$arr['host'].':'.$arr['port'];
+		$url_base = $arr['scheme'].'://'.$arr['host'].($port? (':'.$port) : '');
 		$url_path = isset($arr['path']) ? $arr['path'] : '/';
 		$uri = $url_path.$arr['query'];
 		
@@ -2090,10 +2090,11 @@ class elFinder {
 						// add sheme,host
 						$url = $url_base.$url;
 					}
-					if ($_url !== $url) {
-						fclose($fp);
-						return $this->fsock_get_contents( $url, $timeout, $redirect_max, $ua, $outfp );
+					if ($_url === $url) {
+						sleep(1);
 					}
+					fclose($fp);
+					return $this->fsock_get_contents( $url, $timeout, $redirect_max, $ua, $outfp );
 				}
 				break;
 			case 200:
