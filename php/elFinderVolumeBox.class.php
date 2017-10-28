@@ -504,7 +504,6 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             $url = self::API_URL.'/files/'.$itemId.'/thumbnail.png?min_height=' . $this->tmbSize . '&min_width=' . $this->tmbSize;
 
             $contents = $this->_bd_fetch($url, true);
-
             return $contents;
         } catch (Exception $e) {
             return false;
@@ -1027,7 +1026,10 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
         // copy image into tmbPath so some drivers does not store files on local fs
         if (!$data = $this->_bd_getThumbnail($path)) {
-            return false;
+            // try get full contents as fallback
+            if (!$data = $this->_getContents($path)) {
+                return false;
+            }
         }
         if (!file_put_contents($tmb, $data)) {
             return false;
