@@ -207,35 +207,35 @@ class elFinder {
 	 * @var array
 	 **/
 	protected $commands = array(
-		'open'      => array('target' => false, 'tree' => false, 'init' => false, 'mimes' => false, 'compare' => false, 'reqid' => false),
-		'ls'        => array('target' => true, 'mimes' => false, 'intersect' => false, 'reqid' => false),
-		'tree'      => array('target' => true, 'reqid' => false),
-		'parents'   => array('target' => true, 'until' => false, 'reqid' => false),
-		'tmb'       => array('targets' => true, 'reqid' => false),
-		'file'      => array('target' => true, 'download' => false, 'reqid' => false),
-		'zipdl'     => array('targets' => true, 'download' => false, 'reqid' => false),
-		'size'      => array('targets' => true, 'reqid' => false),
-		'mkdir'     => array('target' => true, 'name' => false, 'dirs' => false, 'reqid' => false),
-		'mkfile'    => array('target' => true, 'name' => true, 'mimes' => false, 'reqid' => false),
-		'rm'        => array('targets' => true, 'reqid' => false),
-		'rename'    => array('target' => true, 'name' => true, 'mimes' => false, 'reqid' => false),
-		'duplicate' => array('targets' => true, 'suffix' => false, 'reqid' => false),
-		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false, 'renames' => false, 'hashes' => false, 'suffix' => false, 'reqid' => false),
-		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'hashes' => false, 'suffix' => false, 'mtime' => false, 'overwrite' => false, 'reqid' => false),
-		'get'       => array('target' => true, 'conv' => false, 'reqid' => false),
-		'put'       => array('target' => true, 'content' => '', 'mimes' => false, 'encoding' => false, 'reqid' => false),
-		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false, 'name' => false, 'reqid' => false),
-		'extract'   => array('target' => true, 'mimes' => false, 'makedir' => false, 'reqid' => false),
-		'search'    => array('q' => true, 'mimes' => false, 'target' => false, 'reqid' => false),
-		'info'      => array('targets' => true, 'compare' => false, 'reqid' => false),
-		'dim'       => array('target' => true, 'reqid' => false),
-		'resize'    => array('target' => true, 'width' => false, 'height' => false, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false, 'quality' => false, 'bg' => false, 'reqid' => false),
-		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => false, 'pass' => false, 'alias' => false, 'options' => false, 'reqid' => false),
-		'url'       => array('target' => true, 'options' => false, 'reqid' => false),
-		'callback'  => array('node' => true, 'json' => false, 'bind' => false, 'done' => false, 'reqid' => false),
-		'chmod'     => array('targets' => true, 'mode' => true, 'reqid' => false),
-		'subdirs'   => array('targets' => true, 'reqid' => false),
-		'abort'     => array('id' => true, 'reqid' => false)
+		'open'      => array('target' => false, 'tree' => false, 'init' => false, 'mimes' => false, 'compare' => false),
+		'ls'        => array('target' => true, 'mimes' => false, 'intersect' => false),
+		'tree'      => array('target' => true),
+		'parents'   => array('target' => true, 'until' => false),
+		'tmb'       => array('targets' => true),
+		'file'      => array('target' => true, 'download' => false),
+		'zipdl'     => array('targets' => true, 'download' => false),
+		'size'      => array('targets' => true),
+		'mkdir'     => array('target' => true, 'name' => false, 'dirs' => false),
+		'mkfile'    => array('target' => true, 'name' => true, 'mimes' => false),
+		'rm'        => array('targets' => true),
+		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
+		'duplicate' => array('targets' => true, 'suffix' => false),
+		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false, 'renames' => false, 'hashes' => false, 'suffix' => false),
+		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'hashes' => false, 'suffix' => false, 'mtime' => false, 'overwrite' => false),
+		'get'       => array('target' => true, 'conv' => false),
+		'put'       => array('target' => true, 'content' => '', 'mimes' => false, 'encoding' => false),
+		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false, 'name' => false),
+		'extract'   => array('target' => true, 'mimes' => false, 'makedir' => false),
+		'search'    => array('q' => true, 'mimes' => false, 'target' => false),
+		'info'      => array('targets' => true, 'compare' => false),
+		'dim'       => array('target' => true),
+		'resize'    => array('target' => true, 'width' => false, 'height' => false, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false, 'quality' => false, 'bg' => false),
+		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => false, 'pass' => false, 'alias' => false, 'options' => false),
+		'url'       => array('target' => true, 'options' => false),
+		'callback'  => array('node' => true, 'json' => false, 'bind' => false, 'done' => false),
+		'chmod'     => array('targets' => true, 'mode' => true),
+		'subdirs'   => array('targets' => true),
+		'abort'     => array('id' => true)
 	);
 	
 	/**
@@ -811,7 +811,13 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	public function commandArgsList($cmd) {
-		return $this->commandExists($cmd) ? $this->commands[$cmd] : array();
+		if ($this->commandExists($cmd)) {
+			$list = $this->commands[$cmd];
+			$list['reqid'] = false;
+		} else {
+			$list = array();
+		}
+		return $list;
 	}
 
 	private function session_expires() {
