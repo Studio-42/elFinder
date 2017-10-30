@@ -323,7 +323,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      */
     protected function _od_createCurl($path, $contents = false)
     {
-        elfinder::extendTimeLimit();
+        elFinder::checkAborted();
         $curl = $this->_od_prepareCurl($path);
 
         if ($contents) {
@@ -685,7 +685,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
         return true;
     }
-    
+
     /**
      * Return debug info for client.
      *
@@ -694,13 +694,13 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     public function debug()
     {
         $res = parent::debug();
-        if (! empty($this->options['accessToken'])) {
+        if (!empty($this->options['accessToken'])) {
             $res['accessToken'] = $this->options['accessToken'];
         }
-    
+
         return $res;
     }
-    
+
     /*********************************************************************/
     /*                        INIT AND CONFIGURE                         */
     /*********************************************************************/
@@ -1267,11 +1267,45 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             return '';
         }
 
-        $cache = $this->_od_getFileRaw($path);
+        //$cache = $this->_od_getFileRaw($path);
+        if (func_num_args() > 2) {
+            $args = func_get_arg(2);
+        } else {
+            $args = array();
+        }
+        if (!empty($args['substitute'])) {
+            $tmbSize = intval($args['substitute']);
+        } else {
+            $tmbSize = null;
+        }
+        list(, $itemId) = $this->_od_splitPath($path);
+        $options = array(
+            'query' => array(
+                'select' => 'id,image',
+            ),
+        );
+        if ($tmbSize) {
+            $tmb = 'c'.$tmbSize.'x'.$tmbSize;
+            $options['query']['expand'] = 'thumbnails(select='.$tmb.')';
+        }
+        $raw = $this->_od_query($itemId, true, false, $options);
 
-        if ($cache && $img = $cache->image) {
+        if ($raw && $img = $raw->image) {
             if (isset($img->width) && isset($img->height)) {
-                return $img->width.'x'.$img->height;
+                $ret = array('dim' => $img->width.'x'.$img->height);
+                if ($tmbSize) {
+                    $srcSize = explode('x', $ret['dim']);
+                    if (min(($tmbSize / $srcSize[0]), ($tmbSize / $srcSize[1])) < 1) {
+                        if (!empty($raw->thumbnails)) {
+                            $tmbArr = (array) $raw->thumbnails[0];
+                            if (!empty($tmbArr[$tmb]->url)) {
+                                $ret['url'] = $tmbArr[$tmb]->url;
+                            }
+                        }
+                    }
+                }
+
+                return $ret;
             }
         }
 
@@ -1469,7 +1503,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             $result = curl_exec($curl);
             curl_close($curl);
 
-            $res = new stdClass;
+            $res = new stdClass();
             if (preg_match('/Location: (.+)/', $result, $m)) {
                 $monUrl = trim($m[1]);
                 while ($res) {
@@ -1482,7 +1516,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                             break;
                         }
                     }
-                 }
+                }
             }
 
             if ($res && isset($res->resourceId)) {

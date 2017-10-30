@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 02dcf06) (2017-10-28)
+ * Version 2.1.29 (2.1-src Nightly: 58f9aea) (2017-10-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8674,7 +8674,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 02dcf06)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 58f9aea)';
 
 
 
@@ -9486,8 +9486,10 @@ elFinder.prototype._options = {
 			grid8px : 'enable',
 			// Preset size array [width, height]
 			presetSize : [[320, 240], [400, 400], [640, 480], [800,600]],
-			// File size (byte) threshold when using the dim command for obtain the image size necessary to start editing
-			getDimThreshold : 200000
+			// File size (bytes) threshold when using the `dim` command for obtain the image size necessary to start editing
+			getDimThreshold : 204800,
+			// File size (bytes) to request to get substitute image (400px) with the `dim` command
+			dimSubImgSize : 307200
 		},
 		rm: {
 			// If trash is valid, items moves immediately to the trash holder without confirm.
@@ -26845,16 +26847,19 @@ elFinder.prototype.commands.resize = function() {
 					resizable      : false,
 					buttons        : buttons,
 					open           : function() {
+						var substituteImg = (fm.option('substituteImg', file.hash) && file.size > options.dimSubImgSize)? true : false,
+							hasSize = (file.width && file.height)? true : false;
 						dMinBtn = base.find('.ui-dialog-titlebar .elfinder-titlebar-minimize').hide();
 						fm.bind('resize', dinit);
 						img.attr('src', src);
 						imgc.attr('src', src);
 						imgr.attr('src', src);
-						if (file.width && file.height) {
-							init();
-						} else if (file.size > (options.getDimThreshold || 0)) {
+						if (hasSize && !substituteImg) {
+							return init();
+						}
+						if (file.size > (options.getDimThreshold || 0)) {
 							dimreq = fm.request({
-								data : {cmd : 'dim', target : file.hash},
+								data : {cmd : 'dim', target : file.hash, substitute : (substituteImg? 400 : '')},
 								preventDefault : true
 							})
 							.done(function(data) {
@@ -26863,9 +26868,16 @@ elFinder.prototype.commands.resize = function() {
 									file.width = dim[0];
 									file.height = dim[1];
 									setdim(dim);
-									init();
+									if (data.url) {
+										img.attr('src', data.url);
+										imgc.attr('src', data.url);
+										imgr.attr('src', data.url);
+									}
+									return init();
 								}
 							})
+						} else if (hasSize) {
+							return init();
 						}
 					},
 					close          : function() {
