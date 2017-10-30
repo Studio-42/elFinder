@@ -1417,11 +1417,18 @@ abstract class elFinderVolumeDriver {
 		
 		// set tmpLinkPath
 		if (elFinder::$tmpLinkPath && !$this->options['tmpLinkPath']) {
-			$this->options['tmpLinkPath'] = elFinder::$tmpLinkPath;
+			if (is_writeable(elFinder::$tmpLinkPath)) {
+				$this->options['tmpLinkPath'] = elFinder::$tmpLinkPath;
+			} else {
+				elFinder::$tmpLinkPath = '';
+			}
 		}
 		if ($this->options['tmpLinkPath'] && is_writable($this->options['tmpLinkPath'])) {
 			$this->tmpLinkPath = realpath($this->options['tmpLinkPath']);
-		} else if (!$this->options['URL'] && is_writable('../files/.tmb')) {
+		} else if (! $this->tmpLinkPath && $this->tmbURL && $this->tmbPath) {
+			$this->tmpLinkPath = $this->tmbPath;
+			$this->options['tmpLinkUrl'] = $this->tmbURL;
+ 		} else if (!$this->options['URL'] && is_writable('../files/.tmb')) {
 			$this->tmpLinkPath = realpath('../files/.tmb');
 			$this->options['tmpLinkUrl'] = '';
 			if (! elFinder::$tmpLinkPath) {
