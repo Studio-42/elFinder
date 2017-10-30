@@ -48,6 +48,13 @@ class elFinder {
 	public static $instance = null;
 	
 	/**
+	 * Current request args
+	 *
+	 * @var array
+	 */
+	public static $currentArgs = array();
+	
+	/**
 	 * Network mount drivers
 	 * 
 	 * @var array
@@ -228,7 +235,7 @@ class elFinder {
 		'extract'   => array('target' => true, 'mimes' => false, 'makedir' => false),
 		'search'    => array('q' => true, 'mimes' => false, 'target' => false),
 		'info'      => array('targets' => true, 'compare' => false),
-		'dim'       => array('target' => true),
+		'dim'       => array('target' => true, 'substitute' => false),
 		'resize'    => array('target' => true, 'width' => false, 'height' => false, 'mode' => false, 'x' => false, 'y' => false, 'degree' => false, 'quality' => false, 'bg' => false),
 		'netmount'  => array('protocol' => true, 'host' => true, 'path' => false, 'port' => false, 'user' => false, 'pass' => false, 'alias' => false, 'options' => false),
 		'url'       => array('target' => true, 'options' => false),
@@ -847,6 +854,9 @@ class elFinder {
 		// set error handler of WARNING, NOTICE
 		set_error_handler('elFinder::phpErrorHandler', E_WARNING | E_NOTICE | E_USER_WARNING | E_USER_NOTICE);
 		
+		// set current request args
+		self::$currentArgs = $args;
+		
 		if (!$this->loaded) {
 			return array('error' => $this->error(self::ERROR_CONF, self::ERROR_CONF_NO_VOL));
 		}
@@ -1460,7 +1470,7 @@ class elFinder {
 		$targets = $args['targets'];
 		
 		foreach ($targets as $target) {
-			elFinder::extendTimeLimit();
+			elFinder::checkAborted();
 			
 			if (($volume = $this->volume($target)) != false
 			&& (($tmb = $volume->tmb($target)) != false)) {
@@ -1683,7 +1693,7 @@ class elFinder {
 		$sizes = array();
 		
 		foreach ($args['targets'] as $target) {
-			elFinder::extendTimeLimit();
+			elFinder::checkAborted();
 			if (($volume = $this->volume($target)) == false
 			|| ($file = $volume->file($target)) == false
 			|| !$file['read']) {
@@ -1828,7 +1838,7 @@ class elFinder {
 		$this->itemLock($targets);
 		
 		foreach ($targets as $target) {
-			elFinder::extendTimeLimit();
+			elFinder::checkAborted();
 			
 			if (($volume = $this->volume($target)) == false
 			|| ($src = $volume->file($target)) == false) {
@@ -1859,7 +1869,7 @@ class elFinder {
 		$result  = array('removed' => array());
 		
 		foreach ($targets as $target) {
-			elFinder::extendTimeLimit();
+			elFinder::checkAborted();
 			
 			if (($volume = $this->volume($target)) == false) {
 				$result['warning'] = $this->error(self::ERROR_RM, '#'.$target, self::ERROR_FILE_NOT_FOUND);
@@ -2298,7 +2308,7 @@ class elFinder {
 		$files = array();
 		$errors = array();
 		foreach($targets as $target) {
-			elFinder::extendTimeLimit();
+			elFinder::checkAborted();
 			
 			$file = $volume->chmod($target, $mode);
 			if ($file) {
@@ -2402,7 +2412,7 @@ class elFinder {
 				
 				try {
 					// to check connection is aborted
-					elFinder::extendTimeLimit();
+					elFinder::checkAborted();
 				} catch (elFinderAbortException $e) {
 					unlink($tmpname);
 					is_file($tmp) && unlink($tmp);
@@ -2547,7 +2557,7 @@ class elFinder {
 						$fp = fopen($tmpfname, 'wb');
 						$data = $this->get_remote_contents($url, 30, 5, 'Mozilla/5.0', $fp);
 						// to check connection is aborted
-						elFinder::extendTimeLimit();
+						elFinder::checkAborted();
 						$_name = preg_replace('~^.*?([^/#?]+)(?:\?.*)?(?:#.*)?$~', '$1', rawurldecode($url));
 						// Check `Content-Disposition` response header
 						if ($data && ($headers = get_headers($url, true)) && !empty($headers['Content-Disposition'])) {
@@ -2774,7 +2784,7 @@ class elFinder {
 		}
 		
 		foreach ($targets as $target) {
-			elFinder::extendTimeLimit();
+			elFinder::checkAborted();
 			
 			if (($srcVolume = $this->volume($target)) == false) {
 				$result['warning'] = array_merge($result['warning'], $this->error($error, '#'.$target, self::ERROR_FILE_NOT_FOUND));
@@ -3135,7 +3145,7 @@ class elFinder {
 			}
 		} else {
 			foreach ($args['targets'] as $hash) {
-				elFinder::extendTimeLimit();
+				elFinder::checkAborted();
 				if (($volume = $this->volume($hash)) != false
 				&& ($info = $volume->file($hash)) != false) {
 					$info['path'] = $volume->path($hash);
@@ -3159,13 +3169,23 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function dim($args) {
+		$res = array();
 		$target = $args['target'];
 		
 		if (($volume = $this->volume($target)) != false) {
-			$dim = $volume->dimensions($target);
-			return $dim ? array('dim' => $dim) : array();
+			if ($dim = $volume->dimensions($target, $args)) {
+				if (is_array($dim) && isset($dim['dim'])) {
+					$res = $dim;
+				} else {
+					$res = array('dim' => $dim);
+					if ($subImgLink = $volume->getSubstituteImgLink($target, explode('x', $dim))) {
+						$res['url'] = $subImgLink;
+					}
+				}
+			}
 		}
-		return array();
+		
+		return $res;
 	}
 	
 	/**
@@ -3786,6 +3806,16 @@ class elFinder {
 		} else {
 			throw new elFinderAbortException();
 		}
+	}
+	
+	/**
+	 * Check connection is aborted
+	 * Script stop immediately if connection aborted
+	 *
+	 * @return void
+	 */
+	public static function checkAborted() {
+		elFinder::extendTimeLimit();
 	}
 	
 	/**

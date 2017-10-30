@@ -59,6 +59,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$this->options['followSymLinks'] = true;
 		$this->options['detectDirIcon'] = '';         // file name that is detected as a folder icon e.g. '.diricon.png'
 		$this->options['keepTimestamp'] = array('copy', 'move'); // keep timestamp at inner filesystem allowed 'copy', 'move' and 'upload'
+		$this->options['substituteImg'] = true;       // support substitute image with dim command
 	}
 	
 	/*********************************************************************/
@@ -644,7 +645,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _scandir($path) {
-		elFinder::extendTimeLimit();
+		elFinder::checkAborted();
 		$files = array();
 		$cache = array();
 		$dirWritable = is_writable($path);

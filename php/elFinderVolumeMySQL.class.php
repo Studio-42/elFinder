@@ -631,9 +631,10 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function _fclose($fp, $path='') {
-		fclose($fp);
+		is_resource($fp) && fclose($fp);
 		if ($path) {
-			unlink($this->getTempFile($path));
+			$file = $this->getTempFile($path);
+			is_file($file) && unlink($file);
 		}
 	}
 	

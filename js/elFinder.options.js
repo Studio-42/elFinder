@@ -472,8 +472,10 @@ elFinder.prototype._options = {
 			grid8px : 'enable',
 			// Preset size array [width, height]
 			presetSize : [[320, 240], [400, 400], [640, 480], [800,600]],
-			// File size (byte) threshold when using the dim command for obtain the image size necessary to start editing
-			getDimThreshold : 200000
+			// File size (bytes) threshold when using the `dim` command for obtain the image size necessary to start editing
+			getDimThreshold : 204800,
+			// File size (bytes) to request to get substitute image (400px) with the `dim` command
+			dimSubImgSize : 307200
 		},
 		rm: {
 			// If trash is valid, items moves immediately to the trash holder without confirm.
