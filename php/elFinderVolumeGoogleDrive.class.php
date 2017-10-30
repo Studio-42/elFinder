@@ -1567,7 +1567,24 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
         if ($file = $this->_gd_getFile($path)) {
             if (isset($file['imageMediaMetadata'])) {
-                return $file['imageMediaMetadata']['width'].'x'.$file['imageMediaMetadata']['height'];
+                $ret = array('dim' => $file['imageMediaMetadata']['width'].'x'.$file['imageMediaMetadata']['height']);
+                if (func_num_args() > 2) {
+                    $args = func_get_arg(2);
+                } else {
+                    $args = array();
+                }
+                if (!empty($args['substitute'])) {
+                    $tmbSize = intval($args['substitute']);
+                    $srcSize = explode('x', $ret['dim']);
+                    if (min(($tmbSize / $srcSize[0]), ($tmbSize / $srcSize[1])) < 1) {
+                        if ($this->_gd_isPublished($file)) {
+                    		$tmbSize = strval($tmbSize);
+                        	$ret['url'] = 'https://drive.google.com/thumbnail?authuser=0&sz=s'.$tmbSize.'&id='.$file['id'];
+                        } else if ($subImgLink = $this->getSubstituteImgLink(elFinder::$currentArgs['target'], $srcSize)) {
+                        	$ret['url'] = $subImgLink;
+                        }
+                    }
+                }
             }
         }
 
@@ -1935,7 +1952,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 // complete.
                 $status = false;
                 while (!$status && !feof($fp)) {
-                    elFinder::extendTimeLimit();
+                    elFinder::checkAborted();
                     // read until you get $chunkSizeBytes from TESTFILE
                     // fread will never return more than 8192 bytes if the stream is read buffered and it does not represent a plain file
                     // An example of a read buffered file is when reading from a URL

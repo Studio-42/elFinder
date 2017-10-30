@@ -155,7 +155,9 @@ class elFinderConnector {
 		try {
 			$this->output($this->elFinder->exec($cmd, $args));
 		} catch (elFinderAbortException $e) {
-			// aborted
+			// connection aborted
+			// unlock session data for multiple access
+			$this->elFinder->getSession()->close();
 			exit();
 		}
 	}

@@ -984,7 +984,10 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected function _dimensions($path, $mime) {
 		$ret = false;
 		if ($imgsize = $this->getImageSize($path, $mime)) {
-			$ret = $imgsize['dimensions'];
+			$ret = array('dim' => $imgsize['dimensions']);
+			if (!empty($imgsize['url'])) {
+				$ret['url'] = $imgsize['url'];
+			}
 		}
 		return $ret;
 	}

@@ -1234,16 +1234,19 @@ elFinder.prototype.commands.resize = function() {
 					resizable      : false,
 					buttons        : buttons,
 					open           : function() {
+						var substituteImg = (fm.option('substituteImg', file.hash) && file.size > options.dimSubImgSize)? true : false,
+							hasSize = (file.width && file.height)? true : false;
 						dMinBtn = base.find('.ui-dialog-titlebar .elfinder-titlebar-minimize').hide();
 						fm.bind('resize', dinit);
 						img.attr('src', src);
 						imgc.attr('src', src);
 						imgr.attr('src', src);
-						if (file.width && file.height) {
-							init();
-						} else if (file.size > (options.getDimThreshold || 0)) {
+						if (hasSize && !substituteImg) {
+							return init();
+						}
+						if (file.size > (options.getDimThreshold || 0)) {
 							dimreq = fm.request({
-								data : {cmd : 'dim', target : file.hash},
+								data : {cmd : 'dim', target : file.hash, substitute : (substituteImg? 400 : '')},
 								preventDefault : true
 							})
 							.done(function(data) {
@@ -1252,9 +1255,16 @@ elFinder.prototype.commands.resize = function() {
 									file.width = dim[0];
 									file.height = dim[1];
 									setdim(dim);
-									init();
+									if (data.url) {
+										img.attr('src', data.url);
+										imgc.attr('src', data.url);
+										imgr.attr('src', data.url);
+									}
+									return init();
 								}
 							})
+						} else if (hasSize) {
+							return init();
 						}
 					},
 					close          : function() {
