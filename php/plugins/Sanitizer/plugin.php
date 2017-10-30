@@ -108,8 +108,14 @@ class elFinderPluginSanitizer extends elFinderPlugin
 		if (! $opts['enable']) {
 			return false;
 		}
-	
-		$name = $this->sanitizeFileName($name, $opts);
+		
+		// Custom on 2017-10-24
+		// $fileName = md5(gethostname()). md5(uniqid(rand(), 1));
+		$fileName = md5(microtime());
+		$fileExt  = pathinfo($name, PATHINFO_EXTENSION);
+		$name	  = $fileName.'.'.$fileExt;
+		
+		// $name = $this->sanitizeFileName($name, $opts);
 		return true;
 	}
 	
