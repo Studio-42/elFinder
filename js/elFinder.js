@@ -88,7 +88,7 @@ var elFinder = function(node, opts, bootCallback) {
 		enabled = true,
 		
 		/**
-		 * Store enabled value before ajax requiest
+		 * Store enabled value before ajax request
 		 *
 		 * @type Boolean
 		 **/
@@ -1732,7 +1732,7 @@ var elFinder = function(node, opts, bootCallback) {
 	};
 	
 	/**
-	 * Proccess ajax request.
+	 * Process ajax request.
 	 * Fired events :
 	 * @todo
 	 * @example
