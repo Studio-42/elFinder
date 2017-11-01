@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 1edbb61) (2017-10-30)
+ * Version 2.1.29 (2.1-src Nightly: 26e188e) (2017-11-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -119,7 +119,7 @@ var elFinder = function(node, opts, bootCallback) {
 		enabled = true,
 		
 		/**
-		 * Store enabled value before ajax requiest
+		 * Store enabled value before ajax request
 		 *
 		 * @type Boolean
 		 **/
@@ -1763,7 +1763,7 @@ var elFinder = function(node, opts, bootCallback) {
 	};
 	
 	/**
-	 * Proccess ajax request.
+	 * Process ajax request.
 	 * Fired events :
 	 * @todo
 	 * @example
@@ -8674,7 +8674,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 1edbb61)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 26e188e)';
 
 
 
@@ -22942,8 +22942,8 @@ elFinder.prototype.commands.netunmount = function() {
 					}
 					if (into === 'window') {
 						// set window size for image if set
-						imgW = winW = Math.round(2 * $(window).width() / 3);
-						imgH = winH = Math.round(2 * $(window).height() / 3);
+						imgW = winW = Math.round(2 * screen.availWidth / 3);
+						imgH = winH = Math.round(2 * screen.availHeight / 3);
 						if (parseInt(file.width) && parseInt(file.height)) {
 							imgW = parseInt(file.width);
 							imgH = parseInt(file.height);
