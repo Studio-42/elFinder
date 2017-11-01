@@ -103,8 +103,8 @@
 					}
 					if (into === 'window') {
 						// set window size for image if set
-						imgW = winW = Math.round(2 * $(window).width() / 3);
-						imgH = winH = Math.round(2 * $(window).height() / 3);
+						imgW = winW = Math.round(2 * screen.availWidth / 3);
+						imgH = winH = Math.round(2 * screen.availHeight / 3);
 						if (parseInt(file.width) && parseInt(file.height)) {
 							imgW = parseInt(file.width);
 							imgH = parseInt(file.height);
