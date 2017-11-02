@@ -703,6 +703,10 @@ elFinder.prototype._options = {
 		path : {
 			// Move to head of work zone without UI navbar
 			toWorkzoneWithoutNavbar : true
+		},
+		dialog : {
+			// Enable to auto focusing on mouse over in the target form element
+			focusOnMouseOver : true
 		}
 	},
 

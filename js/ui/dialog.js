@@ -405,6 +405,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 				})
 				.on('totop', function() {
+					var s = fm.storage('autoFocusDialog');
+					
+					dialog.data('focusOnMouseOver', s? (s > 0) : fm.options.uiOptions.dialog.focusOnMouseOver);
+					
 					if (dialog.hasClass('elfinder-dialog-minimized')) {
 						titlebar.children('.elfinder-titlebar-minimize').trigger('mousedown');
 					}
@@ -504,7 +508,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 				})
 				.on('mouseenter mouseleave', '.'+cltabstop, function(e) {
 					var $this = $(this);
-					if (opts.btnHoverFocus) {
+					if (opts.btnHoverFocus && dialog.data('focusOnMouseOver')) {
 						if (e.type == 'mouseenter' && ! $(':focus').data('keepFocus')) {
 							$this.focus();
 						}
