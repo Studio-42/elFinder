@@ -196,7 +196,7 @@
 	fm.bind('load', function() {
 		var setupPref = function() {
 				var tab = content.find('.elfinder-help-preference'),
-					forms = { language: '', toolbarPref: '', clearBrowserData: '' },
+					forms = { language: '', toolbarPref: '', autoFocusDialog: '', clearBrowserData: '' },
 					dls = $();
 				
 				forms.language = (function() {
@@ -284,6 +284,14 @@
 					});
 					return node;
 				})();
+				
+				forms.autoFocusDialog = $('<input type="checkbox"/>').prop('checked', (function() {
+					var s = fm.storage('autoFocusDialog');
+					return s? (s > 0) : fm.options.uiOptions.dialog.focusOnMouseOver;
+				})()).on('change', function(e) {
+					e.preventDefault();
+					fm.storage('autoFocusDialog', $(this).is(':checked')? 1 : -1);
+				});
 				
 				forms.clearBrowserData = $('<button/>').text(fm.i18n('reset')).button().on('click', function(e) {
 					e.preventDefault();

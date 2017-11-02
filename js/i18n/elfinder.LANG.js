@@ -438,6 +438,8 @@
 			'toolbarPref'     : 'Toolbar setting', // from v2.1.27 added 2.8.2017
 			'charsLeft'       : '... $1 chars left.',  // from v2.1.29 added 30.8.2017
 			'sum'             : 'Sum', // from v2.1.29 added 28.9.2017
+			'roughFileSize'   : 'Rough file size', // from v2.1.30 added 2.11.2017
+			'autoFocusDialog' : 'Focus on the element of dialog with mouseover',  // from v2.1.30 added 2.11.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',

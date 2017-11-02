@@ -31,7 +31,7 @@ class elFinder {
 	 * 
 	 * @var integer
 	 */
-	protected static $ApiRevision = 29;
+	protected static $ApiRevision = 30;
 	
 	/**
 	 * Storages (root dirs)
@@ -3216,7 +3216,7 @@ class elFinder {
 			return array('error' => $this->error(self::ERROR_RESIZESIZE));
 		}
 		return ($file = $volume->resize($target, $width, $height, $x, $y, $mode, $bg, $degree, $quality))
-			? array('changed' => array($file))
+			? (!empty($file['losslessRotate'])? $file : array('changed' => array($file)))
 			: array('error' => $this->error(self::ERROR_RESIZE, $volume->path($target), $volume->error()));
 	}
 	
