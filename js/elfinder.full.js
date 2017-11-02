@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 26e188e) (2017-11-01)
+ * Version 2.1.29 (2.1-src Nightly: a38fb7a) (2017-11-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -848,13 +848,22 @@ var elFinder = function(node, opts, bootCallback) {
 			Object.assign(this.options.uiOptions.toolbarExtra, opts.uiOptions.toolbarExtra);
 		}
 	
-		if (opts.uiOptions.cwd && opts.uiOptions.cwd.listView) {
-			if (opts.uiOptions.cwd.listView.columns) {
-				this.options.uiOptions.cwd.listView.columns = opts.uiOptions.cwd.listView.columns;
+		if (opts.uiOptions.cwd) {
+			if (opts.uiOptions.cwd.listView) {
+				if (opts.uiOptions.cwd.listView.columns) {
+					this.options.uiOptions.cwd.listView.columns = opts.uiOptions.cwd.listView.columns;
+				}
+				if (opts.uiOptions.cwd.listView.columnsCustomName) {
+					this.options.uiOptions.cwd.listView.columnsCustomName = opts.uiOptions.cwd.listView.columnsCustomName;
+				}
 			}
-			if (opts.uiOptions.cwd.listView.columnsCustomName) {
-				this.options.uiOptions.cwd.listView.columnsCustomName = opts.uiOptions.cwd.listView.columnsCustomName;
+			if (opts.uiOptions.cwd.showSelectCheckboxUA) {
+				this.options.uiOptions.cwd.showSelectCheckboxUA = opts.uiOptions.cwd.showSelectCheckboxUA;
 			}
+		}
+		
+		if (opts.uiOptions.navbar && opts.uiOptions.navbar.autoHideUA) {
+			this.options.uiOptions.navbar.autoHideUA = opts.uiOptions.navbar.autoHideUA;
 		}
 	}
 	// join toolbarExtra to toolbar
@@ -8674,7 +8683,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 26e188e)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: a38fb7a)';
 
 
 
@@ -9717,6 +9726,10 @@ elFinder.prototype._options = {
 		path : {
 			// Move to head of work zone without UI navbar
 			toWorkzoneWithoutNavbar : true
+		},
+		dialog : {
+			// Enable to auto focusing on mouse over in the target form element
+			focusOnMouseOver : true
 		}
 	},
 
@@ -11056,7 +11069,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-09-28
+ * @version 2017-11-02
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -11479,6 +11492,8 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'toolbarPref'     : 'Toolbar setting', // from v2.1.27 added 2.8.2017
 			'charsLeft'       : '... $1 chars left.',  // from v2.1.29 added 30.8.2017
 			'sum'             : 'Sum', // from v2.1.29 added 28.9.2017
+			'roughFileSize'   : 'Rough file size', // from v2.1.30 added 2.11.2017
+			'autoFocusDialog' : 'Focus on the element of dialog with mouseover',  // from v2.1.30 added 2.11.2017
 			
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -15356,6 +15371,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 				})
 				.on('totop', function() {
+					var s = fm.storage('autoFocusDialog');
+					
+					dialog.data('focusOnMouseOver', s? (s > 0) : fm.options.uiOptions.dialog.focusOnMouseOver);
+					
 					if (dialog.hasClass('elfinder-dialog-minimized')) {
 						titlebar.children('.elfinder-titlebar-minimize').trigger('mousedown');
 					}
@@ -15455,7 +15474,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 				})
 				.on('mouseenter mouseleave', '.'+cltabstop, function(e) {
 					var $this = $(this);
-					if (opts.btnHoverFocus) {
+					if (opts.btnHoverFocus && dialog.data('focusOnMouseOver')) {
 						if (e.type == 'mouseenter' && ! $(':focus').data('keepFocus')) {
 							$this.focus();
 						}
@@ -21819,7 +21838,7 @@ elFinder.prototype.commands.fullscreen = function() {
 	fm.bind('load', function() {
 		var setupPref = function() {
 				var tab = content.find('.elfinder-help-preference'),
-					forms = { language: '', toolbarPref: '', clearBrowserData: '' },
+					forms = { language: '', toolbarPref: '', autoFocusDialog: '', clearBrowserData: '' },
 					dls = $();
 				
 				forms.language = (function() {
@@ -21907,6 +21926,14 @@ elFinder.prototype.commands.fullscreen = function() {
 					});
 					return node;
 				})();
+				
+				forms.autoFocusDialog = $('<input type="checkbox"/>').prop('checked', (function() {
+					var s = fm.storage('autoFocusDialog');
+					return s? (s > 0) : fm.options.uiOptions.dialog.focusOnMouseOver;
+				})()).on('change', function(e) {
+					e.preventDefault();
+					fm.storage('autoFocusDialog', $(this).is(':checked')? 1 : -1);
+				});
 				
 				forms.clearBrowserData = $('<button/>').text(fm.i18n('reset')).button().on('click', function(e) {
 					e.preventDefault();
@@ -25622,7 +25649,34 @@ elFinder.prototype.commands.rename = function() {
  * @author Sergio Jovani
  **/
 elFinder.prototype.commands.resize = function() {
-
+	var losslessRotate = 0,
+		getBounceBox = function(w, h, theta) {
+			var srcPts = [
+					{x: w/2, y: h/2},
+					{x: -w/2, y: h/2},
+					{x: -w/2, y: -h/2},
+					{x: w/2, y: -h/2}
+				],
+				dstPts = [],
+				min = {x: Number.MAX_VALUE, y: Number.MAX_VALUE},
+				max = {x: Number.MIN_VALUE, y: Number.MIN_VALUE};
+			$.each(srcPts, function(i, srcPt){
+				dstPts.push({
+					x: srcPt.x * Math.cos(theta) - srcPt.y * Math.sin(theta),
+					y: srcPt.x * Math.sin(theta) + srcPt.y * Math.cos(theta)
+				});
+			});
+			$.each(dstPts, function(i, pt) {
+				min.x = Math.min(min.x, pt.x);
+				min.y = Math.min(min.y, pt.y);
+				max.x = Math.max(max.x, pt.x);
+				max.y = Math.max(max.y, pt.y);
+			});
+			return {
+				width: max.x - min.x, height: max.y - min.y
+			};
+		};
+	
 	this.updateOnSelect = false;
 	
 	this.getstate = function() {
@@ -25694,9 +25748,62 @@ elFinder.prototype.commands.resize = function() {
 					input    = '<input type="number" class="ui-corner-all"/>',
 					row      = '<div class="elfinder-resize-row"/>',
 					label    = '<div class="elfinder-resize-label"/>',
+					changeTm = null,
 					control  = $('<div class="elfinder-resize-control"/>')
 						.on('focus', 'input[type=text],input[type=number]', function() {
 							$(this).select();
+						})
+						.on('change', function(e) {
+							changeTm && clearTimeout(changeTm);
+							changeTm = setTimeout(function() {
+								var node, panel, quty, canvas, ctx, img, sx, sy, sw, sh, deg, theta, bb;
+								if (sizeImg && (canvas = sizeImg.data('canvas'))) {
+									node = $(e.target);
+									panel = node.closest('.elfinder-resize-control-panel');
+									quty = panel.find('input.elfinder-resize-quality');
+									if (quty.is(':visible')) {
+										ctx = sizeImg.data('ctx');
+										img = sizeImg.get(0);
+										if (panel.hasClass('elfinder-resize-uiresize')) {
+											// resize
+											sw = canvas.width = width.val();
+											sh = canvas.height = height.val();
+											ctx.drawImage(img, 0, 0, sw, sh);
+										} else if (panel.hasClass('elfinder-resize-uicrop')) {
+											// crop
+											sx = pointX.val();
+											sy = pointY.val();
+											sw = offsetX.val();
+											sh = offsetY.val();
+											canvas.width = sw;
+											canvas.height = sh;
+											ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+										} else {
+											// rotate
+											deg = degree.val();
+											theta = (degree.val() * Math.PI) / 180;
+											bb = getBounceBox(owidth, oheight, theta);
+											sw = canvas.width = bb.width;
+											sh = canvas.height = bb.height;
+											ctx.save();
+											if (deg % 90 !== 0) {
+												ctx.fillStyle = bg.val() || '#FFF';
+												ctx.fillRect(0, 0, sw, sh);
+											}
+											ctx.translate(sw / 2, sh / 2);
+											ctx.rotate(theta);
+											ctx.drawImage(img, -img.width/2, -img.height/2, owidth, oheight);
+											ctx.restore();
+										}
+										canvas.toBlob(function(blob) {
+											blob && quty.next('span').text(' (' + fm.formatSize(blob.size) + ')');
+										}, 'image/jpeg', Math.max(Math.min(quty.val(), 100), 1) / 100);
+									}
+								}
+							}, 60);
+						})
+						.on('mouseup', 'input', function(e) {
+							$(e.target).trigger('change');
 						}),
 					preview  = $('<div class="elfinder-resize-preview"/>')
 						.on('touchmove', function(e) {
@@ -25706,9 +25813,9 @@ elFinder.prototype.commands.resize = function() {
 					spinner  = $('<div class="elfinder-resize-spinner">'+fm.i18n('ntfloadimg')+'</div>'),
 					rhandle  = $('<div class="elfinder-resize-handle touch-punch"/>'),
 					rhandlec = $('<div class="elfinder-resize-handle touch-punch"/>'),
-					uiresize = $('<div class="elfinder-resize-uiresize"/>'),
-					uicrop   = $('<div class="elfinder-resize-uicrop"/>'),
-					uirotate = $('<div class="elfinder-resize-rotate"/>'),
+					uiresize = $('<div class="elfinder-resize-uiresize elfinder-resize-control-panel"/>'),
+					uicrop   = $('<div class="elfinder-resize-uicrop elfinder-resize-control-panel"/>'),
+					uirotate = $('<div class="elfinder-resize-rotate elfinder-resize-control-panel"/>'),
 					uideg270 = $('<button/>').attr('title',fm.i18n('rotate-cw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-l"/>')),
 					uideg90  = $('<button/>').attr('title',fm.i18n('rotate-ccw')).append($('<span class="elfinder-button-icon elfinder-button-icon-rotate-r"/>')),
 					uiprop   = $('<span />'),
@@ -25757,7 +25864,7 @@ elFinder.prototype.commands.resize = function() {
 							}
 						}),
 					width   = $(input)
-						.change(function() {
+						.on('change', function() {
 							var w = parseInt(width.val()),
 								h = parseInt(cratio ? Math.round(w/ratio) : height.val());
 
@@ -25767,7 +25874,7 @@ elFinder.prototype.commands.resize = function() {
 							}
 						}),
 					height  = $(input)
-						.change(function() {
+						.on('change', function() {
 							var h = parseInt(height.val()),
 								w = parseInt(cratio ? Math.round(h*ratio) : width.val());
 
@@ -25783,9 +25890,10 @@ elFinder.prototype.commands.resize = function() {
 					quality = isJpeg && api2?
 						$(input).val(fm.storage('jpgQuality') || fm.option('jpgQuality'))
 							.addClass('elfinder-resize-quality')
+							.attr('min', '1').attr('max', '100').attr('title', '1 - 100')
 							.on('blur', function(){
 								var q = Math.min(100, Math.max(1, parseInt(this.value)));
-								dialog.find('input.elfinder-resize-quality').val(q);
+								control.find('input.elfinder-resize-quality').val(q);
 							})
 						: null,
 					degree = $('<input type="number" class="ui-corner-all" maxlength="3" value="0" />')
@@ -25975,7 +26083,7 @@ elFinder.prototype.commands.resize = function() {
 									}
 								})
 								.on('error', fail)
-								.attr('src', fm.openUrl(file.hash, fm.isCORS? true : false));
+								.attr('src', canvSrc);
 							} else {
 								fail();
 							}
@@ -25991,6 +26099,7 @@ elFinder.prototype.commands.resize = function() {
 							.width(img.width())
 							.height(img.height());
 						crop.updateView();
+						jpgCalc();
 					},
 					setColorData = function() {
 						if (pickctx) {
@@ -26020,6 +26129,9 @@ elFinder.prototype.commands.resize = function() {
 									l = (r *  0.3 + g * 0.59 + b * 0.11) / 255;
 		
 									return [h, s, l, 'hsl'];
+								},
+								rgbRound = function(c) {
+									return Math.round(c / 8) * 8;
 								};
 							
 							calc:
@@ -26059,7 +26171,7 @@ elFinder.prototype.commands.resize = function() {
 										pickc[x][y] = [r, g, b, hue, s, l];
 										// detect the dominant color
 										if ((x < tx1 || x > tx2) && (y < ty1 || y > ty2)) {
-											rgb = r + ',' + g + ',' + b;
+											rgb = rgbRound(r) + ',' + rgbRound(g) + ',' + rgbRound(b);
 											if (! domi[rgb]) {
 												domi[rgb] = 1;
 											} else {
@@ -26124,6 +26236,7 @@ elFinder.prototype.commands.resize = function() {
 							width.val(w);
 							height.val(h);
 							resize.updateView(w, h);
+							jpgCalc();
 						});
 						presetc.on('click', 'span.elfinder-resize-preset', function() {
 							var btn = $(this),
@@ -26144,6 +26257,7 @@ elFinder.prototype.commands.resize = function() {
 								offsetX.val(w);
 								offsetY.val(h);
 								crop.updateView();
+								jpgCalc();
 							}
 						});
 						presetc.children('span.elfinder-resize-preset').each(function() {
@@ -26169,6 +26283,30 @@ elFinder.prototype.commands.resize = function() {
 						}
 						inited = true;
 						dimreq && dimreq.state && dimreq.state() === 'pending' && dimreq.reject();
+						
+						// check lossless rotete
+						if (fm.api >= 2.1030) {
+							if (losslessRotate === 0) {
+								fm.request({
+									data: {
+										cmd    : 'resize',
+										target : file.hash,
+										degree : 0,
+										mode   : 'rotate'
+									},
+									preventDefault : true
+								}).done(function(data) {
+									losslessRotate = data.losslessRotate? 1 : -1;
+									if (losslessRotate === 1 && (degree.val() % 90 === 0)) {
+										uirotate.children('div.elfinder-resize-quality').hide();
+									}
+								}).fail(function() {
+									losslessRotate = -1;
+								});
+							}
+						} else {
+							losslessRotate = -1;
+						}
 						
 						elm = img.get(0);
 						memSize = file.width && file.height? {w: file.width, h: file.height} : (elm.naturalWidth? null : {w: img.width(), h: img.height()});
@@ -26284,11 +26422,13 @@ elFinder.prototype.commands.resize = function() {
 						offsetX.val(owidth);
 						offsetY.val(oheight);
 						crop.updateView();
+						jpgCalc();
 					},
 					resize = {
 						update : function() {
 							width.val(round(img.width()/prop));
 							height.val(round(img.height()/prop));
+							jpgCalc();
 						},
 						
 						updateView : function(w, h) {
@@ -26330,6 +26470,7 @@ elFinder.prototype.commands.resize = function() {
 								offsetX.val(round((rhandlec.data('w')||rhandlec.width())/prop, owidth - pointX.val()));
 								offsetY.val(round((rhandlec.data('h')||rhandlec.height())/prop, oheight - pointY.val()));
 							}
+							jpgCalc();
 						},
 						updateView : function(change) {
 							var r, x, y, w, h;
@@ -26377,7 +26518,16 @@ elFinder.prototype.commands.resize = function() {
 						mouseStartAngle : 0,
 						imageStartAngle : 0,
 						imageBeingRotated : false,
-							
+						
+						setQuality : function() {
+							if (losslessRotate > 0 && (degree.val() % 90) === 0) {
+								uirotate.children('div.elfinder-resize-quality').hide();
+							} else {
+								uirotate.children('div.elfinder-resize-quality').show();
+								jpgCalc();
+							}
+						},
+						
 						update : function(value, animate) {
 							if (typeof value == 'undefined') {
 								rdegree = value = parseInt(degree.val());
@@ -26397,6 +26547,8 @@ elFinder.prototype.commands.resize = function() {
 							degree.val(parseInt(value));
 
 							uidegslider.slider('value', degree.val());
+							
+							rotate.setQuality();
 						},
 						
 						execute : function ( e ) {
@@ -26424,6 +26576,8 @@ elFinder.prototype.commands.resize = function() {
 							degree.val(rotateAngle);
 
 							uidegslider.slider('value', degree.val());
+							
+							rotate.setQuality();
 							
 							return false;
 						},
@@ -26652,6 +26806,17 @@ elFinder.prototype.commands.resize = function() {
 					vline   = 'elfinder-resize-handle-vline',
 					rpoint  = 'elfinder-resize-handle-point',
 					src     = fm.openUrl(file.hash),
+					canvSrc = fm.openUrl(file.hash, fm.isCORS? true : false),
+					sizeImg = quality? $('<img>').attr('src', canvSrc).on('load', function() {
+						try {
+							var canv = document.createElement('canvas');
+							sizeImg.data('canvas', canv).data('ctx', canv.getContext('2d'));
+							jpgCalc();
+						} catch(e) {}
+					}) : null,
+					jpgCalc = function() {
+						control.find('input.elfinder-resize-quality:visible').trigger('change');
+					},
 					dinit   = function() {
 						if (base.hasClass('elfinder-dialog-minimized')) {
 							return;
@@ -26746,7 +26911,7 @@ elFinder.prototype.commands.resize = function() {
 				uiresize.append(
 					$(row).append($(label).text(fm.i18n('width')), width),
 					$(row).append($(label).text(fm.i18n('height')), height, $('<div class="elfinder-resize-whctrls">').append(constr, reset)),
-					(quality? $(row).append($(label).text(fm.i18n('quality')), quality, $('<span/>').text(' (1-100)')) : $()),
+					(quality? $(row).append($(label).text(fm.i18n('quality')), quality, $('<span/>')) : $()),
 					(isJpeg? $(row).append($(label).text(fm.i18n('8pxgrid')).addClass('elfinder-resize-grid8'), grid8px) : $()),
 					$(row).append($(label).text(fm.i18n('scale')), uiprop),
 					$(row).append(preset)
@@ -26758,7 +26923,7 @@ elFinder.prototype.commands.resize = function() {
 						$(row).append($(label).text('Y')).append(pointY),
 						$(row).append($(label).text(fm.i18n('width')), offsetX),
 						$(row).append($(label).text(fm.i18n('height')), offsetY, $('<div class="elfinder-resize-whctrls">').append(constrc, reset.clone(true))),
-						(quality? $(row).append($(label).text(fm.i18n('quality')), quality.clone(true), $('<span/>').text(' (1-100)')) : $()),
+						(quality? $(row).append($(label).text(fm.i18n('quality')), quality.clone(true), $('<span/>')) : $()),
 						(isJpeg? $(row).append($(label).text(fm.i18n('8pxgrid')).addClass('elfinder-resize-grid8')) : $()),
 						$(row).append(presetc)
 					);
@@ -26771,10 +26936,10 @@ elFinder.prototype.commands.resize = function() {
 							$('<div/>').append(uideg270, uideg90)[ctrgrup]()
 						),
 						$(row).css('height', '20px').append(uidegslider),
-						(quality? $(row).addClass('elfinder-resize-quality').append(
+						((quality)? $(row)[losslessRotate < 1? 'show' : 'hide']().addClass('elfinder-resize-quality').append(
 							$(label).text(fm.i18n('quality')),
 							quality.clone(true),
-							$('<span/>').text(' (1-100)')) : $()
+							$('<span/>')) : $()
 						),
 						$(row).append($(label).text(fm.i18n('bgcolor')), bg, picker, reseter),
 						$(row).css('height', '20px').append(pallet)
@@ -26794,9 +26959,9 @@ elFinder.prototype.commands.resize = function() {
 				});
 
 				if (api2) {
-					control.append($(row), uiresize, uicrop.hide(), uirotate.hide());
+					control.append(/*$(row), */uiresize, uicrop.hide(), uirotate.hide());
 				} else {
-					control.append($(row), uiresize);
+					control.append(/*$(row), */uiresize);
 				}
 				
 				rhandle.append('<div class="'+hline+' '+hline+'-top"/>',
@@ -26909,6 +27074,8 @@ elFinder.prototype.commands.resize = function() {
 				}
 				
 				control.find('input,select').prop('disabled', true);
+				control.find('input.elfinder-resize-quality')
+					.next('span').addClass('elfinder-resize-jpgsize').attr('title', fm.i18n('roughFileSize'));
 
 			},
 			

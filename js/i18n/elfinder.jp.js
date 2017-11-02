@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-09-28
+ * @version 2017-11-02
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -432,6 +432,8 @@
 			'toolbarPref'     : 'ツールバー設定', // from v2.1.27 added 2.8.2017
 			'charsLeft'       : '... 残り $1 文字',  // from v2.1.29 added 30.8.2017
 			'sum'             : '合計', // from v2.1.29 added 28.9.2017
+			'roughFileSize'   : '大まかなファイルサイズ', // from v2.1.30 added 2.11.2017
+			'autoFocusDialog' : 'マウスオーバーでダイアログの要素にフォーカスする',  // from v2.1.30 added 2.11.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
