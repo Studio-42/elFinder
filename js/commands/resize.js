@@ -1167,7 +1167,7 @@ elFinder.prototype.commands.resize = function() {
 					rpoint  = 'elfinder-resize-handle-point',
 					src     = fm.openUrl(file.hash),
 					canvSrc = fm.openUrl(file.hash, fm.isCORS? true : false),
-					sizeImg = quality? $('<img>').attr('src', canvSrc).on('load', function() {
+					sizeImg = quality? $('<img>').attr('crossorigin', fm.isCORS? 'use-credentials' : '').attr('src', canvSrc).on('load', function() {
 						try {
 							var canv = document.createElement('canvas');
 							sizeImg.data('canvas', canv).data('ctx', canv.getContext('2d'));
