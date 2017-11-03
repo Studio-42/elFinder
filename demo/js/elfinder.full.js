@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 133f9ba) (2017-11-03)
+ * Version 2.1.29 (2.1-src Nightly: 9a55508) (2017-11-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8683,7 +8683,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 133f9ba)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 9a55508)';
 
 
 
@@ -26843,13 +26843,12 @@ elFinder.prototype.commands.resize = function() {
 						preset.hide();
 						presetc.hide();
 						
-						var dw,
-							win   = fm.options.dialogContained? fmnode : $(window),
+						var win   = fm.options.dialogContained? fmnode : $(window),
 							winH  = win.height(),
 							winW  = win.width(),
-							baseW = base.width(),
 							presW = 'auto',
-							ctrW, prvW;
+							presIn = true,
+							dw, ctrW, prvW;
 						
 						base.width(Math.min(dialogWidth, winW - 30));
 						preview.attr('style', '');
@@ -26864,14 +26863,17 @@ elFinder.prototype.commands.resize = function() {
 						dw = dialog.width() - 20;
 						if (prvW > dw) {
 							preview.width(dw);
+							presIn = false;
 						} else if ((dw - prvW) < ctrW) {
 							if (winW > winH) {
 								preview.width(dw - ctrW - 20);
 							} else {
 								preview.css({ float: 'none', marginLeft: 'auto', marginRight: 'auto'});
+								presIn = false;
 							}
-						} else {
-							presW = ctrW - 2;
+						}
+						if (presIn) {
+							presW = ctrW;
 						}
 						pwidth  = preview.width()  - (rhandle.outerWidth()  - rhandle.width());
 						if (fmnode.hasClass('elfinder-fullscreen')) {
