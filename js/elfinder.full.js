@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 771f3a2) (2017-11-03)
+ * Version 2.1.29 (2.1-src Nightly: 133f9ba) (2017-11-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8683,7 +8683,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 771f3a2)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 133f9ba)';
 
 
 
@@ -26828,7 +26828,9 @@ elFinder.prototype.commands.resize = function() {
 							var canv = document.createElement('canvas');
 							sizeImg.data('canvas', canv).data('ctx', canv.getContext('2d'));
 							jpgCalc();
-						} catch(e) {}
+						} catch(e) {
+							sizeImg.removeData('canvas').removeData('ctx');
+						}
 					}) : null,
 					jpgCalc = function() {
 						control.find('input.elfinder-resize-quality:visible').trigger('change');
@@ -26845,10 +26847,9 @@ elFinder.prototype.commands.resize = function() {
 							win   = fm.options.dialogContained? fmnode : $(window),
 							winH  = win.height(),
 							winW  = win.width(),
-							ctrW  = dialog.find('div.elfinder-resize-control').width(),
-							prvW  = preview.width(),
 							baseW = base.width(),
-							presW = 'auto';
+							presW = 'auto',
+							ctrW, prvW;
 						
 						base.width(Math.min(dialogWidth, winW - 30));
 						preview.attr('style', '');
@@ -26857,7 +26858,8 @@ elFinder.prototype.commands.resize = function() {
 							pheight = preview.height() - (rhandle.outerHeight() - rhandle.height());
 							resize.updateView(owidth, oheight);
 						}
-						prvW  = preview.width(),
+						ctrW  = dialog.find('div.elfinder-resize-control').width();
+						prvW  = preview.width();
 						
 						dw = dialog.width() - 20;
 						if (prvW > dw) {
@@ -27030,6 +27032,7 @@ elFinder.prototype.commands.resize = function() {
 					open           : function() {
 						var substituteImg = (fm.option('substituteImg', file.hash) && file.size > options.dimSubImgSize)? true : false,
 							hasSize = (file.width && file.height)? true : false;
+						dialog.parent().css('overflow', 'hidden');
 						dMinBtn = base.find('.ui-dialog-titlebar .elfinder-titlebar-minimize').hide();
 						fm.bind('resize', dinit);
 						img.attr('src', src);
