@@ -1203,13 +1203,12 @@ elFinder.prototype.commands.resize = function() {
 						preset.hide();
 						presetc.hide();
 						
-						var dw,
-							win   = fm.options.dialogContained? fmnode : $(window),
+						var win   = fm.options.dialogContained? fmnode : $(window),
 							winH  = win.height(),
 							winW  = win.width(),
-							baseW = base.width(),
 							presW = 'auto',
-							ctrW, prvW;
+							presIn = true,
+							dw, ctrW, prvW;
 						
 						base.width(Math.min(dialogWidth, winW - 30));
 						preview.attr('style', '');
@@ -1224,14 +1223,17 @@ elFinder.prototype.commands.resize = function() {
 						dw = dialog.width() - 20;
 						if (prvW > dw) {
 							preview.width(dw);
+							presIn = false;
 						} else if ((dw - prvW) < ctrW) {
 							if (winW > winH) {
 								preview.width(dw - ctrW - 20);
 							} else {
 								preview.css({ float: 'none', marginLeft: 'auto', marginRight: 'auto'});
+								presIn = false;
 							}
-						} else {
-							presW = ctrW - 2;
+						}
+						if (presIn) {
+							presW = ctrW;
 						}
 						pwidth  = preview.width()  - (rhandle.outerWidth()  - rhandle.width());
 						if (fmnode.hasClass('elfinder-fullscreen')) {
