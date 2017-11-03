@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 9b0c6a5) (2017-11-03)
+ * Version 2.1.29 (2.1-src Nightly: 771f3a2) (2017-11-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8683,7 +8683,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 9b0c6a5)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 771f3a2)';
 
 
 
@@ -25749,17 +25749,24 @@ elFinder.prototype.commands.resize = function() {
 					row      = '<div class="elfinder-resize-row"/>',
 					label    = '<div class="elfinder-resize-label"/>',
 					changeTm = null,
+					operate  = false,
+					opStart  = function() { operate = true; },
+					opStop   = function() {
+						if (operate) {
+							operate = false;
+							control.trigger('change');
+						}
+					},
 					control  = $('<div class="elfinder-resize-control"/>')
 						.on('focus', 'input[type=text],input[type=number]', function() {
 							$(this).select();
 						})
-						.on('change', function(e) {
+						.on('change', function() {
 							changeTm && clearTimeout(changeTm);
 							changeTm = setTimeout(function() {
-								var node, panel, quty, canvas, ctx, img, sx, sy, sw, sh, deg, theta, bb;
-								if (sizeImg && (canvas = sizeImg.data('canvas'))) {
-									node = $(e.target);
-									panel = node.closest('.elfinder-resize-control-panel');
+								var panel, quty, canvas, ctx, img, sx, sy, sw, sh, deg, theta, bb;
+								if (sizeImg && ! operate && (canvas = sizeImg.data('canvas'))) {
+									panel = control.children('div.elfinder-resize-control-panel:visible');
 									quty = panel.find('input.elfinder-resize-quality');
 									if (quty.is(':visible')) {
 										ctx = sizeImg.data('ctx');
@@ -25906,6 +25913,8 @@ elFinder.prototype.commands.resize = function() {
 							max: 360,
 							value: degree.val(),
 							animate: true,
+							start: opStart,
+							stop: opStop,
 							change: function(event, ui) {
 								if (ui.value != uidegslider.slider('value')) {
 									rotate.update(ui.value);
@@ -26520,12 +26529,7 @@ elFinder.prototype.commands.resize = function() {
 						imageBeingRotated : false,
 						
 						setQuality : function() {
-							if (losslessRotate > 0 && (degree.val() % 90) === 0) {
-								uirotate.children('div.elfinder-resize-quality').hide();
-							} else {
-								uirotate.children('div.elfinder-resize-quality').show();
-								jpgCalc();
-							}
+							uirotate.children('div.elfinder-resize-quality')[(losslessRotate > 0 && (degree.val() % 90) === 0)? 'hide' : 'show']();
 						},
 						
 						update : function(value, animate) {
@@ -26583,7 +26587,7 @@ elFinder.prototype.commands.resize = function() {
 						},
 						
 						start : function ( e ) {
-							
+							opStart();
 							rotate.imageBeingRotated = true;
 							
 							var imageCentre = rotate.getCenter( imgr );
@@ -26605,6 +26609,8 @@ elFinder.prototype.commands.resize = function() {
 							$(document).unbind( 'mousemove' , rotate.execute);
 							
 							setTimeout( function() { rotate.imageBeingRotated = false; }, 10 );
+							opStop();
+							
 							return false;
 						},
 						
@@ -26633,7 +26639,11 @@ elFinder.prototype.commands.resize = function() {
 								alsoResize  : img,
 								aspectRatio : cratio,
 								resize      : resize.update,
-								stop        : resize.fixHeight
+								start       : opStart,
+								stop        : function(e) {
+									resize.fixHeight;
+									opStop();
+								}
 							});
 							dinit();
 						}
@@ -26652,13 +26662,19 @@ elFinder.prototype.commands.resize = function() {
 									containment : basec,
 									aspectRatio : cratioc,
 									resize      : crop.resize_update,
+									start       : opStart,
+									stop        : opStop,
 									handles     : 'all'
 								})
 								.draggable({
 									handle      : coverc,
 									containment : imgc,
 									drag        : crop.drag_update,
-									stop        : function() { crop.updateView('xy'); }
+									start       : opStart,
+									stop        : function() {
+										crop.updateView('xy');
+										opStop();
+									}
 								});
 							
 							dinit();
@@ -26853,7 +26869,7 @@ elFinder.prototype.commands.resize = function() {
 								preview.css({ float: 'none', marginLeft: 'auto', marginRight: 'auto'});
 							}
 						} else {
-							presW = ctrW;
+							presW = ctrW - 2;
 						}
 						pwidth  = preview.width()  - (rhandle.outerWidth()  - rhandle.width());
 						if (fmnode.hasClass('elfinder-fullscreen')) {
