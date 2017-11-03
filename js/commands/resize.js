@@ -920,8 +920,9 @@ elFinder.prototype.commands.resize = function() {
 							if ( !rotate.imageBeingRotated ) return;
 							
 							var imageCentre = rotate.getCenter( imgr );
-							var mouseXFromCentre = e.pageX - imageCentre[0];
-							var mouseYFromCentre = e.pageY - imageCentre[1];
+							var ev = e.originalEvent.touches? e.originalEvent.touches[0] : e;
+							var mouseXFromCentre = ev.pageX - imageCentre[0];
+							var mouseYFromCentre = ev.pageY - imageCentre[1];
 							var mouseAngle = Math.atan2( mouseYFromCentre, mouseXFromCentre );
 							
 							var rotateAngle = mouseAngle - rotate.mouseStartAngle + rotate.imageStartAngle;
@@ -951,13 +952,15 @@ elFinder.prototype.commands.resize = function() {
 							rotate.imageBeingRotated = true;
 							
 							var imageCentre = rotate.getCenter( imgr );
-							var mouseStartXFromCentre = e.pageX - imageCentre[0];
-							var mouseStartYFromCentre = e.pageY - imageCentre[1];
+							var ev = e.originalEvent.touches? e.originalEvent.touches[0] : e;
+							var mouseStartXFromCentre = ev.pageX - imageCentre[0];
+							var mouseStartYFromCentre = ev.pageY - imageCentre[1];
 							rotate.mouseStartAngle = Math.atan2( mouseStartYFromCentre, mouseStartXFromCentre );
 							
 							rotate.imageStartAngle = parseFloat(imgr.rotate()) * Math.PI / 180.0;
 							
-							$(document).mousemove( rotate.execute );
+							$(document).on('mousemove', rotate.execute);
+							imgr.on('touchmove', rotate.execute);
 							
 							return false;
 						},
@@ -966,7 +969,8 @@ elFinder.prototype.commands.resize = function() {
 							
 							if ( !rotate.imageBeingRotated ) return;
 							
-							$(document).unbind( 'mousemove' , rotate.execute);
+							$(document).off('mousemove', rotate.execute);
+							imgr.off('touchmove', rotate.execute);
 							
 							setTimeout( function() { rotate.imageBeingRotated = false; }, 10 );
 							opStop();
@@ -1285,9 +1289,6 @@ elFinder.prototype.commands.resize = function() {
 					useSaveAs = fm.uploadMimeCheck(file.mime, file.phash),
 					dMinBtn, base;
 				
-				imgr.mousedown( rotate.start );
-				$(document).mouseup( rotate.stop );
-					
 				uiresize.append(
 					$(row).append($(label).text(fm.i18n('width')), width),
 					$(row).append($(label).text(fm.i18n('height')), height, $('<div class="elfinder-resize-whctrls">').append(constr, reset)),
@@ -1400,6 +1401,11 @@ elFinder.prototype.commands.resize = function() {
 						img.attr('src', src);
 						imgc.attr('src', src);
 						imgr.attr('src', src);
+						if (api2) {
+							imgr.on('mousedown touchstart', rotate.start)
+								.on('touchend', rotate.stop);
+							$(document).on('mouseup', rotate.stop);
+						}
 						if (hasSize && !substituteImg) {
 							return init();
 						}
@@ -1427,6 +1433,11 @@ elFinder.prototype.commands.resize = function() {
 						}
 					},
 					close          : function() {
+						if (api2) {
+							imgr.off('mousedown touchstart', rotate.start)
+								.off('touchend', rotate.stop);
+							$(document).off('mouseup', rotate.stop);
+						}
 						fm.unbind('resize', dinit);
 						$(this).elfinderdialog('destroy');
 					},
