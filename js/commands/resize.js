@@ -174,8 +174,10 @@ elFinder.prototype.commands.resize = function() {
 						}),
 					preview  = $('<div class="elfinder-resize-preview"/>')
 						.on('touchmove', function(e) {
-							e.stopPropagation();
-							e.preventDefault();
+							if ($(e.target).hasClass('touch-punch')) {
+								e.stopPropagation();
+								e.preventDefault();
+							}
 						}),
 					spinner  = $('<div class="elfinder-resize-spinner">'+fm.i18n('ntfloadimg')+'</div>'),
 					rhandle  = $('<div class="elfinder-resize-handle touch-punch"/>'),
@@ -232,22 +234,24 @@ elFinder.prototype.commands.resize = function() {
 						}),
 					width   = $(input)
 						.on('change', function() {
-							var w = parseInt(width.val()),
-								h = parseInt(cratio ? Math.round(w/ratio) : height.val());
+							var w = round(parseInt(width.val())),
+								h = round(cratio ? w/ratio : parseInt(height.val()));
 
 							if (w > 0 && h > 0) {
 								resize.updateView(w, h);
+								width.val(w);
 								height.val(h);
 							}
 						}),
 					height  = $(input)
 						.on('change', function() {
-							var h = parseInt(height.val()),
-								w = parseInt(cratio ? Math.round(h*ratio) : width.val());
+							var h = round(parseInt(height.val())),
+								w = round(cratio ? h*ratio : parseInt(width.val()));
 
 							if (w > 0 && h > 0) {
 								resize.updateView(w, h);
 								width.val(w);
+								height.val(h);
 							}
 						}),
 					pointX  = $(input).change(function(){crop.updateView();}),
@@ -411,21 +415,28 @@ elFinder.prototype.commands.resize = function() {
 						.on('click', function() {
 							grid8 = ! grid8;
 							grid8px.html(fm.i18n(grid8? 'enabled' : 'disabled')).toggleClass('ui-state-active', grid8);
-							if (grid8) {
-								width.val(round(width.val()));
-								height.val(round(height.val()));
-								offsetX.val(round(offsetX.val()));
-								offsetY.val(round(offsetY.val()));
-								pointX.val(round(pointX.val()));
-								pointY.val(round(pointY.val()));
-								if (uiresize.is(':visible')) {
-									resize.updateView(width.val(), height.val());
-								} else if (uicrop.is(':visible')) {
-									crop.updateView();
-								}
-							}
+							setStep8();
 						})
 						.button(),
+					setStep8 = function() {
+						var step = grid8? 8 : 1;
+						$.each([width, height, offsetX, offsetY, pointX, pointY], function() {
+							this.attr('step', step);
+						});
+						if (grid8) {
+							width.val(round(width.val()));
+							height.val(round(height.val()));
+							offsetX.val(round(offsetX.val()));
+							offsetY.val(round(offsetY.val()));
+							pointX.val(round(pointX.val()));
+							pointY.val(round(pointY.val()));
+							if (uiresize.is(':visible')) {
+								resize.updateView(width.val(), height.val());
+							} else if (uicrop.is(':visible')) {
+								crop.updateView();
+							}
+						}
+					},
 					setuprimg = function() {
 						var r_scale,
 							fail = function() {
@@ -586,6 +597,7 @@ elFinder.prototype.commands.resize = function() {
 								w = btn.data('s')[0],
 								h = btn.data('s')[1],
 								r = owidth / oheight;
+							btn.data('s', [h, w]).text(h + 'x' + w);
 							if (owidth > w || oheight > h) {
 								if (owidth <= w) {
 									w = round(h * r);
@@ -614,6 +626,7 @@ elFinder.prototype.commands.resize = function() {
 								x = pointX.val(),
 								y = pointY.val();
 							
+							btn.data('s', [h, w]).text(h + 'x' + w);
 							if (owidth >= w && oheight >= h) {
 								if (owidth - w - x < 0) {
 									x = owidth - w;
@@ -761,7 +774,8 @@ elFinder.prototype.commands.resize = function() {
 								}
 							})
 							.filter(':first');
-							
+						
+						setStep8();
 						!fm.UA.Mobile && inputFirst.focus();
 						resizable();
 					},
@@ -804,13 +818,13 @@ elFinder.prototype.commands.resize = function() {
 							if (w > pwidth || h > pheight) {
 								if (w / pwidth > h / pheight) {
 									prop = pwidth / w;
-									img.width(pwidth).height(Math.ceil(h*prop));
+									img.width(pwidth).height(round(h*prop));
 								} else {
 									prop = pheight / h;
-									img.height(pheight).width(Math.ceil(w*prop));
+									img.height(pheight).width(round(w*prop));
 								}
 							} else {
-								img.width(w).height(h);
+								img.width(round(w)).height(round(h));
 							}
 							
 							prop = img.width()/w;
@@ -948,6 +962,10 @@ elFinder.prototype.commands.resize = function() {
 						},
 						
 						start : function ( e ) {
+							if (imgr.hasClass('elfinder-resize-picking')) {
+								return;
+							}
+							
 							opStart();
 							rotate.imageBeingRotated = true;
 							
@@ -1006,6 +1024,7 @@ elFinder.prototype.commands.resize = function() {
 								start       : opStart,
 								stop        : function(e) {
 									resize.fixHeight;
+									resize.updateView(width.val(), height.val());
 									opStop();
 								}
 							});
@@ -1171,7 +1190,7 @@ elFinder.prototype.commands.resize = function() {
 						if (checkVals()) {
 							dialogs = fmnode.children('.'+dlcls).fadeOut();
 							base.removeClass(clactive);
-								
+							fm.enable();
 							if (fm.searchStatus.state < 2 && file.phash !== fm.cwd().hash) {
 								reqOpen = fm.exec('open', [file.phash], {thash: file.phash});
 							}
@@ -1199,8 +1218,8 @@ elFinder.prototype.commands.resize = function() {
 					jpgCalc = function() {
 						control.find('input.elfinder-resize-quality:visible').trigger('change');
 					},
-					dinit   = function() {
-						if (base.hasClass('elfinder-dialog-minimized')) {
+					dinit   = function(e) {
+						if (base.hasClass('elfinder-dialog-minimized') || base.is(':hidden')) {
 							return;
 						}
 						
