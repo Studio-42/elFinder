@@ -2928,7 +2928,6 @@ var elFinder = function(node, opts, bootCallback) {
 
 		if (heightBase && heightBase.data('resizeTm')) {
 			clearTimeout(heightBase.data('resizeTm'));
-		//	heightBase.off('resize.' + self.namespace, fitToBase);
 		}
 		
 		if (typeof h === 'string') {
@@ -2946,12 +2945,16 @@ var elFinder = function(node, opts, bootCallback) {
 						e.preventDefault();
 						e.stopPropagation();
 						tm && clearTimeout(tm);
-						if (! node.hasClass('elfinder-fullscreen')) {
+						if (! node.hasClass('elfinder-fullscreen') && (!self.UA.Mobile || heightBase.data('rotated') !== self.UA.Rotated)) {
+							heightBase.data('rotated', self.UA.Rotated);
 							heightBase.data('resizeTm', setTimeout(function() {
 								self.restoreSize();
 							}, 50));
 						}
 					});
+				}
+				if (typeof heightBase.data('rotated') === 'undefined') {
+					heightBase.data('rotated', self.UA.Rotated);
 				}
 				h = heightBase.height() * (mt[1] / 100) - heightBase.data('marginToMyNode');
 				
@@ -4758,7 +4761,7 @@ elFinder.prototype = {
 	 * @type Object
 	 **/
 	UA : (function(){
-		var webkit = !document.uniqueID && !window.opera && !window.sidebar && window.localStorage && 'WebkitAppearance' in document.documentElement.style,
+		var webkit = !document.unqueID && !window.opera && !window.sidebar && window.localStorage && 'WebkitAppearance' in document.documentElement.style,
 			angle = function() {
 				var a = ((screen && screen.orientation && screen.orientation.angle) || window.orientation || 0) + 0;
 				if (a === -90) {
@@ -4766,36 +4769,40 @@ elFinder.prototype = {
 				}
 				return a;
 			},
-			checkRotated = function() {
+			isRotated = function() {
 				return angle() % 180 === 0? false : true;
+			},
+			UA = {
+				// Browser IE <= IE 6
+				ltIE6   : typeof window.addEventListener == "undefined" && typeof document.documentElement.style.maxHeight == "undefined",
+				// Browser IE <= IE 7
+				ltIE7   : typeof window.addEventListener == "undefined" && typeof document.querySelectorAll == "undefined",
+				// Browser IE <= IE 8
+				ltIE8   : typeof window.addEventListener == "undefined" && typeof document.getElementsByClassName == "undefined",
+				// Browser IE <= IE 9
+				ltIE9  : document.uniqueID && document.documentMode <= 9,
+				// Browser IE <= IE 10
+				ltIE10  : document.uniqueID && document.documentMode <= 10,
+				// Browser IE >= IE 11
+				gtIE11  : document.uniqueID && document.documentMode >= 11,
+				IE      : document.uniqueID,
+				Firefox : window.sidebar,
+				Opera   : window.opera,
+				Webkit  : webkit,
+				Chrome  : webkit && window.chrome,
+				Safari  : webkit && !window.chrome,
+				Mobile  : typeof window.orientation != "undefined",
+				Touch   : typeof window.ontouchstart != "undefined",
+				iOS     : navigator.platform.match(/^iP(?:[ao]d|hone)/),
+				Fullscreen : (typeof (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen) !== 'undefined'),
+				Angle   : angle(),
+				Rotated : isRotated()
 			};
-		$(window).on('orientationchange', checkRotated);
-		return {
-			// Browser IE <= IE 6
-			ltIE6   : typeof window.addEventListener == "undefined" && typeof document.documentElement.style.maxHeight == "undefined",
-			// Browser IE <= IE 7
-			ltIE7   : typeof window.addEventListener == "undefined" && typeof document.querySelectorAll == "undefined",
-			// Browser IE <= IE 8
-			ltIE8   : typeof window.addEventListener == "undefined" && typeof document.getElementsByClassName == "undefined",
-			// Browser IE <= IE 9
-			ltIE9  : document.uniqueID && document.documentMode <= 9,
-			// Browser IE <= IE 10
-			ltIE10  : document.uniqueID && document.documentMode <= 10,
-			// Browser IE >= IE 11
-			gtIE11  : document.uniqueID && document.documentMode >= 11,
-			IE      : document.uniqueID,
-			Firefox : window.sidebar,
-			Opera   : window.opera,
-			Webkit  : webkit,
-			Chrome  : webkit && window.chrome,
-			Safari  : webkit && !window.chrome,
-			Mobile  : typeof window.orientation != "undefined",
-			Touch   : typeof window.ontouchstart != "undefined",
-			iOS     : navigator.platform.match(/^iP(?:[ao]d|hone)/),
-			Fullscreen : (typeof (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen) !== 'undefined'),
-			Angle   : angle(),
-			Rotated : checkRotated()
-		};
+		
+		$(window).on('orientationchange', function() {
+			UA.Rotated = isRotated();
+		});
+		return UA;
 	})(),
 	
 	/**
