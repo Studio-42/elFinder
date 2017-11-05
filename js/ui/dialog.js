@@ -430,6 +430,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 						return;
 					}
 					if (! css && ! dialog.data('resizing')) {
+						if (fm.UA.Mobile && rotated === fm.UA.Rotated) {
+							return;
+						}
+						rotated = fm.UA.Rotated;
 						win = $(window);
 						nodeOffset = elfNode.offset();
 						outerSize = {
@@ -560,7 +564,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					dialog.css('left', Math.max(Math.min(Math.max(pos.left, 0), node.width() - 200), 0));
 				}
 			},
-			maxSize;
+			maxSize, rotated;
 		
 		dialog.prepend(titlebar);
 
