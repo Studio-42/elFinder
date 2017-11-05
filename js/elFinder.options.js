@@ -469,7 +469,7 @@ elFinder.prototype._options = {
 		},
 		resize: {
 			// defalt status of snap to 8px grid of the jpeg image ("enable" or "disable")
-			grid8px : 'enable',
+			grid8px : 'disable',
 			// Preset size array [width, height]
 			presetSize : [[320, 240], [400, 400], [640, 480], [800,600]],
 			// File size (bytes) threshold when using the `dim` command for obtain the image size necessary to start editing
