@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: bd93248) (2017-11-05)
+ * Version 2.1.29 (2.1-src Nightly: 9985955) (2017-11-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2959,7 +2959,6 @@ var elFinder = function(node, opts, bootCallback) {
 
 		if (heightBase && heightBase.data('resizeTm')) {
 			clearTimeout(heightBase.data('resizeTm'));
-		//	heightBase.off('resize.' + self.namespace, fitToBase);
 		}
 		
 		if (typeof h === 'string') {
@@ -2977,12 +2976,16 @@ var elFinder = function(node, opts, bootCallback) {
 						e.preventDefault();
 						e.stopPropagation();
 						tm && clearTimeout(tm);
-						if (! node.hasClass('elfinder-fullscreen')) {
+						if (! node.hasClass('elfinder-fullscreen') && (!self.UA.Mobile || heightBase.data('rotated') !== self.UA.Rotated)) {
+							heightBase.data('rotated', self.UA.Rotated);
 							heightBase.data('resizeTm', setTimeout(function() {
 								self.restoreSize();
 							}, 50));
 						}
 					});
+				}
+				if (typeof heightBase.data('rotated') === 'undefined') {
+					heightBase.data('rotated', self.UA.Rotated);
 				}
 				h = heightBase.height() * (mt[1] / 100) - heightBase.data('marginToMyNode');
 				
@@ -4789,7 +4792,7 @@ elFinder.prototype = {
 	 * @type Object
 	 **/
 	UA : (function(){
-		var webkit = !document.uniqueID && !window.opera && !window.sidebar && window.localStorage && 'WebkitAppearance' in document.documentElement.style,
+		var webkit = !document.unqueID && !window.opera && !window.sidebar && window.localStorage && 'WebkitAppearance' in document.documentElement.style,
 			angle = function() {
 				var a = ((screen && screen.orientation && screen.orientation.angle) || window.orientation || 0) + 0;
 				if (a === -90) {
@@ -4797,36 +4800,40 @@ elFinder.prototype = {
 				}
 				return a;
 			},
-			checkRotated = function() {
+			isRotated = function() {
 				return angle() % 180 === 0? false : true;
+			},
+			UA = {
+				// Browser IE <= IE 6
+				ltIE6   : typeof window.addEventListener == "undefined" && typeof document.documentElement.style.maxHeight == "undefined",
+				// Browser IE <= IE 7
+				ltIE7   : typeof window.addEventListener == "undefined" && typeof document.querySelectorAll == "undefined",
+				// Browser IE <= IE 8
+				ltIE8   : typeof window.addEventListener == "undefined" && typeof document.getElementsByClassName == "undefined",
+				// Browser IE <= IE 9
+				ltIE9  : document.uniqueID && document.documentMode <= 9,
+				// Browser IE <= IE 10
+				ltIE10  : document.uniqueID && document.documentMode <= 10,
+				// Browser IE >= IE 11
+				gtIE11  : document.uniqueID && document.documentMode >= 11,
+				IE      : document.uniqueID,
+				Firefox : window.sidebar,
+				Opera   : window.opera,
+				Webkit  : webkit,
+				Chrome  : webkit && window.chrome,
+				Safari  : webkit && !window.chrome,
+				Mobile  : typeof window.orientation != "undefined",
+				Touch   : typeof window.ontouchstart != "undefined",
+				iOS     : navigator.platform.match(/^iP(?:[ao]d|hone)/),
+				Fullscreen : (typeof (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen) !== 'undefined'),
+				Angle   : angle(),
+				Rotated : isRotated()
 			};
-		$(window).on('orientationchange', checkRotated);
-		return {
-			// Browser IE <= IE 6
-			ltIE6   : typeof window.addEventListener == "undefined" && typeof document.documentElement.style.maxHeight == "undefined",
-			// Browser IE <= IE 7
-			ltIE7   : typeof window.addEventListener == "undefined" && typeof document.querySelectorAll == "undefined",
-			// Browser IE <= IE 8
-			ltIE8   : typeof window.addEventListener == "undefined" && typeof document.getElementsByClassName == "undefined",
-			// Browser IE <= IE 9
-			ltIE9  : document.uniqueID && document.documentMode <= 9,
-			// Browser IE <= IE 10
-			ltIE10  : document.uniqueID && document.documentMode <= 10,
-			// Browser IE >= IE 11
-			gtIE11  : document.uniqueID && document.documentMode >= 11,
-			IE      : document.uniqueID,
-			Firefox : window.sidebar,
-			Opera   : window.opera,
-			Webkit  : webkit,
-			Chrome  : webkit && window.chrome,
-			Safari  : webkit && !window.chrome,
-			Mobile  : typeof window.orientation != "undefined",
-			Touch   : typeof window.ontouchstart != "undefined",
-			iOS     : navigator.platform.match(/^iP(?:[ao]d|hone)/),
-			Fullscreen : (typeof (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen) !== 'undefined'),
-			Angle   : angle(),
-			Rotated : checkRotated()
-		};
+		
+		$(window).on('orientationchange', function() {
+			UA.Rotated = isRotated();
+		});
+		return UA;
 	})(),
 	
 	/**
@@ -8696,7 +8703,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: bd93248)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 9985955)';
 
 
 
@@ -15429,12 +15436,18 @@ $.fn.elfinderdialog = function(opts, fm) {
 				})
 				.on('posinit', function() {
 					var css = opts.position,
-						nodeOffset, minTop, minLeft, outerSize, win, winSize;
+						nodeOffset, minTop, minLeft, outerSize, win, winSize, nodeFull;
 					if (dialog.hasClass('elfinder-maximized')) {
 						return;
 					}
 					if (! css && ! dialog.data('resizing')) {
-						if (fm.UA.Mobile && rotated === fm.UA.Rotated) {
+						nodeFull = elfNode.hasClass('elfinder-fullscreen');
+						dialog.css(nodeFull? {
+							'max-width'  : '100%',
+							'max-height' : '100%',
+							'overflow'   : 'auto'
+						} : restoreStyle);
+						if (fm.UA.Mobile && !nodeFull && rotated === fm.UA.Rotated) {
 							return;
 						}
 						rotated = fm.UA.Rotated;
@@ -15455,7 +15468,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 						winSize.right = winSize.scrLeft + winSize.width;
 						winSize.bottom = winSize.scrTop + winSize.height;
 						
-						if (fm.options.dialogContained) {
+						if (fm.options.dialogContained || nodeFull) {
 							minTop = 0;
 							minLeft = 0;
 						} else {
@@ -15568,7 +15581,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					dialog.css('left', Math.max(Math.min(Math.max(pos.left, 0), node.width() - 200), 0));
 				}
 			},
-			maxSize, rotated;
+			maxSize, rotated, restoreStyle;
 		
 		dialog.prepend(titlebar);
 
@@ -15616,6 +15629,12 @@ $.fn.elfinderdialog = function(opts, fm) {
 			opts.maxHeight = opts.maxHeight? Math.min(maxSize.maxHeight, opts.maxHeight) : maxSize.maxHeight;
 			dialog.css(maxSize);
 		}
+		
+		restoreStyle = {
+			'max-width'  : dialog.css('max-width'),
+			'max-height' : dialog.css('max-height'),
+			'overflow'   : dialog.css('overflow')
+		};
 		
 		dialog.trigger('posinit').data('margin-y', self.outerHeight(true) - self.height());
 		
