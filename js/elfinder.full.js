@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: f953336) (2017-11-05)
+ * Version 2.1.29 (2.1-src Nightly: bd93248) (2017-11-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8696,7 +8696,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: f953336)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: bd93248)';
 
 
 
@@ -15108,6 +15108,14 @@ $.fn.elfinderdialog = function(opts, fm) {
 			btnWidth   = 0,
 			btnCnt     = 0,
 			tabstops   = $(),
+			numberToTel = function() {
+				if (opts.optimizeNumber) {
+					dialog.find('input[type=number]').each(function() {
+						$(this).attr('inputmode', 'numeric');
+						$(this).attr('pattern', '[0-9]*');
+					});
+				}
+			},
 			tabstopsInit = function() {
 				tabstops = dialog.find('.'+cltabstop);
 				if (tabstops.length) {
@@ -15635,7 +15643,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 		} 
 		
 		typeof(opts.create) == 'function' && $.proxy(opts.create, this)();
-			
+		
+		numberToTel();
+		
 		tabstopsInit();
 		
 		opts.autoOpen && self.elfinderdialog('open');
@@ -15666,7 +15676,8 @@ $.fn.elfinderdialog.defaults = {
 	allowMinimize : 'auto',
 	allowMaximize : false,
 	headerBtnPos : 'auto',
-	headerBtnOrder : 'auto'
+	headerBtnOrder : 'auto',
+	optimizeNumber : true
 };
 
 
