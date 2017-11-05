@@ -92,7 +92,7 @@ elFinder.prototype.commands.rename = function() {
 				}
 				if (!inError && pnode.length) {
 					
-					input.off();
+					input.off('blur');
 					
 					if (name == file.name) {
 						return dfrd.reject();
@@ -115,6 +115,7 @@ elFinder.prototype.commands.rename = function() {
 						return false;
 					}
 					
+					input.off();
 					rest();
 					
 					(navbar? input : node).html(fm.escape(name));
