@@ -4758,7 +4758,18 @@ elFinder.prototype = {
 	 * @type Object
 	 **/
 	UA : (function(){
-		var webkit = !document.uniqueID && !window.opera && !window.sidebar && window.localStorage && 'WebkitAppearance' in document.documentElement.style;
+		var webkit = !document.uniqueID && !window.opera && !window.sidebar && window.localStorage && 'WebkitAppearance' in document.documentElement.style,
+			angle = function() {
+				var a = ((screen && screen.orientation && screen.orientation.angle) || window.orientation || 0) + 0;
+				if (a === -90) {
+					a = 270;
+				}
+				return a;
+			},
+			checkRotated = function() {
+				return angle() % 180 === 0? false : true;
+			};
+		$(window).on('orientationchange', checkRotated);
 		return {
 			// Browser IE <= IE 6
 			ltIE6   : typeof window.addEventListener == "undefined" && typeof document.documentElement.style.maxHeight == "undefined",
@@ -4781,7 +4792,9 @@ elFinder.prototype = {
 			Mobile  : typeof window.orientation != "undefined",
 			Touch   : typeof window.ontouchstart != "undefined",
 			iOS     : navigator.platform.match(/^iP(?:[ao]d|hone)/),
-			Fullscreen : (typeof (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen) !== 'undefined')
+			Fullscreen : (typeof (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen) !== 'undefined'),
+			Angle   : angle(),
+			Rotated : checkRotated()
 		};
 	})(),
 	
