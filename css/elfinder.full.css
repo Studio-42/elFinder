@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: d61b719) (2017-11-05)
+ * Version 2.1.29 (2.1-src Nightly: 85d8c51) (2017-11-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -355,7 +355,16 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 
 .elfinder-help-separator { clear:both; padding:.5em;  }
 
-.elfinder-help-link { padding:2px; }
+.elfinder-help-link {
+	display:inline-block;
+	margin-right:12px;
+	padding:2px 0;
+	white-space:nowrap;
+}
+.elfinder-rtl .elfinder-help-link {
+	margin-right:0;
+	margin-left:12px;
+}
 
 .elfinder-help .ui-priority-secondary { font-size:.9em;}
 
@@ -527,6 +536,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-rm-title .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
 	content: none;
 }
+
 /* File: /css/common.css */
 /*********************************************/
 /*            COMMON ELFINDER STUFFS         */
