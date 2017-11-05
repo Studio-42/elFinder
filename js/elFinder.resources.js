@@ -128,18 +128,27 @@ elFinder.prototype.resources = {
 				nnode, pnode,
 				overlay = fm.getUI('overlay'),
 				cleanup = function() {
-					fm.unselectfiles({files : [id]}).unbind('resize', resize);
-					input.remove();
-					if (tree) {
-						node.closest('.elfinder-navbar-wrapper').remove();
+					if (node && node.length) {
+						input.off();
+						node.hide();
+						fm.unselectfiles({files : [id]}).unbind('resize', resize);
+						setTimeout(function() {
+							if (tree) {
+								node.closest('.elfinder-navbar-wrapper').remove();
+							} else {
+								node.remove();
+							}
+						}, 0);
 					}
-					node.remove();
 				},
 				cancel = function(e) { 
 					if (! inError) {
 						cleanup();
-						e.stopPropagation();
 						dfrd.reject();
+						if (e) {
+							e.stopPropagation();
+							e.preventDefault();
+						}
 					}
 				},
 				input = $(tarea? '<textarea/>' : '<input type="text"/>')
@@ -174,6 +183,9 @@ elFinder.prototype.resources = {
 							valid  = true,
 							cut;
 
+						if (name === '') {
+							return cancel();
+						}
 						if (!inError && parent.length) {
 
 							if (fm.options.validName && fm.options.validName.test) {
@@ -220,7 +232,6 @@ elFinder.prototype.resources = {
 										fm.error(error, {modal: true, close: select});
 									})
 									.done(function(data) {
-										dfrd.resolve(data);
 										if (data && data.added && data.added[0]) {
 											var item    = data.added[0],
 												dirhash = item.hash,
@@ -245,6 +256,7 @@ elFinder.prototype.resources = {
 												});
 											}
 										}
+										dfrd.resolve(data);
 									});
 							})
 							.fail(function() {
@@ -254,12 +266,12 @@ elFinder.prototype.resources = {
 					}),
 				select = function() {
 					var name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '');
-					if (!inError && fm.UA.Mobile) {
+					if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? so disable it
 						overlay.on('click', cancel)
 							.removeClass('ui-front').elfinderoverlay('show');
 					}
 					inError = false;
-					input.select().focus();
+					input.css('z-index', overlay.css('z-index')).focus().select();
 					input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
 				},
 				resize = function() {
@@ -279,6 +291,11 @@ elFinder.prototype.resources = {
 
 			if ($.isPlainObject(self.nextAction)){
 				nextAction = Object.assign({}, self.nextAction);
+			}
+			
+			if (fm.UA.iOS) {
+				// prevent auto zoom
+				input.css('font-size', '16px');
 			}
 			
 			if (tree) {
@@ -314,7 +331,7 @@ elFinder.prototype.resources = {
 					pnode.width(colwidth - 15)
 						.parent('td').css('overflow', 'visible');
 				}
-				nnode.empty('').append(input.val(file.name));
+				nnode.empty().append(input.val(file.name));
 			}
 			
 			fm.bind('resize', resize).one('open', openCallback);
