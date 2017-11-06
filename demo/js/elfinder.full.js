@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 9985955) (2017-11-05)
+ * Version 2.1.29 (2.1-src Nightly: a3c6232) (2017-11-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8703,7 +8703,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 9985955)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: a3c6232)';
 
 
 
@@ -12677,7 +12677,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 */
 			addBadgeStyle = function(mime, name) {
 				var sel, ext, type;
-				if (! addedBadges[mime]) {
+				if (mime && ! addedBadges[mime]) {
 					if (typeof addBadgeStyleSheet === 'undefined') {
 						if ($('#elfinderAddBadgeStyle'+fm.namespace).length) {
 							$('#elfinderAddBadgeStyle'+fm.namespace).remove();
