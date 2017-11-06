@@ -12,14 +12,14 @@ elFinder.prototype._options = {
 	 */
 	cdns : {
 		// for editor etc.
-		ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.8',
-		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.30.0',
+		ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.9',
+		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.31.0',
 		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.7.3',
 		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.7.1',
 		simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		// for quicklook etc.
-		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.8.4/hls.min.js',
-		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.0/dash.all.min.js',
+		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.8.5/hls.min.js',
+		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.2/dash.all.min.js',
 		prettify   : '//cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js',
 		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js'
 	},
