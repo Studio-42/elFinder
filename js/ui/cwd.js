@@ -301,7 +301,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 */
 			addBadgeStyle = function(mime, name) {
 				var sel, ext, type;
-				if (! addedBadges[mime]) {
+				if (mime && ! addedBadges[mime]) {
 					if (typeof addBadgeStyleSheet === 'undefined') {
 						if ($('#elfinderAddBadgeStyle'+fm.namespace).length) {
 							$('#elfinderAddBadgeStyle'+fm.namespace).remove();
