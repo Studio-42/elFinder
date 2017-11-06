@@ -3,7 +3,7 @@
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
  * @author Alex Yashkin <alex@yashkin.by>
- * @version 2017-10-06
+ * @version 2017-11-03
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -433,6 +433,8 @@
 			'toolbarPref'     : 'Настройки панели', // from v2.1.27 added 2.8.2017
 			'charsLeft'       : '... еще символов: $1.',  // from v2.1.29 added 30.8.2017
 			'sum'             : 'Общий размер', // from v2.1.29 added 28.9.2017
+			'roughFileSize'   : 'Приблизительный размер файла', // from v2.1.30 added 2.11.2017
+			'autoFocusDialog' : 'Фокус на элементе диалога при наведении мыши',  // from v2.1.30 added 2.11.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
