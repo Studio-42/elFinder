@@ -8,6 +8,8 @@ body {
   font-size: 100%;
   font-family: "Lucida Grande","Lucida Sans Unicode", Helvetica, Arial, Verdana, sans-serif;
   color: #222;
+  margin: 0;
+  padding: 0 20px;
 }
 img { border:0; }
 h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
@@ -110,6 +112,27 @@ h1, h2, h3 { font-family: 'Trebuchet MS', helvetica, sans-serif; }
     line-height: 140%;
     background: url(../images/warning.png) 10px 50% no-repeat;
   }
+
+.gotoFullscreen {
+    display: inline-block;
+    color: rgba(255, 255, 255, 1);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    position: fixed;
+    top: 0;
+    right: 0;
+    transform: rotate(-90deg);
+    transform-origin: right bottom;
+    -webkit-border-radius: 8px 8px 0 0;
+    border-radius: 8px 8px 0 0;
+    padding: 0 10px;
+    background: #a9e4f7;
+    background: -moz-linear-gradient(top, #a9e4f7 0%, #50a1d5 41%);
+    background: -webkit-linear-gradient(top, #a9e4f7 0%,#50a1d5 41%);
+    background: linear-gradient(to bottom, #a9e4f7 0%,#50a1d5 41%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#a9e4f7', endColorstr='#50a1d5',GradientType=0 );
+}
 
 /* Download button */
 
