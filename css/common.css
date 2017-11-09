@@ -127,13 +127,14 @@
 
 /* files num in drag helper */
 .elfinder-drag-num {
+	display: inline-box;
 	position:absolute;
 	top:0;
 	left:0;
-	width:16px;
+	width:auto;
 	height:14px;
 	text-align:center;
-	padding-top:2px;
+	padding:1px 3px 1px 3px;
 	
 	font-weight:bold;
 	color:#fff;
