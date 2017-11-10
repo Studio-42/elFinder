@@ -1122,6 +1122,21 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		return $this->rmdirRecursive($localpath);
 	}
 
+	/**
+	 * Return fileinfo based on filename
+	 * For item ID based path file system
+	 * Please override if needed on each drivers
+	 *
+	 * @param  string  $path  file cache
+	 * @return array
+	 */
+	protected function isNameExists($path) {
+		$res = file_exists($this->convEncIn($path));
+		// restore locale
+		$this->convEncOut();
+		return $res;
+	}
+
 	/******************** Over write (Optimized) functions *************************/
 
 	/**

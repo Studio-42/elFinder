@@ -3651,7 +3651,13 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 */
 	public function uniqueName($dir, $name, $suffix = ' copy', $checkNum = true, $start = 1) {
-		$ext  = '';
+		static $lasts = null;
+		
+		if ($lasts === null) {
+			$lasts = array();
+		}
+		
+		$ext = '';
 
 		if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/i', $name, $m)) {
 			$ext  = '.'.$m[1];
@@ -3666,12 +3672,17 @@ abstract class elFinderVolumeDriver {
 			$name .= $suffix;
 		}
 		$max = $i+100000;
+		
+		if (isset($lasts[$name])) {
+			$i = max($i, $lasts[$name]);
+		}
 
 		while ($i <= $max) {
 			$n = $name.($i > 0 ? sprintf($this->options['uniqueNumFormat'], $i) : '').$ext;
 
 			if (!$this->isNameExists($this->joinPathCE($dir, $n))) {
 				$this->clearcache();
+				$lasts[$name] = ++$i;
 				return $n;
 			}
 			$i++;
