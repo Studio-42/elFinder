@@ -1,3 +1,25 @@
+2017-11-xx  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.30):
+		- [js:core] Fixed #2238 always same filename on upload with some iOS devices
+		- [js:core] Fixed #2240 correspond to parallel request in "Cancel" in notify dialog
+		- [VD:FTP] Fixed #2243 problem of symlink handling
+		- [ui:cwd] bug fix of contextmenu on the "Old School"
+		- [cmd:quicklook] Fixed #2249 close-able docked preview window
+		- [api] cmd `size` can return size infomation of each targets as `sizes`
+		- [api] accept HTTP header "X-elFinderReqid"
+		- [cmd:quicklook:plain text] show all contents with click an element `charsLeft`
+		- [VD:abstract] Fixed #2253 `elFinderVolumeDriver::getWorkFile()` dose not work
+		- [cmd:resize] Fixed #2251 add an option `commandsOptions.resize.getDimThreshold` for rapid starting
+		- [VD:abstract] Fixed #2257 save as progressive JPEG on image editing
+		- [VD:abstract] bug fix of detecting of `tmpLinkPath` and `tmpLinkUrl`
+		- [cmd:resize] Fixed #2265 show the jpeg image save file size
+		- [ui:dialog] Fixed #2264 add an option `uiOptions.dualog.focusOnMouseOver`
+		- [cmd:resize] make rotatable directly with mobile devices
+		- [js:options] change default value of `commandsOptions.resize.grid8px` to 'disable'
+		- [ui:cwd] Fixed #2271 JavaScript stops when adding item count exceeding the option showFiles
+
+
 2017-10-07  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.29):
