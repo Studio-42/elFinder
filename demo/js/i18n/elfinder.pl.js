@@ -3,7 +3,7 @@
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Wojciech Jabłoński <www.jablonski@gmail.com>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2.1.29 2017-10-15
+ * @version 2.1.29 2017-11-11
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -433,6 +433,8 @@
 			'toolbarPref'     : 'Ustawienia paska narzędzi', // from v2.1.27 added 2.8.2017
 			'charsLeft'       : '... pozostało $1 znak(ów).',  // from v2.1.29 added 30.8.2017
 			'sum'             : 'Suma', // from v2.1.29 added 28.9.2017
+			'roughFileSize'   : 'Przybliżony rozmiar pliku', // from v2.1.30 added 2.11.2017
+			'autoFocusDialog' : 'Skoncentruj się na elemencie dialogowym po najechaniu myszą',  // from v2.1.30 added 2.11.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',
