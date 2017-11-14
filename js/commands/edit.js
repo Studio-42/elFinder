@@ -468,7 +468,7 @@ elFinder.prototype.commands.edit = function() {
 						}
 					});
 				} else {
-					if ((!editor.info || !editor.info.preventGet) && fm.mimeIsText(file.mime)) {
+					if ((!editor || !editor.info || !editor.info.preventGet) && fm.mimeIsText(file.mime)) {
 						reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i');
 						if (window.atob && (m = data.content.match(reg))) {
 							data.content = atob(data.content.substr(m[1].length));
