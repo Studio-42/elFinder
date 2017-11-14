@@ -52,7 +52,8 @@ var dirmode = 0755,
 				path.join(src, 'php', 'elFinderPlugin.php'),
 				path.join(src, 'php', 'elFinderSession.php'),
 				path.join(src, 'php', 'elFinderSessionInterface.php'),
-				path.join(src, 'php', '.tmp', '.htaccess')
+				path.join(src, 'php', '.tmp', '.htaccess'),
+				path.join(src, 'php', 'editors', 'editor.php')
 			]
 			.concat(grep(path.join(src, 'php'), '\\.class\\.php$'))
 			.concat(grep(path.join(src, 'php'), 'Netmount\\.php$'))
@@ -72,14 +73,33 @@ var dirmode = 0755,
 			.concat(grep(path.join(src, 'js', 'extras'), '\\.js$'))
 	};
 
+// editors files
+var editors = [];
+try {
+	editors = fs.readdirSync(path.join(src, 'php', 'editors')).map(function(n) {
+		return fs.statSync(path.join(src, 'php', 'editors', n)).isFile()? null : n;
+	});
+} catch (err) { }
+if (editors.length) {
+	for (var i in editors) {
+		if (editors[i] !== null) {
+			files.php = files.php.concat(grep(path.join(src, 'php', 'editors', editors[i]), '.+'));
+		}
+	}
+}
+
 // plugins files
 var plugins = [];
 try {
-	plugins = fs.readdirSync(path.join(src, 'php', 'plugins'));
+	plugins = fs.readdirSync(path.join(src, 'php', 'plugins')).map(function(n) {
+		return fs.statSync(path.join(src, 'php', 'plugins', n)).isFile()? null : n;
+	});;
 } catch (err) { }
 if (plugins.length) {
 	for (var i in plugins) {
-		files.php = files.php.concat(grep(path.join(src, 'php', 'plugins', plugins[i]), '.+'));
+		if (plugins[i] !== null) {
+			files.php = files.php.concat(grep(path.join(src, 'php', 'plugins', plugins[i]), '.+'));
+		}
 	}
 }
 
@@ -156,10 +176,16 @@ task('prebuild', function(){
 			'php',
 			path.join('php', '.tmp'), path.join('php', 'libs'), path.join('php', 'resources'),
 			'files', path.join('files', '.trash')];
+	if (editors.length) {
+		dir.push(path.join('php', 'editors'));
+		for (var i in editors) {
+			(editors[i] !== null) && dir.push(path.join('php', 'editors', editors[i]));
+		}
+	}
 	if (plugins.length) {
 		dir.push(path.join('php', 'plugins'));
 		for (var i in plugins) {
-			dir.push(path.join('php', 'plugins', plugins[i]));
+			(plugins[i] !== null) && dir.push(path.join('php', 'plugins', plugins[i]));
 		}
 	}
 	for (d in dir) {
@@ -325,6 +351,7 @@ task('clean', function(){
 			.concat(grep(path.join('php', '.tmp')))
 			.concat(grep(path.join('php', 'libs')))
 			.concat(grep(path.join('php', 'resources')));
+		uf = [].concat.apply(uf, grep(path.join('php', 'editors')).map(function(dir) { return grep(dir); }));
 		uf = [].concat.apply(uf, grep(path.join('php', 'plugins')).map(function(dir) { return grep(dir); }));
 	}
 	for (f in uf) {
@@ -342,6 +369,8 @@ task('clean', function(){
 			'css', 'img', 'sounds', path.join('files', '.trash'), 'files',
 			path.join('js', 'proxy'), path.join('js', 'i18n', 'help'), path.join('js', 'i18n'), path.join('js', 'extras'), 'js',
 			path.join('php', '.tmp'), path.join('php', 'libs'), path.join('php', 'resources')]
+			.concat(grep(path.join('php', 'editors')))
+			.concat([path.join('php', 'editors'), 'php'])
 			.concat(grep(path.join('php', 'plugins')))
 			.concat([path.join('php', 'plugins'), 'php']);
 		for (d in ud) {
