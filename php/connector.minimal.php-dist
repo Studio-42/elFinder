@@ -69,6 +69,12 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // define('ELFINDER_BOX_CLIENTSECRET', '');
 // ===============================================
 
+
+// // Zoho Office Editor APIKey
+// // https://www.zoho.com/docs/help/office-apis.html
+// define('ELFINDER_ZOHO_OFFICE_APIKEY', '');
+// ===============================================
+
 /**
  * Simple function to demonstrate how to control file access using "accessControl" callback.
  * This method will disable accessing files/folders starting from '.' (dot)

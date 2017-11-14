@@ -8,7 +8,8 @@
 		elFinder.prototype._options.commandsOptions.edit.editors = optEditors.concat(editors(elFinder));
 	}
 }(function(elFinder) {
-	var // get query of getfile
+	var apps = {},
+		// get query of getfile
 		getfile = window.location.search.match(/getfile=([a-z]+)/),
 		useRequire = (typeof define === 'function' && define.amd),
 		hasFlash = (function() {
@@ -151,6 +152,7 @@
 									error('Please disable your ad blocker.');
 								}
 							}, 1000);
+							fm.toFront(container);
 						})
 						.on('error', error)
 						.appendTo(elfNode.hasClass('elfinder-fullscreen')? elfNode : 'body');
@@ -345,6 +347,7 @@
 							maxSize: 2048,
 							language: getLang()
 						});
+						container.css('z-index', $(base).closest('.elfinder-dialog').css('z-index'));
 						// return editor instance
 						dfrd.resolve(featherEditor);
 					},
@@ -1030,6 +1033,115 @@
 			resize : function(textarea, instance, e, data) {
 				// fit height to base node on dialog resize
 				instance && textarea._setHeight();
+			}
+		},
+		{
+			info : {
+				name : 'Zoho Editor',
+				iconImg : 'img/edit_zohooffice.png',
+				cmdCheck : 'ZohoOffice',
+				preventGet: true,
+				hideButtons: true
+			},
+			mimes : [
+				'application/msword',
+				'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+				//'application/pdf',
+				'application/vnd.oasis.opendocument.text',
+				'application/rtf',
+				'text/html',
+				'application/vnd.ms-excel',
+				'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+				'application/vnd.oasis.opendocument.spreadsheet',
+				'application/vnd.sun.xml.calc',
+				'text/csv',
+				'text/tab-separated-values',
+				'application/vnd.ms-powerpoint',
+				'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+				'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+				'application/vnd.oasis.opendocument.presentation',
+				'application/vnd.sun.xml.impress'
+			],
+			html : '<iframe style="width:100%;max-height:100%;border:none;"></iframe>',
+			// Prepare on before show dialog
+			prepare : function(base, dialogOpts, file) {
+				var elfNode = base.editor.fm.getUI();
+				$(base).height(elfNode.height());
+				dialogOpts.width = Math.max(dialogOpts.width, elfNode.width() * .8);
+			},
+			// Initialization of editing node (this: this editors HTML node)
+			init : function(id, file, dum, fm) {
+				var ta = this,
+					ifm = $(this).hide(),
+					spnr = $('<div/>')
+						.css({
+							position: 'absolute',
+							top: '50%',
+							textAlign: 'center',
+							width: '100%',
+							fontSize: '16pt'
+						})
+						.html(fm.i18n('nowLoading') + '<span class="elfinder-spinner"/>')
+						.appendTo(ifm.parent()),
+					cdata = function() {
+						var data = '';
+						$.each(fm.options.customData, function(key, val) {
+							data += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(val);
+						});
+						return data;
+					};
+				
+				return fm.request({
+					data: {
+						cmd: 'editor',
+						name: 'ZohoOffice',
+						method: 'init',
+						'args[target]': file.hash,
+						'args[lang]' : fm.lang,
+						'args[cdata]' : cdata
+					},
+					preventDefault : true
+				}).done(function(data) {
+					if (data.zohourl) {
+						ifm.attr('src', data.zohourl).show().height('100%');
+					} else {
+						data.error && fm.error(data.error);
+						ta.elfinderdialog('destroy');
+					}
+				}).fail(function(error) {
+					error && fm.error(error);
+					ta.elfinderdialog('destroy');
+				}).always(function() {
+					spnr.remove();
+				});
+			},
+			load : function() {},
+			getContent : function() {},
+			save : function() {},
+			// Before dialog close
+			beforeclose : function(base) {
+				var dfd = $.Deferred(),
+					ab = 'about:blank';
+				base.src = ab;
+				setTimeout(function() {
+					var src;
+					try {
+						src = base.contentWindow.location.href;
+					} catch(e) {
+						src = null;
+					}
+					if (src === ab) {
+						dfd.resolve();
+					} else {
+						dfd.reject();
+					}
+				}, 10);
+				return dfd;
+			},
+			// On dialog closed
+			close : function() {
+				var fm = this.fm;
+				fm.sync(fm.cwd().hash);
 			}
 		},
 		{
