@@ -277,6 +277,8 @@ abstract class elFinderVolumeDriver {
 			'csv:text/plain'               => 'text/csv',
 			'json:text/plain'              => 'application/json',
 			'sql:text/plain'               => 'text/x-sql',
+			'rtf:text/rtf'                 => 'application/rtf',
+			'rtfd:text/rtfd'               => 'application/rtfd',
 			'ico:image/vnd.microsoft.icon' => 'image/x-icon',
 			'm4a:video/mp4'                => 'audio/mp4',
 			'oga:application/ogg'          => 'audio/ogg',
@@ -287,7 +289,10 @@ abstract class elFinderVolumeDriver {
 			'mpd:application/xml'          => 'application/dash+xml',
 			'xml:application/xml'          => 'text/xml',
 			'*:application/x-dosexec'      => 'application/x-executable',
-			'webp:application/octet-stream'=> 'image/webp'
+			'webp:application/octet-stream'=> 'image/webp',
+			'doc:application/vnd.ms-office'=> 'application/msword',
+			'xls:application/vnd.ms-office'=> 'application/vnd.ms-excel',
+			'ppt:application/vnd.ms-office'=> 'application/vnd.ms-powerpoint'
 		),
 		// An option to add MimeMap to the `mimeMap` option
 		// Array '[ext]:[detected mime type]' => '[normalized mime]'
@@ -605,8 +610,8 @@ abstract class elFinderVolumeDriver {
 		'htm'   => 'text/html',
 		'js'    => 'text/javascript',
 		'css'   => 'text/css',
-		'rtf'   => 'text/rtf',
-		'rtfd'  => 'text/rtfd',
+		'rtf'   => 'application/rtf',
+		'rtfd'  => 'application/rtfd',
 		'py'    => 'text/x-python',
 		'java'  => 'text/x-java-source',
 		'rb'    => 'text/x-ruby',

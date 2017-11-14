@@ -242,7 +242,8 @@ class elFinder {
 		'callback'  => array('node' => true, 'json' => false, 'bind' => false, 'done' => false),
 		'chmod'     => array('targets' => true, 'mode' => true),
 		'subdirs'   => array('targets' => true),
-		'abort'     => array('id' => true)
+		'abort'     => array('id' => true),
+		'editor'    => array('name' => true, 'method' => true, 'args' => false)
 	);
 	
 	/**
@@ -1909,6 +1910,40 @@ class elFinder {
 			}
 		}
 		return $result;
+	}
+
+	/**
+	 * Gateway for custom contents editor
+	 * 
+	 * @param  array $args command arguments
+	 * @return array
+	 * @author Naoki Sawada
+	 */
+	protected function editor($args = array()) {
+		$name = $args['name'];
+		if (is_array($name)) {
+			$res = array();
+			foreach($name as $c) {
+				$class = 'elFinderEditor' . $c;
+				if (class_exists($class)) {
+					$editor = new $class($this, $args['args']);
+					$res[$c] = $editor->enabled();
+				} else {
+					$res[$c] = 0;
+				}
+			}
+			return $res;
+		} else {
+			$class = 'elFinderEditor' . $name;
+			if (class_exists($class)) {
+				$editor = new $class($this, $args['args']);
+				$method = $args['method'];
+				if ($editor->isAllowedMethod($method) && method_exists($editor, $method)) {
+					return $editor->$method();
+				}
+			}
+			return array('error', $this->error(self::ERROR_UNKNOWN_CMD, 'editor.'.$name.'.'.$method));
+		}
 	}
 
 	/**
