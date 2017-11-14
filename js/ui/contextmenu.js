@@ -262,9 +262,10 @@ $.fn.elfindercontextmenu = function(fm) {
 
 				autoSyncStop = true;
 				fm.autoSync('stop');
-				fm.toFront(menu);
 				base.width(bwidth);
-				menu.stop().removeAttr('style').css(css).show();
+				menu.stop().removeAttr('style').css(css);
+				fm.toFront(menu);
+				menu.show();
 				base.attr('style', bstyle);
 				
 				css[subpos] = parseInt(menu.width());

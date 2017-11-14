@@ -3195,13 +3195,15 @@ var elFinder = function(node, opts, bootCallback) {
 	 * @param  Object  target    Target jQuery node object
 	 */
 	this.toFront = function(target) {
-		var lastnode = node.children(':last');
+		var lastnode = node.children('.ui-front:last');
 		target = $(target);
-		if (lastnode.get(0) !== target.get(0)) {
+		/*if (lastnode.get(0) !== target.get(0)) {
 			target.trigger('beforedommove')
 				.insertAfter(lastnode)
 				.trigger('dommove');
-		}
+		}*/
+		node.children().css('z-index', '');
+		target.css('z-index', lastnode.css('z-index') + 1);
 	};
 	
 	/**
@@ -3631,7 +3633,7 @@ var elFinder = function(node, opts, bootCallback) {
 	// bind core event handlers
 	this
 		.enable(function() {
-			if (!enabled && self.visible() && self.ui.overlay.is(':hidden') && ! node.children('.elfinder-dialog').find('.'+self.res('class', 'editing')).length) {
+			if (!enabled && self.visible() && self.ui.overlay.is(':hidden') && ! node.children('.elfinder-dialog:visible').find('.'+self.res('class', 'editing')).length) {
 				enabled = true;
 				document.activeElement && document.activeElement.blur();
 				node.removeClass('elfinder-disabled');
@@ -7500,6 +7502,16 @@ elFinder.prototype = {
 		}
 		
 		return this.messages['kind'+kind] ? this.i18n('kind'+kind) : mime;
+	},
+	
+	/**
+	 * Return boolean Is mime-type text file
+	 * 
+	 * @param  String  mime-type
+	 * @return Boolean
+	 */
+	mimeIsText : function(mime) {
+		return (this.textMimes[mime] || (mime.indexOf('text/') === 0 && mime.substr(5, 3) !== 'rtf'))? true : false;
 	},
 	
 	/**

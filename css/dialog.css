@@ -14,6 +14,7 @@
 	position: relative;
 	float: left;
 	width: auto;
+	cursor: pointer;
 }
 .elfinder-rtl .std42-dialog.elfinder-dialog-minimized {
 	float: right;
@@ -121,7 +122,14 @@
 .std42-dialog.elfinder-dialog-minimized .ui-dialog-titlebar select {
 	display: none;
 }
-
+.elfinder-spinner { 
+	width:14px;
+	height:14px;
+	background: url("../img/spinner-mini.gif") center center no-repeat;
+	margin:0 5px;
+	display: inline-block;
+	vertical-align: middle;
+}
 /* resize handle for touch devices */
 .elfinder-touch .std42-dialog.ui-dialog:not(ui-resizable-disabled) .ui-resizable-se {
 	width: 12px;

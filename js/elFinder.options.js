@@ -17,6 +17,7 @@ elFinder.prototype._options = {
 		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.7.3',
 		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.7.1',
 		simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
+		xlsx       : '//cdnjs.cloudflare.com/ajax/libs/xlsx/0.11.8',
 		// for quicklook etc.
 		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.8.5/hls.min.js',
 		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.2/dash.all.min.js',
@@ -390,10 +391,11 @@ elFinder.prototype._options = {
 			extraOptions : {
 				// Specify the Creative Cloud API key when using Creative SDK image editor of Creative Cloud.
 				// You can get the API key at https://console.adobe.io/.
-				//creativeCloudApiKey : '',
+				creativeCloudApiKey : '',
 				// Browsing manager URL for CKEditor, TinyMCE
 				// Uses self location with the empty value or not defined.
 				//managerUrl : 'elfinder.html'
+				managerUrl : null
 			}
 		},
 		search : {

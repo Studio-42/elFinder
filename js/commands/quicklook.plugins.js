@@ -295,7 +295,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				mime = file.mime,
 				jqxhr, loading;
 			
-			if (mime.indexOf('text/') === 0 || $.inArray(mime, mimes) !== -1) {
+			if (fm.mimeIsText(mime) || $.inArray(mime, mimes) !== -1) {
 				e.stopImmediatePropagation();
 				
 				(typeof window.PR === 'undefined') && prettify();
