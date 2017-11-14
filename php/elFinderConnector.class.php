@@ -66,7 +66,7 @@ class elFinderConnector {
 	 **/
 	public function run() {
 		$isPost = $this->reqMethod === 'POST';
-		$src    = $isPost ? $_POST : $_GET;
+		$src    = $isPost ? array_merge($_GET, $_POST) : $_GET;
 		$maxInputVars = (! $src || isset($src['targets']))? ini_get('max_input_vars') : null;
 		if ((! $src || $maxInputVars) && $rawPostData = file_get_contents('php://input')) {
 			// for max_input_vars and supports IE XDomainRequest()
@@ -324,7 +324,7 @@ class elFinderConnector {
 		
 		unset($data['header']);
 		
-		if (!empty($data['raw']) && !empty($data['error'])) {
+		if (!empty($data['raw']) && isset($data['error'])) {
 			$out = $data['error'];
 		} else {
 			if (isset($data['debug']) && isset($data['debug']['phpErrors'])) {
