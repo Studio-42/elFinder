@@ -570,6 +570,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				$dirItr = new ParentIterator(
 					new RecursiveDirectoryIterator($path,
 						FilesystemIterator::SKIP_DOTS |
+						FilesystemIterator::CURRENT_AS_SELF |
 						(defined('RecursiveDirectoryIterator::FOLLOW_SYMLINKS')?
 							RecursiveDirectoryIterator::FOLLOW_SYMLINKS : 0)
 					)
