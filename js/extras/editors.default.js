@@ -1063,6 +1063,12 @@
 				'application/vnd.sun.xml.impress'
 			],
 			html : '<iframe style="width:100%;max-height:100%;border:none;"></iframe>',
+			// setup on elFinder bootup
+			setup : function(opts, fm) {
+				if (fm.UA.Mobile || fm.UA.ltIE8) {
+					this.disabled = true;
+				}
+			},
 			// Prepare on before show dialog
 			prepare : function(base, dialogOpts, file) {
 				var elfNode = base.editor.fm.getUI();
