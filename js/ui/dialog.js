@@ -254,7 +254,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 									dum.remove();
 									mnode.height(dialog.height()).children('.ui-dialog-content:first').empty();
 									dialog.before(mnode).hide();
-									mnode.children('.ui-dialog-content:first,.ui-dialog-buttonpane').remove();
+									mnode.children('.ui-dialog-content:first,.ui-dialog-buttonpane,.ui-resizable-handle').remove();
 									mnode.find('.elfinder-titlebar-minimize,.elfinder-titlebar-full').remove();
 									mnode.find('.ui-dialog-titlebar-close').on('mousedown', function(e) {
 										e.stopPropagation();
