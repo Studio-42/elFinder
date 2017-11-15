@@ -1097,7 +1097,7 @@
 						return data;
 					};
 				
-				return fm.request({
+				$(ta).data('xhr', fm.request({
 					data: {
 						cmd: 'editor',
 						name: 'ZohoOffice',
@@ -1119,7 +1119,7 @@
 					ta.elfinderdialog('destroy');
 				}).always(function() {
 					spnr.remove();
-				});
+				}));
 			},
 			load : function() {},
 			getContent : function() {},
@@ -1145,9 +1145,14 @@
 				return dfd;
 			},
 			// On dialog closed
-			close : function() {
-				var fm = this.fm;
-				fm.sync(fm.cwd().hash);
+			close : function(ta) {
+				var fm = this.fm,
+					xhr = $(ta).data('xhr');
+				if (xhr.state() === 'pending') {
+					xhr.reject();
+				} else {
+					fm.sync(fm.cwd().hash);
+				}
 			}
 		},
 		{
