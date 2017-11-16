@@ -1649,7 +1649,9 @@ var elFinder = function(node, opts, bootCallback) {
 				cls += ' elfinder-cwd-bgself';
 			} else if ((self.oldAPI || tmbUrl) && file && file.tmb && file.tmb != 1) {
 				url = tmbUrl + file.tmb;
-			}
+			} else if (self.newAPI && file && file.tmb && file.tmb != 1) {
+                url = file.tmb;
+            }
 			if (url) {
 				if (file.ts) {
 					url += (url.match(/\?/)? '&' : '?') + '_t=' + file.ts;
