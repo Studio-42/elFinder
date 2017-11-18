@@ -26,13 +26,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 			var dialog = e.data;
 			syncTm && clearTimeout(syncTm);
 			syncTm = setTimeout(function() {
-				var opts, prevH, offset;
+				var opts, offset;
 				if (syncSize.enabled) {
-					prevH = dialog.height();
-					if (prevH !== dialog.height()) {
-						offset = dialog.offset();
-						window.scrollTo(offset.top, offset.left);
-					}
 					fitSize(dialog);
 				}
 			}, 50);

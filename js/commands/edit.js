@@ -158,7 +158,7 @@ elFinder.prototype.commands.edit = function() {
 				},
 				opts = {
 					title   : fm.escape(file.name),
-					width   : self.options.dialogWidth || (Math.min(650, $(window).width() * .9)),
+					width   : Math.min((self.options.dialogWidth || 650), $(window).width()),
 					buttons : {},
 					maxWidth  : 'window',
 					maxHeight : 'window',
@@ -203,7 +203,6 @@ elFinder.prototype.commands.edit = function() {
 						var loadRes;
 						ta.initEditArea.call(ta, id, file, content, fm);
 						old = getContent();
-						//fm.disable();
 						if (ta.editor) {
 							loadRes = ta.editor.load(ta[0]) || null;
 							if (loadRes && loadRes.done) {
@@ -235,7 +234,7 @@ elFinder.prototype.commands.edit = function() {
 					return ta.getContent.call(ta, ta[0]);
 				},
 				clsEditing = fm.res('class', 'editing'),
-				ta, old, dialogNode, selEncoding, extEditor;
+				ta, old, dialogNode, selEncoding, extEditor, maxW;
 				
 			if (editor) {
 				if (editor.html) {
@@ -331,9 +330,10 @@ elFinder.prototype.commands.edit = function() {
 						ta.parent().prev().find('.elfinder-titlebar-button:last')
 							.after($('<span class="elfinder-titlebar-button-right"/>').append(selEncoding));
 						
-						//fm.disable();
-						ta.focus(); 
-						ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
+						setTimeout(function() {
+							ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
+							ta.focus();
+						}, 10);
 					};
 				})();
 			}
@@ -386,6 +386,10 @@ elFinder.prototype.commands.edit = function() {
 				})
 				.css({ overflow: 'hidden', minHeight: '7em' })
 				.closest('.ui-dialog').addClass(dlcls);
+			
+			// care to viewport scale change with mobile devices
+			maxW = (fm.options.dialogContained? elfNode : $(window)).width();
+			(dialogNode.width() > maxW) && dialogNode.width(maxW);
 			
 			return dfrd.promise();
 		},
