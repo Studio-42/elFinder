@@ -654,7 +654,19 @@ var elFinder = function(node, opts, bootCallback) {
 		 * @type Function
 		 */
 		savedXhrSend;
-
+	
+	// set UA.Angle, UA.Rotated for mobile devices
+	if (self.UA.Mobile) {
+		$(window).on('orientationchange.'+namespace, function() {
+			var a = ((screen && screen.orientation && screen.orientation.angle) || window.orientation || 0) + 0;
+			if (a === -90) {
+				a = 270;
+			}
+			self.UA.Angle = a;
+			self.UA.Rotated = a % 180 === 0? false : true;
+		}).trigger('orientationchange.'+namespace);
+	}
+	
 	// check opt.bootCallback
 	if (opts.bootCallback && typeof opts.bootCallback === 'function') {
 		(function() {
@@ -4765,17 +4777,16 @@ elFinder.prototype = {
 	 * @type Object
 	 **/
 	UA : (function(){
-		var webkit = !document.unqueID && !window.opera && !window.sidebar && window.localStorage && 'WebkitAppearance' in document.documentElement.style,
-			angle = function() {
+		var self = this,
+			webkit = !document.unqueID && !window.opera && !window.sidebar && window.localStorage && 'WebkitAppearance' in document.documentElement.style,
+			/*setRotated = function() {
 				var a = ((screen && screen.orientation && screen.orientation.angle) || window.orientation || 0) + 0;
 				if (a === -90) {
 					a = 270;
 				}
-				return a;
-			},
-			isRotated = function() {
-				return angle() % 180 === 0? false : true;
-			},
+				UA.Angle = a;
+				UA.Rotated = a % 180 === 0? false : true;
+			},*/
 			UA = {
 				// Browser IE <= IE 6
 				ltIE6   : typeof window.addEventListener == "undefined" && typeof document.documentElement.style.maxHeight == "undefined",
@@ -4799,14 +4810,10 @@ elFinder.prototype = {
 				Touch   : typeof window.ontouchstart != "undefined",
 				iOS     : navigator.platform.match(/^iP(?:[ao]d|hone)/),
 				Fullscreen : (typeof (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen) !== 'undefined'),
-				Angle   : angle(),
-				Rotated : isRotated()
+				Angle   : 0,
+				Rotated : false
 			};
-		
-		$(window).on('orientationchange', function() {
-			UA.Rotated = isRotated();
-		});
-		return UA;
+			return UA;
 	})(),
 	
 	/**

@@ -8,6 +8,7 @@
 	position:absolute;
 	left:auto;
 	right:auto;
+	box-sizing: border-box;
 }
 .std42-dialog.elfinder-dialog-minimized {
 	overFlow: hidden;
