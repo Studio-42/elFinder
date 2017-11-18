@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: c83ae03) (2017-11-16)
+ * Version 2.1.29 (2.1-src Nightly: 0fa23bc) (2017-11-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -685,7 +685,19 @@ var elFinder = function(node, opts, bootCallback) {
 		 * @type Function
 		 */
 		savedXhrSend;
-
+	
+	// set UA.Angle, UA.Rotated for mobile devices
+	if (self.UA.Mobile) {
+		$(window).on('orientationchange.'+namespace, function() {
+			var a = ((screen && screen.orientation && screen.orientation.angle) || window.orientation || 0) + 0;
+			if (a === -90) {
+				a = 270;
+			}
+			self.UA.Angle = a;
+			self.UA.Rotated = a % 180 === 0? false : true;
+		}).trigger('orientationchange.'+namespace);
+	}
+	
 	// check opt.bootCallback
 	if (opts.bootCallback && typeof opts.bootCallback === 'function') {
 		(function() {
@@ -4796,17 +4808,16 @@ elFinder.prototype = {
 	 * @type Object
 	 **/
 	UA : (function(){
-		var webkit = !document.unqueID && !window.opera && !window.sidebar && window.localStorage && 'WebkitAppearance' in document.documentElement.style,
-			angle = function() {
+		var self = this,
+			webkit = !document.unqueID && !window.opera && !window.sidebar && window.localStorage && 'WebkitAppearance' in document.documentElement.style,
+			/*setRotated = function() {
 				var a = ((screen && screen.orientation && screen.orientation.angle) || window.orientation || 0) + 0;
 				if (a === -90) {
 					a = 270;
 				}
-				return a;
-			},
-			isRotated = function() {
-				return angle() % 180 === 0? false : true;
-			},
+				UA.Angle = a;
+				UA.Rotated = a % 180 === 0? false : true;
+			},*/
 			UA = {
 				// Browser IE <= IE 6
 				ltIE6   : typeof window.addEventListener == "undefined" && typeof document.documentElement.style.maxHeight == "undefined",
@@ -4830,14 +4841,10 @@ elFinder.prototype = {
 				Touch   : typeof window.ontouchstart != "undefined",
 				iOS     : navigator.platform.match(/^iP(?:[ao]d|hone)/),
 				Fullscreen : (typeof (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen) !== 'undefined'),
-				Angle   : angle(),
-				Rotated : isRotated()
+				Angle   : 0,
+				Rotated : false
 			};
-		
-		$(window).on('orientationchange', function() {
-			UA.Rotated = isRotated();
-		});
-		return UA;
+			return UA;
 	})(),
 	
 	/**
@@ -8717,7 +8724,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: c83ae03)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 0fa23bc)';
 
 
 
@@ -15047,13 +15054,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 			var dialog = e.data;
 			syncTm && clearTimeout(syncTm);
 			syncTm = setTimeout(function() {
-				var opts, prevH, offset;
+				var opts, offset;
 				if (syncSize.enabled) {
-					prevH = dialog.height();
-					if (prevH !== dialog.height()) {
-						offset = dialog.offset();
-						window.scrollTo(offset.top, offset.left);
-					}
 					fitSize(dialog);
 				}
 			}, 50);
@@ -20617,7 +20619,7 @@ elFinder.prototype.commands.edit = function() {
 				},
 				opts = {
 					title   : fm.escape(file.name),
-					width   : self.options.dialogWidth || (Math.min(650, $(window).width() * .9)),
+					width   : Math.min((self.options.dialogWidth || 650), $(window).width()),
 					buttons : {},
 					maxWidth  : 'window',
 					maxHeight : 'window',
@@ -20662,7 +20664,6 @@ elFinder.prototype.commands.edit = function() {
 						var loadRes;
 						ta.initEditArea.call(ta, id, file, content, fm);
 						old = getContent();
-						//fm.disable();
 						if (ta.editor) {
 							loadRes = ta.editor.load(ta[0]) || null;
 							if (loadRes && loadRes.done) {
@@ -20694,7 +20695,7 @@ elFinder.prototype.commands.edit = function() {
 					return ta.getContent.call(ta, ta[0]);
 				},
 				clsEditing = fm.res('class', 'editing'),
-				ta, old, dialogNode, selEncoding, extEditor;
+				ta, old, dialogNode, selEncoding, extEditor, maxW;
 				
 			if (editor) {
 				if (editor.html) {
@@ -20790,9 +20791,10 @@ elFinder.prototype.commands.edit = function() {
 						ta.parent().prev().find('.elfinder-titlebar-button:last')
 							.after($('<span class="elfinder-titlebar-button-right"/>').append(selEncoding));
 						
-						//fm.disable();
-						ta.focus(); 
-						ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
+						setTimeout(function() {
+							ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
+							ta.focus();
+						}, 10);
 					};
 				})();
 			}
@@ -20845,6 +20847,10 @@ elFinder.prototype.commands.edit = function() {
 				})
 				.css({ overflow: 'hidden', minHeight: '7em' })
 				.closest('.ui-dialog').addClass(dlcls);
+			
+			// care to viewport scale change with mobile devices
+			maxW = (fm.options.dialogContained? elfNode : $(window)).width();
+			(dialogNode.width() > maxW) && dialogNode.width(maxW);
 			
 			return dfrd.promise();
 		},

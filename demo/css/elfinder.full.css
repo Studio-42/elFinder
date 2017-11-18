@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: c83ae03) (2017-11-16)
+ * Version 2.1.29 (2.1-src Nightly: 0fa23bc) (2017-11-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -1690,6 +1690,7 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 	position:absolute;
 	left:auto;
 	right:auto;
+	box-sizing: border-box;
 }
 .std42-dialog.elfinder-dialog-minimized {
 	overFlow: hidden;
