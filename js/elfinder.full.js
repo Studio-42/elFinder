@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 0fa23bc) (2017-11-18)
+ * Version 2.1.29 (2.1-src Nightly: d056c4e) (2017-11-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8146,6 +8146,26 @@ elFinder.prototype = {
 		return ret;
 	},
 	
+	/**
+	 * Is same origin to current site
+	 * 
+	 * @param  String  check url
+	 * @return Boolean
+	 */
+	isSameOrigin : function (checkUrl) {
+		var url;
+		checkUrl = this.convAbsUrl(checkUrl);
+		if (location.origin && window.URL) {
+			try {
+				url = new URL(checkUrl);
+				return location.origin === url.origin;
+			} catch(e) {}
+		}
+		url = document.createElement('a');
+		url.href = checkUrl;
+		return location.protocol === url.protocol && location.host === url.host && location.port && url.port;
+	},
+	
 	navHash2Id : function(hash) {
 		return this.navPrefix + hash;
 	},
@@ -8724,7 +8744,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 0fa23bc)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: d056c4e)';
 
 
 
@@ -20246,7 +20266,7 @@ elFinder.prototype.commands.download = function() {
 							} else {
 								dlName = zipdl.name;
 							}
-							if (html5dl || linkdl) {
+							if ((html5dl && (!fm.UA.Safari || fm.isSameOrigin(fm.options.url))) || linkdl) {
 								url = fm.options.url + (fm.options.url.indexOf('?') === -1 ? '?' : '&')
 								+ 'cmd=zipdl&download=1';
 								$.each([hashes[0], zipdl.file, dlName, zipdl.mime], function(key, val) {
@@ -20360,7 +20380,7 @@ elFinder.prototype.commands.download = function() {
 		} else {
 			for (i = 0; i < files.length; i++) {
 				url = fm.openUrl(files[i].hash, true);
-				if (html5dl) {
+				if (html5dl && (!fm.UA.Safari || fm.isSameOrigin(url))) {
 					click(link.attr('href', url)
 						.attr('download', fm.escape(files[i].name))
 						.attr('target', '_blank')
