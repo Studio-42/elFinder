@@ -397,7 +397,7 @@
 					
 					prev.css('visibility', '');
 					next.css('visibility', '');
-					if (file.hash === fm.cwdId2Hash(cwd.find('[id]:first').attr('id'))) {
+					if (file.hash === fm.cwdId2Hash(cwd.find('[id]:not(.elfinder-cwd-parent):first').attr('id'))) {
 						prev.css('visibility', 'hidden');
 					}
 					if (file.hash === fm.cwdId2Hash(cwd.find('[id]:last').attr('id'))) {
