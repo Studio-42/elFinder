@@ -2876,18 +2876,17 @@ abstract class elFinderVolumeDriver {
 		if ($result) {
 			$this->rmTmb($file);
 			$this->clearstatcache();
-			$stat = $this->stat($path);
 			$fstat = stat($work_path);
-			$stat['size'] = $fstat['size'];
-			$stat['ts'] = $fstat['mtime'];
-			if ($imgsize = getimagesize($work_path)) {
-				$stat['width'] = $imgsize[0];
-				$stat['height'] = $imgsize[1];
-				$stat['mime'] = $imgsize['mime'];
-			}
+			$imgsize = getimagesize($work_path);
 			if ($path !== $work_path) {
+				$file['size'] = $fstat['size'];
+				$file['ts'] = $fstat['mtime'];
+				if ($imgsize) {
+					$file['width'] = $imgsize[0];
+					$file['height'] = $imgsize[1];
+				}
 				if ($fp = fopen($work_path, 'rb')) {
-					$ret = $this->saveCE($fp, $this->dirnameCE($path), $this->basenameCE($path), $stat);
+					$ret = $this->saveCE($fp, $this->dirnameCE($path), $this->basenameCE($path), $file);
 					fclose($fp);
 				}
 			} else {
@@ -2896,8 +2895,10 @@ abstract class elFinderVolumeDriver {
 			if ($ret) {
 				$this->clearcache();
 				$ret = $this->stat($path);
-				$ret['width'] = $stat['width'];
-				$ret['height'] = $stat['height'];
+				if ($imgsize) {
+					$ret['width'] = $imgsize[0];
+					$ret['height'] = $imgsize[1];
+				}
 			}
 		}
 		if ($path !== $work_path) {
@@ -5748,16 +5749,18 @@ abstract class elFinderVolumeDriver {
 	 * @author Troex Nevelin
 	 **/
 	protected function rmTmb($stat) {
-		if ($stat['mime'] === 'directory') {
-			foreach ($this->scandirCE($this->decode($stat['hash'])) as $p) {
-				elFinder::extendTimeLimit(30);
-				$name = $this->basenameCE($p);
-				$name != '.' && $name != '..' && $this->rmTmb($this->stat($p));
+		if ($this->tmbPathWritable) {
+			if ($stat['mime'] === 'directory') {
+				foreach ($this->scandirCE($this->decode($stat['hash'])) as $p) {
+					elFinder::extendTimeLimit(30);
+					$name = $this->basenameCE($p);
+					$name != '.' && $name != '..' && $this->rmTmb($this->stat($p));
+				}
+			} else if (!empty($stat['tmb']) && $stat['tmb'] != "1") {
+				$tmb = $this->tmbPath.DIRECTORY_SEPARATOR.rawurldecode($stat['tmb']);
+				file_exists($tmb) && unlink($tmb);
+				clearstatcache();
 			}
-		} else if (!empty($stat['tmb']) && $stat['tmb'] != "1") {
-			$tmb = $this->tmbPath.DIRECTORY_SEPARATOR.$stat['tmb'];
-			file_exists($tmb) && unlink($tmb);
-			clearstatcache();
 		}
 	}
 	
