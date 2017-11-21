@@ -18,7 +18,11 @@
 		- [cmd:resize] make rotatable directly with mobile devices
 		- [js:options] change default value of `commandsOptions.resize.grid8px` to 'disable'
 		- [ui:cwd] Fixed #2271 JavaScript stops when adding item count exceeding the option showFiles
-
+		- [api] add an cmd `editor` that getway for custom contents editor
+		- [cmd:edit] Fixed #2280 add plugin to edit with Zoho Office Editor
+		- [VD:GoogleDrive] Fixed #2281 class load error with constant `ELFINDER_GOOGLEDRIVE_GOOGLEAPICLIENT`
+		- [js:core] Fixed #2283 thumbnails not displayed with newAPI
+		- And some minor bug fixes
 
 2017-10-07  Naoki Sawada  <hypweb@gmail.com>
 
