@@ -780,6 +780,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
         if ($this->options['useApiThumbnail']) {
             $this->options['tmbURL'] = 'https://';
+            $this->options['tmbPath'] = '';
             $this->queryOptions['query']['expand'] = 'thumbnails(select=small)';
         }
 

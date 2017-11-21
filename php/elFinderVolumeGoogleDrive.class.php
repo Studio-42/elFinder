@@ -989,6 +989,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
         if ($this->options['useGoogleTmb']) {
             $this->options['tmbURL'] = 'https://';
+            $this->options['tmbPath'] = '';
         }
 
         return true;
