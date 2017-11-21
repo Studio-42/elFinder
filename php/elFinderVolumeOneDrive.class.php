@@ -436,6 +436,8 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 if ($raw->thumbnails[0]->small->url) {
                     $stat['tmb'] = substr($raw->thumbnails[0]->small->url, 8); // remove "https://"
                 }
+            } else if ($raw->file->processingMetadata) {
+                $stat['tmb'] = '1';
             }
         }
 
