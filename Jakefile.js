@@ -334,29 +334,27 @@ desc('clean build dir');
 task('clean', function(){
 	console.log('cleaning the floor');
 	uf = [path.join('js', 'elfinder.full.js'), path.join('js', 'elfinder.min.js'),
-		path.join('css', 'elfinder.full.css'), path.join('css', 'elfinder.min.css'),
-		path.join('files', '.trash', '.gitignore'), path.join('files', '.gitignore')];
+		path.join('css', 'elfinder.full.css'), path.join('css', 'elfinder.min.css')];
 	// clean images, sounds, js/i18n and php only if we are not in src
 	if (src != path.resolve()) {
 		uf = uf
-			.concat(path.join('css', 'theme.css'))
-			.concat(grep('img', '\\.png|\\.gif'))
-			.concat(grep('sounds', '\\.wav'))
-			.concat(grep(path.join('js', 'i18n', 'help')))
-			.concat(grep(path.join('js', 'i18n'), '\\.js'))
-			.concat(grep(path.join('js', 'extras')))
-			.concat([path.join('js', 'proxy', 'elFinderSupportVer1.js'), 'Changelog', 'README.md', 'elfinder.html', 'composer.json', 'LICENSE.md', 'main.default.js', path.join('files', 'readme.txt')])
-			.concat(grep('php', '\\.php|\\.sql'))
-			.concat(path.join('php', 'mime.types'))
-			.concat(grep(path.join('php', '.tmp')))
-			.concat(grep(path.join('php', 'libs')))
-			.concat(grep(path.join('php', 'resources')));
-		uf = [].concat.apply(uf, grep(path.join('php', 'editors')).map(function(dir) { return grep(dir); }));
-		uf = [].concat.apply(uf, grep(path.join('php', 'plugins')).map(function(dir) { return grep(dir); }));
+			.concat(grep('./'))
+			.concat(grep('css'))
+			.concat(grep('files'))
+			.concat(grep('img'))
+			.concat(grep('js'))
+			.concat(grep('php'))
+			.concat(grep('sounds'));
+		uf = [].concat.apply(uf, grep('files').map(function(d) { return grep(d); }));
+		uf = [].concat.apply(uf, grep('js').map(function(d) { return grep(d); }));
+		uf = [].concat.apply(uf, grep(path.join('js', 'i18n')).map(function(d) { return grep(d); }));
+		uf = [].concat.apply(uf, grep('php').map(function(d) { return grep(d); }));
+		uf = [].concat.apply(uf, grep(path.join('php', 'editors')).map(function(d) { return grep(d); }));
+		uf = [].concat.apply(uf, grep(path.join('php', 'plugins')).map(function(d) { return grep(d); }));
 	}
 	for (f in uf) {
 		var file = uf[f];
-		if (fs.existsSync(file)) {
+		if (fs.existsSync(file) && fs.statSync(file).isFile()) {
 			console.log('\tunlink ' + file);
 			fs.unlinkSync(file);
 		}
@@ -370,12 +368,11 @@ task('clean', function(){
 			path.join('js', 'proxy'), path.join('js', 'i18n', 'help'), path.join('js', 'i18n'), path.join('js', 'extras'), 'js',
 			path.join('php', '.tmp'), path.join('php', 'libs'), path.join('php', 'resources')]
 			.concat(grep(path.join('php', 'editors')))
-			.concat([path.join('php', 'editors'), 'php'])
 			.concat(grep(path.join('php', 'plugins')))
-			.concat([path.join('php', 'plugins'), 'php']);
+			.concat([path.join('php', 'editors'), path.join('php', 'plugins'), 'php']);
 		for (d in ud) {
 			var dir = ud[d];
-			if (fs.existsSync(dir)) {
+			if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
 				console.log('\trmdir	' + dir);
 				fs.rmdirSync(dir);
 			}
