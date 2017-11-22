@@ -3088,7 +3088,9 @@ abstract class elFinderVolumeDriver {
 		$url = false;
 		if (! $maxSize) {
 			$args = elFinder::$currentArgs;
-			$maxSize = $args['substitute'];
+			if (! empty($args['substitute'])) {
+				$maxSize = $args['substitute'];
+			}
 		}
 		if ($maxSize) {
 			if ($this->getOption('substituteImg')) {
@@ -3835,7 +3837,8 @@ abstract class elFinderVolumeDriver {
 				if ($size = getimagesize($work)) {
 					$size['dimensions'] = $size[0].'x'.$size[1];
 					$srcfp = fopen($work, 'rb');
-					if ($subImgLink = $this->getSubstituteImgLink(elFinder::$currentArgs['target'], $size, $srcfp)) {
+					$cArgs = elFinder::$currentArgs;
+					if (!empty($cArgs['target']) && $subImgLink = $this->getSubstituteImgLink($cArgs['target'], $size, $srcfp)) {
 						$size['url'] = $subImgLink;
 					}
 				}
