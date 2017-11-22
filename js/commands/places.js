@@ -23,6 +23,7 @@ elFinder.prototype.commands.places = function() {
 	this.exec = function(hashes) {
 		var files = this.files(hashes);
 		places.trigger('regist', [ files ]);
+		return $.Deferred().resolve();
 	};
 	
 	fm.one('load', function(){
