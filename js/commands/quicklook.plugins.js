@@ -188,7 +188,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 				e.stopImmediatePropagation();
 
 				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
-				url = fm.openUrl(file.hash, fm.isCORS);
+				url = fm.openUrl(file.hash);
+				if (!fm.isSameOrigin(url)) {
+					url = fm.openUrl(file.hash, true);
+				}
 				img = $('<img/>').hide().appendTo(preview);
 				
 				if (PSD) {
@@ -678,7 +681,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		if (typeof Uint8Array !== 'undefined' && elFinder.Zlib) {
 			preview.on('update', function(e) {
 				var file = e.file,
-					doc, xhr, loading;
+					doc, xhr, loading, url;
 
 				if ($.inArray(file.mime, mimes) !== -1) {
 					// this is our file - stop event propagation
@@ -753,7 +756,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 							loading.remove();
 						}
 					}
-					xhr.open('GET', fm.openUrl(file.hash, fm.isCORS), true);
+					url = fm.openUrl(file.hash);
+					if (!fm.isSameOrigin(url)) {
+						url = fm.openUrl(file.hash, true);
+					}
+					xhr.open('GET', url, true);
 					xhr.responseType = 'arraybuffer';
 					fm.replaceXhrSend();
 					xhr.send();

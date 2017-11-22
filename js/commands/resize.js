@@ -63,7 +63,9 @@ elFinder.prototype.commands.resize = function() {
 				}
 			})
 			.done(function() {
-				fm.storage('jpgQuality', data.quality === fm.option('jpgQuality')? null : data.quality);
+				if (data.quality) {
+					fm.storage('jpgQuality', data.quality === fm.option('jpgQuality')? null : data.quality);
+				}
 				dfrd && dfrd.resolve();
 			});
 		} else {
@@ -259,7 +261,7 @@ elFinder.prototype.commands.resize = function() {
 					offsetX = $(input).change(function(){crop.updateView('w');}),
 					offsetY = $(input).change(function(){crop.updateView('h');}),
 					quality = isJpeg && api2?
-						$(input).val(fm.storage('jpgQuality') || fm.option('jpgQuality'))
+						$(input).val(fm.storage('jpgQuality') > 0? fm.storage('jpgQuality') : fm.option('jpgQuality'))
 							.addClass('elfinder-resize-quality')
 							.attr('min', '1').attr('max', '100').attr('title', '1 - 100')
 							.on('blur', function(){
@@ -1205,7 +1207,7 @@ elFinder.prototype.commands.resize = function() {
 					vline   = 'elfinder-resize-handle-vline',
 					rpoint  = 'elfinder-resize-handle-point',
 					src     = fm.openUrl(file.hash),
-					canvSrc = fm.openUrl(file.hash, fm.isCORS? true : false),
+					canvSrc = fm.openUrl(file.hash, !fm.isSameOrigin(src)),
 					sizeImg = quality? $('<img>').attr('crossorigin', fm.isCORS? 'use-credentials' : '').attr('src', canvSrc).on('load', function() {
 						try {
 							var canv = document.createElement('canvas');
