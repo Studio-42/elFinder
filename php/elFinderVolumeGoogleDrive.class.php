@@ -903,7 +903,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $errors = [];
             if (!$this->service) {
                 if (($this->options['googleApiClient'] || defined('ELFINDER_GOOGLEDRIVE_GOOGLEAPICLIENT')) && !class_exists('Google_Client')) {
-                    include_once $this->options['googleApiClient']? $this->options['googleApiClient'] : ELFINDER_GOOGLEDRIVE_GOOGLEAPICLIENT;
+                    include_once $this->options['googleApiClient'] ? $this->options['googleApiClient'] : ELFINDER_GOOGLEDRIVE_GOOGLEAPICLIENT;
                 }
                 if (!class_exists('Google_Client')) {
                     return $this->setError('Class Google_Client not found.');
@@ -1577,12 +1577,14 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 if (!empty($args['substitute'])) {
                     $tmbSize = intval($args['substitute']);
                     $srcSize = explode('x', $ret['dim']);
-                    if (min(($tmbSize / $srcSize[0]), ($tmbSize / $srcSize[1])) < 1) {
-                        if ($this->_gd_isPublished($file)) {
-                    		$tmbSize = strval($tmbSize);
-                        	$ret['url'] = 'https://drive.google.com/thumbnail?authuser=0&sz=s'.$tmbSize.'&id='.$file['id'];
-                        } else if ($subImgLink = $this->getSubstituteImgLink(elFinder::$currentArgs['target'], $srcSize)) {
-                        	$ret['url'] = $subImgLink;
+                    if ($srcSize[0] && $srcSize[1]) {
+                        if (min(($tmbSize / $srcSize[0]), ($tmbSize / $srcSize[1])) < 1) {
+                            if ($this->_gd_isPublished($file)) {
+                                $tmbSize = strval($tmbSize);
+                                $ret['url'] = 'https://drive.google.com/thumbnail?authuser=0&sz=s'.$tmbSize.'&id='.$file['id'];
+                            } elseif ($subImgLink = $this->getSubstituteImgLink(elFinder::$currentArgs['target'], $srcSize)) {
+                                $ret['url'] = $subImgLink;
+                            }
                         }
                     }
                 }
