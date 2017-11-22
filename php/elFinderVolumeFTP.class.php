@@ -64,6 +64,13 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected $isPureFtpd = false;
 	
 	/**
+	 * Is connected server with FTPS?
+	 * 
+	 * @var bool
+	 */
+	protected $isFTPS = false;
+	
+	/**
 	 * Tmp folder path
 	 *
 	 * @var string
@@ -252,6 +259,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			if (!function_exists('ftp_ssl_connect') || !($this->connect = ftp_ssl_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
 				return $this->setError('Unable to connect to FTP server '.$this->options['host'].$withSSL);
 			}
+			$this->isFTPS = true;
 		} else {
 			if (!($this->connect = ftp_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
 				return $this->setError('Unable to connect to FTP server '.$this->options['host']);
@@ -1036,8 +1044,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 */
 	protected function _fopen($path, $mode='rb') {
 		// try ftp stream wrapper
-		if ($this->options['mode'] == 'passive' && ini_get('allow_url_fopen')) {
-			$url = 'ftp://'.$this->options['user'].':'.$this->options['pass'].'@'.$this->options['host'].':'.$this->options['port'].$path;
+		if ($this->options['mode'] === 'passive' && ini_get('allow_url_fopen')) {
+			$url = ($this->isFTPS? 'ftps' : 'ftp').'://'.$this->options['user'].':'.$this->options['pass'].'@'.$this->options['host'].':'.$this->options['port'].$path;
 			if (strtolower($mode[0]) === 'w') {
 				$context = stream_context_create(array('ftp' => array('overwrite' => true)));
 				$fp = fopen($url, $mode, false, $context);
