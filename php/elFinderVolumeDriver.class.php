@@ -3092,7 +3092,7 @@ abstract class elFinderVolumeDriver {
 				$maxSize = $args['substitute'];
 			}
 		}
-		if ($maxSize) {
+		if ($maxSize && $srcSize[0] && $srcSize[1]) {
 			if ($this->getOption('substituteImg')) {
 				$maxSize = intval($maxSize);
 				$zoom = min(($maxSize/$srcSize[0]),($maxSize/$srcSize[1]));
