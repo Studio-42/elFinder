@@ -249,7 +249,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected function connect() {
 		$withSSL = empty($this->options['ssl'])? '' : ' with SSL';
 		if ($withSSL) {
-			if (!($this->connect = ftp_ssl_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
+			if (!function_exists('ftp_ssl_connect') || !($this->connect = ftp_ssl_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
 				return $this->setError('Unable to connect to FTP server '.$this->options['host'].$withSSL);
 			}
 		} else {
