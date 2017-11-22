@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: a685b2e) (2017-11-22)
+ * Version 2.1.29 (2.1-src Nightly: d6e105d) (2017-11-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8744,7 +8744,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: a685b2e)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: d6e105d)';
 
 
 
@@ -24731,7 +24731,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 				e.stopImmediatePropagation();
 
 				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
-				url = fm.openUrl(file.hash, fm.isCORS);
+				url = fm.openUrl(file.hash);
+				if (!fm.isSameOrigin(url)) {
+					url = fm.openUrl(file.hash, true);
+				}
 				img = $('<img/>').hide().appendTo(preview);
 				
 				if (PSD) {
@@ -25221,7 +25224,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		if (typeof Uint8Array !== 'undefined' && elFinder.Zlib) {
 			preview.on('update', function(e) {
 				var file = e.file,
-					doc, xhr, loading;
+					doc, xhr, loading, url;
 
 				if ($.inArray(file.mime, mimes) !== -1) {
 					// this is our file - stop event propagation
@@ -25296,7 +25299,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 							loading.remove();
 						}
 					}
-					xhr.open('GET', fm.openUrl(file.hash, fm.isCORS), true);
+					url = fm.openUrl(file.hash);
+					if (!fm.isSameOrigin(url)) {
+						url = fm.openUrl(file.hash, true);
+					}
+					xhr.open('GET', url, true);
 					xhr.responseType = 'arraybuffer';
 					fm.replaceXhrSend();
 					xhr.send();
@@ -25869,7 +25876,9 @@ elFinder.prototype.commands.resize = function() {
 				}
 			})
 			.done(function() {
-				fm.storage('jpgQuality', data.quality === fm.option('jpgQuality')? null : data.quality);
+				if (data.quality) {
+					fm.storage('jpgQuality', data.quality === fm.option('jpgQuality')? null : data.quality);
+				}
 				dfrd && dfrd.resolve();
 			});
 		} else {
@@ -26065,7 +26074,7 @@ elFinder.prototype.commands.resize = function() {
 					offsetX = $(input).change(function(){crop.updateView('w');}),
 					offsetY = $(input).change(function(){crop.updateView('h');}),
 					quality = isJpeg && api2?
-						$(input).val(fm.storage('jpgQuality') || fm.option('jpgQuality'))
+						$(input).val(fm.storage('jpgQuality') > 0? fm.storage('jpgQuality') : fm.option('jpgQuality'))
 							.addClass('elfinder-resize-quality')
 							.attr('min', '1').attr('max', '100').attr('title', '1 - 100')
 							.on('blur', function(){
@@ -27011,7 +27020,7 @@ elFinder.prototype.commands.resize = function() {
 					vline   = 'elfinder-resize-handle-vline',
 					rpoint  = 'elfinder-resize-handle-point',
 					src     = fm.openUrl(file.hash),
-					canvSrc = fm.openUrl(file.hash, fm.isCORS? true : false),
+					canvSrc = fm.openUrl(file.hash, !fm.isSameOrigin(src)),
 					sizeImg = quality? $('<img>').attr('crossorigin', fm.isCORS? 'use-credentials' : '').attr('src', canvSrc).on('load', function() {
 						try {
 							var canv = document.createElement('canvas');
