@@ -77,11 +77,14 @@ elFinder.prototype.commands.netmount = function() {
 							data = {cmd : 'netmount', protocol: protocol},
 							cur = o[protocol];
 						$.each(content.find('input.elfinder-netmount-inputs-'+protocol), function(name, input) {
-							var val;
-							if (typeof input.val == 'function') {
-								val = $.trim(input.val());
+							var val, elm;
+							elm = $(input);
+							if (elm.is(':radio,:checkbox')) {
+								if (elm.is(':checked')) {
+									val = $.trim(elm.val());
+								}
 							} else {
-								val = $.trim(input.value);
+								val = $.trim(elm.val());
 							}
 							if (val) {
 								data[input.name] = val;

@@ -130,6 +130,9 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				$options['locale'] = $_REQUEST['locale'];
 			}
 		}
+		if (!empty($_REQUEST['FTPS'])) {
+			$options['ssl'] = true;
+		}
 		$options['statOwner'] = true;
 		$options['allowChmodReadOnly'] = true;
 		return $options;
@@ -244,14 +247,19 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function connect() {
-		if (!empty($this->options['ssl']) && !($this->connect = ftp_ssl_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
-			return $this->setError('Unable to connect to FTP server '.$this->options['host'].' with SSL');
-		} else if (!($this->connect = ftp_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
-			return $this->setError('Unable to connect to FTP server '.$this->options['host']);
+		$withSSL = empty($this->options['ssl'])? '' : ' with SSL';
+		if ($withSSL) {
+			if (!($this->connect = ftp_ssl_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
+				return $this->setError('Unable to connect to FTP server '.$this->options['host'].$withSSL);
+			}
+		} else {
+			if (!($this->connect = ftp_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
+				return $this->setError('Unable to connect to FTP server '.$this->options['host']);
+			}
 		}
 		if (!ftp_login($this->connect, $this->options['user'], $this->options['pass'])) {
 			$this->umount();
-			return $this->setError('Unable to login into '.$this->options['host']);
+			return $this->setError('Unable to login into '.$this->options['host'].$withSSL);
 		}
 		
 		// try switch utf8 mode
