@@ -762,7 +762,6 @@ var elFinder = function(node, opts, bootCallback) {
 						}
 						arrOv(v, base[k])
 					} else {
-						self.log([k,v]);
 						base[k] = v;
 					}
 				});
