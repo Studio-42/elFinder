@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: d22bfd9) (2017-11-23)
+ * Version 2.1.29 (2.1-src Nightly: cc6ff38) (2017-11-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -686,6 +686,11 @@ var elFinder = function(node, opts, bootCallback) {
 		 */
 		savedXhrSend;
 	
+	// opts must be an object
+	if (!opts) {
+		opts = {};
+	}
+	
 	// set UA.Angle, UA.Rotated for mobile devices
 	if (self.UA.Mobile) {
 		$(window).on('orientationchange.'+namespace, function() {
@@ -765,7 +770,41 @@ var elFinder = function(node, opts, bootCallback) {
 	 *
 	 * @type Object
 	 **/
-	this.options = $.extend(true, {}, this._options, opts||{});
+	//this.options = $.extend(true, {}, this._options, opts);
+	this.options = Object.assign({}, this._options);
+	
+	// for old type configuration
+	if (opts.uiOptions) {
+		if (opts.uiOptions.toolbar && Array.isArray(opts.uiOptions.toolbar)) {
+			if ($.isPlainObject(opts.uiOptions.toolbar[opts.uiOptions.toolbar.length - 1])) {
+				Object.assign(self.options.uiOptions.toolbarExtra, opts.uiOptions.toolbar.pop());
+			}
+		}
+	}
+	
+	// Overwrite if opts value is an array
+	(function() {
+		var arrOv = function(obj, base) {
+			if ($.isPlainObject(obj)) {
+				$.each(obj, function(k, v) {
+					if ($.isPlainObject(v)) {
+						if (!base[k]) {
+							base[k] = {};
+						}
+						arrOv(v, base[k])
+					} else {
+						self.log([k,v]);
+						base[k] = v;
+					}
+				});
+			}
+		}
+		arrOv(opts, self.options);
+	})();
+	
+	// join toolbarExtra to toolbar
+	this.options.uiOptions.toolbar.push(this.options.uiOptions.toolbarExtra);
+	delete this.options.uiOptions.toolbarExtra;
 	
 	// set fm.baseUrl
 	this.baseUrl = (function() {
@@ -840,51 +879,6 @@ var elFinder = function(node, opts, bootCallback) {
 		netkey: void(0),
 		disabled: []
 	};
-	
-	if (opts.ui) {
-		this.options.ui = opts.ui;
-	}
-	
-	if (opts.commands) {
-		this.options.commands = opts.commands;
-	}
-	
-	if (opts.uiOptions) {
-		if (opts.uiOptions.toolbar && Array.isArray(opts.uiOptions.toolbar)) {
-			if ($.isPlainObject(opts.uiOptions.toolbar[opts.uiOptions.toolbar.length - 1])) {
-				Object.assign(this.options.uiOptions.toolbarExtra, opts.uiOptions.toolbar.pop());
-			}
-			this.options.uiOptions.toolbar = opts.uiOptions.toolbar;
-		}
-		if (opts.uiOptions.toolbarExtra && $.isPlainObject(opts.uiOptions.toolbarExtra)) {
-			Object.assign(this.options.uiOptions.toolbarExtra, opts.uiOptions.toolbarExtra);
-		}
-	
-		if (opts.uiOptions.cwd) {
-			if (opts.uiOptions.cwd.listView) {
-				if (opts.uiOptions.cwd.listView.columns) {
-					this.options.uiOptions.cwd.listView.columns = opts.uiOptions.cwd.listView.columns;
-				}
-				if (opts.uiOptions.cwd.listView.columnsCustomName) {
-					this.options.uiOptions.cwd.listView.columnsCustomName = opts.uiOptions.cwd.listView.columnsCustomName;
-				}
-			}
-			if (opts.uiOptions.cwd.showSelectCheckboxUA) {
-				this.options.uiOptions.cwd.showSelectCheckboxUA = opts.uiOptions.cwd.showSelectCheckboxUA;
-			}
-		}
-		
-		if (opts.uiOptions.navbar && opts.uiOptions.navbar.autoHideUA) {
-			this.options.uiOptions.navbar.autoHideUA = opts.uiOptions.navbar.autoHideUA;
-		}
-	}
-	// join toolbarExtra to toolbar
-	this.options.uiOptions.toolbar.push(this.options.uiOptions.toolbarExtra);
-	delete this.options.uiOptions.toolbarExtra;
-	
-	if (opts.contextmenu) {
-		Object.assign(this.options.contextmenu, opts.contextmenu);
-	}
 	
 	if (! inFrame && ! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
 		this.options.enableAlways = true;
@@ -3522,21 +3516,6 @@ var elFinder = function(node, opts, bootCallback) {
 	})();
 	
 	/*************  init stuffs  ****************/
-	
-	// check jquery ui
-	if (!($.fn.selectable && $.fn.draggable && $.fn.droppable && $.fn.resizable)) {
-		return alert(this.i18n('errJqui'));
-	}
-
-	// check node
-	if (!node.length) {
-		return alert(this.i18n('errNode'));
-	}
-	// check connector url
-	if (!this.options.url) {
-		return alert(this.i18n('errURL'));
-	}
-
 	Object.assign($.ui.keyCode, {
 		'F1' : 112,
 		'F2' : 113,
@@ -4033,19 +4012,33 @@ var elFinder = function(node, opts, bootCallback) {
 	// elFinder boot up function
 	bootUp = function() {
 		/**
+		 * i18 messages
+		 *
+		 * @type Object
+		 **/
+		self.messages = i18n.messages;
+		
+		// check jquery ui
+		if (!($.fn.selectable && $.fn.draggable && $.fn.droppable && $.fn.resizable)) {
+			return alert(self.i18n('errJqui'));
+		}
+		
+		// check node
+		if (!node.length) {
+			return alert(self.i18n('errNode'));
+		}
+		// check connector url
+		if (!self.options.url) {
+			return alert(self.i18n('errURL'));
+		}
+		
+		/**
 		 * Interface direction
 		 *
 		 * @type String
 		 * @default "ltr"
 		 **/
 		self.direction = i18n.direction;
-		
-		/**
-		 * i18 messages
-		 *
-		 * @type Object
-		 **/
-		self.messages = i18n.messages;
 		
 		/**
 		 * Date/time format
@@ -8744,7 +8737,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: d22bfd9)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: cc6ff38)';
 
 
 
@@ -9379,6 +9372,9 @@ elFinder.prototype._options = {
 			// list of allowed mimetypes to edit of text files
 			// if empty - any text files can be edited
 			mimes : [],
+			// Use the editor stored in the browser (do not display the choices)
+			// This value allowd overwrite with user preferences
+			useStoredEditor : false,
 			// edit files in wysisyg's
 			editors : [
 				// {
@@ -9575,7 +9571,10 @@ elFinder.prototype._options = {
 			// Tabs to show
 			view : ['about', 'shortcuts', 'help', 'preference', 'debug'],
 			// HTML source URL of the heip tab
-			helpSource : ''
+			helpSource : '',
+			// Command list of action when select file
+			// Array value are 'Command Name' or 'Command Name1/CommandName2...'
+			selectActions : ['open', 'edit/download', 'resize/edit/download', 'download', 'quicklook']
 		}
 	},
 	
@@ -11115,7 +11114,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-11-02
+ * @version 2017-11-23
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -11540,7 +11539,10 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'sum'             : 'Sum', // from v2.1.29 added 28.9.2017
 			'roughFileSize'   : 'Rough file size', // from v2.1.30 added 2.11.2017
 			'autoFocusDialog' : 'Focus on the element of dialog with mouseover',  // from v2.1.30 added 2.11.2017
-			
+			'select'          : 'Select', // from v2.1.30 added 23.11.2017
+			'selectAction'    : 'Action when select file', // from v2.1.30 added 23.11.2017
+			'useStoredEditor' : 'Open with the editor used last time', // from v2.1.30 added 23.11.2017
+
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
 			'kindRoot'        : 'Volume Root', // from v2.1.16 added 16.10.2016
@@ -12311,7 +12313,9 @@ $.fn.elfindercontextmenu = function(fm) {
 				close();
 
 				if (data.type && data.targets) {
+					fm.trigger('contextmenucreate', data);
 					create(data.type, data.targets);
+					fm.trigger('contextmenucreatedone', data);
 				} else if (data.raw) {
 					createFromRaw(data.raw);
 				}
@@ -20456,7 +20460,6 @@ elFinder.prototype.commands.edit = function() {
 	var self  = this,
 		fm    = this.fm,
 		dlcls = 'elfinder-dialog-edit',
-		//texts = [],
 		mimesSingle = [],
 		mimes = [],
 		rtrim = function(str){
@@ -21025,6 +21028,7 @@ elFinder.prototype.commands.edit = function() {
 					return false;
 				};
 			
+			stored = fm.storage('storedEditors') || {};
 			editors = {};
 			$.each(self.options.editors || [], function(i, editor) {
 				var name;
@@ -21035,10 +21039,43 @@ elFinder.prototype.commands.edit = function() {
 						&& typeof editor.save == 'function') {
 					
 					name = editor.info && editor.info.name? editor.info.name : ('Editor ' + i);
+					editor.name = name;
 					editors[name] = editor;
 				}
 			});
-		};
+		},
+		store = function(mime, editor) {
+			if (mime && editor) {
+				if (!$.isPlainObject(stored)) {
+					stored = {};
+				}
+				stored[mime] = editor.name;
+				fm.storage('storedEditors', stored);
+				fm.trigger('selectfiles', {files : fm.selected()});
+			}
+		},
+		useStoredEditor = function() {
+			var d = fm.storage('useStoredEditor');
+			return d? (d > 0) : self.options.useStoredEditor;
+		},
+		getSubMenuRaw = function(files, callback) {
+			var subMenuRaw = [];
+			$.each(editors, function(name, ed) {
+				subMenuRaw.push(
+					{
+						label    : fm.escape(name),
+						icon     : ed.info && ed.info.icon? ed.info.icon : 'edit',
+						options  : { iconImg: ed.info && ed.info.iconImg? fm.baseUrl + ed.info.iconImg : void(0) },
+						callback : function() {
+							store(files[0].mime, ed);
+							callback && callback.call(ed);
+						}
+					}		
+				);
+			});
+			return subMenuRaw;
+		},
+		stored;
 	
 	
 	this.shortcuts = [{
@@ -21055,7 +21092,6 @@ elFinder.prototype.commands.edit = function() {
 		this.onlyMimes = this.options.mimes || [];
 		
 		fm.one('open', function() {
-			//texts = fm.res('mimes', 'text') || [];
 			// editors setup
 			if (opts.editors && Array.isArray(opts.editors)) {
 				$.each(opts.editors, function(i, editor) {
@@ -21119,15 +21155,57 @@ elFinder.prototype.commands.edit = function() {
 			}
 		})
 		.bind('select', function() {
-			if (self.enabled()) {
-				setEditors(fm.file(fm.selected()[0]), fm.selected().length);
-				if (Object.keys(editors).length > 1) {
-					self.variants = [];
-					$.each(editors, function(name, editor) {
-						self.variants.push([{ editor: editor }, fm.i18n(name), editor.info && editor.info.iconImg? fm.baseUrl + editor.info.iconImg : 'edit']);
+			editors = null;
+		})
+		.bind('contextmenucreate', function(e) {
+			var file,
+				single = function(editor) {
+					var title = self.title;
+					fm.one('contextmenucreatedone', function() {
+						self.title = title;
 					});
-				} else {
+					self.title = fm.escape(editor.name);
 					delete self.variants;
+				};
+			
+			if (e.data.type === 'files' && self.enabled()) {
+				file = fm.file(e.data.targets[0]);
+				setEditors(file, e.data.targets.length);
+				if (Object.keys(editors).length > 1) {
+					if (!useStoredEditor() || !stored[file.mime]) {
+						delete self.extra;
+						self.variants = [];
+						$.each(editors, function(name, editor) {
+							self.variants.push([{ editor: editor }, fm.i18n(name), editor.info && editor.info.iconImg? fm.baseUrl + editor.info.iconImg : 'edit']);
+						});
+					} else {
+						single(editors[stored[file.mime]]);
+						self.extra = {
+							icon: 'menu',
+							node: $('<span/>')
+								.attr({title: fm.i18n('select')})
+								.on('click touchstart', function(e){
+									if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+										return;
+									}
+									var node = $(this);
+									e.stopPropagation();
+									e.preventDefault();
+									fm.trigger('contextmenu', {
+										raw: getSubMenuRaw(fm.selectedFiles(), function() {
+											var hashes = fm.selected();
+											self.exec(hashes, {editor: this});
+											fm.trigger('selectfiles', {files : hashes});
+										}),
+										x: node.offset().left,
+										y: node.offset().top
+									});
+								})
+						};
+					}
+				} else {
+					single(editors[Object.keys(editors)[0]]);
+					delete self.extra;
 				}
 			}
 		});
@@ -21149,24 +21227,16 @@ elFinder.prototype.commands.edit = function() {
 			node = $(opts && opts._currentNode? opts._currentNode : $('#'+ fm.cwdHash2Id(hashes[0]))),
 			getEditor = function() {
 				var dfd = $.Deferred(),
-					subMenuRaw;
+					storedName;
 				
 				if (!editor && Object.keys(editors).length > 1) {
-					subMenuRaw = [];
-					$.each(editors, function(name, ed) {
-						subMenuRaw.push(
-							{
-								label    : fm.escape(name),
-								icon     : ed.info && ed.info.icon? ed.info.icon : 'edit',
-								options  : { iconImg: ed.info && ed.info.iconImg? fm.baseUrl + ed.info.iconImg : void(0) },
-								callback : function() {
-									dfd.resolve(ed);
-								}
-							}		
-						);
-					});
+					if (useStoredEditor() && (storedName = stored[files[0].mime]) && editors[storedName]) {
+						return dfd.resolve(editors[storedName]);
+					}
 					fm.trigger('contextmenu', {
-						raw: subMenuRaw,
+						raw: getSubMenuRaw(files, function() {
+							dfd.resolve(this);
+						}),
 						x: node.offset().left,
 						y: node.offset().top,
 						opened: function() {
@@ -21184,12 +21254,17 @@ elFinder.prototype.commands.edit = function() {
 					
 					return dfd;
 				} else {
+					Object.keys(editors).length > 1 && editor && store(files[0].mime, editor);
 					return dfd.resolve(editor? editor : (Object.keys(editors).length? editors[Object.keys(editors)[0]] : null));
 				}
 			},
 			dfrd = $.Deferred(),
 			file;
 
+		if (editors === null) {
+			setEditors(files[0], hashes.length);
+		}
+		
 		if (!node.length) {
 			node = fm.getUI('cwd');
 		}
@@ -21991,10 +22066,16 @@ elFinder.prototype.commands.fullscreen = function() {
 	fm.bind('load', function() {
 		var setupPref = function() {
 				var tab = content.find('.elfinder-help-preference'),
-					forms = { language: '', toolbarPref: '', autoFocusDialog: '', clearBrowserData: '' },
+					forms = self.options.prefs || ['language', 'toolbarPref', 'selectAction', 'useStoredEditor', 'autoFocusDialog', 'clearBrowserData'],
 					dls = $();
 				
-				forms.language = (function() {
+				forms = fm.arrayFlip(forms, true);
+				
+				if (fm.options.getFileCallback) {
+					delete forms.selectAction;
+				}
+				
+				forms.language && (forms.language = (function() {
 					var node = $('<div/>');
 					init(function() {
 						var langSel = $('<select/>').on('change', function() {
@@ -22047,9 +22128,9 @@ elFinder.prototype.commands.fullscreen = function() {
 						node.replaceWith(langSel.append(optTags.join('')).val(fm.lang));
 					});
 					return node;
-				})();
+				})());
 				
-				forms.toolbarPref = (function() {
+				forms.toolbarPref && (forms.toolbarPref = (function() {
 					var node = $('<div/>');
 					init(function() {
 						var pnls = $.map(fm.options.uiOptions.toolbar, function(v) {
@@ -22061,7 +22142,7 @@ elFinder.prototype.commands.fullscreen = function() {
 							var cmd = this,
 								name = fm.i18n('cmd'+cmd);
 							if (name === 'cmd'+cmd) {
-								name = cmd;
+								name = fm.i18n(cmd);
 							}
 							tags.push('<span class="elfinder-help-toolbar-item"><label><input type="checkbox" value="'+cmd+'" '+(hides[cmd]? '' : 'checked')+'/>'+name+'</label></span>');
 						});
@@ -22078,24 +22159,63 @@ elFinder.prototype.commands.fullscreen = function() {
 						}));
 					});
 					return node;
-				})();
+				})());
 				
-				forms.autoFocusDialog = $('<input type="checkbox"/>').prop('checked', (function() {
+				forms.selectAction && (forms.selectAction = (function() {
+					var node = $('<div/>');
+					init(function() {
+						var actSel = $('<select/>').on('change', function() {
+								var act = $(this).val();
+								fm.storage('selectAction', act === 'default'? null : act);
+							}),
+							optTags = [],
+							acts = self.options.selectActions;
+						
+						if (acts.indexOf('open') === -1) {
+							acts.unshift('open');
+						}
+						$.each(acts, function(i, act) {
+							var names = $.map(act.split('/'), function(cmd) {
+								var name = fm.i18n('cmd'+cmd);
+								if (name === 'cmd'+cmd) {
+									name = fm.i18n(cmd);
+								}
+								return name;
+							});
+							optTags.push('<option value="'+act+'">'+names.join('/')+'</option>');
+						});
+						node.replaceWith(actSel.append(optTags.join('')).val(fm.storage('selectAction') || 'open'));
+					});
+					return node;
+				})());
+				
+				forms.useStoredEditor && (forms.useStoredEditor = $('<input type="checkbox"/>').prop('checked', (function() {
+					var s = fm.storage('useStoredEditor');
+					return s? (s > 0) : fm.options.commandsOptions.edit.useStoredEditor;
+				})()).on('change', function(e) {
+					e.preventDefault();
+					fm.storage('useStoredEditor', $(this).is(':checked')? 1 : -1);
+					fm.trigger('selectfiles', {files : fm.selected()});
+				}));
+				
+				forms.autoFocusDialog && (forms.autoFocusDialog = $('<input type="checkbox"/>').prop('checked', (function() {
 					var s = fm.storage('autoFocusDialog');
 					return s? (s > 0) : fm.options.uiOptions.dialog.focusOnMouseOver;
 				})()).on('change', function(e) {
 					e.preventDefault();
 					fm.storage('autoFocusDialog', $(this).is(':checked')? 1 : -1);
-				});
+				}));
 				
-				forms.clearBrowserData = $('<button/>').text(fm.i18n('reset')).button().on('click', function(e) {
+				forms.clearBrowserData && (forms.clearBrowserData = $('<button/>').text(fm.i18n('reset')).button().on('click', function(e) {
 					e.preventDefault();
 					fm.storage();
 					$('#'+fm.id).elfinder('reload');
-				});
+				}));
 				
 				$.each(forms, function(n, f) {
-					dls = dls.add($('<dt>'+fm.i18n(n)+'</dt>')).add($('<dd class="elfinder-help-'+n+'"/>').append(f));
+					if (f && f !== true) {
+						dls = dls.add($('<dt>'+fm.i18n(n)+'</dt>')).add($('<dd class="elfinder-help-'+n+'"/>').append(f));
+					}
 				});
 				
 				tab.append($('<dl/>').append(dls));
@@ -23215,6 +23335,19 @@ elFinder.prototype.commands.netunmount = function() {
 				] : []
 			});
 		} else {
+			var selAct = fm.storage('selectAction');
+			var cmd;
+			if (selAct) {
+				$.each(selAct.split('/'), function() {
+					if ((cmd = fm.getCommand(this)) && cmd.enabled()) {
+						return false;
+					}
+					cmd = null;
+				});
+				if (cmd) {
+					return cmd.exec();
+				}
+			}
 			doOpen();
 		}
 		
