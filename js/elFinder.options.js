@@ -295,6 +295,9 @@ elFinder.prototype._options = {
 			// list of allowed mimetypes to edit of text files
 			// if empty - any text files can be edited
 			mimes : [],
+			// Use the editor stored in the browser (do not display the choices)
+			// This value allowd overwrite with user preferences
+			useStoredEditor : false,
 			// edit files in wysisyg's
 			editors : [
 				// {
@@ -491,7 +494,10 @@ elFinder.prototype._options = {
 			// Tabs to show
 			view : ['about', 'shortcuts', 'help', 'preference', 'debug'],
 			// HTML source URL of the heip tab
-			helpSource : ''
+			helpSource : '',
+			// Command list of action when select file
+			// Array value are 'Command Name' or 'Command Name1/CommandName2...'
+			selectActions : ['open', 'edit/download', 'resize/edit/download', 'download', 'quicklook']
 		}
 	},
 	

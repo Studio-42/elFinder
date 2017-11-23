@@ -9,7 +9,6 @@ elFinder.prototype.commands.edit = function() {
 	var self  = this,
 		fm    = this.fm,
 		dlcls = 'elfinder-dialog-edit',
-		//texts = [],
 		mimesSingle = [],
 		mimes = [],
 		rtrim = function(str){
@@ -578,6 +577,7 @@ elFinder.prototype.commands.edit = function() {
 					return false;
 				};
 			
+			stored = fm.storage('storedEditors') || {};
 			editors = {};
 			$.each(self.options.editors || [], function(i, editor) {
 				var name;
@@ -588,10 +588,43 @@ elFinder.prototype.commands.edit = function() {
 						&& typeof editor.save == 'function') {
 					
 					name = editor.info && editor.info.name? editor.info.name : ('Editor ' + i);
+					editor.name = name;
 					editors[name] = editor;
 				}
 			});
-		};
+		},
+		store = function(mime, editor) {
+			if (mime && editor) {
+				if (!$.isPlainObject(stored)) {
+					stored = {};
+				}
+				stored[mime] = editor.name;
+				fm.storage('storedEditors', stored);
+				fm.trigger('selectfiles', {files : fm.selected()});
+			}
+		},
+		useStoredEditor = function() {
+			var d = fm.storage('useStoredEditor');
+			return d? (d > 0) : self.options.useStoredEditor;
+		},
+		getSubMenuRaw = function(files, callback) {
+			var subMenuRaw = [];
+			$.each(editors, function(name, ed) {
+				subMenuRaw.push(
+					{
+						label    : fm.escape(name),
+						icon     : ed.info && ed.info.icon? ed.info.icon : 'edit',
+						options  : { iconImg: ed.info && ed.info.iconImg? fm.baseUrl + ed.info.iconImg : void(0) },
+						callback : function() {
+							store(files[0].mime, ed);
+							callback && callback.call(ed);
+						}
+					}		
+				);
+			});
+			return subMenuRaw;
+		},
+		stored;
 	
 	
 	this.shortcuts = [{
@@ -608,7 +641,6 @@ elFinder.prototype.commands.edit = function() {
 		this.onlyMimes = this.options.mimes || [];
 		
 		fm.one('open', function() {
-			//texts = fm.res('mimes', 'text') || [];
 			// editors setup
 			if (opts.editors && Array.isArray(opts.editors)) {
 				$.each(opts.editors, function(i, editor) {
@@ -672,15 +704,57 @@ elFinder.prototype.commands.edit = function() {
 			}
 		})
 		.bind('select', function() {
-			if (self.enabled()) {
-				setEditors(fm.file(fm.selected()[0]), fm.selected().length);
-				if (Object.keys(editors).length > 1) {
-					self.variants = [];
-					$.each(editors, function(name, editor) {
-						self.variants.push([{ editor: editor }, fm.i18n(name), editor.info && editor.info.iconImg? fm.baseUrl + editor.info.iconImg : 'edit']);
+			editors = null;
+		})
+		.bind('contextmenucreate', function(e) {
+			var file,
+				single = function(editor) {
+					var title = self.title;
+					fm.one('contextmenucreatedone', function() {
+						self.title = title;
 					});
-				} else {
+					self.title = fm.escape(editor.name);
 					delete self.variants;
+				};
+			
+			if (e.data.type === 'files' && self.enabled()) {
+				file = fm.file(e.data.targets[0]);
+				setEditors(file, e.data.targets.length);
+				if (Object.keys(editors).length > 1) {
+					if (!useStoredEditor() || !stored[file.mime]) {
+						delete self.extra;
+						self.variants = [];
+						$.each(editors, function(name, editor) {
+							self.variants.push([{ editor: editor }, fm.i18n(name), editor.info && editor.info.iconImg? fm.baseUrl + editor.info.iconImg : 'edit']);
+						});
+					} else {
+						single(editors[stored[file.mime]]);
+						self.extra = {
+							icon: 'menu',
+							node: $('<span/>')
+								.attr({title: fm.i18n('select')})
+								.on('click touchstart', function(e){
+									if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+										return;
+									}
+									var node = $(this);
+									e.stopPropagation();
+									e.preventDefault();
+									fm.trigger('contextmenu', {
+										raw: getSubMenuRaw(fm.selectedFiles(), function() {
+											var hashes = fm.selected();
+											self.exec(hashes, {editor: this});
+											fm.trigger('selectfiles', {files : hashes});
+										}),
+										x: node.offset().left,
+										y: node.offset().top
+									});
+								})
+						};
+					}
+				} else {
+					single(editors[Object.keys(editors)[0]]);
+					delete self.extra;
 				}
 			}
 		});
@@ -702,24 +776,16 @@ elFinder.prototype.commands.edit = function() {
 			node = $(opts && opts._currentNode? opts._currentNode : $('#'+ fm.cwdHash2Id(hashes[0]))),
 			getEditor = function() {
 				var dfd = $.Deferred(),
-					subMenuRaw;
+					storedName;
 				
 				if (!editor && Object.keys(editors).length > 1) {
-					subMenuRaw = [];
-					$.each(editors, function(name, ed) {
-						subMenuRaw.push(
-							{
-								label    : fm.escape(name),
-								icon     : ed.info && ed.info.icon? ed.info.icon : 'edit',
-								options  : { iconImg: ed.info && ed.info.iconImg? fm.baseUrl + ed.info.iconImg : void(0) },
-								callback : function() {
-									dfd.resolve(ed);
-								}
-							}		
-						);
-					});
+					if (useStoredEditor() && (storedName = stored[files[0].mime]) && editors[storedName]) {
+						return dfd.resolve(editors[storedName]);
+					}
 					fm.trigger('contextmenu', {
-						raw: subMenuRaw,
+						raw: getSubMenuRaw(files, function() {
+							dfd.resolve(this);
+						}),
 						x: node.offset().left,
 						y: node.offset().top,
 						opened: function() {
@@ -737,12 +803,17 @@ elFinder.prototype.commands.edit = function() {
 					
 					return dfd;
 				} else {
+					Object.keys(editors).length > 1 && editor && store(files[0].mime, editor);
 					return dfd.resolve(editor? editor : (Object.keys(editors).length? editors[Object.keys(editors)[0]] : null));
 				}
 			},
 			dfrd = $.Deferred(),
 			file;
 
+		if (editors === null) {
+			setEditors(files[0], hashes.length);
+		}
+		
 		if (!node.length) {
 			node = fm.getUI('cwd');
 		}
