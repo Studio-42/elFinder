@@ -655,6 +655,11 @@ var elFinder = function(node, opts, bootCallback) {
 		 */
 		savedXhrSend;
 	
+	// opts must be an object
+	if (!opts) {
+		opts = {};
+	}
+	
 	// set UA.Angle, UA.Rotated for mobile devices
 	if (self.UA.Mobile) {
 		$(window).on('orientationchange.'+namespace, function() {
@@ -734,7 +739,41 @@ var elFinder = function(node, opts, bootCallback) {
 	 *
 	 * @type Object
 	 **/
-	this.options = $.extend(true, {}, this._options, opts||{});
+	//this.options = $.extend(true, {}, this._options, opts);
+	this.options = Object.assign({}, this._options);
+	
+	// for old type configuration
+	if (opts.uiOptions) {
+		if (opts.uiOptions.toolbar && Array.isArray(opts.uiOptions.toolbar)) {
+			if ($.isPlainObject(opts.uiOptions.toolbar[opts.uiOptions.toolbar.length - 1])) {
+				Object.assign(self.options.uiOptions.toolbarExtra, opts.uiOptions.toolbar.pop());
+			}
+		}
+	}
+	
+	// Overwrite if opts value is an array
+	(function() {
+		var arrOv = function(obj, base) {
+			if ($.isPlainObject(obj)) {
+				$.each(obj, function(k, v) {
+					if ($.isPlainObject(v)) {
+						if (!base[k]) {
+							base[k] = {};
+						}
+						arrOv(v, base[k])
+					} else {
+						self.log([k,v]);
+						base[k] = v;
+					}
+				});
+			}
+		}
+		arrOv(opts, self.options);
+	})();
+	
+	// join toolbarExtra to toolbar
+	this.options.uiOptions.toolbar.push(this.options.uiOptions.toolbarExtra);
+	delete this.options.uiOptions.toolbarExtra;
 	
 	// set fm.baseUrl
 	this.baseUrl = (function() {
@@ -809,51 +848,6 @@ var elFinder = function(node, opts, bootCallback) {
 		netkey: void(0),
 		disabled: []
 	};
-	
-	if (opts.ui) {
-		this.options.ui = opts.ui;
-	}
-	
-	if (opts.commands) {
-		this.options.commands = opts.commands;
-	}
-	
-	if (opts.uiOptions) {
-		if (opts.uiOptions.toolbar && Array.isArray(opts.uiOptions.toolbar)) {
-			if ($.isPlainObject(opts.uiOptions.toolbar[opts.uiOptions.toolbar.length - 1])) {
-				Object.assign(this.options.uiOptions.toolbarExtra, opts.uiOptions.toolbar.pop());
-			}
-			this.options.uiOptions.toolbar = opts.uiOptions.toolbar;
-		}
-		if (opts.uiOptions.toolbarExtra && $.isPlainObject(opts.uiOptions.toolbarExtra)) {
-			Object.assign(this.options.uiOptions.toolbarExtra, opts.uiOptions.toolbarExtra);
-		}
-	
-		if (opts.uiOptions.cwd) {
-			if (opts.uiOptions.cwd.listView) {
-				if (opts.uiOptions.cwd.listView.columns) {
-					this.options.uiOptions.cwd.listView.columns = opts.uiOptions.cwd.listView.columns;
-				}
-				if (opts.uiOptions.cwd.listView.columnsCustomName) {
-					this.options.uiOptions.cwd.listView.columnsCustomName = opts.uiOptions.cwd.listView.columnsCustomName;
-				}
-			}
-			if (opts.uiOptions.cwd.showSelectCheckboxUA) {
-				this.options.uiOptions.cwd.showSelectCheckboxUA = opts.uiOptions.cwd.showSelectCheckboxUA;
-			}
-		}
-		
-		if (opts.uiOptions.navbar && opts.uiOptions.navbar.autoHideUA) {
-			this.options.uiOptions.navbar.autoHideUA = opts.uiOptions.navbar.autoHideUA;
-		}
-	}
-	// join toolbarExtra to toolbar
-	this.options.uiOptions.toolbar.push(this.options.uiOptions.toolbarExtra);
-	delete this.options.uiOptions.toolbarExtra;
-	
-	if (opts.contextmenu) {
-		Object.assign(this.options.contextmenu, opts.contextmenu);
-	}
 	
 	if (! inFrame && ! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
 		this.options.enableAlways = true;
@@ -3491,21 +3485,6 @@ var elFinder = function(node, opts, bootCallback) {
 	})();
 	
 	/*************  init stuffs  ****************/
-	
-	// check jquery ui
-	if (!($.fn.selectable && $.fn.draggable && $.fn.droppable && $.fn.resizable)) {
-		return alert(this.i18n('errJqui'));
-	}
-
-	// check node
-	if (!node.length) {
-		return alert(this.i18n('errNode'));
-	}
-	// check connector url
-	if (!this.options.url) {
-		return alert(this.i18n('errURL'));
-	}
-
 	Object.assign($.ui.keyCode, {
 		'F1' : 112,
 		'F2' : 113,
@@ -4002,19 +3981,33 @@ var elFinder = function(node, opts, bootCallback) {
 	// elFinder boot up function
 	bootUp = function() {
 		/**
+		 * i18 messages
+		 *
+		 * @type Object
+		 **/
+		self.messages = i18n.messages;
+		
+		// check jquery ui
+		if (!($.fn.selectable && $.fn.draggable && $.fn.droppable && $.fn.resizable)) {
+			return alert(self.i18n('errJqui'));
+		}
+		
+		// check node
+		if (!node.length) {
+			return alert(self.i18n('errNode'));
+		}
+		// check connector url
+		if (!self.options.url) {
+			return alert(self.i18n('errURL'));
+		}
+		
+		/**
 		 * Interface direction
 		 *
 		 * @type String
 		 * @default "ltr"
 		 **/
 		self.direction = i18n.direction;
-		
-		/**
-		 * i18 messages
-		 *
-		 * @type Object
-		 **/
-		self.messages = i18n.messages;
 		
 		/**
 		 * Date/time format
