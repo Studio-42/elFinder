@@ -752,7 +752,7 @@
 					serach = (fm.searchStatus.mixed && fm.searchStatus.state > 1);
 				
 				if (file.mime !== 'directory') {
-					if (parseInt(file.size)) {
+					if (parseInt(file.size) || file.mime.match(o.mimeRegexNotEmptyCheck)) {
 						// set current dispInlineRegex
 						self.dispInlineRegex = cwdDispInlineRegex;
 						if (serach || fm.optionsByHashes[hash]) {

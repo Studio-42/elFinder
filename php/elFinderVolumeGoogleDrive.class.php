@@ -452,8 +452,10 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      */
     protected function _gd_getLink($file)
     {
-        if ($url = $file->getWebContentLink()) {
-            return str_replace('export=download', 'export=media', $url);
+        if (strpos($file->mimeType, 'application/vnd.google-apps.') !== 0) {
+            if ($url = $file->getWebContentLink()) {
+                return str_replace('export=download', 'export=media', $url);
+            }
         }
         if ($url = $file->getWebViewLink()) {
             return $url;
@@ -471,7 +473,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      */
     protected function _gd_getDownloadUrl($file)
     {
-        if (strpos($file->mimeType, 'application/vnd.google-apps') !== 0) {
+        if (strpos($file->mimeType, 'application/vnd.google-apps.') !== 0) {
             return 'https://www.googleapis.com/drive/v3/files/'.$file->getId().'?alt=media';
         } else {
             $mimeMap = $this->options['appsExportMap'];
