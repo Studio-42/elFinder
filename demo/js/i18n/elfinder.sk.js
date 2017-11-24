@@ -2,7 +2,7 @@
  * Slovak translation
  * @author Jakub Ďuraš <jkblmr@gmail.com>
  * @author RobiNN <kelcakrobo@gmail.com>
- * @version 2017-11-10
+ * @version 2017-11-24
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -434,6 +434,9 @@
 			'sum'             : 'Súčet', // from v2.1.29 added 28.9.2017
 			'roughFileSize'   : 'Hrubá veľkosť súboru', // from v2.1.30 added 2.11.2017
 			'autoFocusDialog' : 'Zameranie na prvok dialógu s mouseover',  // from v2.1.30 added 2.11.2017
+			'select'          : 'Vybrať', // from v2.1.30 added 23.11.2017
+			'selectAction'    : 'Akcia pri vybratom súbore', // from v2.1.30 added 23.11.2017
+			'useStoredEditor' : 'Otvoriť pomocou naposledy použitého editora', // from v2.1.30 added 23.11.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
