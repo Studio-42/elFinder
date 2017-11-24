@@ -23,6 +23,7 @@
 		- [VD:GoogleDrive] Fixed #2281 class load error with constant `ELFINDER_GOOGLEDRIVE_GOOGLEAPICLIENT`
 		- [js:core] Fixed #2283 thumbnails not displayed with newAPI
 		- [VD:FTP] Fixed #2289 add support for FTP+SSL
+		- [cmd:help] Fixed #2286 add user preferences "Action when select file", "Open with the editor used last time"
 		- And some minor bug fixes
 
 2017-10-07  Naoki Sawada  <hypweb@gmail.com>
