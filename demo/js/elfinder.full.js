@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 658c790) (2017-11-24)
+ * Version 2.1.29 (2.1-src Nightly: 429cfbf) (2017-11-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -777,7 +777,7 @@ var elFinder = function(node, opts, bootCallback) {
 	if (opts.uiOptions) {
 		if (opts.uiOptions.toolbar && Array.isArray(opts.uiOptions.toolbar)) {
 			if ($.isPlainObject(opts.uiOptions.toolbar[opts.uiOptions.toolbar.length - 1])) {
-				Object.assign(self.options.uiOptions.toolbarExtra, opts.uiOptions.toolbar.pop());
+				self.options.uiOptions.toolbarExtra = Object.assign(self.options.uiOptions.toolbarExtra || {}, opts.uiOptions.toolbar.pop());
 			}
 		}
 	}
@@ -8736,7 +8736,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 658c790)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 429cfbf)';
 
 
 
@@ -25470,6 +25470,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			
 			if ($.inArray(file.mime, mimes) !== -1) {
 				if (file.url == '1') {
+					preview.hide();
 					$('<div class="elfinder-quicklook-info-data"><button class="elfinder-info-button">'+fm.i18n('getLink')+'</button></div>').appendTo(ql.info.find('.elfinder-quicklook-info'))
 					.on('click', function() {
 						var self = $(this);
