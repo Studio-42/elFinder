@@ -793,6 +793,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			
 			if ($.inArray(file.mime, mimes) !== -1) {
 				if (file.url == '1') {
+					preview.hide();
 					$('<div class="elfinder-quicklook-info-data"><button class="elfinder-info-button">'+fm.i18n('getLink')+'</button></div>').appendTo(ql.info.find('.elfinder-quicklook-info'))
 					.on('click', function() {
 						var self = $(this);
