@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: 658c790) (2017-11-24)
+ * Version 2.1.29 (2.1-src Nightly: 429cfbf) (2017-11-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2670,7 +2670,7 @@ button.elfinder-info-button {
 	left: -14px;
 }
 .elfinder-ltr .elfinder-quicklook .elfinder-cwd-icon:after {
-	left: -15px;
+	left: -40px;
 }
 .elfinder-ltr .elfinder-navdock .elfinder-quicklook .elfinder-cwd-icon:after {
     left: -12px;
