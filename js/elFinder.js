@@ -746,7 +746,7 @@ var elFinder = function(node, opts, bootCallback) {
 	if (opts.uiOptions) {
 		if (opts.uiOptions.toolbar && Array.isArray(opts.uiOptions.toolbar)) {
 			if ($.isPlainObject(opts.uiOptions.toolbar[opts.uiOptions.toolbar.length - 1])) {
-				Object.assign(self.options.uiOptions.toolbarExtra, opts.uiOptions.toolbar.pop());
+				self.options.uiOptions.toolbarExtra = Object.assign(self.options.uiOptions.toolbarExtra || {}, opts.uiOptions.toolbar.pop());
 			}
 		}
 	}
