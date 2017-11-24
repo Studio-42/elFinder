@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.29 (2.1-src Nightly: d13a388) (2017-11-24)
+ * Version 2.1.29 (2.1-src Nightly: 658c790) (2017-11-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8736,7 +8736,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.29 (2.1-src Nightly: d13a388)';
+elFinder.prototype.version = '2.1.29 (2.1-src Nightly: 658c790)';
 
 
 
@@ -9362,7 +9362,9 @@ elFinder.prototype._options = {
 			// Example ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
 			googleDocsMimes : [],
 			// File size (byte) threshold when using the dim command for obtain the image size necessary to image preview
-			getDimThreshold : 200000
+			getDimThreshold : 200000,
+			// MIME-Type regular expression that does not check empty files
+			mimeRegexNotEmptyCheck : /^application\/vnd\.google-apps\./
 		},
 		// "quicklook" command options.
 		edit : {
@@ -24584,7 +24586,7 @@ elFinder.prototype.commands.places = function() {
 					serach = (fm.searchStatus.mixed && fm.searchStatus.state > 1);
 				
 				if (file.mime !== 'directory') {
-					if (parseInt(file.size)) {
+					if (parseInt(file.size) || file.mime.match(o.mimeRegexNotEmptyCheck)) {
 						// set current dispInlineRegex
 						self.dispInlineRegex = cwdDispInlineRegex;
 						if (serach || fm.optionsByHashes[hash]) {

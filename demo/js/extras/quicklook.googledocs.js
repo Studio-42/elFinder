@@ -49,7 +49,7 @@ try {
 						node.off('load').remove();
 					});
 					
-					loading = $('<div class="elfinder-quicklook-info-data"> Now loading...<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					loading = $('<div class="elfinder-quicklook-info-data">'+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 					
 					node = $('<iframe class="elfinder-quicklook-preview-iframe"/>')
 						.css('background-color', 'transparent')
@@ -59,7 +59,7 @@ try {
 							loading.remove();
 							$(this).css('background-color', '#fff').show();
 						})
-						.attr('src', fm.url(file.hash).replace('/edit', '/embed'));
+						.attr('src', fm.url(file.hash));
 				}
 			}
 			
