@@ -241,7 +241,7 @@
 								ro: 'Română',
 								ru: 'Pусский',
 								si: 'සිංහල',
-								sk: 'Slovenský',
+								sk: 'Slovenčina',
 								sl: 'Slovenščina',
 								sr: 'Srpski',
 								sv: 'Svenska',
