@@ -194,9 +194,9 @@
 			'ntfreload'   : 'フォルダを再読込しています',
 			'ntfmkdir'    : 'フォルダを作成しています',
 			'ntfmkfile'   : 'ファイルを作成しています',
-			'ntfrm'       : 'ファイルを削除しています',
-			'ntfcopy'     : 'ファイルをコピーしています',
-			'ntfmove'     : 'ファイルを移動しています',
+			'ntfrm'       : 'アイテムを削除しています',
+			'ntfcopy'     : 'アイテムをコピーしています',
+			'ntfmove'     : 'アイテムを移動しています',
 			'ntfprepare'  : '既存アイテムを確認しています',
 			'ntfrename'   : 'ファイル名を変更しています',
 			'ntfupload'   : 'ファイルをアップロードしています',
@@ -307,10 +307,10 @@
 			'noaccess'        : 'アクセス禁止',
 			'and'             : ',',
 			'unknown'         : '不明',
-			'selectall'       : '全てのファイルを選択',
-			'selectfiles'     : 'ファイル選択',
-			'selectffile'     : '最初のファイルを選択',
-			'selectlfile'     : '最後のファイルを選択',
+			'selectall'       : 'すべてのアイテムを選択',
+			'selectfiles'     : 'アイテム選択',
+			'selectffile'     : '最初のアイテムを選択',
+			'selectlfile'     : '最後のアイテムを選択',
 			'viewlist'        : 'リスト形式で表示',
 			'viewicons'       : 'アイコン形式で表示',
 			'places'          : 'お気に入り',
@@ -327,7 +327,7 @@
 			'link'            : 'リンク',
 			'searcresult'     : '検索結果',
 			'selected'        : '選択されたアイテム',
-			'about'           : 'アバウト',
+			'about'           : '概要',
 			'shortcuts'       : 'ショートカット',
 			'help'            : 'ヘルプ',
 			'webfm'           : 'ウェブファイルマネージャー',
@@ -437,6 +437,7 @@
 			'select'          : '選択', // from v2.1.30 added 23.11.2017
 			'selectAction'    : 'ファイル選択時の動作', // from v2.1.30 added 23.11.2017
 			'useStoredEditor' : '前回使用したエディターで開く', // from v2.1.30 added 23.11.2017
+			'selectinvert'    : '選択アイテムを反転', // from v2.1.30 added 25.11.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
