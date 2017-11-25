@@ -2,7 +2,7 @@
  * Slovak translation
  * @author Jakub Ďuraš <jkblmr@gmail.com>
  * @author RobiNN <kelcakrobo@gmail.com>
- * @version 2017-11-24
+ * @version 2017-11-25
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -15,7 +15,7 @@
 }(this, function(elFinder) {
 	elFinder.prototype.i18.sk = {
 		translator : 'Jakub Ďuraš &lt;jkblmr@gmail.com&gt;, RobiNN &lt;kelcakrobo@gmail.com&gt;',
-		language   : 'slovenčina',
+		language   : 'Slovenčina',
 		direction  : 'ltr',
 		dateFormat : 'd.m.Y H:i', // Mar 13, 2012 05:27 PM
 		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
@@ -194,10 +194,10 @@
 			'ntfreload'   : 'Znovu-načítanie obsahu priečinka',
 			'ntfmkdir'    : 'Vytváranie priečinka',
 			'ntfmkfile'   : 'Vytváranie súborov',
-			'ntfrm'       : 'Vymazanie súborov',
-			'ntfcopy'     : 'Kopírovanie súborov',
-			'ntfmove'     : 'Premiestnenie súborov',
-			'ntfprepare'  : 'Príprava na kopírovanie súborov',
+			'ntfrm'       : 'Vymazanie položiek',
+			'ntfcopy'     : 'Kopírovanie položiek',
+			'ntfmove'     : 'Premiestnenie položiek',
+			'ntfprepare'  : 'Kontrola existujúcich položiek',
 			'ntfrename'   : 'Premenovanie súborov',
 			'ntfupload'   : 'Nahrávanie súborov',
 			'ntfdownload' : 'Sťahovanie súborov',
@@ -307,10 +307,10 @@
 			'noaccess'        : 'bez prístupu',
 			'and'             : 'a',
 			'unknown'         : 'neznámy',
-			'selectall'       : 'Vybrať všetky súbory',
-			'selectfiles'     : 'Vybrať súbor(y)',
-			'selectffile'     : 'Vybrať prvý súbor',
-			'selectlfile'     : 'Vybrať posledný súbor',
+			'selectall'       : 'Vybrať všetky položky',
+			'selectfiles'     : 'Vybrať položku(y)',
+			'selectffile'     : 'Vybrať prvú položku',
+			'selectlfile'     : 'Vybrať poslednú položku',
 			'viewlist'        : 'Zoznam',
 			'viewicons'       : 'Ikony',
 			'places'          : 'Miesta',
@@ -321,7 +321,7 @@
 			'dim'             : 'Rozmery',
 			'files'           : 'Súbory',
 			'folders'         : 'Priečinky',
-			'items'           : 'Položiek',
+			'items'           : 'Položky',
 			'yes'             : 'áno',
 			'no'              : 'nie',
 			'link'            : 'Odkaz',
@@ -402,8 +402,8 @@
 			'hasSelected'     : 'Vybrali ste $1 položky.', // from v2.1.13 added 6.3.2016
 			'hasClipboard'    : 'Máte $1 položky v schránke.', // from v2.1.13 added 6.3.2016
 			'incSearchOnly'   : 'Prírastkové hľadanie je iba z aktuálneho zobrazenia.', // from v2.1.13 added 6.30.2016
-			'reinstate'       : 'Obnoviť', // from v2.1.15 added 3.8.2016
-			'complete'        : '$1 kompletné', // from v2.1.15 added 21.8.2016
+			'reinstate'       : 'Obnovovanie', // from v2.1.15 added 3.8.2016
+			'complete'        : '$1: kompletné', // from v2.1.15 added 21.8.2016
 			'contextmenu'     : 'Kontextové menu', // from v2.1.15 added 9.9.2016
 			'pageTurning'     : 'Otáčanie stránky', // from v2.1.15 added 10.9.2016
 			'volumeRoots'     : 'Korene média', // from v2.1.16 added 16.9.2016
@@ -437,6 +437,7 @@
 			'select'          : 'Vybrať', // from v2.1.30 added 23.11.2017
 			'selectAction'    : 'Akcia pri vybratom súbore', // from v2.1.30 added 23.11.2017
 			'useStoredEditor' : 'Otvoriť pomocou naposledy použitého editora', // from v2.1.30 added 23.11.2017
+			'selectinvert'    : 'Invertovať výber položiek', // from v2.1.30 added 25.11.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
