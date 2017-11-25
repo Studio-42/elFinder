@@ -187,9 +187,9 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'ntfreload'   : 'Reload folder content',
 			'ntfmkdir'    : 'Creating folder',
 			'ntfmkfile'   : 'Creating files',
-			'ntfrm'       : 'Delete files',
-			'ntfcopy'     : 'Copy files',
-			'ntfmove'     : 'Move files',
+			'ntfrm'       : 'Delete items',
+			'ntfcopy'     : 'Copy items',
+			'ntfmove'     : 'Move items',
 			'ntfprepare'  : 'Checking existing items',
 			'ntfrename'   : 'Rename files',
 			'ntfupload'   : 'Uploading files',
@@ -300,10 +300,10 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'noaccess'        : 'no access',
 			'and'             : 'and',
 			'unknown'         : 'unknown',
-			'selectall'       : 'Select all files',
-			'selectfiles'     : 'Select file(s)',
-			'selectffile'     : 'Select first file',
-			'selectlfile'     : 'Select last file',
+			'selectall'       : 'Select all items',
+			'selectfiles'     : 'Select item(s)',
+			'selectffile'     : 'Select first item',
+			'selectlfile'     : 'Select last item',
 			'viewlist'        : 'List view',
 			'viewicons'       : 'Icons view',
 			'places'          : 'Places',
@@ -430,6 +430,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'select'          : 'Select', // from v2.1.30 added 23.11.2017
 			'selectAction'    : 'Action when select file', // from v2.1.30 added 23.11.2017
 			'useStoredEditor' : 'Open with the editor used last time', // from v2.1.30 added 23.11.2017
+			'selectinvert'    : 'Select items invert', // from v2.1.30 added 25.11.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
