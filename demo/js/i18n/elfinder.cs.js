@@ -2,7 +2,7 @@
  * Czech translation
  * @author Jay Gridley <gridley.jay@hotmail.com>
  * @author RobiNN <kelcakrobo@gmail.com>
- * @version 2017-08-23
+ * @version 2017-11-25
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -15,7 +15,7 @@
 }(this, function(elFinder) {
 	elFinder.prototype.i18.cs = {
 		translator : 'Jay Gridley &lt;gridley.jay@hotmail.com&gt;, RobiNN &lt;kelcakrobo@gmail.com&gt;',
-		language   : 'čeština',
+		language   : 'Čeština',
 		direction  : 'ltr',
 		dateFormat : 'd. m. Y H:i', // Mar 13, 2012 05:27 PM
 		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
@@ -194,10 +194,10 @@
 			'ntfreload'   : 'Obnovování obsahu složky',
 			'ntfmkdir'    : 'Vytváření složky',
 			'ntfmkfile'   : 'Vytváření souborů',
-			'ntfrm'       : 'Mazání souborů',
-			'ntfcopy'     : 'Kopírování souborů',
-			'ntfmove'     : 'Přesunování souborů',
-			'ntfprepare'  : 'Příprava ke kopírování souborů',
+			'ntfrm'       : 'Vymazání položek',
+			'ntfcopy'     : 'Kopírování položek',
+			'ntfmove'     : 'Přemístění položek',
+			'ntfprepare'  : 'Kontrola existujících položek',
 			'ntfrename'   : 'Přejmenovávání souborů',
 			'ntfupload'   : 'Nahrávání souborů',
 			'ntfdownload' : 'Stahování souborů',
@@ -307,10 +307,10 @@
 			'noaccess'        : 'přístup odepřen',
 			'and'             : 'a',
 			'unknown'         : 'neznámý',
-			'selectall'       : 'Vybrat všechny soubory',
-			'selectfiles'     : 'Vybrat soubor(y)',
-			'selectffile'     : 'Vybrat první soubor',
-			'selectlfile'     : 'Vybrat poslední soubor',
+			'selectall'       : 'Vybrat všechny položky',
+			'selectfiles'     : 'Vybrat položku(y)',
+			'selectffile'     : 'Vybrat první položku',
+			'selectlfile'     : 'Vybrat poslední položku',
 			'viewlist'        : 'Seznam',
 			'viewicons'       : 'Ikony',
 			'places'          : 'Místa',
@@ -430,11 +430,20 @@
 			'language'        : 'Nastavte jazyk', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': 'Inicializujte nastavení uložená v tomto prohlížeči', // from v2.1.26 added 28.6.2017
 			'toolbarPref'     : 'Nastavení panelu nástrojů', // from v2.1.27 added 2.8.2017
+			'charsLeft'       : '...$1 znaků zbývá.',  // from v2.1.29 added 30.8.2017
+			'sum'             : 'Součet', // from v2.1.29 added 28.9.2017
+			'roughFileSize'   : 'Hrubá velikost souboru', // from v2.1.30 added 2.11.2017
+			'autoFocusDialog' : 'Zaměření na prvek dialogu s mouseover',  // from v2.1.30 added 2.11.2017
+			'select'          : 'Vybrat', // from v2.1.30 added 23.11.2017
+			'selectAction'    : 'Akce při vybraném souboru', // from v2.1.30 added 23.11.2017
+			'useStoredEditor' : 'Otevřít pomocí naposledy použitého editoru', // from v2.1.30 added 23.11.2017
+			'selectinvert'    : 'Obrátit výběr položek', // from v2.1.30 added 25.11.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámý',
 			'kindRoot'        : 'Kořen média', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'Složka',
+			'kindSelects'     : 'Výběry', // from v2.1.29 added 29.8.2017
 			'kindAlias'       : 'Alias',
 			'kindAliasBroken' : 'Zlomený alias',
 			// applications
