@@ -430,7 +430,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'select'          : 'Select', // from v2.1.30 added 23.11.2017
 			'selectAction'    : 'Action when select file', // from v2.1.30 added 23.11.2017
 			'useStoredEditor' : 'Open with the editor used last time', // from v2.1.30 added 23.11.2017
-			'selectinvert'    : 'Select items invert', // from v2.1.30 added 25.11.2017
+			'selectinvert'    : 'Invert selection', // from v2.1.30 added 25.11.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
