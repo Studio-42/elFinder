@@ -3,7 +3,8 @@
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Wojciech Jabłoński <www.jablonski@gmail.com>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2.1.29 2017-11-11
+ * @author Bogusław Zięba <bobi@poczta.fm>
+ * @version 2017-11-30
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -15,7 +16,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.pl = {
-		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Wojciech Jabłoński &lt;www.jablonski@gmail.com&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;',
+		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Wojciech Jabłoński &lt;www.jablonski@gmail.com&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;',
 		language   : 'Polski',
 		direction  : 'ltr',
 		dateFormat : 'd.m.Y H:i', // Mar 13, 2012 05:27 PM
@@ -435,6 +436,10 @@
 			'sum'             : 'Suma', // from v2.1.29 added 28.9.2017
 			'roughFileSize'   : 'Przybliżony rozmiar pliku', // from v2.1.30 added 2.11.2017
 			'autoFocusDialog' : 'Skoncentruj się na elemencie dialogowym po najechaniu myszą',  // from v2.1.30 added 2.11.2017
+			'select'          : 'Wybierz', // from v2.1.30 added 23.11.2017
+			'selectAction'    : 'Działanie po wybraniu pliku', // from v2.1.30 added 23.11.2017
+			'useStoredEditor' : 'Otwórz za pomocą ostatnio używanego edytora', // from v2.1.30 added 23.11.2017
+			'selectinvert'    : 'Odwróć zaznaczenie', // from v2.1.30 added 25.11.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',
