@@ -80,7 +80,6 @@ elFinder.prototype.resources = {
 						overlay.addClass('ui-front')
 							.elfinderoverlay('hide')
 							.off('click', cancel);
-						pnode.css('z-index', '');
 					}
 					node.removeClass('ui-front').css('position', '');
 					if (tarea) {
@@ -143,6 +142,9 @@ elFinder.prototype.resources = {
 					}
 				},
 				cancel = function(e) { 
+					if (!overlay.is(':hidden')) {
+						pnode.css('z-index', '');
+					}
 					if (! inError) {
 						cleanup();
 						dfrd.reject();
@@ -184,6 +186,9 @@ elFinder.prototype.resources = {
 							valid  = true,
 							cut;
 
+						if (!overlay.is(':hidden')) {
+							pnode.css('z-index', '');
+						}
 						if (name === '') {
 							return cancel();
 						}
@@ -273,7 +278,7 @@ elFinder.prototype.resources = {
 						pnode.css('z-index', overlay.css('z-index') + 1);
 					}
 					inError = false;
-					input.css('z-index', overlay.css('z-index')).focus().select();
+					input.focus().select();
 					input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
 				},
 				resize = function() {
