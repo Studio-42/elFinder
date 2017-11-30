@@ -41,7 +41,6 @@ elFinder.prototype.commands.rename = function() {
 					overlay.addClass('ui-front')
 						.elfinderoverlay('hide')
 						.off('click', cancel);
-					pnode.css('z-index', '');
 				}
 				pnode.removeClass('ui-front')
 					.css('position', '')
@@ -88,6 +87,9 @@ elFinder.prototype.commands.rename = function() {
 				var name   = $.trim(input.val()),
 				valid  = true;
 
+				if (!overlay.is(':hidden')) {
+					pnode.css('z-index', '');
+				}
 				if (name === '') {
 					return cancel();
 				}
@@ -210,6 +212,9 @@ elFinder.prototype.commands.rename = function() {
 			pnode = node.parent(),
 			overlay = fm.getUI('overlay'),
 			cancel = function(e) { 
+				if (!overlay.is(':hidden')) {
+					pnode.css('z-index', '');
+				}
 				if (! inError) {
 					dfrd.reject();
 					if (e) {
