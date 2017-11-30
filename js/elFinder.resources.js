@@ -80,6 +80,7 @@ elFinder.prototype.resources = {
 						overlay.addClass('ui-front')
 							.elfinderoverlay('hide')
 							.off('click', cancel);
+						pnode.css('z-index', '');
 					}
 					node.removeClass('ui-front').css('position', '');
 					if (tarea) {
@@ -269,6 +270,7 @@ elFinder.prototype.resources = {
 					if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? so disable it
 						overlay.on('click', cancel)
 							.removeClass('ui-front').elfinderoverlay('show');
+						pnode.css('z-index', overlay.css('z-index') + 1);
 					}
 					inError = false;
 					input.css('z-index', overlay.css('z-index')).focus().select();
