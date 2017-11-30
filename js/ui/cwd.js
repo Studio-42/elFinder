@@ -1732,7 +1732,19 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 					var p   = this.id ? $(this) : $(this).parents('[id]:first'),
 						tgt = $(e.target),
+						nodeName = e.target.nodeName,
 						sel;
+					
+					if (nodeName === 'INPUT' || nodeName === 'TEXTAREA') {
+						return;
+					}
+					
+					// now renaming
+					if (p.hasClass('ui-front')) {
+						e.stopPropagation();
+						e.preventDefault();
+						return;
+					}
 					
 					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 					if (selectCheckbox && (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select'))) {
@@ -1742,10 +1754,6 @@ $.fn.elfindercwd = function(fm, options) {
 								trigger();
 							}
 						}, 150);
-						return;
-					}
-
-					if (e.target.nodeName == 'INPUT' || e.target.nodeName == 'TEXTAREA') {
 						return;
 					}
 					
