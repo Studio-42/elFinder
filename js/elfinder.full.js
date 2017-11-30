@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 29d45e9) (2017-11-30)
+ * Version 2.1.30 (2.1-src Nightly: dfc92f3) (2017-11-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8736,7 +8736,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 29d45e9)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: dfc92f3)';
 
 
 
@@ -10737,7 +10737,6 @@ elFinder.prototype.resources = {
 						overlay.addClass('ui-front')
 							.elfinderoverlay('hide')
 							.off('click', cancel);
-						pnode.css('z-index', '');
 					}
 					node.removeClass('ui-front').css('position', '');
 					if (tarea) {
@@ -10800,6 +10799,9 @@ elFinder.prototype.resources = {
 					}
 				},
 				cancel = function(e) { 
+					if (!overlay.is(':hidden')) {
+						pnode.css('z-index', '');
+					}
 					if (! inError) {
 						cleanup();
 						dfrd.reject();
@@ -10841,6 +10843,9 @@ elFinder.prototype.resources = {
 							valid  = true,
 							cut;
 
+						if (!overlay.is(':hidden')) {
+							pnode.css('z-index', '');
+						}
 						if (name === '') {
 							return cancel();
 						}
@@ -10930,7 +10935,7 @@ elFinder.prototype.resources = {
 						pnode.css('z-index', overlay.css('z-index') + 1);
 					}
 					inError = false;
-					input.css('z-index', overlay.css('z-index')).focus().select();
+					input.focus().select();
 					input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
 				},
 				resize = function() {
@@ -25718,7 +25723,6 @@ elFinder.prototype.commands.rename = function() {
 					overlay.addClass('ui-front')
 						.elfinderoverlay('hide')
 						.off('click', cancel);
-					pnode.css('z-index', '');
 				}
 				pnode.removeClass('ui-front')
 					.css('position', '')
@@ -25765,6 +25769,9 @@ elFinder.prototype.commands.rename = function() {
 				var name   = $.trim(input.val()),
 				valid  = true;
 
+				if (!overlay.is(':hidden')) {
+					pnode.css('z-index', '');
+				}
 				if (name === '') {
 					return cancel();
 				}
@@ -25887,6 +25894,9 @@ elFinder.prototype.commands.rename = function() {
 			pnode = node.parent(),
 			overlay = fm.getUI('overlay'),
 			cancel = function(e) { 
+				if (!overlay.is(':hidden')) {
+					pnode.css('z-index', '');
+				}
 				if (! inError) {
 					dfrd.reject();
 					if (e) {
