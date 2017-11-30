@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: f1dbacf) (2017-11-30)
+ * Version 2.1.30 (2.1-src Nightly: 29d45e9) (2017-11-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8736,7 +8736,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: f1dbacf)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 29d45e9)';
 
 
 
@@ -10737,6 +10737,7 @@ elFinder.prototype.resources = {
 						overlay.addClass('ui-front')
 							.elfinderoverlay('hide')
 							.off('click', cancel);
+						pnode.css('z-index', '');
 					}
 					node.removeClass('ui-front').css('position', '');
 					if (tarea) {
@@ -10926,6 +10927,7 @@ elFinder.prototype.resources = {
 					if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? so disable it
 						overlay.on('click', cancel)
 							.removeClass('ui-front').elfinderoverlay('show');
+						pnode.css('z-index', overlay.css('z-index') + 1);
 					}
 					inError = false;
 					input.css('z-index', overlay.css('z-index')).focus().select();
@@ -15430,7 +15432,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 	
 						if (typeof(opts.close) == 'function') {
 							$.proxy(opts.close, self[0])();
-						} else if (opts.destroyOnClose) {
+						}
+						if (opts.destroyOnClose && dialog.parent().length) {
 							dialog.hide().remove();
 						}
 						
@@ -16086,7 +16089,7 @@ $.fn.elfinderoverlay = function(opts) {
 		opts = Object.assign({}, opts);
 		$(this).addClass('ui-front ui-widget-overlay elfinder-overlay')
 			.hide()
-			.mousedown(function(e) {
+			.on('mousedown', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 			})
@@ -22908,13 +22911,12 @@ elFinder.prototype.commands.netmount = function() {
 						title          : fm.i18n('netMountDialogTitle'),
 						resizable      : false,
 						modal          : true,
-						destroyOnClose : true,
+						destroyOnClose : false,
 						open           : function() {
 							$(window).on('focus.'+fm.namespace, winFocus);
 							inputs.protocol.change();
 						},
 						close          : function() { 
-							//delete self.dialog; 
 							dfrd.state() == 'pending' && dfrd.reject();
 							$(window).off('focus.'+fm.namespace, winFocus);
 						},
@@ -25716,6 +25718,7 @@ elFinder.prototype.commands.rename = function() {
 					overlay.addClass('ui-front')
 						.elfinderoverlay('hide')
 						.off('click', cancel);
+					pnode.css('z-index', '');
 				}
 				pnode.removeClass('ui-front')
 					.css('position', '')
@@ -25870,6 +25873,7 @@ elFinder.prototype.commands.rename = function() {
 				if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? so disable it
 					overlay.on('click', cancel)
 						.removeClass('ui-front').elfinderoverlay('show');
+					pnode.css('z-index', overlay.css('z-index') + 1);
 				}
 				if (inError) {
 					inError = false;
