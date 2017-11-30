@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: dfc92f3) (2017-11-30)
+ * Version 2.1.30 (2.1-src Nightly: 8cef108) (2017-12-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8736,7 +8736,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: dfc92f3)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 8cef108)';
 
 
 
@@ -14131,7 +14131,19 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 					var p   = this.id ? $(this) : $(this).parents('[id]:first'),
 						tgt = $(e.target),
+						nodeName = e.target.nodeName,
 						sel;
+					
+					if (nodeName === 'INPUT' || nodeName === 'TEXTAREA') {
+						return;
+					}
+					
+					// now renaming
+					if (p.hasClass('ui-front')) {
+						e.stopPropagation();
+						e.preventDefault();
+						return;
+					}
 					
 					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 					if (selectCheckbox && (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select'))) {
@@ -14141,10 +14153,6 @@ $.fn.elfindercwd = function(fm, options) {
 								trigger();
 							}
 						}, 150);
-						return;
-					}
-
-					if (e.target.nodeName == 'INPUT' || e.target.nodeName == 'TEXTAREA') {
 						return;
 					}
 					
