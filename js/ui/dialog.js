@@ -410,7 +410,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 	
 						if (typeof(opts.close) == 'function') {
 							$.proxy(opts.close, self[0])();
-						} else if (opts.destroyOnClose) {
+						}
+						if (opts.destroyOnClose && dialog.parent().length) {
 							dialog.hide().remove();
 						}
 						

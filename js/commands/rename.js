@@ -41,6 +41,7 @@ elFinder.prototype.commands.rename = function() {
 					overlay.addClass('ui-front')
 						.elfinderoverlay('hide')
 						.off('click', cancel);
+					pnode.css('z-index', '');
 				}
 				pnode.removeClass('ui-front')
 					.css('position', '')
@@ -195,6 +196,7 @@ elFinder.prototype.commands.rename = function() {
 				if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? so disable it
 					overlay.on('click', cancel)
 						.removeClass('ui-front').elfinderoverlay('show');
+					pnode.css('z-index', overlay.css('z-index') + 1);
 				}
 				if (inError) {
 					inError = false;

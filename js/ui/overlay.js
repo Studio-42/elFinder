@@ -7,7 +7,7 @@ $.fn.elfinderoverlay = function(opts) {
 		opts = Object.assign({}, opts);
 		$(this).addClass('ui-front ui-widget-overlay elfinder-overlay')
 			.hide()
-			.mousedown(function(e) {
+			.on('mousedown', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 			})
