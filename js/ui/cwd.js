@@ -1736,11 +1736,12 @@ $.fn.elfindercwd = function(fm, options) {
 						sel;
 					
 					if (nodeName === 'INPUT' || nodeName === 'TEXTAREA') {
+						e.stopPropagation();
 						return;
 					}
 					
-					// now renaming
-					if (p.hasClass('ui-front')) {
+					// now name editing
+					if (p.find('input:text,textarea').length) {
 						e.stopPropagation();
 						e.preventDefault();
 						return;
@@ -1778,6 +1779,7 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, fileSelector, function(e) {
 					if (e.target.nodeName == 'INPUT' || e.target.nodeName == 'TEXTAREA' || $(e.target).hasClass('elfinder-cwd-select')) {
+						e.stopPropagation();
 						return;
 					}
 					var p = this.id ? $(this) : $(this).parents('[id]:first');
@@ -1967,6 +1969,12 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				.on('contextmenu.'+fm.namespace, function(e) {
 					var file = $(e.target).closest(fileSelector);
+					
+					// now filename editing
+					if (file.find('input:text,textarea').length) {
+						e.stopPropagation();
+						return;
+					}
 					
 					if (file.length && (e.target.nodeName != 'TD' || $.inArray(fm.cwdId2Hash(file.get(0).id), fm.selected()) > -1)) {
 						e.stopPropagation();

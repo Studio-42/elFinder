@@ -1114,6 +1114,7 @@ $.fn.elfindertree = function(fm, opts) {
 						file = fm.file(hash);
 					
 						if (link.data('longtap')) {
+							link.removeData('longtap');
 							e.stopPropagation();
 						return;
 					}
@@ -1135,9 +1136,15 @@ $.fn.elfindertree = function(fm, opts) {
 						return;
 					}
 					var evt = e.originalEvent,
-					p = $(this)
-					.addClass(hover)
-					.data('longtap', null)
+						p;
+					
+					if (e.target.nodeName === 'INPUT') {
+						e.stopPropagation();
+						return;
+					}
+					
+					p = $(this).addClass(hover)
+					.removeData('longtap')
 					.data('tmlongtap', setTimeout(function(e){
 						// long tap
 						p.data('longtap', true);
@@ -1150,6 +1157,10 @@ $.fn.elfindertree = function(fm, opts) {
 					}, 500));
 				})
 				.on('touchmove touchend', selNavdir, function(e) {
+					if (e.target.nodeName === 'INPUT') {
+						e.stopPropagation();
+						return;
+					}
 					clearTimeout($(this).data('tmlongtap'));
 					if (e.type == 'touchmove') {
 						$(this).removeClass(hover);
@@ -1216,6 +1227,13 @@ $.fn.elfindertree = function(fm, opts) {
 				})
 				.on('contextmenu', selNavdir, function(e) {
 					var self = $(this);
+					
+					// now dirname editing
+					if (self.find('input:text').length) {
+						e.stopPropagation();
+						return;
+					}
+					
 					e.preventDefault();
 
 					fm.trigger('contextmenu', {
@@ -1235,10 +1253,12 @@ $.fn.elfindertree = function(fm, opts) {
 						self.removeClass('ui-state-hover');
 					});
 				})
-				.on('scrolltoview', selNavdir, function() {
+				.on('scrolltoview', selNavdir, function(e, data) {
 					var self = $(this);
 					autoScroll(self.attr('id')).done(function() {
-						fm.resources.blink(self, 'lookme');
+						if (!data || data.blink === 'undefined' || data.blink) {
+							fm.resources.blink(self, 'lookme');
+						}
 					});
 				})
 				// prepend fake dir
