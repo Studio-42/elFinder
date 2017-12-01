@@ -38,9 +38,7 @@ elFinder.prototype.commands.rename = function() {
 			},
 			rest     = function(){
 				if (!overlay.is(':hidden')) {
-					overlay.addClass('ui-front')
-						.elfinderoverlay('hide')
-						.off('click', cancel);
+					overlay.elfinderoverlay('hide').off('click', cancel);
 				}
 				pnode.removeClass('ui-front')
 					.css('position', '')
@@ -195,9 +193,8 @@ elFinder.prototype.commands.rename = function() {
 				.on('blur', blur),
 			select = function() {
 				var name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '');
-				if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? so disable it
-					overlay.on('click', cancel)
-						.removeClass('ui-front').elfinderoverlay('show');
+				if (!inError && fm.UA.Mobile/* && !fm.UA.iOS*/) { // since iOS has a bug? (z-index not effect) so disable it
+					overlay.on('click', cancel).elfinderoverlay('show');
 					pnode.css('z-index', overlay.css('z-index') + 1);
 				}
 				if (inError) {
@@ -224,7 +221,7 @@ elFinder.prototype.commands.rename = function() {
 				}
 			},
 			resize = function() {
-				target.trigger('scrolltoview');
+				target.trigger('scrolltoview', {blink : false});
 			},
 			inError = false;
 		
