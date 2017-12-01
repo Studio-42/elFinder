@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 8cef108) (2017-12-01)
+ * Version 2.1.30 (2.1-src Nightly: 657a337) (2017-12-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8736,7 +8736,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 8cef108)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 657a337)';
 
 
 
@@ -10734,9 +10734,7 @@ elFinder.prototype.resources = {
 				empty= wz.hasClass('elfinder-cwd-wrapper-empty'),
 				rest = function(){
 					if (!overlay.is(':hidden')) {
-						overlay.addClass('ui-front')
-							.elfinderoverlay('hide')
-							.off('click', cancel);
+						overlay.elfinderoverlay('hide').off('click', cancel);
 					}
 					node.removeClass('ui-front').css('position', '');
 					if (tarea) {
@@ -10929,9 +10927,8 @@ elFinder.prototype.resources = {
 					}),
 				select = function() {
 					var name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '');
-					if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? so disable it
-						overlay.on('click', cancel)
-							.removeClass('ui-front').elfinderoverlay('show');
+					if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? (z-index not effect) so disable it
+						overlay.on('click', cancel).elfinderoverlay('show');
 						pnode.css('z-index', overlay.css('z-index') + 1);
 					}
 					inError = false;
@@ -10939,7 +10936,7 @@ elFinder.prototype.resources = {
 					input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
 				},
 				resize = function() {
-					node.trigger('scrolltoview');
+					node.trigger('scrolltoview', {blink : false});
 				},
 				openCallback = function() {
 					dfrd && (dfrd.state() === 'pending') && dfrd.reject();
@@ -11894,28 +11891,30 @@ $.fn.elfindercontextmenu = function(fm) {
 						menu.data('hideTm') && clearTimeout(menu.data('hideTm'));
 					})
 					.data('hideTm', setTimeout(function() {
-						cwd.find('.elfinder-cwd-file').off(evTouchStart);
-						cwd.find('.elfinder-cwd-file.ui-selected')
-						.one(evTouchStart, function(e) {
-							if (e.originalEvent.touches.length > 1) {
-								return;
-							}
-							var tgt = $(e.target);
-							if (menu.first().length && !tgt.is('input:checkbox') && !tgt.hasClass('elfinder-cwd-select')) {
-								open(e.originalEvent.touches[0].pageX, e.originalEvent.touches[0].pageY);
-								return false;
-							}
+						if (menu.is(':visible')) {
 							cwd.find('.elfinder-cwd-file').off(evTouchStart);
-						})
-						.one('unselect.'+fm.namespace, function() {
-							cwd.find('.elfinder-cwd-file').off(evTouchStart);
-						});
-						menu.fadeOut({
-							duration: 300,
-							fail: function() {
-								menu.css('opacity', '1').show();
-							}
-						});
+							cwd.find('.elfinder-cwd-file.ui-selected')
+							.one(evTouchStart, function(e) {
+								if (e.originalEvent.touches.length > 1) {
+									return;
+								}
+								var tgt = $(e.target);
+								if (menu.first().length && !tgt.is('input:checkbox') && !tgt.hasClass('elfinder-cwd-select')) {
+									open(e.originalEvent.touches[0].pageX, e.originalEvent.touches[0].pageY);
+									return false;
+								}
+								cwd.find('.elfinder-cwd-file').off(evTouchStart);
+							})
+							.one('unselect.'+fm.namespace, function() {
+								cwd.find('.elfinder-cwd-file').off(evTouchStart);
+							});
+							menu.fadeOut({
+								duration: 300,
+								fail: function() {
+									menu.css('opacity', '1').show();
+								}
+							});
+						}
 					}, 4500));
 				}
 			},
@@ -14135,11 +14134,12 @@ $.fn.elfindercwd = function(fm, options) {
 						sel;
 					
 					if (nodeName === 'INPUT' || nodeName === 'TEXTAREA') {
+						e.stopPropagation();
 						return;
 					}
 					
-					// now renaming
-					if (p.hasClass('ui-front')) {
+					// now name editing
+					if (p.find('input:text,textarea').length) {
 						e.stopPropagation();
 						e.preventDefault();
 						return;
@@ -14177,6 +14177,7 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, fileSelector, function(e) {
 					if (e.target.nodeName == 'INPUT' || e.target.nodeName == 'TEXTAREA' || $(e.target).hasClass('elfinder-cwd-select')) {
+						e.stopPropagation();
 						return;
 					}
 					var p = this.id ? $(this) : $(this).parents('[id]:first');
@@ -14366,6 +14367,12 @@ $.fn.elfindercwd = function(fm, options) {
 				})
 				.on('contextmenu.'+fm.namespace, function(e) {
 					var file = $(e.target).closest(fileSelector);
+					
+					// now filename editing
+					if (file.find('input:text,textarea').length) {
+						e.stopPropagation();
+						return;
+					}
 					
 					if (file.length && (e.target.nodeName != 'TD' || $.inArray(fm.cwdId2Hash(file.get(0).id), fm.selected()) > -1)) {
 						e.stopPropagation();
@@ -18968,6 +18975,7 @@ $.fn.elfindertree = function(fm, opts) {
 						file = fm.file(hash);
 					
 						if (link.data('longtap')) {
+							link.removeData('longtap');
 							e.stopPropagation();
 						return;
 					}
@@ -18989,9 +18997,15 @@ $.fn.elfindertree = function(fm, opts) {
 						return;
 					}
 					var evt = e.originalEvent,
-					p = $(this)
-					.addClass(hover)
-					.data('longtap', null)
+						p;
+					
+					if (e.target.nodeName === 'INPUT') {
+						e.stopPropagation();
+						return;
+					}
+					
+					p = $(this).addClass(hover)
+					.removeData('longtap')
 					.data('tmlongtap', setTimeout(function(e){
 						// long tap
 						p.data('longtap', true);
@@ -19004,6 +19018,10 @@ $.fn.elfindertree = function(fm, opts) {
 					}, 500));
 				})
 				.on('touchmove touchend', selNavdir, function(e) {
+					if (e.target.nodeName === 'INPUT') {
+						e.stopPropagation();
+						return;
+					}
 					clearTimeout($(this).data('tmlongtap'));
 					if (e.type == 'touchmove') {
 						$(this).removeClass(hover);
@@ -19070,6 +19088,13 @@ $.fn.elfindertree = function(fm, opts) {
 				})
 				.on('contextmenu', selNavdir, function(e) {
 					var self = $(this);
+					
+					// now dirname editing
+					if (self.find('input:text').length) {
+						e.stopPropagation();
+						return;
+					}
+					
 					e.preventDefault();
 
 					fm.trigger('contextmenu', {
@@ -19089,10 +19114,12 @@ $.fn.elfindertree = function(fm, opts) {
 						self.removeClass('ui-state-hover');
 					});
 				})
-				.on('scrolltoview', selNavdir, function() {
+				.on('scrolltoview', selNavdir, function(e, data) {
 					var self = $(this);
 					autoScroll(self.attr('id')).done(function() {
-						fm.resources.blink(self, 'lookme');
+						if (!data || data.blink === 'undefined' || data.blink) {
+							fm.resources.blink(self, 'lookme');
+						}
 					});
 				})
 				// prepend fake dir
@@ -24597,34 +24624,39 @@ elFinder.prototype.commands.places = function() {
 			});
 			
 			preview.on('update', function(e) {
-				var file = e.file,
-					hash = file.hash,
+				var file, hash, serach;
+				
+				if (file = e.file) {
+					hash = file.hash;
 					serach = (fm.searchStatus.mixed && fm.searchStatus.state > 1);
 				
-				if (file.mime !== 'directory') {
-					if (parseInt(file.size) || file.mime.match(o.mimeRegexNotEmptyCheck)) {
-						// set current dispInlineRegex
-						self.dispInlineRegex = cwdDispInlineRegex;
-						if (serach || fm.optionsByHashes[hash]) {
-							try {
-								self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', hash), 'i');
-							} catch(e) {
+					if (file.mime !== 'directory') {
+						if (parseInt(file.size) || file.mime.match(o.mimeRegexNotEmptyCheck)) {
+							// set current dispInlineRegex
+							self.dispInlineRegex = cwdDispInlineRegex;
+							if (serach || fm.optionsByHashes[hash]) {
 								try {
-									self.dispInlineRegex = new RegExp(!fm.isRoot(file)? fm.option('dispInlineRegex', file.phash) : fm.options.dispInlineRegex, 'i');
+									self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', hash), 'i');
 								} catch(e) {
-									self.dispInlineRegex = /^$/;
+									try {
+										self.dispInlineRegex = new RegExp(!fm.isRoot(file)? fm.option('dispInlineRegex', file.phash) : fm.options.dispInlineRegex, 'i');
+									} catch(e) {
+										self.dispInlineRegex = /^$/;
+									}
 								}
 							}
+						} else {
+							//  do not preview of file that size = 0
+							e.stopImmediatePropagation();
 						}
 					} else {
-						//  do not preview of file that size = 0
-						e.stopImmediatePropagation();
+						self.dispInlineRegex = /^$/;
 					}
+					
+					self.info.show();
 				} else {
-					self.dispInlineRegex = /^$/;
+					e.stopImmediatePropagation();
 				}
-				
-				self.info.show();
 			});
 
 			$.each(fm.commands.quicklook.plugins || [], function(i, plugin) {
@@ -25728,9 +25760,7 @@ elFinder.prototype.commands.rename = function() {
 			},
 			rest     = function(){
 				if (!overlay.is(':hidden')) {
-					overlay.addClass('ui-front')
-						.elfinderoverlay('hide')
-						.off('click', cancel);
+					overlay.elfinderoverlay('hide').off('click', cancel);
 				}
 				pnode.removeClass('ui-front')
 					.css('position', '')
@@ -25885,9 +25915,8 @@ elFinder.prototype.commands.rename = function() {
 				.on('blur', blur),
 			select = function() {
 				var name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '');
-				if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? so disable it
-					overlay.on('click', cancel)
-						.removeClass('ui-front').elfinderoverlay('show');
+				if (!inError && fm.UA.Mobile/* && !fm.UA.iOS*/) { // since iOS has a bug? (z-index not effect) so disable it
+					overlay.on('click', cancel).elfinderoverlay('show');
 					pnode.css('z-index', overlay.css('z-index') + 1);
 				}
 				if (inError) {
@@ -25914,7 +25943,7 @@ elFinder.prototype.commands.rename = function() {
 				}
 			},
 			resize = function() {
-				target.trigger('scrolltoview');
+				target.trigger('scrolltoview', {blink : false});
 			},
 			inError = false;
 		
