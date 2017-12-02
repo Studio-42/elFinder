@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 657a337) (2017-12-01)
+ * Version 2.1.30 (2.1-src Nightly: aba312b) (2017-12-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8736,7 +8736,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 657a337)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: aba312b)';
 
 
 
@@ -25915,7 +25915,7 @@ elFinder.prototype.commands.rename = function() {
 				.on('blur', blur),
 			select = function() {
 				var name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '');
-				if (!inError && fm.UA.Mobile/* && !fm.UA.iOS*/) { // since iOS has a bug? (z-index not effect) so disable it
+				if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? (z-index not effect) so disable it
 					overlay.on('click', cancel).elfinderoverlay('show');
 					pnode.css('z-index', overlay.css('z-index') + 1);
 				}
