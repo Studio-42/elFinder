@@ -269,7 +269,7 @@ elFinder.prototype.resources = {
 						}
 					}),
 				select = function() {
-					var name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '');
+					var name = fm.splitFileExtention(input.val())[0];
 					if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? (z-index not effect) so disable it
 						overlay.on('click', cancel).elfinderoverlay('show');
 						pnode.css('z-index', overlay.css('z-index') + 1);
