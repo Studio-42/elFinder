@@ -31,7 +31,7 @@ class elFinder {
 	 * 
 	 * @var integer
 	 */
-	protected static $ApiRevision = 30;
+	protected static $ApiRevision = 31;
 	
 	/**
 	 * Storages (root dirs)
@@ -225,7 +225,7 @@ class elFinder {
 		'mkdir'     => array('target' => true, 'name' => false, 'dirs' => false),
 		'mkfile'    => array('target' => true, 'name' => true, 'mimes' => false),
 		'rm'        => array('targets' => true),
-		'rename'    => array('target' => true, 'name' => true, 'mimes' => false),
+		'rename'    => array('target' => true, 'name' => true, 'mimes' => false, 'targets' => false),
 		'duplicate' => array('targets' => true, 'suffix' => false),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false, 'renames' => false, 'hashes' => false, 'suffix' => false),
 		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'hashes' => false, 'suffix' => false, 'mtime' => false, 'overwrite' => false),
@@ -1799,29 +1799,101 @@ class elFinder {
 	}
 	
 	/**
-	 * Rename file
+	 * Rename file, Accept multiple items >= API 2.1031
 	 *
 	 * @param  array  $args
 	 * @return array
 	 * @author Dmitry (dio) Levashov
+	 * @author Naoki Sawada
 	 **/
 	protected function rename($args) {
 		$target = $args['target'];
-		$name   = $args['name'];
+		$name = $args['name'];
+		$targets = $args['targets'];
+		$rms = array();
+		$notfounds = array();
+		$locked = array();
+		$errs = array();
+		$files = array();
+		$removed = array();
+		$res = array();
 		
-		if (($volume = $this->volume($target)) == false
-		||  ($rm = $volume->file($target)) == false) {
+		if (!($volume = $this->volume($target))) {
 			return array('error' => $this->error(self::ERROR_RENAME, '#'.$target, self::ERROR_FILE_NOT_FOUND));
 		}
-		$rm['realpath'] = $volume->realpath($target);
 		
-		if ($this->itemLocked($target)) {
-			return array('error' => $this->error(self::ERROR_LOCKED, $rm['name']));
+		if ($targets) {
+			array_unshift($targets, $target);
+			foreach($targets as $h) {
+				if ($rm = $volume->file($h)) {
+					if ($this->itemLocked($h)) {
+						$locked[] = $rm['name'];
+					} else {
+						$rm['realpath'] = $volume->realpath($h);
+						$rms[] = $rm;
+					}
+				} else {
+					$notfounds[] = '#'.$h;
+				}
+			}
+			if (!$rms) {
+				$res['error'] = array();
+				if ($notfounds) {
+					$res['error'] = array(self::ERROR_RENAME, join(', ', $notfounds), self::ERROR_FILE_NOT_FOUND);
+				}
+				if ($locked) {
+					array_push($res['error'], self::ERROR_LOCKED, join(', ',$locked));
+				}
+				return $res;
+			}
+			
+			$res['warning'] = array();
+			if ($notfounds) {
+				array_push($res['warning'], self::ERROR_RENAME, join(', ', $notfounds), self::ERROR_FILE_NOT_FOUND);
+			}
+			if ($locked) {
+				array_push($res['warning'], self::ERROR_LOCKED, join(', ',$locked));
+			}
+			
+			foreach($rms as $rm) {
+				$rname = $volume->uniqueName($volume->realpath($rm['phash']), $name, '', false);
+				if ($file = $volume->rename($rm['hash'], $rname)) {
+					$files[] = $file;
+					$removed[] = $rm;
+				} else {
+					$errs[] = $rm['name'];
+				}
+			}
+			
+			if (!$files) {
+				$res['error'] = $this->error(self::ERROR_RENAME, join(', ', $errs), $volume->error());
+				if (!$res['warning']) {
+					unset($res['warning']);
+				}
+				return $res;
+			}
+			if ($errs) {
+				array_push($res['warning'], self::ERROR_RENAME, join(', ', $errs), $volume->error());
+			}
+			if (!$res['warning']) {
+				unset($res['warning']);
+			}
+			$res['added'] = $files;
+			$res['removed'] = $removed;
+			return $res;
+		} else {
+			if (!($rm = $volume->file($target))) {
+				return array('error' => $this->error(self::ERROR_RENAME, '#'.$target, self::ERROR_FILE_NOT_FOUND));
+			}
+			if ($this->itemLocked($target)) {
+				return array('error' => $this->error(self::ERROR_LOCKED, $rm['name']));
+			}
+			$rm['realpath'] = $volume->realpath($target);
+			
+			return ($file = $volume->rename($target, $name)) == false
+				? array('error' => $this->error(self::ERROR_RENAME, $rm['name'], $volume->error()))
+				: array('added' => array($file), 'removed' => array($rm));
 		}
-		
-		return ($file = $volume->rename($target, $name)) == false
-			? array('error' => $this->error(self::ERROR_RENAME, $rm['name'], $volume->error()))
-			: array('added' => array($file), 'removed' => array($rm));
 	}
 	
 	/**
