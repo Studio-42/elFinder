@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-11-23
+ * @version 2017-12-04
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -289,7 +289,7 @@
 
 			/********************************** messages **********************************/
 			'confirmReq'      : '処理を実行しますか？',
-			'confirmRm'       : 'アイテムを完全に削除してもよろしいですか？<br/>この操作は取り消せません！',
+			'confirmRm'       : 'アイテムを完全に削除してもよろしいですか？<br/>この操作は取り消しできません！',
 			'confirmRepl'     : '古いアイテムを新しいアイテムで上書きしますか？',
 			'confirmRest'     : '既存のアイテムをごみ箱のアイテムで上書きしますか？', // fromv2.1.24 added 5.5.2017
 			'confirmConvUTF8' : 'UTF-8 以外の文字が含まれています。<br/>UTF-8  に変換しますか？<br/>変換後の保存でコンテンツは UTF-8 になります。', // from v2.1 added 08.04.2014
@@ -438,6 +438,7 @@
 			'selectAction'    : 'ファイル選択時の動作', // from v2.1.30 added 23.11.2017
 			'useStoredEditor' : '前回使用したエディターで開く', // from v2.1.30 added 23.11.2017
 			'selectinvert'    : '選択アイテムを反転', // from v2.1.30 added 25.11.2017
+			'renameMultiple'  : '選択した $1 個のアイテムを $2 のようにリネームしますか？<br/>この操作は取り消しできません！', // from v2.1.31 added 4.12.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
