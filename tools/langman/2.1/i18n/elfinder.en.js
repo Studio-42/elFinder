@@ -2,7 +2,7 @@
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-11-23
+ * @version 2017-12-04
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -431,6 +431,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'selectAction'    : 'Action when select file', // from v2.1.30 added 23.11.2017
 			'useStoredEditor' : 'Open with the editor used last time', // from v2.1.30 added 23.11.2017
 			'selectinvert'    : 'Invert selection', // from v2.1.30 added 25.11.2017
+			'renameMultiple'  : 'Are you sure you want to rename $1 selected items like $2?<br/>This cannot be undone!', // from v2.1.31 added 4.12.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
