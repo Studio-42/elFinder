@@ -208,11 +208,13 @@ elFinder.prototype.commands.rename = function() {
 								label : 'btnYes',
 								callback : req
 							},
-							cancel : { // cancel callback - required
+							cancel : {
 								label : 'btnCancel',
 								callback : function() {
-									inError = true;
-									select();
+									setTimeout(function() {
+										inError = true;
+										select();
+									}, 120);
 								}
 							}
 						});
