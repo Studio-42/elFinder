@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: aba312b) (2017-12-02)
+ * Version 2.1.30 (2.1-src Nightly: 07c04f1) (2017-12-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8613,6 +8613,23 @@ elFinder.prototype = {
 		return tmpArr;
 	},
 	
+	/**
+	 * Return array ["name without extention", "extention"]
+	 * 
+	 * @param String name
+	 * 
+	 * @return Array
+	 * 
+	 */
+	splitFileExtention : function(name) {
+		var m;
+		if (m = name.match(/^(.+?)\.((?:tar\.(?:gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(?:gz|bz2)|[a-z0-9]{1,4})$/i)) {
+			return [m[1], m[2]];
+		} else {
+			return [name, ''];
+		}
+	},
+	
 	log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
 	
 	debug : function(type, m) {
@@ -8736,7 +8753,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: aba312b)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 07c04f1)';
 
 
 
@@ -10926,7 +10943,7 @@ elFinder.prototype.resources = {
 						}
 					}),
 				select = function() {
-					var name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '');
+					var name = fm.splitFileExtention(input.val())[0];
 					if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? (z-index not effect) so disable it
 						overlay.on('click', cancel).elfinderoverlay('show');
 						pnode.css('z-index', overlay.css('z-index') + 1);
@@ -11119,7 +11136,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-11-23
+ * @version 2017-12-04
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -11548,6 +11565,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'selectAction'    : 'Action when select file', // from v2.1.30 added 23.11.2017
 			'useStoredEditor' : 'Open with the editor used last time', // from v2.1.30 added 23.11.2017
 			'selectinvert'    : 'Invert selection', // from v2.1.30 added 25.11.2017
+			'renameMultiple'  : 'Are you sure you want to rename $1 selected items like $2?<br/>This cannot be undone!', // from v2.1.31 added 4.12.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -14063,15 +14081,12 @@ $.fn.elfindercwd = function(fm, options) {
 					if (selectCheckbox && (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select'))) {
 						e.stopPropagation();
 						e.preventDefault();
-						if (! wrapper.data('touching')) {
-							p.trigger(p.hasClass(clSelected) ? evtUnselect : evtSelect);
-							trigger();
-						}
+						p.trigger(p.hasClass(clSelected) ? evtUnselect : evtSelect);
+						trigger();
 						setTimeout(function() {
 							tgt.prop('checked', p.hasClass(clSelected));
 						}, 10);
-						
-						return false;
+						return;
 					}
 					
 					if (cwd.data('longtap')) {
@@ -14147,12 +14162,7 @@ $.fn.elfindercwd = function(fm, options) {
 					
 					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 					if (selectCheckbox && (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select'))) {
-						setTimeout(function() {
-							if (wrapper.data('touching')) {
-								p.trigger(p.hasClass(clSelected) ? evtUnselect : evtSelect);
-								trigger();
-							}
-						}, 150);
+						e.stopPropagation();
 						return;
 					}
 					
@@ -21563,7 +21573,7 @@ elFinder.prototype.commands.extract = function() {
 		
 		var confirm = function(files, index) {
 			var file = files[index],
-			name = file.name.replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, ''),
+			name = fm.splitFileExtention(file.name)[0],
 			existed = ($.inArray(name, names) >= 0),
 			next = function(){
 				if((index+1) < cnt) {
@@ -25735,9 +25745,28 @@ elFinder.prototype.commands.rename = function() {
 	}];
 	
 	this.getstate = function(sel) {
-		var sel = this.files(sel);
+		var fm  = this.fm,
+			sel = this.files(sel),
+			cnt = sel.length,
+			phash, ext, brk;
+		
+		if (!cnt) {
+			return -1;
+		}
+		
+		if (sel.length > 1 && sel[0].phash) {
+			phash = sel[0].phash;
+			ext = fm.splitFileExtention(sel[0].name)[1];
+		}
 
-		return sel.length == 1 && sel[0].phash && !sel[0].locked  ? 0 : -1;
+		return ((sel.length === 1 && !sel[0].locked && !fm.isRoot(sel[0])) || (fm.api > 2.1030 && cnt === $.map(sel, function(f) {
+			if (!brk && !f.locked && f.phash === phash && !fm.isRoot(f) && ext === fm.splitFileExtention(f.name)[1]) {
+				return f;
+			} else {
+				brk = true;
+				return null;
+			}
+		}).length)) ? 0 : -1;
 	};
 	
 	this.exec = function(hashes, opts) {
@@ -25753,6 +25782,10 @@ elFinder.prototype.commands.rename = function() {
 			navbar   = (type === 'navbar'),
 			target   = $('#'+fm[navbar? 'navHash2Id' : 'cwdHash2Id'](file.hash)),
 			tarea    = (type !== 'navbar' && fm.storage('view') != 'list'),
+			split    = function(name) {
+				var ext = fm.splitFileExtention(name)[1];
+				return [name.substr(0, name.length - ext.length - 1), ext];
+			},
 			unselect = function() {
 				setTimeout(function() {
 					input && input.blur();
@@ -25805,47 +25838,27 @@ elFinder.prototype.commands.rename = function() {
 				}),
 			blur = function(e) {
 				var name   = $.trim(input.val()),
-				valid  = true;
-
-				if (!overlay.is(':hidden')) {
-					pnode.css('z-index', '');
-				}
-				if (name === '') {
-					return cancel();
-				}
-				if (!inError && pnode.length) {
-					
-					input.off('blur');
-					
-					if (name == file.name) {
-						return dfrd.reject();
-					}
-					if (fm.options.validName && fm.options.validName.test) {
-						try {
-							valid = fm.options.validName.test(name);
-						} catch(e) {
-							valid = false;
-						}
-					}
-					if (!name || name === '.' || name === '..' || !valid) {
-						inError = true;
-						fm.error(file.mime === 'directory'? 'errInvDirname' : 'errInvName', {modal: true, close: select});
-						return false;
-					}
-					if (fm.fileByName(name, file.phash)) {
-						inError = true;
-						fm.error(['errExists', name], {modal: true, close: select});
-						return false;
-					}
-					
+				splits = fm.splitFileExtention(name),
+				valid  = true,
+				data = {},
+				req = function() {
 					input.off();
 					rest();
+					
+					data = {
+						cmd : 'rename',
+						name : name,
+						target : file.hash
+					};
+					if (cnt > 1) {
+						data['targets'] = sel;
+					}
 					
 					(navbar? input : node).html(fm.escape(name));
 					fm.lockfiles({files : [file.hash]});
 					fm.request({
-							data   : {cmd : 'rename', target : file.hash, name : name},
-							notify : {type : 'rename', cnt : 1},
+							data   : data,
+							notify : {type : 'rename', cnt : cnt},
 							navigate : {}
 						})
 						.fail(function(error) {
@@ -25855,7 +25868,7 @@ elFinder.prototype.commands.rename = function() {
 							}
 						})
 						.done(function(data) {
-							if (data.added && data.added.length) {
+							if (data.added && data.added.length && cnt === 1) {
 								data.undo = {
 									cmd : 'rename',
 									callback : function() {
@@ -25882,7 +25895,60 @@ elFinder.prototype.commands.rename = function() {
 						})
 						.always(function() {
 							fm.unlockfiles({files : [file.hash]});
+						}
+					);
+				};
+
+				if (!overlay.is(':hidden')) {
+					pnode.css('z-index', '');
+				}
+				if (name === '') {
+					return cancel();
+				}
+				if (!inError && pnode.length) {
+					
+					input.off('blur');
+					
+					if (cnt === 1 && name === file.name) {
+						return dfrd.reject();
+					}
+					if (fm.options.validName && fm.options.validName.test) {
+						try {
+							valid = fm.options.validName.test(name);
+						} catch(e) {
+							valid = false;
+						}
+					}
+					if (!name || name === '.' || name === '..' || !valid) {
+						inError = true;
+						fm.error(file.mime === 'directory'? 'errInvDirname' : 'errInvName', {modal: true, close: select});
+						return false;
+					}
+					if (cnt === 1 && fm.fileByName(name, file.phash)) {
+						inError = true;
+						fm.error(['errExists', name], {modal: true, close: select});
+						return false;
+					}
+					
+					if (cnt === 1) {
+						req();
+					} else {
+						fm.confirm({
+							title : 'cmdrename',
+							text  : ['renameMultiple', cnt, '"'+splits[0]+'1.'+splits[1]+'", "'+splits[0]+'2.'+splits[1]+'"'],
+							accept : {
+								label : 'btnYes',
+								callback : req
+							},
+							cancel : { // cancel callback - required
+								label : 'btnCancel',
+								callback : function() {
+									inError = true;
+									select();
+								}
+							}
 						});
+					}
 				}
 			},
 			input = $(tarea? '<textarea/>' : '<input type="text"/>')
@@ -25914,7 +25980,7 @@ elFinder.prototype.commands.rename = function() {
 				})
 				.on('blur', blur),
 			select = function() {
-				var name = input.val().replace(/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/ig, '');
+				var name = fm.splitFileExtention(input.val())[0];
 				if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? (z-index not effect) so disable it
 					overlay.on('click', cancel).elfinderoverlay('show');
 					pnode.css('z-index', overlay.css('z-index') + 1);
@@ -25969,7 +26035,7 @@ elFinder.prototype.commands.rename = function() {
 			node.empty().append(input.val(file.name));
 		}
 		
-		if (cnt > 1) {
+		if (cnt > 1 && fm.api <= 2.1030) {
 			return dfrd.reject();
 		}
 		
