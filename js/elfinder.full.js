@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 07c04f1) (2017-12-04)
+ * Version 2.1.30 (2.1-src Nightly: 0bb0a5e) (2017-12-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8753,7 +8753,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 07c04f1)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 0bb0a5e)';
 
 
 
@@ -25940,11 +25940,13 @@ elFinder.prototype.commands.rename = function() {
 								label : 'btnYes',
 								callback : req
 							},
-							cancel : { // cancel callback - required
+							cancel : {
 								label : 'btnCancel',
 								callback : function() {
-									inError = true;
-									select();
+									setTimeout(function() {
+										inError = true;
+										select();
+									}, 120);
 								}
 							}
 						});
