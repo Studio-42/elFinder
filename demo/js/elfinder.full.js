@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 0bb0a5e) (2017-12-04)
+ * Version 2.1.30 (2.1-src Nightly: 9c8fd54) (2017-12-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8753,7 +8753,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 0bb0a5e)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 9c8fd54)';
 
 
 
@@ -12266,11 +12266,11 @@ $.fn.elfindercontextmenu = function(fm) {
 								}
 							});
 							if (cmd.extra && cmd.extra.node) {
-								$('<span class="elfinder-button-icon elfinder-button-icon-'+(cmd.extra.icon || '')+' elfinder-contextmenu-extra-icon"/>')
+								$('<span class="elfinder-button-icon elfinder-button-icon-'+(cmd.extra.icon || '')+' '+exIcon+'"/>')
 									.append(cmd.extra.node).appendTo(node);
 								$(cmd.extra.node).trigger('ready');
 							} else {
-								node.remove('.elfinder-contextmenu-extra-icon');
+								node.remove('.'+exIcon);
 							}
 						}
 						
@@ -28421,6 +28421,7 @@ elFinder.prototype.commands.rm = function() {
 							}
 							e.stopPropagation();
 							e.preventDefault();
+							fm.getUI().trigger('click'); // to close the context menu immediately
 							fm.exec('rm', void(0), {_userAction: true, forceRm : true});
 						})
 				};
