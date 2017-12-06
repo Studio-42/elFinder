@@ -1132,13 +1132,6 @@ abstract class elFinderVolumeDriver {
 		}
 		$this->systemRoot = isset($this->options['systemRoot']) ? $this->options['systemRoot'] : $this->separator;
 		
-		// set server encoding
-		if (!empty($this->options['encoding']) && strtoupper($this->options['encoding']) !== 'UTF-8') {
-			$this->encoding = $this->options['encoding'];
-		} else {
-			$this->encoding = null;
-		}
-		
 		// set ARGS
 		$this->ARGS = $_SERVER['REQUEST_METHOD'] === 'POST'? $_POST : $_GET;
 		
@@ -1184,6 +1177,13 @@ abstract class elFinderVolumeDriver {
 		
 		if (!$this->init()) {
 			return false;
+		}
+		
+		// set server encoding
+		if (!empty($this->options['encoding']) && strtoupper($this->options['encoding']) !== 'UTF-8') {
+			$this->encoding = $this->options['encoding'];
+		} else {
+			$this->encoding = null;
 		}
 		
 		// check some options is arrays

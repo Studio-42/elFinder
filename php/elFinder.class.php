@@ -439,6 +439,12 @@ class elFinder {
 	 * @author Dmitry (dio) Levashov
 	 */
 	public function __construct($opts) {
+		// set default_charset
+		if (version_compare(PHP_VERSION, '5.6', '>=')) {
+			ini_set('internal_encoding', 'UTF-8');
+			ini_set('default_charset', 'UTF-8');
+		}
+		
 		// define accept constant of server commands path
 		! defined('ELFINDER_TAR_PATH')      && define('ELFINDER_TAR_PATH',      'tar');
 		! defined('ELFINDER_GZIP_PATH')     && define('ELFINDER_GZIP_PATH',     'gzip');
