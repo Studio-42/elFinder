@@ -509,11 +509,11 @@ $.fn.elfindercontextmenu = function(fm) {
 								}
 							});
 							if (cmd.extra && cmd.extra.node) {
-								$('<span class="elfinder-button-icon elfinder-button-icon-'+(cmd.extra.icon || '')+' elfinder-contextmenu-extra-icon"/>')
+								$('<span class="elfinder-button-icon elfinder-button-icon-'+(cmd.extra.icon || '')+' '+exIcon+'"/>')
 									.append(cmd.extra.node).appendTo(node);
 								$(cmd.extra.node).trigger('ready');
 							} else {
-								node.remove('.elfinder-contextmenu-extra-icon');
+								node.remove('.'+exIcon);
 							}
 						}
 						

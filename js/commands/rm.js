@@ -391,6 +391,7 @@ elFinder.prototype.commands.rm = function() {
 							}
 							e.stopPropagation();
 							e.preventDefault();
+							fm.getUI().trigger('click'); // to close the context menu immediately
 							fm.exec('rm', void(0), {_userAction: true, forceRm : true});
 						})
 				};

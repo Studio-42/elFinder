@@ -80,6 +80,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 					$this->options[$key] = str_replace('/', DIRECTORY_SEPARATOR, $this->options[$key]);
 				}
 			}
+			// PHP >= 7.1 Supports UTF-8 path on Windows
+			if (version_compare(PHP_VERSION, '7.1', '>=')) {
+				$this->options['encoding'] = '';
+			}
 		}
 		if (!$cwd = getcwd()) {
 			return $this->setError('elFinder LocalVolumeDriver requires a result of getcwd().');
