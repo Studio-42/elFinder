@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: a53f9e8) (2017-12-08)
+ * Version 2.1.30 (2.1-src Nightly: a1bdfc2) (2017-12-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -6258,11 +6258,11 @@ elFinder.prototype = {
 							fm.uploads.checkExists(files, target, fm).done(
 								function(res, res2){
 									if (fm.options.overwriteUploadConfirm && fm.option('uploadOverwrite', target)) {
+										hashes = res2;
 										if (res === null) {
 											data.overwrite = 0;
 										} else {
 											renames = res;
-											hashes = res2;
 										}
 										files = $.map(files, function(file){return !file._remove? file : null ;});
 									}
@@ -6414,11 +6414,11 @@ elFinder.prototype = {
 					//names = $.map(names, function(file){return file.name? { name: file.name } : null ;});
 					dfds.push(self.uploads.checkExists(names, target, self).done(
 						function(res, res2){
+							hashes = res2;
 							if (res === null) {
 								data.overwrite = 0;
 							} else{
 								renames = res;
-								hashes = res2;
 								cnt = $.map(names, function(file){return !file._remove? file : null ;}).length;
 								if (cnt != names.length) {
 									cnt = 0;
@@ -8753,7 +8753,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: a53f9e8)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: a1bdfc2)';
 
 
 
