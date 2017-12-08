@@ -203,7 +203,7 @@ elFinder.prototype.commands.rename = function() {
 		pattern : 'shift+f2' + (fm.OS == 'mac' ? ' shift+enter' : ''),
 		description : 'batchRename',
 		callback : function() {
-			self.enabled() && fm.selected().length > 1 && batchRename();
+			fm.selected().length > 1 && batchRename();
 		}
 	}];
 	
