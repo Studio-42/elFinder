@@ -6055,7 +6055,7 @@ abstract class elFinderVolumeDriver {
 				}
 			}
 			unset($o);
-			$this->procExec(ELFINDER_ZIP_PATH . ' -v', $o, $c);
+			$this->procExec(ELFINDER_ZIP_PATH . ' -h', $o, $c);
 			if ($c == 0) {
 				$arcs['create']['application/zip']  = array('cmd' => ELFINDER_ZIP_PATH, 'argc' => '-r9', 'ext' => 'zip');
 			}

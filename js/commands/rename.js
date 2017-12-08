@@ -200,7 +200,7 @@ elFinder.prototype.commands.rename = function() {
 	this.shortcuts = [{
 		pattern : 'f2' + (fm.OS == 'mac' ? ' enter' : '')
 	}, {
-		pattern : 'shift+f2' + (fm.OS == 'mac' ? ' shift+enter' : ''),
+		pattern : 'shift+f2',
 		description : 'batchRename',
 		callback : function() {
 			fm.selected().length > 1 && batchRename();
