@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 3627ee4) (2017-12-06)
+ * Version 2.1.30 (2.1-src Nightly: dc0a64e) (2017-12-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8753,7 +8753,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 3627ee4)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: dc0a64e)';
 
 
 
@@ -11136,7 +11136,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-12-04
+ * @version 2017-12-08
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -11566,6 +11566,11 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'useStoredEditor' : 'Open with the editor used last time', // from v2.1.30 added 23.11.2017
 			'selectinvert'    : 'Invert selection', // from v2.1.30 added 25.11.2017
 			'renameMultiple'  : 'Are you sure you want to rename $1 selected items like $2?<br/>This cannot be undone!', // from v2.1.31 added 4.12.2017
+			'batchRename'     : 'Batch rename', // from v2.1.31 added 8.12.2017
+			'plusNumber'      : '+ Number', // from v2.1.31 added 8.12.2017
+			'asPrefix'        : 'Add prefix', // from v2.1.31 added 8.12.2017
+			'asSuffix'        : 'Add suffix', // from v2.1.31 added 8.12.2017
+			'changeExtention' : 'Change extention', // from v2.1.31 added 8.12.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -25736,8 +25741,197 @@ d=(h[l++]|h[l++]<<8|h[l++]<<16|h[l++]<<24)>>>0;(a.length&4294967295)!==d&&n(Erro
  * Rename selected file.
  *
  * @author Dmitry (dio) Levashov, dio@std42.ru
+ * @author Naoki Sawada
  **/
 elFinder.prototype.commands.rename = function() {
+	var self = this,
+		fm = self.fm,
+		request = function(dfrd, targtes, file, name) {
+			var cnt = targtes? targtes.length : 0,
+				sel = targtes? [file.hash].concat(targtes) : [file.hash],
+				data = {};
+			
+			fm.lockfiles({files : sel});
+			
+			data = {
+				cmd : 'rename',
+				name : name,
+				target : file.hash
+			};
+			if (cnt > 0) {
+				data['targets'] = targtes;
+				if (name.match(/\*/)) {
+					data['q'] = name;
+				}
+			}
+			
+			fm.request({
+					data   : data,
+					notify : {type : 'rename', cnt : cnt},
+					navigate : {}
+				})
+				.fail(function(error) {
+					dfrd && dfrd.reject();
+					if (! error || ! Array.isArray(error) || error[0] !== 'errRename') {
+						fm.sync();
+					}
+				})
+				.done(function(data) {
+					if (data.added && data.added.length && cnt === 1) {
+						data.undo = {
+							cmd : 'rename',
+							callback : function() {
+								return fm.request({
+									data   : {cmd : 'rename', target : data.added[0].hash, name : file.name},
+									notify : {type : 'undo', cnt : 1}
+								});
+							}
+						};
+						data.redo = {
+							cmd : 'rename',
+							callback : function() {
+								return fm.request({
+									data   : {cmd : 'rename', target : file.hash, name : name},
+									notify : {type : 'rename', cnt : 1}
+								});
+							}
+						};
+					}
+					dfrd && dfrd.resolve(data);
+					if (fm.cwd().hash === file.hash) {
+						fm.exec('open', data.added[0].hash);
+					}
+				})
+				.always(function() {
+					fm.unlockfiles({files : sel}).trigger('selectfiles', {files : sel});
+				}
+			);
+		},
+		getHint = function(name, target) {
+			var sel = target || fm.selected(),
+				splits = fm.splitFileExtention(name),
+				f1 = fm.file(sel[0]),
+				f2 = fm.file(sel[1]),
+				ext, hint, add;
+			
+			ext = splits[1]? ('.' + splits[1]) : '';
+			if (splits[1] && splits[0] === '*') {
+				// change extention
+				hint =  '"' + fm.splitFileExtention(f1.name)[0] + ext + '", ';
+				hint += '"' + fm.splitFileExtention(f2.name)[0] + ext + '"';
+			} else if (splits[0].length > 1) {
+				if (splits[0].substr(-1) === '*') {
+					// add prefix
+					add = splits[0].substr(0, splits[0].length - 1);
+					hint =  '"' + add + f1.name+'", ';
+					hint += '"' + add + f2.name+'"';
+				} else if (splits[0].substr(0, 1) === '*') {
+					// add suffix
+					add = splits[0].substr(1);
+					hint =  '"'+fm.splitFileExtention(f1.name)[0] + add + ext + '", ';
+					hint += '"'+fm.splitFileExtention(f2.name)[0] + add + ext + '"';
+				}
+			}
+			if (!hint) {
+				hint = '"'+splits[0] + '1' + ext + '", "' + splits[0] + '2' + ext + '"';
+			}
+			if (sel.length > 2) {
+				hint += ' ...';
+			}
+			return hint;
+		},
+		batchRename = function() {
+			var sel = fm.selected(),
+				tplr = '<input name="type" type="radio" class="elfinder-tabstop">',
+				mkChk = function(node, label) {
+					return $('<label class="elfinder-rename-batch-checks">' + fm.i18n(label) + '</label>').prepend(node);
+				},
+				name = $('<input type="text" class="ui-corner-all elfinder-tabstop">'),
+				num  = $(tplr),
+				prefix  = $(tplr),
+				suffix  = $(tplr),
+				extention  = $(tplr),
+				checks = $('<div/>').append(
+					mkChk(num, 'plusNumber'),
+					mkChk(prefix, 'asPrefix'),
+					mkChk(suffix, 'asSuffix'),
+					mkChk(extention, 'changeExtention')
+				),
+				preview = $('<div class="elfinder-rename-batch-preview"/>'),
+				node = $('<div class="elfinder-rename-batch"/>').append(
+						$('<div class="elfinder-rename-batch-name"/>').append(name),
+						$('<div class="elfinder-rename-batch-type"/>').append(checks),
+						preview
+					),
+				opts = {
+					title : fm.i18n('batchRename'),
+					modal : true,
+					destroyOnClose : true,
+					width: Math.min(380, fm.getUI().width() - 20),
+					buttons : {},
+					open : function() {
+						name.on('input', mkPrev).focus();
+					}
+				},
+				getName = function() {
+					var vName = name.val(),
+						ext = fm.splitFileExtention(fm.file(sel[0]).name)[1];
+					if (vName !== '') {
+						if (prefix.is(':checked')) {
+							vName += '*';
+						} else if (suffix.is(':checked')) {
+							vName = '*' + vName + '.' + ext;
+						} else if (extention.is(':checked')) {
+							vName = '*.' + vName;
+						} else {
+							vName += '.' + ext;
+						}
+					}
+					return vName;
+				},
+				mkPrev = function() {
+					var vName = getName();
+					if (vName !== '') {
+						preview.html(fm.i18n(['renameMultiple', sel.length, getHint(vName)]));
+					} else {
+						preview.empty();
+					}
+				},
+				radios = checks.find('input:radio').on('change', mkPrev),
+				dialog,
+				radios;
+			
+			opts.buttons[fm.i18n('btnApply')] = function() {
+				var vName = getName(),
+					file, targets;
+				if (vName !== '') {
+					dialog.elfinderdialog('close');
+					targets = sel;
+					file = fm.file(targets.shift());
+					request(void(0), targets, file, vName);
+				}
+			};
+			opts.buttons[fm.i18n('btnCancel')] = function() {
+				dialog.elfinderdialog('close');
+			};
+			if ($.fn.checkboxradio) {
+				radios.checkboxradio({
+					create: function(e, ui) {
+						if (this === num.get(0)) {
+							num.prop('checked', true).change();
+						}
+					}
+				});
+			} else {
+				checks.buttonset({
+					create: function(e, ui) {
+						num.prop('checked', true).change();
+					}
+				});
+			}
+			dialog = fm.dialog(node, opts);
+		};
+	
 	this.noChangeDirOnRemovedCwd = true;
 	
 	this.shortcuts = [{
@@ -25745,10 +25939,9 @@ elFinder.prototype.commands.rename = function() {
 	}];
 	
 	this.getstate = function(sel) {
-		var fm  = this.fm,
-			sel = this.files(sel),
+		var sel = this.files(sel),
 			cnt = sel.length,
-			phash, ext, brk;
+			phash, ext, brk, state;
 		
 		if (!cnt) {
 			return -1;
@@ -25759,7 +25952,7 @@ elFinder.prototype.commands.rename = function() {
 			ext = fm.splitFileExtention(sel[0].name)[1];
 		}
 
-		return ((sel.length === 1 && !sel[0].locked && !fm.isRoot(sel[0])) || (fm.api > 2.1030 && cnt === $.map(sel, function(f) {
+		state = ((cnt === 1 && !sel[0].locked && !fm.isRoot(sel[0])) || (fm.api > 2.1030 && cnt === $.map(sel, function(f) {
 			if (!brk && !f.locked && f.phash === phash && !fm.isRoot(f) && ext === fm.splitFileExtention(f.name)[1]) {
 				return f;
 			} else {
@@ -25767,11 +25960,31 @@ elFinder.prototype.commands.rename = function() {
 				return null;
 			}
 		}).length)) ? 0 : -1;
+		
+		if (state !== -1 && cnt > 1) {
+			self.extra = {
+				icon: 'preference',
+				node: $('<span/>')
+					.attr({title: fm.i18n('batchRename')})
+					.on('click touchstart', function(e){
+						if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+							return;
+						}
+						e.stopPropagation();
+						e.preventDefault();
+						fm.getUI().trigger('click'); // to close the context menu immediately
+						batchRename();
+					})
+			};
+		} else {
+			delete self.extra;
+		}
+			
+		return state;
 	};
 	
 	this.exec = function(hashes, opts) {
-		var fm       = this.fm,
-			cwd      = fm.getUI('cwd'),
+		var cwd      = fm.getUI('cwd'),
 			sel      = hashes || (fm.selected().length? fm.selected() : false) || [fm.cwd().hash],
 			cnt      = sel.length,
 			file     = fm.file(sel.shift()),
@@ -25823,9 +26036,6 @@ elFinder.prototype.commands.rename = function() {
 								parent.html(name);
 							} else {
 								target.find(filename).html(name);
-								setTimeout(function() {
-									cwd.find('#'+fm.cwdHash2Id(file.hash)).click();
-								}, 50);
 							}
 						}
 					}, 0);
@@ -25840,63 +26050,11 @@ elFinder.prototype.commands.rename = function() {
 				var name   = $.trim(input.val()),
 				splits = fm.splitFileExtention(name),
 				valid  = true,
-				data = {},
 				req = function() {
 					input.off();
 					rest();
-					
-					data = {
-						cmd : 'rename',
-						name : name,
-						target : file.hash
-					};
-					if (cnt > 1) {
-						data['targets'] = sel;
-					}
-					
 					(navbar? input : node).html(fm.escape(name));
-					fm.lockfiles({files : [file.hash]});
-					fm.request({
-							data   : data,
-							notify : {type : 'rename', cnt : cnt},
-							navigate : {}
-						})
-						.fail(function(error) {
-							dfrd.reject();
-							if (! error || ! Array.isArray(error) || error[0] !== 'errRename') {
-								fm.sync();
-							}
-						})
-						.done(function(data) {
-							if (data.added && data.added.length && cnt === 1) {
-								data.undo = {
-									cmd : 'rename',
-									callback : function() {
-										return fm.request({
-											data   : {cmd : 'rename', target : data.added[0].hash, name : file.name},
-											notify : {type : 'undo', cnt : 1}
-										});
-									}
-								};
-								data.redo = {
-									cmd : 'rename',
-									callback : function() {
-										return fm.request({
-											data   : {cmd : 'rename', target : file.hash, name : name},
-											notify : {type : 'rename', cnt : 1}
-										});
-									}
-								};
-							}
-							dfrd.resolve(data);
-							if (incwd) {
-								fm.exec('open', data.added[0].hash);
-							}
-						})
-						.always(function() {
-							fm.unlockfiles({files : [file.hash]});
-						}
-					);
+					request(dfrd, sel, file, name);
 				};
 
 				if (!overlay.is(':hidden')) {
@@ -25935,7 +26093,7 @@ elFinder.prototype.commands.rename = function() {
 					} else {
 						fm.confirm({
 							title : 'cmdrename',
-							text  : ['renameMultiple', cnt, '"'+splits[0]+'1.'+splits[1]+'", "'+splits[0]+'2.'+splits[1]+'"'],
+							text  : ['renameMultiple', cnt, getHint(name, [file.hash].concat(sel))],
 							accept : {
 								label : 'btnYes',
 								callback : req
@@ -25950,6 +26108,10 @@ elFinder.prototype.commands.rename = function() {
 								}
 							}
 						});
+						setTimeout(function() {
+							fm.trigger('unselectfiles', {files: fm.selected()})
+								.trigger('selectfiles', {files : [file.hash].concat(sel)});
+						}, 120);
 					}
 				}
 			},

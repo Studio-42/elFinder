@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 3627ee4) (2017-12-06)
+ * Version 2.1.30 (2.1-src Nightly: dc0a64e) (2017-12-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -536,6 +536,28 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-rm-title .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
 	content: none;
 }
+
+/********************** COMMAND "RENAME" ****************************/
+.elfinder-rename-batch div {
+	margin: 5px 8px;
+}
+.elfinder-rename-batch .elfinder-rename-batch-name input {
+	width: 100%;
+	font-size: 1.6em;
+}
+.elfinder-rename-batch-type {
+	text-align: center;
+}
+.elfinder-rename-batch .elfinder-rename-batch-type label {
+	margin: 2px;
+	font-size: .9em;
+}
+.elfinder-rename-batch-preview {
+	padding: 0 8px;
+	font-size: 1.1em;
+	min-height: 4ex;
+}
+
 
 /* File: /css/common.css */
 /*********************************************/
@@ -1702,6 +1724,9 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 .elfinder-rtl .std42-dialog.elfinder-dialog-minimized {
 	float: right;
 }
+.std42-dialog input {
+	border:1px solid;
+}
 
 /* titlebar */
 .std42-dialog .ui-dialog-titlebar {
@@ -2014,7 +2039,6 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 
 .elfinder-netmount-tb { margin:0 auto; }
 .elfinder-netmount-tb select,
-.elfinder-netmount-tb input { border:1px solid #ccc; }
 .elfinder-netmount-tb .elfinder-button-icon { cursor: pointer; }
 
 button.elfinder-info-button {

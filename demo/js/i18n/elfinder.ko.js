@@ -2,7 +2,7 @@
  * Korea-한국어 translation
  * @author Hwang Ahreum; <luckmagic@naver.com>
  * @author Park Sungyong; <sungyong@gmail.com>
- * @version 2017-12-06
+ * @version 2017-12-07
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -158,7 +158,7 @@
 			'cmdempty'     : '폴더 비우기', // from v2.1.25 added 22.06.2017
 			'cmdundo'      : '취소', // from v2.1.27 added 31.07.2017
 			'cmdredo'      : '다시 하기', // from v2.1.27 added 31.07.2017
-			'cmdpreference': 'Preferences', // from v2.1.27 added 03.08.2017
+			'cmdpreference': '환경설정', // from v2.1.27 added 03.08.2017
 			'cmdselectall' : '전체 선택', // from v2.1.28 added 15.08.2017
 			'cmdselectnone': '선택 취소', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': '선택 반전', // from v2.1.28 added 15.08.2017
@@ -283,17 +283,17 @@
 			'sortAlsoTreeview'  : '트리뷰도 같이',  // from v2.1.15 added 01.08.2016
 
 			/********************************** new items **********************************/
-			'untitled file.txt' : 'NewFile.txt', // added 10.11.2015
-			'untitled folder'   : 'NewFolder',   // added 10.11.2015
-			'Archive'           : 'NewArchive',  // from v2.1 added 10.11.2015
+			'untitled file.txt' : '새파일.txt', // added 10.11.2015
+			'untitled folder'   : '새폴더',   // added 10.11.2015
+			'Archive'           : '새아카이브',  // from v2.1 added 10.11.2015
 
 			/********************************** messages **********************************/
 			'confirmReq'      : '확인',
 			'confirmRm'       : '이 파일을 정말 삭제 하겠습니까?<br/>실행 후 되돌릴 수 없습니다!',
 			'confirmRepl'     : '파일을 덮어쓰겠습니까?',
 			'confirmRest'     : '이미 있는 항목을 휴지통에 있는 이 것으로 교체하시겠습니까?', // fromv2.1.24 added 5.5.2017
-			'confirmConvUTF8' : 'Not in UTF-8<br/>Convert to UTF-8?<br/>Contents become UTF-8 by saving after conversion.', // from v2.1 added 08.04.2014
-			'confirmNonUTF8'  : 'Character encoding of this file couldn\'t be detected. It need to temporarily convert to UTF-8 for editting.<br/>Please select character encoding of this file.', // from v2.1.19 added 28.11.2016
+			'confirmConvUTF8' : 'UTF-8이 아닙니다<br/>UTF-8로 변환할까요?<br/>변환후 저장하면 UTF-8로 됩니다.', // from v2.1 added 08.04.2014
+			'confirmNonUTF8'  : '이 파일의 인코딩 타입을 알아내지 못했습니다. 편집하려면 임시로 UTF-8로 변환해야 합니다.<br/>어떤 인코딩을 할지 선택하십시오.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : '변경한 부분이 있습니다.<br/>저장하지 않는다면 현재 작업중인 내용을 잃을 수 있습니다.', // from v2.1 added 15.7.2015
 			'confirmTrash'    : '휴지통으로 이동시키겠습니까??', //from v2.1.24 added 29.4.2017
 			'apllyAll'        : '모두 적용',
@@ -327,7 +327,7 @@
 			'link'            : '링크',
 			'searcresult'     : '검색 결과',
 			'selected'        : '아이템 선택',
-			'about'           : 'About',
+			'about'           : '이 프로그램은..',
 			'shortcuts'       : '단축아이콘',
 			'help'            : '도움말',
 			'webfm'           : '웹 파일매니저',
@@ -345,7 +345,7 @@
 			'maintainer'      : '관리자',
 			'translator'      : '번역',
 			'icons'           : '아이콘',
-			'dontforget'      : 'and don\'t forget to take your towel',
+			'dontforget'      : '그리고 수건 가져가는 것을 잊지 마십시오.',
 			'shortcutsof'     : '단축아이콘 사용불가',
 			'dropFiles'       : '여기로 이동하기',
 			'or'              : '또는',
@@ -379,7 +379,7 @@
 			'searchMime'      : '입력한 MIME 타입으로 검색하기', // from v2.1 added 22.5.2015
 			'owner'           : '소유자', // from v2.1 added 20.6.2015
 			'group'           : '그룹', // from v2.1 added 20.6.2015
-			'other'           : 'Other', // from v2.1 added 20.6.2015
+			'other'           : '그외', // from v2.1 added 20.6.2015
 			'execute'         : '실행', // from v2.1 added 20.6.2015
 			'perm'            : '권한', // from v2.1 added 20.6.2015
 			'mode'            : '모드', // from v2.1 added 20.6.2015
@@ -405,28 +405,28 @@
 			'reinstate'       : '원상태로 복원', // from v2.1.15 added 3.8.2016
 			'complete'        : '$1 완료', // from v2.1.15 added 21.8.2016
 			'contextmenu'     : '컨텍스트 메뉴', // from v2.1.15 added 9.9.2016
-			'pageTurning'     : 'Page turning', // from v2.1.15 added 10.9.2016
-			'volumeRoots'     : 'Volume roots', // from v2.1.16 added 16.9.2016
+			'pageTurning'     : '페이지 전환', // from v2.1.15 added 10.9.2016
+			'volumeRoots'     : '볼륨 루트', // from v2.1.16 added 16.9.2016
 			'reset'           : '초기화', // from v2.1.16 added 1.10.2016
 			'bgcolor'         : '배경색', // from v2.1.16 added 1.10.2016
 			'colorPicker'     : '색 선택기', // from v2.1.16 added 1.10.2016
 			'8pxgrid'         : '8px 그리드', // from v2.1.16 added 4.10.2016
-			'enabled'         : 'Enabled', // from v2.1.16 added 4.10.2016
-			'disabled'        : 'Disabled', // from v2.1.16 added 4.10.2016
-			'emptyIncSearch'  : 'Search results is empty in current view.\\APress [Enter] to expand search target.', // from v2.1.16 added 5.10.2016
-			'emptyLetSearch'  : 'First letter search results is empty in current view.', // from v2.1.23 added 24.3.2017
-			'textLabel'       : 'Text label', // from v2.1.17 added 13.10.2016
+			'enabled'         : '활성', // from v2.1.16 added 4.10.2016
+			'disabled'        : '비활성', // from v2.1.16 added 4.10.2016
+			'emptyIncSearch'  : '현재 뷰에는 검색결과가 없습니다.\\A[Enter]를 눌러 검색 대상을 확장하십시오.', // from v2.1.16 added 5.10.2016
+			'emptyLetSearch'  : '현재 뷰에는 첫글자 검색 결과가 없습니다.', // from v2.1.23 added 24.3.2017
+			'textLabel'       : '레이블', // from v2.1.17 added 13.10.2016
 			'minsLeft'        : '$1 분 남았습니다', // from v2.1.17 added 13.11.2016
 			'openAsEncoding'  : '선택한 인코딩으로 다시 열기', // from v2.1.19 added 2.12.2016
 			'saveAsEncoding'  : '선택한 인코딩으로 저장하기', // from v2.1.19 added 2.12.2016
 			'selectFolder'    : '폴더 선택', // from v2.1.20 added 13.12.2016
-			'firstLetterSearch': 'First letter search', // from v2.1.23 added 24.3.2017
-			'presets'         : 'Presets', // from v2.1.25 added 26.5.2017
-			'tooManyToTrash'  : 'It\'s too many items so it can\'t into trash.', // from v2.1.25 added 9.6.2017
-			'TextArea'        : 'TextArea', // from v2.1.25 added 14.6.2017
-			'folderToEmpty'   : 'Empty the folder "$1".', // from v2.1.25 added 22.6.2017
+			'firstLetterSearch': '첫글자 검색', // from v2.1.23 added 24.3.2017
+			'presets'         : '프리셋', // from v2.1.25 added 26.5.2017
+			'tooManyToTrash'  : '휴지통으로 옮기엔 항목이 너무 많습니다.', // from v2.1.25 added 9.6.2017
+			'TextArea'        : '글자영역', // from v2.1.25 added 14.6.2017
+			'folderToEmpty'   : '"$1" 폴더를 비우십시오.', // from v2.1.25 added 22.6.2017
 			'filderIsEmpty'   : ' "$1" 폴더에 아무것도 없습니다.', // from v2.1.25 added 22.6.2017
-			'preference'      : 'Preference', // from v2.1.26 added 28.6.2017
+			'preference'      : '환경설정', // from v2.1.26 added 28.6.2017
 			'language'        : '언어 설정', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': '이 브라우저에 저장된 설정값 초기화하기', // from v2.1.26 added 28.6.2017
 			'toolbarPref'     : '툴바 설정', // from v2.1.27 added 2.8.2017
