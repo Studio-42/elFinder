@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 6f22c62) (2017-12-08)
+ * Version 2.1.30 (2.1-src Nightly: 8fe0ed4) (2017-12-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8753,7 +8753,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 6f22c62)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 8fe0ed4)';
 
 
 
@@ -25937,7 +25937,7 @@ elFinder.prototype.commands.rename = function() {
 	this.shortcuts = [{
 		pattern : 'f2' + (fm.OS == 'mac' ? ' enter' : '')
 	}, {
-		pattern : 'shift+f2' + (fm.OS == 'mac' ? 'shift+enter' : ''),
+		pattern : 'shift+f2' + (fm.OS == 'mac' ? ' shift+enter' : ''),
 		description : 'batchRename',
 		callback : function() {
 			self.enabled() && fm.selected().length > 1 && batchRename();
