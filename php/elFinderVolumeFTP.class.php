@@ -1370,10 +1370,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			// for several files - create new directory
 			// create unique name for directory
 			$src = $dir;
-			$name = basename($path);
-			if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/i', $name, $m)) {
-				$name = substr($name, 0,  strlen($name)-strlen($m[0]));
-			}
+			$splits = elFinder::splitFileExtention(basename($path));
+			$name = $splits[0];
 			$test = $this->_joinPath(dirname($path), $name);
 			if ($this->stat($test)) {
 				$name = $this->uniqueName(dirname($path), $name, '-', false);
