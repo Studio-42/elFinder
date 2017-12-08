@@ -526,3 +526,25 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-rm-title .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
 	content: none;
 }
+
+/********************** COMMAND "RENAME" ****************************/
+.elfinder-rename-batch div {
+	margin: 5px 8px;
+}
+.elfinder-rename-batch .elfinder-rename-batch-name input {
+	width: 100%;
+	font-size: 1.6em;
+}
+.elfinder-rename-batch-type {
+	text-align: center;
+}
+.elfinder-rename-batch .elfinder-rename-batch-type label {
+	margin: 2px;
+	font-size: .9em;
+}
+.elfinder-rename-batch-preview {
+	padding: 0 8px;
+	font-size: 1.1em;
+	min-height: 4ex;
+}
+

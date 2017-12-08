@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-12-04
+ * @version 2017-12-08
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -439,6 +439,11 @@
 			'useStoredEditor' : '前回使用したエディターで開く', // from v2.1.30 added 23.11.2017
 			'selectinvert'    : '選択アイテムを反転', // from v2.1.30 added 25.11.2017
 			'renameMultiple'  : '選択した $1 個のアイテムを $2 のようにリネームしますか？<br/>この操作は取り消しできません！', // from v2.1.31 added 4.12.2017
+			'batchRename'     : '一括リネーム', // from v2.1.31 added 8.12.2017
+			'plusNumber'      : '+ 連番', // from v2.1.31 added 8.12.2017
+			'asPrefix'        : '先頭に追加', // from v2.1.31 added 8.12.2017
+			'asSuffix'        : '末尾に追加', // from v2.1.31 added 8.12.2017
+			'changeExtention' : '拡張子変更', // from v2.1.31 added 8.12.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',

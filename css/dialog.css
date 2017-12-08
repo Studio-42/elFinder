@@ -20,6 +20,9 @@
 .elfinder-rtl .std42-dialog.elfinder-dialog-minimized {
 	float: right;
 }
+.std42-dialog input {
+	border:1px solid;
+}
 
 /* titlebar */
 .std42-dialog .ui-dialog-titlebar {
@@ -332,7 +335,6 @@
 
 .elfinder-netmount-tb { margin:0 auto; }
 .elfinder-netmount-tb select,
-.elfinder-netmount-tb input { border:1px solid #ccc; }
 .elfinder-netmount-tb .elfinder-button-icon { cursor: pointer; }
 
 button.elfinder-info-button {
