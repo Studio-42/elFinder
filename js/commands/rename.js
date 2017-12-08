@@ -356,7 +356,7 @@ elFinder.prototype.commands.rename = function() {
 					} else {
 						fm.confirm({
 							title : 'cmdrename',
-							text  : ['renameMultiple', cnt, getHint(file.name, [file.hash].concat(sel))],
+							text  : ['renameMultiple', cnt, getHint(name, [file.hash].concat(sel))],
 							accept : {
 								label : 'btnYes',
 								callback : req
