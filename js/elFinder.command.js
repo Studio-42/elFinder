@@ -135,32 +135,34 @@ elFinder.prototype.command = function(fm) {
 				var cb = s.callback || function(){ fm.exec(self.name, void(0), {_userAction: true}); };
 				s.callback = function(e) {
 					var enabled, checks = {};
-					if (fm.searchStatus.state < 2) {
-						enabled = fm.isCommandEnabled(self.name);
-					} else {
-						$.each(fm.selected(), function(i, h) {
-							if (fm.optionsByHashes[h]) {
-								checks[h] = true;
-							} else {
-								$.each(fm.volOptions, function(id) {
-									if (!checks[id] && h.indexOf(id) === 0) {
-										checks[id] = true;
-										return false;
-									}
-								});
-							}
-						});
-						$.each(checks, function(h) {
-							enabled = fm.isCommandEnabled(self.name, h);
-							if (! enabled) {
-								return false;
-							}
-						});
-					}
-					if (enabled) {
-						self.event = e;
-						cb.call(self);
-						delete self.event;
+					if (self.enabled()) {
+						if (fm.searchStatus.state < 2) {
+							enabled = fm.isCommandEnabled(self.name);
+						} else {
+							$.each(fm.selected(), function(i, h) {
+								if (fm.optionsByHashes[h]) {
+									checks[h] = true;
+								} else {
+									$.each(fm.volOptions, function(id) {
+										if (!checks[id] && h.indexOf(id) === 0) {
+											checks[id] = true;
+											return false;
+										}
+									});
+								}
+							});
+							$.each(checks, function(h) {
+								enabled = fm.isCommandEnabled(self.name, h);
+								if (! enabled) {
+									return false;
+								}
+							});
+						}
+						if (enabled) {
+							self.event = e;
+							cb.call(self);
+							delete self.event;
+						}
 					}
 				};
 			},
