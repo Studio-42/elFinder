@@ -198,7 +198,13 @@ elFinder.prototype.commands.rename = function() {
 	this.noChangeDirOnRemovedCwd = true;
 	
 	this.shortcuts = [{
-		pattern     : 'f2'+(this.fm.OS == 'mac' ? ' enter' : '')
+		pattern : 'f2' + (fm.OS == 'mac' ? ' enter' : '')
+	}, {
+		pattern : 'shift+f2' + (fm.OS == 'mac' ? 'shift+enter' : ''),
+		description : 'batchRename',
+		callback : function() {
+			self.enabled() && fm.selected().length > 1 && batchRename();
+		}
 	}];
 	
 	this.getstate = function(sel) {
