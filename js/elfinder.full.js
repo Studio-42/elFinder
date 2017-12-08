@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: c52c6ff) (2017-12-08)
+ * Version 2.1.30 (2.1-src Nightly: e7fd0c5) (2017-12-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8753,7 +8753,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: c52c6ff)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: e7fd0c5)';
 
 
 
@@ -10464,32 +10464,34 @@ elFinder.prototype.command = function(fm) {
 				var cb = s.callback || function(){ fm.exec(self.name, void(0), {_userAction: true}); };
 				s.callback = function(e) {
 					var enabled, checks = {};
-					if (fm.searchStatus.state < 2) {
-						enabled = fm.isCommandEnabled(self.name);
-					} else {
-						$.each(fm.selected(), function(i, h) {
-							if (fm.optionsByHashes[h]) {
-								checks[h] = true;
-							} else {
-								$.each(fm.volOptions, function(id) {
-									if (!checks[id] && h.indexOf(id) === 0) {
-										checks[id] = true;
-										return false;
-									}
-								});
-							}
-						});
-						$.each(checks, function(h) {
-							enabled = fm.isCommandEnabled(self.name, h);
-							if (! enabled) {
-								return false;
-							}
-						});
-					}
-					if (enabled) {
-						self.event = e;
-						cb.call(self);
-						delete self.event;
+					if (self.enabled()) {
+						if (fm.searchStatus.state < 2) {
+							enabled = fm.isCommandEnabled(self.name);
+						} else {
+							$.each(fm.selected(), function(i, h) {
+								if (fm.optionsByHashes[h]) {
+									checks[h] = true;
+								} else {
+									$.each(fm.volOptions, function(id) {
+										if (!checks[id] && h.indexOf(id) === 0) {
+											checks[id] = true;
+											return false;
+										}
+									});
+								}
+							});
+							$.each(checks, function(h) {
+								enabled = fm.isCommandEnabled(self.name, h);
+								if (! enabled) {
+									return false;
+								}
+							});
+						}
+						if (enabled) {
+							self.event = e;
+							cb.call(self);
+							delete self.event;
+						}
 					}
 				};
 			},
@@ -25944,7 +25946,7 @@ elFinder.prototype.commands.rename = function() {
 		pattern : 'shift+f2' + (fm.OS == 'mac' ? ' shift+enter' : ''),
 		description : 'batchRename',
 		callback : function() {
-			self.enabled() && fm.selected().length > 1 && batchRename();
+			fm.selected().length > 1 && batchRename();
 		}
 	}];
 	
