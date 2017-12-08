@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 8fe0ed4) (2017-12-08)
+ * Version 2.1.30 (2.1-src Nightly: c52c6ff) (2017-12-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8753,7 +8753,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 8fe0ed4)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: c52c6ff)';
 
 
 
@@ -10459,7 +10459,41 @@ elFinder.prototype.command = function(fm) {
 	 */
 	this.setup = function(name, opts) {
 		var self = this,
-			fm   = this.fm, i, s, sc, cb;
+			fm   = this.fm,
+			setCallback = function(s) {
+				var cb = s.callback || function(){ fm.exec(self.name, void(0), {_userAction: true}); };
+				s.callback = function(e) {
+					var enabled, checks = {};
+					if (fm.searchStatus.state < 2) {
+						enabled = fm.isCommandEnabled(self.name);
+					} else {
+						$.each(fm.selected(), function(i, h) {
+							if (fm.optionsByHashes[h]) {
+								checks[h] = true;
+							} else {
+								$.each(fm.volOptions, function(id) {
+									if (!checks[id] && h.indexOf(id) === 0) {
+										checks[id] = true;
+										return false;
+									}
+								});
+							}
+						});
+						$.each(checks, function(h) {
+							enabled = fm.isCommandEnabled(self.name, h);
+							if (! enabled) {
+								return false;
+							}
+						});
+					}
+					if (enabled) {
+						self.event = e;
+						cb.call(self);
+						delete self.event;
+					}
+				};
+			},
+			i, s, sc;
 
 		this.name      = name;
 		this.title     = fm.messages['cmd'+name] ? fm.i18n('cmd'+name)
@@ -10486,37 +10520,7 @@ elFinder.prototype.command = function(fm) {
 
 		for (i = 0; i < this.shortcuts.length; i++) {
 			s = this.shortcuts[i];
-			cb = s.callback || function(){ fm.exec(this.name, void(0), {_userAction: true}); };
-			s.callback = function(e) {
-				var enabled, checks = {};
-				if (fm.searchStatus.state < 2) {
-					enabled = fm.isCommandEnabled(self.name);
-				} else {
-					$.each(fm.selected(), function(i, h) {
-						if (fm.optionsByHashes[h]) {
-							checks[h] = true;
-						} else {
-							$.each(fm.volOptions, function(id) {
-								if (!checks[id] && h.indexOf(id) === 0) {
-									checks[id] = true;
-									return false;
-								}
-							});
-						}
-					});
-					$.each(checks, function(h) {
-						enabled = fm.isCommandEnabled(self.name, h);
-						if (! enabled) {
-							return false;
-						}
-					});
-				}
-				if (enabled) {
-					self.event = e;
-					cb.call(self);
-					delete self.event;
-				}
-			};
+			setCallback(s);
 			!s.description && (s.description = this.title);
 			fm.shortcut(s);
 		}
