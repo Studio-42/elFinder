@@ -3667,9 +3667,10 @@ abstract class elFinderVolumeDriver {
 		
 		$ext = '';
 
-		if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/i', $name, $m)) {
-			$ext  = '.'.$m[1];
-			$name = substr($name, 0,  strlen($name)-strlen($m[0]));
+		$splits = elFinder::splitFileExtention($name);
+		if ($splits[1]) {
+			$ext  = '.'.$splits[1];
+			$name = $splits[0];
 		} 
 		
 		if ($checkNum && preg_match('/('.preg_quote($suffix, '/').')(\d*)$/i', $name, $m)) {
