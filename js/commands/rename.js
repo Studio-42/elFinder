@@ -146,7 +146,7 @@ elFinder.prototype.commands.rename = function() {
 							vName = '*' + vName + '.' + ext;
 						} else if (extention.is(':checked')) {
 							vName = '*.' + vName;
-						} else {
+						} else if (ext) {
 							vName += '.' + ext;
 						}
 					}
