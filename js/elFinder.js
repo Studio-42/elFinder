@@ -6227,11 +6227,11 @@ elFinder.prototype = {
 							fm.uploads.checkExists(files, target, fm).done(
 								function(res, res2){
 									if (fm.options.overwriteUploadConfirm && fm.option('uploadOverwrite', target)) {
+										hashes = res2;
 										if (res === null) {
 											data.overwrite = 0;
 										} else {
 											renames = res;
-											hashes = res2;
 										}
 										files = $.map(files, function(file){return !file._remove? file : null ;});
 									}
@@ -6383,11 +6383,11 @@ elFinder.prototype = {
 					//names = $.map(names, function(file){return file.name? { name: file.name } : null ;});
 					dfds.push(self.uploads.checkExists(names, target, self).done(
 						function(res, res2){
+							hashes = res2;
 							if (res === null) {
 								data.overwrite = 0;
 							} else{
 								renames = res;
-								hashes = res2;
 								cnt = $.map(names, function(file){return !file._remove? file : null ;}).length;
 								if (cnt != names.length) {
 									cnt = 0;
