@@ -4188,8 +4188,8 @@ class elFinder {
 	 * @return array
 	 */
 	public static function splitFileExtention($name) {
-		if (preg_match('/^(.+?)\.((?:tar\.(?:gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(?:gz|bz2)|[a-z0-9]{1,4})$/i', $name, $m)) {
-			return array($m[1], $m[2]);
+		if (preg_match('/^(.+?)?\.((?:tar\.(?:gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(?:gz|bz2)|[a-z0-9]{1,4})$/i', $name, $m)) {
+			return array((string)$m[1], $m[2]);
 		} else {
 			return array($name, '');
 		}

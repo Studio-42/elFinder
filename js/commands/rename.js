@@ -139,7 +139,7 @@ elFinder.prototype.commands.rename = function() {
 				getName = function() {
 					var vName = name.val(),
 						ext = fm.splitFileExtention(fm.file(sel[0]).name)[1];
-					if (vName !== '') {
+					if (vName !== '' || num.is(':checked')) {
 						if (prefix.is(':checked')) {
 							vName += '*';
 						} else if (suffix.is(':checked')) {
