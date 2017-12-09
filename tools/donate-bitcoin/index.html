@@ -1,0 +1,27 @@
+<!-- donate-bitcoin Copyright (GPL) 2016  Nathan Robinson -->
+<DOCTYPE html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Donate Bitcoin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+  </head>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
+<script src="./index.js"></script>
+<body onload="donate()">
+<center>
+<div id="donatemessage"></div>
+<div id="donation">
+  <input type="number" name="donatebox" id="donatebox" min="0" step="5">
+  <br><br><img style="cursor:pointer" id="donationbutton" height="30px" onclick="donate()" src="">
+</div>
+<div id="donatetext"></div>
+<br>
+<div id="qrcodePlaceHolder"></div>
+</center>
+</body>
+<html>
