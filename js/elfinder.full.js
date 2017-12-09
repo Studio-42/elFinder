@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: a1bdfc2) (2017-12-08)
+ * Version 2.1.30 (2.1-src Nightly: 0441a42) (2017-12-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8623,7 +8623,10 @@ elFinder.prototype = {
 	 */
 	splitFileExtention : function(name) {
 		var m;
-		if (m = name.match(/^(.+?)\.((?:tar\.(?:gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(?:gz|bz2)|[a-z0-9]{1,4})$/i)) {
+		if (m = name.match(/^(.+?)?\.((?:tar\.(?:gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(?:gz|bz2)|[a-z0-9]{1,4})$/i)) {
+			if (typeof m[1] === 'undefined') {
+				m[1] = '';
+			}
 			return [m[1], m[2]];
 		} else {
 			return [name, ''];
@@ -8753,7 +8756,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: a1bdfc2)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 0441a42)';
 
 
 
@@ -12885,7 +12888,7 @@ $.fn.elfindercwd = function(fm, options) {
 					cwd.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').trigger(evtSelect);
 					if (fm.maxTargets && (incHashes || cwdHashes).length > fm.maxTargets) {
 						files = $.map(incHashes || cwdHashes, function(hash) { return fm.file(hash) || null });
-						files = fm.sortFiles(files).slice(0, fm.maxTargets);
+						files = files.slice(0, fm.maxTargets);
 						selectedFiles = {};
 						$.each(files, function(i, v) {
 							selectedFiles[v.hash] = true;
@@ -14048,6 +14051,13 @@ $.fn.elfindercwd = function(fm, options) {
 					buffer = $.map(incHashes || cwdHashes, function(hash) { return fm.file(hash) || null });
 					
 					buffer = fm.sortFiles(buffer);
+					
+					if (incHashes) {
+						incHashes = $.map(buffer, function(f) { return f.hash; });
+					} else {
+						cwdHashes = $.map(buffer, function(f) { return f.hash; });
+					}
+					
 					bufferExt = {
 						renderd: 0,
 						attachTmbs: {},
@@ -14753,12 +14763,16 @@ $.fn.elfindercwd = function(fm, options) {
 				fm.autoSync();
 			})
 			.bind('sortchange', function() {
-				var lastScrollLeft = wrapper.scrollLeft();
+				var lastScrollLeft = wrapper.scrollLeft(),
+					allsel = cwd.hasClass('elfinder-cwd-allselected');
 				
 				content();
 				fm.one('cwdrender', function() {
 					wrapper.scrollLeft(lastScrollLeft);
-					Object.keys(selectedFiles).length && trigger();
+					if (allsel) {
+						selectedFiles = fm.arrayFlip(incHashes || cwdHashes, true);
+					}
+					(allsel || Object.keys(selectedFiles).length) && trigger();
 					resize();
 				});
 			})
@@ -25882,7 +25896,7 @@ elFinder.prototype.commands.rename = function() {
 				getName = function() {
 					var vName = name.val(),
 						ext = fm.splitFileExtention(fm.file(sel[0]).name)[1];
-					if (vName !== '') {
+					if (vName !== '' || num.is(':checked')) {
 						if (prefix.is(':checked')) {
 							vName += '*';
 						} else if (suffix.is(':checked')) {
