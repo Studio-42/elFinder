@@ -71,7 +71,7 @@
 					<form id="elfinder-donate">
 						<input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
 					</form>
-					<div id="elfinder-donate-select">
+					<div id="elfinder-donate-select" style="display:none;">
 						<h4>Which do you want to donate to?</h4>
 
 						<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
@@ -101,6 +101,27 @@
 							<input onclick="_gaq.push(['_trackEvent', 'PayPal', 'Donate']);" type="submit" value="Predecessor  developer (troex@fury.scancode.ru)" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
 							<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
 						</form>
+						
+						<div style="font-size:16px;margin:0 auto;width:300px" class="blockchain-btn"
+							 data-address="17uXdpyEiBks6Ziwx9Zn2Qkv9Xw6AVpEYz"
+							 data-shared="false">
+							<div class="blockchain stage-begin" style="cursor:pointer;">
+								<img src="https://blockchain.info/Resources/buttons/donate_64.png"/>
+							</div>
+							<!--<div class="blockchain stage-loading" style="text-align:center">
+								<img src="https://blockchain.info/Resources/loading-large.gif"/>
+							</div>-->
+							<div class="blockchain stage-ready">
+								 <p align="center">Donate To Bitcoin Address: <b>[[address]]</b><br>(Current developer nao-pon)</p>
+								 <p align="center" class="qr-code"></p>
+							</div>
+							<div class="blockchain stage-paid">
+								 Donation of <b>[[value]] BTC</b> Received. Thank You.
+							</div>
+							<div class="blockchain stage-error">
+								<font color="red">[[error]]</font>
+							</div>
+						</div>
 					</div>
 				</div>
 

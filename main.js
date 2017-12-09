@@ -133,6 +133,7 @@
 					, 'extras/quicklook.googledocs.min'                    // optional GoogleDocs preview
 					, 'elfinderBasicAuth'
 					, xdr
+					, 'blockchain'
 				],
 				start,
 				function(error) {
@@ -162,10 +163,14 @@
 			'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/jquery-ui.min',
 			'elfinder' : 'elfinder.min',
 			'i18nfmsg' : '../../i18nFolderMsgs',
-			'jquery.xdr': '../xdr/jquery.xdr'
+			'jquery.xdr': '../xdr/jquery.xdr',
+			'blockchain': '//blockchain.info/Resources/js/pay-now-button'
 		},
 		shim : {
 			'jquery.xdr': {
+				deps: ['jquery']
+			},
+			'blockchain': {
 				deps: ['jquery']
 			}
 		},
