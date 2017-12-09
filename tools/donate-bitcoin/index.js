@@ -87,7 +87,7 @@ function drawDonationElements(url, donateDisplayMessage) {
 }
 
 function donate() {
-  $.getJSON("https://blockchain.info/ticker?cors=true", function(currencyExchangeResponse) {
+  $.getJSON("https://blockchain.info/ticker?cors=true&_="+(+new Date), function(currencyExchangeResponse) {
       var fiatDonationAmount = getFiatDonationAmount();
       var bitcoinPrice = getBitcoinPrice(currencyExchangeResponse);
       var bitcoinAmountToDonate = computeBitcoinAmount(fiatDonationAmount, bitcoinPrice);
@@ -143,6 +143,9 @@ function composeDonationElements(bitcoinAmountToDonate, fiatDonationAmount) {
 }
 
 $(function() {
+	document.title = 'Donate Bitcoin to ' + $('<span/>').html(organization).get(0).innerText;
 	$('#donatemessage').html("<h1>Donate Bitcoin to " + organization +"</h1>");
 	$('#donatebox').on('input change', donate).val(!isNaN(parseFloat(params.amount))? parseFloat(params.amount) : defaultAmountToDonate);
+	$('#donationbutton').on('click', donate);
+	donate();
 });
