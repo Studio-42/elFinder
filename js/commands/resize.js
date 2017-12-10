@@ -104,9 +104,10 @@ elFinder.prototype.commands.resize = function() {
 			presetSize = Array.isArray(options.presetSize)? options.presetSize : [],
 			dlcls = 'elfinder-dialog-resize',
 			clactive = 'elfinder-dialog-active',
+			clsediting = fm.res('class', 'editing'),
 			open = function(file, id) {
 				var isJpeg   = (file.mime === 'image/jpeg'),
-					dialog   = $('<div class="elfinder-dialog-resize '+fm.res('class', 'editing')+'"/>'),
+					dialog   = $('<div class="elfinder-dialog-resize '+clsediting+'"/>'),
 					input    = '<input type="number" class="ui-corner-all"/>',
 					row      = '<div class="elfinder-resize-row"/>',
 					label    = '<div class="elfinder-resize-label"/>',
@@ -1138,6 +1139,8 @@ elFinder.prototype.commands.resize = function() {
 								dialogs.fadeIn(function() {
 									base.addClass(clactive);
 								});
+								fm.disable();
+								dialog.addClass(clsediting);
 							},
 							make = function() {
 								self.mime = file.mime;
@@ -1192,6 +1195,7 @@ elFinder.prototype.commands.resize = function() {
 						if (checkVals()) {
 							dialogs = fmnode.children('.'+dlcls).fadeOut();
 							base.removeClass(clactive);
+							dialog.removeClass(clsediting);
 							fm.enable();
 							if (fm.searchStatus.state < 2 && file.phash !== fm.cwd().hash) {
 								reqOpen = fm.exec('open', [file.phash], {thash: file.phash});
