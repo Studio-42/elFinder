@@ -83,6 +83,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			// PHP >= 7.1 Supports UTF-8 path on Windows
 			if (version_compare(PHP_VERSION, '7.1', '>=')) {
 				$this->options['encoding'] = '';
+				$this->options['locale'] = '';
 			}
 		}
 		if (!$cwd = getcwd()) {
