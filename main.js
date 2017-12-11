@@ -96,10 +96,10 @@
 							require(
 								[ 'extras/encoding-japanese.min' ],
 								function(Encoding) {
-									if (Encoding.convert) {
-										fm.options.rawStringDecoder = function(s) {
-											return Encoding.convert(s,{to:'UNICODE',type:'string'});
-										};
+									if (Encoding && Encoding.convert) {
+										fm.registRawStringDecoder(function(s) {
+											return Encoding.convert(s, {to:'UNICODE',type:'string'});
+										});
 									}
 								}
 							);
