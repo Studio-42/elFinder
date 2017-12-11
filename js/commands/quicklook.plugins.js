@@ -850,7 +850,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						fm.loadScript(
 							[ fm.options.cdns.rar ],
 							function() {
-								if (typeof define === 'function' && define.amd) {
+								if (fm.hasRequire) {
 									require(['rar'], function(RarArchive) {
 										RAR = RarArchive;
 										getList(url);
