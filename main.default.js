@@ -68,9 +68,9 @@
 											[ 'encoding-japanese' ],
 											function(Encoding) {
 												if (Encoding && Encoding.convert) {
-													fm.options.rawStringDecoder = function(s) {
+													fm.registRawStringDecoder(function(s) {
 														return Encoding.convert(s, {to:'UNICODE',type:'string'});
-													};
+													});
 												}
 											}
 										);
