@@ -11,7 +11,7 @@
 	var apps = {},
 		// get query of getfile
 		getfile = window.location.search.match(/getfile=([a-z]+)/),
-		useRequire = (typeof define === 'function' && define.amd),
+		useRequire = elFinder.hasRequire,
 		hasFlash = (function() {
 			var hasFlash;
 			try {
