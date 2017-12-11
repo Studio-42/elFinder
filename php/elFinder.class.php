@@ -590,9 +590,9 @@ class elFinder {
 		}
 		
 		// setlocale and global locale regists to elFinder::locale
-		self::$locale = !empty($opts['locale']) ? $opts['locale'] : 'en_US.UTF-8';
+		self::$locale = !empty($opts['locale']) ? $opts['locale'] : (substr(PHP_OS, 0, 3) === 'WIN'? 'C' : 'en_US.UTF-8');
 		if (false === setlocale(LC_ALL, self::$locale)) {
-			self::$locale = setlocale(LC_ALL, '');
+			self::$locale = setlocale(LC_ALL, '0');
 		}
 
 		// set defaultMimefile
