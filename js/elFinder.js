@@ -4676,11 +4676,6 @@ var elFinder = function(node, opts, bootCallback) {
 					},
 					toChkTh = {};
 				
-				// regist decodeRawString function
-				if (self.options.rawStringDecoder && $.isFunction(self.options.rawStringDecoder)) {
-					self.decodeRawString = self.options.rawStringDecoder;
-				}
-				
 				// re-calculate elFinder node z-index
 				self.zIndexCalc();
 				
@@ -7781,6 +7776,17 @@ elFinder.prototype = {
 			return str;
 		} else {
 			return oct;
+		}
+	},
+	
+	/**
+	 * Regist this.decodeRawString function
+	 * 
+	 * @return void
+	 */
+	registRawStringDecoder : function(rawStringDecoder) {
+		if ($.isFunction(rawStringDecoder)) {
+			this.decodeRawString = this.options.rawStringDecoder = rawStringDecoder;
 		}
 	},
 	

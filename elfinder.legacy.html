@@ -56,7 +56,7 @@
 									[ '//cdn.rawgit.com/polygonplanet/encoding.js/master/encoding.min.js' ],
 									function() {
 										if (window.Encoding && Encoding.convert) {
-											fm.options.rawStringDecoder = function(s) {
+											fm.registRawStringDecoder(function(s) {
 												return Encoding.convert(s, {to:'UNICODE',type:'string'});
 											};
 										}
