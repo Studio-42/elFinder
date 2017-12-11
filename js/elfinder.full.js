@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: e8e2ae5) (2017-12-11)
+ * Version 2.1.30 (2.1-src Nightly: 3bb57e2) (2017-12-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -4707,11 +4707,6 @@ var elFinder = function(node, opts, bootCallback) {
 					},
 					toChkTh = {};
 				
-				// regist decodeRawString function
-				if (self.options.rawStringDecoder && $.isFunction(self.options.rawStringDecoder)) {
-					self.decodeRawString = self.options.rawStringDecoder;
-				}
-				
 				// re-calculate elFinder node z-index
 				self.zIndexCalc();
 				
@@ -7816,6 +7811,17 @@ elFinder.prototype = {
 	},
 	
 	/**
+	 * Regist this.decodeRawString function
+	 * 
+	 * @return void
+	 */
+	registRawStringDecoder : function(rawStringDecoder) {
+		if ($.isFunction(rawStringDecoder)) {
+			this.decodeRawString = this.options.rawStringDecoder = rawStringDecoder;
+		}
+	},
+	
+	/**
 	 * Return boolean that uploadable MIME type into target folder
 	 * 
 	 * @param  String  mime    MIME type
@@ -8768,7 +8774,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: e8e2ae5)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 3bb57e2)';
 
 
 
