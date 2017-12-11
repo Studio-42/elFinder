@@ -50,15 +50,14 @@
 					function(fm, extraObj) {
 						// `init` event callback function
 						fm.bind('init', function() {
-							// Optional for Japanese decoder "extras/encoding-japanese.min"
-							delete fm.options.rawStringDecoder;
+							// Optional for Japanese decoder "encoding-japanese.js"
 							if (fm.lang === 'jp') {
 								fm.loadScript(
-									[ fm.baseUrl + 'js/extras/encoding-japanese.min.js' ],
+									[ '//cdn.rawgit.com/polygonplanet/encoding.js/master/encoding.min.js' ],
 									function() {
 										if (window.Encoding && Encoding.convert) {
 											fm.options.rawStringDecoder = function(s) {
-												return Encoding.convert(s,{to:'UNICODE',type:'string'});
+												return Encoding.convert(s, {to:'UNICODE',type:'string'});
 											};
 										}
 									},
