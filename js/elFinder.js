@@ -3554,7 +3554,7 @@ var elFinder = function(node, opts, bootCallback) {
 	 * @param  String str
 	 * @return String
 	 */
-	this.decodeRawString = $.isFunction(this.options.rawStringDecoder)? this.options.rawStringDecoder : function(str) {
+	this.decodeRawString = function(str) {
 		var charCodes = function(str) {
 			var i, len, arr;
 			for (i=0,len=str.length,arr=[]; i<len; i++) {
@@ -4675,6 +4675,11 @@ var elFinder = function(node, opts, bootCallback) {
 						self.debug('backend-error', 'Trash hash "'+th+'" was not found or not writable.');
 					},
 					toChkTh = {};
+				
+				// regist decodeRawString function
+				if (self.options.rawStringDecoder && $.isFunction(self.options.rawStringDecoder)) {
+					self.decodeRawString = self.options.rawStringDecoder;
+				}
 				
 				// re-calculate elFinder node z-index
 				self.zIndexCalc();
