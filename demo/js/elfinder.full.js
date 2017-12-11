@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 7395ec3) (2017-12-11)
+ * Version 2.1.30 (2.1-src Nightly: e8e2ae5) (2017-12-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -3585,7 +3585,7 @@ var elFinder = function(node, opts, bootCallback) {
 	 * @param  String str
 	 * @return String
 	 */
-	this.decodeRawString = $.isFunction(this.options.rawStringDecoder)? this.options.rawStringDecoder : function(str) {
+	this.decodeRawString = function(str) {
 		var charCodes = function(str) {
 			var i, len, arr;
 			for (i=0,len=str.length,arr=[]; i<len; i++) {
@@ -4706,6 +4706,11 @@ var elFinder = function(node, opts, bootCallback) {
 						self.debug('backend-error', 'Trash hash "'+th+'" was not found or not writable.');
 					},
 					toChkTh = {};
+				
+				// regist decodeRawString function
+				if (self.options.rawStringDecoder && $.isFunction(self.options.rawStringDecoder)) {
+					self.decodeRawString = self.options.rawStringDecoder;
+				}
 				
 				// re-calculate elFinder node z-index
 				self.zIndexCalc();
@@ -8763,7 +8768,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 7395ec3)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: e8e2ae5)';
 
 
 
