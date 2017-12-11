@@ -62,15 +62,14 @@
 							function(fm, extraObj) {
 								// `init` event callback function
 								fm.bind('init', function() {
-									// Optional for Japanese decoder "extras/encoding-japanese.min"
-									delete fm.options.rawStringDecoder;
+									// Optional for Japanese decoder "encoding-japanese"
 									if (fm.lang === 'jp') {
 										require(
-											[ 'extras/encoding-japanese.min' ],
+											[ 'encoding-japanese' ],
 											function(Encoding) {
-												if (Encoding.convert) {
+												if (Encoding && Encoding.convert) {
 													fm.options.rawStringDecoder = function(s) {
-														return Encoding.convert(s,{to:'UNICODE',type:'string'});
+														return Encoding.convert(s, {to:'UNICODE',type:'string'});
 													};
 												}
 											}
@@ -111,7 +110,8 @@
 		paths : {
 			'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(ie8? '1.12.4' : jqver)+'/jquery.min',
 			'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/jquery-ui.min',
-			'elfinder' : 'elfinder.min'
+			'elfinder' : 'elfinder.min',
+			'encoding-japanese': '//cdn.rawgit.com/polygonplanet/encoding.js/master/encoding.min'
 		},
 		waitSeconds : 10 // optional
 	});
