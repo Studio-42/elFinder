@@ -511,7 +511,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							if (cmd.extra && cmd.extra.node) {
 								$('<span class="elfinder-button-icon elfinder-button-icon-'+(cmd.extra.icon || '')+' '+exIcon+'"/>')
 									.append(cmd.extra.node).appendTo(node);
-								$(cmd.extra.node).trigger('ready');
+								$(cmd.extra.node).trigger('ready', {targets: targets});
 							} else {
 								node.remove('.'+exIcon);
 							}
