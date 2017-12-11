@@ -3955,7 +3955,7 @@ var elFinder = function(node, opts, bootCallback) {
 		
 		if (!self.i18[lang]) {
 			self.lang = 'en';
-			if (typeof define === 'function' && define.amd) {
+			if (self.hasRequire) {
 				require([langJs], function() {
 					dfd.resolve();
 				}, function() {
@@ -4807,6 +4807,13 @@ elFinder.prototype = {
 			};
 			return UA;
 	})(),
+	
+	/**
+	 * Has RequireJS?
+	 * 
+	 * @type Boolean
+	 */
+	hasRequire : (typeof define === 'function' && define.amd),
 	
 	/**
 	 * Current request command
@@ -8195,7 +8202,7 @@ elFinder.prototype = {
 			cnt, scripts = {};
 		
 		opts = opts || {};
-		if (opts.tryRequire && typeof define === 'function' && define.amd) {
+		if (opts.tryRequire && this.hasRequire) {
 			require(urls, callback, opts.error);
 		} else {
 			if ($.isFunction(callback)) {

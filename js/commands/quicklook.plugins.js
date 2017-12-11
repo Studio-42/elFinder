@@ -676,14 +676,60 @@ elFinder.prototype.commands.quicklook.plugins = [
 	function(ql) {
 		var mimes   = ['application/zip', 'application/x-gzip', 'application/x-tar'],
 			preview = ql.preview,
-			fm      = ql.fm;
+			fm      = ql.fm,
+			tarFiles = function(tar) {
+				var filenames = [],
+					tarlen = tar.length,
+					offset = 0,
+					toStr = function(arr) {
+						return String.fromCharCode.apply(null, arr).replace(/\0+$/, '');
+					},
+					h, name, prefix, size, dbs, toStr;
+				while (offset < tarlen && tar[offset] !== 0) {
+					h = tar.subarray(offset, offset + 512);
+					name = toStr(h.subarray(0, 100));
+					if (prefix = toStr(h.subarray(345, 500))) {
+						name = prefix + name;
+					}
+					size = parseInt(toStr(h.subarray(124, 136)), 8);
+					dbs = Math.ceil(size / 512) * 512;
+					if (name === '././@LongLink') {
+						name = toStr(tar.subarray(offset + 512, offset + 512 + dbs));
+					}
+					(name !== 'pax_global_header') && filenames.push(name);
+					offset = offset + 512 + dbs;
+				}
+				return filenames;
+			};
 
-		if (typeof Uint8Array !== 'undefined' && elFinder.Zlib) {
+		if (typeof Uint8Array !== 'undefined') {
 			preview.on('update', function(e) {
 				var file = e.file,
-					doc, xhr, loading, url;
+					doc, xhr, loading, url,
+					makeList = function(filenames) {
+						var header, doc;
+						if (filenames && filenames.length) {
+							filenames = $.map(filenames, function(str) {
+								return fm.decodeRawString(str);
+							});
+							filenames.sort();
+							loading.remove();
+							header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>'
+							doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>')
+								.on('touchstart', function(e) {
+									if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
+										e.originalEvent._preventSwipeX = true;
+									}
+								})
+								.appendTo(preview);
+							ql.hideinfo();
+						}
+					};
 
-				if ($.inArray(file.mime, mimes) !== -1) {
+				if ($.inArray(file.mime, mimes) !== -1 && (
+						file.mime === 'application/x-tar'
+						|| (elFinder.Zlib && (file.mime === 'application/zip' || file.mime === 'application/x-gzip'))
+					)) {
 					// this is our file - stop event propagation
 					e.stopImmediatePropagation();
 					
@@ -697,61 +743,23 @@ elFinder.prototype.commands.quicklook.plugins = [
 					
 					xhr = new XMLHttpRequest();
 					xhr.onload = function(e) {
-						var filenames = [], header, unzip, tar, tarlen, offset, h, name, prefix, size, dbs, toStr;
+						var unzip, filenames;
 						if (this.readyState === 4 && this.response) {
-							setTimeout(function() {
-								try {
-									if (file.mime === 'application/zip') {
-										unzip = new elFinder.Zlib.Unzip(new Uint8Array(xhr.response));
-										filenames = unzip.getFilenames();
-									} else {
-										if (file.mime === 'application/x-gzip') {
-											unzip = new elFinder.Zlib.Gunzip(new Uint8Array(xhr.response));
-											tar = unzip.decompress();
-										} else {
-											tar = new Uint8Array(xhr.response);
-										}
-										tarlen = tar.length;
-										offset = 0;
-										toStr = function(arr) {
-											return String.fromCharCode.apply(null, arr).replace(/\0+$/, '');
-										};
-										while (offset < tarlen && tar[offset] !== 0) {
-											h = tar.subarray(offset, offset + 512);
-											name = toStr(h.subarray(0, 100));
-											if (prefix = toStr(h.subarray(345, 500))) {
-												name = prefix + name;
-											}
-											size = parseInt(toStr(h.subarray(124, 136)), 8);
-											dbs = Math.ceil(size / 512) * 512;
-											if (name === '././@LongLink') {
-												name = toStr(tar.subarray(offset + 512, offset + 512 + dbs));
-											}
-											(name !== 'pax_global_header') && filenames.push(name);
-											offset = offset + 512 + dbs;
-										}
-									}
-								} catch (e) {
-									loading.remove();
-									fm.debug('error', e);
+							try {
+								if (file.mime === 'application/zip') {
+									unzip = new elFinder.Zlib.Unzip(new Uint8Array(xhr.response));
+									filenames = unzip.getFilenames();
+								} else if (file.mime === 'application/x-gzip') {
+									unzip = new elFinder.Zlib.Gunzip(new Uint8Array(xhr.response));
+									filenames = tarFiles(unzip.decompress());
+								} else if (file.mime === 'application/x-tar') {
+									filenames = tarFiles(new Uint8Array(xhr.response));
 								}
-								if (filenames && filenames.length) {
-									filenames = $.map(filenames, function(str) {
-										return fm.decodeRawString(str);
-									});
-									filenames.sort();
-									loading.remove();
-									header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>'
-									doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>')
-										.on('touchstart', function(e) {
-											if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
-												e.originalEvent._preventSwipeX = true;
-											}
-										})
-										.appendTo(preview);
-									ql.hideinfo();
-								}
-							}, 70);
+								makeList(filenames);
+							} catch (e) {
+								loading.remove();
+								fm.debug('error', e);
+							}
 						} else {
 							loading.remove();
 						}
@@ -765,6 +773,111 @@ elFinder.prototype.commands.quicklook.plugins = [
 					fm.replaceXhrSend();
 					xhr.send();
 					fm.restoreXhrSend();
+				}
+			});
+		}
+	},
+
+	/**
+	 * RAR Archive preview plugin using https://github.com/43081j/rar.js
+	 *
+	 * @param elFinder.commands.quicklook
+	 **/
+	function(ql) {
+		var mimes   = ['application/x-rar'],
+			preview = ql.preview,
+			fm      = ql.fm,
+			RAR;
+
+		if (window.DataView) {
+			preview.on('update', function(e) {
+				var file = e.file,
+					loading, url, abort,
+					getList = function(url) {
+						if (abort) {
+							loading.remove();
+							return;
+						}
+						fm.replaceXhrSend();
+						try {
+							var archive = RAR(url, function(err) {
+								fm.restoreXhrSend();
+								loading.remove();
+								var filenames = [],
+									header, doc;
+								if (abort || err) {
+									// An error occurred (not a rar, read error, etc)
+									err && fm.debug('error', err);
+									return;
+								}
+								$.each(archive.entries, function() {
+									filenames.push(this.path);
+								});
+								if (filenames.length) {
+									filenames.sort();
+									header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>'
+									doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>')
+										.on('touchstart', function(e) {
+											if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
+												e.originalEvent._preventSwipeX = true;
+											}
+										})
+										.appendTo(preview);
+									ql.hideinfo();
+								}
+							});
+						} catch(e) {
+							fm.restoreXhrSend();
+							loading.remove();
+						}
+					},
+					error = function() {
+						RAR = false;
+						loading.remove();
+					};
+
+				if (RAR !== false && $.inArray(file.mime, mimes) !== -1) {
+					// this is our file - stop event propagation
+					e.stopImmediatePropagation();
+					
+					loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					
+					// stop loading on change file if not loaded yet
+					preview.one('change', function() {
+						loading.remove();
+						abort = true;
+					});
+					
+					url = fm.openUrl(file.hash);
+					if (!fm.isSameOrigin(url)) {
+						url = fm.openUrl(file.hash, true);
+					}
+					if (RAR) {
+						getList(url);
+					} else {
+						fm.loadScript(
+							[ fm.options.cdns.rar ],
+							function() {
+								if (fm.hasRequire) {
+									require(['rar'], function(RarArchive) {
+										RAR = RarArchive;
+										getList(url);
+									}, error);
+								} else {
+									if (RAR = window.RarArchive) {
+										getList(url);
+									} else {
+										error();
+									}
+								}
+							},
+							{
+								tryRequire: true,
+								error : error
+							}
+						);
+					}
+					
 				}
 			});
 		}

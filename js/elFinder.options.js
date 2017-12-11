@@ -21,7 +21,8 @@ elFinder.prototype._options = {
 		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.8.8/hls.min.js',
 		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.4/dash.all.min.js',
 		prettify   : '//cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js',
-		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js'
+		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js',
+		rar        : '//cdn.rawgit.com/nao-pon/rar.js/ext/rar.min.js'
 	},
 	
 	/**
