@@ -210,7 +210,7 @@ elFinder.prototype.commands.rename = function() {
 	this.getstate = function(sel) {
 		var sel = this.files(sel),
 			cnt = sel.length,
-			phash, ext, brk, state;
+			phash, ext, mime, brk, state;
 		
 		if (!cnt) {
 			return -1;
@@ -218,11 +218,12 @@ elFinder.prototype.commands.rename = function() {
 		
 		if (sel.length > 1 && sel[0].phash) {
 			phash = sel[0].phash;
-			ext = fm.splitFileExtention(sel[0].name)[1];
+			ext = fm.splitFileExtention(sel[0].name)[1].toLowerCase();
+			mime = sel[0].mime;
 		}
 
 		state = ((cnt === 1 && !sel[0].locked && !fm.isRoot(sel[0])) || (fm.api > 2.1030 && cnt === $.map(sel, function(f) {
-			if (!brk && !f.locked && f.phash === phash && !fm.isRoot(f) && ext === fm.splitFileExtention(f.name)[1]) {
+			if (!brk && !f.locked && f.phash === phash && !fm.isRoot(f) && (mime === f.mime || ext === fm.splitFileExtention(f.name)[1]).toLowerCase()) {
 				return f;
 			} else {
 				brk = true;
