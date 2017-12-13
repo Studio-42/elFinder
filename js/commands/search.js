@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "search"
  * Find files
@@ -6,8 +5,9 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.search = function() {
+	"use strict";
 	this.title          = 'Find files';
-	this.options        = {ui : 'searchbutton'}
+	this.options        = {ui : 'searchbutton'};
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
 	
@@ -19,7 +19,7 @@ elFinder.prototype.commands.search = function() {
 	 **/
 	this.getstate = function() {
 		return 0;
-	}
+	};
 	
 	/**
 	 * Send search request to backend.
@@ -45,8 +45,8 @@ elFinder.prototype.commands.search = function() {
 					mime = $.map(mime, function(m){ 
 						m = $.trim(m);
 						return m && ($.inArray(m, onlyMimes) !== -1
-									|| $.map(onlyMimes, function(om) { return m.indexOf(om) === 0? true : null }).length
-									)? m : null 
+									|| $.map(onlyMimes, function(om) { return m.indexOf(om) === 0? true : null; }).length
+									)? m : null;
 					});
 				}
 			} else {
@@ -134,6 +134,6 @@ elFinder.prototype.commands.search = function() {
 		}
 		fm.getUI('toolbar').find('.'+fm.res('class', 'searchbtn')+' :text').focus();
 		return $.Deferred().reject();
-	}
+	};
 
 };

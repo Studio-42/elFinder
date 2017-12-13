@@ -1,5 +1,3 @@
-"use strict";
-
 elFinder.prototype.commands.quicklook.plugins = [
 	
 	/**
@@ -8,6 +6,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
+		"use strict";
 		var mimes   = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp'],
 			preview = ql.preview,
 			WebP;
@@ -120,7 +119,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							setdim(dim);
 							show();
 						}
-					})
+					});
 				}
 			}
 			
@@ -133,6 +132,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
+		"use strict";
 		var fm      = ql.fm,
 			mimes   = ['image/vnd.adobe.photoshop', 'image/x-photoshop'],
 			preview = ql.preview,
@@ -221,6 +221,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
+		"use strict";
 		var mimes   = ['text/html', 'application/xhtml+xml'],
 			preview = ql.preview,
 			fm      = ql.fm;
@@ -254,7 +255,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					loading.remove();
 				});
 			}
-		})
+		});
 	},
 	
 	/**
@@ -263,6 +264,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
+		"use strict";
 		var fm      = ql.fm,
 			mimes   = fm.res('mimes', 'text'),
 			preview = ql.preview,
@@ -366,6 +368,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
+		"use strict";
 		var fm      = ql.fm,
 			mime    = 'application/pdf',
 			preview = ql.preview,
@@ -393,7 +396,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					.appendTo(preview);
 			}
 			
-		})
+		});
 		
 			
 	},
@@ -404,6 +407,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
+		"use strict";
 		var fm      = ql.fm,
 			mime    = 'application/x-shockwave-flash',
 			preview = ql.preview,
@@ -436,6 +440,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
+		"use strict";
 		var preview  = ql.preview,
 			mimes    = {
 				'audio/mpeg'    : 'mp3',
@@ -500,6 +505,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
+		"use strict";
 		var fm       = ql.fm,
 			preview  = ql.preview,
 			mimes    = {
@@ -629,6 +635,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
+		"use strict";
 		var preview = ql.preview,
 			mimes   = [],
 			node,
@@ -674,6 +681,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
+		"use strict";
 		var mimes   = ['application/zip', 'application/x-gzip', 'application/x-tar'],
 			preview = ql.preview,
 			fm      = ql.fm,
@@ -684,7 +692,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					toStr = function(arr) {
 						return String.fromCharCode.apply(null, arr).replace(/\0+$/, '');
 					},
-					h, name, prefix, size, dbs, toStr;
+					h, name, prefix, size, dbs;
 				while (offset < tarlen && tar[offset] !== 0) {
 					h = tar.subarray(offset, offset + 512);
 					name = toStr(h.subarray(0, 100));
@@ -714,7 +722,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							});
 							filenames.sort();
 							loading.remove();
-							header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>'
+							header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>';
 							doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>')
 								.on('touchstart', function(e) {
 									if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
@@ -763,7 +771,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						} else {
 							loading.remove();
 						}
-					}
+					};
 					url = fm.openUrl(file.hash);
 					if (!fm.isSameOrigin(url)) {
 						url = fm.openUrl(file.hash, true);
@@ -784,6 +792,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
+		"use strict";
 		var mimes   = ['application/x-rar'],
 			preview = ql.preview,
 			fm      = ql.fm,
@@ -815,7 +824,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 								});
 								if (filenames.length) {
 									filenames.sort();
-									header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>'
+									header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>';
 									doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>')
 										.on('touchstart', function(e) {
 											if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
@@ -889,6 +898,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
+		"use strict";
 		var fm      = ql.fm,
 			mimes   = ql.options.googleDocsMimes || [],
 			preview = ql.preview,

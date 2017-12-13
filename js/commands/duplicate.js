@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class elFinder command "duplicate"
  * Create file/folder copy with suffix "copy Number"
@@ -7,14 +6,15 @@
  * @author  Dmitry (dio) Levashov
  */
 elFinder.prototype.commands.duplicate = function() {
+	"use strict";
 	var fm = this.fm;
 	
-	this.getstate = function(sel) {
-		var sel = this.files(sel),
+	this.getstate = function(select) {
+		var sel = this.files(select),
 			cnt = sel.length;
 
-		return cnt && fm.cwd().write && $.map(sel, function(f) { return f.read && f.phash === fm.cwd().hash && ! fm.isRoot(f)? f : null  }).length == cnt ? 0 : -1;
-	}
+		return cnt && fm.cwd().write && $.map(sel, function(f) { return f.read && f.phash === fm.cwd().hash && ! fm.isRoot(f)? f : null; }).length == cnt ? 0 : -1;
+	};
 	
 	this.exec = function(hashes) {
 		var fm     = this.fm,
@@ -50,6 +50,6 @@ elFinder.prototype.commands.duplicate = function() {
 			}
 		});
 		
-	}
+	};
 
 };

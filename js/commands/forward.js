@@ -5,6 +5,7 @@
  * @author Dmitry (dio) Levashov
  **/
 (elFinder.prototype.commands.forward = function() {
+	"use strict";
 	this.alwaysEnabled = true;
 	this.updateOnSelect = true;
 	this.shortcuts = [{
@@ -13,10 +14,10 @@
 	
 	this.getstate = function() {
 		return this.fm.history.canForward() ? 0 : -1;
-	}
+	};
 	
 	this.exec = function() {
 		return this.fm.history.forward();
-	}
+	};
 	
 }).prototype = { forceLoad : true }; // this is required command

@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "paste"
  * Paste filesfrom clipboard into directory.
@@ -7,12 +6,12 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.paste = function() {
-	
+	"use strict";
 	this.updateOnSelect  = false;
 	
 	this.handlers = {
 		changeclipboard : function() { this.update(); }
-	}
+	};
 
 	this.shortcuts = [{
 		pattern     : 'ctrl+v shift+insert'
@@ -34,13 +33,13 @@ elFinder.prototype.commands.paste = function() {
 		}
 
 		return this.fm.clipboard().length && dst.mime == 'directory' && dst.write ? 0 : -1;
-	}
+	};
 	
-	this.exec = function(dst, opts) {
+	this.exec = function(select, cOpts) {
 		var self   = this,
 			fm     = self.fm,
-			opts   = opts || {},
-			dst    = dst ? this.files(dst)[0] : fm.cwd(),
+			opts   = cOpts || {},
+			dst    = select ? this.files(dst)[0] : fm.cwd(),
 			files  = fm.clipboard(),
 			cnt    = files.length,
 			cut    = cnt ? files[0].cut : false,
@@ -53,7 +52,7 @@ elFinder.prototype.commands.paste = function() {
 					error && fm.error(error);
 				})
 				.always(function() {
-					fm.unlockfiles({files : $.map(files, function(f) { return f.hash})});
+					fm.unlockfiles({files : $.map(files, function(f) { return f.hash; })});
 				}),
 			copy  = function(files) {
 				return files.length && fm._commands.duplicate
@@ -102,7 +101,7 @@ elFinder.prototype.commands.paste = function() {
 									if (all) {
 										i = existed.length;
 										while (ndx < i--) {
-											files[existed[i]].remove = true
+											files[existed[i]].remove = true;
 										}
 									} else {
 										files[existed[ndx]].remove = true;
@@ -127,7 +126,7 @@ elFinder.prototype.commands.paste = function() {
 										if (all) {
 											i = existed.length;
 											while (ndx < i--) {
-												files[existed[i]].rename = true
+												files[existed[i]].rename = true;
 											}
 										} else {
 											files[existed[ndx]].rename = true;
@@ -138,7 +137,7 @@ elFinder.prototype.commands.paste = function() {
 									}
 								}
 							]
-						})
+						});
 					},
 					valid     = function(names) {
 						var exists = {}, existedArr;
@@ -180,9 +179,9 @@ elFinder.prototype.commands.paste = function() {
 						}
 						existed.length ? confirm(0) : paste(files);
 					},
-					paste     = function(files) {
+					paste     = function(selFiles) {
 						var renames = [],
-							files  = $.map(files, function(file) { 
+							files  = $.map(selFiles, function(file) { 
 								if (file.rename) {
 									renames.push(file.name);
 								}
@@ -200,7 +199,7 @@ elFinder.prototype.commands.paste = function() {
 						//src = files[0].phash;
 						targets = $.map(files, function(f) { return f.hash; });
 						
-						reqData = {cmd : 'paste', dst : dst.hash, targets : targets, cut : cut ? 1 : 0, renames : renames, hashes : hashes, suffix : fm.options.backupSuffix}
+						reqData = {cmd : 'paste', dst : dst.hash, targets : targets, cut : cut ? 1 : 0, renames : renames, hashes : hashes, suffix : fm.options.backupSuffix};
 						fm.request({
 								data   : reqData,
 								notify : {type : cmd, cnt : cnt},
@@ -289,9 +288,9 @@ elFinder.prototype.commands.paste = function() {
 					if (!fm.option('copyOverwrite', dst.hash)) {
 						paste(files);
 					} else {
-						internames = $.map(files, function(f) { return f.name});
+						internames = $.map(files, function(f) { return f.name; });
 						dst.hash == fm.cwd().hash
-							? valid($.map(fm.files(), function(file) { return file.phash == dst.hash ? {hash: file.hash, name: file.name} : null }))
+							? valid($.map(fm.files(), function(file) { return file.phash == dst.hash ? {hash: file.hash, name: file.name} : null; }))
 							: fm.request({
 								data : {cmd : 'ls', target : dst.hash, intersect : internames},
 								notify : {type : 'prepare', cnt : 1, hideCnt : true},
@@ -339,7 +338,7 @@ elFinder.prototype.commands.paste = function() {
 			fparents.pop();
 			if ($.inArray(dst.hash, fparents) !== -1) {
 				
-				if ($.map(fparents, function(h) { var d = fm.file(h); return d.phash == dst.hash && d.name == file.name ? d : null }).length) {
+				if ($.map(fparents, function(h) { var d = fm.file(h); return d.phash == dst.hash && d.name == file.name ? d : null; }).length) {
 					return !dfrd.reject(['errReplByChild', file.name]);
 				}
 			}
@@ -374,6 +373,6 @@ elFinder.prototype.commands.paste = function() {
 		});
 		
 		return dfrd;
-	}
+	};
 
 };

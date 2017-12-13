@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "archive"
  * Archive selected files
@@ -6,6 +5,7 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.archive = function() {
+	"use strict";
 	var self  = this,
 		fm    = self.fm,
 		mimes = [],
@@ -30,10 +30,10 @@ elFinder.prototype.commands.archive = function() {
 		self.change();
 	});
 	
-	this.getstate = function(sel) {
-		var sel = this.files(sel),
+	this.getstate = function(select) {
+		var sel = this.files(select),
 			cnt = sel.length,
-			chk = (cnt && ! fm.isRoot(sel[0]) && (fm.file(sel[0].phash) || {}).write && ! $.map(sel, function(f){ return f.read ? null : true }).length),
+			chk = (cnt && ! fm.isRoot(sel[0]) && (fm.file(sel[0].phash) || {}).write && ! $.map(sel, function(f){ return f.read ? null : true; }).length),
 			cwdId;
 		
 		if (chk && fm.searchStatus.state > 1) {
@@ -42,7 +42,7 @@ elFinder.prototype.commands.archive = function() {
 		}
 		
 		return chk && !this._disabled && mimes.length && (cnt || (dfrd && dfrd.state() == 'pending')) ? 0 : -1;
-	}
+	};
 	
 	this.exec = function(hashes, type) {
 		var files = this.files(hashes),
@@ -87,6 +87,6 @@ elFinder.prototype.commands.archive = function() {
 		}
 		
 		return dfrd;
-	}
+	};
 
 };

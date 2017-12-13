@@ -1,10 +1,10 @@
-"use strict";
 /**
  * @class  elFinder toolbar button to switch current directory view.
  *
  * @author Dmitry (dio) Levashov
  **/
 $.fn.elfinderviewbutton = function(cmd) {
+	"use strict";
 	return this.each(function() {
 		var button = $(this).elfinderbutton(cmd),
 			icon   = button.children('.elfinder-button-icon');

@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class elFinder command "empty".
  * Empty the folder
@@ -7,10 +6,11 @@
  * @author  Naoki Sawada
  */
 elFinder.prototype.commands.empty = function() {
+	"use strict";
 	var fm = this.fm,
 		self = this,
-		selFiles = function(sel) {
-			var sel = self.files(sel);
+		selFiles = function(select) {
+			var sel = self.files(select);
 			if (!sel.length) {
 				sel = [ fm.cwd() ];
 			}
@@ -19,13 +19,13 @@ elFinder.prototype.commands.empty = function() {
 	
 	this.linkedCmds = ['rm'];
 	
-	this.getstate = function(sel) {
-		var sel = selFiles(sel),
+	this.getstate = function(select) {
+		var sel = selFiles(select),
 			cnt;
 		
 		cnt = sel.length;
-		return $.map(sel, function(f) { return f.write && f.mime === 'directory' ? f : null  }).length == cnt ? 0 : -1;
-	}
+		return $.map(sel, function(f) { return f.write && f.mime === 'directory' ? f : null; }).length == cnt ? 0 : -1;
+	};
 	
 	this.exec = function(hashes) {
 		var dirs = selFiles(hashes),
@@ -109,6 +109,6 @@ elFinder.prototype.commands.empty = function() {
 		});
 		
 		return dfrd;
-	}
+	};
 
 };

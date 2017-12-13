@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "places"
  * Regist to Places
@@ -6,6 +5,7 @@
  * @author Naoki Sawada
  **/
 elFinder.prototype.commands.places = function() {
+	"use strict";
 	var self   = this,
 	fm     = this.fm,
 	filter = function(hashes) {
@@ -13,8 +13,8 @@ elFinder.prototype.commands.places = function() {
 	},
 	places = null;
 	
-	this.getstate = function(sel) {
-		var sel = this.hashes(sel),
+	this.getstate = function(select) {
+		var sel = this.hashes(select),
 		cnt = sel.length;
 		
 		return  places && cnt && cnt == filter(sel).length ? 0 : -1;

@@ -1,10 +1,10 @@
-"use strict";
 /**
  * @class  elFinder toolbar's button tor upload file
  *
  * @author Dmitry (dio) Levashov
  **/
 $.fn.elfinderuploadbutton = function(cmd) {
+	"use strict";
 	return this.each(function() {
 		var button = $(this).elfinderbutton(cmd)
 				.off('click'), 

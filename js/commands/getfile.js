@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class elFinder command "getfile". 
  * Return selected files info into outer callback.
@@ -7,6 +6,7 @@
  * @author Dmitry (dio) Levashov, dio@std42.ru
  **/
 (elFinder.prototype.commands.getfile = function() {
+	"use strict";
 	var self   = this,
 		fm     = this.fm,
 		filter = function(files) {
@@ -23,12 +23,12 @@
 	this.callback      = fm.options.getFileCallback;
 	this._disabled     = typeof(this.callback) == 'function';
 	
-	this.getstate = function(sel) {
-		var sel = this.files(sel),
+	this.getstate = function(select) {
+		var sel = this.files(select),
 			cnt = sel.length;
 			
 		return this.callback && cnt && filter(sel).length == cnt ? 0 : -1;
-	}
+	};
 	
 	this.exec = function(hashes) {
 		var fm    = this.fm,
@@ -146,11 +146,11 @@
 		if (req.length) {
 			$.when.apply(null, req).always(function() {
 				dfrd.resolve(result(files));
-			})
+			});
 			return dfrd;
 		}
 		
 		return dfrd.resolve(result(files));
-	}
+	};
 
 }).prototype = { forceLoad : true }; // this is required command

@@ -1,10 +1,10 @@
-"use strict";
 /**
  * @class  elFinder folders tree
  *
  * @author Dmitry (dio) Levashov
  **/
 $.fn.elfindertree = function(fm, opts) {
+	"use strict";
 	var treeclass = fm.res('class', 'tree');
 	
 	this.not('.'+treeclass).each(function() {
@@ -387,7 +387,7 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			replace = {
 				id          : function(dir) { return fm.navHash2Id(dir.hash); },
-				name        : function(dir) { return fm.escape(dir.i18 || dir.name) },
+				name        : function(dir) { return fm.escape(dir.i18 || dir.name); },
 				cssclass    : function(dir) {
 					var cname = (dir.phash && ! dir.isroot ? '' : root)+' '+navdir+' '+fm.perms2class(dir);
 					dir.dirs && !dir.link && (cname += ' ' + collapsed) && dir.dirs == -1 && (cname += ' ' + chksubdir);
@@ -442,7 +442,7 @@ $.fn.elfindertree = function(fm, opts) {
 			 * @return Array
 			 */
 			filter = function(files) {
-				return $.map(files||[], function(f) { return f.mime == 'directory' ? f : null });
+				return $.map(files||[], function(f) { return f.mime == 'directory' ? f : null; });
 			},
 			
 			/**
@@ -634,8 +634,8 @@ $.fn.elfindertree = function(fm, opts) {
 								! mobile && fm.lazy(function() { updateDroppable(null, parent); });
 							},
 							detach = function() {
-								$.each(parent.children('.elfinder-navbar-wrapper'), function(i, n) {
-									var n = $(n),
+								$.each(parent.children('.elfinder-navbar-wrapper'), function(i, elm) {
+									var n = $(elm),
 										ch = n.children('[id]:first'),
 										h, c;
 									if (ch.hasClass(loaded)) {
@@ -779,8 +779,8 @@ $.fn.elfindertree = function(fm, opts) {
 			 * @param Object elFinder item(directory) object
 			 * @return Array hashes
 			 */
-			getEnds = function(dir) {
-				var cur = dir || fm.cwd(),
+			getEnds = function(d) {
+				var cur = d || fm.cwd(),
 					res = [ cur.hash ],
 					phash, root, dir;
 				
@@ -804,8 +804,8 @@ $.fn.elfindertree = function(fm, opts) {
 			 * @param Object elFinder item(directory) object
 			 * @return Object jQuery node object of target node
 			 */
-			selectPages = function(cur) {
-				var cur = cur || fm.cwd(),
+			selectPages = function(current) {
+				var cur = current || fm.cwd(),
 					curHash = cur.hash,
 					node = $('#'+fm.navHash2Id(curHash));
 			
@@ -830,10 +830,10 @@ $.fn.elfindertree = function(fm, opts) {
 			 * @param Boolean do auto scroll
 			 * @return Object jQuery Deferred
 			 */
-			sync = function(cwdDirs, autoScr) {
+			sync = function(cwdDirs, aScr) {
 				var cwd     = fm.cwd(),
 					cwdhash = cwd.hash,
-					autoScr = autoScr === void(0)? syncTree : autoScr,
+					autoScr = aScr === void(0)? syncTree : autoScr,
 					loadParents = function(dir) {
 						var dfd  = $.Deferred(),
 							reqs = [],
@@ -857,9 +857,9 @@ $.fn.elfindertree = function(fm, opts) {
 							var d = fm.file(h),
 								isRoot = d? fm.isRoot(d) : false,
 								node = $('#'+fm.navHash2Id(h)),
-								getPhash = function(h, depth) {
+								getPhash = function(h, dep) {
 									var d, ph,
-										depth = depth || 1;
+										depth = dep || 1;
 									ph = (d = fm.file(h))? d.phash : false;
 									if (ph && depth > 1) {
 										return getPhash(ph, --depth);
@@ -1058,9 +1058,9 @@ $.fn.elfindertree = function(fm, opts) {
 					$('#'+fm.navHash2Id(dir.phash)+sel)
 						.filter(function() { return $.map($(this).next('.'+subtree).children(), function(n) {
 							return ($(n).children().hasClass(root))? null : n;
-						}).length > 0 })
+						}).length > 0; })
 						.addClass(cls);
-				})
+				});
 			},
 			
 			

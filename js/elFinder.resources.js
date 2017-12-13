@@ -1,4 +1,3 @@
-"use strict";
 /**
  * elFinder resources registry.
  * Store shared data
@@ -62,6 +61,7 @@ elFinder.prototype.resources = {
 	
 	mixin : {
 		make : function() {
+			"use strict";
 			var self = this,
 				fm   = this.fm,
 				cmd  = this.name,
@@ -94,7 +94,7 @@ elFinder.prototype.resources = {
 						if (sel) {
 							move && fm.trigger('unlockfiles', {files: sel});
 							fm.clipboard([]);
-							fm.trigger('selectfiles', { files: sel })
+							fm.trigger('selectfiles', { files: sel });
 						}
 						error && fm.error(error);
 					})
@@ -348,6 +348,7 @@ elFinder.prototype.resources = {
 		}
 	},
 	blink: function(elm, mode) {
+		"use strict";
 		var acts = {
 			slowonce : function(){elm.hide().delay(250).fadeIn(750).delay(500).fadeOut(3500);},
 			lookme   : function(){elm.show().fadeOut(500).fadeIn(750);}

@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "sort"
  * Change sort files rule
@@ -6,6 +5,7 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.sort = function() {
+	"use strict";
 	var self  = this,
 		fm    = self.fm,
 		setVar = function() {
@@ -53,7 +53,7 @@ elFinder.prototype.commands.sort = function() {
 	
 	fm.bind('open sortchange', setVar)
 	.bind('open', function() {
-		fm.unbind('add', setVar).one('add', setVar)
+		fm.unbind('add', setVar).one('add', setVar);
 		fm.getUI('toolbar').find('.elfiner-button-sort .elfinder-button-menu .elfinder-button-menu-item').each(function() {
 			var tgt = $(this),
 				rel = tgt.attr('rel');

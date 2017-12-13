@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class elFinder ui
  * Display number of files/selected files and its size in statusbar
@@ -6,6 +5,7 @@
  * @author Dmitry (dio) Levashov
  **/
 $.fn.elfinderstat = function(fm) {
+	"use strict";
 	return this.each(function() {
 		var size       = $(this).addClass('elfinder-stat-size'),
 			sel        = $('<div class="elfinder-stat-selected"/>')

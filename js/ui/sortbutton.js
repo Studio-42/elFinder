@@ -1,11 +1,10 @@
-"use strict";
 /**
  * @class  elFinder toolbar button menu with sort variants.
  *
  * @author Dmitry (dio) Levashov
  **/
 $.fn.elfindersortbutton = function(cmd) {
-	
+	"use strict";
 	return this.each(function() {
 		var fm       = cmd.fm,
 			name     = cmd.name,
@@ -31,7 +30,7 @@ $.fn.elfindersortbutton = function(cmd) {
 			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
 				.hide()
 				.appendTo(button)
-				.on('mouseenter mouseleave', '.'+item, function() { $(this).toggleClass(hover) })
+				.on('mouseenter mouseleave', '.'+item, function() { $(this).toggleClass(hover); })
 				.on('click', '.'+item, function(e) {
 					e.preventDefault();
 					e.stopPropagation();
@@ -80,7 +79,7 @@ $.fn.elfindersortbutton = function(cmd) {
 		
 		fm.bind('disable select', hide).getUI().click(hide);
 			
-		fm.bind('sortchange', update)
+		fm.bind('sortchange', update);
 		
 		if (menu.children().length > 1) {
 			cmd.change(function() {

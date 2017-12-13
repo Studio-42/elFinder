@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "help"
  * "About" dialog
@@ -6,6 +5,7 @@
  * @author Dmitry (dio) Levashov
  **/
 (elFinder.prototype.commands.help = function() {
+	"use strict";
 	var fm   = this.fm,
 		self = this,
 		linktpl = '<div class="elfinder-help-link"> <a href="{url}">{link}</a></div>',
@@ -264,7 +264,7 @@
 					var node = $('<div/>');
 					init(function() {
 						var pnls = $.map(fm.options.uiOptions.toolbar, function(v) {
-								return $.isArray(v)? v : null
+								return $.isArray(v)? v : null;
 							}),
 							tags = [],
 							hides = fm.storage('toolbarhides') || {};
@@ -532,4 +532,3 @@ elFinder.prototype.commands.preference = function() {
 		return this.fm.exec('help', void(0), {tab: 'preference'});
 	};
 };
-

@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class dialogelfinder - open elFinder in dialog window
  *
@@ -14,8 +13,10 @@
  * @author Dmitry (dio) Levashov
  **/
 $.fn.dialogelfinder = function(opts) {
+	"use strict";
 	var position = 'elfinderPosition',
-		destroy  = 'elfinderDestroyOnClose';
+		destroy  = 'elfinderDestroyOnClose',
+		node;
 	
 	this.not('.elfinder').each(function() {
 
@@ -57,7 +58,7 @@ $.fn.dialogelfinder = function(opts) {
 	});
 	
 	if (opts == 'open') {
-		var node = $(this),
+		node = $(this),
 			pos  = node.data(position) || {
 				top  : parseInt($(document).scrollTop() + ($(window).height() < node.height() ? 2 : ($(window).height() - node.height())/2)),
 				left : parseInt($(document).scrollLeft() + ($(window).width() < node.width()  ? 2 : ($(window).width()  - node.width())/2))
@@ -72,7 +73,7 @@ $.fn.dialogelfinder = function(opts) {
 			}, 200);
 		}
 	} else if (opts == 'close') {
-		var node = $(this).removeClass('ui-front');
+		node = $(this).removeClass('ui-front');
 			
 		if (node.is(':visible')) {
 			!!node.data(destroy)
