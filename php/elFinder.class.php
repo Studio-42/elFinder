@@ -2306,24 +2306,35 @@ class elFinder {
 	 * @return array
 	 * @author Naoki Sawada
 	 */
-	protected function parse_data_scheme( $str, $extTable, $args = null) {
+	protected function parse_data_scheme($str, $extTable, $args = null) {
 		$data = $name = '';
+		// Scheme 'data://' require `allow_url_fopen` and `allow_url_include`
 		if ($fp = fopen('data://'.substr($str, 5), 'rb')) {
 			if ($data = stream_get_contents($fp)) {
 				$meta = stream_get_meta_data($fp);
-				$ext = isset($extTable[$meta['mediatype']])? '.' . $extTable[$meta['mediatype']] : '';
-				// Set name if name eq 'image.png' and $args has 'name' array, e.g. clipboard data
-				if (is_array($args['name']) && isset($args['name'][0])) {
-					$name = $args['name'][0];
-					if ($ext) {
-						$name = preg_replace('/\.[^.]*$/', '', $name);
-					}
-				} else {
-					$name = substr(md5($data), 0, 8);
-				}
-				$name .= $ext;
+				$mime = $meta['mediatype'];
 			}
 			fclose($fp);
+		} else if (preg_match('~^data:(.+?/.+?)?(?:;charset=.+?)?;base64,~', substr($str, 0, 128), $m)) {
+			$data = base64_decode(substr($str, strlen($m[0])));
+			if ($m[1]) {
+				$mime = $m[1];
+			}
+		}
+		if ($data) {
+			$ext = ($mime && isset($extTable[$mime]))? '.' . $extTable[$mime] : '';
+			// Set name if name eq 'image.png' and $args has 'name' array, e.g. clipboard data
+			if (is_array($args['name']) && isset($args['name'][0])) {
+				$name = $args['name'][0];
+				if ($ext) {
+					$name = preg_replace('/\.[^.]*$/', '', $name);
+				}
+			} else {
+				$name = substr(md5($data), 0, 8);
+			}
+			$name .= $ext;
+		} else {
+			$data = $name = '';
 		}
 		return array($data, $name);
 	}
