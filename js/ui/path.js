@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class elFinder ui
  * Display current folder path in statusbar.
@@ -7,6 +6,7 @@
  * @author Dmitry (dio) Levashov
  **/
 $.fn.elfinderpath = function(fm, options) {
+	"use strict";
 	return this.each(function() {
 		var query  = '',
 			target = '',
@@ -33,7 +33,7 @@ $.fn.elfinderpath = function(fm, options) {
 				e.stopPropagation();
 				e.preventDefault();
 				
-				var roots = $.map(fm.roots, function(h) { return fm.file(h)}),
+				var roots = $.map(fm.roots, function(h) { return fm.file(h); }),
 				raw = [];
 
 				$.each(roots, function(i, f) {
@@ -145,7 +145,7 @@ $.fn.elfinderpath = function(fm, options) {
 			if (e.data) {
 				query  = e.data.query || '';
 				target = e.data.target || '';
-				mimes  = e.data.mimes || []
+				mimes  = e.data.mimes || [];
 			}
 		})
 		.bind('search', function(e) {

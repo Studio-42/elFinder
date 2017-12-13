@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "mkfile"
  * Create new empty file
@@ -6,6 +5,7 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.mkfile = function() {
+	"use strict";
 	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	this.mime            = 'text/plain';
@@ -14,6 +14,5 @@ elFinder.prototype.commands.mkfile = function() {
 	
 	this.getstate = function() {
 		return this.fm.cwd().write ? 0 : -1;
-	}
-
+	};
 };

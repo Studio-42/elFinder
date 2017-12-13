@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "view"
  * Change current directory view (icons/list)
@@ -6,6 +5,7 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.view = function() {
+	"use strict";
 	var fm = this.fm;
 	this.value          = fm.viewType;
 	this.alwaysEnabled  = true;
@@ -15,7 +15,7 @@ elFinder.prototype.commands.view = function() {
 	
 	this.getstate = function() {
 		return 0;
-	}
+	};
 	
 	this.exec = function() {
 		var self  = this,
@@ -25,6 +25,6 @@ elFinder.prototype.commands.view = function() {
 			self.update(void(0), value);
 			this.resolve();
 		});
-	}
+	};
 
 };

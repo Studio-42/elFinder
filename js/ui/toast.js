@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder toast
  * 
@@ -8,6 +7,7 @@
  * @author Naoki Sawada
  **/
 $.fn.elfindertoast = function(opts, fm) {
+	"use strict";
 	var defOpts = {
 		mode: 'success',
 		msg: '',

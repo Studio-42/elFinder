@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "up"
  * Go into parent directory
@@ -6,6 +5,7 @@
  * @author Dmitry (dio) Levashov
  **/
 (elFinder.prototype.commands.up = function() {
+	"use strict";
 	this.alwaysEnabled = true;
 	this.updateOnSelect = false;
 	
@@ -15,7 +15,7 @@
 	
 	this.getstate = function() {
 		return this.fm.cwd().phash ? 0 : -1;
-	}
+	};
 	
 	this.exec = function() {
 		var fm = this.fm,
@@ -25,6 +25,6 @@
 				fm.selectfiles({files : [cwdhash]});
 			});
 		}) : $.Deferred().reject();
-	}
+	};
 
 }).prototype = { forceLoad : true }; // this is required command

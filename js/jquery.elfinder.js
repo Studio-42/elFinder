@@ -10,7 +10,7 @@ if ($.ui) {
 				}
 				var rect = elem[0].getBoundingClientRect();
 				return document.elementFromPoint(rect.left, rect.top)? false : true;
-			}
+			};
 			
 			if (event.type === 'mousedown' || t.options.elfRefresh) {
 				var i, d,

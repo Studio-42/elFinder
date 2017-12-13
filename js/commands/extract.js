@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "extract"
  * Extract files from archive
@@ -6,14 +5,14 @@
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.extract = function() {
+	"use strict";
 	var self    = this,
 		fm      = self.fm,
 		mimes   = [],
 		filter  = function(files) {
 			return $.map(files, function(file) { 
-				return file.read && $.inArray(file.mime, mimes) !== -1 ? file : null
-				
-			})
+				return file.read && $.inArray(file.mime, mimes) !== -1 ? file : null;
+			});
 		};
 	
 	this.variants = [];
@@ -30,12 +29,12 @@ elFinder.prototype.commands.extract = function() {
 		self.change();
 	});
 	
-	this.getstate = function(sel) {
-		var sel = this.files(sel),
+	this.getstate = function(select) {
+		var sel = this.files(select),
 			cnt = sel.length;
 		
 		return cnt && this.fm.cwd().write && filter(sel).length == cnt ? 0 : -1;
-	}
+	};
 	
 	this.exec = function(hashes, opts) {
 		var files    = this.files(hashes),
@@ -203,6 +202,6 @@ elFinder.prototype.commands.extract = function() {
 		}
 
 		return dfrd;
-	}
+	};
 
 };

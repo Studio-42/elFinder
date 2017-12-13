@@ -1,5 +1,3 @@
-"use strict";
-
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
 		define(['elfinder'], factory);
@@ -9,6 +7,7 @@
 		factory(root.elFinder);
 	}
 }(this, function(elFinder) {
+"use strict";
 try {
 	if (! elFinder.prototype.commands.quicklook.plugins) {
 		elFinder.prototype.commands.quicklook.plugins = [];

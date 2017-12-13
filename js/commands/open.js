@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "open"
  * Enter folder or open files in new windows
@@ -6,33 +5,34 @@
  * @author Dmitry (dio) Levashov
  **/  
 (elFinder.prototype.commands.open = function() {
+	"use strict";
 	this.alwaysEnabled = true;
 	this.noChangeDirOnRemovedCwd = true;
 	
 	this._handlers = {
-		dblclick : function(e) { e.preventDefault(); this.exec(e.data && e.data.file? [ e.data.file ]: void(0)) },
+		dblclick : function(e) { e.preventDefault(); this.exec(e.data && e.data.file? [ e.data.file ]: void(0)); },
 		'select enable disable reload' : function(e) { this.update(e.type == 'disable' ? -1 : void(0));  }
-	}
+	};
 	
 	this.shortcuts = [{
 		pattern     : 'ctrl+down numpad_enter'+(this.fm.OS != 'mac' && ' enter')
 	}];
 
-	this.getstate = function(sel) {
-		var sel = this.files(sel),
+	this.getstate = function(select) {
+		var sel = this.files(select),
 			cnt = sel.length;
 		
 		return cnt == 1 
 			? (sel[0].read? 0 : -1) 
-			: (cnt && !this.fm.UA.Mobile) ? ($.map(sel, function(file) { return file.mime == 'directory' || ! file.read ? null : file}).length == cnt ? 0 : -1) : -1
-	}
+			: (cnt && !this.fm.UA.Mobile) ? ($.map(sel, function(file) { return file.mime == 'directory' || ! file.read ? null : file;}).length == cnt ? 0 : -1) : -1;
+	};
 	
-	this.exec = function(hashes, opts) {
+	this.exec = function(hashes, cOpts) {
 		var fm    = this.fm, 
 			dfrd  = $.Deferred().fail(function(error) { error && fm.error(error); }),
 			files = this.files(hashes),
 			cnt   = files.length,
-			thash = (typeof opts == 'object')? opts.thash : false,
+			thash = (typeof cOpts == 'object')? cOpts.thash : false,
 			opts  = this.options,
 			into  = opts.into || 'window',
 			file, url, s, w, imgW, imgH, winW, winH, reg, link, html5dl, inline;
@@ -55,7 +55,7 @@
 					});
 		}
 		
-		files = $.map(files, function(file) { return file.mime != 'directory' ? file : null });
+		files = $.map(files, function(file) { return file.mime != 'directory' ? file : null; });
 		
 		// nothing to open or files and folders selected - do nothing
 		if (cnt != files.length) {
@@ -92,7 +92,7 @@
 						.attr('target', '_blank')
 						.get(0).click();
 					} else {
-						var wnd = window.open(url);
+						wnd = window.open(url);
 						if (!wnd) {
 							return dfrd.reject('errPopup');
 						}
@@ -145,7 +145,7 @@
 						var params = Object.assign({}, fm.options.customData, {
 							cmd: 'file',
 							target: file.hash,
-							_t: file.ts || parseInt(+new Date/1000) 
+							_t: file.ts || parseInt(+new Date()/1000)
 						});
 						$.each(params, function(key, val)
 						{
@@ -166,7 +166,7 @@
 			}
 			link.remove();
 			return dfrd.resolve(hashes);
-		}
+		};
 		
 		if (cnt > 1) {
 			fm.confirm({
@@ -210,6 +210,6 @@
 		}
 		
 		return dfrd;
-	}
+	};
 
 }).prototype = { forceLoad : true }; // this is required command

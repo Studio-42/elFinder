@@ -1,7 +1,8 @@
 
 $.fn.elfinderoverlay = function(opts) {
-	
-	var fm = this.parent().elfinder('instance');
+	"use strict";
+	var fm = this.parent().elfinder('instance'),
+		o, cnt, show, hide;
 	
 	this.filter(':not(.elfinder-overlay)').each(function() {
 		opts = Object.assign({}, opts);
@@ -19,9 +20,9 @@ $.fn.elfinderoverlay = function(opts) {
 	});
 	
 	if (opts == 'show') {
-		var o    = this.eq(0),
-			cnt  = o.data('cnt') + 1,
-			show = o.data('show');
+		o    = this.eq(0);
+		cnt  = o.data('cnt') + 1;
+		show = o.data('show');
 
 		fm.toFront(o);
 		o.data('cnt', cnt);
@@ -33,9 +34,9 @@ $.fn.elfinderoverlay = function(opts) {
 	} 
 	
 	if (opts == 'hide') {
-		var o    = this.eq(0),
-			cnt  = o.data('cnt') - 1,
-			hide = o.data('hide');
+		o    = this.eq(0);
+		cnt  = o.data('cnt') - 1;
+		hide = o.data('hide');
 		
 		o.data('cnt', cnt);
 			

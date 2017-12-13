@@ -4,13 +4,13 @@
  * @author Naoki Sawada
  **/
 $.fn.elfindernavdock = function(fm, opts) {
-	
+	"use strict";
 	this.not('.elfinder-navdock').each(function() {
 		var self = $(this).hide().addClass('ui-state-default elfinder-navdock touch-punch'),
 			node = self.parent(),
 			wz   = node.children('.elfinder-workzone').append(self),
-			resize = function(to, curH) {
-				var curH = curH || self.height(),
+			resize = function(to, h) {
+				var curH = h || self.height(),
 					diff = to - curH,
 					len  = Object.keys(sizeSyncs).length,
 					calc = len? diff / len : 0,

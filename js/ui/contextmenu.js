@@ -1,11 +1,10 @@
-"use strict";
 /**
  * @class  elFinder contextmenu
  *
  * @author Dmitry (dio) Levashov
  **/
 $.fn.elfindercontextmenu = function(fm) {
-	
+	"use strict";
 	return this.each(function() {
 		var self   = $(this),
 			cmItem = 'elfinder-contextmenu-item',

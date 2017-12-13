@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder toolbar button to switch full scrren mode.
  *
@@ -6,6 +5,7 @@
  **/
 
 $.fn.elfinderfullscreenbutton = function(cmd) {
+	"use strict";
 	return this.each(function() {
 		var button = $(this).elfinderbutton(cmd),
 			icon   = button.children('.elfinder-button-icon');

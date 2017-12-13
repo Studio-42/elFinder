@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "restore"
  * Restore items from the trash
@@ -6,6 +5,7 @@
  * @author Naoki Sawada
  **/
 (elFinder.prototype.commands.restore = function() {
+	"use strict";
 	var self = this,
 		fm = this.fm,
 		fakeCnt = 0,
@@ -69,12 +69,12 @@
 			
 			return dfd;
 		},
-		restore = function(dfrd, files, targets, opts) {
+		restore = function(dfrd, files, targets, ops) {
 			var rHashes = {},
 				others = [],
 				found = false,
 				dirs = [],
-				opts = opts || {},
+				opts = ops || {},
 				id = +new Date(),
 				tm, getFile;
 			
@@ -246,9 +246,9 @@
 	
 	this.getstate = function(sel, e) {
 		sel = sel || fm.selected();
-		return sel.length && $.map(sel, function(h) {var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null }).length == sel.length
+		return sel.length && $.map(sel, function(h) {var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null; }).length == sel.length
 			? 0 : -1;
-	}
+	};
 	
 	this.exec = function(hashes, opts) {
 		var dfrd   = $.Deferred()
@@ -275,6 +275,6 @@
 		}
 			
 		return dfrd;
-	}
+	};
 
 }).prototype = { forceLoad : true }; // this is required command

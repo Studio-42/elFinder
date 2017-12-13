@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class elFinder places/favorites ui
  *
@@ -6,6 +5,7 @@
  * @author Naoki Sawada
  **/
 $.fn.elfinderplaces = function(fm, opts) {
+	"use strict";
 	return this.each(function() {
 		var dirs      = {},
 			c         = 'class',
@@ -71,7 +71,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 					// old data type elFinder <= 2.1.12
 					dat = $.map(dat.split(','), function(hash) { return hash || null;});
 					$.each(dat, function(i, d) {
-						var dir = d.split('#')
+						var dir = d.split('#');
 						dirs[dir[0]] = dir[1]? dir[1] : dir[0];
 					});
 				} else if ($.isPlainObject(dat)) {
@@ -116,7 +116,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 					})
 					.always(function() {
 						spinner.remove();
-					})
+					});
 				}
 			},
 			/**
@@ -236,7 +236,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 				if (tgt.length > 0) {
 					tgt.parent().replaceWith(node);
 					dirs[hash] = dir;
-					return true
+					return true;
 				} else {
 					return false;
 				}
@@ -384,7 +384,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 					},
 					over       : function(e, ui) {
 						var helper = ui.helper,
-							dir    = $.map(helper.data('files'), function(h) { return (fm.file(h).mime === 'directory' && !dirs[h])? h : null});
+							dir    = $.map(helper.data('files'), function(h) { return (fm.file(h).mime === 'directory' && !dirs[h])? h : null; });
 						e.stopPropagation();
 						helper.data('dropover', helper.data('dropover') + 1);
 						if (fm.insideWorkzone(e.pageX, e.pageY)) {
@@ -415,7 +415,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 							} else {
 								resolve = false;
 							}
-						})
+						});
 						save();
 						resolve && helper.hide();
 					}
@@ -576,7 +576,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 					}
 				}
 				
-				hashes = Object.keys(dirs)
+				hashes = Object.keys(dirs);
 				if (hashes.length) {
 					root.prepend(spinner);
 
@@ -597,7 +597,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 							}
 						});
 						$.each(dirs, function(h, f) {
-							if (!f.notfound != !!exists[h]) {
+							if (f.notfound === Boolean(exists[h])) {
 								if ((f.phash === cwd && ev.type !== 'netmount') || (exists[h] && exists[h].mime !== 'directory')) {
 									if (remove(h)) {
 										updated = true;
@@ -618,9 +618,9 @@ $.fn.elfinderplaces = function(fm, opts) {
 						spinner.remove();
 					});
 				}
-			})
+			});
 			
-		})
+		});
 		
 	});
 };
