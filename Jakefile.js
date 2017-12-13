@@ -93,7 +93,7 @@ var plugins = [];
 try {
 	plugins = fs.readdirSync(path.join(src, 'php', 'plugins')).map(function(n) {
 		return fs.statSync(path.join(src, 'php', 'plugins', n)).isFile()? null : n;
-	});;
+	});
 } catch (err) { }
 if (plugins.length) {
 	for (var i in plugins) {
@@ -107,8 +107,8 @@ if (plugins.length) {
 function grep(prefix, mask, exculde) {
 	var m = new RegExp(mask);
 	var e = new RegExp(exculde);
-	var o = new Array();
-	var input = new Array();
+	var o = [];
+	var input = [];
 	try {
 		input = fs.readdirSync(prefix);
 	} catch (err) { }
@@ -188,7 +188,7 @@ task('prebuild', function(){
 			(plugins[i] !== null) && dir.push(path.join('php', 'plugins', plugins[i]));
 		}
 	}
-	for (d in dir) {
+	for (var d in dir) {
 		var bd = dir[d];
 		if (!fs.existsSync(bd)) {
 			console.log('mkdir ' + bd);
@@ -208,7 +208,7 @@ desc('concat elfinder.full.css');
 file({'css/elfinder.full.css': files['elfinder.full.css']}, function(){
 	console.log('concat ' + this.name);
 	var data = '';
-	for (f in this.prereqs) {
+	for (var f in this.prereqs) {
 		file = this.prereqs[f];
 		console.log('\t' + file);
 		data += '\n/* File: ' + file.replace(src, '') + ' */\n';
@@ -231,7 +231,7 @@ file({'js/elfinder.full.js': files['elfinder.full.js']}, function(){
 	var strict = new RegExp('"use strict"\;?\n?');
 	var elf = files['elfinder.full.js'];
 	var data = '';
-	for (f in elf) {
+	for (var f in elf) {
 		file = elf[f];
 		console.log('\t' + file);
 		data += '\n\n/*\n * File: ' + file.replace(src, '') + '\n */\n\n';
@@ -352,7 +352,7 @@ task('clean', function(){
 		uf = [].concat.apply(uf, grep(path.join('php', 'editors')).map(function(d) { return grep(d); }));
 		uf = [].concat.apply(uf, grep(path.join('php', 'plugins')).map(function(d) { return grep(d); }));
 	}
-	for (f in uf) {
+	for (var f in uf) {
 		var file = uf[f];
 		if (fs.existsSync(file) && fs.statSync(file).isFile()) {
 			console.log('\tunlink ' + file);
@@ -370,7 +370,7 @@ task('clean', function(){
 			.concat(grep(path.join('php', 'editors')))
 			.concat(grep(path.join('php', 'plugins')))
 			.concat([path.join('php', 'editors'), path.join('php', 'plugins'), 'php']);
-		for (d in ud) {
+		for (var d in ud) {
 			var dir = ud[d];
 			if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
 				console.log('\trmdir	' + dir);
