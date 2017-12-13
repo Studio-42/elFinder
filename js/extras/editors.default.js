@@ -1,5 +1,3 @@
-"use strict";
-
 (function(editors, elFinder) {
 	if (typeof define === 'function' && define.amd) {
 		define(['elfinder'], editors);
@@ -8,6 +6,7 @@
 		elFinder.prototype._options.commandsOptions.edit.editors = optEditors.concat(editors(elFinder));
 	}
 }(function(elFinder) {
+	"use strict";
 	var apps = {},
 		// get query of getfile
 		getfile = window.location.search.match(/getfile=([a-z]+)/),
@@ -78,7 +77,7 @@
 				p, ifm, url, node;
 			if (pixlr) {
 				// case of redirected from pixlr.com
-				p = window.parent
+				p = window.parent;
 				ifm = p.$('#'+pixlr[1]+'iframe').hide();
 				node = p.$('#'+pixlr[1]).data('resizeoff')();
 				if (image[1].substr(0, 4) === 'http') {
@@ -739,8 +738,8 @@
 							editor, editorBase;
 						
 						// fit height function
-						textarea._setHeight = function(h) {
-							var h    = h || base.height(),
+						textarea._setHeight = function(height) {
+							var h    = height || base.height(),
 								ctrH = 0,
 								areaH;
 							base.children('.editor-toolbar,.editor-statusbar').each(function() {
@@ -864,10 +863,10 @@
 						CKEDITOR.on('dialogDefinition', function(e) {
 							var dlg = e.data.definition.dialog;
 							dlg.on('show', function(e) {
-								fm.getUI().append($('.cke_dialog_background_cover')).append(this.getElement().$)
+								fm.getUI().append($('.cke_dialog_background_cover')).append(this.getElement().$);
 							});
 							dlg.on('hide', function(e) {
-								$('body:first').append($('.cke_dialog_background_cover')).append(this.getElement().$)
+								$('body:first').append($('.cke_dialog_background_cover')).append(this.getElement().$);
 							});
 						});
 					};
@@ -923,9 +922,9 @@
 						// set base height
 						base.height(h);
 						// fit height function
-						textarea._setHeight = function(h) {
+						textarea._setHeight = function(height) {
 							var base = $(this).parent(),
-								h    = h || base.height(),
+								h    = height || base.height(),
 								ctrH = 0,
 								areaH;
 							base.find('.mce-container-body:first').children('.mce-toolbar,.mce-toolbar-grp,.mce-statusbar').each(function() {
@@ -1073,7 +1072,7 @@
 			prepare : function(base, dialogOpts, file) {
 				var elfNode = base.editor.fm.getUI();
 				$(base).height(elfNode.height());
-				dialogOpts.width = Math.max(dialogOpts.width, elfNode.width() * .8);
+				dialogOpts.width = Math.max(dialogOpts.width, elfNode.width() * 0.8);
 			},
 			// Initialization of editing node (this: this editors HTML node)
 			init : function(id, file, dum, fm) {
