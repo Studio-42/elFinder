@@ -175,16 +175,17 @@ task('prebuild', function(){
 			path.join('js', 'i18n'), path.join('js', 'i18n', 'help'), path.join('js', 'extras'), path.join('js', 'proxy'),
 			'php',
 			path.join('php', '.tmp'), path.join('php', 'libs'), path.join('php', 'resources'),
-			'files', path.join('files', '.trash')];
+			'files', path.join('files', '.trash')],
+		i;
 	if (editors.length) {
 		dir.push(path.join('php', 'editors'));
-		for (var i in editors) {
+		for (i in editors) {
 			(editors[i] !== null) && dir.push(path.join('php', 'editors', editors[i]));
 		}
 	}
 	if (plugins.length) {
 		dir.push(path.join('php', 'plugins'));
-		for (var i in plugins) {
+		for (i in plugins) {
 			(plugins[i] !== null) && dir.push(path.join('php', 'plugins', plugins[i]));
 		}
 	}
