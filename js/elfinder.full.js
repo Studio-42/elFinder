@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 81045c9) (2017-12-15)
+ * Version 2.1.30 (2.1-src Nightly: c4171e2) (2017-12-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8773,7 +8773,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 81045c9)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: c4171e2)';
 
 
 
@@ -9133,9 +9133,9 @@ elFinder.prototype._options = {
 		// for quicklook etc.
 		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.8.8/hls.min.js',
 		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.4/dash.all.min.js',
-		prettify   : '//cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js',
+		prettify   : '//rawgit.com/google/code-prettify/master/loader/run_prettify.js',
 		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js',
-		rar        : '//cdn.rawgit.com/nao-pon/rar.js/ext/rar.min.js'
+		rar        : '//rawgit.com/nao-pon/rar.js/ext/rar.min.js'
 	},
 	
 	/**
