@@ -6127,6 +6127,9 @@ abstract class elFinderVolumeDriver {
 		if ($base[0] === $separator && strpos($base, 0, strlen($systemroot)) !== $systemroot) {
 			$base = $systemroot . substr($base, 1);
 		}
+		if ($base !== $systemroot) {
+			$base = rtrim($base, $separator);
+		}
 		
 		// 'Here'
 		if ($path === '' || $path === '.' . $separator) return $base;
@@ -6141,7 +6144,10 @@ abstract class elFinderVolumeDriver {
 		while(preg_match($normreg, $path)) {
 			$path = preg_replace($normreg, '$1', $path, 1);
 		}
-		
+		if ($path !== $systemroot) {
+			$path = rtrim($path, $separator);
+		}
+
 		// Absolute path
 		if ($path[0] === $separator || strpos($path, $systemroot) === 0) {
 			return $path;
