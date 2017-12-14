@@ -1,4 +1,3 @@
-"use strict";
 /**
  * elFinder client options and main script for RequireJS
  *
@@ -6,6 +5,7 @@
  * e.g. `<script data-main="./main.js" src="./require.js"></script>`
  **/
 (function(){
+	"use strict";
 	var // jQuery and jQueryUI version
 		jqver = '3.2.1',
 		uiver = '1.12.1',
