@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: c4171e2) (2017-12-15)
+ * Version 2.1.30 (2.1-src Nightly: 21342a1) (2017-12-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8773,7 +8773,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: c4171e2)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 21342a1)';
 
 
 
@@ -23539,7 +23539,7 @@ elFinder.prototype.commands.paste = function() {
 		var self   = this,
 			fm     = self.fm,
 			opts   = cOpts || {},
-			dst    = select ? this.files(dst)[0] : fm.cwd(),
+			dst    = select ? this.files(select)[0] : fm.cwd(),
 			files  = fm.clipboard(),
 			cnt    = files.length,
 			cut    = cnt ? files[0].cut : false,
