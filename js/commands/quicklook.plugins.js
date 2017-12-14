@@ -801,16 +801,19 @@ elFinder.prototype.commands.quicklook.plugins = [
 		if (window.DataView) {
 			preview.on('update', function(e) {
 				var file = e.file,
-					loading, url, abort,
+					loading, url, archive, abort,
 					getList = function(url) {
 						if (abort) {
 							loading.remove();
 							return;
 						}
-						fm.replaceXhrSend();
 						try {
-							var archive = RAR(url, function(err) {
-								fm.restoreXhrSend();
+							archive = RAR({
+								file: url,
+								type: 2,
+								xhrHeaders: fm.customHeaders,
+								xhrFields: fm.xhrFields
+							}, function(err) {
 								loading.remove();
 								var filenames = [],
 									header, doc;
@@ -853,6 +856,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					
 					// stop loading on change file if not loaded yet
 					preview.one('change', function() {
+						archive && (archive.abort = true);
 						loading.remove();
 						abort = true;
 					});
