@@ -1584,8 +1584,9 @@ class elFinder {
 	protected function file($args) {
 		$target   = $args['target'];
 		$download = !empty($args['download']);
-		$h403     = 'HTTP/1.x 403 Access Denied';
-		$h404     = 'HTTP/1.x 404 Not Found';
+		$h403     = 'HTTP/1.0 403 Access Denied';
+		$h404     = 'HTTP/1.0 404 Not Found';
+		$h304     = 'HTTP/1.1 304 Not Modified';
 
 		if (($volume = $this->volume($target)) == false) { 
 			return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
@@ -1647,6 +1648,7 @@ class elFinder {
 				'Content-Disposition: '.$disp.'; '.$filename,
 				'Content-Transfer-Encoding: binary',
 				'Content-Length: '.$file['size'],
+				'Last-Modified: '.gmdate('D, d M Y H:i:s T', $file['ts']),
 				'Connection: close'
 			)
 		);
@@ -2073,7 +2075,7 @@ class elFinder {
 	 * @return void
 	 */
 	protected function abort($args = array()) {
-		if (! elFinder::$connectionFlagsPath) {
+		if (! elFinder::$connectionFlagsPath || $_SERVER['REQUEST_METHOD'] === 'HEAD') {
 			return;
 		}
 		$flagFile = elFinder::$connectionFlagsPath . DIRECTORY_SEPARATOR . 'elfreq%s';

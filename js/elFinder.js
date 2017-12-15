@@ -992,7 +992,7 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @type Function
 	 */
 	this.restoreXhrSend = function() {
-		XMLHttpRequest.prototype.send = savedXhrSend;
+		savedXhrSend && (XMLHttpRequest.prototype.send = savedXhrSend);
 	};
 	
 	/**
@@ -2113,7 +2113,9 @@ var elFinder = function(elm, opts, bootCallback) {
 				
 				requestCnt++;
 				
-				dfrd.fail(function(error, xhr, response) {
+				dfrd.always(function() {
+					delete options.headers['X-elFinderReqid'];
+				}).fail(function(error, xhr, response) {
 					// unset this cmd queue when user canceling
 					if (error === 0) {
 						if (requestQueue.length) {
