@@ -839,7 +839,6 @@ elFinder.prototype.commands.quicklook.plugins = [
 								}
 							});
 						} catch(e) {
-							fm.restoreXhrSend();
 							loading.remove();
 						}
 					},
