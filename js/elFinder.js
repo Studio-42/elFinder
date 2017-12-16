@@ -5089,6 +5089,7 @@ elFinder.prototype = {
 						confirm = function(ndx) {
 							var last = ndx == exists.length-1,
 								opts = {
+									cssClass : 'elfinder-confirm-upload',
 									title  : fm.i18n('cmdupload'),
 									text   : ['errExists', pathStr + exists[ndx].name, 'confirmRepl'], 
 									all    : !last,
@@ -5129,6 +5130,7 @@ elFinder.prototype = {
 									buttons : [
 										{
 											label : 'btnBackup',
+											cssClass : 'elfinder-confirm-btn-backup',
 											callback : function(all) {
 												var i;
 												if (all) {
@@ -5150,6 +5152,7 @@ elFinder.prototype = {
 							if (!isDir) {
 								opts.buttons.push({
 									label : 'btnRename' + (last? '' : 'All'),
+									cssClass : 'elfinder-confirm-btn-rename',
 									callback : function() {
 										renames = null;
 										resolve();
@@ -7245,6 +7248,7 @@ elFinder.prototype = {
 	 * @param  Object  options
 	 * @example  
 	 * this.confirm({
+	 *    cssClass : 'elfinder-confirm-mydialog',
 	 *    title : 'Remove files',
 	 *    text  : 'Here is question text',
 	 *    accept : {  // accept callback - required
@@ -7284,14 +7288,17 @@ elFinder.prototype = {
 				}
 			},
 			apply = this.i18n('apllyAll'),
-			label, checkbox;
+			label, checkbox, btnNum;
 
-		
+		if (opts.cssClass) {
+			options.cssClass += ' ' + opts.cssClass;
+		}
 		options.buttons[this.i18n(opts.accept.label)] = function() {
 			opts.accept.callback(!!(checkbox && checkbox.prop('checked')));
 			complete = true;
 			$(this).elfinderdialog('close');
 		};
+		options.buttons[this.i18n(opts.accept.label)]._cssClass = 'elfinder-confirm-accept';
 		
 		if (opts.reject) {
 			options.buttons[this.i18n(opts.reject.label)] = function() {
@@ -7299,21 +7306,28 @@ elFinder.prototype = {
 				complete = true;
 				$(this).elfinderdialog('close');
 			};
+			options.buttons[this.i18n(opts.reject.label)]._cssClass = 'elfinder-confirm-reject';
 		}
 		
 		if (opts.buttons && opts.buttons.length > 0) {
+			btnNum = 1;
 			$.each(opts.buttons, function(i, v){
 				options.buttons[self.i18n(v.label)] = function() {
 					v.callback(!!(checkbox && checkbox.prop('checked')));
 					complete = true;
 					$(this).elfinderdialog('close');
 				};
+				options.buttons[self.i18n(v.label)]._cssClass = 'elfinder-confirm-extbtn' + (btnNum++);
+				if (v.cssClass) {
+					options.buttons[self.i18n(v.label)]._cssClass += ' ' + v.cssClass;
+				}
 			});
 		}
 		
 		options.buttons[this.i18n(opts.cancel.label)] = function() {
 			$(this).elfinderdialog('close');
 		};
+		options.buttons[this.i18n(opts.cancel.label)]._cssClass = 'elfinder-confirm-cancel';
 		
 		if (opts.all) {
 			options.create = function() {
