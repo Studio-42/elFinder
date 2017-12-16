@@ -602,6 +602,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 					+cltabstop
 					+'"><span class="ui-button-text">'+name+'</span></button>')
 				.on('click', $.proxy(cb, self[0]));
+			if (cb._cssClass) {
+				button.addClass(cb._cssClass);
+			}
 			if (platformWin) {
 				buttonset.append(button);
 			} else {
