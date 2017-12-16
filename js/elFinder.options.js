@@ -14,15 +14,15 @@ elFinder.prototype._options = {
 		// for editor etc.
 		ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.9',
 		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0',
-		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.7.3',
+		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.8.0',
 		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.7.4',
 		simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		// for quicklook etc.
 		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.8.8/hls.min.js',
 		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.4/dash.all.min.js',
-		prettify   : '//rawgit.com/google/code-prettify/master/loader/run_prettify.js',
+		prettify   : '//cdn.rawgit.com/google/code-prettify/05ad1b76f8af1232da963c17bad144107b07e59a/loader/run_prettify.js',
 		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js',
-		rar        : '//rawgit.com/nao-pon/rar.js/ext/rar.min.js'
+		rar        : '//cdn.rawgit.com/nao-pon/rar.js/d37479a77db969a829ec29dfffb52d95c105c6a5/rar.min.js'
 	},
 	
 	/**
@@ -40,6 +40,13 @@ elFinder.prototype._options = {
 	 */
 	requestType : 'get',
 	
+	/**
+	 * Use CORS to connector url
+	 * 
+	 * @type Boolean|null  true|false|null(Auto detect)
+	 */
+	cors : null,
+
 	/**
 	 * Maximum number of concurrent connections on request
 	 * 
