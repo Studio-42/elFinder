@@ -901,15 +901,34 @@ var elFinder = function(elm, opts, bootCallback) {
 	
 	// configure for CORS
 	(function(){
-		var parseUrl = document.createElement('a'),
-			parseUploadUrl;
-		parseUrl.href = opts.url;
-		if (opts.urlUpload && (opts.urlUpload !== opts.url)) {
-			parseUploadUrl = document.createElement('a');
-			parseUploadUrl.href = opts.urlUpload;
+		if (typeof self.options.cors !== 'undefined' && self.options.cors !== null) {
+			self.isCORS = self.options.cors? true : false;
+		} else {
+			var parseUrl = document.createElement('a'),
+				parseUploadUrl,
+				selfProtocol = window.location.protocol,
+				portReg = function(protocol) {
+					protocol = (!protocol || protocol === ':')? selfProtocol : protocol;
+					return protocol === 'https:'? /\:443$/ : /\:80$/;
+				},
+				selfHost = window.location.host.replace(portReg(selfProtocol), '');
+			parseUrl.href = opts.url;
+			if (opts.urlUpload && (opts.urlUpload !== opts.url)) {
+				parseUploadUrl = document.createElement('a');
+				parseUploadUrl.href = opts.urlUpload;
+			}
+			if (selfHost !== parseUrl.host.replace(portReg(parseUrl.protocol), '')
+				|| (parseUrl.protocol !== ':'&& parseUrl.protocol !== '' && (selfProtocol !== parseUrl.protocol))
+				|| (parseUploadUrl && 
+					(selfHost !== parseUploadUrl.host.replace(portReg(parseUploadUrl.protocol), '')
+					|| (parseUploadUrl.protocol !== ':' && parseUploadUrl.protocol !== '' && (selfProtocol !== parseUploadUrl.protocol))
+					)
+				)
+			) {
+				self.isCORS = true;
+			}
 		}
-		if (window.location.host !== parseUrl.host || (parseUploadUrl && (window.location.host !== parseUploadUrl.host))) {
-			self.isCORS = true;
+		if (self.isCORS) {
 			if (!$.isPlainObject(self.options.customHeaders)) {
 				self.options.customHeaders = {};
 			}
