@@ -111,7 +111,7 @@
 			'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(ie8? '1.12.4' : jqver)+'/jquery.min',
 			'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/jquery-ui.min',
 			'elfinder' : 'elfinder.min',
-			'encoding-japanese': '//cdn.rawgit.com/polygonplanet/encoding.js/master/encoding.min'
+			'encoding-japanese': '//cdn.rawgit.com/polygonplanet/encoding.js/1.0.26/encoding.min'
 		},
 		waitSeconds : 10 // optional
 	});
