@@ -873,6 +873,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 									filenames.push(this.path + (this.size? ' (' + fm.formatSize(this.size) + ')' : ''));
 								});
 								if (filenames.length) {
+									filenames = $.map(filenames, function(str) {
+										return fm.decodeRawString(str);
+									});
 									filenames.sort();
 									header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>';
 									doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>')
