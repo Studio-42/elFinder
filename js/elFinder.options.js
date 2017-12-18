@@ -22,7 +22,9 @@ elFinder.prototype._options = {
 		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.4/dash.all.min.js',
 		prettify   : '//cdn.rawgit.com/google/code-prettify/05ad1b76f8af1232da963c17bad144107b07e59a/loader/run_prettify.js',
 		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js',
-		rar        : '//cdn.rawgit.com/nao-pon/rar.js/d37479a77db969a829ec29dfffb52d95c105c6a5/rar.min.js'
+		rar        : '//cdn.rawgit.com/nao-pon/rar.js/d37479a77db969a829ec29dfffb52d95c105c6a5/rar.min.js',
+		zlibUnzip  : '//cdn.rawgit.com/imaya/zlib.js/0.3.1/bin/unzip.min.js', // need check unzipFiles() in quicklook.plugins.js when update
+		zlibGunzip : '//cdn.rawgit.com/imaya/zlib.js/0.3.1/bin/gunzip.min.js'
 	},
 	
 	/**

@@ -4696,6 +4696,11 @@ var elFinder = function(elm, opts, bootCallback) {
 					},
 					toChkTh = {};
 				
+				// regist rawStringDecoder
+				if (self.options.rawStringDecoder) {
+					self.registRawStringDecoder(self.options.rawStringDecoder);
+				}
+
 				// re-calculate elFinder node z-index
 				self.zIndexCalc();
 				
