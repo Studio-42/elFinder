@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 6e28684) (2017-12-18)
+ * Version 2.1.30 (2.1-src Nightly: 232a7fe) (2017-12-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8813,7 +8813,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 6e28684)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 232a7fe)';
 
 
 
@@ -9175,7 +9175,7 @@ elFinder.prototype._options = {
 		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.4/dash.all.min.js',
 		prettify   : '//cdn.rawgit.com/google/code-prettify/05ad1b76f8af1232da963c17bad144107b07e59a/loader/run_prettify.js',
 		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js',
-		rar        : '//cdn.rawgit.com/nao-pon/rar.js/d37479a77db969a829ec29dfffb52d95c105c6a5/rar.min.js',
+		rar        : '//cdn.rawgit.com/nao-pon/rar.js/6cef13ec66dd67992fc7f3ea22f132d770ebaf8b/rar.min.js',
 		zlibUnzip  : '//cdn.rawgit.com/imaya/zlib.js/0.3.1/bin/unzip.min.js', // need check unzipFiles() in quicklook.plugins.js when update
 		zlibGunzip : '//cdn.rawgit.com/imaya/zlib.js/0.3.1/bin/gunzip.min.js'
 	},
@@ -25684,6 +25684,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 									filenames.push(this.path + (this.size? ' (' + fm.formatSize(this.size) + ')' : ''));
 								});
 								if (filenames.length) {
+									filenames = $.map(filenames, function(str) {
+										return fm.decodeRawString(str);
+									});
 									filenames.sort();
 									header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>';
 									doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>')
