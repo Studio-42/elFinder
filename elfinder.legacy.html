@@ -51,9 +51,9 @@
 						// `init` event callback function
 						fm.bind('init', function() {
 							// Optional for Japanese decoder "encoding-japanese.js"
-							if (fm.lang === 'jp') {
+							if (fm.lang === 'ja') {
 								fm.loadScript(
-									[ '//cdn.rawgit.com/polygonplanet/encoding.js/master/encoding.min.js' ],
+									[ '//cdn.rawgit.com/polygonplanet/encoding.js/1.0.26/encoding.min.js' ],
 									function() {
 										if (window.Encoding && Encoding.convert) {
 											fm.registRawStringDecoder(function(s) {
