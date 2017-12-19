@@ -16,7 +16,7 @@
 	    'folder_a_lot_sample': 'Plenty Items',
 	    'folder_setup_with_composer': 'Setup with composer'
 	  },
-	  'jp': {
+	  'ja': {
 	    'volume_Demo': 'デモ用',
 	    'folder_BasicAuthExample': 'Basic認証サンプル',
 	    'folder_Downloads': 'ダウンロード',
