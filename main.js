@@ -17,8 +17,7 @@
 				fullLang = (navigator.browserLanguage || navigator.language || navigator.userLanguage);
 			}
 			lang = fullLang.substr(0,2);
-			if (lang === 'ja') lang = 'jp';
-			else if (lang === 'pt') lang = 'pt_BR';
+			if (lang === 'pt') lang = 'pt_BR';
 			else if (lang === 'ug') lang = 'ug_CN';
 			else if (lang === 'zh') lang = (fullLang.substr(0,5).toLowerCase() === 'zh-tw')? 'zh_TW' : 'zh_CN';
 			return lang;
@@ -92,7 +91,7 @@
 						$.extend(fm.messages, i18nFolderMsgs.en, i18nFolderMsgs[fm.lang] || {});
 						// Optional for Japanese decoder "extras/encoding-japanese.min"
 						delete fm.options.rawStringDecoder;
-						if (fm.lang === 'jp') {
+						if (fm.lang === 'ja') {
 							require(
 								[ 'extras/encoding-japanese.min' ],
 								function(Encoding) {
