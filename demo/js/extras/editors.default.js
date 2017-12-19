@@ -294,7 +294,6 @@
 					init = function(onload) {
 						var getLang = function() {
 								var langMap = {
-									'jp' : 'ja',
 									'zh_TW' : 'zh_HANT',
 									'zh_CN' : 'zh_HANS'
 								};
