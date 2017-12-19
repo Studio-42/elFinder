@@ -22,8 +22,7 @@
 				fullLang = (navigator.browserLanguage || navigator.language || navigator.userLanguage);
 			}
 			lang = fullLang.substr(0,2);
-			if (lang === 'ja') lang = 'jp';
-			else if (lang === 'pt') lang = 'pt_BR';
+			if (lang === 'pt') lang = 'pt_BR';
 			else if (lang === 'ug') lang = 'ug_CN';
 			else if (lang === 'zh') lang = (fullLang.substr(0,5).toLowerCase() === 'zh-tw')? 'zh_TW' : 'zh_CN';
 			return lang;
@@ -63,7 +62,7 @@
 								// `init` event callback function
 								fm.bind('init', function() {
 									// Optional for Japanese decoder "encoding-japanese"
-									if (fm.lang === 'jp') {
+									if (fm.lang === 'ja') {
 										require(
 											[ 'encoding-japanese' ],
 											function(Encoding) {
