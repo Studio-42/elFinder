@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 7df9735) (2017-12-19)
+ * Version 2.1.30 (2.1-src Nightly: 18c1e1d) (2017-12-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -2021,6 +2021,7 @@ var elFinder = function(elm, opts, bootCallback) {
 						}
 						self.newAPI = self.api >= 2;
 						self.oldAPI = !self.newAPI;
+						self.enable();
 					}
 					
 					if (response.textMimes && Array.isArray(response.textMimes)) {
@@ -2316,6 +2317,12 @@ var elFinder = function(elm, opts, bootCallback) {
 			},
 			bindData = {opts: opts, result: true};
 		
+		// prevent request initial request is completed
+		if (!self.api && !data.init) {
+			syncOnFail = false;
+			return dfrd.reject();
+		}
+
 		// trigger "request.cmd" that callback be able to cancel request by substituting "false" for "event.data.result"
 		self.trigger('request.' + cmd, bindData, true);
 		
@@ -3679,7 +3686,7 @@ var elFinder = function(elm, opts, bootCallback) {
 	// bind core event handlers
 	this
 		.enable(function() {
-			if (!enabled && self.visible() && self.ui.overlay.is(':hidden') && ! node.children('.elfinder-dialog.' + self.res('class', 'editing') + ':visible').length) {
+			if (!enabled && self.api && self.visible() && self.ui.overlay.is(':hidden') && ! node.children('.elfinder-dialog.' + self.res('class', 'editing') + ':visible').length) {
 				enabled = true;
 				document.activeElement && document.activeElement.blur();
 				node.removeClass('elfinder-disabled');
@@ -3873,26 +3880,27 @@ var elFinder = function(elm, opts, bootCallback) {
 		soundPath = this.options.soundPath.replace(/\/+$/, '') + '/';
 	}
 	
-	// attach events to document
-	$(document)
-		// disable elfinder on click outside elfinder
-		.on('click.'+namespace, function(e) { enabled && ! self.options.enableAlways && !$(e.target).closest(node).length && self.disable(); })
-		// exec shortcuts
-		.on(keydown+' '+keypress, execShortcut);
-	
-	// attach events to window
-	self.options.useBrowserHistory && $(window)
-		.on('popstate.' + namespace, function(ev) {
-			var target = ev.originalEvent.state && ev.originalEvent.state.thash;
-			target && !$.isEmptyObject(self.files()) && self.request({
-				data   : {cmd  : 'open', target : target, onhistory : 1},
-				notify : {type : 'open', cnt : 1, hideCnt : true},
-				syncOnFail : true
-			});
-		});
-	
-	(function(){
+	self.one('opendone', function() {
+		self.log('attached event to window');
 		var tm;
+		// attach events to document
+		$(document)
+			// disable elfinder on click outside elfinder
+			.on('click.'+namespace, function(e) { enabled && ! self.options.enableAlways && !$(e.target).closest(node).length && self.disable(); })
+			// exec shortcuts
+			.on(keydown+' '+keypress, execShortcut);
+		
+		// attach events to window
+		self.options.useBrowserHistory && $(window)
+			.on('popstate.' + namespace, function(ev) {
+				var target = ev.originalEvent.state && ev.originalEvent.state.thash;
+				target && !$.isEmptyObject(self.files()) && self.request({
+					data   : {cmd  : 'open', target : target, onhistory : 1},
+					notify : {type : 'open', cnt : 1, hideCnt : true},
+					syncOnFail : true
+				});
+			});
+		
 		$(window).on('resize.' + namespace, function(e){
 			if (e.target === this) {
 				tm && clearTimeout(tm);
@@ -3920,75 +3928,75 @@ var elFinder = function(elm, opts, bootCallback) {
 			}
 			self.trigger('unload');
 		});
-	})();
 
-	// bind window onmessage for CORS
-	$(window).on('message.' + namespace, function(e){
-		var res = e.originalEvent || null,
-			obj, data;
-		if (res && self.uploadURL.indexOf(res.origin) === 0) {
-			try {
-				obj = JSON.parse(res.data);
-				data = obj.data || null;
-				if (data) {
-					if (data.error) {
-						if (obj.bind) {
-							self.trigger(obj.bind+'fail', data);
+		// bind window onmessage for CORS
+		$(window).on('message.' + namespace, function(e){
+			var res = e.originalEvent || null,
+				obj, data;
+			if (res && self.uploadURL.indexOf(res.origin) === 0) {
+				try {
+					obj = JSON.parse(res.data);
+					data = obj.data || null;
+					if (data) {
+						if (data.error) {
+							if (obj.bind) {
+								self.trigger(obj.bind+'fail', data);
+							}
+							self.error(data.error);
+						} else {
+							data.warning && self.error(data.warning);
+							self.updateCache(data);
+							data.removed && data.removed.length && self.remove(data);
+							data.added   && data.added.length   && self.add(data);
+							data.changed && data.changed.length && self.change(data);
+							if (obj.bind) {
+								self.trigger(obj.bind, data);
+								self.trigger(obj.bind+'done');
+							}
+							data.sync && self.sync();
 						}
-						self.error(data.error);
-					} else {
-						data.warning && self.error(data.warning);
-						self.updateCache(data);
-						data.removed && data.removed.length && self.remove(data);
-						data.added   && data.added.length   && self.add(data);
-						data.changed && data.changed.length && self.change(data);
-						if (obj.bind) {
-							self.trigger(obj.bind, data);
-							self.trigger(obj.bind+'done');
-						}
-						data.sync && self.sync();
 					}
+				} catch (e) {
+					self.sync();
 				}
-			} catch (e) {
-				self.sync();
 			}
-		}
-	});
-
-	// elFinder enable always
-	if (self.options.enableAlways) {
-		$(window).on('focus.' + namespace, function(e){
-			(e.target === this) && self.enable();
 		});
-		if (inFrame) {
-			$(window.top).on('focus.' + namespace, function() {
-				if (self.enable() && (! parentIframe || parentIframe.is(':visible'))) {
-					setTimeout(function() {
-						$(window).focus();
-					}, 10);
-				}
+
+		// elFinder enable always
+		if (self.options.enableAlways) {
+			$(window).on('focus.' + namespace, function(e){
+				(e.target === this) && self.enable();
+			});
+			if (inFrame) {
+				$(window.top).on('focus.' + namespace, function() {
+					if (self.enable() && (! parentIframe || parentIframe.is(':visible'))) {
+						setTimeout(function() {
+							$(window).focus();
+						}, 10);
+					}
+				});
+			}
+		} else if (inFrame) {
+			$(window).on('blur.' + namespace, function(e){
+				enabled && e.target === this && self.disable();
 			});
 		}
-	} else if (inFrame) {
-		$(window).on('blur.' + namespace, function(e){
-			enabled && e.target === this && self.disable();
-		});
-	}
 
-	// return focus to the window on click (elFInder in the frame)
-	if (inFrame) {
-		node.on('click', function(e) {
-			$(window).focus();
-		});
-	}
-	
-	// elFinder to enable by mouse over
-	if (this.options.enableByMouseOver) {
-		node.on('mouseenter', function(e) {
-			(inFrame) && $(window).focus();
-			! self.enabled() && self.enable();
-		});
-	}
+		// return focus to the window on click (elFInder in the frame)
+		if (inFrame) {
+			node.on('click', function(e) {
+				$(window).focus();
+			});
+		}
+		
+		// elFinder to enable by mouse over
+		if (self.options.enableByMouseOver) {
+			node.on('mouseenter', function(e) {
+				(inFrame) && $(window).focus();
+				! self.enabled() && self.enable();
+			});
+		}
+	});
 
 	// store instance in node
 	node[0].elfinder = this;
@@ -8816,7 +8824,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 7df9735)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 18c1e1d)';
 
 
 
@@ -15522,7 +15530,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 							}
 						});
 					}
-					checkEditing();
+					dialog.hasClass(fm.res('class', 'editing')) && checkEditing();
 				})
 				.on('close', function(e) {
 					var dialogs, dfd;
