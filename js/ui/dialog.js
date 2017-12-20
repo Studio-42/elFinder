@@ -379,7 +379,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 							}
 						});
 					}
-					checkEditing();
+					dialog.hasClass(fm.res('class', 'editing')) && checkEditing();
 				})
 				.on('close', function(e) {
 					var dialogs, dfd;
