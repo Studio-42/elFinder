@@ -729,7 +729,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			},
 			Zlib;
 
-		if (window.Uint8Array && window.DataView) {
+		if (window.Uint8Array && window.DataView && fm.options.cdns.zlibUnzip && fm.options.cdns.zlibGunzip) {
 			preview.on('update', function(e) {
 				var file = e.file,
 					doc, xhr, loading, url,
@@ -898,7 +898,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					},
 					_RAR;
 
-				if (RAR !== false && $.inArray(file.mime, mimes) !== -1) {
+				if (fm.options.cdns.rar && RAR !== false && $.inArray(file.mime, mimes) !== -1) {
 					// this is our file - stop event propagation
 					e.stopImmediatePropagation();
 					
