@@ -10,8 +10,8 @@ elFinder.prototype.commands.extract = function() {
 		fm      = self.fm,
 		mimes   = [],
 		filter  = function(files) {
-			return $.map(files, function(file) { 
-				return file.read && $.inArray(file.mime, mimes) !== -1 ? file : null;
+			return $.grep(files, function(file) { 
+				return file.read && $.inArray(file.mime, mimes) !== -1 ? true : false;
 			});
 		};
 	
@@ -50,7 +50,10 @@ elFinder.prototype.commands.extract = function() {
 
 		var names = $.map(fm.files(hashes), function(file) { return file.name; });
 		var map = {};
-		$.map(fm.files(hashes), function(file) { map[file.name] = file; });
+		$.grep(fm.files(hashes), function(file) {
+			map[file.name] = file;
+			return false;
+		});
 		
 		var decide = function(decision) {
 			switch (decision) {

@@ -246,7 +246,7 @@
 	
 	this.getstate = function(sel, e) {
 		sel = sel || fm.selected();
-		return sel.length && $.map(sel, function(h) {var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null; }).length == sel.length
+		return sel.length && $.grep(sel, function(h) {var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? true : false; }).length == sel.length
 			? 0 : -1;
 	};
 	

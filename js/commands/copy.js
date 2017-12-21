@@ -15,7 +15,7 @@ elFinder.prototype.commands.copy = function() {
 		var sel = this.files(select),
 			cnt = sel.length;
 
-		return cnt && $.map(sel, function(f) { return f.read ? f : null; }).length == cnt ? 0 : -1;
+		return cnt && $.grep(sel, function(f) { return f.read ? true : false; }).length == cnt ? 0 : -1;
 	};
 	
 	this.exec = function(hashes) {

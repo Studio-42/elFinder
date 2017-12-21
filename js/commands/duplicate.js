@@ -13,7 +13,7 @@ elFinder.prototype.commands.duplicate = function() {
 		var sel = this.files(select),
 			cnt = sel.length;
 
-		return cnt && fm.cwd().write && $.map(sel, function(f) { return f.read && f.phash === fm.cwd().hash && ! fm.isRoot(f)? f : null; }).length == cnt ? 0 : -1;
+		return cnt && fm.cwd().write && $.grep(sel, function(f) { return f.read && f.phash === fm.cwd().hash && ! fm.isRoot(f)? true : false; }).length == cnt ? 0 : -1;
 	};
 	
 	this.exec = function(hashes) {

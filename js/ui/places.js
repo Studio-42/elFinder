@@ -69,7 +69,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 				dat = fm.storage(key);
 				if (typeof dat === 'string') {
 					// old data type elFinder <= 2.1.12
-					dat = $.map(dat.split(','), function(hash) { return hash || null;});
+					dat = $.grep(dat.split(','), function(hash) { return hash? true : false;});
 					$.each(dat, function(i, d) {
 						var dir = d.split('#');
 						dirs[dir[0]] = dir[1]? dir[1] : dir[0];
@@ -384,7 +384,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 					},
 					over       : function(e, ui) {
 						var helper = ui.helper,
-							dir    = $.map(helper.data('files'), function(h) { return (fm.file(h).mime === 'directory' && !dirs[h])? h : null; });
+							dir    = $.grep(helper.data('files'), function(h) { return (fm.file(h).mime === 'directory' && !dirs[h])? true : false; });
 						e.stopPropagation();
 						helper.data('dropover', helper.data('dropover') + 1);
 						if (fm.insideWorkzone(e.pageX, e.pageY)) {

@@ -24,7 +24,7 @@
 		
 		return cnt == 1 
 			? (sel[0].read? 0 : -1) 
-			: (cnt && !this.fm.UA.Mobile) ? ($.map(sel, function(file) { return file.mime == 'directory' || ! file.read ? null : file;}).length == cnt ? 0 : -1) : -1;
+			: (cnt && !this.fm.UA.Mobile) ? ($.grep(sel, function(file) { return file.mime == 'directory' || ! file.read ? false : true;}).length == cnt ? 0 : -1) : -1;
 	};
 	
 	this.exec = function(hashes, cOpts) {
@@ -55,7 +55,7 @@
 					});
 		}
 		
-		files = $.map(files, function(file) { return file.mime != 'directory' ? file : null; });
+		files = $.grep(files, function(file) { return file.mime != 'directory' ? true : false; });
 		
 		// nothing to open or files and folders selected - do nothing
 		if (cnt != files.length) {

@@ -64,7 +64,7 @@ elFinder.prototype.commands.mkdir = function() {
 		if (curOrg === 'navbar') {
 			return cnt && sel[0].write && sel[0].read? 0 : -1;  
 		} else {
-			return cwd.write && (!cnt || $.map(sel, function(f) { return f.read && ! f.locked? f : null; }).length == cnt)? 0 : -1;
+			return cwd.write && (!cnt || $.grep(sel, function(f) { return f.read && ! f.locked? true : false; }).length == cnt)? 0 : -1;
 		}
 	};
 

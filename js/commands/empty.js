@@ -24,7 +24,7 @@ elFinder.prototype.commands.empty = function() {
 			cnt;
 		
 		cnt = sel.length;
-		return $.map(sel, function(f) { return f.write && f.mime === 'directory' ? f : null; }).length == cnt ? 0 : -1;
+		return $.grep(sel, function(f) { return f.write && f.mime === 'directory' ? true : false; }).length == cnt ? 0 : -1;
 	};
 	
 	this.exec = function(hashes) {

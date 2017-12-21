@@ -326,7 +326,7 @@ elFinder.prototype.command = function(fm) {
 	 */
 	this.hashes = function(hashes) {
 		return hashes
-			? $.map(Array.isArray(hashes) ? hashes : [hashes], function(hash) { return fm.file(hash) ? hash : null; })
+			? $.grep(Array.isArray(hashes) ? hashes : [hashes], function(hash) { return fm.file(hash) ? true : false; })
 			: fm.selected();
 	};
 	

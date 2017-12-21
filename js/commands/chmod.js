@@ -55,8 +55,8 @@ elFinder.prototype.commands.chmod = function() {
 	this.checkstate = function(sel) {
 		var cnt = sel.length;
 		if (!cnt) return false;
-		var chk = $.map(sel, function(f) {
-			return (f.isowner && f.perm && isPerm(f.perm) && (cnt == 1 || f.mime != 'directory')) ? f : null;
+		var chk = $.grep(sel, function(f) {
+			return (f.isowner && f.perm && isPerm(f.perm) && (cnt == 1 || f.mime != 'directory')) ? true : false;
 		}).length;
 		return (cnt == chk)? true : false;
 	};

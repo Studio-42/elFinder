@@ -278,8 +278,8 @@ elFinder.prototype.commands.rm = function() {
 											if (Object.keys(res).length) {
 												if (err.length > 1) {
 													if (res.removed || res.removed.length) {
-														hashes = $.map(targets, function(h) {
-															return $.inArray(h, res.removed) === -1? h : null;
+														hashes = $.grep(targets, function(h) {
+															return $.inArray(h, res.removed) === -1? true : false;
 														});
 													}
 													if (hashes.length) {
@@ -350,7 +350,7 @@ elFinder.prototype.commands.rm = function() {
 			if (targets && targets.length) {
 				if (targets.length > 1 && fm.searchStatus.state === 2) {
 					root1st = fm.file(fm.root(targets[0])).volumeid;
-					if (!$.map(targets, function(h) { return h.indexOf(root1st) !== 0? 1 : null ; }).length) {
+					if (!$.grep(targets, function(h) { return h.indexOf(root1st) !== 0? true : false ; }).length) {
 						thash = fm.option('trashHash', targets[0]);
 					}
 				} else {
@@ -406,7 +406,7 @@ elFinder.prototype.commands.rm = function() {
 	this.getstate = function(select) {
 		var sel   = this.hashes(select);
 		
-		return sel.length && $.map(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? h : null; }).length == sel.length
+		return sel.length && $.grep(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? true : false; }).length == sel.length
 			? 0 : -1;
 	};
 	

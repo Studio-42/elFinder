@@ -12,8 +12,8 @@
 		filter = function(files) {
 			var o = self.options;
 
-			files = $.map(files, function(file) {
-				return (file.mime != 'directory' || o.folders) && file.read ? file : null;
+			files = $.grep(files, function(file) {
+				return (file.mime != 'directory' || o.folders) && file.read ? true : false;
 			});
 
 			return o.multiple || files.length == 1 ? files : [];
