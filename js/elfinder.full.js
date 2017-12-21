@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 3949986) (2017-12-21)
+ * Version 2.1.30 (2.1-src Nightly: 1c72256) (2017-12-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8825,7 +8825,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 3949986)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 1c72256)';
 
 
 
@@ -25556,7 +25556,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			},
 			Zlib;
 
-		if (window.Uint8Array && window.DataView) {
+		if (window.Uint8Array && window.DataView && fm.options.cdns.zlibUnzip && fm.options.cdns.zlibGunzip) {
 			preview.on('update', function(e) {
 				var file = e.file,
 					doc, xhr, loading, url,
@@ -25724,7 +25724,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					},
 					_RAR;
 
-				if (RAR !== false && $.inArray(file.mime, mimes) !== -1) {
+				if (fm.options.cdns.rar && RAR !== false && $.inArray(file.mime, mimes) !== -1) {
 					// this is our file - stop event propagation
 					e.stopImmediatePropagation();
 					
