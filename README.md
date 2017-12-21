@@ -157,15 +157,12 @@ You can create or modify the language file to use translation tool. Please refer
 
 3rd party connectors
 --------------------
- * [ASP.NET](https://github.com/leniel/elFinder.Net)
  * [ASP.NET Core](https://github.com/gordon-matt/elFinder.NetCore)
+ * [ASP.NET](https://github.com/leniel/elFinder.Net)
  * [Java Servlet](https://github.com/trustsystems/elfinder-java-connector)
+ * [JavaScript/Efw](https://github.com/efwGrp/efw3.X/blob/master/help/api_efw_tag.md#elfinder-tag)
  * [Python](https://github.com/Studio-42/elfinder-python)
  * [Ruby/Rails](https://github.com/phallstrom/el_finder)
- * [Django](https://github.com/mikery/django-elfinder)
- * [Laravel](https://github.com/barryvdh/laravel-elfinder)
- * [JavaScript/Efw](https://github.com/efwGrp/efw3.X/blob/master/help/api_efw_tag.md#elfinder-tag)
- * [Symfony](https://github.com/helios-ag/FMElfinderBundle) 
 
 3rd party Volume Drivers
 --------------------
@@ -177,8 +174,21 @@ Hint: [How to load CSS with RequireJS?](https://github.com/Studio-42/elFinder/wi
 
  * [lokothodida/elfinder-theme-moono](https://github.com/lokothodida/elfinder-theme-moono)
  * [lokothodida/elfinder-theme-windows-10](https://github.com/lokothodida/elfinder-theme-windows-10)
- * [StudioJunkyard/elfinder-boostrap-theme](https://github.com/StudioJunkyard/LibreICONS/tree/master/themes/elFinder)
  * [RobiNN1/elFinder-Material-Theme](https://github.com/RobiNN1/elFinder-Material-Theme)
+ * [StudioJunkyard/elfinder-boostrap-theme](https://github.com/StudioJunkyard/LibreICONS/tree/master/themes/elFinder)
+
+3rd party Integrations
+--------------------
+ * [Django](https://github.com/mikery/django-elfinder)
+ * [Drupal](https://www.drupal.org/project/elfinder)
+ * [Laravel](https://github.com/barryvdh/laravel-elfinder)
+ * [Roundcube](https://github.com/Offerel/roundcube_elfinder)
+ * [Symfony](https://github.com/helios-ag/FMElfinderBundle)
+ * [Tiki Wiki](https://doc.tiki.org/elFinder)
+ * [WordPress](https://wordpress.org/plugins/file-manager/)
+ * [XOOPS](https://github.com/nao-pon/xelfinder)
+ * [Yii](http://www.yiiframework.com/extension/elfinder/)
+ * [Zenphoto](http://www.zenphoto.org/news/elfinder/)
 
 Support
 -------
