@@ -95,8 +95,8 @@ elFinder.prototype.commands.upload = function() {
 			},
 			getSelector = function() {
 				var hash = targetDir.hash,
-					dirs = $.map(fm.files(hash), function(f) {
-						return (f.mime === 'directory' && f.write)? f : null; 
+					dirs = $.grep(fm.files(hash), function(f) {
+						return (f.mime === 'directory' && f.write)? true : false; 
 					});
 				
 				if (! dirs.length) {

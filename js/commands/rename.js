@@ -221,12 +221,12 @@ elFinder.prototype.commands.rename = function() {
 			mime = sel[0].mime;
 		}
 
-		state = ((cnt === 1 && !sel[0].locked && !fm.isRoot(sel[0])) || (fm.api > 2.1030 && cnt === $.map(sel, function(f) {
+		state = ((cnt === 1 && !sel[0].locked && !fm.isRoot(sel[0])) || (fm.api > 2.1030 && cnt === $.grep(sel, function(f) {
 			if (!brk && !f.locked && f.phash === phash && !fm.isRoot(f) && (mime === f.mime || ext === fm.splitFileExtention(f.name)[1].toLowerCase())) {
-				return f;
+				return true;
 			} else {
-				brk = true;
-				return null;
+				brk && (brk = true);
+				return false;
 			}
 		}).length)) ? 0 : -1;
 		

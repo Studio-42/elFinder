@@ -45,7 +45,7 @@ elFinder.prototype.commands.search = function() {
 					mime = $.map(mime, function(m){ 
 						m = $.trim(m);
 						return m && ($.inArray(m, onlyMimes) !== -1
-									|| $.map(onlyMimes, function(om) { return m.indexOf(om) === 0? true : null; }).length
+									|| $.grep(onlyMimes, function(om) { return m.indexOf(om) === 0? true : false; }).length
 									)? m : null;
 					});
 				}

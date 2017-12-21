@@ -33,9 +33,9 @@ elFinder.prototype.commands.download = function() {
 
 			if (mixed) {
 				mixedCmd = czipdl? 'zipdl' : 'download';
-				hashes = $.map(hashes, function(h) {
+				hashes = $.grep(hashes, function(h) {
 					var f = fm.file(h),
-						res = (! f || (! czipdl && f.mime === 'directory') || ! fm.isCommandEnabled(mixedCmd, h))? null : h;
+						res = (! f || (! czipdl && f.mime === 'directory') || ! fm.isCommandEnabled(mixedCmd, h))? false : true;
 					if (f && inExec && ! res) {
 						$('#' + fm.cwdHash2Id(f.hash)).trigger('unselect');
 					}
@@ -50,8 +50,8 @@ elFinder.prototype.commands.download = function() {
 				}
 			}
 			
-			return $.map(self.files(hashes), function(f) { 
-				var res = (! f.read || (! zipOn && f.mime == 'directory')) ? null : f;
+			return $.grep(self.files(hashes), function(f) { 
+				var res = (! f.read || (! zipOn && f.mime == 'directory')) ? false : true;
 				if (inExec && ! res) {
 					$('#' + fm.cwdHash2Id(f.hash)).trigger('unselect');
 				}
@@ -317,7 +317,7 @@ elFinder.prototype.commands.download = function() {
 			return dfrd.reject();
 		}
 		
-		fileCnt = $.map(files, function(f) { return f.mime === 'directory'? null : true; }).length;
+		fileCnt = $.grep(files, function(f) { return f.mime === 'directory'? false : true; }).length;
 		link = $('<a>').hide().appendTo('body');
 		html5dl = (typeof link.get(0).download === 'string');
 		

@@ -9,7 +9,7 @@ elFinder.prototype.commands.places = function() {
 	var self   = this,
 	fm     = this.fm,
 	filter = function(hashes) {
-		return $.map(self.files(hashes), function(f) { return f.mime == 'directory' ? f : null; });
+		return $.grep(self.files(hashes), function(f) { return f.mime == 'directory' ? true : false; });
 	},
 	places = null;
 	

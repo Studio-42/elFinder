@@ -43,16 +43,16 @@ elFinder.prototype.commands.edit = function() {
 				mime = files[0].mime;
 				ext = files[0].name.replace(/^.*(\.[^.]+)$/, '$1');
 			}
-			return $.map(files, function(file) {
+			return $.grep(files, function(file) {
 				var res;
 				if (skip) {
-					return null;
+					return false;
 				}
 				res = (fm.mimeIsText(file.mime) || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
 					&& (!self.onlyMimes.length || $.inArray(file.mime, self.onlyMimes) !== -1)
 					&& file.read && file.write
 					&& (cnt === 1 || (file.mime === mime && file.name.substr(ext.length * -1) === ext))
-					&& fm.uploadMimeCheck(file.mime, file.phash)? file : null;
+					&& fm.uploadMimeCheck(file.mime, file.phash)? true : false;
 				if (!res) {
 					skip = true;
 				}
@@ -670,11 +670,11 @@ elFinder.prototype.commands.edit = function() {
 				
 				dfd.always(function() {
 					if (ccData) {
-						opts.editors = $.map(opts.editors, function(e) {
+						opts.editors = $.grep(opts.editors, function(e) {
 							if (e.info && e.info.cmdCheck) {
-								return ccData[e.info.cmdCheck]? e : null;
+								return ccData[e.info.cmdCheck]? true : false;
 							} else {
-								return e;
+								return true;
 							}
 						});
 					}
@@ -695,8 +695,8 @@ elFinder.prototype.commands.edit = function() {
 					mimesSingle = ($.uniqueSort || $.unique)(mimesSingle);
 					mimes = ($.uniqueSort || $.unique)(mimes);
 					
-					opts.editors = $.map(opts.editors, function(e) {
-						return e.disabled? null : e;
+					opts.editors = $.grep(opts.editors, function(e) {
+						return e.disabled? false : true;
 					});
 				});
 			}

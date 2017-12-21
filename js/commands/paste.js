@@ -161,13 +161,13 @@ elFinder.prototype.commands.paste = function() {
 								}
 							} else {
 								existedArr = [];
-								existed = $.map(names, function(n) {
+								existed = $.grep(names, function(n) {
 									if (typeof n === 'string') {
-										return n;
+										return true;
 									} else {
 										// support to >=2.1.11 plugin Normalizer, Sanitizer
 										existedArr = existedArr.concat(n);
-										return null;
+										return false;
 									}
 								});
 								if (existedArr.length) {
@@ -181,11 +181,11 @@ elFinder.prototype.commands.paste = function() {
 					},
 					paste     = function(selFiles) {
 						var renames = [],
-							files  = $.map(selFiles, function(file) { 
+							files  = $.grep(selFiles, function(file) { 
 								if (file.rename) {
 									renames.push(file.name);
 								}
-								return !file.remove ? file : null;
+								return !file.remove ? true : false;
 							}),
 							cnt    = files.length,
 							groups = {},
@@ -338,7 +338,7 @@ elFinder.prototype.commands.paste = function() {
 			fparents.pop();
 			if ($.inArray(dst.hash, fparents) !== -1) {
 				
-				if ($.map(fparents, function(h) { var d = fm.file(h); return d.phash == dst.hash && d.name == file.name ? d : null; }).length) {
+				if ($.grep(fparents, function(h) { var d = fm.file(h); return d.phash == dst.hash && d.name == file.name ? true : false; }).length) {
 					return !dfrd.reject(['errReplByChild', file.name]);
 				}
 			}

@@ -263,8 +263,8 @@
 				forms.toolbarPref && (forms.toolbarPref = (function() {
 					var node = $('<div/>');
 					init(function() {
-						var pnls = $.map(fm.options.uiOptions.toolbar, function(v) {
-								return $.isArray(v)? v : null;
+						var pnls = $.grep(fm.options.uiOptions.toolbar, function(v) {
+								return $.isArray(v)? true : false;
 							}),
 							tags = [],
 							hides = fm.storage('toolbarhides') || {};

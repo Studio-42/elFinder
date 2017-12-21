@@ -442,7 +442,7 @@ $.fn.elfindertree = function(fm, opts) {
 			 * @return Array
 			 */
 			filter = function(files) {
-				return $.map(files||[], function(f) { return f.mime == 'directory' ? f : null; });
+				return $.grep(files||[], function(f) { return f.mime == 'directory' ? true : false; });
 			},
 			
 			/**
@@ -528,23 +528,23 @@ $.fn.elfindertree = function(fm, opts) {
 								}
 								
 								if (data.removed && data.removed.length) {
-									dirs = $.map(dirs, function(d) {
+									dirs = $.grep(dirs, function(d) {
 										if (data.removed.indexOf(d.hash) === -1) {
-											return d;
+											return true;
 										} else {
-											changed = true;
-											return null;
+											!changed && (changed = true);
+											return false;
 										}
 									});
 								}
 								
 								if (data.added && data.added.length) {
-									dirs = dirs.concat($.map(data.added, function(d) {
+									dirs = dirs.concat($.grep(data.added, function(d) {
 										if (hashes[d.hash] === void(0)) {
-											changed = true;
-											return d;
+											!changed && (changed = true);
+											return true;
 										} else {
-											return null;
+											return false;
 										}
 									}));
 								}
@@ -1056,8 +1056,8 @@ $.fn.elfindertree = function(fm, opts) {
 				
 				$.each(dirs, function(i, dir) {
 					$('#'+fm.navHash2Id(dir.phash)+sel)
-						.filter(function() { return $.map($(this).next('.'+subtree).children(), function(n) {
-							return ($(n).children().hasClass(root))? null : n;
+						.filter(function() { return $.grep($(this).next('.'+subtree).children(), function(n) {
+							return ($(n).children().hasClass(root))? false : true;
 						}).length > 0; })
 						.addClass(cls);
 				});
@@ -1412,9 +1412,9 @@ $.fn.elfindertree = function(fm, opts) {
 			var lock = e.type == 'lockfiles',
 				helperLocked = e.data.helper? e.data.helper.data('locked') : false,
 				act  = (lock && !helperLocked) ? 'disable' : 'enable',
-				dirs = $.map(e.data.files||[], function(h) {  
+				dirs = $.grep(e.data.files||[], function(h) {  
 					var dir = fm.file(h);
-					return dir && dir.mime == 'directory' ? h : null;
+					return dir && dir.mime == 'directory' ? true : false;
 				});
 				
 			$.each(dirs, function(i, hash) {

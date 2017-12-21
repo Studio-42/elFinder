@@ -166,8 +166,8 @@ window.elFinderSupportVer1 = function(upload) {
 			files = {}, 
 			filter = function(file) { return file && file.hash && file.name && file.mime ? file : null; },
 			getDirs = function(items) {
-				return $.map(items, function(i) {
-					return i && i.mime && i.mime === 'directory'? i : null;
+				return $.grep(items, function(i) {
+					return i && i.mime && i.mime === 'directory'? true : false;
 				});
 			},
 			getTreeDiff = function(files) {
