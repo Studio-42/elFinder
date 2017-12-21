@@ -382,7 +382,7 @@
 			// ACE Editor
 			// called on initialization of elFinder cmd edit (this: this editor's config object)
 			setup : function(opts, fm) {
-				if (fm.UA.ltIE8) {
+				if (fm.UA.ltIE8 || !fm.options.cdns.ace) {
 					this.disabled = true;
 				}
 			},
@@ -573,7 +573,7 @@
 			// CodeMirror
 			// called on initialization of elFinder cmd edit (this: this editor's config object)
 			setup : function(opts, fm) {
-				if (fm.UA.ltIE10) {
+				if (fm.UA.ltIE10 || !fm.options.cdns.codemirror) {
 					this.disabled = true;
 				}
 			},
@@ -717,7 +717,7 @@
 			// SimpleMDE
 			// called on initialization of elFinder cmd edit (this: this editor's config object)
 			setup : function(opts, fm) {
-				if (fm.UA.ltIE10) {
+				if (fm.UA.ltIE10 || !fm.options.cdns.simplemde) {
 					this.disabled = true;
 				}
 			},
@@ -811,8 +811,12 @@
 			},
 			exts  : ['htm', 'html', 'xhtml'],
 			setup : function(opts, fm) {
-				if (opts.extraOptions && opts.extraOptions.managerUrl) {
-					this.managerUrl = opts.extraOptions.managerUrl;
+				if (!fm.options.cdns.ckeditor) {
+					this.disabled = true;
+				} else {
+					if (opts.extraOptions && opts.extraOptions.managerUrl) {
+						this.managerUrl = opts.extraOptions.managerUrl;
+					}
 				}
 			},
 			load : function(textarea) {
@@ -905,8 +909,12 @@
 			},
 			exts  : ['htm', 'html', 'xhtml'],
 			setup : function(opts, fm) {
-				if (opts.extraOptions && opts.extraOptions.managerUrl) {
-					this.managerUrl = opts.extraOptions.managerUrl;
+				if (!fm.options.cdns.tinymce) {
+					this.disabled = true;
+				} else {
+					if (opts.extraOptions && opts.extraOptions.managerUrl) {
+						this.managerUrl = opts.extraOptions.managerUrl;
+					}
 				}
 			},
 			load : function(textarea) {
