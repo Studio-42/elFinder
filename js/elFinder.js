@@ -3850,7 +3850,6 @@ var elFinder = function(elm, opts, bootCallback) {
 	}
 	
 	self.one('opendone', function() {
-		self.log('attached event to window');
 		var tm;
 		// attach events to document
 		$(document)
