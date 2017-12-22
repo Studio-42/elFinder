@@ -1427,7 +1427,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		var parents = [],
 			dir;
 		
-		while ((dir = this.file(hash))) {
+		while (hash && (dir = this.file(hash))) {
 			parents.unshift(dir.hash);
 			hash = dir.phash;
 		}
