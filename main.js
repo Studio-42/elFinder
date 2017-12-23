@@ -163,7 +163,7 @@
 			'elfinder' : 'elfinder.min',
 			'i18nfmsg' : '../../i18nFolderMsgs',
 			'jquery.xdr': '../xdr/jquery.xdr',
-			'blockchain': '//blockchain.info/Resources/js/pay-now-button'
+			'blockchain': '../../tools/donate-bitcoin/pay-now-button'
 		},
 		shim : {
 			'jquery.xdr': {
