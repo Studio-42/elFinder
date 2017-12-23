@@ -900,7 +900,7 @@ $.fn.elfindercwd = function(fm, options) {
 			tableHeader = null,
 			
 			// To fixed table header colmun
-			fixTableHeader = function(options) {
+			fixTableHeader = function(optsArg) {
 				if (! options.listView.fixedHeader) {
 					return;
 				}
@@ -911,7 +911,7 @@ $.fn.elfindercwd = function(fm, options) {
 						base.css('left', val);
 					}
 				},
-				opts = options || {},
+				opts = optsArg || {},
 				cnt, base, table, thead, tbody, hheight, htr, btr, htd, btd, htw, btw, init;
 				
 				tbody = cwd.find('tbody');
