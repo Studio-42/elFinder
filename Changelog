@@ -1,3 +1,27 @@
+2017-12-xx  Naoki Sawada  <hypweb@gmail.com>
+
+	* elFinder (2.1.31):
+		- [ui:dialog] bugfix that used dialog is not removed
+		- [cmd:rename,resources:mixin] bugfix that can't access filename edit area with mobile devices
+		- [ui:cwd,ui:tree] Fixed #2303 UX at rename is not good
+		- [cmd:rename] Fixed #2308 rename multiple items at once 
+		- [cmd:rename] Fixed #2315 add batch rename function
+		- [js:core] Fixed #2320 problem that rename on upload don't work with FormData
+		- [cmd:rm] fix problem of contentmenu extra button "Remove" not work on tree
+		- [cmd:quicklook] add "RAR Archive" preview
+		- [js:core] bugfix of registration `of fm.decodeRawString` by `fm.options.rawStringDecoder`
+		- [php:core] Fixed #2312 can't upload by "paste url or images" on IE
+		- [cmd:mkdir] fixed #2326 became can not be create folder on the tree
+		- [VD:abstract] Fixed #2329 problem of getFullPath() with without folder name
+		- [js:core] Fixed #2332 CORS detection gives false positive on IE11
+		- [ui:dialog] Fixed #2331 add CSS class name to dialog buttons
+		- [cmd:quicklook] show file size of the Archive preview
+		- [js:core] fix problem that options.drawString encoder does not effect
+		- Fixed #2336 'jp' isn't a Japanese in ISO-639 correctly it's a 'ja'
+		- [js:core] Fixed #2337 prevent request initial request is completed
+		- [js:options] allow empty value of cdns to disable it
+
+
 2017-11-29  Naoki Sawada  <hypweb@gmail.com>
 
 	* elFinder (2.1.30):
@@ -25,6 +49,7 @@
 		- [VD:FTP] Fixed #2289 add support for FTP+SSL
 		- [cmd:help] Fixed #2286 add user preferences "Action when select file", "Open with the editor used last time"
 		- And some minor bug fixes
+
 
 2017-10-07  Naoki Sawada  <hypweb@gmail.com>
 
@@ -65,6 +90,7 @@
 		- [i18n:LANG] add "Sum" for the caption of recursive folder size
 		- [js:core] Fixed #2236 show target path in upload confirm dialog at non-cwd
 		- And some minor bug fixes
+
 
 2017-08-16  Naoki Sawada  <hypweb@gmail.com>
 

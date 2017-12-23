@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 1c72256) (2017-12-21)
+ * Version 2.1.30 (2.1-src Nightly: 3f53326) (2017-12-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -1458,7 +1458,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		var parents = [],
 			dir;
 		
-		while ((dir = this.file(hash))) {
+		while (hash && (dir = this.file(hash))) {
 			parents.unshift(dir.hash);
 			hash = dir.phash;
 		}
@@ -8825,7 +8825,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 1c72256)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 3f53326)';
 
 
 
@@ -13407,7 +13407,7 @@ $.fn.elfindercwd = function(fm, options) {
 			tableHeader = null,
 			
 			// To fixed table header colmun
-			fixTableHeader = function(options) {
+			fixTableHeader = function(optsArg) {
 				if (! options.listView.fixedHeader) {
 					return;
 				}
@@ -13418,7 +13418,7 @@ $.fn.elfindercwd = function(fm, options) {
 						base.css('left', val);
 					}
 				},
-				opts = options || {},
+				opts = optsArg || {},
 				cnt, base, table, thead, tbody, hheight, htr, btr, htd, btd, htw, btw, init;
 				
 				tbody = cwd.find('tbody');
