@@ -205,7 +205,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      */
     protected function _bd_refreshToken()
     {
-        if ($this->token->expires < time()) {
+        if (!property_exists($this->token, 'expires') || $this->token->expires < time()) {
             if (!$token = $this->session->get('BoxTokens')) {
                 $token = $this->token;
             }

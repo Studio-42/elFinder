@@ -191,7 +191,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      */
     protected function _od_refreshToken()
     {
-        if ($this->token->expires < time()) {
+        if (!property_exists($this->token, 'expires') || $this->token->expires < time()) {
             if (!$token = $this->session->get('OneDriveTokens')) {
                 $token = $this->token;
             }
