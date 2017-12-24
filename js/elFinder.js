@@ -7978,9 +7978,6 @@ elFinder.prototype = {
 						var node = $(this),
 							path = node.val(),
 							spn;
-						if (e.type === 'click') {
-							node.data('keepFocus')? node.removeData('keepFocus') : node.data('keepFocus', true);
-						}
 						self.inputs.path.val(path);
 						if (opts.folders && (e.type === 'change' || node.data('current') !== path)) {
 							node.next().remove();

@@ -34,14 +34,6 @@ elFinder.prototype.commands.netmount = function() {
 					},
 					inputs = {
 						protocol : $('<select/>')
-						.on('click',function() {
-							var $this = $(this);
-							if ($this.data('keepFocus')) {
-								$this.removeData('keepFocus');
-							} else {
-								$this.data('keepFocus', true);
-							}
-						})
 						.on('change', function(e, data){
 							var protocol = this.value;
 							content.find('.elfinder-netmount-tr').hide();
@@ -222,8 +214,9 @@ elFinder.prototype.commands.netunmount = function() {
 	};
 
 	this.getstate = function(sel) {
-		var fm = this.fm;
-		return !!sel && this.drivers.length && !this._disabled && fm.file(sel[0]).netkey ? 0 : -1;
+		var fm = this.fm,
+			file;
+		return !!sel && this.drivers.length && !this._disabled && (file = fm.file(sel[0])) && file.netkey ? 0 : -1;
 	};
 	
 	this.exec = function(hashes) {
