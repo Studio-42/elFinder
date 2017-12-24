@@ -23,17 +23,17 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     /**
      * @var string The base URL for API requests
      **/
-    const API_URL = 'https://api.onedrive.com/v1.0/drive/items/';
+    const API_URL = 'https://graph.microsoft.com/v1.0/me/drive/items/';
 
     /**
      * @var string The base URL for authorization requests
      */
-    const AUTH_URL = 'https://login.live.com/oauth20_authorize.srf';
+    const AUTH_URL = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize';
 
     /**
      * @var string The base URL for token requests
      */
-    const TOKEN_URL = 'https://login.live.com/oauth20_token.srf';
+    const TOKEN_URL = 'https://login.microsoftonline.com/common/oauth2/v2.0/token';
 
     /**
      * OneDrive token object.
@@ -603,13 +603,13 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                         $offline = '';
                         // Gets a log in URL with sufficient privileges from the OneDrive API
                         if (!empty($options['offline'])) {
-                            $offline = ' wl.offline_access';
+                            $offline = ' offline_access';
                         }
 
                         $redirect_uri = $options['url'].'/netmount/onedrive/1';
                         $url = self::AUTH_URL
                             .'?client_id='.urlencode($options['client_id'])
-                            .'&scope='.urlencode('wl.skydrive_update'.$offline)
+                            .'&scope='.urlencode('files.readwrite.all'.$offline)
                             .'&response_type=code'
                             .'&redirect_uri='.urlencode($redirect_uri);
 
