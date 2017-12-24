@@ -1064,7 +1064,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
             list(, $itemId) = $this->_od_splitPath($path);
             try {
-                $url = self::API_URL.$itemId.'/action.createLink';
+                $url = self::API_URL.$itemId.'/createLink';
                 $data = (object) array(
                     'type' => 'embed',
                     'scope' => 'anonymous',
@@ -1502,7 +1502,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             list(, $parentId) = $this->_od_splitPath($targetDir);
             list(, $itemId) = $this->_od_splitPath($source);
 
-            $url = self::API_URL.$itemId.'/action.copy';
+            $url = self::API_URL.$itemId.'/copy';
 
             $properties = array(
                 'name' => (string) $name,
@@ -1532,13 +1532,21 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 $monUrl = trim($m[1]);
                 while ($res) {
                     usleep(200000);
-                    $curl = $this->_od_prepareCurl($monUrl);
+                    $curl = curl_init($monUrl);
+                    curl_setopt_array($curl, array(
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_HTTPHEADER => array(
+                            'Content-Type: application/json'
+                        )
+                    ));
                     $res = json_decode(curl_exec($curl));
                     curl_close($curl);
                     if (isset($res->status)) {
                         if ($res->status === 'completed' || $res->status === 'failed') {
                             break;
                         }
+                    } else if (isset($res->error)) {
+                        return $this->setError('OneDrive error: '.$res->error->message);
                     }
                 }
             }
