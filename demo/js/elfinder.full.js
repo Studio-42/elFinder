@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: 3f53326) (2017-12-23)
+ * Version 2.1.30 (2.1-src Nightly: 6ec1e19) (2017-12-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -7995,7 +7995,7 @@ elFinder.prototype = {
 				root      : 'root',
 				pathI18n  : 'folderId',
 				folders   : true
-			}, (noOffline === null? (opts || {}) : {noOffline : noOffline})),
+			}, (noOffline === null? (opt || {}) : {noOffline : noOffline})),
 			addFolders = function(fm, bro, folders) {
 				var self = this,
 					cnt  = Object.keys($.isPlainObject(folders)? folders : {}).length,
@@ -8016,7 +8016,7 @@ elFinder.prototype = {
 							if (path != opts.root) {
 								spn = spinner();
 								if (xhr && xhr.state() === 'pending') {
-									self.abortXHR(xhr, { quiet: true , abort: true });
+									fm.abortXHR(xhr, { quiet: true , abort: true });
 								}
 								node.after(spn);
 								xhr = fm.request({
@@ -8025,13 +8025,14 @@ elFinder.prototype = {
 								}).done(function(data){
 									addFolders.call(self, fm, node, data.folders);
 								}).always(function() {
-									self.abortXHR(xhr, { quiet: true });
+									fm.abortXHR(xhr, { quiet: true });
 									spn.remove();
 								}).xhr;
 							}
 						}
 					});
-					bro.after($('<div/>').append(select));
+					bro.after($('<div/>').append(select))
+						.closest('.ui-dialog').trigger('tabstopsInit');
 					select.focus();
 				}
 			},
@@ -8825,7 +8826,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 3f53326)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 6ec1e19)';
 
 
 
@@ -15683,6 +15684,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 				.on('focus', '.'+cltabstop, function() {
 					$(this).addClass(clhover).parent('label').addClass(clhover);
 					this.id && $(this).parent().find('label[for='+this.id+']').addClass(clhover);
+				})
+				.on('click', 'select.'+cltabstop, function() {
+					var node = $(this);
+					node.data('keepFocus')? node.removeData('keepFocus') : node.data('keepFocus', true);
 				})
 				.on('blur', '.'+cltabstop, function() {
 					$(this).removeClass(clhover).removeData('keepFocus').parent('label').removeClass(clhover);
@@ -23037,14 +23042,6 @@ elFinder.prototype.commands.netmount = function() {
 					},
 					inputs = {
 						protocol : $('<select/>')
-						.on('click',function() {
-							var $this = $(this);
-							if ($this.data('keepFocus')) {
-								$this.removeData('keepFocus');
-							} else {
-								$this.data('keepFocus', true);
-							}
-						})
 						.on('change', function(e, data){
 							var protocol = this.value;
 							content.find('.elfinder-netmount-tr').hide();
@@ -23225,8 +23222,9 @@ elFinder.prototype.commands.netunmount = function() {
 	};
 
 	this.getstate = function(sel) {
-		var fm = this.fm;
-		return !!sel && this.drivers.length && !this._disabled && fm.file(sel[0]).netkey ? 0 : -1;
+		var fm = this.fm,
+			file;
+		return !!sel && this.drivers.length && !this._disabled && (file = fm.file(sel[0])) && file.netkey ? 0 : -1;
 	};
 	
 	this.exec = function(hashes) {
