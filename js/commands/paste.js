@@ -161,9 +161,9 @@ elFinder.prototype.commands.paste = function() {
 								}
 							} else {
 								existedArr = [];
-								existed = $.grep(names, function(n) {
+								existed = $.map(names, function(n) {
 									if (typeof n === 'string') {
-										return true;
+										return n;
 									} else {
 										// support to >=2.1.11 plugin Normalizer, Sanitizer
 										existedArr = existedArr.concat(n);
