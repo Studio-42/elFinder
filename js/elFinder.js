@@ -5205,9 +5205,9 @@ elFinder.prototype = {
 											existed = data.list || [];
 										} else {
 											existedArr = [];
-											existed = $.grep(data.list, function(n) {
+											existed = $.map(data.list, function(n) {
 												if (typeof n === 'string') {
-													return true;
+													return n;
 												} else {
 													// support to >=2.1.11 plugin Normalizer, Sanitizer
 													existedArr = existedArr.concat(n);
