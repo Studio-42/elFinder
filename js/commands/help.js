@@ -232,7 +232,7 @@
 								hu: 'Magyar',
 								id: 'Bahasa Indonesia',
 								it: 'Italiano',
-								jp: '日本語',
+								ja: '日本語',
 								ko: '한국어',
 								nl: 'Nederlands',
 								no: 'Norsk',
@@ -263,8 +263,8 @@
 				forms.toolbarPref && (forms.toolbarPref = (function() {
 					var node = $('<div/>');
 					init(function() {
-						var pnls = $.grep(fm.options.uiOptions.toolbar, function(v) {
-								return $.isArray(v)? true : false;
+						var pnls = $.map(fm.options.uiOptions.toolbar, function(v) {
+								return $.isArray(v)? v : false;
 							}),
 							tags = [],
 							hides = fm.storage('toolbarhides') || {};
