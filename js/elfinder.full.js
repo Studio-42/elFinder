@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: bf5dbc2) (2017-12-26)
+ * Version 2.1.30 (2.1-src Nightly: 31510a4) (2017-12-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8826,7 +8826,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: bf5dbc2)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 31510a4)';
 
 
 
@@ -22260,7 +22260,7 @@ elFinder.prototype.commands.fullscreen = function() {
 								hu: 'Magyar',
 								id: 'Bahasa Indonesia',
 								it: 'Italiano',
-								jp: '日本語',
+								ja: '日本語',
 								ko: '한국어',
 								nl: 'Nederlands',
 								no: 'Norsk',
@@ -22291,8 +22291,8 @@ elFinder.prototype.commands.fullscreen = function() {
 				forms.toolbarPref && (forms.toolbarPref = (function() {
 					var node = $('<div/>');
 					init(function() {
-						var pnls = $.grep(fm.options.uiOptions.toolbar, function(v) {
-								return $.isArray(v)? true : false;
+						var pnls = $.map(fm.options.uiOptions.toolbar, function(v) {
+								return $.isArray(v)? v : false;
 							}),
 							tags = [],
 							hides = fm.storage('toolbarhides') || {};
