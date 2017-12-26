@@ -45,6 +45,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	protected $archiveSize = 0;
 
 	/**
+	 * Is checking stat owner
+	 *
+	 * @var        boolean
+	 */
+	protected $statOwner = false;
+
+	/**
 	 * Constructor
 	 * Extend options with required fields
 	 *
@@ -193,6 +200,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (! empty($this->options['keepTimestamp'])) {
 			$this->options['keepTimestamp'] = array_flip($this->options['keepTimestamp']);
 		}
+
+		$this->statOwner = (!empty($this->options['statOwner']));
 	}
 	
 	/**
@@ -439,12 +448,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function _stat($path) {
-		
-		static $statOwner;
-		if (is_null($statOwner)) {
-			$statOwner = (!empty($this->options['statOwner']));
-		}
-		
 		$stat = array();
 
 		if (!file_exists($path) && !is_link($path)) {
@@ -481,7 +484,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		}
 		$size = sprintf('%u', filesize($path));
 		$stat['ts'] = filemtime($path);
-		if ($statOwner) {
+		if ($this->statOwner) {
 			$fstat = stat($path);
 			$uid = $fstat['uid'];
 			$gid = $fstat['gid'];
@@ -655,7 +658,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$files = array();
 		$cache = array();
 		$dirWritable = is_writable($path);
-		$statOwner = (!empty($this->options['statOwner']));
 		$dirItr = array();
 		$followSymLinks = $this->options['followSymLinks'];
 		try {
@@ -711,7 +713,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				$size = sprintf('%u', $file->getSize());
 				$stat['ts'] = $file->getMTime();
 				if (!$br) {
-					if ($statOwner && !$linkreadable) {
+					if ($this->statOwner && !$linkreadable) {
 						$uid = $file->getOwner();
 						$gid = $file->getGroup();
 						$stat['perm'] = substr((string)decoct($file->getPerms()), -4);
