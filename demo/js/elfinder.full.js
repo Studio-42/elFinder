@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.30 (2.1-src Nightly: eb0a61f) (2017-12-26)
+ * Version 2.1.30 (2.1-src Nightly: 6e0618a) (2017-12-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2017, Studio 42
@@ -8826,7 +8826,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.30 (2.1-src Nightly: eb0a61f)';
+elFinder.prototype.version = '2.1.30 (2.1-src Nightly: 6e0618a)';
 
 
 
@@ -9179,12 +9179,12 @@ elFinder.prototype._options = {
 	cdns : {
 		// for editor etc.
 		ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.9',
-		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.32.0',
+		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.33.0',
 		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.8.0',
 		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.7.4',
 		simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		// for quicklook etc.
-		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.8.8/hls.min.js',
+		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.8.9/hls.min.js',
 		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.4/dash.all.min.js',
 		prettify   : '//cdn.rawgit.com/google/code-prettify/05ad1b76f8af1232da963c17bad144107b07e59a/loader/run_prettify.js',
 		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js',
@@ -10962,12 +10962,12 @@ elFinder.prototype.resources = {
 							}
 							if (!name || name === '.' || name === '..' || !valid) {
 								inError = true;
-								fm.error(file.mime === 'directory'? 'errInvDirname' : 'errInvName', {modal: true, close: select});
+								fm.error(file.mime === 'directory'? 'errInvDirname' : 'errInvName', {modal: true, close: function(){setTimeout(select, 120);}});
 								return false;
 							}
 							if (fm.fileByName(name, phash)) {
 								inError = true;
-								fm.error(['errExists', name], {modal: true, close: select});
+								fm.error(['errExists', name], {modal: true, close: function(){setTimeout(select, 120);}});
 								return false;
 							}
 
@@ -10994,7 +10994,7 @@ elFinder.prototype.resources = {
 										fm.unlockfiles({files : [id]});
 										inError = true;
 										input.show().prev().remove();
-										fm.error(error, {modal: true, close: select});
+										fm.error(error, {modal: true, close: function(){setTimeout(select, 120);}});
 									})
 									.done(function(data) {
 										if (data && data.added && data.added[0]) {
@@ -11036,6 +11036,7 @@ elFinder.prototype.resources = {
 						pnode.css('z-index', overlay.css('z-index') + 1);
 					}
 					inError = false;
+					! fm.enabled() && fm.enable();
 					input.focus().select();
 					input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
 				},
@@ -26288,12 +26289,12 @@ elFinder.prototype.commands.rename = function() {
 					}
 					if (!name || name === '.' || name === '..' || !valid) {
 						inError = true;
-						fm.error(file.mime === 'directory'? 'errInvDirname' : 'errInvName', {modal: true, close: select});
+						fm.error(file.mime === 'directory'? 'errInvDirname' : 'errInvName', {modal: true, close: function(){setTimeout(select, 120);}});
 						return false;
 					}
 					if (cnt === 1 && fm.fileByName(name, file.phash)) {
 						inError = true;
-						fm.error(['errExists', name], {modal: true, close: select});
+						fm.error(['errExists', name], {modal: true, close: function(){setTimeout(select, 120);}});
 						return false;
 					}
 					
@@ -26358,6 +26359,7 @@ elFinder.prototype.commands.rename = function() {
 					overlay.on('click', cancel).elfinderoverlay('show');
 					pnode.css('z-index', overlay.css('z-index') + 1);
 				}
+				! fm.enabled() && fm.enable();
 				if (inError) {
 					inError = false;
 					input.on('blur', blur);
