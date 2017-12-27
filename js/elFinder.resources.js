@@ -201,12 +201,12 @@ elFinder.prototype.resources = {
 							}
 							if (!name || name === '.' || name === '..' || !valid) {
 								inError = true;
-								fm.error(file.mime === 'directory'? 'errInvDirname' : 'errInvName', {modal: true, close: select});
+								fm.error(file.mime === 'directory'? 'errInvDirname' : 'errInvName', {modal: true, close: function(){setTimeout(select, 120);}});
 								return false;
 							}
 							if (fm.fileByName(name, phash)) {
 								inError = true;
-								fm.error(['errExists', name], {modal: true, close: select});
+								fm.error(['errExists', name], {modal: true, close: function(){setTimeout(select, 120);}});
 								return false;
 							}
 
@@ -233,7 +233,7 @@ elFinder.prototype.resources = {
 										fm.unlockfiles({files : [id]});
 										inError = true;
 										input.show().prev().remove();
-										fm.error(error, {modal: true, close: select});
+										fm.error(error, {modal: true, close: function(){setTimeout(select, 120);}});
 									})
 									.done(function(data) {
 										if (data && data.added && data.added[0]) {
@@ -275,6 +275,7 @@ elFinder.prototype.resources = {
 						pnode.css('z-index', overlay.css('z-index') + 1);
 					}
 					inError = false;
+					! fm.enabled() && fm.enable();
 					input.focus().select();
 					input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
 				},
