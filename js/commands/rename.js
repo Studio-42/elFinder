@@ -348,12 +348,12 @@ elFinder.prototype.commands.rename = function() {
 					}
 					if (!name || name === '.' || name === '..' || !valid) {
 						inError = true;
-						fm.error(file.mime === 'directory'? 'errInvDirname' : 'errInvName', {modal: true, close: select});
+						fm.error(file.mime === 'directory'? 'errInvDirname' : 'errInvName', {modal: true, close: function(){setTimeout(select, 120);}});
 						return false;
 					}
 					if (cnt === 1 && fm.fileByName(name, file.phash)) {
 						inError = true;
-						fm.error(['errExists', name], {modal: true, close: select});
+						fm.error(['errExists', name], {modal: true, close: function(){setTimeout(select, 120);}});
 						return false;
 					}
 					
@@ -418,6 +418,7 @@ elFinder.prototype.commands.rename = function() {
 					overlay.on('click', cancel).elfinderoverlay('show');
 					pnode.css('z-index', overlay.css('z-index') + 1);
 				}
+				! fm.enabled() && fm.enable();
 				if (inError) {
 					inError = false;
 					input.on('blur', blur);
