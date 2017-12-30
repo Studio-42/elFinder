@@ -1,13 +1,13 @@
 /**
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
- * @author Naoki Sawada <hypweb@gmail.com>
+ * @author Naoki Sawada <hypweb+elfinder@gmail.com>
  * @version 2017-12-08
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 	elFinder.prototype.i18.en = {
-		translator : 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;, Naoki Sawada &lt;hypweb@gmail.com&gt;',
+		translator : 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;, Naoki Sawada &lt;hypweb+elfinder@gmail.com&gt;',
 		language   : 'English',
 		direction  : 'ltr',
 		dateFormat : 'M d, Y h:i A', // Mar 13, 2012 05:27 PM
