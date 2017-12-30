@@ -1079,7 +1079,7 @@
 			prepare : function(base, dialogOpts, file) {
 				var elfNode = base.editor.fm.getUI();
 				$(base).height(elfNode.height());
-				dialogOpts.width = Math.max(dialogOpts.width, elfNode.width() * 0.8);
+				dialogOpts.width = Math.max(dialogOpts.width || 0, elfNode.width() * 0.8);
 			},
 			// Initialization of editing node (this: this editors HTML node)
 			init : function(id, file, dum, fm) {
