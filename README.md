@@ -204,7 +204,7 @@ Authors
 
  * Chief developer: Dmitry "dio" Levashov <dio@std42.ru>
  * Maintainer: Troex Nevelin <troex@fury.scancode.ru>
- * Developers: Alexey Sukhotin <strogg@yandex.ru>, Naoki Sawada <hypweb@gmail.com>
+ * Developers: Alexey Sukhotin <strogg@yandex.ru>, Naoki Sawada <hypweb+elfinder@gmail.com>
  * Icons: [PixelMixer](http://pixelmixer.ru), [Yusuke Kamiyamane](http://p.yusukekamiyamane.com)
 
 We hope our tools will be helpful for you.
