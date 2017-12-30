@@ -1,4 +1,4 @@
-2017-12-27  Naoki Sawada  <hypweb@gmail.com>
+2017-12-27  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.31):
 		- [ui:dialog] bugfix that used dialog is not removed
@@ -24,7 +24,7 @@
 		- And some minor bug fixes
 
 
-2017-11-29  Naoki Sawada  <hypweb@gmail.com>
+2017-11-29  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.30):
 		- [js:core] Fixed #2238 always same filename on upload with some iOS devices
@@ -53,7 +53,7 @@
 		- And some minor bug fixes
 
 
-2017-10-07  Naoki Sawada  <hypweb@gmail.com>
+2017-10-07  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.29):
 		- [cmd:quicklook.plugins] Fixed #2149 support Data URI scheme contents of the text file
@@ -94,7 +94,7 @@
 		- And some minor bug fixes
 
 
-2017-08-16  Naoki Sawada  <hypweb@gmail.com>
+2017-08-16  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.28):
 		- [ui:cwd] Fixed #2140 sync problem of col-width of table header when item add/remove
@@ -103,7 +103,7 @@
 		- And some minor bug fixes
 
 
-2017-08-10  Naoki Sawada  <hypweb@gmail.com>
+2017-08-10  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.27):
 		- [php:core] Fixed #2104 notice error in `getIniBytes()` with php 7.1
@@ -125,7 +125,7 @@
 		- And some minor bug fixes
 
 
-2017-07-17  Naoki Sawada  <hypweb@gmail.com>
+2017-07-17  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.26):
 		- [php:core] Fixed #2069 add static method `elFinder::getApiFullVersion()`
@@ -144,7 +144,7 @@
 		- And some minor bug fixes
 
 
-2017-06-23  Naoki Sawada  <hypweb@gmail.com>
+2017-06-23  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.25):
 		- [php] Fixed #2014 "Parse error" on PHP < 5.3
@@ -166,7 +166,7 @@
 		- And some minor bug fixes
 
 
-2017-05-19  Naoki Sawada  <hypweb@gmail.com>
+2017-05-19  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.24):
 		- [js:options] Fixed #1947 add client option `dispInlineRegex` for legacy connectors
@@ -195,7 +195,7 @@
 		- And some minor bug fixes
 
 
-2017-03-31  Naoki Sawada  <hypweb@gmail.com>
+2017-03-31  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.23):
 		- [VD:Dropbox2] Fixed #1598 add a driver of Dropbox APIv2
@@ -219,7 +219,7 @@
 		- And some minor bug fixes
 
 
-2017-02-25  Naoki Sawada  <hypweb@gmail.com>
+2017-02-25  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.22):
 		- [VD:LocalFileSystem] Fixed #1882 option `copyJoin` does not work on extract
@@ -230,19 +230,19 @@
 		- And some minor bug fixes
 
 
-2017-02-25  Naoki Sawada  <hypweb@gmail.com>
+2017-02-25  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.0.9):
 		- [VD:abstract] Fixed #1911 unable to rename folder
 
 
-2017-02-09  Naoki Sawada  <hypweb@gmail.com>
+2017-02-09  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.0.8):
 		- [VD:security] Fixed #1891 MIME-type check of unknown item is not execute
 
 
-2017-02-07  Naoki Sawada  <hypweb@gmail.com>
+2017-02-07  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.21):
 		- [cmd:open] Fixed #1844 make configurable to open into tab(s)
@@ -255,7 +255,7 @@
 		- And some minor bug fixes
 
 
-2017-01-11  Naoki Sawada  <hypweb@gmail.com>
+2017-01-11  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.20):
 		- [php:core] Fixed #1800 session write before umount of the volume
@@ -273,7 +273,7 @@
 		- [php:core] Fixed #1843 security vulnerability fix
 
 
-2016-12-10  Naoki Sawada  <hypweb@gmail.com>
+2016-12-10  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.19):
 		- [js] Fixed #1000 Wrap compiled code in UMD (for commonJs and AMD support)
@@ -292,7 +292,7 @@
 		- And some minor bug fixes
 
 
-2016-11-21  Naoki Sawada  <hypweb@gmail.com>
+2016-11-21  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.18):
 
@@ -302,7 +302,7 @@
 		- And some minor bug fixes
 
 
-2016-11-19  Naoki Sawada  <hypweb@gmail.com>
+2016-11-19  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.17):
 
@@ -336,7 +336,7 @@
 		- And some minor bug fixes
 
 
-2016-10-11  Naoki Sawada  <hypweb@gmail.com>
+2016-10-11  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.16):
 		- [cmd:info] Fixed #1652 add CSS class name `file.csscls` to icon
@@ -358,7 +358,7 @@
 		- And some minor bug fixes
 
 
-2016-09-12  Naoki Sawada  <hypweb@gmail.com>
+2016-09-12  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.15):
 		- [js:command] inheritable elFinder.command object rel. #1545
@@ -399,7 +399,7 @@
 		- [ui:dialog] Fixed #1647 controlling tabstop by `elfinder-tabstop` css class name
 		- And some minor bug fixes
 
-2016-07-25  Naoki Sawada  <hypweb@gmail.com>
+2016-07-25  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.14):
 		- [js:core,VD:abstract] Fixed #1525 do MIME check before file upload
@@ -412,7 +412,7 @@
 		- And some minor bug fixes
 
 
-2016-07-11  Naoki Sawada  <hypweb@gmail.com>
+2016-07-11  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.13):
 		- [ui:cwd] Fixed #1433 create a thumbnail of the video file with ffmpeg
@@ -442,13 +442,13 @@
 		- And some minor bug fixes
 
 
-2016-07-11  Naoki Sawada  <hypweb@gmail.com>
+2016-07-11  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.0.7):
 		- [VD:abstract] Fixed #1514 security vulnerability in the archive command
 
 
-2016-05-30  Naoki Sawada  <hypweb@gmail.com>
+2016-05-30  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.12):
 		- Fixed #1321 Not trim white spaces on editing the text file
@@ -485,7 +485,7 @@
 		- And some minor bug fixes
 
 
-2016-04-11  Naoki Sawada  <hypweb@gmail.com>
+2016-04-11  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.11):
 		- Added Archive(zip|gzip|tar) quicklook preview plugin
@@ -494,7 +494,7 @@
 		- And some minor bug fixes
 
 
-2016-04-02  Naoki Sawada  <hypweb@gmail.com>
+2016-04-02  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.10):
 		- Fixed #1061, #1231 Supported controllable folder icons
@@ -507,7 +507,7 @@
 		- And some minor bug fixes
 
 
-2016-03-11  Naoki Sawada  <hypweb@gmail.com>
+2016-03-11  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.9):
 		- Fixed enbug of 2.1.6-2.1.7 PHP error undefind valiable/array to string conversion
@@ -531,7 +531,7 @@
 		- And some minor bug fixes
 
 
-2016-03-07  Naoki Sawada  <hypweb@gmail.com>
+2016-03-07  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.8):
 		- Added a new volume driver `MsSQL`
@@ -544,7 +544,7 @@
 		- And some minor bug fixes
 
 
-2016-02-21  Naoki Sawada  <hypweb@gmail.com>
+2016-02-21  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.7):
 		- Added connector main options `commonTempPath` and `maxArcFilesSize`
@@ -564,13 +564,13 @@
 		- And some minor bug fixes
 
 
-2015-02-21  Naoki Sawada  <hypweb@gmail.com>
+2015-02-21  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.0.6):
 		- Fixed #1213 infinite loop in PHP connector
 
 
-2016-01-19  Naoki Sawada  <hypweb@gmail.com>
+2016-01-19  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.6):
 		- Fixed #1074 startPath for multi volumes
@@ -590,7 +590,7 @@
 		- And some minor bug fixes
 
 
-2015-12-26  Naoki Sawada  <hypweb@gmail.com>
+2015-12-26  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.5):
 		- Fixed bug that can't in writable with `chmod`
@@ -601,20 +601,20 @@
 		- And some minor bug fixes
 
 
-2015-12-26  Naoki Sawada  <hypweb@gmail.com>  
+2015-12-26  Naoki Sawada  <hypweb+elfinder@gmail.com>  
 
 	* elFinder (2.0.5):
 		- Fixed problem if filename included character that can't be json encode
 
 
-2015-12-16  Naoki Sawada  <hypweb@gmail.com>
+2015-12-16  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.4):
 		- Fixed #1163 Dropbox driver supported windows server
 		- Fixed search problem on Windows server
 
 
-2015-12-13  Naoki Sawada  <hypweb@gmail.com>
+2015-12-13  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.3):
 		- Auto configure `customHeaders`, `xhrFields` for CORS
@@ -634,7 +634,7 @@
 		- Others, some minor bug fixes
 
 
-2015-11-23  Naoki Sawada  <hypweb@gmail.com>
+2015-11-23  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.2):
 		- [security-fix] vulnerability of the MIME type quarantine
@@ -651,13 +651,13 @@
 		- Others, some minor bug fixes
 
 
-2015-11-23  Naoki Sawada  <hypweb@gmail.com>
+2015-11-23  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.0.4):
 		- [security-fix] vulnerability of the MIME type quarantine
 
 
-2015-11-10  Naoki Sawada  <hypweb@gmail.com>
+2015-11-10  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.1):
 		- More High performance server backend and light client UI
@@ -677,7 +677,7 @@
 		- Supports custom CSS class function of tree view
 
 
-2015-11-10  Naoki Sawada  <hypweb@gmail.com>
+2015-11-10  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.0.3):
 		- jQuery 1.9+ support
