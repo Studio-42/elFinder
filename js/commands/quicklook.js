@@ -382,7 +382,7 @@
 			info.html('');
 		})
 		// update info/icon
-		.on('update', function(e) {
+		.on('previewupdate', function(e) {
 			var fm      = self.fm,
 				preview = self.preview,
 				file    = e.file,
@@ -741,12 +741,12 @@
 							// try re-get file object
 							self.value = Object.assign({}, fm.file(self.value.hash));
 						}
-						preview.trigger($.Event('update', {file : self.value}));
+						preview.trigger($.Event('previewupdate', {file : self.value}));
 					}
 				}
 			});
 			
-			preview.on('update', function(e) {
+			preview.on('previewupdate', function(e) {
 				var file, hash, serach;
 				
 				if (file = e.file) {
@@ -816,7 +816,7 @@
 				$.each(e.data.changed, function() {
 					if (self.window.data('hash') === this.hash) {
 						self.window.data('hash', null);
-						self.preview.trigger('update');
+						self.preview.trigger('previewupdate');
 						return false;
 					}
 				});
