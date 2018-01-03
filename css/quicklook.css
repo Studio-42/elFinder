@@ -122,7 +122,8 @@
 }
 .elfinder-quicklook-titlebar-icon .ui-icon {
 	position: relative;
-	margin: -9px 3px 0px 0px;
+	margin: 0px 3px 0px 0px;
+	display: inline-block;
 	cursor: pointer;
 	border-radius: 10px;
 	border: 1px solid;
