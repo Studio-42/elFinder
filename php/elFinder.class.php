@@ -158,6 +158,10 @@ class elFinder {
 	 * If the session storage mechanism of the system does not allow `UTF-8`
 	 * And it must be `true` option 'base64encodeSessionData' of elFinder
 	 * 
+	 * WARNING: When enabling this option, if saving the data passed from the user directly to the session variable,
+	 * it make vulnerable to the object injection attack, so use it carefully.
+	 * see https://github.com/Studio-42/elFinder/issues/2345
+	 * 
 	 * @var bool
 	 */
 	protected static $base64encodeSessionData = false;
