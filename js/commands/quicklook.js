@@ -45,11 +45,13 @@
 		 **/
 		state      = closed,
 		/**
-		 * next/prev event name (requied to cwd catch it)
-		 *
-		 * @type Number
+		 * Event name of update
+		 * for fix conflicts with Prototype.JS
+		 * 
+		 * `@see https://github.com/Studio-42/elFinder/pull/2346
+		 * @type String
 		 **/
-		// keydown    = fm.UA.Firefox || fm.UA.Opera ? 'keypress' : 'keydown',
+		evUpdate = Element.update? 'quicklookupdate' : 'update',
 		/**
 		 * navbar icon class
 		 *
@@ -359,6 +361,7 @@
 		init = true,
 		dockHeight,	getSize, tm4cwd, dockedNode, selectTm;
 
+	this.evUpdate = evUpdate,
 	(this.navbar = navbar)._show = navShow;
 	this.resize = 'resize.'+fm.namespace;
 	this.info = $('<div/>').addClass(infocls)
@@ -382,7 +385,7 @@
 			info.html('');
 		})
 		// update info/icon
-		.on('update', function(e) {
+		.on(evUpdate, function(e) {
 			var fm      = self.fm,
 				preview = self.preview,
 				file    = e.file,
@@ -741,12 +744,12 @@
 							// try re-get file object
 							self.value = Object.assign({}, fm.file(self.value.hash));
 						}
-						preview.trigger($.Event('update', {file : self.value}));
+						preview.trigger($.Event(evUpdate, {file : self.value}));
 					}
 				}
 			});
 			
-			preview.on('update', function(e) {
+			preview.on(evUpdate, function(e) {
 				var file, hash, serach;
 				
 				if (file = e.file) {
@@ -816,7 +819,7 @@
 				$.each(e.data.changed, function() {
 					if (self.window.data('hash') === this.hash) {
 						self.window.data('hash', null);
-						self.preview.trigger('update');
+						self.preview.trigger(evUpdate);
 						return false;
 					}
 				});
