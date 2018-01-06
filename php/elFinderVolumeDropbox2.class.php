@@ -1339,11 +1339,8 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
             }
             $dropboxFile = new DropboxFile($filepath);
             if ($name === '') {
-                $dir = $this->_dirname($path);
-                $name = $this->_basename($path);
                 $fullpath = $path;
             } else {
-                $dir = $path;
                 $fullpath = $this->_db_joinName($path, $name);
             }
 
@@ -1394,7 +1391,14 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
             if (file_put_contents($local, $content, LOCK_EX) !== false
             && ($fp = fopen($local, 'rb'))) {
                 clearstatcache();
-                $res = $this->_save($fp, $path, '', []);
+                $name = '';
+                $stat = $this->stat($path);
+                if ($stat) {
+                    // keep real name
+                    $path = $this->_dirname($path);
+                    $name = $stat['name'];
+                }
+                $res = $this->_save($fp, $path, $name, []);
                 fclose($fp);
             }
             file_exists($local) && unlink($local);

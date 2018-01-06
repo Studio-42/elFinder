@@ -876,6 +876,7 @@
 
 				if (!self.confObj.loader) {
 					self.confObj.loader = $.Deferred();
+					window.CKEDITOR_BASEPATH = fm.options.cdns.ckeditor + '/';
 					$.getScript(fm.options.cdns.ckeditor + '/ckeditor.js', function() {
 						self.confObj.loader.resolve();
 					});

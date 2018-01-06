@@ -6960,8 +6960,8 @@ elFinder.prototype = {
 			return elFinder.prototype.naturalCompare(file1.mime, file2.mime);
 		},
 		date : function(file1, file2) { 
-			var date1 = file1.ts || file1.date,
-				date2 = file2.ts || file2.date;
+			var date1 = file1.ts || file1.date || 0,
+				date2 = file2.ts || file2.date || 0;
 
 			return date1 === date2 ? 0 : date1 > date2 ? 1 : -1;
 		},
