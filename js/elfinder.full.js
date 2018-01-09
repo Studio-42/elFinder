@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.31 (2.1-src Nightly: 96ac443) (2018-01-06)
+ * Version 2.1.31 (2.1-src Nightly: 82847d8) (2018-01-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8826,7 +8826,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.31 (2.1-src Nightly: 96ac443)';
+elFinder.prototype.version = '2.1.31 (2.1-src Nightly: 82847d8)';
 
 
 
@@ -15207,17 +15207,27 @@ $.fn.elfinderdialog = function(opts, fm) {
 			if (opts === 'open') {
 				dialog.css('display') === 'none' && dialog.fadeIn(120, function() {
 					dialog.trigger('open');
+					fm.trigger('dialogopened', {dialog: dialog});
 				});
 			} else if (opts === 'close' || opts === 'destroy') {
 				dialog.stop(true);
-				(dialog.is(':visible') || elfNode.is(':hidden')) && dialog.trigger('close');
-				opts == 'destroy' && dialog.remove();
+				if (dialog.is(':visible') || elfNode.is(':hidden')) {
+					dialog.trigger('close');
+					fm.trigger('dialogclosed', {dialog: dialog});
+				}
+				if (opts === 'destroy') {
+					dialog.remove();
+					fm.trigger('dialogremoved', {dialog: dialog});
+				}
 			} else if (opts === 'toTop') {
 				dialog.trigger('totop');
+				fm.trigger('dialogtotoped', {dialog: dialog});
 			} else if (opts === 'posInit') {
 				dialog.trigger('posinit');
+				fm.trigger('dialogposinited', {dialog: dialog});
 			} else if (opts === 'tabstopsInit') {
 				dialog.trigger('tabstopsInit');
+				fm.trigger('dialogtabstopsinited', {dialog: dialog});
 			} else if (opts === 'checkEditing') {
 				checkEditing();
 			}
@@ -15349,10 +15359,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 										dialog.hasClass('ui-draggable') && dialog.draggable('disable');
 										dialog.hasClass('ui-resizable') && dialog.resizable('disable');
 									} catch(e) {}
-									if (typeof elm.data('style') === 'undefined') {
-										self.height(self.height());
-										elm.data('style', self.attr('style') || '');
-									}
 									self.css('width', '100%').css('height', dialog.height() - dialog.children('.ui-dialog-titlebar').outerHeight(true) - buttonpane.outerHeight(true));
 								} else {
 									self.attr('style', elm.data('style'));
@@ -15368,8 +15374,13 @@ $.fn.elfinderdialog = function(opts, fm) {
 						});
 						titlebar.prepend($('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-full"><span class="ui-icon ui-icon-plusthick"/></span>')
 							.on('mousedown', function(e) {
+								var elm = $(this);
 								e.preventDefault();
 								e.stopPropagation();
+								if (!dialog.hasClass('elfinder-maximized') && typeof elm.data('style') === 'undefined') {
+									self.height(self.height());
+									elm.data('style', self.attr('style') || '');
+								}
 								fm.toggleMaximize(dialog);
 							})
 						);
@@ -15548,8 +15559,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 					
 					dfd.done(function() {
-						dialog.hide();
-						
 						syncSize.enabled && elfNode.off('resize.'+fm.namespace, syncFunc);
 						
 						if (opts.closeOnEscape) {
@@ -15560,7 +15569,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 							fm.toggleMaximize(dialog, false);
 						}
 						
-						dialog.data('modal') && fm.getUI('overlay').elfinderoverlay('hide');
+						dialog.hide().data('modal') && fm.getUI('overlay').elfinderoverlay('hide');
 	
 						if (typeof(opts.close) == 'function') {
 							$.proxy(opts.close, self[0])();
@@ -20779,7 +20788,6 @@ elFinder.prototype.commands.edit = function() {
 							ta.editor && ta.editor.close(ta[0], ta.editor.instance);
 							ta.elfinderdialog('destroy');
 						};
-						fm.toggleMaximize($(this).closest('.ui-dialog'), false);
 						if (changed()) {
 							fm.confirm({
 								title  : self.title,
