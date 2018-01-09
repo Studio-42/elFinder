@@ -405,8 +405,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 					
 					dfd.done(function() {
-						dialog.hide();
-						
 						syncSize.enabled && elfNode.off('resize.'+fm.namespace, syncFunc);
 						
 						if (opts.closeOnEscape) {
@@ -417,7 +415,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 							fm.toggleMaximize(dialog, false);
 						}
 						
-						dialog.data('modal') && fm.getUI('overlay').elfinderoverlay('hide');
+						dialog.hide().data('modal') && fm.getUI('overlay').elfinderoverlay('hide');
 	
 						if (typeof(opts.close) == 'function') {
 							$.proxy(opts.close, self[0])();
