@@ -53,17 +53,27 @@ $.fn.elfinderdialog = function(opts, fm) {
 			if (opts === 'open') {
 				dialog.css('display') === 'none' && dialog.fadeIn(120, function() {
 					dialog.trigger('open');
+					fm.trigger('dialogopened', {dialog: dialog});
 				});
 			} else if (opts === 'close' || opts === 'destroy') {
 				dialog.stop(true);
-				(dialog.is(':visible') || elfNode.is(':hidden')) && dialog.trigger('close');
-				opts == 'destroy' && dialog.remove();
+				if (dialog.is(':visible') || elfNode.is(':hidden')) {
+					dialog.trigger('close');
+					fm.trigger('dialogclosed', {dialog: dialog});
+				}
+				if (opts === 'destroy') {
+					dialog.remove();
+					fm.trigger('dialogremoved', {dialog: dialog});
+				}
 			} else if (opts === 'toTop') {
 				dialog.trigger('totop');
+				fm.trigger('dialogtotoped', {dialog: dialog});
 			} else if (opts === 'posInit') {
 				dialog.trigger('posinit');
+				fm.trigger('dialogposinited', {dialog: dialog});
 			} else if (opts === 'tabstopsInit') {
 				dialog.trigger('tabstopsInit');
+				fm.trigger('dialogtabstopsinited', {dialog: dialog});
 			} else if (opts === 'checkEditing') {
 				checkEditing();
 			}
