@@ -169,7 +169,6 @@ elFinder.prototype.commands.edit = function() {
 							ta.editor && ta.editor.close(ta[0], ta.editor.instance);
 							ta.elfinderdialog('destroy');
 						};
-						fm.toggleMaximize($(this).closest('.ui-dialog'), false);
 						if (changed()) {
 							fm.confirm({
 								title  : self.title,
