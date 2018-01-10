@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.31 (2.1-src Nightly: 49776fd) (2018-01-10)
+ * Version 2.1.31 (2.1-src Nightly: b42ac2a) (2018-01-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8826,7 +8826,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.31 (2.1-src Nightly: 49776fd)';
+elFinder.prototype.version = '2.1.31 (2.1-src Nightly: b42ac2a)';
 
 
 
@@ -21337,7 +21337,7 @@ elFinder.prototype.commands.edit = function() {
 				file = fm.file(e.data.targets[0]);
 				setEditors(file, e.data.targets.length);
 				if (Object.keys(editors).length > 1) {
-					if (!useStoredEditor() || !stored[file.mime]) {
+					if (!useStoredEditor() || !stored[file.mime] || !editors[stored[file.mime]]) {
 						delete self.extra;
 						self.variants = [];
 						$.each(editors, function(name, editor) {
