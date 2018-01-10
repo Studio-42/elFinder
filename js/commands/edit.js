@@ -586,6 +586,7 @@ elFinder.prototype.commands.edit = function() {
 					
 					name = editor.info && editor.info.name? editor.info.name : ('Editor ' + i);
 					editor.name = name;
+					editor.i18n = fm.i18n(name);
 					editors[name] = editor;
 				}
 			});
@@ -609,7 +610,7 @@ elFinder.prototype.commands.edit = function() {
 			$.each(editors, function(name, ed) {
 				subMenuRaw.push(
 					{
-						label    : fm.escape(name),
+						label    : fm.escape(ed.i18n),
 						icon     : ed.info && ed.info.icon? ed.info.icon : 'edit',
 						options  : { iconImg: ed.info && ed.info.iconImg? fm.baseUrl + ed.info.iconImg : void(0) },
 						callback : function() {
@@ -710,7 +711,7 @@ elFinder.prototype.commands.edit = function() {
 					fm.one('contextmenucreatedone', function() {
 						self.title = title;
 					});
-					self.title = fm.escape(editor.name);
+					self.title = fm.escape(editor.i18n);
 					delete self.variants;
 				};
 			
