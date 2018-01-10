@@ -35,7 +35,8 @@
 			thash = (typeof cOpts == 'object')? cOpts.thash : false,
 			opts  = this.options,
 			into  = opts.into || 'window',
-			file, url, s, w, imgW, imgH, winW, winH, reg, link, html5dl, inline;
+			file, url, s, w, imgW, imgH, winW, winH, reg, link, html5dl, inline,
+			selAct, cmd;
 
 		if (!cnt && !thash) {
 			{
@@ -193,11 +194,10 @@
 				] : []
 			});
 		} else {
-			var selAct = fm.storage('selectAction');
-			var cmd;
+			selAct = fm.storage('selectAction');
 			if (selAct) {
 				$.each(selAct.split('/'), function() {
-					if ((cmd = fm.getCommand(this)) && cmd.enabled()) {
+					if (this !== 'open' && (cmd = fm.getCommand(this)) && cmd.enabled()) {
 						return false;
 					}
 					cmd = null;
