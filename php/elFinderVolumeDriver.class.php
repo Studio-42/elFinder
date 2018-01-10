@@ -4295,7 +4295,7 @@ abstract class elFinderVolumeDriver {
 	static protected function mimetypeInternalDetect($path = '') {
 		// load default MIME table file "mime.types"
 		if (!elFinderVolumeDriver::$mimetypesLoaded) {
-			$this->getMimeTable();
+			elFinderVolumeDriver::mimetypeInternalDetect();
 		}
 		$ext = '';
 		if ($path) {
