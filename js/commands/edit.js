@@ -718,7 +718,7 @@ elFinder.prototype.commands.edit = function() {
 				file = fm.file(e.data.targets[0]);
 				setEditors(file, e.data.targets.length);
 				if (Object.keys(editors).length > 1) {
-					if (!useStoredEditor() || !stored[file.mime]) {
+					if (!useStoredEditor() || !stored[file.mime] || !editors[stored[file.mime]]) {
 						delete self.extra;
 						self.variants = [];
 						$.each(editors, function(name, editor) {
