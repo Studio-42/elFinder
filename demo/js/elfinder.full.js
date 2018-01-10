@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.31 (2.1-src Nightly: 9651719) (2018-01-10)
+ * Version 2.1.31 (2.1-src Nightly: 5f47edf) (2018-01-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8826,7 +8826,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.31 (2.1-src Nightly: 9651719)';
+elFinder.prototype.version = '2.1.31 (2.1-src Nightly: 5f47edf)';
 
 
 
@@ -23341,7 +23341,8 @@ elFinder.prototype.commands.netunmount = function() {
 			thash = (typeof cOpts == 'object')? cOpts.thash : false,
 			opts  = this.options,
 			into  = opts.into || 'window',
-			file, url, s, w, imgW, imgH, winW, winH, reg, link, html5dl, inline;
+			file, url, s, w, imgW, imgH, winW, winH, reg, link, html5dl, inline,
+			selAct, cmd;
 
 		if (!cnt && !thash) {
 			{
@@ -23499,11 +23500,10 @@ elFinder.prototype.commands.netunmount = function() {
 				] : []
 			});
 		} else {
-			var selAct = fm.storage('selectAction');
-			var cmd;
+			selAct = fm.storage('selectAction');
 			if (selAct) {
 				$.each(selAct.split('/'), function() {
-					if ((cmd = fm.getCommand(this)) && cmd.enabled()) {
+					if (this !== 'open' && (cmd = fm.getCommand(this)) && cmd.enabled()) {
 						return false;
 					}
 					cmd = null;
