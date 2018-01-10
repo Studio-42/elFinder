@@ -1174,34 +1174,8 @@ abstract class elFinderVolumeDriver {
 		// load mimes from external file for mimeDetect == 'internal'
 		// based on Alexey Sukhotin idea and patch: http://elrte.org/redmine/issues/163
 		// file must be in file directory or in parent one 
-		if ($this->mimeDetect === 'internal' && !self::$mimetypesLoaded) {
-			self::$mimetypesLoaded = true;
-			$this->mimeDetect = 'internal';
-			$file = false;
-			if (!empty($this->options['mimefile']) && file_exists($this->options['mimefile'])) {
-				$file = $this->options['mimefile'];
-			} elseif (elFinder::$defaultMimefile && file_exists(elFinder::$defaultMimefile)) {
-				$file = elFinder::$defaultMimefile;
-			} elseif (file_exists(dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types')) {
-				$file = dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types';
-			} elseif (file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'mime.types')) {
-				$file = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'mime.types';
-			}
-
-			if ($file && file_exists($file)) {
-				$mimecf = file($file);
-
-				foreach ($mimecf as $line_num => $line) {
-					if (!preg_match('/^\s*#/', $line)) {
-						$mime = preg_split('/\s+/', $line, -1, PREG_SPLIT_NO_EMPTY);
-						for ($i = 1, $size = count($mime); $i < $size ; $i++) {
-							if (!isset(self::$mimetypes[$mime[$i]])) {
-								self::$mimetypes[$mime[$i]] = $mime[0];
-							}
-						}
-					}
-				}
-			}
+		if ($this->mimeDetect === 'internal' && !elFinderVolumeDriver::$mimetypesLoaded) {
+			elFinderVolumeDriver::loadMimeTypes(!empty($this->options['mimefile'])? $this->options['mimefile'] : '');
 		}
 
 		$this->rootName = empty($this->options['alias']) ? $this->basenameCE($this->root) : $this->options['alias'];
@@ -1446,7 +1420,9 @@ abstract class elFinderVolumeDriver {
 	 */
 	public function getMimeTable() {
 		// load mime.types
-		! elFinderVolumeDriver::$mimetypesLoaded && elFinderVolumeDriver::mimetypeInternalDetect();
+		if (! elFinderVolumeDriver::$mimetypesLoaded) {
+			elFinderVolumeDriver::loadMimeTypes();
+		}
 		return elFinderVolumeDriver::$mimetypes;
 	}
 	
@@ -4286,6 +4262,42 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Load file of mime.types
+	 *
+	 * @param string  $mimeTypesFile  The mime types file
+	 */
+	static protected function loadMimeTypes($mimeTypesFile = '') {
+		if (! elFinderVolumeDriver::$mimetypesLoaded) {
+			elFinderVolumeDriver::$mimetypesLoaded = true;
+			$file = false;
+			if (!empty($mimeTypesFile) && file_exists($mimeTypesFile)) {
+				$file = $mimeTypesFile;
+			} elseif (elFinder::$defaultMimefile && file_exists(elFinder::$defaultMimefile)) {
+				$file = elFinder::$defaultMimefile;
+			} elseif (file_exists(dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types')) {
+				$file = dirname(__FILE__).DIRECTORY_SEPARATOR.'mime.types';
+			} elseif (file_exists(dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'mime.types')) {
+				$file = dirname(dirname(__FILE__)).DIRECTORY_SEPARATOR.'mime.types';
+			}
+
+			if ($file && file_exists($file)) {
+				$mimecf = file($file);
+
+				foreach ($mimecf as $line_num => $line) {
+					if (!preg_match('/^\s*#/', $line)) {
+						$mime = preg_split('/\s+/', $line, -1, PREG_SPLIT_NO_EMPTY);
+						for ($i = 1, $size = count($mime); $i < $size ; $i++) {
+							if (!isset(self::$mimetypes[$mime[$i]])) {
+								self::$mimetypes[$mime[$i]] = $mime[0];
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Detect file mimetype using "internal" method or Loading mime.types with $path = ''
 	 *
 	 * @param  string  $path  file path
@@ -4295,7 +4307,7 @@ abstract class elFinderVolumeDriver {
 	static protected function mimetypeInternalDetect($path = '') {
 		// load default MIME table file "mime.types"
 		if (!elFinderVolumeDriver::$mimetypesLoaded) {
-			elFinderVolumeDriver::mimetypeInternalDetect();
+			elFinderVolumeDriver::loadMimeTypes();
 		}
 		$ext = '';
 		if ($path) {
