@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.31 (2.1-src Nightly: e15ba87) (2018-01-10)
+ * Version 2.1.31 (2.1-src Nightly: 9651719) (2018-01-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8826,7 +8826,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.31 (2.1-src Nightly: e15ba87)';
+elFinder.prototype.version = '2.1.31 (2.1-src Nightly: 9651719)';
 
 
 
@@ -21205,6 +21205,7 @@ elFinder.prototype.commands.edit = function() {
 					
 					name = editor.info && editor.info.name? editor.info.name : ('Editor ' + i);
 					editor.name = name;
+					editor.i18n = fm.i18n(name);
 					editors[name] = editor;
 				}
 			});
@@ -21228,7 +21229,7 @@ elFinder.prototype.commands.edit = function() {
 			$.each(editors, function(name, ed) {
 				subMenuRaw.push(
 					{
-						label    : fm.escape(name),
+						label    : fm.escape(ed.i18n),
 						icon     : ed.info && ed.info.icon? ed.info.icon : 'edit',
 						options  : { iconImg: ed.info && ed.info.iconImg? fm.baseUrl + ed.info.iconImg : void(0) },
 						callback : function() {
@@ -21329,7 +21330,7 @@ elFinder.prototype.commands.edit = function() {
 					fm.one('contextmenucreatedone', function() {
 						self.title = title;
 					});
-					self.title = fm.escape(editor.name);
+					self.title = fm.escape(editor.i18n);
 					delete self.variants;
 				};
 			
