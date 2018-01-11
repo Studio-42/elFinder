@@ -429,6 +429,7 @@ abstract class elFinderVolumeDriver {
 		// cache control HTTP headers for commands `file` and  `get`
 		'cacheHeaders' => array(
 			'Cache-Control: max-age=3600',
+			'Expires:',
 			'Pragma:'
 		),
 		// Header to use to accelerate sending local files to clients (e.g. 'X-Sendfile', 'X-Accel-Redirect')
