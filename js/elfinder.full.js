@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.31 (2.1-src Nightly: 0ad8269) (2018-01-11)
+ * Version 2.1.31 (2.1-src Nightly: 6823543) (2018-01-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8826,7 +8826,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.31 (2.1-src Nightly: 0ad8269)';
+elFinder.prototype.version = '2.1.31 (2.1-src Nightly: 6823543)';
 
 
 
@@ -23370,7 +23370,7 @@ elFinder.prototype.commands.netunmount = function() {
 		}
 		
 		var doOpen = function() {
-			var wnd, target;
+			var wnd, target, getOnly;
 			
 			try {
 				reg = new RegExp(fm.option('dispInlineRegex'), 'i');
@@ -23405,7 +23405,15 @@ elFinder.prototype.commands.netunmount = function() {
 						}
 					}
 				} else {
-					if (url.indexOf(fm.options.url) === 0) {
+					getOnly = (typeof opts.method === 'string' && opts.method.toLowerCase() === 'get');
+					if (!getOnly
+						&& url.indexOf(fm.options.url) === 0
+						&& fm.options.customData
+						&& Object.keys(fm.options.customData).length
+						// Since playback by POST request can not be done in Chrome, media allows GET request
+						&& !file.mime.match(/^(?:video|audio)/)
+					) {
+						// Send request as 'POST' method to hide custom data at location bar
 						url = '';
 					}
 					if (into === 'window') {
@@ -23431,7 +23439,7 @@ elFinder.prototype.commands.netunmount = function() {
 							}
 						}
 						w = 'width='+winW+',height='+winH;
-						wnd = window.open(url, target, w + ',top=50,left=50,scrollbars=yes,resizable=yes');
+						wnd = window.open(url, target, w + ',top=50,left=50,scrollbars=yes,resizable=yes,titlebar=no');
 					} else {
 						if (into === 'tabs') {
 							target = file.hash;
@@ -23446,7 +23454,7 @@ elFinder.prototype.commands.netunmount = function() {
 					if (url === '') {
 						var form = document.createElement("form");
 						form.action = fm.options.url;
-						form.method = typeof opts.method === 'string' && opts.method.toLowerCase() === 'get'? 'GET' : 'POST';
+						form.method = 'POST';
 						form.target = target;
 						form.style.display = 'none';
 						var params = Object.assign({}, fm.options.customData, {
