@@ -64,7 +64,7 @@
 		}
 		
 		var doOpen = function() {
-			var wnd, target;
+			var wnd, target, getOnly;
 			
 			try {
 				reg = new RegExp(fm.option('dispInlineRegex'), 'i');
@@ -99,7 +99,15 @@
 						}
 					}
 				} else {
-					if (url.indexOf(fm.options.url) === 0) {
+					getOnly = (typeof opts.method === 'string' && opts.method.toLowerCase() === 'get');
+					if (!getOnly
+						&& url.indexOf(fm.options.url) === 0
+						&& fm.options.customData
+						&& Object.keys(fm.options.customData).length
+						// Since playback by POST request can not be done in Chrome, media allows GET request
+						&& !file.mime.match(/^(?:video|audio)/)
+					) {
+						// Send request as 'POST' method to hide custom data at location bar
 						url = '';
 					}
 					if (into === 'window') {
@@ -125,7 +133,7 @@
 							}
 						}
 						w = 'width='+winW+',height='+winH;
-						wnd = window.open(url, target, w + ',top=50,left=50,scrollbars=yes,resizable=yes');
+						wnd = window.open(url, target, w + ',top=50,left=50,scrollbars=yes,resizable=yes,titlebar=no');
 					} else {
 						if (into === 'tabs') {
 							target = file.hash;
@@ -140,7 +148,7 @@
 					if (url === '') {
 						var form = document.createElement("form");
 						form.action = fm.options.url;
-						form.method = typeof opts.method === 'string' && opts.method.toLowerCase() === 'get'? 'GET' : 'POST';
+						form.method = 'POST';
 						form.target = target;
 						form.style.display = 'none';
 						var params = Object.assign({}, fm.options.customData, {
