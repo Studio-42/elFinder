@@ -2,7 +2,7 @@
  * Czech translation
  * @author Jay Gridley <gridley.jay@hotmail.com>
  * @author RobiNN <kelcakrobo@gmail.com>
- * @version 2017-11-25
+ * @version 2018-01-12
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -438,6 +438,12 @@
 			'selectAction'    : 'Akce při vybraném souboru', // from v2.1.30 added 23.11.2017
 			'useStoredEditor' : 'Otevřít pomocí naposledy použitého editoru', // from v2.1.30 added 23.11.2017
 			'selectinvert'    : 'Obrátit výběr položek', // from v2.1.30 added 25.11.2017
+			'renameMultiple'  : 'Opravdu chcete přejmenovat $1 vybraných položek, jako například $2<br/>Není to možné vrátit zpět!', // from v2.1.31 added 4.12.2017
+			'batchRename'     : 'Batch přejmenování', // from v2.1.31 added 8.12.2017
+			'plusNumber'      : '+ Číslo', // from v2.1.31 added 8.12.2017
+			'asPrefix'        : 'Přidat předponu', // from v2.1.31 added 8.12.2017
+			'asSuffix'        : 'Přidat příponu', // from v2.1.31 added 8.12.2017
+			'changeExtention' : 'Změnit příponu', // from v2.1.31 added 8.12.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámý',
