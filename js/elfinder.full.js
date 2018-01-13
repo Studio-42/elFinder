@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.31 (2.1-src Nightly: 8aa765e) (2018-01-12)
+ * Version 2.1.31 (2.1-src Nightly: 5e3e0a3) (2018-01-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -984,12 +984,27 @@ var elFinder = function(elm, opts, bootCallback) {
 	requestMaxConn = Math.max(parseInt(this.options.requestMaxConn), 1);
 	
 	/**
+	 * Custom data that given as options
+	 * 
+	 * @type Object
+	 * @default {}
+	 */
+	this.optsCustomData = $.isPlainObject(this.options.customData) ? this.options.customData : {};
+
+	/**
 	 * Any data to send across every ajax request
 	 *
 	 * @type Object
 	 * @default {}
 	 **/
-	this.customData = $.isPlainObject(this.options.customData) ? this.options.customData : {};
+	this.customData = Object.assign({}, this.optsCustomData);
+
+	/**
+	 * Previous custom data from connector
+	 * 
+	 * @type Object|null
+	 */
+	this.prevCustomData = null;
 
 	/**
 	 * Any custom headers to send across every ajax request
@@ -1672,7 +1687,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			url += '&download=1';
 		}
 		
-		$.each(this.options.customData, function(key, val) {
+		$.each(this.customData, function(key, val) {
 			url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(val);
 		});
 		
@@ -1814,7 +1829,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			// request ID
 			reqId    = (+ new Date()).toString(16) + Math.floor(1000 * Math.random()).toString(16), 
 			// request data
-			data     = Object.assign({}, o.customData, {mimes : o.onlyMimes}, opts.data || opts),
+			data     = Object.assign({}, self.customData, {mimes : o.onlyMimes}, opts.data || opts),
 			// command name
 			cmd      = data.cmd,
 			// current cmd is "open"
@@ -6111,7 +6126,7 @@ elFinder.prototype = {
 						formData.append('hashes['+ i +']', v);
 					});
 				}
-				$.each(self.options.customData, function(key, val) {
+				$.each(self.customData, function(key, val) {
 					formData.append(key, val);
 				});
 				$.each(self.options.onlyMimes, function(i, mime) {
@@ -6507,7 +6522,7 @@ elFinder.prototype = {
 					form.append('<input type="hidden" name="mimes[]" value="'+self.escape(mime)+'"/>');
 				});
 				
-				$.each(self.options.customData, function(key, val) {
+				$.each(self.customData, function(key, val) {
 					form.append('<input type="hidden" name="'+key+'" value="'+self.escape(val)+'"/>');
 				});
 				
@@ -6917,8 +6932,25 @@ elFinder.prototype = {
 				return res;
 			},
 			error = [],
-			name, i18, i18nFolderName, prevId;
+			name, i18, i18nFolderName, prevId, cData;
 		
+		// set cunstom data
+		if (data.customData && data.customData !== self.prevCustomData) {
+			self.prevCustomData = data.customData;
+			try {
+				cData = JSON.parse(data.customData);
+				if ($.isPlainObject(cData)) {
+					self.prevCustomData = cData;
+					$.each(Object.keys(cData), function(i, key) {
+						if (cData[key] === null) {
+							delete cData[key];
+							delete self.optsCustomData[key];
+						}
+					});
+					self.customData = Object.assign({}, self.optsCustomData, cData);
+				}
+			} catch(e) {}
+		}
 
 		if (data.options) {
 			normalizeOptions(data.options);
@@ -8826,7 +8858,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.31 (2.1-src Nightly: 8aa765e)';
+elFinder.prototype.version = '2.1.31 (2.1-src Nightly: 5e3e0a3)';
 
 
 
@@ -20410,7 +20442,7 @@ elFinder.prototype.commands.download = function() {
 								$.each([hashes[0], zipdl.file, dlName, zipdl.mime], function(key, val) {
 									url += '&targets%5B%5D='+encodeURIComponent(val);
 								});
-								$.each(fm.options.customData, function(key, val) {
+								$.each(fm.customData, function(key, val) {
 									url += '&'+encodeURIComponent(key)+'='+encodeURIComponent(val);
 								});
 								url += '&'+encodeURIComponent(dlName);
@@ -20447,7 +20479,7 @@ elFinder.prototype.commands.download = function() {
 								$.each([hashes[0], zipdl.file, dlName, zipdl.mime], function(key, val) {
 									form.append('<input type="hidden" name="targets[]" value="'+fm.escape(val)+'"/>');
 								});
-								$.each(fm.options.customData, function(key, val) {
+								$.each(fm.customData, function(key, val) {
 									form.append('<input type="hidden" name="'+key+'" value="'+fm.escape(val)+'"/>');
 								});
 								form.attr('target', uniq).appendTo('body');
@@ -23408,8 +23440,8 @@ elFinder.prototype.commands.netunmount = function() {
 					getOnly = (typeof opts.method === 'string' && opts.method.toLowerCase() === 'get');
 					if (!getOnly
 						&& url.indexOf(fm.options.url) === 0
-						&& fm.options.customData
-						&& Object.keys(fm.options.customData).length
+						&& fm.customData
+						&& Object.keys(fm.customData).length
 						// Since playback by POST request can not be done in Chrome, media allows GET request
 						&& !file.mime.match(/^(?:video|audio)/)
 					) {
@@ -23457,7 +23489,7 @@ elFinder.prototype.commands.netunmount = function() {
 						form.method = 'POST';
 						form.target = target;
 						form.style.display = 'none';
-						var params = Object.assign({}, fm.options.customData, {
+						var params = Object.assign({}, fm.customData, {
 							cmd: 'file',
 							target: file.hash,
 							_t: file.ts || parseInt(+new Date()/1000)
