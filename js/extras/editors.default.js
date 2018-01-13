@@ -1098,7 +1098,7 @@
 						.appendTo(ifm.parent()),
 					cdata = function() {
 						var data = '';
-						$.each(fm.options.customData, function(key, val) {
+						$.each(fm.customData, function(key, val) {
 							data += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(val);
 						});
 						return data;

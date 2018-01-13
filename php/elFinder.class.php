@@ -368,7 +368,14 @@ class elFinder {
 	 * @var integer
 	 */
 	protected $itemLockExpire = 3600;
-	
+
+	/**
+	 * Additional request querys
+	 * 
+	 * @var array|null
+	 */
+	protected $customData = null;
+
 	// Errors messages
 	const ERROR_UNKNOWN           = 'errUnknown';
 	const ERROR_UNKNOWN_CMD       = 'errUnknownCmd';
@@ -1068,6 +1075,11 @@ class elFinder {
 		// remove self::$abortCheckFile
 		$this->abort();
 		
+		// custom data
+		if ($this->customData !== null) {
+			$result['customData'] = $this->customData? json_encode($this->customData) : '';
+		}
+
 		if (!empty($result['callback'])) {
 			$result['callback']['json'] = json_encode($result);
 			$this->callback($result['callback']);
@@ -1091,6 +1103,37 @@ class elFinder {
 	}
 	
 	/**
+	 * Sets custom data(s).
+	 *
+	 * @param  string|array  $key    The key or data array
+	 * @param  mixed         $val    The value
+	 * 
+	 * @return self    ( elFinder instance )
+	 */
+	public function setCustomData($key, $val = null) {
+		if (is_array($key)) {
+			foreach($key as $k => $v) {
+				$this->customData[$k] = $v;
+			}
+		} else {
+			$this->customData[$key] = $val;
+		}
+		return $this;
+	}
+
+	/**
+	 * Removes a custom data.
+	 *
+	 * @param  string  $key    The key
+	 * 
+	 * @return self    ( elFinder instance )
+	 */
+	public function removeCustomData($key) {
+		$this->customData[$key] = null;
+		return $this;
+	}
+
+	/**
 	 * Update sesstion value of a NetVolume option
 	 * 
 	 * @param string $netKey
@@ -1101,7 +1144,6 @@ class elFinder {
 		$netVolumes = $this->getNetVolumes();
 		if (is_string($netKey) && isset($netVolumes[$netKey]) && is_string($optionKey)) {
 			$netVolumes[$netKey][$optionKey] = $val;
-			$this->saveNetVolumes($netVolumes);
 		}
 	}
 	
