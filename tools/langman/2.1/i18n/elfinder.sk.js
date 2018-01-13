@@ -2,7 +2,7 @@
  * Slovak translation
  * @author Jakub Ďuraš <jkblmr@gmail.com>
  * @author RobiNN <kelcakrobo@gmail.com>
- * @version 2017-11-25
+ * @version 2018-01-12
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -435,9 +435,15 @@
 			'roughFileSize'   : 'Hrubá veľkosť súboru', // from v2.1.30 added 2.11.2017
 			'autoFocusDialog' : 'Zameranie na prvok dialógu s mouseover',  // from v2.1.30 added 2.11.2017
 			'select'          : 'Vybrať', // from v2.1.30 added 23.11.2017
-			'selectAction'    : 'Akcia pri vybratom súbore', // from v2.1.30 added 23.11.2017
+			'selectAction'    : 'Akcia pri vybranom súbore', // from v2.1.30 added 23.11.2017
 			'useStoredEditor' : 'Otvoriť pomocou naposledy použitého editora', // from v2.1.30 added 23.11.2017
 			'selectinvert'    : 'Invertovať výber položiek', // from v2.1.30 added 25.11.2017
+			'renameMultiple'  : 'Naozaj chcete premenovať $1 vybraných položiek, ako napríklad $2<br/>Nie je to možné vrátiť späť!', // from v2.1.31 added 4.12.2017
+			'batchRename'     : 'Batch premenovanie', // from v2.1.31 added 8.12.2017
+			'plusNumber'      : '+ Číslo', // from v2.1.31 added 8.12.2017
+			'asPrefix'        : 'Pridať predponu', // from v2.1.31 added 8.12.2017
+			'asSuffix'        : 'Pridať príponu', // from v2.1.31 added 8.12.2017
+			'changeExtention' : 'Zmeniť príponu', // from v2.1.31 added 8.12.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
