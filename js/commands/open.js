@@ -102,8 +102,8 @@
 					getOnly = (typeof opts.method === 'string' && opts.method.toLowerCase() === 'get');
 					if (!getOnly
 						&& url.indexOf(fm.options.url) === 0
-						&& fm.options.customData
-						&& Object.keys(fm.options.customData).length
+						&& fm.customData
+						&& Object.keys(fm.customData).length
 						// Since playback by POST request can not be done in Chrome, media allows GET request
 						&& !file.mime.match(/^(?:video|audio)/)
 					) {
@@ -151,7 +151,7 @@
 						form.method = 'POST';
 						form.target = target;
 						form.style.display = 'none';
-						var params = Object.assign({}, fm.options.customData, {
+						var params = Object.assign({}, fm.customData, {
 							cmd: 'file',
 							target: file.hash,
 							_t: file.ts || parseInt(+new Date()/1000)
