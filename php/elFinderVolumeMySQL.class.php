@@ -238,7 +238,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		if ($res) {
 			while ($row = $res->fetch_assoc()) {
 				$id = $row['id'];
-				if ($row['parent_id']) {
+				if ($row['parent_id'] && $id != $this->root) {
 					$row['phash'] = $this->encode($row['parent_id']);
 				} 
 				
@@ -368,7 +368,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 					continue;
 				}
 				$id = $row['id'];
-				if ($row['parent_id']) {
+				if ($row['parent_id'] && $id != $this->root) {
 					$row['phash'] = $this->encode($row['parent_id']);
 				} 
 				$row['path'] = $this->_path($id);
@@ -534,7 +534,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		
 		if ($res) {
 			$stat = $res->fetch_assoc();
-			if ($stat['parent_id']) {
+			if ($stat['parent_id'] && $stat['id'] != $this->root) {
 				$stat['phash'] = $this->encode($stat['parent_id']);
 			} 
 			if ($stat['mime'] == 'directory') {
