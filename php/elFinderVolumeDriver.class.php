@@ -4217,7 +4217,7 @@ abstract class elFinderVolumeDriver {
 			$nameCheck = true;
 		}
 		$ext = (false === $pos = strrpos($name, '.')) ? '' : substr($name, $pos + 1);
-		$size = filesize($path);
+		$size = file_exists($path)? filesize($path) : 0;
 		if (! $nameCheck && is_readable($path) && $size > 0) {
 			// detecting by contents
 			if ($this->mimeDetect === 'finfo') {
