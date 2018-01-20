@@ -123,6 +123,7 @@ elFinder.prototype.resources = {
 							input && input.blur();
 						}, 50);
 					}),
+				notify = data.notify || {type : cmd, cnt : 1},
 				nnode, pnode,
 				overlay = fm.getUI('overlay'),
 				cleanup = function() {
@@ -224,7 +225,7 @@ elFinder.prototype.resources = {
 
 								fm.request({
 										data        : Object.assign({cmd : req, name : name, target : phash}, data || {}), 
-										notify      : {type : cmd, cnt : 1},
+										notify      : notify,
 										preventFail : true,
 										syncOnFail  : true,
 										navigate    : {toast : toast},
