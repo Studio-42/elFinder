@@ -224,7 +224,7 @@ elFinder.prototype.resources = {
 
 								fm.request({
 										data        : Object.assign({cmd : req, name : name, target : phash}, data || {}), 
-										notify      : {type : cmd, cnt : 1},
+										notify      : {type : req, cnt : 1},
 										preventFail : true,
 										syncOnFail  : true,
 										navigate    : {toast : toast},

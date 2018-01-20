@@ -31,7 +31,7 @@ class elFinder {
 	 * 
 	 * @var integer
 	 */
-	protected static $ApiRevision = 31;
+	protected static $ApiRevision = 32;
 	
 	/**
 	 * Storages (root dirs)
@@ -3203,6 +3203,17 @@ class elFinder {
 				$fmeta = stream_get_meta_data($fp);
 				$mime = $this->detectMimeType($fmeta['uri']);
 				$args['content'] = 'data:'.$mime.';base64,'.base64_encode(file_get_contents($fmeta['uri']));
+			}
+			$encoding = '';
+			$args['content'] = "\0" . $args['content'];
+		} else if ($encoding === 'hash') {
+			$_hash = $args['content'];
+			if ($_src = $this->getVolume($_hash)) {
+				if ($_file = $_src->file($_hash)) {
+					if ($_data = $_src->getContents($_hash)) {
+						$args['content'] = 'data:'.$file['mime'].';base64,'.base64_encode($_data);
+					}
+				}
 			}
 			$encoding = '';
 			$args['content'] = "\0" . $args['content'];
