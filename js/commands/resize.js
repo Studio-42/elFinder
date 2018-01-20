@@ -1146,7 +1146,7 @@ elFinder.prototype.commands.resize = function() {
 								self.prefix = file.name.replace(/ \d+(\.[^.]+)?$/, '$1');
 								self.requestCmd = 'mkfile';
 								self.nextAction = {};
-								self.data = {target : file.phash, notify : {type : 'mkfile', cnt : 1}};
+								self.data = {target : file.phash};
 								$.proxy(fm.res('mixin', 'make'), self)()
 									.done(function(data) {
 										var hash, dfd;
