@@ -1944,7 +1944,8 @@ class elFinder {
 					$rname = $volume->uniqueName($volume->realpath($rm['phash']), $name, '', false);
 				} else {
 					if ($type === 'extention') {
-						$rname = elFinder::splitFileExtention($rm['name'])[0] . '.' . $name;
+						$splits = elFinder::splitFileExtention($rm['name']);
+						$rname = $splits[0] . '.' . $name;
 					} else if ($type === 'prefix') {
 						$rname = $name . $rm['name'];
 					} else if ($type === 'suffix') {
