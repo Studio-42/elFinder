@@ -431,7 +431,7 @@
 			'filderIsEmpty'   : '文件夹 "$1" 为空.', // from v2.1.25 added 22.6.2017
 			'preference'      : '偏好', // from v2.1.26 added 28.6.2017
 			'language'        : '语言设置', // from v2.1.26 added 28.6.2017
-			'clearBrowserData': '重量保存在此浏览器中的设置', // from v2.1.26 added 28.6.2017
+			'clearBrowserData': '清除保存在此浏览器中的偏好设置', // from v2.1.26 added 28.6.2017
 			'toolbarPref'     : '工具栏设置', // from v2.1.27 added 2.8.2017
 			'charsLeft'       : '... $1 chars left.',  // from v2.1.29 added 30.8.2017
 			'sum'             : '总数', // from v2.1.29 added 28.9.2017
