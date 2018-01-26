@@ -358,7 +358,7 @@
 			'restoreFiles'    : '恢复文件', // from v2.1.24 added 5.5.2017
 			'rmFromPlaces'    : '从这里中删除',
 			'aspectRatio'     : '保持比例',
-			'scale'           : '高宽比',
+			'scale'           : '缩放比例',
 			'width'           : '宽',
 			'height'          : '高',
 			'resize'          : '调整大小',
@@ -415,7 +415,7 @@
 			'colorPicker'     : '颜色选择器', // from v2.1.16 added 1.10.2016
 			'8pxgrid'         : '步长(8px)', // from v2.1.16 added 4.10.2016
 			'enabled'         : '启用', // from v2.1.16 added 4.10.2016
-			'disabled'        : '禁用', // from v2.1.16 added 4.10.2016
+			'disabled'        : '关闭', // from v2.1.16 added 4.10.2016
 			'emptyIncSearch'  : '当前视图下没有匹配结果', // from v2.1.16 added 5.10.2016
 			'emptyLetSearch'  : '当前视图中的第一个字母搜索结果为空', // from v2.1.23 added 24.3.2017
 			'textLabel'       : '文本标签', // from v2.1.17 added 13.10.2016
