@@ -4,19 +4,8 @@
  * @author Andy Hu <andyhu7@yahoo.com.hk>
  * @author Max Wen<max.wen@qq.com>
  * @author Kejun Chang <changkejun@hotmail.com>
- * @version 2017-02-03
- */
-/**
- * elFinder translation template
- * use this file to create new translation
- * submit new translation via https://github.com/Studio-42/elFinder/issues
- * or make a pull request
- */
-
-/**
- * 简体中文 translation
- * @author Translator Name <translator@email.tld>
- * @version 201x-xx-xx
+ * @author LDMING <china-live@live.cn>
+ * @version 2018-01-26
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -28,44 +17,46 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.zh_CN = {
-		translator : '翻译者 deerchao &lt;deerchao@gmail.com&gt;, Andy Hu &lt;andyhu7@yahoo.com.hk&gt;, Max Wen&lt;max.wen@qq.com&gt;, Kejun Chang &lt;changkejun@hotmail.com&gt;',
+		translator : '翻译者 deerchao &lt;deerchao@gmail.com&gt;, Andy Hu &lt;andyhu7@yahoo.com.hk&gt;, Max Wen&lt;max.wen@qq.com&gt;, Kejun Chang &lt;changkejun@hotmail.com&gt;, LDMING &lt;china-live@live.cn&gt;',
 		language   : '简体中文',
 		direction  : 'ltr',
 		dateFormat : 'Y-m-d H:i', // Mar 13, 2012 05:27 PM
 		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
+		nonameDateFormat : 'ymd-His', // to apply if upload file is noname: 120513172700
 		messages   : {
 
 			/********************************** errors **********************************/
 			'error'                : '错误',
 			'errUnknown'           : '未知的错误.',
 			'errUnknownCmd'        : '未知的命令.',
-			'errJqui'              : '无效的 jQuery UI 配置. 必须包含 Selectable, draggable 以及 droppable 组件.',
+			'errJqui'              : '无效的 jQuery UI 配置,必须包含 Selectable、draggable 以及 droppable 组件.',
 			'errNode'              : 'elFinder 需要能创建 DOM 元素.',
 			'errURL'               : '无效的 elFinder 配置! URL 选项未配置.',
 			'errAccess'            : '访问被拒绝.',
-			'errConnect'           : '不能连接到后端.',
+			'errConnect'           : '不能连接到服务器端.',
 			'errAbort'             : '连接中止.',
 			'errTimeout'           : '连接超时.',
-			'errNotFound'          : '未找到后端.',
-			'errResponse'          : '无效的后端响应.',
-			'errConf'              : '无效的后端配置.',
+			'errNotFound'          : '未找到服务器端.',
+			'errResponse'          : '无效的服务器端响应.',
+			'errConf'              : '无效的服务器端配置.',
 			'errJSON'              : 'PHP JSON 模块未安装.',
 			'errNoVolumes'         : '无可读的卷.',
-			'errCmdParams'         : '无效的参数, 命令: "$1".',
-			'errDataNotJSON'       : '响应不符合 JSON 格式.',
-			'errDataEmpty'         : '响应为空.',
-			'errCmdReq'            : '后端请求需要命令名称.',
+			'errCmdParams'         : '无效的命令 "$1".',
+			'errDataNotJSON'       : '服务器返回的数据不符合 JSON 格式.',
+			'errDataEmpty'         : '服务器返回的数据为空.',
+			'errCmdReq'            : '服务器端请求需要命令名称.',
 			'errOpen'              : '无法打开 "$1".',
 			'errNotFolder'         : '对象不是文件夹.',
 			'errNotFile'           : '对象不是文件.',
 			'errRead'              : '无法读取 "$1".',
 			'errWrite'             : '无法写入 "$1".',
-			'errPerm'              : '无权限.',
-			'errLocked'            : '"$1" 被锁定,不能重命名, 移动或删除.',
-			'errExists'            : '文件 "$1" 已经存在了.',
+			'errPerm'              : '没有权限.',
+			'errLocked'            : '"$1" 已被锁定,不能重命名, 移动或删除.',
+			'errExists'            : '文件 "$1" 已经存在.',
 			'errInvName'           : '无效的文件名.',
-			'errFolderNotFound'    : '未找到文件夹.',
-			'errFileNotFound'      : '未找到文件.',
+			'errInvDirname'        : '无效的文件夹名.',  // from v2.1.24 added 12.4.2017
+			'errFolderNotFound'    : '文件夹不存在.',
+			'errFileNotFound'      : '文件不存在.',
 			'errTrgFolderNotFound' : '未找到目标文件夹 "$1".',
 			'errPopup'             : '浏览器拦截了弹出窗口. 请在选项中允许弹出窗口.',
 			'errMkdir'             : '不能创建文件夹 "$1".',
@@ -82,23 +73,24 @@
 			'errUploadMime'        : '不允许的文件类型.',
 			'errUploadTransfer'    : '"$1" 传输错误.',
 			'errUploadTemp'        : '无法为上传文件创建临时文件.', // from v2.1 added 26.09.2015
-			'errNotReplace'        : '对象 "$1" 已经在此位置存在, 不能被其他对象替换.', // new
+			'errNotReplace'        : ' "$1" 已存在, 不能被替换.', // new
 			'errReplace'           : '无法替换 "$1".',
 			'errSave'              : '无法保存 "$1".',
 			'errCopy'              : '无法复制 "$1".',
 			'errMove'              : '无法移动 "$1".',
 			'errCopyInItself'      : '不能移动 "$1" 到原有位置.',
 			'errRm'                : '无法删除 "$1".',
+			'errTrash'             : '无法移到回收站.', // from v2.1.24 added 30.4.2017
 			'errRmSrc'             : '不能删除源文件.',
 			'errExtract'           : '无法从 "$1" 提取文件.',
 			'errArchive'           : '无法创建压缩包.',
 			'errArcType'           : '不支持的压缩格式.',
 			'errNoArchive'         : '文件不是压缩包, 或者不支持该压缩格式.',
-			'errCmdNoSupport'      : '后端不支持该命令.',
-			'errReplByChild'       : '文件夹 “$1” 不能被它所包含的项目替换.',
+			'errCmdNoSupport'      : '服务器端不支持该命令.',
+			'errReplByChild'       : '不能用文件夹 “$1” 下的项替换文件夹 “$1” 自身.',
 			'errArcSymlinks'       : '出于安全上的考虑，不允许解压包含符号链接的压缩包.', // edited 24.06.2012
 			'errArcMaxSize'        : '压缩包文件超过最大允许文件大小范围.',
-			'errResize'            : '无法重新调整大小 "$1".',
+			'errResize'            : '无法将调整大小到 "$1".',
 			'errResizeDegree'      : '无效的旋转角度.',  // added 7.3.2013
 			'errResizeRotate'      : '无法旋转图片.',  // added 7.3.2013
 			'errResizeSize'        : '无效的图片尺寸.',  // added 7.3.2013
@@ -110,18 +102,22 @@
 			'errNetMountFailed'    : '装载失败.',         // added 17.04.2012
 			'errNetMountHostReq'   : '需要指定主机.', // added 18.04.2012
 			'errSessionExpires'    : '您的会话由于长时间未活动已过期.',
-			'errCreatingTempDir'   : '无法创建临时目录: "$1"',
-			'errFtpDownloadFile'   : '无法从FTP下载: "$1" 文件',
-			'errFtpUploadFile'     : '无法将文件: "$1" 上传至FTP',
-			'errFtpMkdir'          : '无法在FTP上创建远程目录: "$1"',
-			'errArchiveExec'       : '归档文件时出错: "$1"',
-			'errExtractExec'       : '解压文件时出错: "$1"',
-			'errNetUnMount'        : '无法卸载', // from v2.1 added 30.04.2012
+			'errCreatingTempDir'   : '无法创建临时目录 "$1"',
+			'errFtpDownloadFile'   : '无法从FTP下载文件 "$1" ',
+			'errFtpUploadFile'     : '无法将文件 "$1" 上传至FTP',
+			'errFtpMkdir'          : '无法在FTP上创建远程目录 "$1"',
+			'errArchiveExec'       : '归档文件"$1"时出错.',
+			'errExtractExec'       : '解压文件"$1"时出错.',
+			'errNetUnMount'        : '无法卸载.', // from v2.1 added 30.04.2012
 			'errConvUTF8'          : '未转换至UTF-8', // from v2.1 added 08.04.2014
 			'errFolderUpload'      : '如果您需要上传目录, 请尝试使用Google Chrome.', // from v2.1 added 26.6.2015
-			'errSearchTimeout'     : '搜索 "$1" 超时. 仅显示部分搜索结果.', // from v2.1 added 12.1.2016
+			'errSearchTimeout'     : '搜索 "$1" 超时,仅显示部分搜索结果.', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : '必需重新授权.', // from v2.1.10 added 24.3.2016
-			'errMaxTargets'        : '可选择项目的最大数量为 $1.', // from v2.1.17 added 17.10.2016
+			'errMaxTargets'        : '最大可选择项目数为 $1.', // from v2.1.17 added 17.10.2016
+			'errRestore'           : '无法从回收站中恢复，无法识别还原目的地.', // from v2.1.24 added 3.5.2017
+			'errEditorNotFound'    : '找不到这个文件的编辑器.', // from v2.1.25 added 23.5.2017
+			'errServerError'       : '服务端发生错误.', // from v2.1.25 added 16.6.2017
+			'errEmpty'             : '无法清空文件夹 "$1".', // from v2.1.25 added 22.6.2017
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : '创建压缩包',
@@ -129,14 +125,14 @@
 			'cmdcopy'      : '复制',
 			'cmdcut'       : '剪切',
 			'cmddownload'  : '下载',
-			'cmdduplicate' : '创建复本',
+			'cmdduplicate' : '创建副本',
 			'cmdedit'      : '编辑文件',
 			'cmdextract'   : '从压缩包提取文件',
 			'cmdforward'   : '前进',
 			'cmdgetfile'   : '选择文件',
-			'cmdhelp'      : '关于本软件',
+			'cmdhelp'      : '关于',
 			'cmdhome'      : '首页',
-			'cmdinfo'      : '查看信息',
+			'cmdinfo'      : '查看详情',
 			'cmdmkdir'     : '新建文件夹',
 			'cmdmkdirin'   : '至新文件夹', // from v2.1.7 added 19.2.2016
 			'cmdmkfile'    : '新建文本文件',
@@ -146,11 +142,13 @@
 			'cmdreload'    : '刷新',
 			'cmdrename'    : '重命名',
 			'cmdrm'        : '删除',
+			'cmdtrash'     : '至回收站', //from v2.1.24 added 29.4.2017
+			'cmdrestore'   : '恢复', //from v2.1.24 added 3.5.2017
 			'cmdsearch'    : '查找文件',
 			'cmdup'        : '转到上一级文件夹',
 			'cmdupload'    : '上传文件',
 			'cmdview'      : '查看',
-			'cmdresize'    : '重新调整大小',
+			'cmdresize'    : '调整大小&旋转',
 			'cmdsort'      : '排序',
 			'cmdnetmount'  : '装载网络卷', // added 18.04.2012
 			'cmdnetunmount': '卸载', // from v2.1 added 30.04.2012
@@ -160,6 +158,13 @@
 			'cmdcolwidth'  : '设置列宽', // from v2.1.13 added 12.06.2016
 			'cmdfullscreen': '全屏显示', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : '移动', // from v2.1.15 added 21.08.2016
+			'cmdempty'     : '清空文件夹', // from v2.1.25 added 22.06.2017
+			'cmdundo'      : '撤消', // from v2.1.27 added 31.07.2017
+			'cmdredo'      : '重做', // from v2.1.27 added 31.07.2017
+			'cmdpreference': '偏好', // from v2.1.27 added 03.08.2017
+			'cmdselectall' : '全选', // from v2.1.28 added 15.08.2017
+			'cmdselectnone': '全不选', // from v2.1.28 added 15.08.2017
+			'cmdselectinvert': '反向选择', // from v2.1.28 added 15.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : '关闭',
@@ -180,6 +185,11 @@
 			'btnFileName':'文件名',  // from v2.1 added 22.5.2015
 			'btnSaveClose': '保存并关闭', // from v2.1 added 12.6.2015
 			'btnBackup' : '备份', // fromv2.1 added 28.11.2015
+			'btnRename'    : '重命名',      // from v2.1.24 added 6.4.2017
+			'btnRenameAll' : '重命名(All)', // from v2.1.24 added 6.4.2017
+			'btnPrevious' : 'Prev ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnNext'     : 'Next ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnSaveAs'   : '另存为', // from v2.1.25 added 24.5.2017
 
 			/******************************** notifications ********************************/
 			'ntfopen'     : '打开文件夹',
@@ -211,6 +221,14 @@
 			'ntfzipdl'    : '正在创建一个下载文件', // from v2.1.7 added 23.1.2016
 			'ntfparents'  : '正在取得路径信息', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': '正在处理上传文件', // from v2.1.17 added 2.11.2016
+			'ntftrash'    : '移动到回收站', // from v2.1.24 added 2.5.2017
+			'ntfrestore'  : '从回收站恢复', // from v2.1.24 added 3.5.2017
+			'ntfchkdir'   : '检查目标文件夹', // from v2.1.24 added 3.5.2017
+			'ntfundo'     : '撤消上一个全局操作', // from v2.1.27 added 31.07.2017
+			'ntfredo'     : '重做上一全局操作', // from v2.1.27 added 31.07.2017
+
+			/*********************************** volumes *********************************/
+			'volume_Trash' : '回收站', //from v2.1.24 added 29.4.2017
 
 			/************************************ dates **********************************/
 			'dateUnknown' : '未知',
@@ -276,9 +294,11 @@
 			'confirmReq'      : '请确认',
 			'confirmRm'       : '确定要删除文件吗?<br/>该操作不可撤销!',
 			'confirmRepl'     : '用新的文件替换原有文件?',
+			'confirmRest'     : '从回收站替换当前项?', // fromv2.1.24 added 5.5.2017
 			'confirmConvUTF8' : '文件不是UTF-8格式.<br/>转换为UTF-8吗？<br/>通过在转换后保存,内容变为UTF-8.', // from v2.1 added 08.04.2014
 			'confirmNonUTF8'  : '无法检测到此文件的字符编码.需要暂时转换此文件为UTF-8编码以进行编辑.<br/>请选择此文件的字符编码.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : '文件已被编辑.<br/>如果不保存直接关闭,将丢失编辑内容.', // from v2.1 added 15.7.2015
+			'confirmTrash'    : '确定要将该项移动到回收站么?', //from v2.1.24 added 29.4.2017
 			'apllyAll'        : '全部应用',
 			'name'            : '名称',
 			'size'            : '大小',
@@ -318,9 +338,9 @@
 			'protocolver'     : '协议版本',
 			'homepage'        : '项目主页',
 			'docs'            : '文档',
-			'github'          : '复刻我们的Github',
-			'twitter'         : '关注我们的推特',
-			'facebook'        : '加入我们的脸书',
+			'github'          : '复刻我们的github',
+			'twitter'         : '关注我们的twitter',
+			'facebook'        : '加入我们的facebook',
 			'team'            : '团队',
 			'chiefdev'        : '首席开发',
 			'developer'       : '开发',
@@ -335,17 +355,18 @@
 			'selectForUpload' : '选择要上传的文件',
 			'moveFiles'       : '移动文件',
 			'copyFiles'       : '复制文件',
-			'rmFromPlaces'    : '从位置中删除',
+			'restoreFiles'    : '恢复文件', // from v2.1.24 added 5.5.2017
+			'rmFromPlaces'    : '从这里中删除',
 			'aspectRatio'     : '保持比例',
-			'scale'           : '高宽比',
+			'scale'           : '缩放比例',
 			'width'           : '宽',
 			'height'          : '高',
-			'resize'          : '重新调整大小',
+			'resize'          : '调整大小',
 			'crop'            : '裁切',
 			'rotate'          : '旋转',
-			'rotate-cw'       : '顺时针旋转90度',
-			'rotate-ccw'      : '逆时针旋转90度',
-			'degree'          : '度',
+			'rotate-cw'       : '顺时针旋转90°',
+			'rotate-ccw'      : '逆时针旋转90°',
+			'degree'          : '°',
 			'netMountDialogTitle' : '装载网络目录', // added 18.04.2012
 			'protocol'            : '协议', // added 18.04.2012
 			'host'                : '主机', // added 18.04.2012
@@ -392,20 +413,46 @@
 			'reset'           : '重置', // from v2.1.16 added 1.10.2016
 			'bgcolor'         : '背景色', // from v2.1.16 added 1.10.2016
 			'colorPicker'     : '颜色选择器', // from v2.1.16 added 1.10.2016
-			'8pxgrid'         : '8px 网格', // from v2.1.16 added 4.10.2016
-			'enabled'         : '活性', // from v2.1.16 added 4.10.2016
-			'disabled'        : '非活性', // from v2.1.16 added 4.10.2016
+			'8pxgrid'         : '步长(8px)', // from v2.1.16 added 4.10.2016
+			'enabled'         : '启用', // from v2.1.16 added 4.10.2016
+			'disabled'        : '关闭', // from v2.1.16 added 4.10.2016
 			'emptyIncSearch'  : '当前视图下没有匹配结果', // from v2.1.16 added 5.10.2016
+			'emptyLetSearch'  : '当前视图中的第一个字母搜索结果为空', // from v2.1.23 added 24.3.2017
 			'textLabel'       : '文本标签', // from v2.1.17 added 13.10.2016
 			'minsLeft'        : '剩余 $1 分钟', // from v2.1.17 added 13.11.2016
 			'openAsEncoding'  : '使用所选编码重新打开', // from v2.1.19 added 2.12.2016
 			'saveAsEncoding'  : '使用所选编码保存', // from v2.1.19 added 2.12.2016
 			'selectFolder'    : '选择目录', // from v2.1.20 added 13.12.2016
+			'firstLetterSearch': '首字母搜索', // from v2.1.23 added 24.3.2017
+			'presets'         : '预置', // from v2.1.25 added 26.5.2017
+			'tooManyToTrash'  : '项目太多，不能移动到回收站.', // from v2.1.25 added 9.6.2017
+			'TextArea'        : '文本区域', // from v2.1.25 added 14.6.2017
+			'folderToEmpty'   : '清空文件夹 "$1".', // from v2.1.25 added 22.6.2017
+			'filderIsEmpty'   : '文件夹 "$1" 为空.', // from v2.1.25 added 22.6.2017
+			'preference'      : '偏好', // from v2.1.26 added 28.6.2017
+			'language'        : '语言设置', // from v2.1.26 added 28.6.2017
+			'clearBrowserData': '清除保存在此浏览器中的偏好设置', // from v2.1.26 added 28.6.2017
+			'toolbarPref'     : '工具栏设置', // from v2.1.27 added 2.8.2017
+			'charsLeft'       : '... $1 chars left.',  // from v2.1.29 added 30.8.2017
+			'sum'             : '总数', // from v2.1.29 added 28.9.2017
+			'roughFileSize'   : '粗略的文件大小', // from v2.1.30 added 2.11.2017
+			'autoFocusDialog' : '鼠标悬停在对话框内可编辑区域时自动获得焦点',  // from v2.1.30 added 2.11.2017
+			'select'          : '选择', // from v2.1.30 added 23.11.2017
+			'selectAction'    : '双击选择的文件时', // from v2.1.30 added 23.11.2017
+			'useStoredEditor' : '用上次使用的编辑器打开', // from v2.1.30 added 23.11.2017
+			'selectinvert'    : '反向选择', // from v2.1.30 added 25.11.2017
+			'renameMultiple'  : '确定要重命名选定项 $1 为 $2 吗?<br/>该操作不能撤消!', // from v2.1.31 added 4.12.2017
+			'batchRename'     : '批量重命名', // from v2.1.31 added 8.12.2017
+			'plusNumber'      : '增加数量', // from v2.1.31 added 8.12.2017
+			'asPrefix'        : '添加前缀', // from v2.1.31 added 8.12.2017
+			'asSuffix'        : '添加后缀', // from v2.1.31 added 8.12.2017
+			'changeExtention' : '变化范围', // from v2.1.31 added 8.12.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '未知',
 			'kindRoot'        : '根目录', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : '文件夹',
+			'kindSelects'     : '选择', // from v2.1.29 added 29.8.2017
 			'kindAlias'       : '别名',
 			'kindAliasBroken' : '错误的别名',
 			// applications
@@ -417,7 +464,7 @@
 			'kindMsPP'        : 'Microsoft Powerpoint 演示',
 			'kindOO'          : 'Open Office 文档',
 			'kindAppFlash'    : 'Flash 程序',
-			'kindPDF'         : 'Portable Document Format (PDF)',
+			'kindPDF'         : 'PDF 文档',
 			'kindTorrent'     : 'Bittorrent 文件',
 			'kind7z'          : '7z 压缩包',
 			'kindTAR'         : 'TAR 压缩包',
