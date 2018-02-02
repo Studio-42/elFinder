@@ -172,7 +172,8 @@ class elFinderPluginWatermark extends elFinderPlugin {
 	
 	private function watermarkPrint_imagick($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo, $opts) {
 		
-		try {
+		try { throw new Exception("Error Processing Request", 1);
+		
 			// Open the original image
 			$img = new Imagick($src);
 			
@@ -205,6 +206,8 @@ class elFinderPluginWatermark extends elFinderPlugin {
 			
 			return $result ? true : false;
 		} catch (Exception $e) {
+			$ermsg = $e->getMessage();
+			$ermsg && trigger_error($ermsg);
 			return false;
 		}
 	}
@@ -220,33 +223,33 @@ class elFinderPluginWatermark extends elFinderPlugin {
 				if (imagetypes() & IMG_GIF) {
 					$oWatermarkImg = imagecreatefromgif($watermark);
 				} else {
-					$ermsg = 'GIF images are not supported';
+					$ermsg = 'GIF images are not supported as watermark image';
 				}
 				break;
 			case 'image/jpeg':
 				if (imagetypes() & IMG_JPG) {
 					$oWatermarkImg = imagecreatefromjpeg($watermark) ;
 				} else {
-					$ermsg = 'JPEG images are not supported';
+					$ermsg = 'JPEG images are not supported as watermark image';
 				}
 				break;
 			case 'image/png':
 				if (imagetypes() & IMG_PNG) {
 					$oWatermarkImg = imagecreatefrompng($watermark) ;
 				} else {
-					$ermsg = 'PNG images are not supported';
+					$ermsg = 'PNG images are not supported as watermark image';
 				}
 				break;
 			case 'image/wbmp':
 				if (imagetypes() & IMG_WBMP) {
 					$oWatermarkImg = imagecreatefromwbmp($watermark);
 				} else {
-					$ermsg = 'WBMP images are not supported';
+					$ermsg = 'WBMP images are not supported as watermark image';
 				}
 				break;
 			default:
 				$oWatermarkImg = false;
-				$ermsg = $watermarkImgInfo['mime'].' images are not supported';
+				$ermsg = $watermarkImgInfo['mime'].' images are not supported as watermark image';
 				break;
 		}
 		
@@ -256,38 +259,39 @@ class elFinderPluginWatermark extends elFinderPlugin {
 					if (imagetypes() & IMG_GIF) {
 						$oSrcImg = imagecreatefromgif($src);
 					} else {
-						$ermsg = 'GIF images are not supported';
+						$ermsg = 'GIF images are not supported as source image';
 					}
 					break;
 				case 'image/jpeg':
 					if (imagetypes() & IMG_JPG) {
 						$oSrcImg = imagecreatefromjpeg($src) ;
 					} else {
-						$ermsg = 'JPEG images are not supported';
+						$ermsg = 'JPEG images are not supported as source image';
 					}
 					break;
 				case 'image/png':
 					if (imagetypes() & IMG_PNG) {
 						$oSrcImg = imagecreatefrompng($src) ;
 					} else {
-						$ermsg = 'PNG images are not supported';
+						$ermsg = 'PNG images are not supported as source image';
 					}
 					break;
 				case 'image/wbmp':
 					if (imagetypes() & IMG_WBMP) {
 						$oSrcImg = imagecreatefromwbmp($src);
 					} else {
-						$ermsg = 'WBMP images are not supported';
+						$ermsg = 'WBMP images are not supported as source image';
 					}
 					break;
 				default:
 					$oSrcImg = false;
-					$ermsg = $srcImgInfo['mime'].' images are not supported';
+					$ermsg = $srcImgInfo['mime'].' images are not supported as source image';
 					break;
 			}
 		}
 		
 		if ($ermsg || false === $oSrcImg || false === $oWatermarkImg) {
+			$ermsg && trigger_error($ermsg);
 			return false;
 		}
 		
