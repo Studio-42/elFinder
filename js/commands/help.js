@@ -196,7 +196,7 @@
 	fm.bind('load', function() {
 		var setupPref = function() {
 				var tab = content.find('.elfinder-help-preference'),
-					forms = self.options.prefs || ['language', 'toolbarPref', 'selectAction', 'useStoredEditor', 'autoFocusDialog', 'clearBrowserData'],
+					forms = self.options.prefs || ['language', 'toolbarPref', 'columnPref', 'selectAction', 'useStoredEditor', 'autoFocusDialog', 'clearBrowserData'],
 					dls = $();
 				
 				forms = fm.arrayFlip(forms, true);
@@ -264,7 +264,7 @@
 					var node = $('<div/>');
 					init(function() {
 						var pnls = $.map(fm.options.uiOptions.toolbar, function(v) {
-								return $.isArray(v)? v : false;
+								return $.isArray(v)? v : null;
 							}),
 							tags = [],
 							hides = fm.storage('toolbarhides') || {};
@@ -286,6 +286,32 @@
 							}
 							fm.storage('toolbarhides', hides);
 							fm.trigger('toolbarpref');
+						}));
+					});
+					return node;
+				})());
+				
+				forms.columnPref && (forms.columnPref = (function() {
+					var node = $('<div/>');
+					init(function() {
+						var cols = fm.options.uiOptions.cwd.listView.columns,
+							tags = [],
+							hides = fm.storage('columnhides') || {};
+						$.each(cols, function() {
+							var key = this,
+								name = fm.getColumnName(key);
+							tags.push('<span class="elfinder-help-column-item"><label><input type="checkbox" value="'+key+'" '+(hides[key]? '' : 'checked')+'/>'+name+'</label></span>');
+						});
+						node.replaceWith($(tags.join(' ')).on('change', 'input', function() {
+							var v = $(this).val(),
+								o = $(this).is(':checked');
+							if (!o && !hides[v]) {
+								hides[v] = true;
+							} else if (o && hides[v]) {
+								delete hides[v];
+							}
+							fm.storage('columnhides', hides);
+							fm.trigger('columnpref', { repaint: true });
 						}));
 					});
 					return node;
@@ -343,8 +369,16 @@
 				}));
 				
 				$.each(forms, function(n, f) {
+					var title;
 					if (f && f !== true) {
-						dls = dls.add($('<dt>'+fm.i18n(n)+'</dt>')).add($('<dd class="elfinder-help-'+n+'"/>').append(f));
+						title = fm.i18n(n);
+						if (f.is('input:checkbox')) {
+							if (!f.attr('id')) {
+								f.attr('id', 'elfinder-help-'+n+'-checkbox');
+							}
+							title = '<label for="'+f.attr('id')+'">'+title+'</label>';
+						}
+						dls = dls.add($('<dt>'+title+'</dt>')).add($('<dd class="elfinder-help-'+n+'"/>').append(f));
 					}
 				});
 				

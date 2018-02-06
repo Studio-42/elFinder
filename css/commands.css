@@ -481,11 +481,18 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-help-preference dd {
 	margin-bottom: 1em;
 }
+.elfinder-help-preference dt label {
+	cursor: pointer;
+}
 .elfinder-help-preference dd label,
 .elfinder-help-preference dd input[type=checkbox] {
 	white-space: nowrap;
 	display: inline-block;
 	cursor: pointer;
+}
+.elfinder-help-preference dd.elfinder-help-toolbarPref,
+.elfinder-help-preference dd.elfinder-help-columnPref {
+	padding-top: 3ex;
 }
 
 /********************** COMMAND "INFO" ****************************/
