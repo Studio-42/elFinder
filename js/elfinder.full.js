@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.31 (2.1-src Nightly: 5982021) (2018-02-03)
+ * Version 2.1.31 (2.1-src Nightly: 746ab4b) (2018-02-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -4055,6 +4055,8 @@ var elFinder = function(elm, opts, bootCallback) {
 	
 	// elFinder boot up function
 	bootUp = function() {
+		var columnNames;
+
 		/**
 		 * i18 messages
 		 *
@@ -4076,6 +4078,28 @@ var elFinder = function(elm, opts, bootCallback) {
 			return alert(self.i18n('errURL'));
 		}
 		
+		// column key/name map for fm.getColumnName()
+		columnNames = Object.assign({
+			name : self.i18n('name'),
+			perm : self.i18n('perms'),
+			date : self.i18n('modify'),
+			size : self.i18n('size'),
+			kind : self.i18n('kind'),
+			modestr : self.i18n('mode'),
+			modeoct : self.i18n('mode'),
+			modeboth : self.i18n('mode')
+		}, self.options.uiOptions.cwd.listView.columnsCustomName);
+
+		/**
+		 * Gets the column name of cwd list view
+		 *
+		 * @param      String  key     The key
+		 * @return     String  The column name.
+		 */
+		self.getColumnName = function(key) {
+			return columnNames[key] || self.i18n(key);
+		};
+
 		/**
 		 * Interface direction
 		 *
@@ -8858,7 +8882,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.31 (2.1-src Nightly: 5982021)';
+elFinder.prototype.version = '2.1.31 (2.1-src Nightly: 746ab4b)';
 
 
 
@@ -11257,7 +11281,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2017-12-08
+ * @version 2018-02-06
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -11677,7 +11701,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'preference'      : 'Preference', // from v2.1.26 added 28.6.2017
 			'language'        : 'Language setting', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': 'Initialize the settings saved in this browser', // from v2.1.26 added 28.6.2017
-			'toolbarPref'     : 'Toolbar setting', // from v2.1.27 added 2.8.2017
+			'toolbarPref'     : 'Toolbar settings', // from v2.1.27 added 2.8.2017
 			'charsLeft'       : '... $1 chars left.',  // from v2.1.29 added 30.8.2017
 			'sum'             : 'Sum', // from v2.1.29 added 28.9.2017
 			'roughFileSize'   : 'Rough file size', // from v2.1.30 added 2.11.2017
@@ -11692,6 +11716,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'asPrefix'        : 'Add prefix', // from v2.1.31 added 8.12.2017
 			'asSuffix'        : 'Add suffix', // from v2.1.31 added 8.12.2017
 			'changeExtention' : 'Change extention', // from v2.1.31 added 8.12.2017
+			'columnPref'      : 'Columns settings (List view)', // from v2.1.32 added 6.2.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -13924,27 +13949,11 @@ $.fn.elfindercwd = function(fm, options) {
 				}
 			},
 			
-			msg = {
-				name : fm.i18n('name'),
-				perm : fm.i18n('perms'),
-				date : fm.i18n('modify'),
-				size : fm.i18n('size'),
-				kind : fm.i18n('kind'),
-				modestr : fm.i18n('mode'),
-				modeoct : fm.i18n('mode'),
-				modeboth : fm.i18n('mode')
-			},
-			
 			customColsNameBuild = function() {
 				var name = '',
-				customColsName = '',
-				names = Object.assign({}, msg, options.listView.columnsCustomName);
+				customColsName = '';
 				for (var i = 0; i < customCols.length; i++) {
-					if (typeof names[customCols[i]] !== 'undefined') {
-						name = names[customCols[i]];
-					} else {
-						name = fm.i18n(customCols[i]);
-					}
+					name = fm.getColumnName(customCols[i]);
 					customColsName +='<td class="elfinder-cwd-view-th-'+customCols[i]+' sortable-item">'+name+'</td>';
 				}
 				return customColsName;
@@ -14066,7 +14075,7 @@ $.fn.elfindercwd = function(fm, options) {
 
 				if (list) {
 					cwd.html('<table><thead/><tbody/></table>');
-					thtr = $('<tr class="ui-state-default"><td class="elfinder-cwd-view-th-name">'+msg.name+'</td>'+customColsNameBuild()+'</tr>');
+					thtr = $('<tr class="ui-state-default"><td class="elfinder-cwd-view-th-name">'+fm.getColumnName('name')+'</td>'+customColsNameBuild()+'</tr>');
 					cwd.find('thead').hide().append(
 						thtr
 						.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
@@ -14680,22 +14689,34 @@ $.fn.elfindercwd = function(fm, options) {
 		}
 		
 		// setup costomCols
-		if (customCols = fm.storage('cwdCols')) {
-			customCols = $.grep(customCols, function(n) {
-				return (options.listView.columns.indexOf(n) !== -1)? true : false;
-			});
-			if (options.listView.columns.length > customCols.length) {
-				$.each(options.listView.columns, function(i, n) {
-					if (customCols.indexOf(n) === -1) {
-						customCols.push(n);
-					}
+		fm.bind('columnpref', function(e) {
+			var opts = e.data || {};
+			if (customCols = fm.storage('cwdCols')) {
+				customCols = $.grep(customCols, function(n) {
+					return (options.listView.columns.indexOf(n) !== -1)? true : false;
 				});
+				if (options.listView.columns.length > customCols.length) {
+					$.each(options.listView.columns, function(i, n) {
+						if (customCols.indexOf(n) === -1) {
+							customCols.push(n);
+						}
+					});
+				}
+			} else {
+				customCols = options.listView.columns;
 			}
-		} else {
-			customCols = options.listView.columns;
-		}
-		templates.row = makeTemplateRow();
-		
+			// column names array that hidden
+			var columnhides = fm.storage('columnhides') || null;
+			if (columnhides && Object.keys(columnhides).length)
+			customCols = $.grep(customCols, function(n) {
+				return columnhides[n]? false : true;
+			});
+			// make template with customCols
+			templates.row = makeTemplateRow();
+			// repaint if need it
+			list && opts.repaint && content();
+		}).trigger('columnpref');
+
 		if (mobile) {
 			// for iOS5 bug
 			$('body').on('touchstart touchmove touchend', function(e){});
@@ -22266,7 +22287,7 @@ elFinder.prototype.commands.fullscreen = function() {
 	fm.bind('load', function() {
 		var setupPref = function() {
 				var tab = content.find('.elfinder-help-preference'),
-					forms = self.options.prefs || ['language', 'toolbarPref', 'selectAction', 'useStoredEditor', 'autoFocusDialog', 'clearBrowserData'],
+					forms = self.options.prefs || ['language', 'toolbarPref', 'columnPref', 'selectAction', 'useStoredEditor', 'autoFocusDialog', 'clearBrowserData'],
 					dls = $();
 				
 				forms = fm.arrayFlip(forms, true);
@@ -22334,7 +22355,7 @@ elFinder.prototype.commands.fullscreen = function() {
 					var node = $('<div/>');
 					init(function() {
 						var pnls = $.map(fm.options.uiOptions.toolbar, function(v) {
-								return $.isArray(v)? v : false;
+								return $.isArray(v)? v : null;
 							}),
 							tags = [],
 							hides = fm.storage('toolbarhides') || {};
@@ -22356,6 +22377,32 @@ elFinder.prototype.commands.fullscreen = function() {
 							}
 							fm.storage('toolbarhides', hides);
 							fm.trigger('toolbarpref');
+						}));
+					});
+					return node;
+				})());
+				
+				forms.columnPref && (forms.columnPref = (function() {
+					var node = $('<div/>');
+					init(function() {
+						var cols = fm.options.uiOptions.cwd.listView.columns,
+							tags = [],
+							hides = fm.storage('columnhides') || {};
+						$.each(cols, function() {
+							var key = this,
+								name = fm.getColumnName(key);
+							tags.push('<span class="elfinder-help-column-item"><label><input type="checkbox" value="'+key+'" '+(hides[key]? '' : 'checked')+'/>'+name+'</label></span>');
+						});
+						node.replaceWith($(tags.join(' ')).on('change', 'input', function() {
+							var v = $(this).val(),
+								o = $(this).is(':checked');
+							if (!o && !hides[v]) {
+								hides[v] = true;
+							} else if (o && hides[v]) {
+								delete hides[v];
+							}
+							fm.storage('columnhides', hides);
+							fm.trigger('columnpref', { repaint: true });
 						}));
 					});
 					return node;
@@ -22413,8 +22460,16 @@ elFinder.prototype.commands.fullscreen = function() {
 				}));
 				
 				$.each(forms, function(n, f) {
+					var title;
 					if (f && f !== true) {
-						dls = dls.add($('<dt>'+fm.i18n(n)+'</dt>')).add($('<dd class="elfinder-help-'+n+'"/>').append(f));
+						title = fm.i18n(n);
+						if (f.is('input:checkbox')) {
+							if (!f.attr('id')) {
+								f.attr('id', 'elfinder-help-'+n+'-checkbox');
+							}
+							title = '<label for="'+f.attr('id')+'">'+title+'</label>';
+						}
+						dls = dls.add($('<dt>'+title+'</dt>')).add($('<dd class="elfinder-help-'+n+'"/>').append(f));
 					}
 				});
 				
