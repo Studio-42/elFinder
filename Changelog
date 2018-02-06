@@ -1,3 +1,28 @@
+2018-02-xx  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.32):
+		- [js:extras:editors.default] Fixed problem of initial widh of Zoho editor
+		- [cmd:quicklook] Fixed #2346 conflict of `update` event with prototype.js
+		- [php:core] Fixed #2345 aFixeddd the warning about object injection attacks
+		- [VD:Dropbox2] Fixed #2348 edit File not respecting filename capitalization
+		- [js:extras:editors] Fixed #2319 supports local CKEditor
+		- [js:core] bugfix of sort by timestamp about unknown values
+		- [ui:dialog] Fixed size restoration problem from maximized dialog
+		- [ui:dialog] bugfix of when closes editing dialog of maximized
+		- [VD:abstract] Fixed #2352 problem of detect MIME-Type as 'unknown' with the empty file
+		- [cmd:open] Fixed #2359 can't open with "open" of "Action when select file"
+		- [VD:abstract] update `mimeMap` of default options
+		- [VD:TrashMySQL] add a new volume "TrashMySQL"
+		- [php:core] Fixed #2365 make custom data controllable from the connector side
+		- [VD:MySQL] bugfix that it was not possible to set as root path other than the root id
+		- [api:put] allow puts by the self item hash
+		- [i18n] correction of confirm message when duplicate upload
+		- [i18n] Fixed #2369 modify wording of 'confirmRepl'
+		- [cmd:help] Fixed #2370 add "Column setting" to Preferences tab
+		- [i18n:LANG] add `'columnPref': 'Columns settings (List view)'`
+		- And some minor bug fixes
+
+
 2017-12-27  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.31):
