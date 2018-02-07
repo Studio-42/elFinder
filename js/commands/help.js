@@ -372,7 +372,7 @@
 					var title;
 					if (f && f !== true) {
 						title = fm.i18n(n);
-						if (f.is('input:checkbox')) {
+						if (f instanceof jQuery && f.length === 1 && f.is('input:checkbox')) {
 							if (!f.attr('id')) {
 								f.attr('id', 'elfinder-help-'+n+'-checkbox');
 							}
