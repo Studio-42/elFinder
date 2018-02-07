@@ -3,7 +3,7 @@
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
  * @author Alex Yashkin <alex@yashkin.by>
- * @version 2017-12-18
+ * @version 2018-02-07
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -437,7 +437,7 @@
 			'autoFocusDialog' : 'Фокус на элементе диалога при наведении мыши',  // from v2.1.30 added 2.11.2017
 			'select'          : 'Выбрать', // from v2.1.30 added 23.11.2017
 			'selectAction'    : 'Действие при выборе файла', // from v2.1.30 added 23.11.2017
-			'useStoredEditor' : 'Открывать в редакторе, использованном последний раз', // from v2.1.30 added 23.11.2017
+			'useStoredEditor' : 'Открывать в редакторе, выбранном в прошлый раз', // from v2.1.30 added 23.11.2017
 			'selectinvert'    : 'Выбрать элементы с инвертированием', // from v2.1.30 added 25.11.2017
 			'renameMultiple'  : 'Переименовать выбранные элементы ($1 шт.) в $2?<br/>Действие нельзя отменить!', // from v2.1.31 added 4.12.2017
 			'batchRename'     : 'Групповое переименование', // from v2.1.31 added 8.12.2017
@@ -445,6 +445,7 @@
 			'asPrefix'        : 'Добавить префикс', // from v2.1.31 added 8.12.2017
 			'asSuffix'        : 'Добавить суффикс', // from v2.1.31 added 8.12.2017
 			'changeExtention' : 'Изменить расширение', // from v2.1.31 added 8.12.2017
+			'columnPref'      : 'Настройки колонок (для просмотра в виде списка)', // from v2.1.32 added 6.2.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
