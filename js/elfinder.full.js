@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.31 (2.1-src Nightly: 3c19627) (2018-02-06)
+ * Version 2.1.32 (2.1-src Nightly: 832b185) (2018-02-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8887,7 +8887,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.31 (2.1-src Nightly: 3c19627)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 832b185)';
 
 
 
@@ -22468,7 +22468,7 @@ elFinder.prototype.commands.fullscreen = function() {
 					var title;
 					if (f && f !== true) {
 						title = fm.i18n(n);
-						if (f.is('input:checkbox')) {
+						if (f instanceof jQuery && f.length === 1 && f.is('input:checkbox')) {
 							if (!f.attr('id')) {
 								f.attr('id', 'elfinder-help-'+n+'-checkbox');
 							}
