@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: 79d744f) (2018-02-08)
+ * Version 2.1.32 (2.1-src Nightly: f84194a) (2018-02-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -6224,7 +6224,8 @@ elFinder.prototype = {
 							paths = [],
 							excludes = fm.options.folderUploadExclude[fm.OS] || null;
 						$.each(files, function(i, file) {
-							var relPath = file.webkitRelativePath || file.relativePath || '';
+							var relPath = file.webkitRelativePath || file.relativePath || '',
+								idx, rootDir;
 							if (! relPath) {
 								return false;
 							}
@@ -6235,6 +6236,11 @@ elFinder.prototype = {
 								relPath = relPath.replace(/\/[^\/]*$/, '');
 								if (relPath && $.inArray(relPath, mkdirs) === -1) {
 									mkdirs.push(relPath);
+									// checking the root directory to supports <input type="file" webkitdirectory> see #2378
+									idx = relPath.indexOf('/');
+									if (idx !== -1 && (rootDir = relPath.substr(0, idx)) && $.inArray(rootDir, mkdirs) === -1) {
+										mkdirs.unshift(rootDir);
+									}
 								}
 							}
 							paths.push(relPath);
@@ -8887,7 +8893,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 79d744f)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: f84194a)';
 
 
 
