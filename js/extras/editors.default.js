@@ -115,14 +115,16 @@
 				elfNode = fm.getUI(),
 				container = $('<iframe class="ui-front" allowtransparency="true">'),
 				file = this.file,
-				src = 'https://pixlr.com/'+mode+'/?s=c',
-				myurl = window.location.href.toString().replace(/#.*$/, ''),
 				error = function(error) {
 					container.remove();
 					node.data('loading')(true);
 					fm.error(error || 'Can not launch Pixlr.');
 				},
 				launch = function() {
+					var src = 'https://pixlr.com/'+mode+'/?s=c',
+						myurl = window.location.href.toString().replace(/#.*$/, ''),
+						opts = {};
+
 					errtm = setTimeout(error, 10000);
 					myurl += (myurl.indexOf('?') === -1? '?' : '&') + 'pixlr='+node.attr('id');
 					src += '&referrer=elFinder&locktitle=true';
@@ -131,19 +133,32 @@
 					src += '&title='+encodeURIComponent(file.name);
 					src += '&locktype='+encodeURIComponent(file.mime === 'image/png'? 'png' : 'jpg');
 					src += '&image='+encodeURIComponent(node.attr('src'));
+					
+					opts.src = src;
+					opts.css = {
+						width: '100%',
+						height: $(window).height()+'px',
+						position: 'fixed',
+						display: 'block',
+						backgroundColor: 'transparent',
+						border: 'none',
+						top: 0,
+						right: 0
+					};
+
+					// trigger event 'editEditorPrepare'
+					fm.trigger('editEditorPrepare', {
+						node: base,
+						name: 'Pixlr ' + mode.charAt(0).toUpperCase() + mode.substring(1),
+						editorObj: void(0),
+						instance: container,
+						opts: opts
+					});
+
 					container
 						.attr('id', node.attr('id')+'iframe')
-						.attr('src', src)
-						.css({
-							width: '100%',
-							height: $(window).height()+'px',
-							position: 'fixed',
-							display: 'block',
-							backgroundColor: 'transparent',
-							border: 'none',
-							top: 0,
-							right: 0
-						})
+						.attr('src', opts.src)
+						.css(opts.css)
 						.on('load', function() {
 							errtm && clearTimeout(errtm);
 							setTimeout(function() {
@@ -298,7 +313,7 @@
 									'zh_CN' : 'zh_HANS'
 								};
 								return langMap[fm.lang]? langMap[fm.lang] : fm.lang;
-							};
+							}, opts;
 							
 						if (!container.length) {
 							container = $('<div id="elfinder-aviary-container" class="ui-front"/>').css({
@@ -327,7 +342,7 @@
 							container.appendTo(container.parent());
 						}
 						node.on('click', launch).data('loading')();
-						featherEditor = new Aviary.Feather({
+						opts = {
 							apiKey: self.confObj.apiKey,
 							onSave: function(imageID, newURL) {
 								featherEditor.showWaitIndicator();
@@ -344,7 +359,16 @@
 							appendTo: container.get(0),
 							maxSize: 2048,
 							language: getLang()
+						};
+						// trigger event 'editEditorPrepare'
+						fm.trigger('editEditorPrepare', {
+							node: base,
+							name: 'Creative Cloud',
+							editorObj: Aviary,
+							instance: void(0),
+							opts: opts
 						});
+						featherEditor = new Aviary.Feather(opts);
 						container.css('z-index', $(base).closest('.elfinder-dialog').css('z-index'));
 						// return editor instance
 						dfrd.resolve(featherEditor);
@@ -393,8 +417,9 @@
 			},
 			load : function(textarea) {
 				var self = this,
+					fm   = this.fm,
 					dfrd = $.Deferred(),
-					cdn  = this.fm.options.cdns.ace,
+					cdn  = fm.options.cdns.ace,
 					start = function() {
 						var editor, editorBase, mode,
 						ta = $(textarea),
@@ -542,6 +567,15 @@
 						)
 						.prependTo(taBase.next());
 
+						// trigger event 'editEditorPrepare'
+						fm.trigger('editEditorPrepare', {
+							node: textarea,
+							name: 'ACE Editor',
+							editorObj: ace,
+							instance: editor,
+							opts: {}
+						});
+						
 						dfrd.resolve(editor);
 					};
 
@@ -583,19 +617,20 @@
 				iconImg : 'img/edit_codemirror.png'
 			},
 			load : function(textarea) {
-				var cmUrl = this.fm.options.cdns.codemirror,
+				var fm = this.fm,
+					cmUrl = fm.options.cdns.codemirror,
 					dfrd = $.Deferred(),
 					self = this,
 					start = function(CodeMirror) {
 						var ta   = $(textarea),
 							base = ta.parent(),
-							editor, editorBase;
+							editor, editorBase, opts;
 						
 						// set base height
 						base.height(base.height());
 						
-						// CodeMirror configure
-						editor = CodeMirror.fromTextArea(textarea, {
+						// CodeMirror configure options
+						opts = {
 							lineNumbers: true,
 							lineWrapping: true,
 							extraKeys : {
@@ -603,7 +638,19 @@
 								'Ctrl-Q': function() { self.doCancel(); },
 								'Ctrl-W': function() { self.doCancel(); }
 							}
+						};
+
+						// trigger event 'editEditorPrepare'
+						fm.trigger('editEditorPrepare', {
+							node: textarea,
+							name: 'CodeMirror',
+							editorObj: CodeMirror,
+							instance: void(0),
+							opts: opts
 						});
+
+						// CodeMirror configure
+						editor = CodeMirror.fromTextArea(textarea, opts);
 						
 						// return editor instance
 						dfrd.resolve(editor);
@@ -728,13 +775,14 @@
 			exts  : ['md'],
 			load : function(textarea) {
 				var self = this,
+					fm   = this.fm,
 					base = $(textarea).parent(),
 					dfrd = $.Deferred(),
-					cdn  = this.fm.options.cdns.simplemde,
+					cdn  = fm.options.cdns.simplemde,
 					start = function(SimpleMDE) {
 						var h     = base.height(),
 							delta = base.outerHeight(true) - h + 14,
-							editor, editorBase;
+							editor, editorBase, opts;
 						
 						// fit height function
 						textarea._setHeight = function(height) {
@@ -753,11 +801,22 @@
 						// set base height
 						base.height(h);
 						
-						// make editor
-						editor = new SimpleMDE({
+						opts = {
 							element: textarea,
 							autofocus: true
+						};
+
+						// trigger event 'editEditorPrepare'
+						fm.trigger('editEditorPrepare', {
+							node: textarea,
+							name: 'SimpleMDE',
+							editorObj: SimpleMDE,
+							instance: void(0),
+							opts: opts
 						});
+
+						// make editor
+						editor = new SimpleMDE(opts);
 						dfrd.resolve(editor);
 						
 						// editor base node
@@ -829,7 +888,8 @@
 							h = base.height(),
 							reg = /([&?]getfile=)[^&]+/,
 							loc = self.confObj.managerUrl || window.location.href.replace(/#.*$/, ''),
-							name = 'ckeditor';
+							name = 'ckeditor',
+							opts;
 						
 						// make manager location
 						if (reg.test(loc)) {
@@ -839,13 +899,15 @@
 						}
 						// set base height
 						base.height(h);
-						// CKEditor configure
-						CKEDITOR.replace(textarea.id, {
+
+						// CKEditor configure options
+						opts = {
 							startupFocus : true,
 							fullPage: true,
 							allowedContent: true,
 							filebrowserBrowseUrl : loc,
 							removePlugins: 'resize',
+							extraPlugins: 'colorbutton,justify,font,docprops',
 							on: {
 								'instanceReady' : function(e) {
 									var editor = e.editor;
@@ -862,7 +924,19 @@
 									dfrd.resolve(e.editor);
 								}
 							}
+						};
+
+						// trigger event 'editEditorPrepare'
+						fm.trigger('editEditorPrepare', {
+							node: textarea,
+							name: 'CKEditor',
+							editorObj: CKEDITOR,
+							instance: void(0),
+							opts: opts
 						});
+
+						// CKEditor configure
+						CKEDITOR.replace(textarea.id, opts);
 						CKEDITOR.on('dialogDefinition', function(e) {
 							var dlg = e.data.definition.dialog;
 							dlg.on('show', function(e) {
@@ -926,7 +1000,9 @@
 						var base = $(textarea).parent(),
 							dlg = base.closest('.elfinder-dialog'),
 							h = base.height(),
-							delta = base.outerHeight(true) - h;
+							delta = base.outerHeight(true) - h,
+							opts;
+
 						// set base height
 						base.height(h);
 						// fit height function
@@ -942,8 +1018,9 @@
 							base.find('.mce-edit-area iframe:first').height(areaH);
 							return areaH;
 						};
-						// TinyMCE configure
-						tinymce.init({
+
+						// TinyMCE configure options
+						opts = {
 							selector: '#' + textarea.id,
 							resize: false,
 							plugins: [
@@ -1011,7 +1088,19 @@
 								});
 								return false;
 							}
+						};
+
+						// trigger event 'editEditorPrepare'
+						fm.trigger('editEditorPrepare', {
+							node: textarea,
+							name: 'CKEditor',
+							editorObj: CKEDITOR,
+							instance: void(0),
+							opts: opts
 						});
+
+						// TinyMCE configure
+						tinymce.init(opts);
 					};
 				
  				// impossible launch TineMCE in native fullscreen mode
@@ -1115,8 +1204,23 @@
 					},
 					preventDefault : true
 				}).done(function(data) {
+					var opts;
 					if (data.zohourl) {
-						ifm.attr('src', data.zohourl).show().height('100%');
+						opts = {
+							css: {
+								height: '100%'
+							}
+						};
+						// trigger event 'editEditorPrepare'
+						fm.trigger('editEditorPrepare', {
+							node: ta,
+							name: 'Zoho Editor',
+							editorObj: void(0),
+							instance: ifm,
+							opts: opts
+						});
+
+						ifm.attr('src', data.zohourl).show().css(opts.css);
 					} else {
 						data.error && fm.error(data.error);
 						ta.elfinderdialog('destroy');
@@ -1168,7 +1272,16 @@
 				name : 'TextArea',
 				useTextAreaEvent : true
 			},
-			load : function(){},
+			load : function(textarea) {
+				// trigger event 'editEditorPrepare'
+				this.fm.trigger('editEditorPrepare', {
+					node: textarea,
+					name: 'TextArea',
+					editorObj: void(0),
+					instance: void(0),
+					opts: {}
+				});
+			},
 			save : function(){}
 		}
 	];
