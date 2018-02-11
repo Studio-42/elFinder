@@ -57,15 +57,22 @@ $.fn.elfindersearchbutton = function(cmd) {
 			input  = $('<input type="text" size="42"/>')
 				.on('focus', function() {
 					incVal = '';
+					button.addClass('ui-state-active');
+					fm.trigger('uiresize');
 					opts && opts.slideDown();
 				})
 				.on('blur', function(){
 					if (opts) {
 						if (!opts.data('infocus')) {
-							opts.slideUp();
+							opts.slideUp(function() {
+								button.removeClass('ui-state-active');
+								fm.trigger('uiresize');
+							});
 						} else {
 							opts.data('infocus', false);
 						}
+					} else {
+						button.removeClass('ui-state-active');
 					}
 				})
 				.appendTo(button)
