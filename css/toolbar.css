@@ -234,8 +234,12 @@
 	height: auto;
 	min-height: 26px;
 	float:right;
-	width:202px;
+	width: 70px;
 	overflow: visible;
+}
+
+.elfinder .elfinder-button-search.ui-state-active {
+	width: 220px;
 }
 
 .elfinder .elfinder-button-search .elfinder-button-menu {
@@ -260,8 +264,9 @@
 
 /* search text field */
 .elfinder-button-search input[type=text] {
-	width:160px;
-	height:22px;
+	box-sizing: border-box;
+	cowidth: 100%;
+	height: 26px;
 	padding:0 20px;
 	line-height: 22px;
 	border:0 solid;
@@ -276,7 +281,7 @@
 	display: none;
 }
 .elfinder-touch .elfinder-button-search input {
-	height:28px;
+	height:30px;
 	line-height: 28px;
 }
 .elfinder-rtl .elfinder-button-search input { direction:rtl; }
