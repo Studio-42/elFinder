@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: 3ae25cc) (2018-02-11)
+ * Version 2.1.32 (2.1-src Nightly: 0f493a1) (2018-02-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8893,7 +8893,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 3ae25cc)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 0f493a1)';
 
 
 
@@ -17200,7 +17200,6 @@ $.fn.elfindersearchbutton = function(cmd) {
 			button = $(this).hide().addClass('ui-widget-content elfinder-button '+btnCls),
 			search = function() {
 				input.data('inctm') && clearTimeout(input.data('inctm'));
-				opts && opts.slideUp();
 				var val = $.trim(input.val()),
 					from = !$('#' + id('SearchFromAll')).prop('checked'),
 					mime = $('#' + id('SearchMime')).prop('checked');
@@ -17218,7 +17217,6 @@ $.fn.elfindersearchbutton = function(cmd) {
 				if (val) {
 					cmd.exec(val, from, mime).done(function() {
 						result = true;
-						input.focus();
 					}).fail(function() {
 						abort();
 					});
