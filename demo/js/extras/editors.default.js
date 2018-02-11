@@ -10,7 +10,7 @@
 	var apps = {},
 		// get query of getfile
 		getfile = window.location.search.match(/getfile=([a-z]+)/),
-		useRequire = elFinder.hasRequire,
+		useRequire = elFinder.prototype.hasRequire,
 		hasFlash = (function() {
 			var hasFlash;
 			try {
