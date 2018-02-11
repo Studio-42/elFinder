@@ -906,8 +906,10 @@
 							fullPage: true,
 							allowedContent: true,
 							filebrowserBrowseUrl : loc,
+							toolbarCanCollapse: true,
+							toolbarStartupExpanded: !fm.UA.Mobile,
 							removePlugins: 'resize',
-							extraPlugins: 'colorbutton,justify,font,docprops',
+							extraPlugins: 'colorbutton,justify,docprops',
 							on: {
 								'instanceReady' : function(e) {
 									var editor = e.editor;
