@@ -98,7 +98,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 						icon     : 'accept',
 						callback : function() {
 							textLabel = ! textLabel;
-							self.height('').find('.elfinder-button-text')[textLabel? 'show':'hide']();
+							self.css('height', '').find('.elfinder-button-text')[textLabel? 'show':'hide']();
 							fm.trigger('uiresize').storage('toolbarTextLabel', textLabel? '1' : '0');
 						},
 					},{
@@ -266,17 +266,19 @@ $.fn.elfindertoolbar = function(fm, opts) {
 							fm.trigger('resize');
 						},
 						always: function() {
-							self.css('height', '');
-							fm.trigger('uiresize');
-							if (swipeHandle) {
-								if (toshow) {
-									swipeHandle.stop(true, true).hide();
-								} else {
-									swipeHandle.height(data.handleH? data.handleH : '');
-									fm.resources.blink(swipeHandle, 'slowonce');
+							setTimeout(function() {
+								self.css('height', '');
+								fm.trigger('uiresize');
+								if (swipeHandle) {
+									if (toshow) {
+										swipeHandle.stop(true, true).hide();
+									} else {
+										swipeHandle.height(data.handleH? data.handleH : '');
+										fm.resources.blink(swipeHandle, 'slowonce');
+									}
 								}
-							}
-							data.init && fm.trigger('uiautohide');
+								data.init && fm.trigger('uiautohide');
+							}, 0);
 						}
 					}, data);
 				self.data('swipeClose', ! toshow).stop(true, true).animate({height : 'toggle'}, opt);
