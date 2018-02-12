@@ -3877,11 +3877,10 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		
-		for ($i = 0, $c = count($this->attributes); $i < $c; $i++) {
-			$attrs = $this->attributes[$i];
-			
+		foreach($this->attributes as $attrs) {
 			if (isset($attrs[$name]) && isset($attrs['pattern']) && preg_match($attrs['pattern'], $relpath)) {
 				$perm = $attrs[$name];
+				break;
 			} 
 		}
 		
