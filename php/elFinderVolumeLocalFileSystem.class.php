@@ -482,16 +482,21 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$stat['alias'] = $this->_path($target);
 			$stat['target'] = $target;
 		}
-		$size = sprintf('%u', filesize($path));
-		$stat['ts'] = filemtime($path);
-		if ($this->statOwner) {
-			$fstat = stat($path);
-			$uid = $fstat['uid'];
-			$gid = $fstat['gid'];
-			$stat['perm'] = substr((string)decoct($fstat['mode']), -4);
-			$stat = array_merge($stat, $this->getOwnerStat($uid, $gid));
-		}
+
+		$readable = is_readable($path);
 		
+		if ($readable) {
+			$size = sprintf('%u', filesize($path));
+			$stat['ts'] = filemtime($path);
+			if ($this->statOwner) {
+				$fstat = stat($path);
+				$uid = $fstat['uid'];
+				$gid = $fstat['gid'];
+				$stat['perm'] = substr((string)decoct($fstat['mode']), -4);
+				$stat = array_merge($stat, $this->getOwnerStat($uid, $gid));
+			}
+		}
+
 		if (($dir = is_dir($path)) && $this->options['detectDirIcon']) {
 			$favicon = $path . DIRECTORY_SEPARATOR . $this->options['detectDirIcon'];
 			if ($this->URL && file_exists($favicon)) {
@@ -503,11 +508,15 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$stat['mime'] = $dir ? 'directory' : $this->mimetype($path);
 		}
 		//logical rights first
-		$stat['read'] = ($linkreadable || is_readable($path))? null : false;
+		$stat['read'] = ($linkreadable || $readable)? null : false;
 		$stat['write'] = is_writable($path)? null : false;
 
 		if (is_null($stat['read'])) {
-			$stat['size'] = $dir ? 0 : $size;
+			if ($dir) {
+				$stat['size'] = 0;
+			} else if (isset($size)) {
+				$stat['size'] = $size;
+			}
 		}
 		
 		return $stat;
