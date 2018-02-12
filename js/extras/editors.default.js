@@ -1095,8 +1095,8 @@
 						// trigger event 'editEditorPrepare'
 						fm.trigger('editEditorPrepare', {
 							node: textarea,
-							name: 'CKEditor',
-							editorObj: CKEDITOR,
+							name: 'TinyMCE',
+							editorObj: tinymce,
 							instance: void(0),
 							opts: opts
 						});
