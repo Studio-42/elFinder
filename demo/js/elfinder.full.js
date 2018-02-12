@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: a6986a5) (2018-02-12)
+ * Version 2.1.32 (2.1-src Nightly: 483bc4e) (2018-02-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8893,7 +8893,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: a6986a5)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 483bc4e)';
 
 
 
@@ -9245,14 +9245,14 @@ elFinder.prototype._options = {
 	 */
 	cdns : {
 		// for editor etc.
-		ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.9',
-		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.33.0',
+		ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.3.1',
+		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.34.0',
 		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.8.0',
-		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.7.4',
+		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.7.6',
 		simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		// for quicklook etc.
 		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.8.9/hls.min.js',
-		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.4/dash.all.min.js',
+		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.5/dash.all.min.js',
 		prettify   : '//cdn.rawgit.com/google/code-prettify/05ad1b76f8af1232da963c17bad144107b07e59a/loader/run_prettify.js',
 		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js',
 		rar        : '//cdn.rawgit.com/nao-pon/rar.js/6cef13ec66dd67992fc7f3ea22f132d770ebaf8b/rar.min.js',
@@ -17242,7 +17242,10 @@ $.fn.elfindersearchbutton = function(cmd) {
 					incVal = '';
 					button.addClass('ui-state-active');
 					fm.trigger('uiresize');
-					opts && opts.slideDown();
+					opts && opts.slideDown(function() {
+						// Care for on browser window re-active
+						button.addClass('ui-state-active');
+					});
 				})
 				.on('blur', function(){
 					if (opts) {
@@ -17326,11 +17329,27 @@ $.fn.elfindersearchbutton = function(cmd) {
 		
 		$('<span class="ui-icon ui-icon-search" title="'+cmd.title+'"/>')
 			.appendTo(button)
-			.click(search);
+			.on('mousedown', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				if (button.hasClass('ui-state-active')) {
+					search();
+				} else {
+					input.focus();
+				}
+			});
 		
 		$('<span class="ui-icon ui-icon-close"/>')
 			.appendTo(button)
-			.click(abort);
+			.on('mousedown', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				if (input.val() === '' && !button.hasClass('ui-state-active')) {
+					input.focus();
+				} else {
+					abort();
+				}
+			});
 		
 		// wait when button will be added to DOM
 		fm.bind('toolbarload', function(){
