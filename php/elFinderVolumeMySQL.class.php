@@ -53,6 +53,13 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	protected $dbError = '';
 
 	/**
+	 * This root has parent id
+	 *
+	 * @var        boolean
+	 */
+	protected $rootHasParent = false;
+
+	/**
 	 * Constructor
 	 * Extend options with required fields
 	 *
@@ -315,7 +322,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		$dirs = array();
 		$timeout = $this->options['searchTimeout']? $this->searchStart + $this->options['searchTimeout'] : 0;
 		
-		if ($path != $this->root) {
+		if ($path != $this->root || $this->rootHasParent) {
 			$dirs = $inpath = array(intval($path));
 			while($inpath) {
 				$in = '('.join(',', $inpath).')';
@@ -345,7 +352,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 			}
 			$whr = join(' OR ', $whrs);
 		} else {
-			$whr = sprintf('f.name RLIKE \'%s\'', $this->db->real_escape_string($q));
+			$whr = sprintf('f.name LIKE \'%%%s%%\'', $this->db->real_escape_string($q));
 		}
 		if ($dirs) {
 			$whr = '(' . $whr . ') AND (`parent_id` IN (' . join(',', $dirs) . '))';
@@ -368,6 +375,9 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 					continue;
 				}
 				$id = $row['id'];
+				if ($id == $this->root) {
+					continue;
+				}
 				if ($row['parent_id'] && $id != $this->root) {
 					$row['phash'] = $this->encode($row['parent_id']);
 				} 
@@ -388,7 +398,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				}
 			}
 		}
-		
+		debug($result);
 		return $result;
 	}
 
@@ -534,7 +544,11 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 		
 		if ($res) {
 			$stat = $res->fetch_assoc();
-			if ($stat['parent_id'] && $stat['id'] != $this->root) {
+			if ($stat['id'] == $this->root) {
+				$this->rootHasParent = true;
+				$stat['parent_id'] = '';
+			}
+			if ($stat['parent_id']) {
 				$stat['phash'] = $this->encode($stat['parent_id']);
 			} 
 			if ($stat['mime'] == 'directory') {
