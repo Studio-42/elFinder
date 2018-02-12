@@ -57,7 +57,10 @@ $.fn.elfindersearchbutton = function(cmd) {
 					incVal = '';
 					button.addClass('ui-state-active');
 					fm.trigger('uiresize');
-					opts && opts.slideDown();
+					opts && opts.slideDown(function() {
+						// Care for on browser window re-active
+						button.addClass('ui-state-active');
+					});
 				})
 				.on('blur', function(){
 					if (opts) {
@@ -141,11 +144,27 @@ $.fn.elfindersearchbutton = function(cmd) {
 		
 		$('<span class="ui-icon ui-icon-search" title="'+cmd.title+'"/>')
 			.appendTo(button)
-			.click(search);
+			.on('mousedown', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				if (button.hasClass('ui-state-active')) {
+					search();
+				} else {
+					input.focus();
+				}
+			});
 		
 		$('<span class="ui-icon ui-icon-close"/>')
 			.appendTo(button)
-			.click(abort);
+			.on('mousedown', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				if (input.val() === '' && !button.hasClass('ui-state-active')) {
+					input.focus();
+				} else {
+					abort();
+				}
+			});
 		
 		// wait when button will be added to DOM
 		fm.bind('toolbarload', function(){

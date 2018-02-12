@@ -12,14 +12,14 @@ elFinder.prototype._options = {
 	 */
 	cdns : {
 		// for editor etc.
-		ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.9',
-		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.33.0',
+		ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.3.1',
+		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.34.0',
 		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.8.0',
-		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.7.4',
+		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.7.6',
 		simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		// for quicklook etc.
 		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.8.9/hls.min.js',
-		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.4/dash.all.min.js',
+		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.5/dash.all.min.js',
 		prettify   : '//cdn.rawgit.com/google/code-prettify/05ad1b76f8af1232da963c17bad144107b07e59a/loader/run_prettify.js',
 		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js',
 		rar        : '//cdn.rawgit.com/nao-pon/rar.js/6cef13ec66dd67992fc7f3ea22f132d770ebaf8b/rar.min.js',
