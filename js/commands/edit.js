@@ -385,6 +385,7 @@ elFinder.prototype.commands.edit = function() {
 					e.stopPropagation();
 				})
 				.css({ overflow: 'hidden', minHeight: '7em' })
+				.addClass('elfinder-edit-editor')
 				.closest('.ui-dialog').addClass(dlcls  + ' ' + clsEditing);
 			
 			// care to viewport scale change with mobile devices

@@ -979,6 +979,119 @@
 			}
 		},
 		{
+			// CKEditor5 balloon mode for html file
+			info : {
+				name : 'CKEditor5',
+				iconImg : 'img/edit_ckeditor5.png'
+			},
+			exts : ['htm', 'html', 'xhtml'],
+			html : '<div></div>',
+			setup : function(opts, fm) {
+				if (!fm.options.cdns.ckeballoon) {
+					this.disabled = true;
+				}
+			},
+			// Prepare on before show dialog
+			prepare : function(base, dialogOpts, file) {
+				$(base).height(base.editor.fm.getUI().height() - 100);
+			},
+			init : function(id, file, data, fm) {
+				var m = data.match(/^([\s\S]*<body[^>]*>)([\s\S]+)(<\/body>[\s\S]*)$/i),
+					header = '',
+					body = '',
+					footer ='';
+				this.css({
+					width: '100%',
+					height: '100%',
+					'box-sizing': 'border-box'
+				});
+				if (m) {
+					header = m[1];
+					body = m[2];
+					footer = m[3];
+				} else {
+					body = data;
+				}
+				this.data('data', {
+					header: header,
+					body: body,
+					footer: footer
+				});
+			},
+			load : function(editnode) {
+				var self = this,
+					fm   = this.fm,
+					dfrd = $.Deferred(),
+					init = function(editor) {
+						var base = $(editnode).parent(),
+							opts;
+						
+						// set base height
+						base.height(fm.getUI().height() - 80);
+
+						// CKEditor5 configure options
+						opts = {};
+
+						// trigger event 'editEditorPrepare'
+						fm.trigger('editEditorPrepare', {
+							node: editnode,
+							name: 'CKEditor5',
+							editorObj: editor,
+							instance: void(0),
+							opts: opts
+						});
+
+						editor
+							.create(editnode, opts)
+							.then(function(editor) {
+								editor.setData($(editnode).data('data').body);
+								$('.ck-balloon-panel').css({
+									'z-index': fm.getMaximizeCss().zIndex + 1
+								});
+								dfrd.resolve(editor);
+							})
+							.catch(function(error) {
+								fm.error(error);
+							});
+					};
+
+				if (!self.confObj.loader) {
+					self.confObj.loader = $.Deferred();
+					self.fm.loadScript([
+						fm.options.cdns.ckeballoon
+					], function(editor) {
+						if (!editor) {
+							editor = window.BalloonEditor || window.InlineEditor || window.ClassicEditor;
+						}
+						self.confObj.loader.resolve(editor);
+					}, {
+						tryRequire: true,
+						loadType: 'tag'
+					});
+				}
+				self.confObj.loader.done(init);
+				return dfrd;
+			},
+			getContent : function() {
+				var data = $(this).data('data');
+				return data.header + data.body + data.footer;
+			},
+			close : function(editnode, instance) {
+				instance && instance.destroy();
+			},
+			save : function(editnode, instance) {
+				var elm = $(editnode),
+					data = elm.data('data');
+				if (instance) {
+					data.body = instance.getData();
+					elm.data('data', data);
+				}
+			},
+			focus : function(editnode, instance) {
+				$(editnode).focus();
+			}
+		},
+		{
 			// TinyMCE for html file
 			info : {
 				name : 'TinyMCE',

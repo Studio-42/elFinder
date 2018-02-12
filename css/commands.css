@@ -284,6 +284,10 @@
 .elfinder-touch .elfinder-file-edit {
 	font-size: 16px;
 }
+/* edit area */
+.ui-dialog .ui-dialog-content.elfinder-edit-editor {
+	background-color: #fff;
+}
 /* bottom margen for softkeyboard on fullscreen mode */
 .elfinder-touch.elfinder-fullscreen-native textarea.elfinder-file-edit {
 	padding-bottom: 20em;
