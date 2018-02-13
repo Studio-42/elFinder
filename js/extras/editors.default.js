@@ -985,9 +985,10 @@
 				iconImg : 'img/edit_ckeditor5.png'
 			},
 			exts : ['htm', 'html', 'xhtml'],
-			html : '<div></div>',
+			html : '<div class="edit-editor-ckeditor5"></div>',
 			setup : function(opts, fm) {
-				if (!fm.options.cdns.ckeballoon) {
+				// check cdn and ES6 support
+				if (!fm.options.cdns.ckeditor5 || typeof window.Symbol !== 'function' || typeof Symbol() !== 'symbol') {
 					this.disabled = true;
 				}
 			},
@@ -1030,7 +1031,9 @@
 						base.height(fm.getUI().height() - 80);
 
 						// CKEditor5 configure options
-						opts = {};
+						opts = {
+							//language: fm.lang
+						};
 
 						// trigger event 'editEditorPrepare'
 						fm.trigger('editEditorPrepare', {
@@ -1044,6 +1047,35 @@
 						editor
 							.create(editnode, opts)
 							.then(function(editor) {
+								var fileRepo = editor.plugins.get('FileRepository');
+								fileRepo.createAdapter = /* for <= 1.0.0-alpha.2 */
+								fileRepo.createUploadAdapter = function(loader) {
+									var uploder = function(loader) {
+										this.upload = function() {
+											return new Promise(function(resolve, reject) {
+												fm.getCommand('upload').exec({files: [loader.file]})
+													.done(function(data){
+														if (data.added && data.added.length) {
+															fm.url(data.added[0].hash, { async: true }).done(function(url) {
+																resolve({
+																	default: fm.convAbsUrl(url)
+																});
+															}).fail(function() {
+																reject('errFileNotFound');
+															});
+														} else {
+															reject(fm.i18n(data.error? data.error : 'errUpload'));
+														}
+													})
+													.fail(function(error) {
+														reject(fm.i18n(error? error : 'errUploadNoFiles'));
+													});
+											});
+										};
+										this.abort = function() {};
+									};
+									return new uploder(loader);
+								};
 								editor.setData($(editnode).data('data').body);
 								$('.ck-balloon-panel').css({
 									'z-index': fm.getMaximizeCss().zIndex + 1
@@ -1058,7 +1090,8 @@
 				if (!self.confObj.loader) {
 					self.confObj.loader = $.Deferred();
 					self.fm.loadScript([
-						fm.options.cdns.ckeballoon
+						fm.options.cdns.ckeditor5 + '/balloon/ckeditor.js'
+						//,fm.options.cdns.ckeditor5 + '/balloon/lang/'+fm.lang+'.js'
 					], function(editor) {
 						if (!editor) {
 							editor = window.BalloonEditor || window.InlineEditor || window.ClassicEditor;
