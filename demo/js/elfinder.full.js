@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: 39b7731) (2018-02-14)
+ * Version 2.1.32 (2.1-src Nightly: d31d2c1) (2018-02-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8893,7 +8893,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 39b7731)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: d31d2c1)';
 
 
 
@@ -9643,7 +9643,9 @@ elFinder.prototype._options = {
 				// Browsing manager URL for CKEditor, TinyMCE
 				// Uses self location with the empty value or not defined.
 				//managerUrl : 'elfinder.html'
-				managerUrl : null
+				managerUrl : null,
+				// CKEditor5' builds mode - 'classic', 'inline' or 'balloon' 
+				ckeditor5Mode : 'balloon'
 			}
 		},
 		search : {
