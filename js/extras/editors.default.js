@@ -990,6 +990,10 @@
 				// check cdn and ES6 support
 				if (!fm.options.cdns.ckeditor5 || typeof window.Symbol !== 'function' || typeof Symbol() !== 'symbol') {
 					this.disabled = true;
+				} else {
+					if (opts.extraOptions && opts.extraOptions.ckeditor5Mode) {
+						this.ckeditor5Mode = opts.extraOptions.ckeditor5Mode;
+					}
 				}
 			},
 			// Prepare on before show dialog
@@ -1023,7 +1027,8 @@
 				var self = this,
 					fm   = this.fm,
 					dfrd = $.Deferred(),
-					init = function(editor) {
+					mode = self.confObj.ckeditor5Mode || 'balloon',
+					init = function(cEditor) {
 						var base = $(editnode).parent(),
 							opts;
 						
@@ -1032,48 +1037,25 @@
 
 						// CKEditor5 configure options
 						opts = {
-							//language: fm.lang
+							toolbar: ['headings', '|', 'bold', 'italic', 'link', 'insertimage', 'bulletedList', 'numberedList', 'blockQuote', 'undo', 'redo' ]
+							// ,language: fm.lang // currently version this isn't support yet
 						};
 
 						// trigger event 'editEditorPrepare'
 						fm.trigger('editEditorPrepare', {
 							node: editnode,
 							name: 'CKEditor5',
-							editorObj: editor,
+							editorObj: cEditor,
 							instance: void(0),
 							opts: opts
 						});
 
-						editor
+						cEditor
 							.create(editnode, opts)
 							.then(function(editor) {
 								var fileRepo = editor.plugins.get('FileRepository');
 								fileRepo.createAdapter = /* for <= 1.0.0-alpha.2 */
 								fileRepo.createUploadAdapter = function(loader) {
-									var uploder = function(loader) {
-										this.upload = function() {
-											return new Promise(function(resolve, reject) {
-												fm.getCommand('upload').exec({files: [loader.file]})
-													.done(function(data){
-														if (data.added && data.added.length) {
-															fm.url(data.added[0].hash, { async: true }).done(function(url) {
-																resolve({
-																	default: fm.convAbsUrl(url)
-																});
-															}).fail(function() {
-																reject('errFileNotFound');
-															});
-														} else {
-															reject(fm.i18n(data.error? data.error : 'errUpload'));
-														}
-													})
-													.fail(function(error) {
-														reject(fm.i18n(error? error : 'errUploadNoFiles'));
-													});
-											});
-										};
-										this.abort = function() {};
-									};
 									return new uploder(loader);
 								};
 								editor.setData($(editnode).data('data').body);
@@ -1081,17 +1063,46 @@
 									'z-index': fm.getMaximizeCss().zIndex + 1
 								});
 								dfrd.resolve(editor);
+								/*fm.log({
+									plugins: cEditor.build.plugins.map(function(p) { return p.pluginName; }),
+									toolbars: Array.from(editor.ui.componentFactory.names())
+								});*/
 							})
 							.catch(function(error) {
 								fm.error(error);
 							});
+					},
+					uploder = function(loader) {
+						this.upload = function() {
+							return new Promise(function(resolve, reject) {
+								fm.getCommand('upload').exec({files: [loader.file]})
+									.done(function(data){
+										if (data.added && data.added.length) {
+											fm.url(data.added[0].hash, { async: true }).done(function(url) {
+												resolve({
+													default: fm.convAbsUrl(url)
+												});
+											}).fail(function() {
+												reject('errFileNotFound');
+											});
+										} else {
+											reject(fm.i18n(data.error? data.error : 'errUpload'));
+										}
+									})
+									.fail(function(error) {
+										reject(fm.i18n(error? error : 'errUploadNoFiles'));
+									});
+							});
+						};
+						this.abort = function() {};
 					};
 
 				if (!self.confObj.loader) {
 					self.confObj.loader = $.Deferred();
 					self.fm.loadScript([
-						fm.options.cdns.ckeditor5 + '/balloon/ckeditor.js'
-						//,fm.options.cdns.ckeditor5 + '/balloon/lang/'+fm.lang+'.js'
+						fm.options.cdns.ckeditor5 + '/' + mode + '/ckeditor.js'
+						// currently version this isn't support yet
+						//,fm.options.cdns.ckeditor5 + '/' + mode + '/translations/'+fm.lang+'.js'
 					], function(editor) {
 						if (!editor) {
 							editor = window.BalloonEditor || window.InlineEditor || window.ClassicEditor;
