@@ -410,7 +410,9 @@ elFinder.prototype._options = {
 				// Browsing manager URL for CKEditor, TinyMCE
 				// Uses self location with the empty value or not defined.
 				//managerUrl : 'elfinder.html'
-				managerUrl : null
+				managerUrl : null,
+				// CKEditor5' builds mode - 'classic', 'inline' or 'balloon' 
+				ckeditor5Mode : 'balloon'
 			}
 		},
 		search : {
