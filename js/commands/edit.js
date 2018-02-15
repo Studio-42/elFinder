@@ -28,6 +28,10 @@ elFinder.prototype.commands.edit = function() {
 			});
 			return sel;
 		},
+		getStoreId = function(name) {
+			// for compatibility to previous version
+			return name.toLowerCase().replace(/ +/g, '');
+		},
 		
 		/**
 		 * Return files acceptable to edit
@@ -255,7 +259,10 @@ elFinder.prototype.commands.edit = function() {
 					doClose  : savecl,
 					file     : file,
 					fm       : fm,
-					confObj  : editor
+					confObj  : editor,
+					trigger  : function(evName, data) {
+						fm.trigger('editEditor' + evName, Object.assign({}, editor.info || {}, data));
+					}
 				};
 			}
 			
@@ -590,9 +597,10 @@ elFinder.prototype.commands.edit = function() {
 						&& typeof editor.save == 'function') {
 					
 					name = editor.info && editor.info.name? editor.info.name : ('Editor ' + i);
+					editor.id = editor.info && editor.info.id? editor.info.id : ('editor' + i),
 					editor.name = name;
 					editor.i18n = fm.i18n(name);
-					editors[name] = editor;
+					editors[editor.id] = editor;
 				}
 			});
 		},
@@ -601,7 +609,7 @@ elFinder.prototype.commands.edit = function() {
 				if (!$.isPlainObject(stored)) {
 					stored = {};
 				}
-				stored[mime] = editor.name;
+				stored[mime] = editor.id;
 				fm.storage('storedEditors', stored);
 				fm.trigger('selectfiles', {files : fm.selected()});
 			}
@@ -612,7 +620,7 @@ elFinder.prototype.commands.edit = function() {
 		},
 		getSubMenuRaw = function(files, callback) {
 			var subMenuRaw = [];
-			$.each(editors, function(name, ed) {
+			$.each(editors, function(id, ed) {
 				subMenuRaw.push(
 					{
 						label    : fm.escape(ed.i18n),
@@ -724,14 +732,14 @@ elFinder.prototype.commands.edit = function() {
 				file = fm.file(e.data.targets[0]);
 				setEditors(file, e.data.targets.length);
 				if (Object.keys(editors).length > 1) {
-					if (!useStoredEditor() || !stored[file.mime] || !editors[stored[file.mime]]) {
+					if (!useStoredEditor() || !stored[file.mime] || !editors[getStoreId(stored[file.mime])]) {
 						delete self.extra;
 						self.variants = [];
-						$.each(editors, function(name, editor) {
-							self.variants.push([{ editor: editor }, fm.i18n(name), editor.info && editor.info.iconImg? fm.baseUrl + editor.info.iconImg : 'edit']);
+						$.each(editors, function(id, editor) {
+							self.variants.push([{ editor: editor }, editor.i18n, editor.info && editor.info.iconImg? fm.baseUrl + editor.info.iconImg : 'edit']);
 						});
 					} else {
-						single(editors[stored[file.mime]]);
+						single(editors[getStoreId(stored[file.mime])]);
 						self.extra = {
 							icon: 'menu',
 							node: $('<span/>')
@@ -779,11 +787,11 @@ elFinder.prototype.commands.edit = function() {
 			node = $(opts && opts._currentNode? opts._currentNode : $('#'+ fm.cwdHash2Id(hashes[0]))),
 			getEditor = function() {
 				var dfd = $.Deferred(),
-					storedName;
+					storedId;
 				
 				if (!editor && Object.keys(editors).length > 1) {
-					if (useStoredEditor() && (storedName = stored[files[0].mime]) && editors[storedName]) {
-						return dfd.resolve(editors[storedName]);
+					if (useStoredEditor() && (storedId = getStoreId(stored[files[0].mime])) && editors[storedId]) {
+						return dfd.resolve(editors[storedId]);
 					}
 					fm.trigger('contextmenu', {
 						raw: getSubMenuRaw(files, function() {
