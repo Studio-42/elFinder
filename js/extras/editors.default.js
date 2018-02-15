@@ -102,7 +102,8 @@
 			}
 		},
 		pixlrLoad = function(mode, base) {
-			var fm = this.fm,
+			var self = this,
+				fm = this.fm,
 				node = $(base).children('img:first')
 					.data('loading')()
 					.data('resizeoff', function() {
@@ -147,9 +148,8 @@
 					};
 
 					// trigger event 'editEditorPrepare'
-					fm.trigger('editEditorPrepare', {
+					self.trigger('Prepare', {
 						node: base,
-						name: 'Pixlr ' + mode.charAt(0).toUpperCase() + mode.substring(1),
 						editorObj: void(0),
 						instance: container,
 						opts: opts
@@ -210,6 +210,7 @@
 		{
 			// Pixlr Editor
 			info : {
+				id : 'pixlreditor',
 				name : 'Pixlr Editor',
 				iconImg : 'img/edit_pixlreditor.png',
 				urlAsContent: true,
@@ -242,6 +243,7 @@
 		{
 			// Pixlr Express
 			info : {
+				id: 'pixlrexpress',
 				name : 'Pixlr Express',
 				iconImg : 'img/edit_pixlrexpress.png',
 				urlAsContent: true,
@@ -274,6 +276,7 @@
 			// Adobe Creative SDK Creative Tools Image Editor UI
 			// MIME types to accept
 			info : {
+				id : 'creativecloud',
 				name : 'Creative Cloud',
 				iconImg : 'img/edit_creativecloud.png',
 				schemeContent: true,
@@ -361,9 +364,8 @@
 							language: getLang()
 						};
 						// trigger event 'editEditorPrepare'
-						fm.trigger('editEditorPrepare', {
+						self.trigger('Prepare', {
 							node: base,
-							name: 'Creative Cloud',
 							editorObj: Aviary,
 							instance: void(0),
 							opts: opts
@@ -412,6 +414,7 @@
 			},
 			// `mimes` is not set for support everything kind of text file
 			info : {
+				id : 'aceeditor',
 				name : 'ACE Editor',
 				iconImg : 'img/edit_aceeditor.png'
 			},
@@ -568,9 +571,8 @@
 						.prependTo(taBase.next());
 
 						// trigger event 'editEditorPrepare'
-						fm.trigger('editEditorPrepare', {
+						self.trigger('Prepare', {
 							node: textarea,
-							name: 'ACE Editor',
 							editorObj: ace,
 							instance: editor,
 							opts: {}
@@ -613,6 +615,7 @@
 			},
 			// `mimes` is not set for support everything kind of text file
 			info : {
+				id : 'codemirror',
 				name : 'CodeMirror',
 				iconImg : 'img/edit_codemirror.png'
 			},
@@ -641,9 +644,8 @@
 						};
 
 						// trigger event 'editEditorPrepare'
-						fm.trigger('editEditorPrepare', {
+						self.trigger('Prepare', {
 							node: textarea,
-							name: 'CodeMirror',
 							editorObj: CodeMirror,
 							instance: void(0),
 							opts: opts
@@ -769,6 +771,7 @@
 				}
 			},
 			info : {
+				id : 'simplemde',
 				name : 'SimpleMDE',
 				iconImg : 'img/edit_simplemde.png'
 			},
@@ -807,9 +810,8 @@
 						};
 
 						// trigger event 'editEditorPrepare'
-						fm.trigger('editEditorPrepare', {
+						self.trigger('Prepare', {
 							node: textarea,
-							name: 'SimpleMDE',
 							editorObj: SimpleMDE,
 							instance: void(0),
 							opts: opts
@@ -865,6 +867,7 @@
 		{
 			// CKEditor for html file
 			info : {
+				id : 'ckeditor',
 				name : 'CKEditor',
 				iconImg : 'img/edit_ckeditor.png'
 			},
@@ -929,9 +932,8 @@
 						};
 
 						// trigger event 'editEditorPrepare'
-						fm.trigger('editEditorPrepare', {
+						self.trigger('Prepare', {
 							node: textarea,
-							name: 'CKEditor',
 							editorObj: CKEDITOR,
 							instance: void(0),
 							opts: opts
@@ -981,6 +983,7 @@
 		{
 			// CKEditor5 balloon mode for html file
 			info : {
+				id : 'ckeditor5',
 				name : 'CKEditor5',
 				iconImg : 'img/edit_ckeditor5.png'
 			},
@@ -1042,9 +1045,8 @@
 						};
 
 						// trigger event 'editEditorPrepare'
-						fm.trigger('editEditorPrepare', {
+						self.trigger('Prepare', {
 							node: editnode,
-							name: 'CKEditor5',
 							editorObj: cEditor,
 							instance: void(0),
 							opts: opts
@@ -1138,6 +1140,7 @@
 		{
 			// TinyMCE for html file
 			info : {
+				id : 'tinymce',
 				name : 'TinyMCE',
 				iconImg : 'img/edit_tinymce.png'
 			},
@@ -1250,9 +1253,8 @@
 						};
 
 						// trigger event 'editEditorPrepare'
-						fm.trigger('editEditorPrepare', {
+						self.trigger('Prepare', {
 							node: textarea,
-							name: 'TinyMCE',
 							editorObj: tinymce,
 							instance: void(0),
 							opts: opts
@@ -1292,6 +1294,7 @@
 		},
 		{
 			info : {
+				id : 'zohoeditor',
 				name : 'Zoho Editor',
 				iconImg : 'img/edit_zohooffice.png',
 				cmdCheck : 'ZohoOffice',
@@ -1371,9 +1374,8 @@
 							}
 						};
 						// trigger event 'editEditorPrepare'
-						fm.trigger('editEditorPrepare', {
+						ta.editor.trigger('Prepare', {
 							node: ta,
-							name: 'Zoho Editor',
 							editorObj: void(0),
 							instance: ifm,
 							opts: opts
@@ -1428,14 +1430,14 @@
 		{
 			// Simple Text (basic textarea editor)
 			info : {
+				id : 'textarea',
 				name : 'TextArea',
 				useTextAreaEvent : true
 			},
 			load : function(textarea) {
 				// trigger event 'editEditorPrepare'
-				this.fm.trigger('editEditorPrepare', {
+				this.trigger('Prepare', {
 					node: textarea,
-					name: 'TextArea',
 					editorObj: void(0),
 					instance: void(0),
 					opts: {}
