@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: 3d78d61) (2018-02-16)
+ * Version 2.1.32 (2.1-src Nightly: 56ee237) (2018-02-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8359,20 +8359,26 @@ elFinder.prototype = {
 				dataType : 'script',
 				cache    : true
 			},
-			success = null,
-			cnt, scripts = {};
+			success, cnt, scripts = {}, results = {};
 		
 		opts = opts || {};
 		if (opts.tryRequire && this.hasRequire) {
 			require(urls, callback, opts.error);
 		} else {
-			if ($.isFunction(callback)) {
-				success = function(d, status) {
-					if (!status || status === 'success' || status === 'notmodified') {
+			success = function() {
+				var cnt, fi, hasError;
+				$.each(results, function(i, status) {
+					if (status !== 'success' && status !== 'notmodified') {
+						hasError = true;
+						return false;
+					}
+				});
+				if (!hasError) {
+					if ($.isFunction(callback)) {
 						if (check) {
 							if (typeof check.obj[check.name] === 'undefined') {
-								var cnt = check.timeout? (check.timeout / 10) : 1;
-								var fi = setInterval(function() {
+								cnt = check.timeout? (check.timeout / 10) : 1;
+								fi = setInterval(function() {
 									if (--cnt < 0 || typeof check.obj[check.name] !== 'undefined') {
 										clearInterval(fi);
 										callback();
@@ -8384,13 +8390,13 @@ elFinder.prototype = {
 						} else {
 							callback();
 						}
-					} else {
-						if (opts.error && $.isFunction(opts.error)) {
-							opts.error();
-						}
 					}
-				};
-			}
+				} else {
+					if (opts.error && $.isFunction(opts.error)) {
+						opts.error({ loadResults: results });
+					}
+				}
+			};
 
 			if (opts.loadType === 'tag') {
 				$('head > script').each(function() {
@@ -8402,7 +8408,8 @@ elFinder.prototype = {
 						script;
 					
 					if (scripts[url]) {
-						(--cnt < 1) && success(void(0), scripts[url]._error);
+						results[i] = scripts[url]._error || 'success';
+						(--cnt < 1) && success();
 					} else {
 						script = document.createElement('script');
 						script.charset = opts.charset || 'UTF-8';
@@ -8411,23 +8418,33 @@ elFinder.prototype = {
 							if ( !done && (!this.readyState ||
 									this.readyState === 'loaded' || this.readyState === 'complete') ) {
 								done = true;
+								results[i] = 'success';
 								(--cnt < 1) && success();
 							}
 						};
 						script.onerror = function(err) {
-							script._error = (err && err.type)? err.type : 'error';
-							(--cnt < 1) && success(void(0), script._error);
+							results[i] = script._error = (err && err.type)? err.type : 'error';
+							(--cnt < 1) && success();
 						};
 						script.src = url;
 					}
 				});
 			} else {
 				opts = $.isPlainObject(opts)? Object.assign(defOpts, opts) : defOpts;
-				(function appendScript() {
-					$.ajax(Object.assign(opts, {
-						url: urls.shift(),
-						success: urls.length? appendScript : success
-					}));
+				cnt = 0;
+				(function appendScript(d, status) {
+					if (d !== void(0)) {
+						results[cnt++] = status;
+					}
+					if (urls.length) {
+						$.ajax(Object.assign({}, opts, {
+							url: urls.shift(),
+							success: appendScript,
+							error: appendScript
+						}));
+					} else {
+						success();
+					}
 				})();
 			}
 		}
@@ -8893,7 +8910,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 3d78d61)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 56ee237)';
 
 
 
@@ -17200,7 +17217,12 @@ $.fn.elfindersearchbutton = function(cmd) {
 			id     = function(name){return fm.namespace + name;},
 			toolbar= fm.getUI('toolbar'),
 			btnCls = fm.res('class', 'searchbtn'),
-			button = $(this).hide().addClass('ui-widget-content elfinder-button '+btnCls),
+			button = $(this)
+				.hide()
+				.addClass('ui-widget-content elfinder-button '+btnCls)
+				.on('click', function(e) {
+					e.stopPropagation();
+				}),
 			search = function() {
 				input.data('inctm') && clearTimeout(input.data('inctm'));
 				var val = $.trim(input.val()),
@@ -17250,7 +17272,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 						button.addClass('ui-state-active');
 					});
 				})
-				.on('blur', function(){
+				.on('blur', function() {
 					if (opts) {
 						if (!opts.data('infocus')) {
 							opts.slideUp(function() {
@@ -22471,7 +22493,7 @@ elFinder.prototype.commands.fullscreen = function() {
 							optTags = [],
 							acts = self.options.selectActions;
 						
-						if (acts.indexOf('open') === -1) {
+						if ($.inArray('open', acts) === -1) {
 							acts.unshift('open');
 						}
 						$.each(acts, function(i, act) {
@@ -22493,7 +22515,6 @@ elFinder.prototype.commands.fullscreen = function() {
 					var s = fm.storage('useStoredEditor');
 					return s? (s > 0) : fm.options.commandsOptions.edit.useStoredEditor;
 				})()).on('change', function(e) {
-					e.preventDefault();
 					fm.storage('useStoredEditor', $(this).is(':checked')? 1 : -1);
 					fm.trigger('selectfiles', {files : fm.selected()});
 				}));
@@ -22502,7 +22523,6 @@ elFinder.prototype.commands.fullscreen = function() {
 					var s = fm.storage('autoFocusDialog');
 					return s? (s > 0) : fm.options.uiOptions.dialog.focusOnMouseOver;
 				})()).on('change', function(e) {
-					e.preventDefault();
 					fm.storage('autoFocusDialog', $(this).is(':checked')? 1 : -1);
 				}));
 				
