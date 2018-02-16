@@ -12,7 +12,12 @@ $.fn.elfindersearchbutton = function(cmd) {
 			id     = function(name){return fm.namespace + name;},
 			toolbar= fm.getUI('toolbar'),
 			btnCls = fm.res('class', 'searchbtn'),
-			button = $(this).hide().addClass('ui-widget-content elfinder-button '+btnCls),
+			button = $(this)
+				.hide()
+				.addClass('ui-widget-content elfinder-button '+btnCls)
+				.on('click', function(e) {
+					e.stopPropagation();
+				}),
 			search = function() {
 				input.data('inctm') && clearTimeout(input.data('inctm'));
 				var val = $.trim(input.val()),
@@ -62,7 +67,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 						button.addClass('ui-state-active');
 					});
 				})
-				.on('blur', function(){
+				.on('blur', function() {
 					if (opts) {
 						if (!opts.data('infocus')) {
 							opts.slideUp(function() {

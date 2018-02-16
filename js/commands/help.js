@@ -327,7 +327,7 @@
 							optTags = [],
 							acts = self.options.selectActions;
 						
-						if (acts.indexOf('open') === -1) {
+						if ($.inArray('open', acts) === -1) {
 							acts.unshift('open');
 						}
 						$.each(acts, function(i, act) {
@@ -349,7 +349,6 @@
 					var s = fm.storage('useStoredEditor');
 					return s? (s > 0) : fm.options.commandsOptions.edit.useStoredEditor;
 				})()).on('change', function(e) {
-					e.preventDefault();
 					fm.storage('useStoredEditor', $(this).is(':checked')? 1 : -1);
 					fm.trigger('selectfiles', {files : fm.selected()});
 				}));
@@ -358,7 +357,6 @@
 					var s = fm.storage('autoFocusDialog');
 					return s? (s > 0) : fm.options.uiOptions.dialog.focusOnMouseOver;
 				})()).on('change', function(e) {
-					e.preventDefault();
 					fm.storage('autoFocusDialog', $(this).is(':checked')? 1 : -1);
 				}));
 				

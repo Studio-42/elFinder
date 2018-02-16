@@ -8328,20 +8328,26 @@ elFinder.prototype = {
 				dataType : 'script',
 				cache    : true
 			},
-			success = null,
-			cnt, scripts = {};
+			success, cnt, scripts = {}, results = {};
 		
 		opts = opts || {};
 		if (opts.tryRequire && this.hasRequire) {
 			require(urls, callback, opts.error);
 		} else {
-			if ($.isFunction(callback)) {
-				success = function(d, status) {
-					if (!status || status === 'success' || status === 'notmodified') {
+			success = function() {
+				var cnt, fi, hasError;
+				$.each(results, function(i, status) {
+					if (status !== 'success' && status !== 'notmodified') {
+						hasError = true;
+						return false;
+					}
+				});
+				if (!hasError) {
+					if ($.isFunction(callback)) {
 						if (check) {
 							if (typeof check.obj[check.name] === 'undefined') {
-								var cnt = check.timeout? (check.timeout / 10) : 1;
-								var fi = setInterval(function() {
+								cnt = check.timeout? (check.timeout / 10) : 1;
+								fi = setInterval(function() {
 									if (--cnt < 0 || typeof check.obj[check.name] !== 'undefined') {
 										clearInterval(fi);
 										callback();
@@ -8353,13 +8359,13 @@ elFinder.prototype = {
 						} else {
 							callback();
 						}
-					} else {
-						if (opts.error && $.isFunction(opts.error)) {
-							opts.error();
-						}
 					}
-				};
-			}
+				} else {
+					if (opts.error && $.isFunction(opts.error)) {
+						opts.error({ loadResults: results });
+					}
+				}
+			};
 
 			if (opts.loadType === 'tag') {
 				$('head > script').each(function() {
@@ -8371,7 +8377,8 @@ elFinder.prototype = {
 						script;
 					
 					if (scripts[url]) {
-						(--cnt < 1) && success(void(0), scripts[url]._error);
+						results[i] = scripts[url]._error || 'success';
+						(--cnt < 1) && success();
 					} else {
 						script = document.createElement('script');
 						script.charset = opts.charset || 'UTF-8';
@@ -8380,23 +8387,33 @@ elFinder.prototype = {
 							if ( !done && (!this.readyState ||
 									this.readyState === 'loaded' || this.readyState === 'complete') ) {
 								done = true;
+								results[i] = 'success';
 								(--cnt < 1) && success();
 							}
 						};
 						script.onerror = function(err) {
-							script._error = (err && err.type)? err.type : 'error';
-							(--cnt < 1) && success(void(0), script._error);
+							results[i] = script._error = (err && err.type)? err.type : 'error';
+							(--cnt < 1) && success();
 						};
 						script.src = url;
 					}
 				});
 			} else {
 				opts = $.isPlainObject(opts)? Object.assign(defOpts, opts) : defOpts;
-				(function appendScript() {
-					$.ajax(Object.assign(opts, {
-						url: urls.shift(),
-						success: urls.length? appendScript : success
-					}));
+				cnt = 0;
+				(function appendScript(d, status) {
+					if (d !== void(0)) {
+						results[cnt++] = status;
+					}
+					if (urls.length) {
+						$.ajax(Object.assign({}, opts, {
+							url: urls.shift(),
+							success: appendScript,
+							error: appendScript
+						}));
+					} else {
+						success();
+					}
 				})();
 			}
 		}
