@@ -1070,7 +1070,7 @@
 									toolbars: Array.from(editor.ui.componentFactory.names())
 								});*/
 							})
-							.catch(function(error) {
+							['catch'](function(error) { // ['cache'] instead .cache for fix error on ie8 
 								fm.error(error);
 							});
 					},
@@ -1082,7 +1082,7 @@
 										if (data.added && data.added.length) {
 											fm.url(data.added[0].hash, { async: true }).done(function(url) {
 												resolve({
-													default: fm.convAbsUrl(url)
+													'default': fm.convAbsUrl(url)
 												});
 											}).fail(function() {
 												reject('errFileNotFound');
