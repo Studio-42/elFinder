@@ -1036,7 +1036,7 @@
 							opts;
 						
 						// set base height
-						base.height(fm.getUI().height() - 80);
+						base.height(fm.getUI().height() - 100);
 
 						// CKEditor5 configure options
 						opts = {
@@ -1061,7 +1061,9 @@
 									return new uploder(loader);
 								};
 								editor.setData($(editnode).data('data').body);
-								$('.ck-balloon-panel').css({
+								// move .ck-body to elFinder node for fullscreen mode
+								fm.getUI().append($('body > div.ck-body'));
+								$('div.ck-balloon-panel').css({
 									'z-index': fm.getMaximizeCss().zIndex + 1
 								});
 								dfrd.resolve(editor);
