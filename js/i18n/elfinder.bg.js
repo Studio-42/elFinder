@@ -145,7 +145,7 @@
 			'cmdup'        : 'Една директория нагоре',
 			'cmdupload'    : 'Качи файлове',
 			'cmdview'      : 'Виж',
-			'cmdresize'    : 'Размер на изображение',
+			'cmdresize'    : 'Промени изображение',
 			'cmdsort'      : 'Подреди',
 			'cmdnetmount'  : 'Монтирай мрежов ресурс', // added 18.04.2012
 			'cmdnetunmount': 'Размонтирай', // from v2.1 added 30.04.2012
@@ -156,8 +156,8 @@
 			'cmdfullscreen': 'Цял екран', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : 'Премести', // from v2.1.15 added 21.08.2016
 			'cmdempty'     : 'Изпразни папката', // from v2.1.25 added 22.06.2017
-			'cmdundo'      : 'Назад', // from v2.1.27 added 31.07.2017
-			'cmdredo'      : 'Напред', // from v2.1.27 added 31.07.2017
+			'cmdundo'      : 'Отмени', // from v2.1.27 added 31.07.2017
+			'cmdredo'      : 'Преправи', // from v2.1.27 added 31.07.2017
 			'cmdpreference': 'Настройки', // from v2.1.27 added 03.08.2017
 			'cmdselectall' : 'Избери всичко', // from v2.1.28 added 15.08.2017
 			'cmdselectnone': 'Избери нищо', // from v2.1.28 added 15.08.2017
@@ -349,7 +349,7 @@
 			'shortcutsof'     : 'Преките пътища са изключени',
 			'dropFiles'       : 'Пуснете файловете тук',
 			'or'              : 'или',
-			'selectForUpload' : 'Избери файлове за качване',
+			'selectForUpload' : 'Избери файлове',
 			'moveFiles'       : 'Премести файлове',
 			'copyFiles'       : 'Копирай файлове',
 			'restoreFiles'    : 'Възстанови файлове', // from v2.1.24 added 5.5.2017
@@ -372,7 +372,7 @@
 			'pass'                : 'Парола', // added 18.04.2012
 			'confirmUnmount'      : 'Ще размонтирате $1?',  // from v2.1 added 30.04.2012
 			'dropFilesBrowser': 'Пусни или вмъкни файлове от браузера', // from v2.1 added 30.05.2012
-			'dropPasteFiles'  : 'Пусни или вмъкни файлове тук', // from v2.1 added 07.04.2014
+			'dropPasteFiles'  : 'Тук поснете файловете, URL адресите или изображенията от клипборда', // from v2.1 added 07.04.2014
 			'encoding'        : 'Кодировка', // from v2.1 added 19.12.2014
 			'locale'          : 'Локали',   // from v2.1 added 19.12.2014
 			'searchTarget'    : 'Цел: $1',                // from v2.1 added 22.5.2015
@@ -419,9 +419,9 @@
 			'minsLeft'        : '$1 мин остават', // from v2.1.17 added 13.11.2016
 			'openAsEncoding'  : 'Отваряне отново с избрано кодиране', // from v2.1.19 added 2.12.2016
 			'saveAsEncoding'  : 'Запазете с избраното кодиране', // from v2.1.19 added 2.12.2016
-			'selectFolder'    : 'Изберете папка', // from v2.1.20 added 13.12.2016
+			'selectFolder'    : 'Избери папка', // from v2.1.20 added 13.12.2016
 			'firstLetterSearch': 'Търсене по първа буква', // from v2.1.23 added 24.3.2017
-			'presets'         : 'Пресети', // from v2.1.25 added 26.5.2017
+			'presets'         : 'Мостри', // from v2.1.25 added 26.5.2017
 			'tooManyToTrash'  : 'Прекалено много позиции, не може да премести в кошчето.', // from v2.1.25 added 9.6.2017
 			'TextArea'        : 'Ттекстово поле', // from v2.1.25 added 14.6.2017
 			'folderToEmpty'   : 'Изпразнете папка "$1".', // from v2.1.25 added 22.6.2017
