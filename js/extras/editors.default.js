@@ -126,7 +126,7 @@
 						myurl = window.location.href.toString().replace(/#.*$/, ''),
 						opts = {};
 
-					errtm = setTimeout(error, 10000);
+					errtm = setTimeout(error, 15000);
 					myurl += (myurl.indexOf('?') === -1? '?' : '&') + 'pixlr='+node.attr('id');
 					src += '&referrer=elFinder&locktitle=true';
 					src += '&exit='+encodeURIComponent(myurl+'&image=0');
