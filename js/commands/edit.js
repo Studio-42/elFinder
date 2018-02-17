@@ -28,10 +28,6 @@ elFinder.prototype.commands.edit = function() {
 			});
 			return sel;
 		},
-		getStoreId = function(name) {
-			// for compatibility to previous version
-			return name.toLowerCase().replace(/ +/g, '');
-		},
 		
 		/**
 		 * Return files acceptable to edit
@@ -635,6 +631,14 @@ elFinder.prototype.commands.edit = function() {
 			});
 			return subMenuRaw;
 		},
+		getStoreId = function(name) {
+			// for compatibility to previous version
+			return name.toLowerCase().replace(/ +/g, '');
+		},
+		getStoredEditor = function(mime) {
+			var name = stored[mime];
+			return name && Object.keys(editors).length? editors[getStoreId(name)] : void(0);
+		},
 		stored;
 	
 	
@@ -718,7 +722,7 @@ elFinder.prototype.commands.edit = function() {
 			editors = null;
 		})
 		.bind('contextmenucreate', function(e) {
-			var file,
+			var file, editor,
 				single = function(editor) {
 					var title = self.title;
 					fm.one('contextmenucreatedone', function() {
@@ -732,14 +736,14 @@ elFinder.prototype.commands.edit = function() {
 				file = fm.file(e.data.targets[0]);
 				setEditors(file, e.data.targets.length);
 				if (Object.keys(editors).length > 1) {
-					if (!useStoredEditor() || !stored[file.mime] || !editors[getStoreId(stored[file.mime])]) {
+					if (!useStoredEditor() || !(editor = getStoredEditor(file.mime))) {
 						delete self.extra;
 						self.variants = [];
 						$.each(editors, function(id, editor) {
 							self.variants.push([{ editor: editor }, editor.i18n, editor.info && editor.info.iconImg? fm.baseUrl + editor.info.iconImg : 'edit']);
 						});
 					} else {
-						single(editors[getStoreId(stored[file.mime])]);
+						single(editor);
 						self.extra = {
 							icon: 'menu',
 							node: $('<span/>')
@@ -790,8 +794,8 @@ elFinder.prototype.commands.edit = function() {
 					storedId;
 				
 				if (!editor && Object.keys(editors).length > 1) {
-					if (useStoredEditor() && (storedId = getStoreId(stored[files[0].mime])) && editors[storedId]) {
-						return dfd.resolve(editors[storedId]);
+					if (useStoredEditor() && (editor = getStoredEditor(files[0].mime))) {
+						return dfd.resolve(editor);
 					}
 					fm.trigger('contextmenu', {
 						raw: getSubMenuRaw(files, function() {
