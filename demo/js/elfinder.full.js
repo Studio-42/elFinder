@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: 1420758) (2018-02-17)
+ * Version 2.1.32 (2.1-src Nightly: 0240f60) (2018-02-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -4468,7 +4468,15 @@ var elFinder = function(elm, opts, bootCallback) {
 					toolbar = self.getUI('toolbar'),
 					moveEv = 'touchmove.stopscroll',
 					moveTm,
-					moveOn  = function(e) {
+					moveUpOn = function(e) {
+						var touches = e.originalEvent.touches || [{}],
+							y = touches[0].pageY || null;
+						if (!lastY || y < lastY) {
+							e.preventDefault();
+							moveTm && clearTimeout(moveTm);
+						}
+					},
+					moveDownOn = function(e) {
 						e.preventDefault();
 						moveTm && clearTimeout(moveTm);
 					},
@@ -4527,14 +4535,14 @@ var elFinder = function(elm, opts, bootCallback) {
 							}
 						}
 						if (toolbar) {
-							toolbarH = toolbar.height();
-							nodeTop = nodeOffset.top;
-							if (y - nodeTop < (toolbar.is(':hidden')? handleH : (toolbarH + 30))) {
-								lastY = y;
-								node.on(moveEv, moveOn);
-								moveOff();
-							} else {
-								lastY = false;
+							lastY = false;
+							if (! e.originalEvent._preventSwipeY) {
+								toolbarH = toolbar.height();
+								nodeTop = nodeOffset.top;
+								if (y - nodeTop < (toolbar.is(':hidden')? handleH : (toolbarH + 30))) {
+									lastY = y;
+									node.on(moveEv, toolbar.is(':hidden')? moveDownOn: moveUpOn);
+								}
 							}
 						}
 					} else {
@@ -4558,7 +4566,6 @@ var elFinder = function(elm, opts, bootCallback) {
 								if (mode === 'slideDown' || toolbarT + 20 > y) {
 									if (toolbar.is(mode === 'slideDown' ? ':hidden' : ':visible')) {
 										toolbar.stop(true, true).trigger('toggle', {duration: 100, handleH: handleH});
-										moveOff();
 									}
 									lastY = false;
 								}
@@ -8910,7 +8917,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 1420758)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 0240f60)';
 
 
 
@@ -9229,10 +9236,24 @@ $.fn.elfUiWidgetInstance = function(name) {
 if (! $.fn.scrollRight) {
 	$.fn.extend({
 		scrollRight: function (val) {
+			var node = this.get(0);
 			if (val === undefined) {
-				return Math.max(0, this[0].scrollWidth - (this[0].scrollLeft + this[0].clientWidth));
+				return Math.max(0, node.scrollWidth - (node.scrollLeft + node.clientWidth));
 			}
-			return this.scrollLeft(this[0].scrollWidth - this[0].clientWidth - val);
+			return this.scrollLeft(node.scrollWidth - node.clientWidth - val);
+		}
+	});
+}
+
+// function scrollBottom
+if (! $.fn.scrollBottom) {
+	$.fn.extend({
+		scrollBottom: function(val) { 
+			var node = this.get(0);
+			if (val === undefined) {
+				return Math.max(0, node.scrollHeight - (node.scrollTop + node.clientHeight));
+			}
+			return this.scrollTop(node.scrollHeight - node.clientHeight - val);
 		}
 	});
 }
@@ -15254,6 +15275,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					maxWidth : syncSize.width?  node.width() - delta.width  : null,
 					maxHeight: syncSize.height? node.height() - delta.height : null
 				};
+				Object.assign(restoreStyle, opts);
 				dialog.css(opts).trigger('resize');
 				if (dialog.data('hasResizable') && (dialog.resizable('option', 'maxWidth') < opts.maxWidth || dialog.resizable('option', 'maxHeight') < opts.maxHeight)) {
 					dialog.resizable('option', opts);
@@ -15275,7 +15297,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 				dialogs = elfNode.children('.' + cldialog + '.' + fm.res('class', 'editing') + ':visible');
 			fm[dialogs.length? 'disable' : 'enable']();
 		},
-		syncTm, dialog, elfNode;
+		syncTm, dialog, elfNode, restoreStyle;
 	
 	if (fm && fm.ui) {
 		elfNode = fm.getUI();
@@ -15616,7 +15638,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 					
 					dialog.trigger('totop');
-					
+
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 					
 					fm.UA.Mobile && tabstopNext().focus();
@@ -15699,9 +15721,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 					if (! css && ! dialog.data('resizing')) {
 						nodeFull = elfNode.hasClass('elfinder-fullscreen');
 						dialog.css(nodeFull? {
-							'max-width'  : '100%',
-							'max-height' : '100%',
-							'overflow'   : 'auto'
+							maxWidth  : '100%',
+							maxHeight : '100%',
+							overflow   : 'auto'
 						} : restoreStyle);
 						if (fm.UA.Mobile && !nodeFull && rotated === fm.UA.Rotated) {
 							return;
@@ -15841,7 +15863,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					dialog.css('left', Math.max(Math.min(Math.max(pos.left, 0), node.width() - 200), 0));
 				}
 			},
-			maxSize, rotated, restoreStyle;
+			maxSize, rotated;
 		
 		dialog.prepend(titlebar);
 
@@ -15896,9 +15918,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 		}
 		
 		restoreStyle = {
-			'max-width'  : dialog.css('max-width'),
-			'max-height' : dialog.css('max-height'),
-			'overflow'   : dialog.css('overflow')
+			maxWidth  : dialog.css('max-width'),
+			maxHeight : dialog.css('max-height'),
+			overflow   : dialog.css('overflow')
 		};
 		
 		dialog.trigger('posinit').data('margin-y', self.outerHeight(true) - self.height());
@@ -18080,6 +18102,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 										fm.resources.blink(swipeHandle, 'slowonce');
 									}
 								}
+								toshow && self.scrollTop('0px');
 								data.init && fm.trigger('uiautohide');
 							}, 0);
 						}
@@ -18087,6 +18110,10 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				self.data('swipeClose', ! toshow).stop(true, true).animate({height : 'toggle'}, opt);
 				autoHide.toolbar = !toshow;
 				fm.storage('autoHide', Object.assign(fm.storage('autoHide'), {toolbar: autoHide.toolbar}));
+			}).on('touchstart', function(e) {
+				if (self.scrollBottom() > 5) {
+					e.originalEvent._preventSwipeY = true;
+				}
 			});
 		}
 	});
@@ -22546,7 +22573,7 @@ elFinder.prototype.commands.fullscreen = function() {
 							}
 							title = '<label for="'+f.attr('id')+'">'+title+'</label>';
 						}
-						dls = dls.add($('<dt>'+title+'</dt>')).add($('<dd class="elfinder-help-'+n+'"/>').append(f));
+						dls = dls.add($('<dt class="elfinder-help-'+n+'">'+title+'</dt>')).add($('<dd class="elfinder-help-'+n+'"/>').append(f));
 					}
 				});
 				
