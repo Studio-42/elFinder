@@ -309,10 +309,24 @@ $.fn.elfUiWidgetInstance = function(name) {
 if (! $.fn.scrollRight) {
 	$.fn.extend({
 		scrollRight: function (val) {
+			var node = this.get(0);
 			if (val === undefined) {
-				return Math.max(0, this[0].scrollWidth - (this[0].scrollLeft + this[0].clientWidth));
+				return Math.max(0, node.scrollWidth - (node.scrollLeft + node.clientWidth));
 			}
-			return this.scrollLeft(this[0].scrollWidth - this[0].clientWidth - val);
+			return this.scrollLeft(node.scrollWidth - node.clientWidth - val);
+		}
+	});
+}
+
+// function scrollBottom
+if (! $.fn.scrollBottom) {
+	$.fn.extend({
+		scrollBottom: function(val) { 
+			var node = this.get(0);
+			if (val === undefined) {
+				return Math.max(0, node.scrollHeight - (node.scrollTop + node.clientHeight));
+			}
+			return this.scrollTop(node.scrollHeight - node.clientHeight - val);
 		}
 	});
 }

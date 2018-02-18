@@ -277,6 +277,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 										fm.resources.blink(swipeHandle, 'slowonce');
 									}
 								}
+								toshow && self.scrollTop('0px');
 								data.init && fm.trigger('uiautohide');
 							}, 0);
 						}
@@ -284,6 +285,10 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				self.data('swipeClose', ! toshow).stop(true, true).animate({height : 'toggle'}, opt);
 				autoHide.toolbar = !toshow;
 				fm.storage('autoHide', Object.assign(fm.storage('autoHide'), {toolbar: autoHide.toolbar}));
+			}).on('touchstart', function(e) {
+				if (self.scrollBottom() > 5) {
+					e.originalEvent._preventSwipeY = true;
+				}
 			});
 		}
 	});

@@ -4437,7 +4437,15 @@ var elFinder = function(elm, opts, bootCallback) {
 					toolbar = self.getUI('toolbar'),
 					moveEv = 'touchmove.stopscroll',
 					moveTm,
-					moveOn  = function(e) {
+					moveUpOn = function(e) {
+						var touches = e.originalEvent.touches || [{}],
+							y = touches[0].pageY || null;
+						if (!lastY || y < lastY) {
+							e.preventDefault();
+							moveTm && clearTimeout(moveTm);
+						}
+					},
+					moveDownOn = function(e) {
 						e.preventDefault();
 						moveTm && clearTimeout(moveTm);
 					},
@@ -4496,14 +4504,14 @@ var elFinder = function(elm, opts, bootCallback) {
 							}
 						}
 						if (toolbar) {
-							toolbarH = toolbar.height();
-							nodeTop = nodeOffset.top;
-							if (y - nodeTop < (toolbar.is(':hidden')? handleH : (toolbarH + 30))) {
-								lastY = y;
-								node.on(moveEv, moveOn);
-								moveOff();
-							} else {
-								lastY = false;
+							lastY = false;
+							if (! e.originalEvent._preventSwipeY) {
+								toolbarH = toolbar.height();
+								nodeTop = nodeOffset.top;
+								if (y - nodeTop < (toolbar.is(':hidden')? handleH : (toolbarH + 30))) {
+									lastY = y;
+									node.on(moveEv, toolbar.is(':hidden')? moveDownOn: moveUpOn);
+								}
 							}
 						}
 					} else {
@@ -4527,7 +4535,6 @@ var elFinder = function(elm, opts, bootCallback) {
 								if (mode === 'slideDown' || toolbarT + 20 > y) {
 									if (toolbar.is(mode === 'slideDown' ? ':hidden' : ':visible')) {
 										toolbar.stop(true, true).trigger('toggle', {duration: 100, handleH: handleH});
-										moveOff();
 									}
 									lastY = false;
 								}

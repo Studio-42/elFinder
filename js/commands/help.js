@@ -376,7 +376,7 @@
 							}
 							title = '<label for="'+f.attr('id')+'">'+title+'</label>';
 						}
-						dls = dls.add($('<dt>'+title+'</dt>')).add($('<dd class="elfinder-help-'+n+'"/>').append(f));
+						dls = dls.add($('<dt class="elfinder-help-'+n+'">'+title+'</dt>')).add($('<dd class="elfinder-help-'+n+'"/>').append(f));
 					}
 				});
 				
