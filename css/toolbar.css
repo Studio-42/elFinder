@@ -7,6 +7,8 @@
 	border-left:0 solid transparent;
 	border-top:0 solid transparent;
 	border-right:0 solid transparent;
+	max-height: 50%;
+	overflow-y: auto;
 }
 
 /* container for button's group */
