@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: 6c7bbd5) (2018-02-18)
+ * Version 2.1.32 (2.1-src Nightly: 33e9b8a) (2018-02-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8917,7 +8917,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 6c7bbd5)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 33e9b8a)';
 
 
 
@@ -17417,7 +17417,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 		
 		fm
 			.one('open', function() {
-				opts = (fm.api < 2.1)? null : $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
+				opts = (fm.api < 2.1)? null : $('<div class="ui-front ui-widget ui-widget-content elfinder-button-search-menu ui-corner-all"/>')
 					.append(
 						$('<div class="buttonset"/>')
 							.append(
@@ -17432,7 +17432,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 							)
 					)
 					.hide()
-					.appendTo(button);
+					.appendTo(fm.getUI());
 				if (opts) {
 					opts.find('div.buttonset').buttonset();
 					$('#'+id('SearchFromAll')).next('label').attr('title', fm.i18n('searchTarget', fm.i18n('btnAll')));
@@ -17443,7 +17443,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 						})
 						.on('click', 'input', function(e) {
 							e.stopPropagation();
-							$.trim(input.val()) && search();
+							$.trim(input.val())? search() : input.focus();
 						});
 				}
 			})
