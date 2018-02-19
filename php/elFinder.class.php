@@ -514,7 +514,7 @@ class elFinder {
 		$this->debug = (isset($opts['debug']) && $opts['debug'] ? true : false);
 		if ($this->debug) {
 			error_reporting(defined('ELFINDER_DEBUG_ERRORLEVEL')? ELFINDER_DEBUG_ERRORLEVEL : -1);
-			ini_set('diaplay_errors', '1');
+			ini_set('display_errors', '1');
 			// clear output buffer and stop output filters
 			while(ob_get_level() && ob_end_clean()){}
 		}
