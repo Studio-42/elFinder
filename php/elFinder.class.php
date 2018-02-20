@@ -452,9 +452,24 @@ class elFinder {
 	public function __construct($opts) {
 		// set default_charset
 		if (version_compare(PHP_VERSION, '5.6', '>=')) {
-			ini_set('internal_encoding', 'UTF-8');
-			ini_set('default_charset', 'UTF-8');
+			if (ini_get('iconv.internal_encoding')) {
+				ini_set('iconv.internal_encoding', '');
+			}
+			if (ini_get('mbstring.internal_encoding')) {
+				ini_set('mbstring.internal_encoding', '');
+			}
+			if (ini_get('internal_encoding')) {
+				ini_set('internal_encoding', '');
+			}
+		} else {
+			if (function_exists('iconv_set_encoding')) {
+				iconv_set_encoding('internal_encoding', 'UTF-8');
+			}
+			if (function_exists('mb_internal_encoding')) {
+				mb_internal_encoding('UTF-8');
+			}
 		}
+		ini_set('default_charset', 'UTF-8');
 		
 		// define accept constant of server commands path
 		! defined('ELFINDER_TAR_PATH')      && define('ELFINDER_TAR_PATH',      'tar');
