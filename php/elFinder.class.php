@@ -462,10 +462,10 @@ class elFinder {
 				ini_set('internal_encoding', '');
 			}
 		} else {
-			if (function_exists('iconv_set_encoding')) {
+			if (function_exists('iconv_set_encoding') && strtoupper(iconv_get_encoding('internal_encoding')) !== 'UTF-8') {
 				iconv_set_encoding('internal_encoding', 'UTF-8');
 			}
-			if (function_exists('mb_internal_encoding')) {
+			if (function_exists('mb_internal_encoding') && strtoupper(mb_internal_encoding()) !== 'UTF-8') {
 				mb_internal_encoding('UTF-8');
 			}
 		}

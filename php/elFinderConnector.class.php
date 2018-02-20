@@ -40,7 +40,7 @@ class elFinderConnector {
 	 * 
 	 * @var string
 	 */
-	protected static $contentType = 'Content-Type: application/json';
+	protected static $contentType = 'Content-Type: application/json; charset=utf-8';
 	
 	/**
 	 * Constructor
