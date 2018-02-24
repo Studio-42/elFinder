@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: 8182be7) (2018-02-24)
+ * Version 2.1.32 (2.1-src Nightly: a99d6e3) (2018-02-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -7299,8 +7299,8 @@ elFinder.prototype = {
 
 			if (cancel) {
 				button = $('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">'+this.i18n('btnCancel')+'</span></button>')
-					.on('hover', function(e) { 
-						$(this).toggleClass(clhover, e.type == 'mouseenter');
+					.on('mouseenter mouseleave', function(e) { 
+						$(this).toggleClass(clhover, e.type === 'mouseenter');
 					});
 				notify.children('div.elfinder-notify-cancel').append(button);
 			}
@@ -8168,7 +8168,7 @@ elFinder.prototype = {
 				opts.noOffline && f.offline.closest('tr').hide();
 				if (data.mode == 'makebtn') {
 					f0.removeClass('elfinder-info-spinner').removeData('expires').removeData('funcexpup');
-					f.host.find('input').on('hover', function(){$(this).toggleClass('ui-state-hover');});
+					f.host.find('input').on('mouseenter mouseleave', function(){$(this).toggleClass('ui-state-hover');});
 					f1.val('');
 					f.path.val(opts.root).next().remove();
 					f.user.val('');
@@ -8917,7 +8917,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 8182be7)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: a99d6e3)';
 
 
 
@@ -11882,7 +11882,7 @@ $.fn.elfinderbutton = function(cmd) {
 			button   = $(this).addClass('ui-state-default elfinder-button')
 				.attr('title', cmd.title)
 				.append('<span class="elfinder-button-icon elfinder-button-icon-' + (cmd.className? cmd.className : cmd.name) + '"/>', text)
-				.on('hover', function(e) { !button.hasClass(disabled) && button[e.type == 'mouseleave' ? 'removeClass' : 'addClass'](hover);})
+				.on('mouseenter mouseleave', function(e) { !button.hasClass(disabled) && button[e.type == 'mouseleave' ? 'removeClass' : 'addClass'](hover);})
 				.on('click', function(e) { 
 					if (!button.hasClass(disabled)) {
 						if (menu && cmd.variants.length >= 1) {
@@ -17546,7 +17546,7 @@ $.fn.elfindersortbutton = function(cmd) {
 			button   = $(this).addClass('ui-state-default elfinder-button elfinder-menubutton elfiner-button-'+name)
 				.attr('title', cmd.title)
 				.append('<span class="elfinder-button-icon elfinder-button-icon-'+name+'"/>', text)
-				.on('hover', function(e) { !button.hasClass(disabled) && button.toggleClass(hover); })
+				.on('mouseenter mouseleave', function(e) { !button.hasClass(disabled) && button.toggleClass(hover); })
 				.on('click', function(e) {
 					if (!button.hasClass(disabled)) {
 						e.stopPropagation();
@@ -22613,7 +22613,7 @@ elFinder.prototype.commands.fullscreen = function() {
 		content = $(html.join(''));
 		
 		content.find('.ui-tabs-nav li')
-			.on('hover', function() {
+			.on('mouseenter mouseleave', function() {
 				$(this).toggleClass('ui-state-hover');
 			})
 			.children()
@@ -29425,10 +29425,8 @@ elFinder.prototype.commands.sort = function() {
 							}
 						}
 					})
-					.on('hover', function() {
-						$(this).addClass('ui-state-hover');
-					},function() {
-						$(this).removeClass('ui-state-hover');
+					.on('mouseenter mouseleave', function(e) {
+						$(this).toggleClass('ui-state-hover', e.type === 'mouseenter');
 					});
 				}
 				
@@ -29858,8 +29856,8 @@ elFinder.prototype.commands.upload = function() {
 							input.click();
 						}
 					})
-					.on('hover', function() {
-						$(this).toggleClass(hover);
+					.on('mouseenter mouseleave', function(e) {
+						$(this).toggleClass(hover, e.type === 'mouseenter');
 					});
 			},
 			dfrd = $.Deferred(),
