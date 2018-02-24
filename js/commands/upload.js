@@ -162,8 +162,8 @@ elFinder.prototype.commands.upload = function() {
 							input.click();
 						}
 					})
-					.on('hover', function() {
-						$(this).toggleClass(hover);
+					.on('mouseenter mouseleave', function(e) {
+						$(this).toggleClass(hover, e.type === 'mouseenter');
 					});
 			},
 			dfrd = $.Deferred(),

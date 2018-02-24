@@ -166,6 +166,7 @@ class elFinderPluginWatermark extends elFinderPlugin {
 		if (class_exists('Imagick', false)) {
 			return $this->watermarkPrint_imagick($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo, $opts);
 		} else {
+			elFinder::expandMemoryForGD(array($watermarkImgInfo, $srcImgInfo));
 			return $this->watermarkPrint_gd($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo, $srcImgInfo, $opts);
 		}
 	}
@@ -216,7 +217,7 @@ class elFinderPluginWatermark extends elFinderPlugin {
 		
 		$watermark_width = $watermarkImgInfo[0];
 		$watermark_height = $watermarkImgInfo[1];
-				
+
 		$ermsg = '';
 		switch ($watermarkImgInfo['mime']) {
 			case 'image/gif':

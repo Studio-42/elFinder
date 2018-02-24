@@ -19,7 +19,7 @@ $.fn.elfindersortbutton = function(cmd) {
 			button   = $(this).addClass('ui-state-default elfinder-button elfinder-menubutton elfiner-button-'+name)
 				.attr('title', cmd.title)
 				.append('<span class="elfinder-button-icon elfinder-button-icon-'+name+'"/>', text)
-				.on('hover', function(e) { !button.hasClass(disabled) && button.toggleClass(hover); })
+				.on('mouseenter mouseleave', function(e) { !button.hasClass(disabled) && button.toggleClass(hover); })
 				.on('click', function(e) {
 					if (!button.hasClass(disabled)) {
 						e.stopPropagation();
