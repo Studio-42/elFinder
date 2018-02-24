@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: c89c0ba) (2018-02-21)
+ * Version 2.1.32 (2.1-src Nightly: 4973274) (2018-02-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -3703,7 +3703,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		.enable(function() {
 			if (!enabled && self.api && self.visible() && self.ui.overlay.is(':hidden') && ! node.children('.elfinder-dialog.' + self.res('class', 'editing') + ':visible').length) {
 				enabled = true;
-				document.activeElement && document.activeElement.blur();
+				document.activeElement && document.activeElement.trigger('blur');
 				node.removeClass('elfinder-disabled');
 			}
 		})
@@ -3985,7 +3985,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				$(window.top).on('focus.' + namespace, function() {
 					if (self.enable() && (! parentIframe || parentIframe.is(':visible'))) {
 						setTimeout(function() {
-							$(window).focus();
+							$(window).trigger('focus');
 						}, 10);
 					}
 				});
@@ -3999,14 +3999,14 @@ var elFinder = function(elm, opts, bootCallback) {
 		// return focus to the window on click (elFInder in the frame)
 		if (inFrame) {
 			node.on('click', function(e) {
-				$(window).focus();
+				$(window).trigger('focus');
 			});
 		}
 		
 		// elFinder to enable by mouse over
 		if (self.options.enableByMouseOver) {
 			node.on('mouseenter', function(e) {
-				(inFrame) && $(window).focus();
+				(inFrame) && $(window).trigger('focus');
 				! self.enabled() && self.enable();
 			});
 		}
@@ -4800,7 +4800,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				self.trigger('opendone');
 				
 				if (inFrame && self.options.enableAlways) {
-					$(window).focus();
+					$(window).trigger('focus');
 				}
 				
 				// check self.trashes
@@ -7299,7 +7299,7 @@ elFinder.prototype = {
 
 			if (cancel) {
 				button = $('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">'+this.i18n('btnCancel')+'</span></button>')
-					.hover(function(e) { 
+					.on('hover', function(e) { 
 						$(this).toggleClass(clhover, e.type == 'mouseenter');
 					});
 				notify.children('div.elfinder-notify-cancel').append(button);
@@ -8107,7 +8107,7 @@ elFinder.prototype = {
 					});
 					bro.after($('<div/>').append(select))
 						.closest('.ui-dialog').trigger('tabstopsInit');
-					select.focus();
+					select.trigger('focus');
 				}
 			},
 			spinner = function() {
@@ -8168,7 +8168,7 @@ elFinder.prototype = {
 				opts.noOffline && f.offline.closest('tr').hide();
 				if (data.mode == 'makebtn') {
 					f0.removeClass('elfinder-info-spinner').removeData('expires').removeData('funcexpup');
-					f.host.find('input').hover(function(){$(this).toggleClass('ui-state-hover');});
+					f.host.find('input').on('hover', function(){$(this).toggleClass('ui-state-hover');});
 					f1.val('');
 					f.path.val(opts.root).next().remove();
 					f.user.val('');
@@ -8917,7 +8917,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: c89c0ba)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 4973274)';
 
 
 
@@ -10989,7 +10989,7 @@ elFinder.prototype.resources = {
 				node = ui.trigger('create.'+fm.namespace, file).find('#'+fm[find](id))
 					.on('unselect.'+fm.namespace, function() {
 						setTimeout(function() {
-							input && input.blur();
+							input && input.trigger('blur');
 						}, 50);
 					}),
 				nnode, pnode,
@@ -11038,7 +11038,7 @@ elFinder.prototype.resources = {
 						if (e.keyCode == $.ui.keyCode.ESCAPE) {
 							dfrd.reject();
 						} else if (e.keyCode == $.ui.keyCode.ENTER) {
-							input.blur();
+							input.trigger('blur');
 						}
 					})
 					.on('mousedown click dblclick', function(e) {
@@ -11145,7 +11145,7 @@ elFinder.prototype.resources = {
 					}
 					inError = false;
 					! fm.enabled() && fm.enable();
-					input.focus().select();
+					input.trigger('focus').trigger('select');
 					input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
 				},
 				resize = function() {
@@ -11187,7 +11187,7 @@ elFinder.prototype.resources = {
 				if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
 					dst.children('.'+arrow).click().data('dfrd').done(function() {
 						if (input.val() === file.name) {
-							input.val(fm.uniqueName(this.prefix, phash)).select().focus();
+							input.val(fm.uniqueName(this.prefix, phash)).trigger('select').trigger('focus');
 						}
 					}.bind(this));
 				}
@@ -11262,7 +11262,7 @@ $.fn.dialogelfinder = function(opts) {
 			toolbar = $('<div class="ui-widget-header dialogelfinder-drag ui-corner-top">'+(opts.title || 'Files')+'</div>'),
 			button  = $('<a href="#" class="dialogelfinder-drag-close ui-corner-all"><span class="ui-icon ui-icon-closethick"> </span></a>')
 				.appendTo(toolbar)
-				.click(function(e) {
+				.on('click', function(e) {
 					e.preventDefault();
 					
 					node.dialogelfinder('close');
@@ -11882,8 +11882,8 @@ $.fn.elfinderbutton = function(cmd) {
 			button   = $(this).addClass('ui-state-default elfinder-button')
 				.attr('title', cmd.title)
 				.append('<span class="elfinder-button-icon elfinder-button-icon-' + (cmd.className? cmd.className : cmd.name) + '"/>', text)
-				.hover(function(e) { !button.hasClass(disabled) && button[e.type == 'mouseleave' ? 'removeClass' : 'addClass'](hover);})
-				.click(function(e) { 
+				.on('hover', function(e) { !button.hasClass(disabled) && button[e.type == 'mouseleave' ? 'removeClass' : 'addClass'](hover);})
+				.on('click', function(e) { 
 					if (!button.hasClass(disabled)) {
 						if (menu && cmd.variants.length >= 1) {
 							// close other menus
@@ -11928,7 +11928,7 @@ $.fn.elfinderbutton = function(cmd) {
 					fm.exec(cmd.name, fm.selected(), opts);
 				});
 
-			cmd.fm.bind('disable select', hideMenu).getUI().click(hideMenu);
+			cmd.fm.bind('disable select', hideMenu).getUI().on('click', hideMenu);
 			
 			cmd.change(function() {
 				menu.html('');
@@ -12083,7 +12083,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						.replace('{label}', label)
 						.replace('{style}', style)
 						.replace('{className}', className))
-					.click(function(e) {
+					.on('click', function(e) {
 						e.stopPropagation();
 						e.preventDefault();
 						callback();
@@ -14721,7 +14721,7 @@ $.fn.elfindercwd = function(fm, options) {
 			},
 			
 			// elfinder node
-			parent = $(this).parent().resize(resize),
+			parent = $(this).parent().on('resize', resize),
 			
 			// workzone node 
 			wz = parent.children('.elfinder-workzone').append(wrapper.append(this).append(bottomMarker)),
@@ -15641,7 +15641,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 					
-					fm.UA.Mobile && tabstopNext().focus();
+					fm.UA.Mobile && tabstopNext().trigger('focus');
 					
 					if (opts.closeOnEscape) {
 						$(document).on('keyup.'+id, function(e) {
@@ -15710,7 +15710,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					elfNode.children('.'+cldialog+':not(.'+clmodal+')').removeClass(clactive+' ui-front');
 					dialog.addClass(clactive+' ui-front');
 
-					! fm.UA.Mobile && tabstopNext().focus();
+					! fm.UA.Mobile && tabstopNext().trigger('focus');
 				})
 				.on('posinit', function() {
 					var css = opts.position,
@@ -15813,7 +15813,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					var $this = $(this);
 					if (opts.btnHoverFocus && dialog.data('focusOnMouseOver')) {
 						if (e.type == 'mouseenter' && ! $(':focus').data('keepFocus')) {
-							$this.focus();
+							$this.trigger('focus');
 						}
 					} else {
 						$this.toggleClass(clhover, e.type == 'mouseenter');
@@ -15825,7 +15825,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 						e.stopPropagation();
 						if (e.keyCode == $.ui.keyCode.ENTER) {
 							e.preventDefault();
-							$this.click();
+							$this.trigger('click');
 						}  else if ((e.keyCode == $.ui.keyCode.TAB && e.shiftKey) || e.keyCode == $.ui.keyCode.LEFT || e.keyCode == $.ui.keyCode.UP) {
 							if ($this.is('input:text') && (!(e.ctrlKey || e.metaKey) && e.keyCode == $.ui.keyCode.LEFT)) {
 								return;
@@ -15837,7 +15837,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 								return;
 							}
 							e.preventDefault();
-							tabstopPrev(this).focus();
+							tabstopPrev(this).trigger('focus');
 						}  else if (e.keyCode == $.ui.keyCode.TAB || e.keyCode == $.ui.keyCode.RIGHT || e.keyCode == $.ui.keyCode.DOWN) {
 							if ($this.is('input:text') && (!(e.ctrlKey || e.metaKey) && e.keyCode == $.ui.keyCode.RIGHT)) {
 								return;
@@ -15849,7 +15849,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 								return;
 							}
 							e.preventDefault();
-							tabstopNext(this).focus();
+							tabstopNext(this).trigger('focus');
 						}
 					}
 				})
@@ -16024,7 +16024,8 @@ $.fn.elfinderfullscreenbutton = function(cmd) {
 $.fn.elfindernavbar = function(fm, opts) {
 		this.not('.elfinder-navbar').each(function() {
 		var nav    = $(this).hide().addClass('ui-state-default elfinder-navbar'),
-			parent = nav.parent(),
+			ovf    = nav.css('overflow'),
+			parent = nav.css('overflow', 'hidden').parent(),
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
 			ltr    = fm.direction == 'ltr',
@@ -16039,6 +16040,9 @@ $.fn.elfindernavbar = function(fm, opts) {
 
 			fm.one('cssloaded', function() {
 				delta = nav.outerHeight() - nav.height();
+			}).one('opendone',function() {
+				handle && handle.trigger('resize');
+				nav.css('overflow', ovf);
 			}).bind('wzresize', function() {
 				var navdockH = 0;
 				if (! navdock) {
@@ -16141,10 +16145,6 @@ $.fn.elfindernavbar = function(fm, opts) {
 					}, 50));
 				})
 				.children('.ui-resizable-handle').addClass('ui-front');
-
-			fm.one('opendone', function() {
-				handle.trigger('resize');
-			});
 		}
 
 		if (setWidth = fm.storage('navbarWidth')) {
@@ -16707,7 +16707,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 							add(exists[h] || Object.assign({notfound: true}, f));
 						});
 						if (fm.storage('placesState') > 0) {
-							root.click();
+							root.trigger('click');
 						}
 					})
 					.always(function() {
@@ -16904,7 +16904,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 **/
 			root = wrapper.children('.'+navdir)
 				.addClass(clroot)
-				.click(function(e) {
+				.on('click', function(e) {
 					e.stopPropagation();
 					if (root.hasClass(collapsed)) {
 						places.toggleClass(expanded);
@@ -17274,7 +17274,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 			},
 			abort = function() {
 				input.data('inctm') && clearTimeout(input.data('inctm'));
-				input.val('').blur();
+				input.val('').trigger('blur');
 				if (result || incVal) {
 					result = false;
 					incVal = '';
@@ -17346,7 +17346,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 								(incVal !== val) && fm.trigger('incsearchstart', { query: val });
 								incVal = val;
 								if (val === '' && fm.searchStatus.state > 1 && fm.searchStatus.query) {
-									input.val(fm.searchStatus.query).select();
+									input.val(fm.searchStatus.query).trigger('select');
 								} 
 							}
 						}, isopts.wait));
@@ -17382,7 +17382,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 				if (button.hasClass('ui-state-active')) {
 					search();
 				} else {
-					input.focus();
+					input.trigger('focus');
 				}
 			});
 		
@@ -17392,7 +17392,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 				e.stopPropagation();
 				e.preventDefault();
 				if (input.val() === '' && !button.hasClass('ui-state-active')) {
-					input.focus();
+					input.trigger('focus');
 				} else {
 					abort();
 				}
@@ -17443,12 +17443,12 @@ $.fn.elfindersearchbutton = function(cmd) {
 						})
 						.on('click', 'input', function(e) {
 							e.stopPropagation();
-							$.trim(input.val())? search() : input.focus();
+							$.trim(input.val())? search() : input.trigger('focus');
 						});
 				}
 			})
 			.select(function() {
-				input.blur();
+				input.trigger('blur');
 			})
 			.bind('searchend', function() {
 				input.val('');
@@ -17486,7 +17486,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 				pattern     : 'ctrl+f f3',
 				description : cmd.title,
 				callback    : function() { 
-					input.select().focus();
+					input.trigger('select').trigger('focus');
 				}
 			})
 			.shortcut({
@@ -17546,8 +17546,8 @@ $.fn.elfindersortbutton = function(cmd) {
 			button   = $(this).addClass('ui-state-default elfinder-button elfinder-menubutton elfiner-button-'+name)
 				.attr('title', cmd.title)
 				.append('<span class="elfinder-button-icon elfinder-button-icon-'+name+'"/>', text)
-				.hover(function(e) { !button.hasClass(disabled) && button.toggleClass(hover); })
-				.click(function(e) {
+				.on('hover', function(e) { !button.hasClass(disabled) && button.toggleClass(hover); })
+				.on('click', function(e) {
 					if (!button.hasClass(disabled)) {
 						e.stopPropagation();
 						menu.is(':hidden') && cmd.fm.getUI().click();
@@ -17579,7 +17579,7 @@ $.fn.elfindersortbutton = function(cmd) {
 			menu.append($('<div class="'+item+'" rel="'+name+'"><span class="ui-icon ui-icon-arrowthick-1-n"/><span class="ui-icon ui-icon-arrowthick-1-s"/>'+fm.i18n('sort'+name)+'</div>').data('type', name));
 		});
 		
-		menu.children().click(function(e) {
+		menu.children().on('click', function(e) {
 			var type = $(this).attr('rel');
 			
 			cmd.exec([], {
@@ -17592,19 +17592,19 @@ $.fn.elfindersortbutton = function(cmd) {
 		
 		$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-stick"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortFoldersFirst')+'</div>')
 			.appendTo(menu)
-			.click(function() {
+			.on('click', function() {
 				cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : !fm.sortStickFolders, tree : fm.sortAlsoTreeview});
 			});
 
 		if ($.fn.elfindertree && $.inArray('tree', fm.options.ui) !== -1) {
 			$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-tree"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortAlsoTreeview')+'</div>')
 				.appendTo(menu)
-				.click(function() {
+				.on('click', function() {
 					cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : fm.sortStickFolders, tree : !fm.sortAlsoTreeview});
 				});
 		}
 		
-		fm.bind('disable select', hide).getUI().click(hide);
+		fm.bind('disable select', hide).getUI().on('click', hide);
 			
 		fm.bind('sortchange', update);
 		
@@ -19642,7 +19642,7 @@ $.fn.elfinderuploadbutton = function(cmd) {
 				.off('click'), 
 			form = $('<form/>').appendTo(button),
 			input = $('<input type="file" multiple="true" title="'+cmd.fm.i18n('selectForUpload')+'"/>')
-				.change(function() {
+				.on('change', function() {
 					var _input = $(this);
 					if (_input.val()) {
 						cmd.exec({input : _input.remove()[0]});
@@ -20181,10 +20181,10 @@ elFinder.prototype.commands.chmod = function() {
 				return;
 			}
 		}).on('focus', function(e){
-			$(this).select();
+			$(this).trigger('select');
 		}).on('keyup', function(e) {
 			if ($(this).val().length == 3) {
-				$(this).select();
+				$(this).trigger('select');
 				setcheck($(this).val());
 			}
 		});
@@ -21072,7 +21072,7 @@ elFinder.prototype.commands.edit = function() {
 							}
 							
 						})
-						.on('mouseenter', function(){this.focus();});
+						.on('mouseenter', function(){this.trigger('focus');});
 					}
 
 					ta.initEditArea = function(id, file, content) {
@@ -21096,7 +21096,7 @@ elFinder.prototype.commands.edit = function() {
 						
 						setTimeout(function() {
 							ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
-							ta.focus();
+							ta.trigger('focus');
 						}, 10);
 					};
 				})();
@@ -21276,7 +21276,7 @@ elFinder.prototype.commands.edit = function() {
 							})
 							.done(function(data) {
 								setTimeout(function(){
-									ta.focus();
+									ta.trigger('focus');
 									ta.editor && ta.editor.focus(ta[0], ta.editor.instance);
 								}, 50);
 								ta.trigger('_savedone');
@@ -22613,7 +22613,7 @@ elFinder.prototype.commands.fullscreen = function() {
 		content = $(html.join(''));
 		
 		content.find('.ui-tabs-nav li')
-			.hover(function() {
+			.on('hover', function() {
 				$(this).toggleClass('ui-state-hover');
 			})
 			.children()
@@ -22629,7 +22629,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				}
 				
 			})
-			.filter(':first').click();
+			.filter(':first').trigger('click');
 		
 		// preference
 		usePref && setupPref();
@@ -22742,7 +22742,7 @@ elFinder.prototype.commands.fullscreen = function() {
 		} else {
 			debugShow();
 		}
-		this.dialog.trigger('initContents').elfinderdialog('open').find((tab? '.elfinder-help-tab-'+tab : '.ui-tabs-nav li') + ' a:first').click();
+		this.dialog.trigger('initContents').elfinderdialog('open').find((tab? '.elfinder-help-tab-'+tab : '.ui-tabs-nav li') + ' a:first').trigger('click');
 		return $.Deferred().resolve();
 	};
 
@@ -23252,7 +23252,7 @@ elFinder.prototype.commands.netmount = function() {
 								o[protocol].select(fm, e, data);
 							}
 							setTimeout(function() {
-								content.find('input:text.elfinder-tabstop:visible:first').focus();
+								content.find('input:text.elfinder-tabstop:visible:first').trigger('focus');
 							}, 20);
 						})
 						.addClass('ui-corner-all')
@@ -23264,7 +23264,7 @@ elFinder.prototype.commands.netmount = function() {
 						destroyOnClose : false,
 						open           : function() {
 							$(window).on('focus.'+fm.namespace, winFocus);
-							inputs.protocol.change();
+							inputs.protocol.trigger('change');
 						},
 						close          : function() { 
 							dfrd.state() == 'pending' && dfrd.reject();
@@ -23336,7 +23336,7 @@ elFinder.prototype.commands.netmount = function() {
 							if (comp) {
 								doMount();
 							} else {
-								next.focus();
+								next.trigger('focus');
 							}
 						}
 					}),
@@ -23378,7 +23378,7 @@ elFinder.prototype.commands.netmount = function() {
 				dialog = fm.dialog(form.append(content), opts);
 				dialogNode = dialog.closest('.ui-dialog');
 				dialog.ready(function(){
-					inputs.protocol.change();
+					inputs.protocol.trigger('change');
 					dialog.elfinderdialog('posInit');
 				});
 				return dialog;
@@ -23666,7 +23666,7 @@ elFinder.prototype.commands.netunmount = function() {
 					} else if (into !== 'window') {
 						wnd.location = url;
 					}
-					wnd.focus();
+					wnd.trigger('focus');
 					
 				}
 			}
@@ -24540,11 +24540,11 @@ elFinder.prototype.commands.places = function() {
 			.append('<div class="elfinder-quicklook-navbar-separator"/>')
 			.append($('<div class="'+navicon+' '+navicon+'-close"/>').on('click touchstart', function(e) { ! navmove && self.window.trigger('close'); return false; }))
 		,
-		titleClose = $('<span class="ui-front ui-icon elfinder-icon-close ui-icon-closethick"/>').mousedown(function(e) {
+		titleClose = $('<span class="ui-front ui-icon elfinder-icon-close ui-icon-closethick"/>').on('mousedown', function(e) {
 			e.stopPropagation();
 			self.window.trigger('close');
 		}),
-		titleDock = $('<span class="ui-front ui-icon elfinder-icon-minimize ui-icon-minusthick"/>').mousedown(function(e) {
+		titleDock = $('<span class="ui-front ui-icon elfinder-icon-minimize ui-icon-minusthick"/>').on('mousedown', function(e) {
 			e.stopPropagation();
 			if (! self.docked()) {
 				self.window.trigger('navdockin');
@@ -26286,7 +26286,7 @@ elFinder.prototype.commands.rename = function() {
 					width: Math.min(380, fm.getUI().width() - 20),
 					buttons : {},
 					open : function() {
-						name.on('input', mkPrev).focus();
+						name.on('input', mkPrev).trigger('focus');
 					}
 				},
 				getName = function() {
@@ -26423,7 +26423,7 @@ elFinder.prototype.commands.rename = function() {
 			},
 			unselect = function() {
 				setTimeout(function() {
-					input && input.blur();
+					input && input.trigger('blur');
 				}, 50);
 			},
 			rest     = function(){
@@ -26555,7 +26555,7 @@ elFinder.prototype.commands.rename = function() {
 						dfrd.reject();
 					} else if (e.keyCode == $.ui.keyCode.ENTER) {
 						e.preventDefault();
-						input.blur();
+						input.trigger('blur');
 					}
 				})
 				.on('mousedown click dblclick', function(e) {
@@ -26576,7 +26576,7 @@ elFinder.prototype.commands.rename = function() {
 					inError = false;
 					input.on('blur', blur);
 				}
-				input.focus().select();
+				input.trigger('focus').trigger('select');
 				input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
 			},
 			node = navbar? target.contents().filter(function(){ return this.nodeType==3 && $(this).parent().attr('id') === fm.navHash2Id(file.hash); })
@@ -26635,7 +26635,7 @@ elFinder.prototype.commands.rename = function() {
 		}
 		
 		fm.one('select', function() {
-			input.parent().length && file && $.inArray(file.hash, fm.selected()) === -1 && input.blur();
+			input.parent().length && file && $.inArray(file.hash, fm.selected()) === -1 && input.trigger('blur');
 		});
 		
 		input.trigger('keyup');
@@ -26775,7 +26775,7 @@ elFinder.prototype.commands.resize = function() {
 					},
 					control  = $('<div class="elfinder-resize-control"/>')
 						.on('focus', 'input[type=text],input[type=number]', function() {
-							$(this).select();
+							$(this).trigger('select');
 						})
 						.on('change', function() {
 							changeTm && clearTimeout(changeTm);
@@ -26860,7 +26860,7 @@ elFinder.prototype.commands.resize = function() {
 						'<input class="api2" type="radio" name="type" id="'+id+'-rotate" value="rotate" /><label class="api2" for="'+id+'-rotate">'+fm.i18n('rotate')+'</label>'),
 					mode     = 'resize',
 					type     = uitype[ctrgrup]()[ctrgrup]('disable').find('input')
-						.change(function() {
+						.on('change', function() {
 							mode = $(this).val();
 							
 							resetView();
@@ -26910,10 +26910,10 @@ elFinder.prototype.commands.resize = function() {
 								height.val(h);
 							}
 						}),
-					pointX  = $(input).change(function(){crop.updateView();}),
-					pointY  = $(input).change(function(){crop.updateView();}),
-					offsetX = $(input).change(function(){crop.updateView('w');}),
-					offsetY = $(input).change(function(){crop.updateView('h');}),
+					pointX  = $(input).on('change', function(){crop.updateView();}),
+					pointY  = $(input).on('change', function(){crop.updateView();}),
+					offsetX = $(input).on('change', function(){crop.updateView('w');}),
+					offsetY = $(input).on('change', function(){crop.updateView('h');}),
 					quality = isJpeg && api2?
 						$(input).val(fm.storage('jpgQuality') > 0? fm.storage('jpgQuality') : fm.option('jpgQuality'))
 							.addClass('elfinder-resize-quality')
@@ -26924,7 +26924,7 @@ elFinder.prototype.commands.resize = function() {
 							})
 						: null,
 					degree = $('<input type="number" class="ui-corner-all" maxlength="3" value="0" />')
-						.change(function() {
+						.on('change', function() {
 							rotate.update();
 						}),
 					uidegslider = $('<div class="elfinder-resize-rotate-slider touch-punch"/>')
@@ -27404,7 +27404,7 @@ elFinder.prototype.commands.resize = function() {
 										cancel : {
 											label    : 'btnCancel',
 											callback : function(){
-												$(this).focus();
+												$(this).trigger('focus');
 											}
 										}
 									};
@@ -27432,7 +27432,7 @@ elFinder.prototype.commands.resize = function() {
 							.filter(':first');
 						
 						setStep8();
-						!fm.UA.Mobile && inputFirst.focus();
+						!fm.UA.Mobile && inputFirst.trigger('focus');
 						resizable();
 					},
 					img     = $('<img/>')
@@ -29235,7 +29235,7 @@ elFinder.prototype.commands.search = function() {
 				});
 			});
 		}
-		fm.getUI('toolbar').find('.'+fm.res('class', 'searchbtn')+' :text').focus();
+		fm.getUI('toolbar').find('.'+fm.res('class', 'searchbtn')+' :text').trigger('focus');
 		return $.Deferred().reject();
 	};
 
@@ -29425,7 +29425,7 @@ elFinder.prototype.commands.sort = function() {
 							}
 						}
 					})
-					.hover(function() {
+					.on('hover', function() {
 						$(this).addClass('ui-state-hover');
 					},function() {
 						$(this).removeClass('ui-state-hover');
@@ -29816,7 +29816,7 @@ elFinder.prototype.commands.upload = function() {
 									var title = base.children('.ui-dialog-titlebar:first').find('span.elfinder-upload-target');
 									targets = [ f.hash ];
 									title.html(' - ' + fm.escape(f.i18 || f.name));
-									$this.focus();
+									$this.trigger('focus');
 								},
 								options  : {
 									className : (targets && targets.length && f.hash === targets[0])? 'ui-state-active' : '',
@@ -29829,7 +29829,7 @@ elFinder.prototype.commands.upload = function() {
 					$.each(dirs, function(i, f) {
 						raw.push(getRaw(f, 'dir'));
 					});
-					$this.blur();
+					$this.trigger('blur');
 					fm.trigger('contextmenu', {
 						raw: raw,
 						x: e.pageX || $(this).offset().left,
@@ -29842,7 +29842,7 @@ elFinder.prototype.commands.upload = function() {
 			inputButton = function(type, caption) {
 				var button,
 					input = $('<input type="file" ' + type + '/>')
-					.change(function() {
+					.on('change', function() {
 						upload({input : input.get(0), type : 'files'});
 					})
 					.on('dragover', function(e) {
@@ -29858,7 +29858,7 @@ elFinder.prototype.commands.upload = function() {
 							input.click();
 						}
 					})
-					.hover(function() {
+					.on('hover', function() {
 						$(this).toggleClass(hover);
 					});
 			},
@@ -30010,7 +30010,7 @@ elFinder.prototype.commands.upload = function() {
 					paste(e);
 				})
 				.on('mousedown click', function(){
-					$(this).focus();
+					$(this).trigger('focus');
 				})
 				.on('focus', function(){
 					this.innerHTML = '';
@@ -30051,7 +30051,7 @@ elFinder.prototype.commands.upload = function() {
 					paste(e);
 				})
 				.on('mousedown click', function(){
-					$(this).focus();
+					$(this).trigger('focus');
 				})
 				.on('focus', function(){
 					this.innerHTML = '';
