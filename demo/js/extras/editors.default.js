@@ -540,7 +540,7 @@
 								if (ta.data('ace')) {
 									ta.removeData('ace');
 									editorBase.hide();
-									ta.val(editor.session.getValue()).show().focus();
+									ta.val(editor.session.getValue()).show().trigger('focus');
 									$(this).text('AceEditor');
 								} else {
 									ta.data('ace', true);
@@ -695,7 +695,7 @@
 								if (ta.data('cm')) {
 									ta.removeData('cm');
 									editorBase.hide();
-									ta.val(editor.getValue()).show().focus();
+									ta.val(editor.getValue()).show().trigger('focus');
 									$(this).text('CodeMirror');
 								} else {
 									ta.data('cm', true);
@@ -1136,7 +1136,7 @@
 				}
 			},
 			focus : function(editnode, instance) {
-				$(editnode).focus();
+				$(editnode).trigger('focus');
 			}
 		},
 		{
