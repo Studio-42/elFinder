@@ -25,7 +25,7 @@ $.fn.dialogelfinder = function(opts) {
 			toolbar = $('<div class="ui-widget-header dialogelfinder-drag ui-corner-top">'+(opts.title || 'Files')+'</div>'),
 			button  = $('<a href="#" class="dialogelfinder-drag-close ui-corner-all"><span class="ui-icon ui-icon-closethick"> </span></a>')
 				.appendTo(toolbar)
-				.click(function(e) {
+				.on('click', function(e) {
 					e.preventDefault();
 					
 					node.dialogelfinder('close');

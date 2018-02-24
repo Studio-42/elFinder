@@ -84,7 +84,7 @@ elFinder.prototype.commands.sort = function() {
 							}
 						}
 					})
-					.hover(function() {
+					.on('hover', function() {
 						$(this).addClass('ui-state-hover');
 					},function() {
 						$(this).removeClass('ui-state-hover');

@@ -120,7 +120,7 @@ elFinder.prototype.resources = {
 				node = ui.trigger('create.'+fm.namespace, file).find('#'+fm[find](id))
 					.on('unselect.'+fm.namespace, function() {
 						setTimeout(function() {
-							input && input.blur();
+							input && input.trigger('blur');
 						}, 50);
 					}),
 				nnode, pnode,
@@ -169,7 +169,7 @@ elFinder.prototype.resources = {
 						if (e.keyCode == $.ui.keyCode.ESCAPE) {
 							dfrd.reject();
 						} else if (e.keyCode == $.ui.keyCode.ENTER) {
-							input.blur();
+							input.trigger('blur');
 						}
 					})
 					.on('mousedown click dblclick', function(e) {
@@ -276,7 +276,7 @@ elFinder.prototype.resources = {
 					}
 					inError = false;
 					! fm.enabled() && fm.enable();
-					input.focus().select();
+					input.trigger('focus').trigger('select');
 					input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
 				},
 				resize = function() {
@@ -318,7 +318,7 @@ elFinder.prototype.resources = {
 				if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
 					dst.children('.'+arrow).click().data('dfrd').done(function() {
 						if (input.val() === file.name) {
-							input.val(fm.uniqueName(this.prefix, phash)).select().focus();
+							input.val(fm.uniqueName(this.prefix, phash)).trigger('select').trigger('focus');
 						}
 					}.bind(this));
 				}

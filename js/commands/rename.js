@@ -133,7 +133,7 @@ elFinder.prototype.commands.rename = function() {
 					width: Math.min(380, fm.getUI().width() - 20),
 					buttons : {},
 					open : function() {
-						name.on('input', mkPrev).focus();
+						name.on('input', mkPrev).trigger('focus');
 					}
 				},
 				getName = function() {
@@ -270,7 +270,7 @@ elFinder.prototype.commands.rename = function() {
 			},
 			unselect = function() {
 				setTimeout(function() {
-					input && input.blur();
+					input && input.trigger('blur');
 				}, 50);
 			},
 			rest     = function(){
@@ -402,7 +402,7 @@ elFinder.prototype.commands.rename = function() {
 						dfrd.reject();
 					} else if (e.keyCode == $.ui.keyCode.ENTER) {
 						e.preventDefault();
-						input.blur();
+						input.trigger('blur');
 					}
 				})
 				.on('mousedown click dblclick', function(e) {
@@ -423,7 +423,7 @@ elFinder.prototype.commands.rename = function() {
 					inError = false;
 					input.on('blur', blur);
 				}
-				input.focus().select();
+				input.trigger('focus').trigger('select');
 				input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
 			},
 			node = navbar? target.contents().filter(function(){ return this.nodeType==3 && $(this).parent().attr('id') === fm.navHash2Id(file.hash); })
@@ -482,7 +482,7 @@ elFinder.prototype.commands.rename = function() {
 		}
 		
 		fm.one('select', function() {
-			input.parent().length && file && $.inArray(file.hash, fm.selected()) === -1 && input.blur();
+			input.parent().length && file && $.inArray(file.hash, fm.selected()) === -1 && input.trigger('blur');
 		});
 		
 		input.trigger('keyup');

@@ -416,7 +416,7 @@
 		content = $(html.join(''));
 		
 		content.find('.ui-tabs-nav li')
-			.hover(function() {
+			.on('hover', function() {
 				$(this).toggleClass('ui-state-hover');
 			})
 			.children()
@@ -432,7 +432,7 @@
 				}
 				
 			})
-			.filter(':first').click();
+			.filter(':first').trigger('click');
 		
 		// preference
 		usePref && setupPref();
@@ -545,7 +545,7 @@
 		} else {
 			debugShow();
 		}
-		this.dialog.trigger('initContents').elfinderdialog('open').find((tab? '.elfinder-help-tab-'+tab : '.ui-tabs-nav li') + ' a:first').click();
+		this.dialog.trigger('initContents').elfinderdialog('open').find((tab? '.elfinder-help-tab-'+tab : '.ui-tabs-nav li') + ' a:first').trigger('click');
 		return $.Deferred().resolve();
 	};
 

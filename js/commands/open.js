@@ -169,7 +169,7 @@
 					} else if (into !== 'window') {
 						wnd.location = url;
 					}
-					wnd.focus();
+					wnd.trigger('focus');
 					
 				}
 			}

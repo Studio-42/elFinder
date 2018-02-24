@@ -20,8 +20,8 @@ $.fn.elfinderbutton = function(cmd) {
 			button   = $(this).addClass('ui-state-default elfinder-button')
 				.attr('title', cmd.title)
 				.append('<span class="elfinder-button-icon elfinder-button-icon-' + (cmd.className? cmd.className : cmd.name) + '"/>', text)
-				.hover(function(e) { !button.hasClass(disabled) && button[e.type == 'mouseleave' ? 'removeClass' : 'addClass'](hover);})
-				.click(function(e) { 
+				.on('hover', function(e) { !button.hasClass(disabled) && button[e.type == 'mouseleave' ? 'removeClass' : 'addClass'](hover);})
+				.on('click', function(e) { 
 					if (!button.hasClass(disabled)) {
 						if (menu && cmd.variants.length >= 1) {
 							// close other menus
@@ -66,7 +66,7 @@ $.fn.elfinderbutton = function(cmd) {
 					fm.exec(cmd.name, fm.selected(), opts);
 				});
 
-			cmd.fm.bind('disable select', hideMenu).getUI().click(hideMenu);
+			cmd.fm.bind('disable select', hideMenu).getUI().on('click', hideMenu);
 			
 			cmd.change(function() {
 				menu.html('');

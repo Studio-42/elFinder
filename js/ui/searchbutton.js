@@ -47,7 +47,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 			},
 			abort = function() {
 				input.data('inctm') && clearTimeout(input.data('inctm'));
-				input.val('').blur();
+				input.val('').trigger('blur');
 				if (result || incVal) {
 					result = false;
 					incVal = '';
@@ -119,7 +119,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 								(incVal !== val) && fm.trigger('incsearchstart', { query: val });
 								incVal = val;
 								if (val === '' && fm.searchStatus.state > 1 && fm.searchStatus.query) {
-									input.val(fm.searchStatus.query).select();
+									input.val(fm.searchStatus.query).trigger('select');
 								} 
 							}
 						}, isopts.wait));
@@ -155,7 +155,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 				if (button.hasClass('ui-state-active')) {
 					search();
 				} else {
-					input.focus();
+					input.trigger('focus');
 				}
 			});
 		
@@ -165,7 +165,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 				e.stopPropagation();
 				e.preventDefault();
 				if (input.val() === '' && !button.hasClass('ui-state-active')) {
-					input.focus();
+					input.trigger('focus');
 				} else {
 					abort();
 				}
@@ -216,12 +216,12 @@ $.fn.elfindersearchbutton = function(cmd) {
 						})
 						.on('click', 'input', function(e) {
 							e.stopPropagation();
-							$.trim(input.val())? search() : input.focus();
+							$.trim(input.val())? search() : input.trigger('focus');
 						});
 				}
 			})
 			.select(function() {
-				input.blur();
+				input.trigger('blur');
 			})
 			.bind('searchend', function() {
 				input.val('');
@@ -259,7 +259,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 				pattern     : 'ctrl+f f3',
 				description : cmd.title,
 				callback    : function() { 
-					input.select().focus();
+					input.trigger('select').trigger('focus');
 				}
 			})
 			.shortcut({

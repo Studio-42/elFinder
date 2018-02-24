@@ -43,7 +43,7 @@ elFinder.prototype.commands.netmount = function() {
 								o[protocol].select(fm, e, data);
 							}
 							setTimeout(function() {
-								content.find('input:text.elfinder-tabstop:visible:first').focus();
+								content.find('input:text.elfinder-tabstop:visible:first').trigger('focus');
 							}, 20);
 						})
 						.addClass('ui-corner-all')
@@ -55,7 +55,7 @@ elFinder.prototype.commands.netmount = function() {
 						destroyOnClose : false,
 						open           : function() {
 							$(window).on('focus.'+fm.namespace, winFocus);
-							inputs.protocol.change();
+							inputs.protocol.trigger('change');
 						},
 						close          : function() { 
 							dfrd.state() == 'pending' && dfrd.reject();
@@ -127,7 +127,7 @@ elFinder.prototype.commands.netmount = function() {
 							if (comp) {
 								doMount();
 							} else {
-								next.focus();
+								next.trigger('focus');
 							}
 						}
 					}),
@@ -169,7 +169,7 @@ elFinder.prototype.commands.netmount = function() {
 				dialog = fm.dialog(form.append(content), opts);
 				dialogNode = dialog.closest('.ui-dialog');
 				dialog.ready(function(){
-					inputs.protocol.change();
+					inputs.protocol.trigger('change');
 					dialog.elfinderdialog('posInit');
 				});
 				return dialog;

@@ -19,8 +19,8 @@ $.fn.elfindersortbutton = function(cmd) {
 			button   = $(this).addClass('ui-state-default elfinder-button elfinder-menubutton elfiner-button-'+name)
 				.attr('title', cmd.title)
 				.append('<span class="elfinder-button-icon elfinder-button-icon-'+name+'"/>', text)
-				.hover(function(e) { !button.hasClass(disabled) && button.toggleClass(hover); })
-				.click(function(e) {
+				.on('hover', function(e) { !button.hasClass(disabled) && button.toggleClass(hover); })
+				.on('click', function(e) {
 					if (!button.hasClass(disabled)) {
 						e.stopPropagation();
 						menu.is(':hidden') && cmd.fm.getUI().click();
@@ -52,7 +52,7 @@ $.fn.elfindersortbutton = function(cmd) {
 			menu.append($('<div class="'+item+'" rel="'+name+'"><span class="ui-icon ui-icon-arrowthick-1-n"/><span class="ui-icon ui-icon-arrowthick-1-s"/>'+fm.i18n('sort'+name)+'</div>').data('type', name));
 		});
 		
-		menu.children().click(function(e) {
+		menu.children().on('click', function(e) {
 			var type = $(this).attr('rel');
 			
 			cmd.exec([], {
@@ -65,19 +65,19 @@ $.fn.elfindersortbutton = function(cmd) {
 		
 		$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-stick"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortFoldersFirst')+'</div>')
 			.appendTo(menu)
-			.click(function() {
+			.on('click', function() {
 				cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : !fm.sortStickFolders, tree : fm.sortAlsoTreeview});
 			});
 
 		if ($.fn.elfindertree && $.inArray('tree', fm.options.ui) !== -1) {
 			$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-tree"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortAlsoTreeview')+'</div>')
 				.appendTo(menu)
-				.click(function() {
+				.on('click', function() {
 					cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : fm.sortStickFolders, tree : !fm.sortAlsoTreeview});
 				});
 		}
 		
-		fm.bind('disable select', hide).getUI().click(hide);
+		fm.bind('disable select', hide).getUI().on('click', hide);
 			
 		fm.bind('sortchange', update);
 		

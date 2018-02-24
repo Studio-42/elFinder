@@ -307,10 +307,10 @@ elFinder.prototype.commands.chmod = function() {
 				return;
 			}
 		}).on('focus', function(e){
-			$(this).select();
+			$(this).trigger('select');
 		}).on('keyup', function(e) {
 			if ($(this).val().length == 3) {
-				$(this).select();
+				$(this).trigger('select');
 				setcheck($(this).val());
 			}
 		});

@@ -123,7 +123,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						.replace('{label}', label)
 						.replace('{style}', style)
 						.replace('{className}', className))
-					.click(function(e) {
+					.on('click', function(e) {
 						e.stopPropagation();
 						e.preventDefault();
 						callback();

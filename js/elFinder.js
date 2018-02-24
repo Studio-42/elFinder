@@ -3672,7 +3672,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		.enable(function() {
 			if (!enabled && self.api && self.visible() && self.ui.overlay.is(':hidden') && ! node.children('.elfinder-dialog.' + self.res('class', 'editing') + ':visible').length) {
 				enabled = true;
-				document.activeElement && document.activeElement.blur();
+				document.activeElement && document.activeElement.trigger('blur');
 				node.removeClass('elfinder-disabled');
 			}
 		})
@@ -3954,7 +3954,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				$(window.top).on('focus.' + namespace, function() {
 					if (self.enable() && (! parentIframe || parentIframe.is(':visible'))) {
 						setTimeout(function() {
-							$(window).focus();
+							$(window).trigger('focus');
 						}, 10);
 					}
 				});
@@ -3968,14 +3968,14 @@ var elFinder = function(elm, opts, bootCallback) {
 		// return focus to the window on click (elFInder in the frame)
 		if (inFrame) {
 			node.on('click', function(e) {
-				$(window).focus();
+				$(window).trigger('focus');
 			});
 		}
 		
 		// elFinder to enable by mouse over
 		if (self.options.enableByMouseOver) {
 			node.on('mouseenter', function(e) {
-				(inFrame) && $(window).focus();
+				(inFrame) && $(window).trigger('focus');
 				! self.enabled() && self.enable();
 			});
 		}
@@ -4769,7 +4769,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				self.trigger('opendone');
 				
 				if (inFrame && self.options.enableAlways) {
-					$(window).focus();
+					$(window).trigger('focus');
 				}
 				
 				// check self.trashes
@@ -7268,7 +7268,7 @@ elFinder.prototype = {
 
 			if (cancel) {
 				button = $('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">'+this.i18n('btnCancel')+'</span></button>')
-					.hover(function(e) { 
+					.on('hover', function(e) { 
 						$(this).toggleClass(clhover, e.type == 'mouseenter');
 					});
 				notify.children('div.elfinder-notify-cancel').append(button);
@@ -8076,7 +8076,7 @@ elFinder.prototype = {
 					});
 					bro.after($('<div/>').append(select))
 						.closest('.ui-dialog').trigger('tabstopsInit');
-					select.focus();
+					select.trigger('focus');
 				}
 			},
 			spinner = function() {
@@ -8137,7 +8137,7 @@ elFinder.prototype = {
 				opts.noOffline && f.offline.closest('tr').hide();
 				if (data.mode == 'makebtn') {
 					f0.removeClass('elfinder-info-spinner').removeData('expires').removeData('funcexpup');
-					f.host.find('input').hover(function(){$(this).toggleClass('ui-state-hover');});
+					f.host.find('input').on('hover', function(){$(this).toggleClass('ui-state-hover');});
 					f1.val('');
 					f.path.val(opts.root).next().remove();
 					f.user.val('');

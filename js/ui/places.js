@@ -111,7 +111,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 							add(exists[h] || Object.assign({notfound: true}, f));
 						});
 						if (fm.storage('placesState') > 0) {
-							root.click();
+							root.trigger('click');
 						}
 					})
 					.always(function() {
@@ -308,7 +308,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 **/
 			root = wrapper.children('.'+navdir)
 				.addClass(clroot)
-				.click(function(e) {
+				.on('click', function(e) {
 					e.stopPropagation();
 					if (root.hasClass(collapsed)) {
 						places.toggleClass(expanded);

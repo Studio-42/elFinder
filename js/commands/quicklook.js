@@ -344,11 +344,11 @@
 			.append('<div class="elfinder-quicklook-navbar-separator"/>')
 			.append($('<div class="'+navicon+' '+navicon+'-close"/>').on('click touchstart', function(e) { ! navmove && self.window.trigger('close'); return false; }))
 		,
-		titleClose = $('<span class="ui-front ui-icon elfinder-icon-close ui-icon-closethick"/>').mousedown(function(e) {
+		titleClose = $('<span class="ui-front ui-icon elfinder-icon-close ui-icon-closethick"/>').on('mousedown', function(e) {
 			e.stopPropagation();
 			self.window.trigger('close');
 		}),
-		titleDock = $('<span class="ui-front ui-icon elfinder-icon-minimize ui-icon-minusthick"/>').mousedown(function(e) {
+		titleDock = $('<span class="ui-front ui-icon elfinder-icon-minimize ui-icon-minusthick"/>').on('mousedown', function(e) {
 			e.stopPropagation();
 			if (! self.docked()) {
 				self.window.trigger('navdockin');

@@ -2103,7 +2103,7 @@ $.fn.elfindercwd = function(fm, options) {
 			},
 			
 			// elfinder node
-			parent = $(this).parent().resize(resize),
+			parent = $(this).parent().on('resize', resize),
 			
 			// workzone node 
 			wz = parent.children('.elfinder-workzone').append(wrapper.append(this).append(bottomMarker)),
