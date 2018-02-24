@@ -3016,8 +3016,8 @@ var elFinder = function(elm, opts, bootCallback) {
 		}
 		
 		node.css({ width : w, height : parseInt(h) });
-		size.w = node.width();
-		size.h = node.height();
+		size.w = Math.round(node.width());
+		size.h = Math.round(node.height());
 		node.data('resizeSize', size);
 		if (size.w !== prv.w || size.h !== prv.h) {
 			node.trigger('resize');
