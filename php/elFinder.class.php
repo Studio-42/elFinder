@@ -123,6 +123,14 @@ class elFinder {
 	);
 	
 	/**
+	 * Maximum memory size to be extended during GD processing
+	 * (0: not expanded, -1: unlimited or memory size notation)
+	 *
+	 * @var integer|string
+	 */
+	public static $memoryLimitGD = 0;
+
+	/**
 	 * Path of current request flag file for abort check
 	 * 
 	 * @var string
@@ -623,6 +631,9 @@ class elFinder {
 
 		// set defaultMimefile
 		elFinder::$defaultMimefile = (isset($opts['defaultMimefile']) ? $opts['defaultMimefile'] : '');
+
+		// set memoryLimitGD
+		elFinder::$memoryLimitGD = $opts['memoryLimitGD']? $opts['memoryLimitGD'] : 0;
 
 		// bind events listeners
 		if (!empty($opts['bind']) && is_array($opts['bind'])) {
@@ -4281,6 +4292,44 @@ class elFinder {
 		}
 	}
 	
+	/**
+	 * Gets the memory size by imageinfo.
+	 *
+	 * @param      array    $imgInfo   array that result of getimagesize()
+	 *
+	 * @return     integer  The memory size by imageinfo.
+	 */
+	public static function getMemorySizeByImageInfo($imgInfo) {
+		$width = $imgInfo[0];
+		$height = $imgInfo[1];
+		$bits = isset($imgInfo['bits'])? $imgInfo['bits'] : 24;
+		$channels = isset($imgInfo['channels'])? $imgInfo['channels'] : 3;
+		return round(($width * $height * $bits * $channels / 8 + Pow(2, 16)) * 1.65);
+	}
+
+	/**
+	 * Auto expand memory for GD processing
+	 *
+	 * @param      array  $imgInfos  The image infos
+	 */
+	public static function expandMemoryForGD($imgInfos) {
+		if (elFinder::$memoryLimitGD != 0 && $imgInfos && is_array($imgInfos)) {
+			if (!is_array($imgInfos[0])) {
+				$imgInfos = array($imgInfos);
+			}
+			$limit = self::getIniBytes('', elFinder::$memoryLimitGD);
+			$memLimit = self::getIniBytes('memory_limit');
+			$needs = 0;
+			foreach($imgInfos as $info) {
+				$needs += self::getMemorySizeByImageInfo($info);
+			}
+			$needs += memory_get_usage();
+			if ($needs > $memLimit && ($limit == -1 || $limit > $needs)) {
+				ini_set('memory_limit', $needs);
+			}
+		}
+	}
+
 	/***************************************************************************/
 	/*                                 callbacks                               */
 	/***************************************************************************/

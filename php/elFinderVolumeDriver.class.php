@@ -5176,6 +5176,7 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'gd':
+				elFinder::expandMemoryForGD(array($s, array($size_w, $size_h)));
 				$img = $this->gdImageCreate($path,$s['mime']);
 
 				if ($img && false != ($tmp = imagecreatetruecolor($size_w, $size_h))) {
@@ -5286,6 +5287,7 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'gd':
+				elFinder::expandMemoryForGD(array($s, array($width, $height)));
 				$img = $this->gdImageCreate($path,$s['mime']);
 
 				if ($img && false != ($tmp = imagecreatetruecolor($width, $height))) {
@@ -5423,6 +5425,7 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'gd':
+				elFinder::expandMemoryForGD(array($s, array($width, $height)));
 				$img = $this->gdImageCreate($path,$s['mime']);
 
 				if ($img &&  false != ($tmp = imagecreatetruecolor($width, $height))) {
@@ -5549,6 +5552,7 @@ abstract class elFinderVolumeDriver {
 				break;
 
 			case 'gd':
+				elFinder::expandMemoryForGD(array($s, array($w, $h)));
 				$img = $this->gdImageCreate($path,$s['mime']);
 
 				$degree = 360 - $degree;
