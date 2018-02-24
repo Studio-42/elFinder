@@ -3672,7 +3672,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		.enable(function() {
 			if (!enabled && self.api && self.visible() && self.ui.overlay.is(':hidden') && ! node.children('.elfinder-dialog.' + self.res('class', 'editing') + ':visible').length) {
 				enabled = true;
-				document.activeElement && document.activeElement.trigger('blur');
+				document.activeElement && document.activeElement.blur();
 				node.removeClass('elfinder-disabled');
 			}
 		})
