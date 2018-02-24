@@ -382,7 +382,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 					
-					fm.UA.Mobile && tabstopNext().focus();
+					fm.UA.Mobile && tabstopNext().trigger('focus');
 					
 					if (opts.closeOnEscape) {
 						$(document).on('keyup.'+id, function(e) {
@@ -451,7 +451,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					elfNode.children('.'+cldialog+':not(.'+clmodal+')').removeClass(clactive+' ui-front');
 					dialog.addClass(clactive+' ui-front');
 
-					! fm.UA.Mobile && tabstopNext().focus();
+					! fm.UA.Mobile && tabstopNext().trigger('focus');
 				})
 				.on('posinit', function() {
 					var css = opts.position,
@@ -554,7 +554,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					var $this = $(this);
 					if (opts.btnHoverFocus && dialog.data('focusOnMouseOver')) {
 						if (e.type == 'mouseenter' && ! $(':focus').data('keepFocus')) {
-							$this.focus();
+							$this.trigger('focus');
 						}
 					} else {
 						$this.toggleClass(clhover, e.type == 'mouseenter');
@@ -566,7 +566,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 						e.stopPropagation();
 						if (e.keyCode == $.ui.keyCode.ENTER) {
 							e.preventDefault();
-							$this.click();
+							$this.trigger('click');
 						}  else if ((e.keyCode == $.ui.keyCode.TAB && e.shiftKey) || e.keyCode == $.ui.keyCode.LEFT || e.keyCode == $.ui.keyCode.UP) {
 							if ($this.is('input:text') && (!(e.ctrlKey || e.metaKey) && e.keyCode == $.ui.keyCode.LEFT)) {
 								return;
@@ -578,7 +578,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 								return;
 							}
 							e.preventDefault();
-							tabstopPrev(this).focus();
+							tabstopPrev(this).trigger('focus');
 						}  else if (e.keyCode == $.ui.keyCode.TAB || e.keyCode == $.ui.keyCode.RIGHT || e.keyCode == $.ui.keyCode.DOWN) {
 							if ($this.is('input:text') && (!(e.ctrlKey || e.metaKey) && e.keyCode == $.ui.keyCode.RIGHT)) {
 								return;
@@ -590,7 +590,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 								return;
 							}
 							e.preventDefault();
-							tabstopNext(this).focus();
+							tabstopNext(this).trigger('focus');
 						}
 					}
 				})

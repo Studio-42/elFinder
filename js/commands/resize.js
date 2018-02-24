@@ -122,7 +122,7 @@ elFinder.prototype.commands.resize = function() {
 					},
 					control  = $('<div class="elfinder-resize-control"/>')
 						.on('focus', 'input[type=text],input[type=number]', function() {
-							$(this).select();
+							$(this).trigger('select');
 						})
 						.on('change', function() {
 							changeTm && clearTimeout(changeTm);
@@ -207,7 +207,7 @@ elFinder.prototype.commands.resize = function() {
 						'<input class="api2" type="radio" name="type" id="'+id+'-rotate" value="rotate" /><label class="api2" for="'+id+'-rotate">'+fm.i18n('rotate')+'</label>'),
 					mode     = 'resize',
 					type     = uitype[ctrgrup]()[ctrgrup]('disable').find('input')
-						.change(function() {
+						.on('change', function() {
 							mode = $(this).val();
 							
 							resetView();
@@ -257,10 +257,10 @@ elFinder.prototype.commands.resize = function() {
 								height.val(h);
 							}
 						}),
-					pointX  = $(input).change(function(){crop.updateView();}),
-					pointY  = $(input).change(function(){crop.updateView();}),
-					offsetX = $(input).change(function(){crop.updateView('w');}),
-					offsetY = $(input).change(function(){crop.updateView('h');}),
+					pointX  = $(input).on('change', function(){crop.updateView();}),
+					pointY  = $(input).on('change', function(){crop.updateView();}),
+					offsetX = $(input).on('change', function(){crop.updateView('w');}),
+					offsetY = $(input).on('change', function(){crop.updateView('h');}),
 					quality = isJpeg && api2?
 						$(input).val(fm.storage('jpgQuality') > 0? fm.storage('jpgQuality') : fm.option('jpgQuality'))
 							.addClass('elfinder-resize-quality')
@@ -271,7 +271,7 @@ elFinder.prototype.commands.resize = function() {
 							})
 						: null,
 					degree = $('<input type="number" class="ui-corner-all" maxlength="3" value="0" />')
-						.change(function() {
+						.on('change', function() {
 							rotate.update();
 						}),
 					uidegslider = $('<div class="elfinder-resize-rotate-slider touch-punch"/>')
@@ -751,7 +751,7 @@ elFinder.prototype.commands.resize = function() {
 										cancel : {
 											label    : 'btnCancel',
 											callback : function(){
-												$(this).focus();
+												$(this).trigger('focus');
 											}
 										}
 									};
@@ -779,7 +779,7 @@ elFinder.prototype.commands.resize = function() {
 							.filter(':first');
 						
 						setStep8();
-						!fm.UA.Mobile && inputFirst.focus();
+						!fm.UA.Mobile && inputFirst.trigger('focus');
 						resizable();
 					},
 					img     = $('<img/>')

@@ -311,7 +311,7 @@ elFinder.prototype.commands.edit = function() {
 							}
 							
 						})
-						.on('mouseenter', function(){this.focus();});
+						.on('mouseenter', function(){this.trigger('focus');});
 					}
 
 					ta.initEditArea = function(id, file, content) {
@@ -335,7 +335,7 @@ elFinder.prototype.commands.edit = function() {
 						
 						setTimeout(function() {
 							ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
-							ta.focus();
+							ta.trigger('focus');
 						}, 10);
 					};
 				})();
@@ -515,7 +515,7 @@ elFinder.prototype.commands.edit = function() {
 							})
 							.done(function(data) {
 								setTimeout(function(){
-									ta.focus();
+									ta.trigger('focus');
 									ta.editor && ta.editor.focus(ta[0], ta.editor.instance);
 								}, 50);
 								ta.trigger('_savedone');

@@ -132,7 +132,7 @@ elFinder.prototype.commands.search = function() {
 				});
 			});
 		}
-		fm.getUI('toolbar').find('.'+fm.res('class', 'searchbtn')+' :text').focus();
+		fm.getUI('toolbar').find('.'+fm.res('class', 'searchbtn')+' :text').trigger('focus');
 		return $.Deferred().reject();
 	};
 
