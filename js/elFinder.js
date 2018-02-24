@@ -7268,8 +7268,8 @@ elFinder.prototype = {
 
 			if (cancel) {
 				button = $('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><span class="ui-button-text">'+this.i18n('btnCancel')+'</span></button>')
-					.on('hover', function(e) { 
-						$(this).toggleClass(clhover, e.type == 'mouseenter');
+					.on('mouseenter mouseleave', function(e) { 
+						$(this).toggleClass(clhover, e.type === 'mouseenter');
 					});
 				notify.children('div.elfinder-notify-cancel').append(button);
 			}
@@ -8137,7 +8137,7 @@ elFinder.prototype = {
 				opts.noOffline && f.offline.closest('tr').hide();
 				if (data.mode == 'makebtn') {
 					f0.removeClass('elfinder-info-spinner').removeData('expires').removeData('funcexpup');
-					f.host.find('input').on('hover', function(){$(this).toggleClass('ui-state-hover');});
+					f.host.find('input').on('mouseenter mouseleave', function(){$(this).toggleClass('ui-state-hover');});
 					f1.val('');
 					f.path.val(opts.root).next().remove();
 					f.user.val('');

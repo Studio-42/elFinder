@@ -416,7 +416,7 @@
 		content = $(html.join(''));
 		
 		content.find('.ui-tabs-nav li')
-			.on('hover', function() {
+			.on('mouseenter mouseleave', function() {
 				$(this).toggleClass('ui-state-hover');
 			})
 			.children()
