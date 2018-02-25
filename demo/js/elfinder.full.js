@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: a99d6e3) (2018-02-24)
+ * Version 2.1.32 (2.1-src Nightly: 4fe7149) (2018-02-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -115,14 +115,14 @@ var elFinder = function(elm, opts, bootCallback) {
 		 *
 		 * @type Boolean
 		 **/
-		enabled = true,
+		enabled = false,
 		
 		/**
 		 * Store enabled value before ajax request
 		 *
 		 * @type Boolean
 		 **/
-		prevEnabled = true,
+		prevEnabled = false,
 		
 		/**
 		 * List of build-in events which mapped into methods with same names
@@ -2036,7 +2036,6 @@ var elFinder = function(elm, opts, bootCallback) {
 						}
 						self.newAPI = self.api >= 2;
 						self.oldAPI = !self.newAPI;
-						self.enable();
 					}
 					
 					if (response.textMimes && Array.isArray(response.textMimes)) {
@@ -4831,6 +4830,9 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 				
 			});
+		// to enable / disable
+		self[self.options.enableAlways? 'enable' : 'disable']();
+		
 		// self.timeEnd('load');
 		// End of bootUp()
 	};
@@ -8917,7 +8919,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: a99d6e3)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 4fe7149)';
 
 
 
@@ -15690,7 +15692,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 							dialogs.filter(':last').trigger('totop');
 						}
 						
-						checkEditing();
+						dialog.hasClass(fm.res('class', 'editing')) && checkEditing();
 					});
 				})
 				.on('totop', function() {
