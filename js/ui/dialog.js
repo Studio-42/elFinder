@@ -431,7 +431,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 							dialogs.filter(':last').trigger('totop');
 						}
 						
-						checkEditing();
+						dialog.hasClass(fm.res('class', 'editing')) && checkEditing();
 					});
 				})
 				.on('totop', function() {

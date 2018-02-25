@@ -84,14 +84,14 @@ var elFinder = function(elm, opts, bootCallback) {
 		 *
 		 * @type Boolean
 		 **/
-		enabled = true,
+		enabled = false,
 		
 		/**
 		 * Store enabled value before ajax request
 		 *
 		 * @type Boolean
 		 **/
-		prevEnabled = true,
+		prevEnabled = false,
 		
 		/**
 		 * List of build-in events which mapped into methods with same names
@@ -2005,7 +2005,6 @@ var elFinder = function(elm, opts, bootCallback) {
 						}
 						self.newAPI = self.api >= 2;
 						self.oldAPI = !self.newAPI;
-						self.enable();
 					}
 					
 					if (response.textMimes && Array.isArray(response.textMimes)) {
@@ -4800,6 +4799,9 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 				
 			});
+		// to enable / disable
+		self[self.options.enableAlways? 'enable' : 'disable']();
+		
 		// self.timeEnd('load');
 		// End of bootUp()
 	};
