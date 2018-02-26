@@ -1355,12 +1355,12 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @return mixed
 	 */
 	this.option = function(name, target) {
-		var res;
+		var res, item;
 		target = target || cwd;
 		if (self.optionsByHashes[target] && typeof self.optionsByHashes[target][name] !== 'undefined') {
 			return self.optionsByHashes[target][name];
 		}
-		if (cwd !== target) {
+		if (self.hasVolOptions && cwd !== target && (!(item = self.file(target)) || item.phash !== cwd)) {
 			res = '';
 			$.each(self.volOptions, function(id, opt) {
 				if (target.indexOf(id) === 0) {
@@ -1557,7 +1557,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					return file.url;
 				}
 				
-				baseUrl = (file.hash.indexOf(self.cwd().volumeid) === 0)? cwdOptions.url : self.option('url', file.hash);
+				baseUrl = self.option('url', file.phash || file.hash);
 				
 				if (baseUrl) {
 					return baseUrl + $.map(self.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/');
@@ -1946,11 +1946,12 @@ var elFinder = function(elm, opts, bootCallback) {
 				// Set currrent request command name
 				self.currentReqCmd = cmd;
 				
-				if (response.debug && (!d || (d !== 'all' && !d['backend-error']))) {
+				if (response.debug && (!d || d !== 'all')) {
 					if (!d) {
-						self.options.debug = {};
+						d = self.options.debug = {};
 					}
-					self.options.debug['backend-error'] = true;
+					d['backend-error'] = true;
+					d['warning'] = true;
 				}
 				
 				if (raw) {
@@ -3806,6 +3807,13 @@ var elFinder = function(elm, opts, bootCallback) {
 	this.volOptions = {};
 
 	/**
+	 * Has volOptions data
+	 * 
+	 * @type Boolean
+	 */
+	this.hasVolOptions = false;
+
+	/**
 	 * Hash of trash holders
 	 * key: trash folder hash
 	 * val: source volume hash
@@ -3973,7 +3981,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		
 		// elFinder to enable by mouse over
 		if (self.options.enableByMouseOver) {
-			node.on('mouseenter', function(e) {
+			node.on('mouseenter touchstart', function(e) {
 				(inFrame) && $(window).trigger('focus');
 				! self.enabled() && self.enable();
 			});
@@ -4797,10 +4805,9 @@ var elFinder = function(elm, opts, bootCallback) {
 						$.each(toChkTh, trashDisable);
 					});
 				}
-				
+				// to enable / disable
+				self[self.options.enableAlways? 'enable' : 'disable']();
 			});
-		// to enable / disable
-		self[self.options.enableAlways? 'enable' : 'disable']();
 		
 		// self.timeEnd('load');
 		// End of bootUp()
@@ -6799,7 +6806,7 @@ elFinder.prototype = {
 					vid, targetOptions, isRoot;
 				
 				if (file && file.hash && file.name && file.mime) {
-					if (file.mime == 'application/x-empty') {
+					if (file.mime === 'application/x-empty') {
 						file.mime = 'text/plain';
 					}
 					
@@ -6825,6 +6832,7 @@ elFinder.prototype = {
 							vid = file.volumeid;
 							
 							if (isRoot) {
+								self.hasVolOptions = true;
 								if (! self.volOptions[vid]) {
 									self.volOptions[vid] = {
 										// set dispInlineRegex
@@ -6847,6 +6855,11 @@ elFinder.prototype = {
 									targetOptions.tmbUrl = file.tmbUrl;
 								}
 								
+								// '/' required at the end of url
+								if (targetOptions.url && targetOptions.url.substr(-1) !== '/') {
+									targetOptions.url += '/';
+								}
+
 								// check uiCmdMap
 								chkCmdMap(targetOptions);
 								
@@ -6971,6 +6984,7 @@ elFinder.prototype = {
 		
 		if (data.cwd) {
 			if (data.cwd.volumeid && data.options && Object.keys(data.options).length && self.isRoot(data.cwd)) {
+				self.hasVolOptions = true;
 				self.volOptions[data.cwd.volumeid] = data.options;
 			}
 			data.cwd = filter(data.cwd, true);
@@ -6997,6 +7011,11 @@ elFinder.prototype = {
 		// merge options that apply only to cwd
 		if (data.cwd && data.cwd.options && data.options) {
 			Object.assign(data.options, normalizeOptions(data.cwd.options));
+		}
+
+		// '/' required at the end of url
+		if (data.options && data.options.url && data.options.url.substr(-1) !== '/') {
+			data.options.url += '/';
 		}
 		
 		// check error

@@ -28,7 +28,16 @@ elFinder.prototype.commands.edit = function() {
 			});
 			return sel;
 		},
-		
+		getDlgWidth = function() {
+			var m, width;
+			if (typeof self.options.dialogWidth === 'string' && (m = self.options.dialogWidth.match(/(\d+)%/))) {
+				width = parseInt(fm.getUI().width() * (m[1] / 100));
+			} else {
+				width = parseInt(self.options.dialogWidth || 650);
+			}
+			return Math.min(width, $(window).width());
+		},
+
 		/**
 		 * Return files acceptable to edit
 		 *
@@ -159,7 +168,7 @@ elFinder.prototype.commands.edit = function() {
 				},
 				opts = {
 					title   : fm.escape(file.name),
-					width   : Math.min((self.options.dialogWidth || 650), $(window).width()),
+					width   : getDlgWidth(),
 					buttons : {},
 					maxWidth  : 'window',
 					maxHeight : 'window',
@@ -311,7 +320,7 @@ elFinder.prototype.commands.edit = function() {
 							}
 							
 						})
-						.on('mouseenter', function(){this.trigger('focus');});
+						.on('mouseenter', function(){this.focus();});
 					}
 
 					ta.initEditArea = function(id, file, content) {
