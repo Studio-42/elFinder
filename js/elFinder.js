@@ -3973,7 +3973,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		
 		// elFinder to enable by mouse over
 		if (self.options.enableByMouseOver) {
-			node.on('mouseenter', function(e) {
+			node.on('mouseenter touchstart', function(e) {
 				(inFrame) && $(window).trigger('focus');
 				! self.enabled() && self.enable();
 			});
@@ -4797,10 +4797,9 @@ var elFinder = function(elm, opts, bootCallback) {
 						$.each(toChkTh, trashDisable);
 					});
 				}
-				
+				// to enable / disable
+				self[self.options.enableAlways? 'enable' : 'disable']();
 			});
-		// to enable / disable
-		self[self.options.enableAlways? 'enable' : 'disable']();
 		
 		// self.timeEnd('load');
 		// End of bootUp()
