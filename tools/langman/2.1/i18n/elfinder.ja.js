@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-02-06
+ * @version 2018-03-02
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -445,6 +445,8 @@
 			'asSuffix'        : '末尾に追加', // from v2.1.31 added 8.12.2017
 			'changeExtention' : '拡張子変更', // from v2.1.31 added 8.12.2017
 			'columnPref'      : '列項目設定(リストビュー)', // from v2.1.32 added 6.2.2018
+			'reflectOnImmediate' : '全ての変更は、直ちにアーカイブに反映されます。', // from v2.1.33 added 2.3.2018
+			'reflectOnUnmount'   : 'このボリュームをアンマウントするまで、変更は反映されません。', // from v2.1.33 added 2.3.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
