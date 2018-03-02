@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: df8a1e2) (2018-02-27)
+ * Version 2.1.32 (2.1-src Nightly: 356945f) (2018-03-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -430,12 +430,7 @@ var elFinder = function(elm, opts, bootCallback) {
 							}
 						}
 						if (files[f.phash]) {
-							if (! files[f.phash].dirs) {
-								files[f.phash].dirs = 1;
-							}
-							if (f.ts && (files[f.phash].ts || 0) < f.ts) {
-								files[f.phash].ts = f.ts;
-							}
+							self.applyLeafRootStats(files[f.phash]);
 						}
 					}
 					
@@ -498,6 +493,24 @@ var elFinder = function(elm, opts, bootCallback) {
 							if (roots[hash]) {
 								delete self.roots[roots[hash]];
 							}
+							// restore stats of deleted root parent directory
+							$.each(self.leafRoots, function(phash, roots) {
+								var idx, pdir;
+								if ((idx = $.inArray(hash, roots))!== -1) {
+									if (roots.length === 1) {
+										if ((pdir = files[phash]) && pdir._realStats) {
+											$.each(pdir._realStats, function(k, v) {
+												pdir[k] = v;
+											});
+											remove(pdir._realStats);
+											self.change({ changed: [pdir] });
+										}
+										delete self.leafRoots[phash];
+									} else {
+										self.leafRoots[phash].splice(idx, 1);
+									}
+								}
+							});
 							if (self.searchStatus.state < 2) {
 								$.each(files, function(h, f) {
 									f.phash == hash && rm(h);
@@ -549,6 +562,9 @@ var elFinder = function(elm, opts, bootCallback) {
 					});
 				}
 				files[hash] = files[hash] ? Object.assign(files[hash], file) : file;
+				if (self.leafRoots[file.hash]) {
+					self.applyLeafRootStats(file, true);
+				}
 			});
 		},
 		
@@ -1996,6 +2012,12 @@ var elFinder = function(elm, opts, bootCallback) {
 				} else if (!$.isPlainObject(response)) {
 					return dfrd.reject(['errResponse', 'errDataNotJSON'], xhr, response);
 				} else if (response.error) {
+					if (isOpen) {
+						// check leafRoots
+						$.each(self.leafRoots, function(phash, roots) {
+							self.leafRoots[phash] = $.grep(roots, function(h) { return h !== data.target; });
+						});
+					}
 					return dfrd.reject(response.error, xhr, response);
 				}
 				
@@ -6938,23 +6960,13 @@ elFinder.prototype = {
 							}
 						}
 						
-						if (self.leafRoots[file.hash]) {
-							// has leaf root to `dirs: 1`
-							if (! file.dirs) {
-								file.dirs = 1;
-							}
-							// set ts
-							$.each(self.leafRoots[file.hash], function() {
-								var f = self.file(this);
-								if (f && f.ts && (file.ts || 0) < f.ts) {
-									file.ts = f.ts;
-								}
-							});
-						}
-						
 						// lock trash bins holder
 						if (self.trashes[file.hash]) {
 							file.locked = true;
+						}
+
+						if (self.leafRoots[file.hash]) {
+							self.applyLeafRootStats(file, true);
 						}
 					} else if (fileFilter) {
 						try {
@@ -8750,6 +8762,45 @@ elFinder.prototype = {
 	},
 	
 	/**
+	 * Apply leaf root stats to target directory
+	 *
+	 * @param      object     dir     object of target directory
+	 * @param      boolean    update  is force update
+	 */
+	applyLeafRootStats : function(dir, update) {
+		var self = this,
+			change = false;
+		// backup original stats
+		if (update || !dir._realStats) {
+			dir._realStats = {
+				locked: dir.locked,
+				dirs: dir.dirs,
+				ts: dir.ts
+			};
+		}
+		// set lock
+		if (!dir.locked) {
+			dir.locked = 1;
+			change = true;
+		}
+		// has leaf root to `dirs: 1`
+		if (!dir.dirs) {
+			dir.dirs = 1;
+			change = true;
+		}
+		// set ts
+		$.each(self.leafRoots[dir.hash], function() {
+			var f = self.file(this);
+			if (f && f.ts && (dir.ts || 0) < f.ts) {
+				dir.ts = f.ts;
+				change = true;
+			}
+		});
+		// trigger change event
+		change && self.change({ changed: [dir] });
+	},
+
+	/**
 	 * To aborted XHR object
 	 * 
 	 * @param Object xhr
@@ -8938,7 +8989,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: df8a1e2)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 356945f)';
 
 
 
@@ -11354,7 +11405,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-02-06
+ * @version 2018-03-02
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -11790,6 +11841,8 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'asSuffix'        : 'Add suffix', // from v2.1.31 added 8.12.2017
 			'changeExtention' : 'Change extention', // from v2.1.31 added 8.12.2017
 			'columnPref'      : 'Columns settings (List view)', // from v2.1.32 added 6.2.2018
+			'reflectOnImmediate' : 'All changes will reflect immediately to the archive.', // from v2.1.33 added 2.3.2018
+			'reflectOnUnmount'   : 'Any changes will not reflect until un-mount this volume.', // from v2.1.33 added 2.3.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -17831,7 +17884,9 @@ $.fn.elfindertoast = function(opts, fm) {
 					rmTm = setTimeout(rm, opts.timeOut);
 				}
 			}
-		}).hide().addClass('toast-' + opts.mode).append($('<div class="elfinder-toast-msg"/>').html(opts.msg));
+		}).hide().addClass('toast-' + opts.mode).append($('<div class="elfinder-toast-msg"/>').html(opts.msg.replace(/%([a-zA-Z0-9]+)%/g, function(m, m1) {
+			return fm.i18n(m1);
+		})));
 		
 		if (opts.extNode) {
 			self.append(opts.extNode);
@@ -18929,12 +18984,12 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			getEnds = function(d) {
 				var cur = d || fm.cwd(),
-					res = [ cur.hash ],
+					res = cur.hash? [ cur.hash ] : [],
 					phash, root, dir;
 				
 				root = fm.root(cur.hash);
 				dir = fm.file(root);
-				while (phash = dir.phash) {
+				while (dir && (phash = dir.phash)) {
 					res.unshift(phash);
 					root = fm.root(phash);
 					dir = fm.file(root);
@@ -21203,7 +21258,7 @@ elFinder.prototype.commands.edit = function() {
 				id     = 'edit-'+fm.namespace+'-'+file.hash,
 				d      = fm.getUI().find('#'+id),
 				conv   = !convert? 0 : convert,
-				req, error;
+				req, error, res;
 			
 			
 			if (d.length) {
@@ -21217,6 +21272,20 @@ elFinder.prototype.commands.edit = function() {
 				return dfrd.reject(error);
 			}
 			
+			if (editor && editor.info && typeof editor.info.edit === 'function') {
+				res = editor.info.edit.call(fm, file, editor);
+				if (res.promise) {
+					res.done(function() {
+						dfrd.resolve();
+					}).fail(function(error) {
+						dfrd.reject(error);
+					});
+				} else {
+					res? dfrd.resolve() : dfrd.reject();
+				}
+				return dfrd;
+			}
+
 			if (editor && editor.info && (editor.info.urlAsContent || editor.info.preventGet)) {
 				req = $.Deferred();
 				if (! editor.info.preventGet) {
@@ -21236,7 +21305,7 @@ elFinder.prototype.commands.edit = function() {
 			}
 			
 			req.done(function(data) {
-				var selEncoding, reg, m;
+				var selEncoding, reg, m, res;
 				if (data.doconv) {
 					fm.confirm({
 						title  : self.title,
