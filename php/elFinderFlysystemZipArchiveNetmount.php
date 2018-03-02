@@ -109,6 +109,7 @@ class elFinderVolumeFlysystemZipArchiveNetmount extends Driver
     public function netunmount($netVolumes, $key)
     {
         $this->clearcache();
+        $srcVolume = null;
         if (!empty($this->options['useTempFile'])) {
             $srcVolume = elFinder::$instance->getVolume($this->options['host']);
         }
@@ -131,7 +132,7 @@ class elFinderVolumeFlysystemZipArchiveNetmount extends Driver
     {
         try {
             $refresh = false;
-            if ($opts['useTempFile']) {
+            if (!empty($opts['useTempFile'])) {
                 if (!file_exists($opts['localpath'])) {
                     if (!$srcVolume = elFinder::$instance->getVolume($opts['host'])) {
                         throw new Exception(elFinder::ERROR_FILE_NOT_FOUND);
