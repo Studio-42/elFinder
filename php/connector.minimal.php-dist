@@ -75,6 +75,12 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // define('ELFINDER_ZOHO_OFFICE_APIKEY', '');
 // ===============================================
 
+// // Zip Archive editor
+// // Installation by composer
+// // `composer require barryvdh/elfinder-flysystem-driver league/flysystem-ziparchive`
+// define('ELFINDER_DISABLE_ZIPEDITOR', false); // set `true` to disable zip editor
+// ===============================================
+
 /**
  * Simple function to demonstrate how to control file access using "accessControl" callback.
  * This method will disable accessing files/folders starting from '.' (dot)

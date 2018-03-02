@@ -249,6 +249,13 @@
 	background-position:0 0;
 	background-size: contain;
 }
+.elfinder-navbar-root-zip .elfinder-cwd-icon,
+.elfinder-cwd .elfinder-navbar-root-zip.elfinder-droppable-active .elfinder-cwd-icon,
+.elfinder-cwd-view-list .elfinder-navbar-root-zip td .elfinder-cwd-icon  {
+	background-image:url("../img/volume_icon_zip.png");
+	background-position:0 0;
+	background-size: contain;
+}
 .elfinder-cwd .elfinder-navbar-root-googledrive.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd .elfinder-navbar-root-onedrive.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd .elfinder-navbar-root-box.elfinder-droppable-active .elfinder-cwd-icon {

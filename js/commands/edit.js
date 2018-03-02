@@ -421,7 +421,7 @@ elFinder.prototype.commands.edit = function() {
 				id     = 'edit-'+fm.namespace+'-'+file.hash,
 				d      = fm.getUI().find('#'+id),
 				conv   = !convert? 0 : convert,
-				req, error;
+				req, error, res;
 			
 			
 			if (d.length) {
@@ -435,6 +435,20 @@ elFinder.prototype.commands.edit = function() {
 				return dfrd.reject(error);
 			}
 			
+			if (editor && editor.info && typeof editor.info.edit === 'function') {
+				res = editor.info.edit.call(fm, file, editor);
+				if (res.promise) {
+					res.done(function() {
+						dfrd.resolve();
+					}).fail(function(error) {
+						dfrd.reject(error);
+					});
+				} else {
+					res? dfrd.resolve() : dfrd.reject();
+				}
+				return dfrd;
+			}
+
 			if (editor && editor.info && (editor.info.urlAsContent || editor.info.preventGet)) {
 				req = $.Deferred();
 				if (! editor.info.preventGet) {
@@ -454,7 +468,7 @@ elFinder.prototype.commands.edit = function() {
 			}
 			
 			req.done(function(data) {
-				var selEncoding, reg, m;
+				var selEncoding, reg, m, res;
 				if (data.doconv) {
 					fm.confirm({
 						title  : self.title,
