@@ -1430,6 +1430,53 @@
 			}
 		},
 		{
+			// Zip Archive with FlySystem
+			info : {
+				id : 'ziparchive',
+				name : 'btnMount',
+				cmdCheck : 'ZipArchive',
+				edit : function(file, editor) {
+					var fm = this,
+						dfrd = $.Deferred();
+					fm.request({
+						data:{
+							cmd: 'netmount',
+							protocol: 'ziparchive',
+							host: file.hash,
+							path: file.phash
+						},
+						notify : {type : 'netmount', cnt : 1, hideCnt : true}
+					}).done(function(data) {
+						var pdir;
+						if (data.added && data.added.length) {
+							if (data.added[0].phash) {
+								if (pdir = fm.file(data.added[0].phash)) {
+									if (! pdir.dirs) {
+										pdir.dirs = 1;
+										fm.change({ changed: [ pdir ] });
+									}
+								}
+							}
+							fm.one('netmountdone', function() {
+								fm.exec('open', data.added[0].hash);
+								fm.one('opendone', function() {
+									data.toast && fm.toast(data.toast);
+								});
+							});
+						}
+						dfrd.resolve();
+					})
+					.fail(function(error) {
+						dfrd.reject(error);
+					});
+					return dfrd;
+				}
+			},
+			mimes : ['application/zip'],
+			load : function() {},
+			save : function(){}
+		},
+		{
 			// Simple Text (basic textarea editor)
 			info : {
 				id : 'textarea',

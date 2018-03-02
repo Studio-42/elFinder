@@ -399,12 +399,7 @@ var elFinder = function(elm, opts, bootCallback) {
 							}
 						}
 						if (files[f.phash]) {
-							if (! files[f.phash].dirs) {
-								files[f.phash].dirs = 1;
-							}
-							if (f.ts && (files[f.phash].ts || 0) < f.ts) {
-								files[f.phash].ts = f.ts;
-							}
+							self.applyLeafRootStats(files[f.phash]);
 						}
 					}
 					
@@ -467,6 +462,24 @@ var elFinder = function(elm, opts, bootCallback) {
 							if (roots[hash]) {
 								delete self.roots[roots[hash]];
 							}
+							// restore stats of deleted root parent directory
+							$.each(self.leafRoots, function(phash, roots) {
+								var idx, pdir;
+								if ((idx = $.inArray(hash, roots))!== -1) {
+									if (roots.length === 1) {
+										if ((pdir = files[phash]) && pdir._realStats) {
+											$.each(pdir._realStats, function(k, v) {
+												pdir[k] = v;
+											});
+											remove(pdir._realStats);
+											self.change({ changed: [pdir] });
+										}
+										delete self.leafRoots[phash];
+									} else {
+										self.leafRoots[phash].splice(idx, 1);
+									}
+								}
+							});
 							if (self.searchStatus.state < 2) {
 								$.each(files, function(h, f) {
 									f.phash == hash && rm(h);
@@ -518,6 +531,9 @@ var elFinder = function(elm, opts, bootCallback) {
 					});
 				}
 				files[hash] = files[hash] ? Object.assign(files[hash], file) : file;
+				if (self.leafRoots[file.hash]) {
+					self.applyLeafRootStats(file, true);
+				}
 			});
 		},
 		
@@ -1965,6 +1981,12 @@ var elFinder = function(elm, opts, bootCallback) {
 				} else if (!$.isPlainObject(response)) {
 					return dfrd.reject(['errResponse', 'errDataNotJSON'], xhr, response);
 				} else if (response.error) {
+					if (isOpen) {
+						// check leafRoots
+						$.each(self.leafRoots, function(phash, roots) {
+							self.leafRoots[phash] = $.grep(roots, function(h) { return h !== data.target; });
+						});
+					}
 					return dfrd.reject(response.error, xhr, response);
 				}
 				
@@ -6907,23 +6929,13 @@ elFinder.prototype = {
 							}
 						}
 						
-						if (self.leafRoots[file.hash]) {
-							// has leaf root to `dirs: 1`
-							if (! file.dirs) {
-								file.dirs = 1;
-							}
-							// set ts
-							$.each(self.leafRoots[file.hash], function() {
-								var f = self.file(this);
-								if (f && f.ts && (file.ts || 0) < f.ts) {
-									file.ts = f.ts;
-								}
-							});
-						}
-						
 						// lock trash bins holder
 						if (self.trashes[file.hash]) {
 							file.locked = true;
+						}
+
+						if (self.leafRoots[file.hash]) {
+							self.applyLeafRootStats(file, true);
 						}
 					} else if (fileFilter) {
 						try {
@@ -8718,6 +8730,45 @@ elFinder.prototype = {
 		return dfrd;
 	},
 	
+	/**
+	 * Apply leaf root stats to target directory
+	 *
+	 * @param      object     dir     object of target directory
+	 * @param      boolean    update  is force update
+	 */
+	applyLeafRootStats : function(dir, update) {
+		var self = this,
+			change = false;
+		// backup original stats
+		if (update || !dir._realStats) {
+			dir._realStats = {
+				locked: dir.locked,
+				dirs: dir.dirs,
+				ts: dir.ts
+			};
+		}
+		// set lock
+		if (!dir.locked) {
+			dir.locked = 1;
+			change = true;
+		}
+		// has leaf root to `dirs: 1`
+		if (!dir.dirs) {
+			dir.dirs = 1;
+			change = true;
+		}
+		// set ts
+		$.each(self.leafRoots[dir.hash], function() {
+			var f = self.file(this);
+			if (f && f.ts && (dir.ts || 0) < f.ts) {
+				dir.ts = f.ts;
+				change = true;
+			}
+		});
+		// trigger change event
+		change && self.change({ changed: [dir] });
+	},
+
 	/**
 	 * To aborted XHR object
 	 * 

@@ -85,6 +85,12 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // define('ELFINDER_ZOHO_OFFICE_APIKEY', '');
 // ===============================================
 
+// // Zip Archive editor
+// // Installation by composer
+// // `composer require barryvdh/elfinder-flysystem-driver league/flysystem-ziparchive`
+// define('ELFINDER_DISABLE_ZIPEDITOR', false); // set `true` to disable zip editor
+// ===============================================
+
 function debug() {
 	$arg = func_get_args();
 	ob_start();

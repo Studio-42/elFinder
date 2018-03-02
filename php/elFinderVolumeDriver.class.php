@@ -2521,7 +2521,7 @@ abstract class elFinderVolumeDriver {
 			return $this->setError(elFinder::ERROR_UPLOAD_FILE_SIZE);
 		}
 		
-		return $this->_getContents($this->convEncIn($this->decode($hash), true));
+		return $file['size']? $this->_getContents($this->convEncIn($this->decode($hash), true)) : '';
 	}
 	
 	/**

@@ -494,6 +494,8 @@ class elFinder {
 		! defined('ELFINDER_JPEGTRAN_PATH') && define('ELFINDER_JPEGTRAN_PATH', 'jpegtran');
 		! defined('ELFINDER_FFMPEG_PATH')   && define('ELFINDER_FFMPEG_PATH',   'ffmpeg');
 		
+		! defined('ELFINDER_DISABLE_ZIPEDITOR') && define('ELFINDER_DISABLE_ZIPEDITOR', false);
+
 		// for backward compat
 		$this->version = (string)self::$ApiVersion;
 		
@@ -630,10 +632,10 @@ class elFinder {
 		}
 
 		// set defaultMimefile
-		elFinder::$defaultMimefile = (isset($opts['defaultMimefile']) ? $opts['defaultMimefile'] : '');
+		elFinder::$defaultMimefile = isset($opts['defaultMimefile'])? $opts['defaultMimefile'] : '';
 
 		// set memoryLimitGD
-		elFinder::$memoryLimitGD = $opts['memoryLimitGD']? $opts['memoryLimitGD'] : 0;
+		elFinder::$memoryLimitGD = isset($opts['memoryLimitGD'])? $opts['memoryLimitGD'] : 0;
 
 		// bind events listeners
 		if (!empty($opts['bind']) && is_array($opts['bind'])) {
@@ -674,6 +676,11 @@ class elFinder {
 
 		if (!isset($opts['roots']) || !is_array($opts['roots'])) {
 			$opts['roots'] = array();
+		}
+
+		// try to enable elFinderVolumeFlysystemZipArchiveNetmount to zip editing
+		if (empty(elFinder::$netDrivers['ziparchive'])) {
+			elFinder::$netDrivers['ziparchive'] = 'FlysystemZipArchiveNetmount';
 		}
 
 		// check for net volumes stored in session
@@ -1276,6 +1283,7 @@ class elFinder {
 	protected function netmount($args) {
 		$options  = array();
 		$protocol = $args['protocol'];
+		$toast = '';
 		
 		if ($protocol === 'netunmount') {
 			if (! empty($args['user']) && $volume = $this->volume($args['user'])) {
@@ -1322,6 +1330,10 @@ class elFinder {
 				}
 				return $options;
 			}
+			if (!empty($options['toast'])) {
+				$toast = $options['toast'];
+				unset($options['toast']);
+			}
 		}
 		
 		$netVolumes = $this->getNetVolumes();
@@ -1335,10 +1347,10 @@ class elFinder {
 		
 		// load additional volume root options
 		if (! empty($this->optionsNetVolumes['*'])) {
-			$options = array_merge($options, $this->optionsNetVolumes['*']);
+			$options = array_merge($this->optionsNetVolumes['*'], $options);
 		}
 		if (! empty($this->optionsNetVolumes[$protocol])) {
-			$options = array_merge($options, $this->optionsNetVolumes[$protocol]);
+			$options = array_merge($this->optionsNetVolumes[$protocol], $options);
 		}
 		
 		if (! $key =  $volume->netMountKey) {
@@ -1346,12 +1358,16 @@ class elFinder {
 		}
 		$options['netkey'] = $key;
 		
-		if ($volume->mount($options)) {
+		if (!isset($netVolumes[$key]) && $volume->mount($options)) {
 			$options['driver'] = $driver;
 			$netVolumes[$key]  = $options;
 			$this->saveNetVolumes($netVolumes);
 			$rootstat = $volume->file($volume->root());
-			return array('added' => array($rootstat));
+			$res = array('added' => array($rootstat));
+			if ($toast) {
+				$res['toast'] = $toast;
+			}
+			return $res;
 		} else {
 			$this->removeNetVolume(null, $volume);
 			return array('error' => $this->error(self::ERROR_NETMOUNT, $args['host'], implode(' ', $volume->error())));

@@ -781,12 +781,12 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			getEnds = function(d) {
 				var cur = d || fm.cwd(),
-					res = [ cur.hash ],
+					res = cur.hash? [ cur.hash ] : [],
 					phash, root, dir;
 				
 				root = fm.root(cur.hash);
 				dir = fm.file(root);
-				while (phash = dir.phash) {
+				while (dir && (phash = dir.phash)) {
 					res.unshift(phash);
 					root = fm.root(phash);
 					dir = fm.file(root);
