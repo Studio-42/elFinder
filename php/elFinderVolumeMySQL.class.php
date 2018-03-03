@@ -128,6 +128,9 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 
 		$this->updateCache($this->options['path'], $this->_stat($this->options['path']));
 
+		// enable command archive
+		$this->options['useRemoteArchive'] = true;
+
 		return true;
 	}
 

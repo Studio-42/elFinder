@@ -402,6 +402,8 @@ abstract class elFinderVolumeDriver {
 		'archiveMimes' => array(),
 		// Manual config for archivers. See example below. Leave empty for auto detect
 		'archivers'    => array(),
+		// Use Archive function for remote volume
+		'useRemoteArchive' => false,
 		// plugin settings
 		'plugin'       => array(),
 		// Is support parent directory time stamp update on add|remove|rename item
@@ -1251,6 +1253,13 @@ abstract class elFinderVolumeDriver {
 			: $this->nameValidator;
 
 		$this->_checkArchivers();
+
+		// enabling archivers['create'] with options['useRemoteArchive']
+		if ($this->options['useRemoteArchive'] && empty($this->archivers['create']) && $this->getTempPath()) {
+			$_archivers = $this->getArchivers();
+			$this->archivers['create'] = $this->getArchivers()['create'];
+		}
+
 		// manual control archive types to create
 		if (!empty($this->options['archiveMimes']) && is_array($this->options['archiveMimes'])) {
 			foreach ($this->archivers['create'] as $mime => $v) {
@@ -2657,7 +2666,8 @@ abstract class elFinderVolumeDriver {
 		}
 		
 		$files = array();
-		
+		$useRemoteArchive = !empty($this->options['useRemoteArchive']);
+
 		foreach ($hashes as $hash) {
 			if (($file = $this->file($hash)) == false) {
 				return $this->setError(elFinder::ERROR_FILE_NOT_FOUND, '#'+$hash);
@@ -2674,7 +2684,7 @@ abstract class elFinderVolumeDriver {
 				}
 			}
 			
-			$files[] = $this->basenameCE($path);
+			$files[] = $useRemoteArchive? $hash : $this->basenameCE($path);
 		}
 		
 		if ($name === '') {
@@ -2685,7 +2695,39 @@ abstract class elFinderVolumeDriver {
 		$name .='.' . $archiver['ext'];
 		$name = $this->uniqueName($dir, $name, '');
 		$this->clearcache();
-		return ($path = $this->convEncOut($this->_archive($this->convEncIn($dir), $this->convEncIn($files), $this->convEncIn($name), $archiver))) ? $this->stat($path) : false;
+		if ($useRemoteArchive) {
+			return ($path = $this->remoteArchive($files, $name, $archiver)) ? $this->stat($path) : false;
+		} else {
+			return ($path = $this->convEncOut($this->_archive($this->convEncIn($dir), $this->convEncIn($files), $this->convEncIn($name), $archiver))) ? $this->stat($path) : false;
+		}
+	}
+
+	/**
+	 * Create an archive from remote items 
+	 *
+	 * @param      string   $hashes  files hashes list
+	 * @param      string   $name    archive name
+	 * @param      string   $arc     archiver options
+	 * @return     string|boolean  path of created archive
+	 */
+	protected function remoteArchive($hashes, $name, $arc) {
+		$resPath = false;
+		$file0 = $this->file($hashes[0]);
+		if ($file0 && ($dir = $this->getItemsInHand($hashes))) {
+			$files = self::localScandir($dir);
+			if ($files) {
+				if ($arc = $this->makeArchive($dir, $files, $name, $arc)) {
+					if ($fp = fopen($arc, 'rb')) {
+						$path = $this->decode($file0['phash']);
+						$stat = array();
+						$resPath = $this->saveCE($fp, $path, $name, $stat);
+						fclose($fp);
+					}
+				}
+			}
+			$this->rmdirRecursive($dir);
+		}
+		return $resPath;
 	}
 	
 	/**
