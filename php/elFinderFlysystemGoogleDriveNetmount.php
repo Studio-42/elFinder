@@ -51,6 +51,8 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Hypweb\elFinderFlysyst
             if ($this->options['icon'] === true) {
                 unset($this->options['icon']);
             }
+            // enable command archive
+            $this->options['useRemoteArchive'] = true;
         }
         return $res;
     }

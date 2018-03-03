@@ -994,6 +994,9 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $this->options['tmbPath'] = '';
         }
 
+        // enable command archive
+        $this->options['useRemoteArchive'] = true;
+
         return true;
     }
 
@@ -1010,9 +1013,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         if (!$this->tmp && $this->tmbPathWritable) {
             $this->tmp = $this->tmbPath;
         }
-
-        $this->disabled[] = 'archive';
-        $this->disabled[] = 'extract';
 
         if ($this->isMyReload()) {
             $this->_gd_getDirectoryData(false);

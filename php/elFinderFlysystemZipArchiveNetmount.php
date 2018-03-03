@@ -28,11 +28,15 @@ class elFinderVolumeFlysystemZipArchiveNetmount extends Driver
         if (empty($this->options['icon'])) {
             $this->options['icon'] = true;
         }
+        
         if ($res = parent::init()) {
             if ($this->options['icon'] === true) {
                 unset($this->options['icon']);
             }
+            // enable command archive
+            $this->options['useRemoteArchive'] = true;
         }
+        
         return $res;
     }
 
@@ -170,8 +174,8 @@ class elFinderVolumeFlysystemZipArchiveNetmount extends Driver
     /**
      * @inheritdoc
      */
-	protected function tmbname($stat) {
-		return $this->netMountKey.substr($stat['hash'], strlen($this->id)).$stat['ts'].'.png';
-	}
+    protected function tmbname($stat) {
+        return $this->netMountKey.substr($stat['hash'], strlen($this->id)).$stat['ts'].'.png';
+    }
 
 }
