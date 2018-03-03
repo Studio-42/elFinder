@@ -928,6 +928,9 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             $this->queryOptions['query']['expand'] = 'thumbnails(select=small)';
         }
 
+        // enable command archive
+        $this->options['useRemoteArchive'] = true;
+
         return true;
     }
 
@@ -944,9 +947,6 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         if (!$this->tmp && $this->tmbPathWritable) {
             $this->tmp = $this->tmbPath;
         }
-
-        $this->disabled[] = 'archive';
-        $this->disabled[] = 'extract';
     }
 
     /*********************************************************************/

@@ -545,6 +545,9 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
         // 'lsPlSleep' minmum 10 sec
         $this->options['lsPlSleep'] = max(10, $this->options['lsPlSleep']);
 
+        // enable command archive
+        $this->options['useRemoteArchive'] = true;
+
         return true;
     }
 
@@ -561,9 +564,6 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
         if (!$this->tmp && $this->tmbPathWritable) {
             $this->tmp = $this->tmbPath;
         }
-
-        $this->disabled[] = 'archive';
-        $this->disabled[] = 'extract';
 
         if ($this->isMyReload()) {
             //$this->_db_getDirectoryData(false);
