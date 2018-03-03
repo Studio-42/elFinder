@@ -2826,6 +2826,8 @@ abstract class elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 */
 	public function search($q, $mimes, $hash = null) {
+		$res = array();
+
 		$dir = null;
 		if ($hash) {
 			$dir = $this->decode($hash);
@@ -2866,6 +2868,10 @@ abstract class elFinderVolumeDriver {
 			);
 		}
 		
+		if ($q === '' || $this->commandDisabled('search')) {
+			return $res;
+		}
+
 		// valided regex $this->options['searchExDirReg']
 		if ($this->options['searchExDirReg']) {
 			if (false === preg_match($this->options['searchExDirReg'], '')) {
@@ -2873,9 +2879,17 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		
-		return ($q === '' || $this->commandDisabled('search'))
-			? array()
-			: $this->doSearch(is_null($dir)? $this->root : $dir, $q, $mimes);
+		// check the leaf root too
+		if (!$mimes && (is_null($dir) || $dir == $this->root)) {
+			$rootStat = $this->stat($this->root);
+			if (!empty($rootStat['phash'])) {
+				if ($this->stripos($rootStat['name'], $q) !== false) {
+					$res = array($rootStat);
+				}
+			}
+		}
+
+		return array_merge($res, $this->doSearch(is_null($dir)? $this->root : $dir, $q, $mimes));
 	}
 	
 	/**
