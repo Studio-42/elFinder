@@ -2448,19 +2448,23 @@ $.fn.elfindercwd = function(fm, options) {
 
 				if (query) {
 					$.each(e.data.changed || [], function(i, file) {
-						remove([file.hash]);
-						if (file.name.indexOf(query) !== -1) {
-							add([file], 'change');
-							$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
-							added = true;
+						if ($('#'+fm.cwdHash2Id(file.hash)).length) {
+							remove([file.hash]);
+							if (file.name.indexOf(query) !== -1) {
+								add([file], 'change');
+								$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
+								added = true;
+							}
 						}
 					});
 				} else {
 					$.each($.grep(e.data.changed || [], function(f) { return f.phash == phash ? true : false; }), function(i, file) {
-						remove([file.hash]);
-						add([file], 'change');
-						$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
-						added = true;
+						if ($('#'+fm.cwdHash2Id(file.hash)).length) {
+							remove([file.hash]);
+							add([file], 'change');
+							$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
+							added = true;
+						}
 					});
 				}
 				
