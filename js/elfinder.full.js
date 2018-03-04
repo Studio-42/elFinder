@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: cabec98) (2018-03-05)
+ * Version 2.1.32 (2.1-src Nightly: 26912fc) (2018-03-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9003,7 +9003,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: cabec98)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 26912fc)';
 
 
 
@@ -11419,7 +11419,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-03-02
+ * @version 2018-03-05
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -11780,7 +11780,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'port'                : 'Port', // added 18.04.2012
 			'user'                : 'User', // added 18.04.2012
 			'pass'                : 'Password', // added 18.04.2012
-			'confirmUnmount'      : 'Are you unmount $1?',  // from v2.1 added 30.04.2012
+			'confirmUnmount'      : 'Are you sure to unmount $1?',  // from v2.1 added 30.04.2012
 			'dropFilesBrowser': 'Drop or Paste files from browser', // from v2.1 added 30.05.2012
 			'dropPasteFiles'  : 'Drop files, Paste URLs or images(clipboard) here', // from v2.1 added 07.04.2014
 			'encoding'        : 'Encoding', // from v2.1 added 19.12.2014
@@ -11857,6 +11857,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'columnPref'      : 'Columns settings (List view)', // from v2.1.32 added 6.2.2018
 			'reflectOnImmediate' : 'All changes will reflect immediately to the archive.', // from v2.1.33 added 2.3.2018
 			'reflectOnUnmount'   : 'Any changes will not reflect until un-mount this volume.', // from v2.1.33 added 2.3.2018
+			'unmountChildren' : 'The following volume(s) mounted on this volume also unmounted. Are you sure to unmount it?', // from v2.1.33 added 5.3.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -23571,7 +23572,19 @@ elFinder.prototype.commands.netunmount = function() {
 				.fail(function(error) {
 					error && fm.error(error);
 				}),
-			drive  = fm.file(hashes[0]);
+			drive  = fm.file(hashes[0]),
+			childrenRoots = function(hash) {
+				var roots = [];
+				if (fm.leafRoots) {
+					$.each(fm.leafRoots, function(phash, hashes) {
+						var parents = fm.parents(phash);
+						if ($.inArray(hash, parents) !== -1) {
+							roots = roots.concat(hashes);
+						}
+					});
+				}
+				return roots;
+			};
 
 		if (this._disabled) {
 			return dfrd.reject();
@@ -23585,34 +23598,81 @@ elFinder.prototype.commands.netunmount = function() {
 					label    : 'btnUnmount',
 					callback : function() {  
 						var chDrive = (fm.root() == drive.hash),
-							base = $('#'+fm.navHash2Id(drive.hash)).parent(),
-							navTo = (base.next().length? base.next() : base.prev()).find('.elfinder-navbar-root');
-						fm.request({
-							data   : {cmd  : 'netmount', protocol : 'netunmount', host: drive.netkey, user : drive.hash, pass : 'dum'}, 
-							notify : {type : 'netunmount', cnt : 1, hideCnt : true},
-							preventFail : true
-						})
-						.fail(function(error) {
-							dfrd.reject(error);
-						})
-						.done(function(data) {
-							var open = fm.root();
-							if (chDrive) {
-								if (navTo.length) {
-									open = fm.navId2Hash(navTo[0].id);
-								} else {
-									// fallback
-									$.each(fm.files(), function(h, f) {
-										if (f.mime == 'directory') {
-											open = h;
-											return null;
+							roots = childrenRoots(drive.hash),
+							requests = [],
+							doUmount = function() {
+								$.when(requests).done(function() {
+									var base = $('#'+fm.navHash2Id(drive.hash)).parent(),
+										navTo = (base.next().length? base.next() : base.prev()).find('.elfinder-navbar-root');
+
+									fm.request({
+										data   : {cmd  : 'netmount', protocol : 'netunmount', host: drive.netkey, user : drive.hash, pass : 'dum'}, 
+										notify : {type : 'netunmount', cnt : 1, hideCnt : true},
+										preventFail : true
+									})
+									.fail(function(error) {
+										dfrd.reject(error);
+									})
+									.done(function(data) {
+										var open = fm.root();
+										if (chDrive) {
+											if (navTo.length) {
+												open = fm.navId2Hash(navTo[0].id);
+											} else {
+												// fallback
+												$.each(fm.files(), function(h, f) {
+													if (f.mime == 'directory') {
+														open = h;
+														return null;
+													}
+												});
+											}
+											fm.exec('open', open);
 										}
+										dfrd.resolve();
 									});
+								}).fail(function(error) {
+									dfrd.reject(error);
+								});
+							};
+						
+						if (roots.length) {
+							fm.confirm({
+								title : self.title,
+								text  : (function() {
+									var msgs = ['unmountChildren'];
+									$.each(roots, function(i, hash) {
+										msgs.push([fm.file(hash).name]);
+									});
+									return msgs;
+								})(),
+								accept : {
+									label : 'btnUnmount',
+									callback : function() {
+										$.each(roots, function(i, hash) {
+											var d = fm.file(hash);
+											if (d.netkey) {
+												requests.push(fm.request({
+													data   : {cmd  : 'netmount', protocol : 'netunmount', host: d.netkey, user : d.hash, pass : 'dum'}, 
+													notify : {type : 'netunmount', cnt : 1, hideCnt : true},
+													preventFail : true
+												}));
+											}
+										});
+										doUmount();
+									}
+								},
+								cancel : {
+									label : 'btnCancel',
+									callback : function() {
+										dfrd.reject();
+									}
 								}
-								fm.exec('open', open);
-							}
-							dfrd.resolve();
-						});
+							});
+						} else {
+							requests = null;
+							doUmount();
+						}
 					}
 				},
 				cancel : {
