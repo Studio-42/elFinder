@@ -25,9 +25,9 @@ $.fn.elfinderbutton = function(cmd) {
 					if (!button.hasClass(disabled)) {
 						if (menu && cmd.variants.length >= 1) {
 							// close other menus
-							menu.is(':hidden') && cmd.fm.getUI().click();
+							menu.is(':hidden') && fm.getUI().click();
 							e.stopPropagation();
-							menu.css(button.offset()).slideToggle(100);
+							menu.css(getMenuOffset()).slideToggle(100);
 						} else {
 							fm.exec(cmd.name, void(0), {_userAction: true, _currentType: 'toolbar', _currentNode: button });
 						}
@@ -36,6 +36,14 @@ $.fn.elfinderbutton = function(cmd) {
 				}),
 			hideMenu = function() {
 				menu.hide();
+			},
+			getMenuOffset = function() {
+				var baseOffset = fm.getUI().offset(),
+					buttonOffset = button.offset();
+				return {
+					top : buttonOffset.top - baseOffset.top,
+					left : buttonOffset.left - baseOffset.left
+				};
 			};
 			
 		text.hide();
@@ -66,7 +74,7 @@ $.fn.elfinderbutton = function(cmd) {
 					fm.exec(cmd.name, fm.selected(), opts);
 				});
 
-			cmd.fm.bind('disable select', hideMenu).getUI().on('click', hideMenu);
+			fm.bind('disable select', hideMenu).getUI().on('click', hideMenu);
 			
 			cmd.change(function() {
 				menu.html('');

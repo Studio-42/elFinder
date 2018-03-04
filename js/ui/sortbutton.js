@@ -23,8 +23,8 @@ $.fn.elfindersortbutton = function(cmd) {
 				.on('click', function(e) {
 					if (!button.hasClass(disabled)) {
 						e.stopPropagation();
-						menu.is(':hidden') && cmd.fm.getUI().click();
-						menu.css(button.offset()).slideToggle(100);
+						menu.is(':hidden') && fm.getUI().click();
+						menu.css(getMenuOffset()).slideToggle(100);
 					}
 				}),
 			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
@@ -44,7 +44,15 @@ $.fn.elfindersortbutton = function(cmd) {
 				menu.children('.elfinder-sort-stick').toggleClass(selected, fm.sortStickFolders);
 				menu.children('.elfinder-sort-tree').toggleClass(selected, fm.sortAlsoTreeview);
 			},
-			hide = function() { menu.hide(); };
+			hide = function() { menu.hide(); },
+			getMenuOffset = function() {
+				var baseOffset = fm.getUI().offset(),
+					buttonOffset = button.offset();
+				return {
+					top : buttonOffset.top - baseOffset.top,
+					left : buttonOffset.left - baseOffset.left
+				};
+			};
 			
 		text.hide();
 		
