@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: d52702b) (2018-03-04)
+ * Version 2.1.32 (2.1-src Nightly: d0dd0c5) (2018-03-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8989,7 +8989,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: d52702b)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: d0dd0c5)';
 
 
 
@@ -11961,9 +11961,9 @@ $.fn.elfinderbutton = function(cmd) {
 					if (!button.hasClass(disabled)) {
 						if (menu && cmd.variants.length >= 1) {
 							// close other menus
-							menu.is(':hidden') && cmd.fm.getUI().click();
+							menu.is(':hidden') && fm.getUI().click();
 							e.stopPropagation();
-							menu.css(button.offset()).slideToggle(100);
+							menu.css(getMenuOffset()).slideToggle(100);
 						} else {
 							fm.exec(cmd.name, void(0), {_userAction: true, _currentType: 'toolbar', _currentNode: button });
 						}
@@ -11972,6 +11972,14 @@ $.fn.elfinderbutton = function(cmd) {
 				}),
 			hideMenu = function() {
 				menu.hide();
+			},
+			getMenuOffset = function() {
+				var baseOffset = fm.getUI().offset(),
+					buttonOffset = button.offset();
+				return {
+					top : buttonOffset.top - baseOffset.top,
+					left : buttonOffset.left - baseOffset.left
+				};
 			};
 			
 		text.hide();
@@ -12002,7 +12010,7 @@ $.fn.elfinderbutton = function(cmd) {
 					fm.exec(cmd.name, fm.selected(), opts);
 				});
 
-			cmd.fm.bind('disable select', hideMenu).getUI().on('click', hideMenu);
+			fm.bind('disable select', hideMenu).getUI().on('click', hideMenu);
 			
 			cmd.change(function() {
 				menu.html('');
@@ -17624,8 +17632,8 @@ $.fn.elfindersortbutton = function(cmd) {
 				.on('click', function(e) {
 					if (!button.hasClass(disabled)) {
 						e.stopPropagation();
-						menu.is(':hidden') && cmd.fm.getUI().click();
-						menu.css(button.offset()).slideToggle(100);
+						menu.is(':hidden') && fm.getUI().click();
+						menu.css(getMenuOffset()).slideToggle(100);
 					}
 				}),
 			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
@@ -17645,7 +17653,15 @@ $.fn.elfindersortbutton = function(cmd) {
 				menu.children('.elfinder-sort-stick').toggleClass(selected, fm.sortStickFolders);
 				menu.children('.elfinder-sort-tree').toggleClass(selected, fm.sortAlsoTreeview);
 			},
-			hide = function() { menu.hide(); };
+			hide = function() { menu.hide(); },
+			getMenuOffset = function() {
+				var baseOffset = fm.getUI().offset(),
+					buttonOffset = button.offset();
+				return {
+					top : buttonOffset.top - baseOffset.top,
+					left : buttonOffset.left - baseOffset.left
+				};
+			};
 			
 		text.hide();
 		
