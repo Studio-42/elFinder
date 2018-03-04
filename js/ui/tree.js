@@ -438,11 +438,14 @@ $.fn.elfindertree = function(fm, opts) {
 			/**
 			 * Return only dirs from files list
 			 *
-			 * @param  Array  files list
+			 * @param  Array   files list
+			 * @param  Boolean do check exists
 			 * @return Array
 			 */
-			filter = function(files) {
-				return $.grep(files||[], function(f) { return f.mime == 'directory' ? true : false; });
+			filter = function(files, checkExists) {
+				return $.grep(files || [], function(f) {
+					return (f.mime === 'directory' && (!checkExists || $('#'+fm.navHash2Id(f.hash)).length)) ? true : false;
+				});
 			},
 			
 			/**
@@ -1320,7 +1323,7 @@ $.fn.elfindertree = function(fm, opts) {
 		})
 		// update changed dirs
 		.change(function(e) {
-			var dirs = filter(e.data.changed),
+			var dirs = filter(e.data.changed, true),
 				length = dirs.length,
 				l    = length,
 				tgts = $(),
@@ -1377,7 +1380,7 @@ $.fn.elfindertree = function(fm, opts) {
 				node.trigger('update.'+fm.namespace, { change: 'done' });
 			});
 			
-			sync(void(0), false);
+			length && sync(void(0), false);
 		})
 		// remove dirs
 		.remove(function(e) {
