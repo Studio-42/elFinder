@@ -825,7 +825,7 @@ elFinder.prototype.commands.edit = function() {
 							dfd.resolve(this);
 						}),
 						x: node.offset().left,
-						y: node.offset().top,
+						y: node.offset().top + 22,
 						opened: function() {
 							fm.one('closecontextmenu',function() {
 								setTimeout(function() {
