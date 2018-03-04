@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: f4ed76b) (2018-03-04)
+ * Version 2.1.32 (2.1-src Nightly: cabec98) (2018-03-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -420,20 +420,6 @@ var elFinder = function(elm, opts, bootCallback) {
 						sorterChk = false;
 					}
 					
-					// make or update of leaf roots cache
-					if (f.isroot && f.phash) {
-						if (! self.leafRoots[f.phash]) {
-							self.leafRoots[f.phash] = [ f.hash ];
-						} else {
-							if ($.inArray(f.hash, self.leafRoots[f.phash]) === -1) {
-								self.leafRoots[f.phash].push(f.hash);
-							}
-						}
-						if (files[f.phash]) {
-							self.applyLeafRootStats(files[f.phash]);
-						}
-					}
-					
 					if (f.phash && (type === 'add' || type === 'change')) {
 						if (parents = self.parents(f.phash)) {
 							$.each(parents, function() {
@@ -562,9 +548,6 @@ var elFinder = function(elm, opts, bootCallback) {
 					});
 				}
 				files[hash] = files[hash] ? Object.assign(files[hash], file) : file;
-				if (self.leafRoots[file.hash]) {
-					self.applyLeafRootStats(file, true);
-				}
 			});
 		},
 		
@@ -6885,6 +6868,17 @@ elFinder.prototype = {
 							vid = file.volumeid;
 							
 							if (isRoot) {
+								// make or update of leaf roots cache
+								if (file.phash) {
+									if (! self.leafRoots[file.phash]) {
+										self.leafRoots[file.phash] = [ file.hash ];
+									} else {
+										if ($.inArray(file.hash, self.leafRoots[file.phash]) === -1) {
+											self.leafRoots[file.phash].push(file.hash);
+										}
+									}
+								}
+
 								self.hasVolOptions = true;
 								if (! self.volOptions[vid]) {
 									self.volOptions[vid] = {
@@ -7000,6 +6994,13 @@ elFinder.prototype = {
 				});
 				return res;
 			},
+			applyLeafRootStats = function(data) {
+				$.each(data, function(i, f) {
+					if (self.leafRoots[f.hash]) {
+						self.applyLeafRootStats(f, true);
+					}
+				});
+			},
 			error = [],
 			name, i18, i18nFolderName, prevId, cData;
 		
@@ -7049,6 +7050,13 @@ elFinder.prototype = {
 		}
 		if (data.api) {
 			data.init = true;
+		}
+
+		if (Object.keys(self.leafRoots).length) {
+			data.files && applyLeafRootStats(data.files);
+			data.tree && applyLeafRootStats(data.tree);
+			data.added && applyLeafRootStats(data.added);
+			data.changed && applyLeafRootStats(data.changed);
 		}
 
 		// merge options that apply only to cwd
@@ -8766,9 +8774,13 @@ elFinder.prototype = {
 	 *
 	 * @param      object     dir     object of target directory
 	 * @param      boolean    update  is force update
+	 * 
+	 * @return     boolean    dir object was chenged 
 	 */
 	applyLeafRootStats : function(dir, update) {
 		var self = this,
+			prev = update? dir : (self.file(dir.hash) || dir),
+			prevTs = prev.ts,
 			change = false;
 		// backup original stats
 		if (update || !dir._realStats) {
@@ -8779,12 +8791,12 @@ elFinder.prototype = {
 			};
 		}
 		// set lock
-		if (!dir.locked) {
+		if (!prev.locked) {
 			dir.locked = 1;
 			change = true;
 		}
 		// has leaf root to `dirs: 1`
-		if (!dir.dirs) {
+		if (!prev.dirs) {
 			dir.dirs = 1;
 			change = true;
 		}
@@ -8793,11 +8805,13 @@ elFinder.prototype = {
 			var f = self.file(this);
 			if (f && f.ts && (dir.ts || 0) < f.ts) {
 				dir.ts = f.ts;
-				change = true;
 			}
 		});
-		// trigger change event
-		change && self.change({ changed: [dir] });
+		if (prevTs !== dir.ts) {
+			change = true;
+		}
+
+		return change;
 	},
 
 	/**
@@ -8989,7 +9003,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: f4ed76b)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: cabec98)';
 
 
 
@@ -15148,19 +15162,23 @@ $.fn.elfindercwd = function(fm, options) {
 
 				if (query) {
 					$.each(e.data.changed || [], function(i, file) {
-						remove([file.hash]);
-						if (file.name.indexOf(query) !== -1) {
-							add([file], 'change');
-							$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
-							added = true;
+						if ($('#'+fm.cwdHash2Id(file.hash)).length) {
+							remove([file.hash]);
+							if (file.name.indexOf(query) !== -1) {
+								add([file], 'change');
+								$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
+								added = true;
+							}
 						}
 					});
 				} else {
 					$.each($.grep(e.data.changed || [], function(f) { return f.phash == phash ? true : false; }), function(i, file) {
-						remove([file.hash]);
-						add([file], 'change');
-						$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
-						added = true;
+						if ($('#'+fm.cwdHash2Id(file.hash)).length) {
+							remove([file.hash]);
+							add([file], 'change');
+							$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
+							added = true;
+						}
 					});
 				}
 				
@@ -18657,11 +18675,14 @@ $.fn.elfindertree = function(fm, opts) {
 			/**
 			 * Return only dirs from files list
 			 *
-			 * @param  Array  files list
+			 * @param  Array   files list
+			 * @param  Boolean do check exists
 			 * @return Array
 			 */
-			filter = function(files) {
-				return $.grep(files||[], function(f) { return f.mime == 'directory' ? true : false; });
+			filter = function(files, checkExists) {
+				return $.grep(files || [], function(f) {
+					return (f.mime === 'directory' && (!checkExists || $('#'+fm.navHash2Id(f.hash)).length)) ? true : false;
+				});
 			},
 			
 			/**
@@ -19539,7 +19560,7 @@ $.fn.elfindertree = function(fm, opts) {
 		})
 		// update changed dirs
 		.change(function(e) {
-			var dirs = filter(e.data.changed),
+			var dirs = filter(e.data.changed, true),
 				length = dirs.length,
 				l    = length,
 				tgts = $(),
@@ -19596,7 +19617,7 @@ $.fn.elfindertree = function(fm, opts) {
 				node.trigger('update.'+fm.namespace, { change: 'done' });
 			});
 			
-			sync(void(0), false);
+			length && sync(void(0), false);
 		})
 		// remove dirs
 		.remove(function(e) {
