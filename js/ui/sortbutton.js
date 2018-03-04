@@ -24,12 +24,12 @@ $.fn.elfindersortbutton = function(cmd) {
 					if (!button.hasClass(disabled)) {
 						e.stopPropagation();
 						menu.is(':hidden') && cmd.fm.getUI().click();
-						menu.slideToggle(100);
+						menu.css(button.offset()).slideToggle(100);
 					}
 				}),
 			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
 				.hide()
-				.appendTo(button)
+				.appendTo(fm.getUI())
 				.on('mouseenter mouseleave', '.'+item, function() { $(this).toggleClass(hover); })
 				.on('click', '.'+item, function(e) {
 					e.preventDefault();
