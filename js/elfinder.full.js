@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: 2de465a) (2018-03-04)
+ * Version 2.1.32 (2.1-src Nightly: d52702b) (2018-03-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8989,7 +8989,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 2de465a)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: d52702b)';
 
 
 
@@ -11963,7 +11963,7 @@ $.fn.elfinderbutton = function(cmd) {
 							// close other menus
 							menu.is(':hidden') && cmd.fm.getUI().click();
 							e.stopPropagation();
-							menu.slideToggle(100);
+							menu.css(button.offset()).slideToggle(100);
 						} else {
 							fm.exec(cmd.name, void(0), {_userAction: true, _currentType: 'toolbar', _currentNode: button });
 						}
@@ -11985,7 +11985,7 @@ $.fn.elfinderbutton = function(cmd) {
 			
 			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
 				.hide()
-				.appendTo(button)
+				.appendTo(fm.getUI())
 				.on('mouseenter mouseleave', '.'+item, function() { $(this).toggleClass(hover); })
 				.on('click', '.'+item, function(e) {
 					var opts = $(this).data('value');
@@ -17625,12 +17625,12 @@ $.fn.elfindersortbutton = function(cmd) {
 					if (!button.hasClass(disabled)) {
 						e.stopPropagation();
 						menu.is(':hidden') && cmd.fm.getUI().click();
-						menu.slideToggle(100);
+						menu.css(button.offset()).slideToggle(100);
 					}
 				}),
 			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
 				.hide()
-				.appendTo(button)
+				.appendTo(fm.getUI())
 				.on('mouseenter mouseleave', '.'+item, function() { $(this).toggleClass(hover); })
 				.on('click', '.'+item, function(e) {
 					e.preventDefault();

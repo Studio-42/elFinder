@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: 2de465a) (2018-03-04)
+ * Version 2.1.32 (2.1-src Nightly: d52702b) (2018-03-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -3274,13 +3274,13 @@ embed.elfinder-quicklook-preview-audio {
 /* menu */
 .elfinder-button-menu {
 	position:absolute;
-	left:0;
-	top:25px;
+	margin-top: 16px;
+	margin-left: -8px;
 	padding:3px 0;
 }
 
 .elfinder-touch .elfinder-button-menu {
-	top:35px;
+	margin-top: 20px;
 }
 
 /* menu item */
