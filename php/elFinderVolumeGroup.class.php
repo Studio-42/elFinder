@@ -134,11 +134,7 @@ class elFinderVolumeGroup extends elFinderVolumeDriver {
 	 * {@inheritDoc}
 	 **/
 	protected function _subdirs($path) {
-		$dirs = false;
-		if ($path === '/') {
-			return true;
-		}
-		return $dirs;
+		return false;
 	}
 	
 	/**

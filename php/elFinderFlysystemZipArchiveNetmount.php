@@ -14,6 +14,7 @@ class elFinderVolumeFlysystemZipArchiveNetmount extends Driver
         parent::__construct();
         
         $opts = array(
+            'acceptedName' => '#^[^/\\?*:|"<>]*[^./\\?*:|"<>]$#',
             'rootCssClass' => 'elfinder-navbar-root-zip'
         );
 
