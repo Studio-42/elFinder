@@ -142,6 +142,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		}
 		$options['statOwner'] = true;
 		$options['allowChmodReadOnly'] = true;
+		$options['acceptedName'] = '#^[^/\\?*:|"<>]*[^./\\?*:|"<>]$#';
 		return $options;
 	}
 	
