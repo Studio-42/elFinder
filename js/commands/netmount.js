@@ -263,17 +263,14 @@ elFinder.prototype.commands.netunmount = function() {
 				accept : {
 					label    : 'btnUnmount',
 					callback : function() {  
-						var chDrive = (fm.root() == drive.hash),
-							roots = childrenRoots(drive.hash),
+						var target =  drive.hash,
+							roots = childrenRoots(target),
 							requests = [],
 							removed = [],
 							doUmount = function() {
 								$.when(requests).done(function() {
-									var base = $('#'+fm.navHash2Id(drive.hash)).parent(),
-										navTo = (base.next().length? base.next() : base.prev()).find('.elfinder-navbar-root');
-
 									fm.request({
-										data   : {cmd  : 'netmount', protocol : 'netunmount', host: drive.netkey, user : drive.hash, pass : 'dum'}, 
+										data   : {cmd  : 'netmount', protocol : 'netunmount', host: drive.netkey, user : target, pass : 'dum'}, 
 										notify : {type : 'netunmount', cnt : 1, hideCnt : true},
 										preventFail : true
 									})
@@ -281,21 +278,6 @@ elFinder.prototype.commands.netunmount = function() {
 										dfrd.reject(error);
 									})
 									.done(function(data) {
-										var open = fm.root();
-										if (chDrive) {
-											if (navTo.length) {
-												open = fm.navId2Hash(navTo[0].id);
-											} else {
-												// fallback
-												$.each(fm.files(), function(h, f) {
-													if (f.mime == 'directory') {
-														open = h;
-														return null;
-													}
-												});
-											}
-											fm.exec('open', open);
-										}
 										dfrd.resolve();
 									});
 								}).fail(function(error) {
