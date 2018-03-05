@@ -26,6 +26,7 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Hypweb\elFinderFlysyst
         parent::__construct();
         
         $opts = array(
+            'acceptedName' => '#^[^/\\?*:|"<>]*[^./\\?*:|"<>]$#',
             'rootCssClass' => 'elfinder-navbar-root-googledrive',
             'gdAlias'        => '%s@GDrive',
             'gdCacheDir'     => __DIR__ . '/.tmp',
