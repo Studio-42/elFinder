@@ -142,10 +142,11 @@ class elFinderVolumeFlysystemZipArchiveNetmount extends Driver
                         throw new Exception(elFinder::ERROR_FILE_NOT_FOUND);
                     }
                     $tfp = fopen($opts['localpath'], 'wb');
-                    if (!$tfp || false === stream_copy_to_stream($srcVolume->open($opts['host']), $tfp)) {
+                    $sfp = $srcVolume->open($opts['host']);
+                    if (!$tfp || false === stream_copy_to_stream($sfp, $tfp)) {
                         throw new Exception(elFinder::ERROR_UPLOAD_TEMP);
                     }
-                    $srcVolume->close($opts['host']);
+                    $srcVolume->close($sfp, $opts['host']);
                     fclose($tfp);
                     $refresh = true;
                 } else {
