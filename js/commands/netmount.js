@@ -228,14 +228,26 @@ elFinder.prototype.commands.netunmount = function() {
 				}),
 			drive  = fm.file(hashes[0]),
 			childrenRoots = function(hash) {
-				var roots = [];
+				var roots = [],
+					work;
 				if (fm.leafRoots) {
+					work = [];
 					$.each(fm.leafRoots, function(phash, hashes) {
-						var parents = fm.parents(phash);
-						if ($.inArray(hash, parents) !== -1) {
-							roots = roots.concat(hashes);
+						var parents = fm.parents(phash),
+							idx, deep;
+						if ((idx = $.inArray(hash, parents)) !== -1) {
+							idx = parents.length - idx;
+							$.each(hashes, function(i, h) {
+								work.push({i: idx, hash: h});
+							});
 						}
 					});
+					if (work.length) {
+						work.sort(function(a, b) { return a.i < b.i; });
+						$.each(work, function(i, o) {
+							roots.push(o.hash);
+						});
+					}
 				}
 				return roots;
 			};
@@ -254,6 +266,7 @@ elFinder.prototype.commands.netunmount = function() {
 						var chDrive = (fm.root() == drive.hash),
 							roots = childrenRoots(drive.hash),
 							requests = [],
+							removed = [],
 							doUmount = function() {
 								$.when(requests).done(function() {
 									var base = $('#'+fm.navHash2Id(drive.hash)).parent(),
@@ -286,6 +299,9 @@ elFinder.prototype.commands.netunmount = function() {
 										dfrd.resolve();
 									});
 								}).fail(function(error) {
+									if (removed.length) {
+										fm.remove({ removed: removed });
+									}
 									dfrd.reject(error);
 								});
 							};
@@ -309,7 +325,11 @@ elFinder.prototype.commands.netunmount = function() {
 												requests.push(fm.request({
 													data   : {cmd  : 'netmount', protocol : 'netunmount', host: d.netkey, user : d.hash, pass : 'dum'}, 
 													notify : {type : 'netunmount', cnt : 1, hideCnt : true},
-													preventFail : true
+													preventDefault : true
+												}).done(function(data) {
+													if (data.removed) {
+														removed = removed.concat(data.removed);
+													}
 												}));
 											}
 										});
