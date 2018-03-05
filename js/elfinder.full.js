@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: 26912fc) (2018-03-05)
+ * Version 2.1.32 (2.1-src Nightly: 218e063) (2018-03-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9003,7 +9003,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 26912fc)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 218e063)';
 
 
 
@@ -23574,14 +23574,26 @@ elFinder.prototype.commands.netunmount = function() {
 				}),
 			drive  = fm.file(hashes[0]),
 			childrenRoots = function(hash) {
-				var roots = [];
+				var roots = [],
+					work;
 				if (fm.leafRoots) {
+					work = [];
 					$.each(fm.leafRoots, function(phash, hashes) {
-						var parents = fm.parents(phash);
-						if ($.inArray(hash, parents) !== -1) {
-							roots = roots.concat(hashes);
+						var parents = fm.parents(phash),
+							idx, deep;
+						if ((idx = $.inArray(hash, parents)) !== -1) {
+							idx = parents.length - idx;
+							$.each(hashes, function(i, h) {
+								work.push({i: idx, hash: h});
+							});
 						}
 					});
+					if (work.length) {
+						work.sort(function(a, b) { return a.i < b.i; });
+						$.each(work, function(i, o) {
+							roots.push(o.hash);
+						});
+					}
 				}
 				return roots;
 			};
@@ -23600,6 +23612,7 @@ elFinder.prototype.commands.netunmount = function() {
 						var chDrive = (fm.root() == drive.hash),
 							roots = childrenRoots(drive.hash),
 							requests = [],
+							removed = [],
 							doUmount = function() {
 								$.when(requests).done(function() {
 									var base = $('#'+fm.navHash2Id(drive.hash)).parent(),
@@ -23632,6 +23645,9 @@ elFinder.prototype.commands.netunmount = function() {
 										dfrd.resolve();
 									});
 								}).fail(function(error) {
+									if (removed.length) {
+										fm.remove({ removed: removed });
+									}
 									dfrd.reject(error);
 								});
 							};
@@ -23655,7 +23671,11 @@ elFinder.prototype.commands.netunmount = function() {
 												requests.push(fm.request({
 													data   : {cmd  : 'netmount', protocol : 'netunmount', host: d.netkey, user : d.hash, pass : 'dum'}, 
 													notify : {type : 'netunmount', cnt : 1, hideCnt : true},
-													preventFail : true
+													preventDefault : true
+												}).done(function(data) {
+													if (data.removed) {
+														removed = removed.concat(data.removed);
+													}
 												}));
 											}
 										});

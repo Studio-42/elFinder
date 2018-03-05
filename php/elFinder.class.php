@@ -567,9 +567,10 @@ class elFinder {
 		// try session start | restart
 		$this->session->start();
 		
-		$sessionUseCmds = array();
+		// 'netmount' added to handle requests synchronously on unmount
+		$sessionUseCmds = array('netmount');
 		if (isset($opts['sessionUseCmds']) && is_array($opts['sessionUseCmds'])) {
-			$sessionUseCmds = $opts['sessionUseCmds'];
+			$sessionUseCmds = array_merge($sessionUseCmds, $opts['sessionUseCmds']);
 		}
 
 		// set self::$volumesCnt by HTTP header "X-elFinder-VolumesCntStart"
