@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: a4fd230) (2018-03-05)
+ * Version 2.1.32 (2.1-src Nightly: 92ffc6f) (2018-03-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9003,7 +9003,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: a4fd230)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 92ffc6f)';
 
 
 
@@ -16125,7 +16125,6 @@ $.fn.elfinderfullscreenbutton = function(cmd) {
 $.fn.elfindernavbar = function(fm, opts) {
 		this.not('.elfinder-navbar').each(function() {
 		var nav    = $(this).hide().addClass('ui-state-default elfinder-navbar'),
-			ovf    = nav.css('overflow'),
 			parent = nav.css('overflow', 'hidden').parent(),
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
@@ -16143,7 +16142,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 				delta = nav.outerHeight() - nav.height();
 			}).one('opendone',function() {
 				handle && handle.trigger('resize');
-				nav.css('overflow', ovf);
+				nav.css('overflow', 'auto');
 			}).bind('wzresize', function() {
 				var navdockH = 0;
 				if (! navdock) {
