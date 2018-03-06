@@ -103,6 +103,7 @@ Requirements
 ### Server
  * Any web server
  * PHP 5.2+ (Recommend PHP 5.4 or higher) And for thumbnails - GD / Imagick module / convert(imagemagick) require
+     * Recommend PHP 7.1 or higher to supports non-ASCII character of file path/name on the Windows server
 
 Installation
 ------------
