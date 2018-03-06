@@ -9,7 +9,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		"use strict";
 		var mimes   = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp'],
 			preview = ql.preview,
-			WebP;
+			WebP, flipMime;
 		
 		// webp support
 		WebP = new Image();
@@ -87,7 +87,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 				},
 				url, img, loading, m;
 
-			if (ql.dispInlineRegex.test(file.mime) && $.inArray(file.mime, mimes) !== -1) {
+			if (!flipMime) {
+				flipMime = fm.arrayFlip(mimes);
+			}
+			if (flipMime[file.mime] && ql.dispInlineRegex.test(file.mime)) {
 				// this is our file - stop event propagation
 				e.stopImmediatePropagation();
 
@@ -134,7 +137,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	function(ql) {
 		"use strict";
 		var fm      = ql.fm,
-			mimes   = ['image/vnd.adobe.photoshop', 'image/x-photoshop'],
+			mimes   = fm.arrayFlip(['image/vnd.adobe.photoshop', 'image/x-photoshop']),
 			preview = ql.preview,
 			load    = function(url, img, loading) {
 				try {
@@ -183,7 +186,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				url, img, loading, m,
 				_define, _require;
 
-			if (fm.options.cdns.psd && ! fm.UA.ltIE10 && ql.dispInlineRegex.test(file.mime) && $.inArray(file.mime, mimes) !== -1) {
+			if (mimes[file.mime] && fm.options.cdns.psd && ! fm.UA.ltIE10 && ql.dispInlineRegex.test(file.mime)) {
 				// this is our file - stop event propagation
 				e.stopImmediatePropagation();
 
@@ -222,14 +225,14 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 **/
 	function(ql) {
 		"use strict";
-		var mimes   = ['text/html', 'application/xhtml+xml'],
-			preview = ql.preview,
-			fm      = ql.fm;
+		var fm      = ql.fm,
+			mimes   = fm.arrayFlip(['text/html', 'application/xhtml+xml']),
+			preview = ql.preview;
 			
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file, jqxhr, loading;
 			
-			if (ql.dispInlineRegex.test(file.mime) && $.inArray(file.mime, mimes) !== -1) {
+			if (mimes[file.mime] && ql.dispInlineRegex.test(file.mime)) {
 				e.stopImmediatePropagation();
 
 				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
@@ -265,9 +268,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 **/
 	function(ql) {
 		"use strict";
-		var mimes   = ['text/x-markdown'],
+		var fm      = ql.fm,
+			mimes   = fm.arrayFlip(['text/x-markdown']),
 			preview = ql.preview,
-			fm      = ql.fm,
 			marked  = null,
 			show = function(data, loading) {
 				ql.hideinfo();
@@ -285,7 +288,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file, jqxhr, loading;
 			
-			if (fm.options.cdns.marked && marked !== false && file.mime === 'text/x-markdown' && ql.dispInlineRegex.test('text/html')) {
+			if (mimes[file.mime] && fm.options.cdns.marked && marked !== false && ql.dispInlineRegex.test(file.mime)) {
 				e.stopImmediatePropagation();
 
 				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
@@ -341,7 +344,6 @@ elFinder.prototype.commands.quicklook.plugins = [
 	function(ql) {
 		"use strict";
 		var fm      = ql.fm,
-			mimes   = fm.res('mimes', 'text'),
 			preview = ql.preview,
 			textMaxlen = parseInt(ql.options.textMaxlen) || 2000,
 			prettify = function() {
@@ -375,7 +377,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				mime = file.mime,
 				jqxhr, loading;
 			
-			if (fm.mimeIsText(mime) || $.inArray(mime, mimes) !== -1) {
+			if (fm.mimeIsText(file.mime)) {
 				e.stopImmediatePropagation();
 				
 				(typeof window.PR === 'undefined') && prettify();
@@ -454,7 +456,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		} else {
 			$.each(navigator.plugins, function(i, plugins) {
 				$.each(plugins, function(i, plugin) {
-					if (plugin.type == mime) {
+					if (plugin.type === mime) {
 						return !(active = true);
 					}
 				});
@@ -464,7 +466,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		active && preview.on(ql.evUpdate, function(e) {
 			var file = e.file, node;
 			
-			if (ql.dispInlineRegex.test(file.mime) && file.mime == mime) {
+			if (file.mime === mime && ql.dispInlineRegex.test(file.mime)) {
 				e.stopImmediatePropagation();
 				ql.hideinfo();
 				node = $('<object class="elfinder-quicklook-preview-pdf" data="'+fm.openUrl(file.hash)+'" type="application/pdf" />')
@@ -490,7 +492,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 
 		$.each(navigator.plugins, function(i, plugins) {
 			$.each(plugins, function(i, plugin) {
-				if (plugin.type == mime) {
+				if (plugin.type === mime) {
 					return !(active = true);
 				}
 			});
@@ -500,7 +502,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			var file = e.file,
 				node;
 				
-			if (ql.dispInlineRegex.test(file.mime) && file.mime == mime) {
+			if (file.mime === mime && ql.dispInlineRegex.test(file.mime)) {
 				e.stopImmediatePropagation();
 				ql.hideinfo();
 				node = $('<embed class="elfinder-quicklook-preview-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" src="'+fm.openUrl(file.hash)+'" quality="high" type="application/x-shockwave-flash" wmode="transparent" />')
@@ -722,6 +724,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				(plugin.type.indexOf('audio/') === 0 || plugin.type.indexOf('video/') === 0) && mimes.push(plugin.type);
 			});
 		});
+		mimes = ql.fm.arrayFlip(mimes);
 		
 		preview.on(ql.evUpdate, function(e) {
 			var file  = e.file,
@@ -731,7 +734,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
 				};
 			
-			if (ql.dispInlineRegex.test(file.mime) && $.inArray(file.mime, mimes) !== -1) {
+			if (mimes[file.mime] && ql.dispInlineRegex.test(file.mime)) {
 				e.stopImmediatePropagation();
 				(video = mime.indexOf('video/') === 0) && ql.hideinfo();
 				node = $('<embed src="'+ql.fm.openUrl(file.hash)+'" type="'+mime+'" class="elfinder-quicklook-preview-'+(video ? 'video' : 'audio')+'"/>')
@@ -757,9 +760,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 **/
 	function(ql) {
 		"use strict";
-		var mimes   = ['application/zip', 'application/x-gzip', 'application/x-tar'],
+		var fm      = ql.fm,
+			mimes   = fm.arrayFlip(['application/zip', 'application/x-gzip', 'application/x-tar']),
 			preview = ql.preview,
-			fm      = ql.fm,
 			unzipFiles = function() {
 				/** @type {Array.<string>} */
 				var filenameList = [];
@@ -806,69 +809,69 @@ elFinder.prototype.commands.quicklook.plugins = [
 
 		if (window.Uint8Array && window.DataView && fm.options.cdns.zlibUnzip && fm.options.cdns.zlibGunzip) {
 			preview.on(ql.evUpdate, function(e) {
-				var file = e.file,
-					doc, xhr, loading, url,
-					req = function() {
-						xhr = new XMLHttpRequest();
-						xhr.onload = function(e) {
-							var unzip, filenames;
-							if (this.readyState === 4 && this.response) {
-								try {
-									if (file.mime === 'application/zip') {
-										unzip = new Zlib.Unzip(new Uint8Array(xhr.response));
-										//filenames = unzip.getFilenames();
-										filenames = unzipFiles.call(unzip);
-									} else if (file.mime === 'application/x-gzip') {
-										unzip = new Zlib.Gunzip(new Uint8Array(xhr.response));
-										filenames = tarFiles(unzip.decompress());
-									} else if (file.mime === 'application/x-tar') {
-										filenames = tarFiles(new Uint8Array(xhr.response));
-									}
-									makeList(filenames);
-								} catch (e) {
-									loading.remove();
-									fm.debug('error', e);
-								}
-							} else {
-								loading.remove();
-							}
-						};
-						url = fm.openUrl(file.hash);
-						if (!fm.isSameOrigin(url)) {
-							url = fm.openUrl(file.hash, true);
-						}
-						xhr.open('GET', url, true);
-						xhr.responseType = 'arraybuffer';
-						fm.replaceXhrSend();
-						xhr.send();
-						fm.restoreXhrSend();
-					},
-					makeList = function(filenames) {
-						var header, doc;
-						if (filenames && filenames.length) {
-							filenames = $.map(filenames, function(str) {
-								return fm.decodeRawString(str);
-							});
-							filenames.sort();
-							loading.remove();
-							header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>';
-							doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>')
-								.on('touchstart', function(e) {
-									if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
-										e.originalEvent._preventSwipeX = true;
-									}
-								})
-								.appendTo(preview);
-							ql.hideinfo();
-						}
-					},
-					isTar = (file.mime === 'application/x-tar'),
-					_Zlib;
-
-				if ($.inArray(file.mime, mimes) !== -1 && (
+				var file  = e.file,
+					isTar = (file.mime === 'application/x-tar');
+				if (mimes[file.mime] && (
 						isTar
 						|| ((typeof Zlib === 'undefined' || Zlib) && (file.mime === 'application/zip' || file.mime === 'application/x-gzip'))
 					)) {
+					var doc, xhr, loading, url,
+						req = function() {
+							xhr = new XMLHttpRequest();
+							xhr.onload = function(e) {
+								var unzip, filenames;
+								if (this.readyState === 4 && this.response) {
+									try {
+										if (file.mime === 'application/zip') {
+											unzip = new Zlib.Unzip(new Uint8Array(xhr.response));
+											//filenames = unzip.getFilenames();
+											filenames = unzipFiles.call(unzip);
+										} else if (file.mime === 'application/x-gzip') {
+											unzip = new Zlib.Gunzip(new Uint8Array(xhr.response));
+											filenames = tarFiles(unzip.decompress());
+										} else if (file.mime === 'application/x-tar') {
+											filenames = tarFiles(new Uint8Array(xhr.response));
+										}
+										makeList(filenames);
+									} catch (e) {
+										loading.remove();
+										fm.debug('error', e);
+									}
+								} else {
+									loading.remove();
+								}
+							};
+							url = fm.openUrl(file.hash);
+							if (!fm.isSameOrigin(url)) {
+								url = fm.openUrl(file.hash, true);
+							}
+							xhr.open('GET', url, true);
+							xhr.responseType = 'arraybuffer';
+							fm.replaceXhrSend();
+							xhr.send();
+							fm.restoreXhrSend();
+						},
+						makeList = function(filenames) {
+							var header, doc;
+							if (filenames && filenames.length) {
+								filenames = $.map(filenames, function(str) {
+									return fm.decodeRawString(str);
+								});
+								filenames.sort();
+								loading.remove();
+								header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>';
+								doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>')
+									.on('touchstart', function(e) {
+										if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
+											e.originalEvent._preventSwipeX = true;
+										}
+									})
+									.appendTo(preview);
+								ql.hideinfo();
+							}
+						},
+						_Zlib;
+
 					// this is our file - stop event propagation
 					e.stopImmediatePropagation();
 					
@@ -915,65 +918,65 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 **/
 	function(ql) {
 		"use strict";
-		var mimes   = ['application/x-rar'],
+		var fm      = ql.fm,
+			mimes   = fm.arrayFlip(['application/x-rar']),
 			preview = ql.preview,
-			fm      = ql.fm,
 			RAR;
 
 		if (window.DataView) {
 			preview.on(ql.evUpdate, function(e) {
-				var file = e.file,
-					loading, url, archive, abort,
-					getList = function(url) {
-						if (abort) {
-							loading.remove();
-							return;
-						}
-						try {
-							archive = RAR({
-								file: url,
-								type: 2,
-								xhrHeaders: fm.customHeaders,
-								xhrFields: fm.xhrFields
-							}, function(err) {
+				var file = e.file;
+				if (mimes[file.mime] && fm.options.cdns.rar && RAR !== false) {
+					var loading, url, archive, abort,
+						getList = function(url) {
+							if (abort) {
 								loading.remove();
-								var filenames = [],
-									header, doc;
-								if (abort || err) {
-									// An error occurred (not a rar, read error, etc)
-									err && fm.debug('error', err);
-									return;
-								}
-								$.each(archive.entries, function() {
-									filenames.push(this.path + (this.size? ' (' + fm.formatSize(this.size) + ')' : ''));
-								});
-								if (filenames.length) {
-									filenames = $.map(filenames, function(str) {
-										return fm.decodeRawString(str);
+								return;
+							}
+							try {
+								archive = RAR({
+									file: url,
+									type: 2,
+									xhrHeaders: fm.customHeaders,
+									xhrFields: fm.xhrFields
+								}, function(err) {
+									loading.remove();
+									var filenames = [],
+										header, doc;
+									if (abort || err) {
+										// An error occurred (not a rar, read error, etc)
+										err && fm.debug('error', err);
+										return;
+									}
+									$.each(archive.entries, function() {
+										filenames.push(this.path + (this.size? ' (' + fm.formatSize(this.size) + ')' : ''));
 									});
-									filenames.sort();
-									header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>';
-									doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>')
-										.on('touchstart', function(e) {
-											if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
-												e.originalEvent._preventSwipeX = true;
-											}
-										})
-										.appendTo(preview);
-									ql.hideinfo();
-								}
-							});
-						} catch(e) {
+									if (filenames.length) {
+										filenames = $.map(filenames, function(str) {
+											return fm.decodeRawString(str);
+										});
+										filenames.sort();
+										header = '<strong>'+fm.escape(file.mime)+'</strong> ('+fm.formatSize(file.size)+')'+'<hr/>';
+										doc = $('<div class="elfinder-quicklook-preview-archive-wrapper">'+header+'<pre class="elfinder-quicklook-preview-text">'+fm.escape(filenames.join("\n"))+'</pre></div>')
+											.on('touchstart', function(e) {
+												if ($(this)['scroll' + (fm.direction === 'ltr'? 'Right' : 'Left')]() > 5) {
+													e.originalEvent._preventSwipeX = true;
+												}
+											})
+											.appendTo(preview);
+										ql.hideinfo();
+									}
+								});
+							} catch(e) {
+								loading.remove();
+							}
+						},
+						error = function() {
+							RAR = false;
 							loading.remove();
-						}
-					},
-					error = function() {
-						RAR = false;
-						loading.remove();
-					},
-					_RAR;
+						},
+						_RAR;
 
-				if (fm.options.cdns.rar && RAR !== false && $.inArray(file.mime, mimes) !== -1) {
 					// this is our file - stop event propagation
 					e.stopImmediatePropagation();
 					
@@ -1037,21 +1040,21 @@ elFinder.prototype.commands.quicklook.plugins = [
 	function(ql) {
 		"use strict";
 		var fm      = ql.fm,
-			mimes   = ql.options.googleDocsMimes || [],
+			mimes   = fm.arrayFlip(ql.options.googleDocsMimes || []),
 			preview = ql.preview,
 			win     = ql.window,
 			navi    = ql.navbar,
 			node;
 			
 		preview.on(ql.evUpdate, function(e) {
-			var win     = ql.window,
-				file    = e.file,
-				setNavi = function() {
-					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '56px' : '');
-				},
-				loading;
-			
-			if ($.inArray(file.mime, mimes) !== -1) {
+			var file = e.file;
+			if (mimes[file.mime]) {
+				var win     = ql.window,
+					setNavi = function() {
+						navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '56px' : '');
+					},
+					loading;
+				
 				if (file.url == '1') {
 					preview.hide();
 					$('<div class="elfinder-quicklook-info-data"><button class="elfinder-info-button">'+fm.i18n('getLink')+'</button></div>').appendTo(ql.info.find('.elfinder-quicklook-info'))
