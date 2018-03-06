@@ -7,7 +7,6 @@ $.fn.elfindernavbar = function(fm, opts) {
 	"use strict";
 	this.not('.elfinder-navbar').each(function() {
 		var nav    = $(this).hide().addClass('ui-state-default elfinder-navbar'),
-			ovf    = nav.css('overflow'),
 			parent = nav.css('overflow', 'hidden').parent(),
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
@@ -25,7 +24,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 				delta = nav.outerHeight() - nav.height();
 			}).one('opendone',function() {
 				handle && handle.trigger('resize');
-				nav.css('overflow', ovf);
+				nav.css('overflow', 'auto');
 			}).bind('wzresize', function() {
 				var navdockH = 0;
 				if (! navdock) {
