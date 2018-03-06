@@ -1,3 +1,33 @@
+2018-03-xx  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.33):
+		- [cmd:upload] Fixed #2379 icon of target folder list is not shown
+		- [js:core] Fixed #2378 sometime can't upload from directory selector
+		- [cmd:edit] Fixed #2381 trigger event "editEditorPrepare" before build editor
+		- [cmd:edit] Fixed #2382 can't reopen editor on return from canceling SaveAs from cancel action
+		- [cmd:edit] Fixed #2383 can't use CodeMirror, SimpleMDE with require.js
+		- [VD:MySQL] Fixed #2384 infinitely loop on search if root has parent_id
+		- [js:extras:editors] add CKEditor5 editor
+		- [js,css] Fixed #2390 optimization to mobile devices
+		- [cmd:search] Fixed #2392 broken search design in current nightlty
+		- [php:core] Fixed #2393 strange corruption of PHP internal_encoding
+		- [js] Fixed #2401 remove deprecated functions of jQuery
+		- [js] Fixed #2401 change `on('hover')` to `on('mouseenter mouseleave')`
+		- [php:core] Fixed #2402 add an option `memoryLimitGD` to connector main options
+		- [js:core] Fixed #2403 backward compatibility with API 2.0 is broken
+		- [cmd:edit] Fixed #2405 mount the zip archive to edit archive contents
+		- [VD:abstract] Fixed #2407 include the leaf root into search results
+		- [VD:abstract] Fixed #2408 have the generic archive function for remote volume
+		- [js:core] optimization of handling of leafRoots
+		- [cmd:netmount] also unmount volumes included in volume to be unmounted
+		- [i18n:LANG] add 'reflectOnImmediate','reflectOnUnmount','unmountChildren'
+		- [cmd:netmount] follow the tree in reverse and unmount them in order
+		- [php:core] add 'netmount' to `sessionUseCmds` for handle requests synchronously on unmount
+		- [VD:Group] correction of `dirs` result of root stat
+		- [VD] allow uploading all file types to the net mount volume
+		- And some minor bug fixes
+
+
 2018-02-07  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.32):
