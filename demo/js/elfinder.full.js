@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: 92ffc6f) (2018-03-06)
+ * Version 2.1.32 (2.1-src Nightly: e442e80) (2018-03-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9003,7 +9003,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 92ffc6f)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: e442e80)';
 
 
 
@@ -9382,7 +9382,8 @@ elFinder.prototype._options = {
 		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js',
 		rar        : '//cdn.rawgit.com/nao-pon/rar.js/6cef13ec66dd67992fc7f3ea22f132d770ebaf8b/rar.min.js',
 		zlibUnzip  : '//cdn.rawgit.com/imaya/zlib.js/0.3.1/bin/unzip.min.js', // need check unzipFiles() in quicklook.plugins.js when update
-		zlibGunzip : '//cdn.rawgit.com/imaya/zlib.js/0.3.1/bin/gunzip.min.js'
+		zlibGunzip : '//cdn.rawgit.com/imaya/zlib.js/0.3.1/bin/gunzip.min.js',
+		marked     : '//cdnjs.cloudflare.com/ajax/libs/marked/0.3.17/marked.min.js'
 	},
 	
 	/**
@@ -25501,6 +25502,80 @@ elFinder.prototype.commands.quicklook.plugins = [
 	},
 	
 	/**
+	 * MarkDown preview plugin
+	 *
+	 * @param elFinder.commands.quicklook
+	 **/
+	function(ql) {
+				var mimes   = ['text/x-markdown'],
+			preview = ql.preview,
+			fm      = ql.fm,
+			marked  = null,
+			show = function(data, loading) {
+				ql.hideinfo();
+				var doc = $('<iframe class="elfinder-quicklook-preview-html"/>').appendTo(preview)[0].contentWindow.document;
+				doc.open();
+				doc.write(marked(data.content));
+				doc.close();
+				loading.remove();
+			},
+			error = function(loading) {
+				marked = false;
+				loading.remove();
+			};
+			
+		preview.on(ql.evUpdate, function(e) {
+			var file = e.file, jqxhr, loading;
+			
+			if (fm.options.cdns.marked && marked !== false && file.mime === 'text/x-markdown' && ql.dispInlineRegex.test('text/html')) {
+				e.stopImmediatePropagation();
+
+				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+
+				// stop loading on change file if not loaded yet
+				preview.one('change', function() {
+					jqxhr.state() == 'pending' && jqxhr.reject();
+				}).addClass('elfinder-overflow-auto');
+				
+				jqxhr = fm.request({
+					data           : {cmd : 'get', target : file.hash, conv : 1, _t : file.ts},
+					options        : {type: 'get', cache : true},
+					preventDefault : true
+				})
+				.done(function(data) {
+					if (marked || window.marked) {
+						if (!marked) {
+							marked = window.marked;
+						}
+						show(data, loading);
+					} else {
+						fm.loadScript([fm.options.cdns.marked],
+							function(res) { 
+								marked = res || window.marked || false;
+								delete window.marked;
+								if (marked) {
+									show(data, loading);
+								} else {
+									error(loading);
+								}
+							},
+							{
+								tryRequire: true,
+								error: function() {
+									error(loading);
+								}
+							}
+						);
+					}
+				})
+				.fail(function() {
+					error(loading);
+				});
+			}
+		});
+	},
+
+	/**
 	 * Texts preview plugin
 	 *
 	 * @param elFinder.commands.quicklook
@@ -26859,7 +26934,8 @@ elFinder.prototype.commands.rename = function() {
  * @author Sergio Jovani
  **/
 elFinder.prototype.commands.resize = function() {
-		var losslessRotate = 0,
+	"use strict";
+	var losslessRotate = 0,
 		getBounceBox = function(w, h, theta) {
 			var srcPts = [
 					{x: w/2, y: h/2},
