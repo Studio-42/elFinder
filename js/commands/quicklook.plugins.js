@@ -259,6 +259,81 @@ elFinder.prototype.commands.quicklook.plugins = [
 	},
 	
 	/**
+	 * MarkDown preview plugin
+	 *
+	 * @param elFinder.commands.quicklook
+	 **/
+	function(ql) {
+		"use strict";
+		var mimes   = ['text/x-markdown'],
+			preview = ql.preview,
+			fm      = ql.fm,
+			marked  = null,
+			show = function(data, loading) {
+				ql.hideinfo();
+				var doc = $('<iframe class="elfinder-quicklook-preview-html"/>').appendTo(preview)[0].contentWindow.document;
+				doc.open();
+				doc.write(marked(data.content));
+				doc.close();
+				loading.remove();
+			},
+			error = function(loading) {
+				marked = false;
+				loading.remove();
+			};
+			
+		preview.on(ql.evUpdate, function(e) {
+			var file = e.file, jqxhr, loading;
+			
+			if (fm.options.cdns.marked && marked !== false && file.mime === 'text/x-markdown' && ql.dispInlineRegex.test('text/html')) {
+				e.stopImmediatePropagation();
+
+				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+
+				// stop loading on change file if not loaded yet
+				preview.one('change', function() {
+					jqxhr.state() == 'pending' && jqxhr.reject();
+				}).addClass('elfinder-overflow-auto');
+				
+				jqxhr = fm.request({
+					data           : {cmd : 'get', target : file.hash, conv : 1, _t : file.ts},
+					options        : {type: 'get', cache : true},
+					preventDefault : true
+				})
+				.done(function(data) {
+					if (marked || window.marked) {
+						if (!marked) {
+							marked = window.marked;
+						}
+						show(data, loading);
+					} else {
+						fm.loadScript([fm.options.cdns.marked],
+							function(res) { 
+								marked = res || window.marked || false;
+								delete window.marked;
+								if (marked) {
+									show(data, loading);
+								} else {
+									error(loading);
+								}
+							},
+							{
+								tryRequire: true,
+								error: function() {
+									error(loading);
+								}
+							}
+						);
+					}
+				})
+				.fail(function() {
+					error(loading);
+				});
+			}
+		});
+	},
+
+	/**
 	 * Texts preview plugin
 	 *
 	 * @param elFinder.commands.quicklook
