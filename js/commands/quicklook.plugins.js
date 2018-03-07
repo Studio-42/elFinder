@@ -79,11 +79,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 					})
 					.trigger('changesize');
 					
+					//show image
+					img.fadeIn(100);
+				},
+				hideInfo = function() {
 					loading.remove();
 					// hide info/icon
 					ql.hideinfo();
-					//show image
-					img.fadeIn(100);
 				},
 				url, img, loading, m;
 
@@ -101,7 +103,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 				img = $('<img/>')
 					.hide()
 					.appendTo(preview)
-					.on('load', show)
+					.on('load', function() {
+						hideInfo();
+						show();
+					})
 					.on('error', function() {
 						loading.remove();
 					})
@@ -232,7 +237,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file, jqxhr, loading;
 			
-			if (mimes[file.mime] && ql.dispInlineRegex.test(file.mime)) {
+			if (mimes[file.mime] && ql.dispInlineRegex.test(file.mime) && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax)) {
 				e.stopImmediatePropagation();
 
 				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
@@ -288,7 +293,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file, jqxhr, loading;
 			
-			if (mimes[file.mime] && fm.options.cdns.marked && marked !== false && ql.dispInlineRegex.test(file.mime)) {
+			if (mimes[file.mime] && fm.options.cdns.marked && marked !== false && ql.dispInlineRegex.test(file.mime) && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax)) {
 				e.stopImmediatePropagation();
 
 				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
@@ -377,7 +382,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				mime = file.mime,
 				jqxhr, loading;
 			
-			if (fm.mimeIsText(file.mime)) {
+			if (fm.mimeIsText(file.mime) && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax)) {
 				e.stopImmediatePropagation();
 				
 				(typeof window.PR === 'undefined') && prettify();
@@ -1098,15 +1103,103 @@ elFinder.prototype.commands.quicklook.plugins = [
 						.on('load', function() {
 							ql.hideinfo();
 							loading.remove();
+							ql.preview.after(ql.info);
 							$(this).css('background-color', '#fff').show();
+						})
+						.on('error', function() {
+							loading.remove();
+							ql.preview.after(ql.info);
 						})
 						.attr('src', '//docs.google.com/gview?embedded=true&url=' + encodeURIComponent(fm.convAbsUrl(fm.url(file.hash))));
 					
 					win.on('viewchange.googledocs', setNavi);
 					setNavi();
+					ql.info.after(ql.preview);
 				}
 			}
 			
+		});
+	},
+
+	/**
+	 * Show file MD5 hashe preview plugin
+	 *
+	 * @param elFinder.commands.quicklook
+	 **/
+	function(ql) {
+		"use strict";
+		var fm      = ql.fm,
+			preview = ql.preview,
+			libObj  = null,
+			show = function(data, loading) {
+				var spark = new libObj(),
+					arr = data.content.split(/$^/, 5242880),
+					job;
+
+				job = fm.asyncJob(function(str) {
+					spark.append(str);
+				}, arr).done(function() {
+					loading.replaceWith('<div class="elfinder-quicklook-info-data">MD5: ' + spark.end() + '</div>');
+				}).fail(function() {
+					loading.remove();
+				});
+
+				preview.one('change', function() {
+					job._abort();
+				});
+			},
+			error = function(loading) {
+				loading.remove();
+			};
+			
+		preview.on(ql.evUpdate, function(e) {
+			var file = e.file, jqxhr, loading;
+			
+			if (file.mime !== 'directory' && fm.options.cdns.sparkmd5 && libObj !== false && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax)) {
+
+				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+
+				// stop loading on change file if not loaded yet
+				preview.one('change', function() {
+					jqxhr.state() == 'pending' && jqxhr.reject();
+				}).addClass('elfinder-overflow-auto');
+				
+				jqxhr = fm.request({
+					data           : {cmd : 'get', target : file.hash, conv : 1, _t : file.ts},
+					options        : {type: 'get', cache : true},
+					preventDefault : true
+				})
+				.done(function(data) {
+					if (libObj || window.SparkMD5) {
+						if (!libObj) {
+							libObj = window.SparkMD5;
+						}
+						show(data, loading);
+					} else {
+						fm.loadScript([fm.options.cdns.sparkmd5],
+							function(res) { 
+								libObj = res || window.SparkMD5 || false;
+								delete window.SparkMD5;
+								if (libObj) {
+									show(data, loading);
+								} else {
+									error(loading);
+								}
+							},
+							{
+								tryRequire: true,
+								error: function() {
+									libObj = false;
+									error(loading);
+								}
+							}
+						);
+					}
+				})
+				.fail(function() {
+					error(loading);
+				});
+			}
 		});
 	}
 
