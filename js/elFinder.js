@@ -5112,7 +5112,8 @@ elFinder.prototype = {
 	cmdsToAdd : 'archive duplicate extract mkdir mkfile paste rm upload',
 	
 	parseUploadData : function(text) {
-		var data;
+		var self = this,
+			data;
 		
 		if (!$.trim(text)) {
 			return {error : ['errResponse', 'errDataEmpty']};
@@ -5124,11 +5125,11 @@ elFinder.prototype = {
 			return {error : ['errResponse', 'errDataNotJSON']};
 		}
 		
-		data = this.normalize(data);
-		if (!this.validResponse('upload', data)) {
+		data = self.normalize(data);
+		if (!self.validResponse('upload', data)) {
 			return {error : (response.norError || ['errResponse'])};
 		}
-		data.removed = $.merge((data.removed || []), $.map(data.added||[], function(f) { return f.hash; }));
+		data.removed = $.merge((data.removed || []), $.map(data.added || [], function(f) { return self.file(f.hash)? f.hash : null; }));
 		return data;
 		
 	},
@@ -5251,7 +5252,7 @@ elFinder.prototype = {
 					fm.request({
 						data : {cmd : 'ls', target : target, intersect : $.map(names, function(item) { return item.name;})},
 						notify : {type : 'preupload', cnt : 1, hideCnt : true},
-						preventFail : true
+						preventDefault : true
 					})
 					.done(function(data) {
 						var existedArr, cwdItems;
@@ -5615,9 +5616,9 @@ elFinder.prototype = {
 							self.currentReqCmd = 'upload';
 							data.warning && self.error(data.warning);
 							self.updateCache(data);
-							data.removed && self.remove(data);
-							data.added   && self.add(data);
-							data.changed && self.change(data);
+							data.removed && data.removed.length && self.remove(data);
+							data.added   && data.added.length   && self.add(data);
+							data.changed && data.changed.length && self.change(data);
 		 					self.trigger('upload', data, false);
 		 					self.trigger('uploaddone');
 							data.sync && self.sync();
