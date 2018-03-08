@@ -1106,9 +1106,6 @@ class elFinder {
 		// unlock locked items
 		$this->itemAutoUnlock();
 		
-		// remove self::$abortCheckFile
-		$this->abort();
-		
 		// custom data
 		if ($this->customData !== null) {
 			$result['customData'] = $this->customData? json_encode($this->customData) : '';
