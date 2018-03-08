@@ -191,7 +191,7 @@
 			file.perm && content.push(row.replace(l, msg.perm).replace(v, fm.formatFileMode(file.perm)));
 			
 			// Get MD5 hash
-			if (window.ArrayBuffer && fm.options.cdns.sparkmd5 && file.mime !== 'directory' && (!o.getSizeMax || file.size <= o.getSizeMax)) {
+			if (window.ArrayBuffer && fm.options.cdns.sparkmd5 && file.mime !== 'directory' && file.size > 0 && (!o.getSizeMax || file.size <= o.getSizeMax)) {
 				content.push(row.replace(l, msg.md5).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'md5')));
 				reqs.push(fm.getContentsHashes(file.hash, { md5: true }).done(function(hashes) {
 					replSpinner(hashes.md5 || msg.unknown, 'md5');
