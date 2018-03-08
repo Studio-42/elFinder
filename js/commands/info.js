@@ -31,7 +31,8 @@
 			owner    : fm.i18n('owner'),
 			group    : fm.i18n('group'),
 			perm     : fm.i18n('perm'),
-			getlink  : fm.i18n('getLink')
+			getlink  : fm.i18n('getLink'),
+			md5      : fm.i18n('MD5')
 		};
 		
 	this.tpl = {
@@ -83,6 +84,9 @@
 					if (reqDfrd && reqDfrd.state() === 'pending') {
 						reqDfrd.reject();
 					}
+					$.grep(reqs, function(r) {
+						r && r.state() === 'pending' && r.reject();
+					});
 				}
 			},
 			count = [],
@@ -102,8 +106,8 @@
 			return $.Deferred().resolve();
 		}
 		
-		if (cnt == 1) {
-			file  = files[0];
+		if (cnt === 1) {
+			file = files[0];
 			
 			if (file.icon) {
 				style = ' '+fm.getIconStyle(file);
@@ -179,13 +183,22 @@
 				}
 			}
 			
-			
 			content.push(row.replace(l, msg.modify).replace(v, fm.formatDate(file)));
 			content.push(row.replace(l, msg.perms).replace(v, fm.formatPermissions(file)));
 			content.push(row.replace(l, msg.locked).replace(v, file.locked ? msg.yes : msg.no));
 			file.owner && content.push(row.replace(l, msg.owner).replace(v, file.owner));
 			file.group && content.push(row.replace(l, msg.group).replace(v, file.group));
 			file.perm && content.push(row.replace(l, msg.perm).replace(v, fm.formatFileMode(file.perm)));
+			
+			// Get MD5 hash
+			if (window.ArrayBuffer && fm.options.cdns.sparkmd5 && file.mime !== 'directory' && (!o.getSizeMax || file.size <= o.getSizeMax)) {
+				content.push(row.replace(l, msg.md5).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'md5')));
+				reqs.push(fm.getContentsHashes(file.hash, { md5: true }).done(function(hashes) {
+					replSpinner(hashes.md5 || msg.unknown, 'md5');
+				}).fail(function() {
+					replSpinner(msg.unknown, 'md5');
+				}));
+			}
 			
 			// Add custom info fields
 			if (o.custom) {
