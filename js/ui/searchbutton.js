@@ -220,9 +220,6 @@ $.fn.elfindersearchbutton = function(cmd) {
 						});
 				}
 			})
-			.select(function() {
-				input.trigger('blur');
-			})
 			.bind('searchend', function() {
 				input.val('');
 			})
