@@ -3663,11 +3663,9 @@ var elFinder = function(elm, opts, bootCallback) {
 			type = responseType || 'arraybuffer',
 			url, req;
 
-		dfd._abort = function() {
-			if (req && req.state() === 'pending') {
-				req.reject();
-			}
-		};
+		dfd.fail(function() {
+			req && req.state() === 'pending' && req.reject();
+		});
 
 		url = self.openUrl(hash);
 		if (!self.isSameOrigin(url)) {
@@ -3701,15 +3699,26 @@ var elFinder = function(elm, opts, bootCallback) {
 		var hashLibs = {
 			check : true
 		},
-		md5Calc = function(data) {
+		md5Calc = function(arr) {
 			var spark = new hashLibs.SparkMD5.ArrayBuffer(),
-				arr = (data instanceof ArrayBuffer && data.byteLength > 0)? self.sliceArrayBuffer(data, 5242880) : false,
 				job;
 
 			job = self.asyncJob(function(buf) {
 				spark.append(buf);
 			}, arr).done(function() {
 				job._md5 = spark.end();
+			});
+
+			return job;
+		},
+		sha256Calc = function(arr) {
+			var sha = new hashLibs.jsSHA('SHA-256', 'ARRAYBUFFER'),
+				job;
+
+			job = self.asyncJob(function(buf) {
+				sha.update(buf);
+			}, arr).done(function() {
+				job._sha256 = sha.getHash('HEX');
 			});
 
 			return job;
@@ -3731,18 +3740,18 @@ var elFinder = function(elm, opts, bootCallback) {
 				req;
 
 			dfd.fail(function() {
-				req && req._abort();
+				req && req.reject();
 				for (var i = 0; i < jobs.length; i++) {
-					jobs[i]._abort();
+					jobs[i].reject();
 				}
 			});
 
 			if (hashLibs.check) {
-				var libsmd5 = $.Deferred();
 
 				delete hashLibs.check;
 
 				// load SparkMD5
+				var libsmd5 = $.Deferred();
 				if (window.ArrayBuffer && self.options.cdns.sparkmd5) {
 					libs.push(libsmd5);
 					self.loadScript([self.options.cdns.sparkmd5],
@@ -3762,16 +3771,46 @@ var elFinder = function(elm, opts, bootCallback) {
 						}
 					);
 				}
+
+				// load jsSha
+				var libssha = $.Deferred();
+				if (window.ArrayBuffer && self.options.cdns.jssha) {
+					libs.push(libssha);
+					self.loadScript([self.options.cdns.jssha],
+						function(res) { 
+							var jsSHA = res || window.jsSHA;
+							window.jsSHA && delete window.jsSHA;
+							libssha.resolve();
+							if (jsSHA) {
+								hashLibs.jsSHA = jsSHA;
+							}
+						},
+						{
+							tryRequire: true,
+							error: function() {
+								libssha.reject();
+							}
+						}
+					);
+				}
 			}
 			
 			$.when.apply(null, libs).always(function() {
 				if (Object.keys(hashLibs).length) {
 					req = self.getContents(target).done(function(arrayBuffer) {
+						var arr = (arrayBuffer instanceof ArrayBuffer && arrayBuffer.byteLength > 0)? self.sliceArrayBuffer(arrayBuffer, 5242880) : false;
+
 						if (needs.md5 && hashLibs.SparkMD5) {
-							var jobmd5 = md5Calc(arrayBuffer).done(function() {
+							var jobmd5 = md5Calc(arr).done(function() {
 								res['md5'] = jobmd5._md5;
 							});
 							jobs.push(jobmd5);
+						}
+						if (needs.sha256 && hashLibs.jsSHA) {
+							var jobsha256 = sha256Calc(arr).done(function() {
+								res['sha256'] = jobsha256._sha256;
+							});
+							jobs.push(jobsha256);
 						}
 						$.when.apply(null, jobs).always(function() {
 							dfd.resolve(res);
@@ -8639,9 +8678,7 @@ elFinder.prototype = {
 	 * @return Object $.Deferred that has an extended method _abort()
 	 */
 	asyncJob : function(func, arr, opts) {
-		var dfrd = $.Deferred().always(function() {
-				dfrd._abort = function() {};
-			}),
+		var dfrd = $.Deferred(),
 			abortFlg = false,
 			parms = Object.assign({
 				interval : 0,
@@ -8661,6 +8698,13 @@ elFinder.prototype = {
 				dfrd[resolve? 'resolve' : 'reject'](resArr);
 			}
 		};
+		
+		dfrd.fail(function() {
+			dfrd._abort();
+		}).always(function() {
+			dfrd._abort = function() {};
+		});
+
 		if (typeof func === 'function' && Array.isArray(arr)) {
 			vars = arr.concat();
 			exec = function() {
@@ -8686,7 +8730,6 @@ elFinder.prototype = {
 			};
 			if (vars.length) {
 				tm = setTimeout(exec, 0);
-				//exec();
 			} else {
 				dfrd.resolve(resArr);
 			}

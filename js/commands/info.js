@@ -32,7 +32,8 @@
 			group    : fm.i18n('group'),
 			perm     : fm.i18n('perm'),
 			getlink  : fm.i18n('getLink'),
-			md5      : fm.i18n('MD5')
+			md5      : fm.i18n('MD5'),
+			sha256   : fm.i18n('SHA256')
 		};
 		
 	this.tpl = {
@@ -191,12 +192,17 @@
 			file.perm && content.push(row.replace(l, msg.perm).replace(v, fm.formatFileMode(file.perm)));
 			
 			// Get MD5 hash
-			if (window.ArrayBuffer && fm.options.cdns.sparkmd5 && file.mime !== 'directory' && file.size > 0 && (!o.getSizeMax || file.size <= o.getSizeMax)) {
+			if (window.ArrayBuffer && (fm.options.cdns.sparkmd5 || fm.options.cdns.jssha) && file.mime !== 'directory' && file.size > 0 && (!o.getSizeMax || file.size <= o.getSizeMax)) {
+				
 				content.push(row.replace(l, msg.md5).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'md5')));
-				reqs.push(fm.getContentsHashes(file.hash, { md5: true }).done(function(hashes) {
+				content.push(row.replace(l, msg.sha256).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'sha256')));
+
+				reqs.push(fm.getContentsHashes(file.hash, { md5: true, sha256: true }).done(function(hashes) {
 					replSpinner(hashes.md5 || msg.unknown, 'md5');
+					replSpinner(hashes.sha256 || msg.unknown, 'sha256');
 				}).fail(function() {
 					replSpinner(msg.unknown, 'md5');
+					replSpinner(msg.unknown, 'sha256');
 				}));
 			}
 			

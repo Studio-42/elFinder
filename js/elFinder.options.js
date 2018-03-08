@@ -27,7 +27,8 @@ elFinder.prototype._options = {
 		zlibUnzip  : '//cdn.rawgit.com/imaya/zlib.js/0.3.1/bin/unzip.min.js', // need check unzipFiles() in quicklook.plugins.js when update
 		zlibGunzip : '//cdn.rawgit.com/imaya/zlib.js/0.3.1/bin/gunzip.min.js',
 		marked     : '//cdnjs.cloudflare.com/ajax/libs/marked/0.3.17/marked.min.js',
-		sparkmd5   : '//cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.0/spark-md5.min.js'
+		sparkmd5   : '//cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.0/spark-md5.min.js',
+		jssha      : '//cdnjs.cloudflare.com/ajax/libs/jsSHA/2.3.1/sha.js'
 	},
 	
 	/**
