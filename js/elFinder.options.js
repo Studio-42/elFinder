@@ -430,6 +430,8 @@ elFinder.prototype._options = {
 		// "info" command options.
 		info : {
 			nullUrlDirLinkSelf : true,
+			// Maximum file size (byte) when using the get command to get the MD5 hash
+			getSizeMax : 104857600, // 100 MB
 			custom : {
 				// /**
 				//  * Example of custom info `desc`

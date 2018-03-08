@@ -820,41 +820,45 @@ elFinder.prototype.commands.quicklook.plugins = [
 						isTar
 						|| ((typeof Zlib === 'undefined' || Zlib) && (file.mime === 'application/zip' || file.mime === 'application/x-gzip'))
 					)) {
-					var doc, xhr, loading, url,
+					var jqxhr, loading, url,
 						req = function() {
-							xhr = new XMLHttpRequest();
-							xhr.onload = function(e) {
-								var unzip, filenames;
-								if (this.readyState === 4 && this.response) {
-									try {
-										if (file.mime === 'application/zip') {
-											unzip = new Zlib.Unzip(new Uint8Array(xhr.response));
-											//filenames = unzip.getFilenames();
-											filenames = unzipFiles.call(unzip);
-										} else if (file.mime === 'application/x-gzip') {
-											unzip = new Zlib.Gunzip(new Uint8Array(xhr.response));
-											filenames = tarFiles(unzip.decompress());
-										} else if (file.mime === 'application/x-tar') {
-											filenames = tarFiles(new Uint8Array(xhr.response));
-										}
-										makeList(filenames);
-									} catch (e) {
-										loading.remove();
-										fm.debug('error', e);
-									}
-								} else {
-									loading.remove();
-								}
-							};
 							url = fm.openUrl(file.hash);
 							if (!fm.isSameOrigin(url)) {
 								url = fm.openUrl(file.hash, true);
 							}
-							xhr.open('GET', url, true);
-							xhr.responseType = 'arraybuffer';
-							fm.replaceXhrSend();
-							xhr.send();
-							fm.restoreXhrSend();
+							jqxhr = fm.request({
+								data    : {cmd : 'get'},
+								options : {
+									url: url,
+									type: 'get',
+									cache : true,
+									dataType : 'binary',
+									responseType :'arraybuffer',
+									processData: false
+								}
+							})
+							.fail(function() {
+								loading.remove();
+							})
+							.done(function(data) {
+								var unzip, filenames;
+								try {
+									if (file.mime === 'application/zip') {
+										unzip = new Zlib.Unzip(new Uint8Array(data));
+										//filenames = unzip.getFilenames();
+										filenames = unzipFiles.call(unzip);
+									} else if (file.mime === 'application/x-gzip') {
+										unzip = new Zlib.Gunzip(new Uint8Array(data));
+										filenames = tarFiles(unzip.decompress());
+									} else if (file.mime === 'application/x-tar') {
+										filenames = tarFiles(new Uint8Array(data));
+									}
+									makeList(filenames);
+								} catch (e) {
+									loading.remove();
+									fm.debug('error', e);
+								}
+							});
 						},
 						makeList = function(filenames) {
 							var header, doc;
@@ -884,8 +888,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 					
 					// stop loading on change file if not loaded yet
 					preview.one('change', function() {
+						jqxhr.state() === 'pending' && jqxhr.reject();
 						loading.remove();
-						xhr && xhr.readyState < 4 && xhr.abort();
 					});
 					
 					if (Zlib) {
@@ -1129,75 +1133,28 @@ elFinder.prototype.commands.quicklook.plugins = [
 	function(ql) {
 		"use strict";
 		var fm      = ql.fm,
-			preview = ql.preview,
-			libObj  = null,
-			show = function(data, loading) {
-				var spark = new libObj(),
-					arr = data.content.split(/$^/, 5242880),
-					job;
-
-				job = fm.asyncJob(function(str) {
-					spark.append(str);
-				}, arr).done(function() {
-					loading.replaceWith('<div class="elfinder-quicklook-info-data">MD5: ' + spark.end() + '</div>');
-				}).fail(function() {
-					loading.remove();
-				});
-
-				preview.one('change', function() {
-					job._abort();
-				});
-			},
-			error = function(loading) {
-				loading.remove();
-			};
+			preview = ql.preview;
 			
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file, jqxhr, loading;
 			
-			if (file.mime !== 'directory' && fm.options.cdns.sparkmd5 && libObj !== false && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax)) {
+			if (window.ArrayBuffer && fm.options.cdns.sparkmd5 && file.mime !== 'directory' && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax)) {
 
 				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 
 				// stop loading on change file if not loaded yet
 				preview.one('change', function() {
-					jqxhr.state() == 'pending' && jqxhr.reject();
+					jqxhr && jqxhr.state() === 'pending' && jqxhr.reject();
 				}).addClass('elfinder-overflow-auto');
 				
-				jqxhr = fm.request({
-					data           : {cmd : 'get', target : file.hash, conv : 1, _t : file.ts},
-					options        : {type: 'get', cache : true},
-					preventDefault : true
-				})
-				.done(function(data) {
-					if (libObj || window.SparkMD5) {
-						if (!libObj) {
-							libObj = window.SparkMD5;
-						}
-						show(data, loading);
+				jqxhr = fm.getContentsHashes(file.hash, { md5: true }).done(function(hashes) {
+					if (hashes.md5) {
+						loading.replaceWith('<div class="elfinder-quicklook-info-data">'+fm.i18n('MD5')+': ' + hashes.md5 + '</div>');
 					} else {
-						fm.loadScript([fm.options.cdns.sparkmd5],
-							function(res) { 
-								libObj = res || window.SparkMD5 || false;
-								delete window.SparkMD5;
-								if (libObj) {
-									show(data, loading);
-								} else {
-									error(loading);
-								}
-							},
-							{
-								tryRequire: true,
-								error: function() {
-									libObj = false;
-									error(loading);
-								}
-							}
-						);
+						loading.remove();
 					}
-				})
-				.fail(function() {
-					error(loading);
+				}).fail(function() {
+					loading.remove();
 				});
 			}
 		});
