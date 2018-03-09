@@ -316,9 +316,22 @@
 	min-width:200px;
 	border:0 solid;
 	margin:1em .2em 1em .2em;
+	width: 100%;
 }
 
-.elfinder-info-tb td { white-space:nowrap; padding:2px; }
+.elfinder-info-tb td {
+	white-space: pre-wrap;
+	padding: 2px;
+}
+
+.elfinder-info-tb td.elfinder-info-label {
+	white-space: nowrap;
+}
+
+.elfinder-info-tb td.elfinder-info-hash {
+	word-break: break-word;
+	max-width: 32em;
+}
 
 .elfinder-info-tb tr td:first-child { text-align:right;  }
 

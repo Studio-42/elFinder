@@ -17,6 +17,10 @@
 	font-family: Verdana,Arial,Helvetica,sans-serif;
 }
 
+.elfinder-font-mono {
+	line-height: 2ex;
+}
+
 /* in lazy execution status */
 .elfinder.elfinder-processing * {
 	cursor: progress !important

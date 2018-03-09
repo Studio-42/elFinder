@@ -453,11 +453,11 @@ var elFinder = function(elm, opts, bootCallback) {
 								var idx, pdir;
 								if ((idx = $.inArray(hash, roots))!== -1) {
 									if (roots.length === 1) {
-										if ((pdir = files[phash]) && pdir._realStats) {
+										if ((pdir = Object.assign({}, files[phash])) && pdir._realStats) {
 											$.each(pdir._realStats, function(k, v) {
 												pdir[k] = v;
 											});
-											remove(pdir._realStats);
+											remove(files[phash]._realStats);
 											self.change({ changed: [pdir] });
 										}
 										delete self.leafRoots[phash];
@@ -510,8 +510,8 @@ var elFinder = function(elm, opts, bootCallback) {
 			$.each(changed, function(i, file) {
 				var hash = file.hash;
 				if (files[hash]) {
-					$.each(['locked', 'hidden', 'width', 'height'], function(i, v){
-						if (files[hash][v] && !file[v]) {
+					$.each(Object.keys(files[hash]), function(i, v){
+						if (typeof file[v] === 'undefined') {
 							delete files[hash][v];
 						}
 					});
@@ -3663,11 +3663,9 @@ var elFinder = function(elm, opts, bootCallback) {
 			type = responseType || 'arraybuffer',
 			url, req;
 
-		dfd._abort = function() {
-			if (req && req.state() === 'pending') {
-				req.reject();
-			}
-		};
+		dfd.fail(function() {
+			req && req.state() === 'pending' && req.reject();
+		});
 
 		url = self.openUrl(hash);
 		if (!self.isSameOrigin(url)) {
@@ -3701,9 +3699,8 @@ var elFinder = function(elm, opts, bootCallback) {
 		var hashLibs = {
 			check : true
 		},
-		md5Calc = function(data) {
+		md5Calc = function(arr) {
 			var spark = new hashLibs.SparkMD5.ArrayBuffer(),
-				arr = (data instanceof ArrayBuffer && data.byteLength > 0)? self.sliceArrayBuffer(data, 5242880) : false,
 				job;
 
 			job = self.asyncJob(function(buf) {
@@ -3711,6 +3708,22 @@ var elFinder = function(elm, opts, bootCallback) {
 			}, arr).done(function() {
 				job._md5 = spark.end();
 			});
+
+			return job;
+		},
+		shaCalc = function(arr, length) {
+			var sha, job;
+
+			try {
+				sha = new hashLibs.jsSHA('SHA' + (length.substr(0, 1) === '3'? length : ('-' + length)), 'ARRAYBUFFER');
+				job = self.asyncJob(function(buf) {
+					sha.update(buf);
+				}, arr).done(function() {
+					job._sha = sha.getHash('HEX');
+				});
+			} catch(e) {
+				job = $.Deferred.reject();
+			}
 
 			return job;
 		};
@@ -3724,25 +3737,25 @@ var elFinder = function(elm, opts, bootCallback) {
 		 */
 		self.getContentsHashes = function(target, needHashes) {
 			var dfd = $.Deferred(),
-				needs = needHashes || { md5: true },
+				needs = self.arrayFlip(needHashes || ['md5'], true),
 				libs = [],
 				jobs = [],
 				res = {},
 				req;
 
 			dfd.fail(function() {
-				req && req._abort();
+				req && req.reject();
 				for (var i = 0; i < jobs.length; i++) {
-					jobs[i]._abort();
+					jobs[i].reject();
 				}
 			});
 
 			if (hashLibs.check) {
-				var libsmd5 = $.Deferred();
 
 				delete hashLibs.check;
 
 				// load SparkMD5
+				var libsmd5 = $.Deferred();
 				if (window.ArrayBuffer && self.options.cdns.sparkmd5) {
 					libs.push(libsmd5);
 					self.loadScript([self.options.cdns.sparkmd5],
@@ -3762,20 +3775,73 @@ var elFinder = function(elm, opts, bootCallback) {
 						}
 					);
 				}
+
+				// load jsSha
+				var libssha = $.Deferred();
+				if (window.ArrayBuffer && self.options.cdns.jssha) {
+					libs.push(libssha);
+					self.loadScript([self.options.cdns.jssha],
+						function(res) { 
+							var jsSHA = res || window.jsSHA;
+							window.jsSHA && delete window.jsSHA;
+							libssha.resolve();
+							if (jsSHA) {
+								hashLibs.jsSHA = jsSHA;
+							}
+						},
+						{
+							tryRequire: true,
+							error: function() {
+								libssha.reject();
+							}
+						}
+					);
+				}
 			}
 			
 			$.when.apply(null, libs).always(function() {
 				if (Object.keys(hashLibs).length) {
 					req = self.getContents(target).done(function(arrayBuffer) {
+						var arr = (arrayBuffer instanceof ArrayBuffer && arrayBuffer.byteLength > 0)? self.sliceArrayBuffer(arrayBuffer, 1048576) : false,
+							i;
+
 						if (needs.md5 && hashLibs.SparkMD5) {
-							var jobmd5 = md5Calc(arrayBuffer).done(function() {
-								res['md5'] = jobmd5._md5;
+							jobs.push(function() {
+								var job = md5Calc(arr).done(function() {
+									var f;
+									res['md5'] = job._md5;
+									if (f = self.file(target)) {
+										f.md5 = job._md5;
+									}
+									dfd.notify(res);
+								});
+								return job;
 							});
-							jobs.push(jobmd5);
 						}
-						$.when.apply(null, jobs).always(function() {
-							dfd.resolve(res);
-						});
+						if (hashLibs.jsSHA) {
+							$.each(['1', '224', '256', '384', '512', '3-224', '3-256', '3-384', '3-512', 'ke128', 'ke256'], function(i, v) {
+								if (needs['sha' + v]) {
+									jobs.push(function() {
+										var job = shaCalc(arr, v).done(function() {
+											var f;
+											res['sha' + v] = job._sha;
+											if (f = self.file(target)) {
+												f['sha' + v] = job._sha;
+											}
+											dfd.notify(res);
+										});
+										return job;
+									});
+								}
+							});
+						}
+						if (jobs.length) {
+							self.sequence(jobs).always(function() {
+								dfd.resolve(res);
+							});
+						} else {
+							dfd.reject();
+						}
 					}).fail(function() {
 						dfd.reject();
 					});
@@ -7106,8 +7172,12 @@ elFinder.prototype = {
 			},
 			applyLeafRootStats = function(data) {
 				$.each(data, function(i, f) {
+					var pfile;
 					if (self.leafRoots[f.hash]) {
-						self.applyLeafRootStats(f, true);
+						self.applyLeafRootStats(f);
+					}
+					if (f.phash && self.isRoot(f) && (pfile = self.file(f.phash))) {
+						self.applyLeafRootStats(pfile);
 					}
 				});
 			},
@@ -8639,9 +8709,7 @@ elFinder.prototype = {
 	 * @return Object $.Deferred that has an extended method _abort()
 	 */
 	asyncJob : function(func, arr, opts) {
-		var dfrd = $.Deferred().always(function() {
-				dfrd._abort = function() {};
-			}),
+		var dfrd = $.Deferred(),
 			abortFlg = false,
 			parms = Object.assign({
 				interval : 0,
@@ -8661,6 +8729,13 @@ elFinder.prototype = {
 				dfrd[resolve? 'resolve' : 'reject'](resArr);
 			}
 		};
+		
+		dfrd.fail(function() {
+			dfrd._abort();
+		}).always(function() {
+			dfrd._abort = function() {};
+		});
+
 		if (typeof func === 'function' && Array.isArray(arr)) {
 			vars = arr.concat();
 			exec = function() {
@@ -8686,7 +8761,6 @@ elFinder.prototype = {
 			};
 			if (vars.length) {
 				tm = setTimeout(exec, 0);
-				//exec();
 			} else {
 				dfrd.resolve(resArr);
 			}
@@ -8895,8 +8969,8 @@ elFinder.prototype = {
 		// backup original stats
 		if (update || !dir._realStats) {
 			dir._realStats = {
-				locked: dir.locked,
-				dirs: dir.dirs,
+				locked: dir.locked || 0,
+				dirs: dir.dirs || 0,
 				ts: dir.ts
 			};
 		}
