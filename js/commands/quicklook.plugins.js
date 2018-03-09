@@ -1123,41 +1123,6 @@ elFinder.prototype.commands.quicklook.plugins = [
 			}
 			
 		});
-	},
-
-	/**
-	 * Show file MD5 hashe preview plugin
-	 *
-	 * @param elFinder.commands.quicklook
-	 **/
-	function(ql) {
-		"use strict";
-		var fm      = ql.fm,
-			preview = ql.preview;
-			
-		preview.on(ql.evUpdate, function(e) {
-			var file = e.file, jqxhr, loading;
-			
-			if (window.ArrayBuffer && fm.options.cdns.sparkmd5 && file.mime !== 'directory' && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax)) {
-
-				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
-
-				// stop loading on change file if not loaded yet
-				preview.one('change', function() {
-					jqxhr && jqxhr.state() === 'pending' && jqxhr.reject();
-				}).addClass('elfinder-overflow-auto');
-				
-				jqxhr = fm.getContentsHashes(file.hash, { md5: true }).done(function(hashes) {
-					if (hashes.md5) {
-						loading.replaceWith('<div class="elfinder-quicklook-info-data">'+fm.i18n('MD5')+': ' + hashes.md5 + '</div>');
-					} else {
-						loading.remove();
-					}
-				}).fail(function() {
-					loading.remove();
-				});
-			}
-		});
 	}
 
 ];
