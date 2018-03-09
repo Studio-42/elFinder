@@ -1,3 +1,8 @@
+.elfinder-font-mono {
+	font-family: "Ricty Diminished", "Myrica M", Consolas, "Courier New", Courier, Monaco, monospace;
+	font-size: 1.1em;
+}
+
 .elfinder-contextmenu .elfinder-contextmenu-item span { font-size:.72em; }
 
 .elfinder-cwd-view-icons .elfinder-cwd-filename { font-size:.7em; }

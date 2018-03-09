@@ -31,16 +31,14 @@
 			owner    : fm.i18n('owner'),
 			group    : fm.i18n('group'),
 			perm     : fm.i18n('perm'),
-			getlink  : fm.i18n('getLink'),
-			md5      : fm.i18n('MD5'),
-			sha256   : fm.i18n('SHA256')
+			getlink  : fm.i18n('getLink')
 		};
 		
 	this.tpl = {
 		main       : '<div class="ui-helper-clearfix elfinder-info-title {dirclass}"><span class="elfinder-cwd-icon {class} ui-corner-all"{style}/>{title}</div><table class="elfinder-info-tb">{content}</table>',
 		itemTitle  : '<strong>{name}</strong><span class="elfinder-info-kind">{kind}</span>',
 		groupTitle : '<strong>{items}: {num}</strong>',
-		row        : '<tr><td>{label} : </td><td>{value}</td></tr>',
+		row        : '<tr><td class="elfinder-info-label">{label} : </td><td class="{class}">{value}</td></tr>',
 		spinner    : '<span>{text}</span> <span class="'+spclass+' '+spclass+'-{name}"/>'
 	};
 	
@@ -91,12 +89,15 @@
 				}
 			},
 			count = [],
-			replSpinner = function(msg, name) { dialog.find('.'+spclass+'-'+name).parent().html(msg); },
+			replSpinner = function(msg, name, className) {
+				dialog.find('.'+spclass+'-'+name).parent().html(msg).addClass(className || '');
+			},
 			id = fm.namespace+'-info-'+$.map(files, function(f) { return f.hash; }).join('-'),
 			dialog = fm.getUI().find('#'+id),
 			customActions = [],
 			style = '',
-			size, tmb, file, title, dcnt, rdcnt, path;
+			hashClass = 'elfinder-font-mono elfinder-info-hash',
+			size, tmb, file, title, dcnt, rdcnt, path, getHashAlgorisms;
 			
 		if (!cnt) {
 			return $.Deferred().reject();
@@ -131,15 +132,15 @@
 			content.push(row.replace(l, msg.size).replace(v, size));
 			file.alias && content.push(row.replace(l, msg.aliasfor).replace(v, file.alias));
 			if (path = fm.path(file.hash, true)) {
-				content.push(row.replace(l, msg.path).replace(v, fm.escape(path)));
+				content.push(row.replace(l, msg.path).replace(v, fm.escape(path).replace(/(\/|\\)/g, "$1&#8203;")).replace('{class}', 'elfinder-info-path'));
 			} else {
-				content.push(row.replace(l, msg.path).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'path')));
+				content.push(row.replace(l, msg.path).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'path')).replace('{class}', 'elfinder-info-path'));
 				reqs.push(fm.path(file.hash, true, {notify: null})
 				.fail(function() {
 					replSpinner(msg.unknown, 'path');
 				})
 				.done(function(path) {
-					replSpinner(path, 'path');
+					replSpinner(path.replace(/(\/|\\)/g, "$1&#8203;"), 'path');
 				}));
 			}
 			if (file.read) {
@@ -192,18 +193,30 @@
 			file.perm && content.push(row.replace(l, msg.perm).replace(v, fm.formatFileMode(file.perm)));
 			
 			// Get MD5 hash
-			if (window.ArrayBuffer && (fm.options.cdns.sparkmd5 || fm.options.cdns.jssha) && file.mime !== 'directory' && file.size > 0 && (!o.getSizeMax || file.size <= o.getSizeMax)) {
-				
-				content.push(row.replace(l, msg.md5).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'md5')));
-				content.push(row.replace(l, msg.sha256).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'sha256')));
+			if (window.ArrayBuffer && (fm.options.cdns.sparkmd5 || fm.options.cdns.jssha) && file.mime !== 'directory' && file.size > 0 && (!o.showHashMaxsize || file.size <= o.showHashMaxsize)) {
+				getHashAlgorisms = [];
+				$.each(o.showHashAlgorisms, function(i, n) {
+					if (!file[n]) {
+					content.push(row.replace(l, fm.i18n(n)).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', n)));
+						getHashAlgorisms.push(n);
+					} else {
+						content.push(row.replace(l, fm.i18n(n)).replace(v, file[n]).replace('{class}', hashClass));
+					}
+				});
 
-				reqs.push(fm.getContentsHashes(file.hash, { md5: true, sha256: true }).done(function(hashes) {
-					replSpinner(hashes.md5 || msg.unknown, 'md5');
-					replSpinner(hashes.sha256 || msg.unknown, 'sha256');
-				}).fail(function() {
-					replSpinner(msg.unknown, 'md5');
-					replSpinner(msg.unknown, 'sha256');
-				}));
+				reqs.push(
+					fm.getContentsHashes(file.hash, getHashAlgorisms).progress(function(hashes) {
+						$.each(getHashAlgorisms, function(i, n) {
+							if (hashes[n]) {
+								replSpinner(hashes[n], n, hashClass);
+							}
+						});
+					}).always(function() {
+						$.each(getHashAlgorisms, function(i, n) {
+							replSpinner(msg.unknown, n);
+						});
+					})
+				);
 			}
 			
 			// Add custom info fields
@@ -250,7 +263,7 @@
 			}
 		}
 		
-		view = view.replace('{title}', title).replace('{content}', content.join(''));
+		view = view.replace('{title}', title).replace('{content}', content.join('').replace(/{class}/g, ''));
 		
 		dialog = fm.dialog(view, opts);
 		dialog.attr('id', id);

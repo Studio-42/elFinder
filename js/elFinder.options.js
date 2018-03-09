@@ -300,8 +300,6 @@ elFinder.prototype._options = {
 			googleDocsMimes : [],
 			// File size (byte) threshold when using the dim command for obtain the image size necessary to image preview
 			getDimThreshold : 200000,
-			// Maximum file size (byte) when using the get command to any contents preview
-			getSizeMax : 104857600, // 100 MB
 			// MIME-Type regular expression that does not check empty files
 			mimeRegexNotEmptyCheck : /^application\/vnd\.google-apps\./
 		},
@@ -431,8 +429,11 @@ elFinder.prototype._options = {
 		// "info" command options.
 		info : {
 			nullUrlDirLinkSelf : true,
-			// Maximum file size (byte) when using the get command to get the MD5 hash
-			getSizeMax : 104857600, // 100 MB
+			// Maximum file size (byte) to get file contents hash (md5, sha256 ...)
+			showHashMaxsize : 104857600, // 100 MB
+			// Array of hash algorisms to show on info dialog
+			// These name are 'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'sha3-224', 'sha3-256', 'sha3-384', 'sha3-512', 'shake128' and 'shake256'
+			showHashAlgorisms : ['md5', 'sha256'],
 			custom : {
 				// /**
 				//  * Example of custom info `desc`

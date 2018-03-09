@@ -453,11 +453,11 @@ var elFinder = function(elm, opts, bootCallback) {
 								var idx, pdir;
 								if ((idx = $.inArray(hash, roots))!== -1) {
 									if (roots.length === 1) {
-										if ((pdir = files[phash]) && pdir._realStats) {
+										if ((pdir = Object.assign({}, files[phash])) && pdir._realStats) {
 											$.each(pdir._realStats, function(k, v) {
 												pdir[k] = v;
 											});
-											remove(pdir._realStats);
+											remove(files[phash]._realStats);
 											self.change({ changed: [pdir] });
 										}
 										delete self.leafRoots[phash];
@@ -510,8 +510,8 @@ var elFinder = function(elm, opts, bootCallback) {
 			$.each(changed, function(i, file) {
 				var hash = file.hash;
 				if (files[hash]) {
-					$.each(['locked', 'hidden', 'width', 'height'], function(i, v){
-						if (files[hash][v] && !file[v]) {
+					$.each(Object.keys(files[hash]), function(i, v){
+						if (typeof file[v] === 'undefined') {
 							delete files[hash][v];
 						}
 					});
@@ -3711,15 +3711,19 @@ var elFinder = function(elm, opts, bootCallback) {
 
 			return job;
 		},
-		sha256Calc = function(arr) {
-			var sha = new hashLibs.jsSHA('SHA-256', 'ARRAYBUFFER'),
-				job;
+		shaCalc = function(arr, length) {
+			var sha, job;
 
-			job = self.asyncJob(function(buf) {
-				sha.update(buf);
-			}, arr).done(function() {
-				job._sha256 = sha.getHash('HEX');
-			});
+			try {
+				sha = new hashLibs.jsSHA('SHA' + (length.substr(0, 1) === '3'? length : ('-' + length)), 'ARRAYBUFFER');
+				job = self.asyncJob(function(buf) {
+					sha.update(buf);
+				}, arr).done(function() {
+					job._sha = sha.getHash('HEX');
+				});
+			} catch(e) {
+				job = $.Deferred.reject();
+			}
 
 			return job;
 		};
@@ -3733,7 +3737,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		 */
 		self.getContentsHashes = function(target, needHashes) {
 			var dfd = $.Deferred(),
-				needs = needHashes || { md5: true },
+				needs = self.arrayFlip(needHashes || ['md5'], true),
 				libs = [],
 				jobs = [],
 				res = {},
@@ -3798,23 +3802,46 @@ var elFinder = function(elm, opts, bootCallback) {
 			$.when.apply(null, libs).always(function() {
 				if (Object.keys(hashLibs).length) {
 					req = self.getContents(target).done(function(arrayBuffer) {
-						var arr = (arrayBuffer instanceof ArrayBuffer && arrayBuffer.byteLength > 0)? self.sliceArrayBuffer(arrayBuffer, 5242880) : false;
+						var arr = (arrayBuffer instanceof ArrayBuffer && arrayBuffer.byteLength > 0)? self.sliceArrayBuffer(arrayBuffer, 1048576) : false,
+							i;
 
 						if (needs.md5 && hashLibs.SparkMD5) {
-							var jobmd5 = md5Calc(arr).done(function() {
-								res['md5'] = jobmd5._md5;
+							jobs.push(function() {
+								var job = md5Calc(arr).done(function() {
+									var f;
+									res['md5'] = job._md5;
+									if (f = self.file(target)) {
+										f.md5 = job._md5;
+									}
+									dfd.notify(res);
+								});
+								return job;
 							});
-							jobs.push(jobmd5);
 						}
-						if (needs.sha256 && hashLibs.jsSHA) {
-							var jobsha256 = sha256Calc(arr).done(function() {
-								res['sha256'] = jobsha256._sha256;
+						if (hashLibs.jsSHA) {
+							$.each(['1', '224', '256', '384', '512', '3-224', '3-256', '3-384', '3-512', 'ke128', 'ke256'], function(i, v) {
+								if (needs['sha' + v]) {
+									jobs.push(function() {
+										var job = shaCalc(arr, v).done(function() {
+											var f;
+											res['sha' + v] = job._sha;
+											if (f = self.file(target)) {
+												f['sha' + v] = job._sha;
+											}
+											dfd.notify(res);
+										});
+										return job;
+									});
+								}
 							});
-							jobs.push(jobsha256);
 						}
-						$.when.apply(null, jobs).always(function() {
-							dfd.resolve(res);
-						});
+						if (jobs.length) {
+							self.sequence(jobs).always(function() {
+								dfd.resolve(res);
+							});
+						} else {
+							dfd.reject();
+						}
 					}).fail(function() {
 						dfd.reject();
 					});
@@ -7145,8 +7172,12 @@ elFinder.prototype = {
 			},
 			applyLeafRootStats = function(data) {
 				$.each(data, function(i, f) {
+					var pfile;
 					if (self.leafRoots[f.hash]) {
-						self.applyLeafRootStats(f, true);
+						self.applyLeafRootStats(f);
+					}
+					if (f.phash && self.isRoot(f) && (pfile = self.file(f.phash))) {
+						self.applyLeafRootStats(pfile);
 					}
 				});
 			},
@@ -8938,8 +8969,8 @@ elFinder.prototype = {
 		// backup original stats
 		if (update || !dir._realStats) {
 			dir._realStats = {
-				locked: dir.locked,
-				dirs: dir.dirs,
+				locked: dir.locked || 0,
+				dirs: dir.dirs || 0,
 				ts: dir.ts
 			};
 		}
