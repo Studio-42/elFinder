@@ -7149,10 +7149,6 @@ elFinder.prototype = {
 						if (self.trashes[file.hash]) {
 							file.locked = true;
 						}
-
-						if (self.leafRoots[file.hash]) {
-							self.applyLeafRootStats(file, true);
-						}
 					} else if (fileFilter) {
 						try {
 							if (! fileFilter(file)) {
@@ -7185,14 +7181,30 @@ elFinder.prototype = {
 				});
 				return res;
 			},
-			applyLeafRootStats = function(data) {
-				$.each(data, function(i, f) {
-					var pfile;
+			applyLeafRootStats = function(dataArr, type) {
+				$.each(dataArr, function(i, f) {
+					var pfile, done;
 					if (self.leafRoots[f.hash]) {
 						self.applyLeafRootStats(f);
 					}
-					if (f.phash && self.isRoot(f) && (pfile = self.file(f.phash))) {
+					// update leaf root parent stat
+					if (type !== 'change' && f.phash && self.isRoot(f) && (pfile = self.file(f.phash))) {
 						self.applyLeafRootStats(pfile);
+						// add to data.changed
+						if (!data.changed) {
+							data.changed = [pfile];
+						} else {
+							$.each(data.changed, function(i, f) {
+								if (f.hash === pfile.hash) {
+									data.changed[i] = pfile;
+									done = true;
+									return false;
+								}
+							});
+							if (!done) {
+								data.changed.push(pfile);
+							}
+						}
 					}
 				});
 			},
@@ -7251,7 +7263,7 @@ elFinder.prototype = {
 			data.files && applyLeafRootStats(data.files);
 			data.tree && applyLeafRootStats(data.tree);
 			data.added && applyLeafRootStats(data.added);
-			data.changed && applyLeafRootStats(data.changed);
+			data.changed && applyLeafRootStats(data.changed, 'change');
 		}
 
 		// merge options that apply only to cwd
