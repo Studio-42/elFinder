@@ -195,7 +195,7 @@
 			// Get MD5 hash
 			if (window.ArrayBuffer && (fm.options.cdns.sparkmd5 || fm.options.cdns.jssha) && file.mime !== 'directory' && file.size > 0 && (!o.showHashMaxsize || file.size <= o.showHashMaxsize)) {
 				getHashAlgorisms = [];
-				$.each(o.showHashAlgorisms, function(i, n) {
+				$.each(fm.storage('hashchekcer') || o.showHashAlgorisms, function(i, n) {
 					if (!file[n]) {
 					content.push(row.replace(l, fm.i18n(n)).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', n)));
 						getHashAlgorisms.push(n);

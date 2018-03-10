@@ -196,7 +196,7 @@
 	fm.bind('load', function() {
 		var setupPref = function() {
 				var tab = content.find('.elfinder-help-preference'),
-					forms = self.options.prefs || ['language', 'toolbarPref', 'columnPref', 'selectAction', 'useStoredEditor', 'autoFocusDialog', 'clearBrowserData'],
+					forms = self.options.prefs || ['language', 'toolbarPref', 'columnPref', 'selectAction', 'useStoredEditor', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'],
 					dls = $();
 				
 				forms = fm.arrayFlip(forms, true);
@@ -353,6 +353,32 @@
 					fm.trigger('selectfiles', {files : fm.selected()});
 				}));
 				
+				forms.hashChecker && fm.hashCheckers.length && (forms.hashChecker = (function() {
+					var node = $('<div/>');
+					init(function() {
+						var tags = [],
+							enabled = fm.arrayFlip(fm.storage('hashchekcer') || fm.options.commandsOptions.info.showHashAlgorisms, true);
+						$.each(fm.hashCheckers, function() {
+							var cmd = this,
+								name = fm.i18n(cmd);
+							tags.push('<span class="elfinder-help-hashchecker-item"><label><input type="checkbox" value="'+cmd+'" '+(enabled[cmd]? 'checked' : '')+'/>'+name+'</label></span>');
+						});
+						node.replaceWith($(tags.join(' ')).on('change', 'input', function() {
+							var v = $(this).val(),
+								o = $(this).is(':checked');
+							if (o) {
+								enabled[v] = true;
+							} else if (enabled[v]) {
+								delete enabled[v];
+							}
+							fm.storage('hashchekcer', $.grep(fm.hashCheckers, function(v) {
+								return enabled[v];
+							}));
+						}));
+					});
+					return node;
+				})());
+
 				forms.autoFocusDialog && (forms.autoFocusDialog = $('<input type="checkbox"/>').prop('checked', (function() {
 					var s = fm.storage('autoFocusDialog');
 					return s? (s > 0) : fm.options.uiOptions.dialog.focusOnMouseOver;
@@ -367,7 +393,8 @@
 				}));
 				
 				$.each(forms, function(n, f) {
-					var title;
+					var checkboxes = fm.arrayFlip(['toolbarPref', 'columnPref', 'hashChecker'], ' elfinder-help-checkboxes'),
+						title;
 					if (f && f !== true) {
 						title = fm.i18n(n);
 						if (f instanceof jQuery && f.length === 1 && f.is('input:checkbox')) {
@@ -376,7 +403,7 @@
 							}
 							title = '<label for="'+f.attr('id')+'">'+title+'</label>';
 						}
-						dls = dls.add($('<dt class="elfinder-help-'+n+'">'+title+'</dt>')).add($('<dd class="elfinder-help-'+n+'"/>').append(f));
+						dls = dls.add($('<dt class="elfinder-help-'+n+checkboxes[n]+'">'+title+'</dt>')).add($('<dd class="elfinder-help-'+n+'"/>').append(f));
 					}
 				});
 				
