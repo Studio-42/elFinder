@@ -3693,40 +3693,55 @@ var elFinder = function(elm, opts, bootCallback) {
 	};
 
 	/**
+	 * Supported check hash algorisms
+	 * 
+	 * @type Array
+	 */
+	self.hashCheckers = [];
+
+	/**
 	 * Closure of getContentsHashes()
 	 */
 	(function(self) {
 		var hashLibs = {
-			check : true
-		},
-		md5Calc = function(arr) {
-			var spark = new hashLibs.SparkMD5.ArrayBuffer(),
-				job;
+				check : true
+			},
+			md5Calc = function(arr) {
+				var spark = new hashLibs.SparkMD5.ArrayBuffer(),
+					job;
 
-			job = self.asyncJob(function(buf) {
-				spark.append(buf);
-			}, arr).done(function() {
-				job._md5 = spark.end();
-			});
-
-			return job;
-		},
-		shaCalc = function(arr, length) {
-			var sha, job;
-
-			try {
-				sha = new hashLibs.jsSHA('SHA' + (length.substr(0, 1) === '3'? length : ('-' + length)), 'ARRAYBUFFER');
 				job = self.asyncJob(function(buf) {
-					sha.update(buf);
+					spark.append(buf);
 				}, arr).done(function() {
-					job._sha = sha.getHash('HEX');
+					job._md5 = spark.end();
 				});
-			} catch(e) {
-				job = $.Deferred.reject();
-			}
 
-			return job;
-		};
+				return job;
+			},
+			shaCalc = function(arr, length) {
+				var sha, job;
+
+				try {
+					sha = new hashLibs.jsSHA('SHA' + (length.substr(0, 1) === '3'? length : ('-' + length)), 'ARRAYBUFFER');
+					job = self.asyncJob(function(buf) {
+						sha.update(buf);
+					}, arr).done(function() {
+						job._sha = sha.getHash('HEX');
+					});
+				} catch(e) {
+					job = $.Deferred.reject();
+				}
+
+				return job;
+			};
+
+		// make fm.hashCheckers
+		if (self.options.cdns.sparkmd5) {
+			self.hashCheckers.push('md5');
+		}
+		if (self.options.cdns.jssha) {
+			self.hashCheckers = self.hashCheckers.concat(['sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'sha3-224', 'sha3-256', 'sha3-384', 'sha3-512', 'shake128', 'shake256']);
+		}
 
 		/**
 		 * Gets the contents hashes.
