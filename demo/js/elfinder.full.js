@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: cf1fc2d) (2018-03-10)
+ * Version 2.1.32 (2.1-src Nightly: 8eb1cda) (2018-03-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -7180,10 +7180,6 @@ elFinder.prototype = {
 						if (self.trashes[file.hash]) {
 							file.locked = true;
 						}
-
-						if (self.leafRoots[file.hash]) {
-							self.applyLeafRootStats(file, true);
-						}
 					} else if (fileFilter) {
 						try {
 							if (! fileFilter(file)) {
@@ -7216,14 +7212,30 @@ elFinder.prototype = {
 				});
 				return res;
 			},
-			applyLeafRootStats = function(data) {
-				$.each(data, function(i, f) {
-					var pfile;
+			applyLeafRootStats = function(dataArr, type) {
+				$.each(dataArr, function(i, f) {
+					var pfile, done;
 					if (self.leafRoots[f.hash]) {
 						self.applyLeafRootStats(f);
 					}
-					if (f.phash && self.isRoot(f) && (pfile = self.file(f.phash))) {
+					// update leaf root parent stat
+					if (type !== 'change' && f.phash && self.isRoot(f) && (pfile = self.file(f.phash))) {
 						self.applyLeafRootStats(pfile);
+						// add to data.changed
+						if (!data.changed) {
+							data.changed = [pfile];
+						} else {
+							$.each(data.changed, function(i, f) {
+								if (f.hash === pfile.hash) {
+									data.changed[i] = pfile;
+									done = true;
+									return false;
+								}
+							});
+							if (!done) {
+								data.changed.push(pfile);
+							}
+						}
 					}
 				});
 			},
@@ -7282,7 +7294,7 @@ elFinder.prototype = {
 			data.files && applyLeafRootStats(data.files);
 			data.tree && applyLeafRootStats(data.tree);
 			data.added && applyLeafRootStats(data.added);
-			data.changed && applyLeafRootStats(data.changed);
+			data.changed && applyLeafRootStats(data.changed, 'change');
 		}
 
 		// merge options that apply only to cwd
@@ -9250,7 +9262,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: cf1fc2d)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 8eb1cda)';
 
 
 
@@ -14365,19 +14377,21 @@ $.fn.elfindercwd = function(fm, options) {
 				var l = files.length,
 					inSearch = fm.searchStatus.state > 1,
 					curCmd = fm.getCommand(fm.currentReqCmd) || {},
-					hash, n, ndx, allItems;
+					hash, n, ndx, found;
 
 				// removed cwd
 				if (!fm.cwd().hash && !curCmd.noChangeDirOnRemovedCwd) {
-					allItems = fm.files();
 					$.each(cwdParents.reverse(), function(i, h) {
-						if (allItems[h]) {
+						if (fm.file(h)) {
+							found = true;
 							fm.one(fm.currentReqCmd + 'done', function() {
 								!fm.cwd().hash && fm.exec('open', h);
 							});
 							return false;
 						}
 					});
+					// fallback to fm.roots[0]
+					!found && !fm.cwd().hash && fm.exec('open', fm.roots[Object.keys(fm.roots)[0]]);
 					return;
 				}
 				
@@ -15263,7 +15277,7 @@ $.fn.elfindercwd = function(fm, options) {
 							return isIn;
 						},
 						req = phash?
-							(! fm.file(phash)?
+							(! fm.file(phash) || hasUiTree?
 								(! hasUiTree?
 									fm.request({
 										data: {
@@ -15273,8 +15287,10 @@ $.fn.elfindercwd = function(fm, options) {
 										preventFail : true
 									}) : (function() {
 										var dfd = $.Deferred();
-										fm.one('parents', function() {
-											dfd.resolve();
+										fm.one('treesync', function(e) {
+											e.data.always(function() {
+												dfd.resolve();
+											});
 										});
 										return dfd;
 									})()
@@ -19549,7 +19565,10 @@ $.fn.elfindertree = function(fm, opts) {
 				} else {
 					done(void(0), dfrd);
 				}
-					
+				
+				// trigger 'treesync' with my $.Deferred
+				fm.trigger('treesync', dfrd);
+
 				return dfrd;
 			},
 			
