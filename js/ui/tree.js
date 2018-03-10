@@ -1004,7 +1004,10 @@ $.fn.elfindertree = function(fm, opts) {
 				} else {
 					done(void(0), dfrd);
 				}
-					
+				
+				// trigger 'treesync' with my $.Deferred
+				fm.trigger('treesync', dfrd);
+
 				return dfrd;
 			},
 			
