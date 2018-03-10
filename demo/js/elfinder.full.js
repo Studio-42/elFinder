@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: 56d99bd) (2018-03-10)
+ * Version 2.1.32 (2.1-src Nightly: cf1fc2d) (2018-03-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -3724,40 +3724,55 @@ var elFinder = function(elm, opts, bootCallback) {
 	};
 
 	/**
+	 * Supported check hash algorisms
+	 * 
+	 * @type Array
+	 */
+	self.hashCheckers = [];
+
+	/**
 	 * Closure of getContentsHashes()
 	 */
 	(function(self) {
 		var hashLibs = {
-			check : true
-		},
-		md5Calc = function(arr) {
-			var spark = new hashLibs.SparkMD5.ArrayBuffer(),
-				job;
+				check : true
+			},
+			md5Calc = function(arr) {
+				var spark = new hashLibs.SparkMD5.ArrayBuffer(),
+					job;
 
-			job = self.asyncJob(function(buf) {
-				spark.append(buf);
-			}, arr).done(function() {
-				job._md5 = spark.end();
-			});
-
-			return job;
-		},
-		shaCalc = function(arr, length) {
-			var sha, job;
-
-			try {
-				sha = new hashLibs.jsSHA('SHA' + (length.substr(0, 1) === '3'? length : ('-' + length)), 'ARRAYBUFFER');
 				job = self.asyncJob(function(buf) {
-					sha.update(buf);
+					spark.append(buf);
 				}, arr).done(function() {
-					job._sha = sha.getHash('HEX');
+					job._md5 = spark.end();
 				});
-			} catch(e) {
-				job = $.Deferred.reject();
-			}
 
-			return job;
-		};
+				return job;
+			},
+			shaCalc = function(arr, length) {
+				var sha, job;
+
+				try {
+					sha = new hashLibs.jsSHA('SHA' + (length.substr(0, 1) === '3'? length : ('-' + length)), 'ARRAYBUFFER');
+					job = self.asyncJob(function(buf) {
+						sha.update(buf);
+					}, arr).done(function() {
+						job._sha = sha.getHash('HEX');
+					});
+				} catch(e) {
+					job = $.Deferred.reject();
+				}
+
+				return job;
+			};
+
+		// make fm.hashCheckers
+		if (self.options.cdns.sparkmd5) {
+			self.hashCheckers.push('md5');
+		}
+		if (self.options.cdns.jssha) {
+			self.hashCheckers = self.hashCheckers.concat(['sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'sha3-224', 'sha3-256', 'sha3-384', 'sha3-512', 'shake128', 'shake256']);
+		}
 
 		/**
 		 * Gets the contents hashes.
@@ -9235,7 +9250,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 56d99bd)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: cf1fc2d)';
 
 
 
@@ -11713,7 +11728,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-03-07
+ * @version 2018-03-10
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -12153,6 +12168,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'reflectOnUnmount'   : 'Any changes will not reflect until un-mount this volume.', // from v2.1.33 added 2.3.2018
 			'unmountChildren' : 'The following volume(s) mounted on this volume also unmounted. Are you sure to unmount it?', // from v2.1.33 added 5.3.2018
 			'selectionInfo'   : 'Selection Info', // from v2.1.33 added 7.3.2018
+			'hashChecker'     : 'Algorithms to show the file hash', // from v2.1.33 added 10.3.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -22821,7 +22837,7 @@ elFinder.prototype.commands.fullscreen = function() {
 	fm.bind('load', function() {
 		var setupPref = function() {
 				var tab = content.find('.elfinder-help-preference'),
-					forms = self.options.prefs || ['language', 'toolbarPref', 'columnPref', 'selectAction', 'useStoredEditor', 'autoFocusDialog', 'clearBrowserData'],
+					forms = self.options.prefs || ['language', 'toolbarPref', 'columnPref', 'selectAction', 'useStoredEditor', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'],
 					dls = $();
 				
 				forms = fm.arrayFlip(forms, true);
@@ -22978,6 +22994,32 @@ elFinder.prototype.commands.fullscreen = function() {
 					fm.trigger('selectfiles', {files : fm.selected()});
 				}));
 				
+				forms.hashChecker && fm.hashCheckers.length && (forms.hashChecker = (function() {
+					var node = $('<div/>');
+					init(function() {
+						var tags = [],
+							enabled = fm.arrayFlip(fm.storage('hashchekcer') || fm.options.commandsOptions.info.showHashAlgorisms, true);
+						$.each(fm.hashCheckers, function() {
+							var cmd = this,
+								name = fm.i18n(cmd);
+							tags.push('<span class="elfinder-help-hashchecker-item"><label><input type="checkbox" value="'+cmd+'" '+(enabled[cmd]? 'checked' : '')+'/>'+name+'</label></span>');
+						});
+						node.replaceWith($(tags.join(' ')).on('change', 'input', function() {
+							var v = $(this).val(),
+								o = $(this).is(':checked');
+							if (o) {
+								enabled[v] = true;
+							} else if (enabled[v]) {
+								delete enabled[v];
+							}
+							fm.storage('hashchekcer', $.grep(fm.hashCheckers, function(v) {
+								return enabled[v];
+							}));
+						}));
+					});
+					return node;
+				})());
+
 				forms.autoFocusDialog && (forms.autoFocusDialog = $('<input type="checkbox"/>').prop('checked', (function() {
 					var s = fm.storage('autoFocusDialog');
 					return s? (s > 0) : fm.options.uiOptions.dialog.focusOnMouseOver;
@@ -22992,7 +23034,8 @@ elFinder.prototype.commands.fullscreen = function() {
 				}));
 				
 				$.each(forms, function(n, f) {
-					var title;
+					var checkboxes = fm.arrayFlip(['toolbarPref', 'columnPref', 'hashChecker'], ' elfinder-help-checkboxes'),
+						title;
 					if (f && f !== true) {
 						title = fm.i18n(n);
 						if (f instanceof jQuery && f.length === 1 && f.is('input:checkbox')) {
@@ -23001,7 +23044,7 @@ elFinder.prototype.commands.fullscreen = function() {
 							}
 							title = '<label for="'+f.attr('id')+'">'+title+'</label>';
 						}
-						dls = dls.add($('<dt class="elfinder-help-'+n+'">'+title+'</dt>')).add($('<dd class="elfinder-help-'+n+'"/>').append(f));
+						dls = dls.add($('<dt class="elfinder-help-'+n+checkboxes[n]+'">'+title+'</dt>')).add($('<dd class="elfinder-help-'+n+'"/>').append(f));
 					}
 				});
 				
@@ -23437,7 +23480,7 @@ elFinder.prototype.commands.hidden = function() {
 			// Get MD5 hash
 			if (window.ArrayBuffer && (fm.options.cdns.sparkmd5 || fm.options.cdns.jssha) && file.mime !== 'directory' && file.size > 0 && (!o.showHashMaxsize || file.size <= o.showHashMaxsize)) {
 				getHashAlgorisms = [];
-				$.each(o.showHashAlgorisms, function(i, n) {
+				$.each(fm.storage('hashchekcer') || o.showHashAlgorisms, function(i, n) {
 					if (!file[n]) {
 					content.push(row.replace(l, fm.i18n(n)).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', n)));
 						getHashAlgorisms.push(n);
