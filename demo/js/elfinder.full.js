@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: 8503d57) (2018-03-11)
+ * Version 2.1.32 (2.1-src Nightly: 6770311) (2018-03-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9285,7 +9285,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 8503d57)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 6770311)';
 
 
 
@@ -19028,8 +19028,8 @@ $.fn.elfindertree = function(fm, opts) {
 			 * @return Array
 			 */
 			filter = function(files, checkExists) {
-				return $.grep(files || [], function(f) {
-					return (f.mime === 'directory' && (!checkExists || $('#'+fm.navHash2Id(f.hash)).length)) ? true : false;
+				return $.map(files || [], function(f) {
+					return (f.mime === 'directory' && (!checkExists || $('#'+fm.navHash2Id(f.hash)).length)) ? f : null;
 				});
 			},
 			
@@ -19576,7 +19576,7 @@ $.fn.elfindertree = function(fm, opts) {
 					dfrd = $.Deferred(),
 					baseNode, spinner;
 				
-				if (!$('#'+fm.navHash2Id(cwdhash)).length || (!cwd.phash && !$('#'+fm.navHash2Id(cwdhash)).hasClass(loaded))) {
+				if (!$('#'+fm.navHash2Id(cwdhash)).length) {
 					loadParents()
 					.done(function(res) {
 						done(res, dfrd);
