@@ -38,7 +38,6 @@ class elFinderVolumeGroup extends elFinderVolumeDriver {
 			'mkdir',
 			'mkfile',
 			'paste',
-			'rename',
 			'resize',
 			'rm',
 			'upload'
