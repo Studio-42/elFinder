@@ -378,12 +378,12 @@ $.fn.elfindercontextmenu = function(fm) {
 
 					if (cmd && !isCwd && (!fm.searchStatus.state || !cmd.disableOnSearch)) {
 						cmd.__disabled = cmd._disabled;
-						cmd._disabled = !(cmd.alwaysEnabled || (fm._commands[cmdName] ? $.inArray(name, disabled) === -1 && (!useMap || $.inArray(cmdName, disabled) === -1) : false));
+						cmd._disabled = !(cmd.alwaysEnabled || (fm._commands[cmdName] ? $.inArray(name, disabled) === -1 && (!useMap || !disabled[cmdName]) : false));
 						$.each(cmd.linkedCmds, function(i, n) {
 							var c;
 							if (c = fm.getCommand(n)) {
 								c.__disabled = c._disabled;
-								c._disabled = !(c.alwaysEnabled || (fm._commands[n] ? $.inArray(n, disabled) === -1 : false));
+								c._disabled = !(c.alwaysEnabled || (fm._commands[n] ? !disabled[n] : false));
 							}
 						});
 					}

@@ -1379,22 +1379,18 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @param  Array  target hashes
 	 * @return Array
 	 */
-	this.getDisabledCmds = function(targets) {
-		var disabled = ['hidden'];
+	this.getDisabledCmds = function(targets, flip) {
+		var disabled = {'hidden': true};
 		if (! Array.isArray(targets)) {
 			targets = [ targets ];
 		}
 		$.each(targets, function(i, h) {
-			var disCmds = self.option('disabled', h);
+			var disCmds = self.option('disabledFlip', h);
 			if (disCmds) {
-				$.each(disCmds, function(i, cmd) {
-					if ($.inArray(cmd, disabled) === -1) {
-						disabled.push(cmd);
-					}
-				});
+				Object.assign(disabled, disCmds);
 			}
 		});
-		return disabled;
+		return flip? disabled : Object.keys(disabled);
 	};
 	
 	/**
@@ -2848,7 +2844,7 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @return Boolean
 	 */
 	this.isCommandEnabled = function(name, dstHash) {
-		var disabled,
+		var disabled, cmd,
 			cvid = self.cwd().volumeid || '';
 		
 		// In serach results use selected item hash to check
@@ -2856,14 +2852,15 @@ var elFinder = function(elm, opts, bootCallback) {
 			dstHash = self.selected()[0];
 		}
 		if (dstHash && (! cvid || dstHash.indexOf(cvid) !== 0)) {
-			disabled = self.option('disabled', dstHash);
-			if (! disabled) {
-				disabled = [];
-			}
+			disabled = self.option('disabledFlip', dstHash);
+			//if (! disabled) {
+			//	disabled = {};
+			//}
 		} else {
-			disabled = cwdOptions.disabled;
+			disabled = cwdOptions.disabledFlip/* || {}*/;
 		}
-		return this._commands[name] ? $.inArray(name, disabled) === -1 : false;
+		cmd = this._commands[name];
+		return cmd ? (cmd.alwaysEnabled || !disabled[name]) : false;
 	};
 	
 	/**
@@ -6999,10 +6996,14 @@ elFinder.prototype = {
 				var disabled;
 				if (opts.uiCmdMap) {
 					if ($.isPlainObject(opts.uiCmdMap) && Object.keys(opts.uiCmdMap).length) {
-						disabled = opts.disabled;
+						if (!opts.disabledFlip) {
+							opts.disabledFlip = {};
+						}
+						disabled = opts.disabledFlip;
 						$.each(opts.uiCmdMap, function(f, t) {
-							if (t === 'hidden' && $.inArray(f, disabled) === -1) {
-								disabled.push(f);
+							if (t === 'hidden' && !disabled[f]) {
+								opts.disabled.push(f);
+								opts.disabledFlip[f] = true;
 							}
 						});
 					} else {
@@ -7025,12 +7026,17 @@ elFinder.prototype = {
 						}
 					}
 				});
+				if (opts['disabled']) {
+					opts['disabledFlip'] = self.arrayFlip(opts['disabled'], true);
+				} else {
+					opts['disabledFlip'] = {};
+				}
 				return opts;
 			},
-			filter = function(file, asMap) { 
+			filter = function(file, asMap, type) { 
 				var res = asMap? file : true,
 					ign = asMap? null : false,
-					vid, targetOptions, isRoot;
+					vid, targetOptions, isRoot, rootNames;
 				
 				if (file && file.hash && file.name && file.mime) {
 					if (file.mime === 'application/x-empty') {
@@ -7088,6 +7094,7 @@ elFinder.prototype = {
 								// for compat <= v2.1.13
 								if (file.disabled) {
 									targetOptions.disabled = file.disabled;
+									targetOptions.disabledFlip = self.arrayFlip(file.disabled, true);
 								}
 								if (file.tmbUrl) {
 									targetOptions.tmbUrl = file.tmbUrl;
@@ -7116,7 +7123,11 @@ elFinder.prototype = {
 										file[k] = targetOptions[k];
 									}
 								});
-								self.roots[vid] = file.hash;
+
+								// regist fm.roots
+								if (type !== 'cwd') {
+									self.roots[vid] = file.hash;
+								}
 							}
 							
 							if (prevId !== vid) {
@@ -7145,6 +7156,18 @@ elFinder.prototype = {
 							}
 						}
 						
+						if (isRoot) {
+							if (rootNames = self.storage('rootNames')) {
+								if (rootNames[file.hash]) {
+									file._name = file.name;
+									file._i18 = file.i18;
+									file.name = rootNames[file.hash] = rootNames[file.hash];
+									delete file.i18;
+								}
+								self.storage('rootNames', rootNames);
+							}
+						}
+
 						// lock trash bins holder
 						if (self.trashes[file.hash]) {
 							file.locked = true;
@@ -7238,7 +7261,7 @@ elFinder.prototype = {
 				self.hasVolOptions = true;
 				self.volOptions[data.cwd.volumeid] = data.options;
 			}
-			data.cwd = filter(data.cwd, true);
+			data.cwd = filter(data.cwd, true, 'cwd');
 		}
 		if (data.files) {
 			data.files = $.grep(data.files, filter);
