@@ -443,8 +443,8 @@ $.fn.elfindertree = function(fm, opts) {
 			 * @return Array
 			 */
 			filter = function(files, checkExists) {
-				return $.grep(files || [], function(f) {
-					return (f.mime === 'directory' && (!checkExists || $('#'+fm.navHash2Id(f.hash)).length)) ? true : false;
+				return $.map(files || [], function(f) {
+					return (f.mime === 'directory' && (!checkExists || $('#'+fm.navHash2Id(f.hash)).length)) ? f : null;
 				});
 			},
 			
@@ -991,7 +991,7 @@ $.fn.elfindertree = function(fm, opts) {
 					dfrd = $.Deferred(),
 					baseNode, spinner;
 				
-				if (!$('#'+fm.navHash2Id(cwdhash)).length || (!cwd.phash && !$('#'+fm.navHash2Id(cwdhash)).hasClass(loaded))) {
+				if (!$('#'+fm.navHash2Id(cwdhash)).length) {
 					loadParents()
 					.done(function(res) {
 						done(res, dfrd);
