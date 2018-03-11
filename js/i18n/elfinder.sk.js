@@ -449,6 +449,7 @@
 			'reflectOnUnmount'   : 'Akékoľvek zmeny sa neodzrkadľujú, kým sa toto médium neodinštaluje.', // from v2.1.33 added 2.3.2018
 			'unmountChildren' : 'Nasledujúce médium(a) pripojené v tomto médiu je tiež odpojené. Určite ho odpojiť?', // from v2.1.33 added 5.3.2018
 			'selectionInfo'   : 'Informácie o výbere', // from v2.1.33 added 7.3.2018
+			'hashChecker'     : 'Algoritmy na zobrazenie hashu súborov', // from v2.1.33 added 10.3.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
