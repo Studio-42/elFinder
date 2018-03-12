@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.32 (2.1-src Nightly: fd7daea) (2018-03-12)
+ * Version 2.1.32 (2.1-src Nightly: 6afe4fe) (2018-03-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9285,7 +9285,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.32 (2.1-src Nightly: fd7daea)';
+elFinder.prototype.version = '2.1.32 (2.1-src Nightly: 6afe4fe)';
 
 
 
@@ -12326,7 +12326,7 @@ $.fn.elfinderbutton = function(cmd) {
 							e.stopPropagation();
 							menu.css(getMenuOffset()).slideToggle(100);
 						} else {
-							fm.exec(cmd.name, void(0), {_userAction: true, _currentType: 'toolbar', _currentNode: button });
+							fm.exec(cmd.name, getSelected(), {_userAction: true, _currentType: 'toolbar', _currentNode: button });
 						}
 						
 					}
@@ -12341,6 +12341,18 @@ $.fn.elfinderbutton = function(cmd) {
 					top : buttonOffset.top - baseOffset.top,
 					left : buttonOffset.left - baseOffset.left
 				};
+			},
+			getSelected = function() {
+				var sel = fm.selected(),
+					cwd;
+				if (!sel.length) {
+					if (cwd = fm.cwd()) {
+						sel = [ fm.cwd().hash ];
+					} else {
+						sel = void(0);
+					}
+				}
+				return sel;
 			};
 			
 		text.hide();
@@ -12368,7 +12380,7 @@ $.fn.elfinderbutton = function(cmd) {
 					if (typeof opts === 'object') {
 						opts._userAction = true;
 					}
-					fm.exec(cmd.name, fm.selected(), opts);
+					fm.exec(cmd.name, getSelected(), opts);
 				});
 
 			fm.bind('disable select', hideMenu).getUI().on('click', hideMenu);
@@ -19411,6 +19423,13 @@ $.fn.elfindertree = function(fm, opts) {
 			},
 			
 			/**
+			 * Flag indicating that synchronization is currently in progress
+			 * 
+			 * @type Boolean
+			 */
+			syncing,
+
+			/**
 			 * Mark current directory as active
 			 * If current directory is not in tree - load it and its parents
 			 *
@@ -19577,6 +19596,7 @@ $.fn.elfindertree = function(fm, opts) {
 					baseNode, spinner;
 				
 				if (!$('#'+fm.navHash2Id(cwdhash)).length) {
+					syncing = true;
 					loadParents()
 					.done(function(res) {
 						done(res, dfrd);
@@ -19585,6 +19605,9 @@ $.fn.elfindertree = function(fm, opts) {
 					.fail(function() { 
 						rmSpinner(true);
 						dfrd.reject();
+					})
+					.always(function() {
+						syncing = false;
 					});
 				} else {
 					done(void(0), dfrd);
@@ -19913,6 +19936,11 @@ $.fn.elfindertree = function(fm, opts) {
 		})
 		// update changed dirs
 		.change(function(e) {
+			// do ot perfome while syncing
+			if (syncing) {
+				return;
+			}
+
 			var dirs = filter(e.data.changed, true),
 				length = dirs.length,
 				l    = length,
@@ -27160,7 +27188,7 @@ elFinder.prototype.commands.rename = function() {
 			filename = '.elfinder-cwd-filename',
 			opts     = cOpts || {},
 			incwd    = (fm.cwd().hash == file.hash),
-			type     = opts._currentType? opts._currentType : (incwd? 'navbar' : 'files'),
+			type     = (opts._currentType === 'navbar' || opts._currentType === 'files')? opts._currentType : (incwd? 'navbar' : 'files'),
 			navbar   = (type !== 'files'),
 			target   = $('#'+fm[navbar? 'navHash2Id' : 'cwdHash2Id'](file.hash)),
 			tarea    = (!navbar && fm.storage('view') != 'list'),
