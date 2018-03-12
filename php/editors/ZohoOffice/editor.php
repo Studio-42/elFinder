@@ -73,6 +73,7 @@ class elFinderEditorZohoOffice extends elFinderEditor
                 if ($lang === 'jp') {
                     $lang = 'ja';
                 }
+                $srvsName = $this->srvs[$file['mime']];
                 $data = array(
                     'apikey' => ELFINDER_ZOHO_OFFICE_APIKEY,
                     'output' => 'url',
@@ -83,11 +84,15 @@ class elFinderEditorZohoOffice extends elFinderEditor
                     'lang' => $lang,
                     'saveurl' => elFinder::getConnectorUrl().'?cmd=editor&name=ZohoOffice&method=save'.$cdata,
                 );
+                // patch for the Show API's bug
+                if ($srvsName === 'show') {
+                    $data['saveurl'] .= '&id=' . $hash;
+                }
                 if ($cfile) {
                     $data['content'] = $cfile;
                 }
                 $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $this->urls[$this->srvs[$file['mime']]]);
+                curl_setopt($ch, CURLOPT_URL, $this->urls[$srvsName]);
                 curl_setopt($ch, CURLOPT_TIMEOUT, self::$curlTimeout);
                 curl_setopt($ch, CURLOPT_HEADER, 0);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -121,8 +126,8 @@ class elFinderEditorZohoOffice extends elFinderEditor
 
     public function save()
     {
-        if (isset($_POST) && ! empty($_POST['id'])) {
-            $hash = $_POST['id'];
+        if (isset($_POST) && ! empty($_REQUEST['id'])) {
+            $hash = $_REQUEST['id'];
             if ($volume = $this->elfinder->getVolume($hash)) {
                 $content = file_get_contents($_FILES['content']['tmp_name']);
                 if ($volume->putContents($hash, $content)) {
