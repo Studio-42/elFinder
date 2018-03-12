@@ -3757,9 +3757,6 @@ var elFinder = function(elm, opts, bootCallback) {
 
 			dfd.fail(function() {
 				req && req.reject();
-				for (var i = 0; i < jobs.length; i++) {
-					jobs[i].reject();
-				}
 			});
 
 			if (hashLibs.check) {
@@ -3821,11 +3818,14 @@ var elFinder = function(elm, opts, bootCallback) {
 							jobs.push(function() {
 								var job = md5Calc(arr).done(function() {
 									var f;
-									res['md5'] = job._md5;
+									res.md5 = job._md5;
 									if (f = self.file(target)) {
 										f.md5 = job._md5;
 									}
 									dfd.notify(res);
+								});
+								dfd.fail(function() {
+									job.reject();
 								});
 								return job;
 							});
