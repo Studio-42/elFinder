@@ -306,7 +306,7 @@ elFinder.prototype.commands.rename = function() {
 			filename = '.elfinder-cwd-filename',
 			opts     = cOpts || {},
 			incwd    = (fm.cwd().hash == file.hash),
-			type     = opts._currentType? opts._currentType : (incwd? 'navbar' : 'files'),
+			type     = (opts._currentType === 'navbar' || opts._currentType === 'files')? opts._currentType : (incwd? 'navbar' : 'files'),
 			navbar   = (type !== 'files'),
 			target   = $('#'+fm[navbar? 'navHash2Id' : 'cwdHash2Id'](file.hash)),
 			tarea    = (!navbar && fm.storage('view') != 'list'),
