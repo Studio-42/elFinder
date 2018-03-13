@@ -75,7 +75,16 @@ $.ajaxTransport('+binary', function(options, originalOptions, jqXHR) {
 				for (var i in headers ) {
 					xhr.setRequestHeader(i, headers[i] );
 				}
-				
+
+				// setuo xhrFields
+				if (options.xhrFields) {
+					for (var key in options.xhrFields) {
+						if (key in xhr) {
+							xhr[key] = options.xhrFields[key];
+						}
+					}
+				}
+
 				xhr.responseType = dataType;
 				xhr.send(data);
 			},
