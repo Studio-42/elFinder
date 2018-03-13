@@ -77,7 +77,7 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 
 // // Zip Archive editor
 // // Installation by composer
-// // `composer require barryvdh/elfinder-flysystem-driver league/flysystem-ziparchive`
+// // `composer require nao-pon/elfinder-flysystem-ziparchive-netmount`
 // define('ELFINDER_DISABLE_ZIPEDITOR', false); // set `true` to disable zip editor
 // ===============================================
 

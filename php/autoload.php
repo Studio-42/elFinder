@@ -21,7 +21,6 @@ function elFinderAutoloader($name) {
 		'elFinderVolumeFTP' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeFTP.class.php',
 		'elFinderVolumeFlysystemGoogleDriveCache' => ELFINDER_PHP_ROOT_PATH . '/elFinderFlysystemGoogleDriveNetmount.php',
 		'elFinderVolumeFlysystemGoogleDriveNetmount' => ELFINDER_PHP_ROOT_PATH . '/elFinderFlysystemGoogleDriveNetmount.php',
-		'elFinderVolumeFlysystemZipArchiveNetmount' => ELFINDER_PHP_ROOT_PATH . '/elFinderFlysystemZipArchiveNetmount.php',
 		'elFinderVolumeGoogleDrive' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeGoogleDrive.class.php',
 		'elFinderVolumeGroup' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeGroup.class.php',
 		'elFinderVolumeLocalFileSystem' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeLocalFileSystem.class.php',
