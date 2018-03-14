@@ -1,4 +1,4 @@
-2018-03-xx  Naoki Sawada  <hypweb+elfinder@gmail.com>
+2018-03-14  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.33):
 		- [cmd:upload] Fixed #2379 icon of target folder list is not shown
@@ -25,6 +25,11 @@
 		- [php:core] add 'netmount' to `sessionUseCmds` for handle requests synchronously on unmount
 		- [VD:Group] correction of `dirs` result of root stat
 		- [VD] allow uploading all file types to the net mount volume
+		- [cmd:quicklook] add the MarkDown viewer with marked.js
+		- [js:core] Fixed #2413 problem that unnecessary "remove" event fires on upload
+		- [cmd:info] show the md5, sha256 contents hashes
+		- [cmd:help] add preference "Algorithms to show the file hash"
+		- [js:rename] Fixed #2419 allow rename of the volume root name
 		- And some minor bug fixes
 
 
