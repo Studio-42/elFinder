@@ -189,6 +189,11 @@ $.fn.elfindersearchbutton = function(cmd) {
 		});
 		
 		fm
+			.one('init', function() {
+				fm.getUI('cwd').on('click', function() {
+					input.trigger('blur');
+				});
+			})
 			.one('open', function() {
 				opts = (fm.api < 2.1)? null : $('<div class="ui-front ui-widget ui-widget-content elfinder-button-search-menu ui-corner-all"/>')
 					.append(
