@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.33 (2.1-src Nightly: c15f96c) (2018-03-15)
+ * Version 2.1.33 (2.1-src Nightly: 7b750c1) (2018-03-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9285,7 +9285,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.33 (2.1-src Nightly: c15f96c)';
+elFinder.prototype.version = '2.1.33 (2.1-src Nightly: 7b750c1)';
 
 
 
@@ -11624,11 +11624,11 @@ elFinder.prototype.resources = {
 					dst.addClass(collapsed+' '+expanded+' elfinder-subtree-loaded');
 				}
 				if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
-					dst.children('.'+arrow).click().data('dfrd').done(function() {
+					dst.children('.'+arrow).trigger('click').data('dfrd').done(function() {
 						if (input.val() === file.name) {
-							input.val(fm.uniqueName(this.prefix, phash)).trigger('select').trigger('focus');
+							input.val(fm.uniqueName(self.prefix, phash)).trigger('select').trigger('focus');
 						}
-					}.bind(this));
+					});
 				}
 				nnode = node.contents().filter(function(){ return this.nodeType==3 && $(this).parent().attr('id') === fm.navHash2Id(file.hash); });
 				nnode.replaceWith(input.val(file.name));
@@ -18909,7 +18909,7 @@ $.fn.elfindertree = function(fm, opts) {
 					dst.addClass(hover);
 					if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
 						dst.data('expandTimer', setTimeout(function() {
-							dst.is('.'+collapsed+'.'+hover) && dst.children('.'+arrow).click();
+							dst.is('.'+collapsed+'.'+hover) && dst.children('.'+arrow).trigger('click');
 						}, 500));
 					}
 					if (dst.is('.elfinder-ro,.elfinder-na')) {
@@ -19722,7 +19722,7 @@ $.fn.elfindertree = function(fm, opts) {
 						dst.addClass(hover);
 						if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
 							dst.data('expandTimer', setTimeout(function() {
-								dst.is('.'+collapsed+'.'+hover) && dst.children('.'+arrow).click();
+								dst.is('.'+collapsed+'.'+hover) && dst.children('.'+arrow).trigger('click');
 							}, 500));
 						}
 					}
@@ -19750,14 +19750,14 @@ $.fn.elfindertree = function(fm, opts) {
 					if (hash != fm.cwd().hash && !link.hasClass(disabled)) {
 						fm.exec('open', hash).done(function() {
 							fm.one('opendone', function() {
-								fm.select({selected: [hash], origin: 'tree'});
+								fm.select({selected: [hash], origin: 'navbar'});
 							});
 						});
 					} else {
 						if (link.hasClass(collapsed)) {
-							link.children('.'+arrow).click();
+							link.children('.'+arrow).trigger('click');
 						}
-						fm.select({selected: [hash], origin: 'tree'});
+						fm.select({selected: [hash], origin: 'navbar'});
 					}
 				})
 				// for touch device
@@ -19815,7 +19815,7 @@ $.fn.elfindertree = function(fm, opts) {
 								fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
 								checkSubdirs();
 							} else {
-								stree.stop(true, true).slideToggle('normal', function(){
+								stree.stop(true, true)[link.hasClass(expanded)? 'slideDown' : 'slideUp']('normal', function(){
 									fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
 									checkSubdirs();
 								});
@@ -23713,22 +23713,26 @@ elFinder.prototype.commands.mkdir = function() {
 	this.value           = '';
 	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
+	this.syncTitleOnChange = true;
 	this.mime            = 'directory';
 	this.prefix          = 'untitled folder';
 	this.exec            = function(select, cOpts) {
+		var onCwd;
+
 		if (select && select.length && cOpts && cOpts._currentType && cOpts._currentType === 'navbar') {
 			this.origin = cOpts._currentType;
 			this.data = {
 				target: select[0]
 			};
 		} else {
-			this.origin = curOrg? curOrg : 'cwd';
+			onCwd = fm.cwd().hash === select[0];
+			this.origin = curOrg && !onCwd? curOrg : 'cwd';
 			delete this.data;
 		}
 		if (! select && ! this.options.intoNewFolderToolbtn) {
 			fm.getUI('cwd').trigger('unselectall');
 		}
-		this.move = (this.origin !== 'navbar' && fm.selected().length)? true : false;
+		this.move = (!onCwd && curOrg !== 'navbar' && fm.selected().length)? true : false;
 		return $.proxy(fm.res('mixin', 'make'), self)();
 	};
 	
@@ -23747,7 +23751,7 @@ elFinder.prototype.commands.mkdir = function() {
 		
 		self.className = 'mkdir';
 		curOrg = sel.length? (e.data.origin || '') : '';
-		if (sel.length && (curOrg !== 'navbar')) {
+		if (sel.length && curOrg !== 'navbar' && fm.cwd().hash !== sel[0]) {
 			self.title = fm.i18n('cmdmkdirin');
 			self.className += ' elfinder-button-icon-mkdirin';
 		} else {
@@ -23758,7 +23762,7 @@ elFinder.prototype.commands.mkdir = function() {
 	
 	this.getstate = function(select) {
 		var cwd = fm.cwd(),
-			sel = (curOrg === 'navbar' || (select && select[0] != cwd.hash))? this.files(select || fm.selected()) : [],
+			sel = (curOrg === 'navbar' || (select && select[0] !== cwd.hash))? this.files(select || fm.selected()) : [],
 			cnt = sel.length;
 
 		if (curOrg === 'navbar') {
