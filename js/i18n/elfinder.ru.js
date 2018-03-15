@@ -3,7 +3,7 @@
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
  * @author Alex Yashkin <alex@yashkin.by>
- * @version 2018-03-13
+ * @version 2018-03-15
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -160,9 +160,9 @@
 			'cmdundo'      : 'Отменить', // from v2.1.27 added 31.07.2017
 			'cmdredo'      : 'Вернуть', // from v2.1.27 added 31.07.2017
 			'cmdpreference': 'Предпочтения', // from v2.1.27 added 03.08.2017
-			'cmdselectall' : 'Выделить все', // from v2.1.28 added 15.08.2017
-			'cmdselectnone': 'Снять все выделение', // from v2.1.28 added 15.08.2017
-			'cmdselectinvert': 'Инвертировать выделение', // from v2.1.28 added 15.08.2017
+			'cmdselectall' : 'Выбрать все', // from v2.1.28 added 15.08.2017
+			'cmdselectnone': 'Отменить выбор', // from v2.1.28 added 15.08.2017
+			'cmdselectinvert': 'Инвертировать выбор', // from v2.1.28 added 15.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Закрыть',
@@ -449,8 +449,8 @@
 			'reflectOnImmediate' : 'Все изменения немедленно отражаются в архиве.', // from v2.1.33 added 2.3.2018
 			'reflectOnUnmount'   : 'Изменения не вступят в силу до тех пор, пока вы не размонтируете этот том.', // from v2.1.33 added 2.3.2018
 			'unmountChildren' : 'Тома, смонтированные на этом томе, также будут размонтированы. Вы хотите отключить его?', // from v2.1.33 added 5.3.2018
-			'selectionInfo'   : 'Информация о выделении', // from v2.1.33 added 7.3.2018
-			'hashChecker'     : 'Алгоритмы отображения хэшей файлов', // from v2.1.33 added 10.3.2018
+			'selectionInfo'   : 'Информация о выборе', // from v2.1.33 added 7.3.2018
+			'hashChecker'     : 'Алгоритмы для отображения хеш-сумм файлов', // from v2.1.33 added 10.3.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
