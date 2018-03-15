@@ -316,11 +316,11 @@ elFinder.prototype.resources = {
 					dst.addClass(collapsed+' '+expanded+' elfinder-subtree-loaded');
 				}
 				if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
-					dst.children('.'+arrow).click().data('dfrd').done(function() {
+					dst.children('.'+arrow).trigger('click').data('dfrd').done(function() {
 						if (input.val() === file.name) {
-							input.val(fm.uniqueName(this.prefix, phash)).trigger('select').trigger('focus');
+							input.val(fm.uniqueName(self.prefix, phash)).trigger('select').trigger('focus');
 						}
-					}.bind(this));
+					});
 				}
 				nnode = node.contents().filter(function(){ return this.nodeType==3 && $(this).parent().attr('id') === fm.navHash2Id(file.hash); });
 				nnode.replaceWith(input.val(file.name));
