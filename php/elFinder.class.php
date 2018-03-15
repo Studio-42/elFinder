@@ -1320,7 +1320,7 @@ class elFinder {
 		// pass session handler
 		$volume->setSession($this->session);
 		
-		if (method_exists($volume, 'netmountPrepare')) {
+		if (is_callable(array($volume, 'netmountPrepare'))) {
 			$options = $volume->netmountPrepare($options);
 			if (isset($options['exit'])) {
 				if ($options['exit'] === 'callback') {
@@ -1357,6 +1357,10 @@ class elFinder {
 		$options['netkey'] = $key;
 		
 		if (!isset($netVolumes[$key]) && $volume->mount($options)) {
+			// call post-process function of netmount
+			if (is_callable(array($volume, 'postNetmount'))) {
+				$volume->postNetmount($options);
+			}
 			$options['driver'] = $driver;
 			$netVolumes[$key]  = $options;
 			$this->saveNetVolumes($netVolumes);
