@@ -136,6 +136,7 @@
 .elfinder-tree .elfinder-navbar-root-googledrive .elfinder-navbar-icon { background-image:url("../img/volume_icon_googledrive.png"); background-position:0 0; }
 .elfinder-tree .elfinder-navbar-root-onedrive .elfinder-navbar-icon { background-image:url("../img/volume_icon_onedrive.png"); background-position:0 0; }
 .elfinder-tree .elfinder-navbar-root-box .elfinder-navbar-icon { background-image:url("../img/volume_icon_box.png"); background-position:0 0; }
+.elfinder-tree .elfinder-navbar-root-zip .elfinder-navbar-icon { background-image:url("../img/volume_icon_zip.png"); background-position:0 0; }
 .elfinder-tree .elfinder-navbar-root-network .elfinder-navbar-icon { background-image:url("../img/toolbar.png"); background-position: 0 -688px; }
 
 /* icon in active/hove/dropactive state */

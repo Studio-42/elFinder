@@ -40,7 +40,7 @@ class elFinderConnector {
 	 * 
 	 * @var string
 	 */
-	protected static $contentType = 'Content-Type: application/json';
+	protected static $contentType = 'Content-Type: application/json; charset=utf-8';
 	
 	/**
 	 * Constructor
@@ -66,7 +66,7 @@ class elFinderConnector {
 	 **/
 	public function run() {
 		$isPost = $this->reqMethod === 'POST';
-		$src    = $isPost ? $_POST : $_GET;
+		$src    = $isPost ? array_merge($_GET, $_POST) : $_GET;
 		$maxInputVars = (! $src || isset($src['targets']))? ini_get('max_input_vars') : null;
 		if ((! $src || $maxInputVars) && $rawPostData = file_get_contents('php://input')) {
 			// for max_input_vars and supports IE XDomainRequest()
@@ -155,7 +155,9 @@ class elFinderConnector {
 		try {
 			$this->output($this->elFinder->exec($cmd, $args));
 		} catch (elFinderAbortException $e) {
-			// aborted
+			// connection aborted
+			// unlock session data for multiple access
+			$this->elFinder->getSession()->close();
 			exit();
 		}
 	}
@@ -322,7 +324,7 @@ class elFinderConnector {
 		
 		unset($data['header']);
 		
-		if (!empty($data['raw']) && !empty($data['error'])) {
+		if (!empty($data['raw']) && isset($data['error'])) {
 			$out = $data['error'];
 		} else {
 			if (isset($data['debug']) && isset($data['debug']['phpErrors'])) {

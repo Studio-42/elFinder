@@ -1,8 +1,8 @@
 /**
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
- * @author Naoki Sawada <hypweb@gmail.com>
- * @version 2017-09-28
+ * @author Naoki Sawada <hypweb+elfinder@gmail.com>
+ * @version 2018-03-10
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -13,8 +13,8 @@
 		factory(root.elFinder);
 	}
 }(this, function(elFinder) {
-	elFinder.prototype.i18.jp = {
-		translator : 'Tomoaki Yoshida &lt;info@yoshida-studio.jp&gt;, Naoki Sawada &lt;hypweb@gmail.com&gt;',
+	elFinder.prototype.i18.ja = {
+		translator : 'Tomoaki Yoshida &lt;info@yoshida-studio.jp&gt;, Naoki Sawada &lt;hypweb+elfinder@gmail.com&gt;',
 		language   : 'Japanese',
 		direction  : 'ltr',
 		dateFormat : 'Y/m/d h:i A', // Mar 13, 2012 05:27 PM
@@ -149,7 +149,7 @@
 			'cmdsort'      : 'ソート',
 			'cmdnetmount'  : 'ネットワークボリュームをマウント', // added 18.04.2012
 			'cmdnetunmount': 'アンマウント', // from v2.1 added 30.04.2012
-			'cmdplaces'    : 'お気に入りへ', // added 28.12.2014
+			'cmdplaces'    : 'よく使う項目へ', // added 28.12.2014
 			'cmdchmod'     : '属性変更', // from v2.1 added 20.6.2015
 			'cmdopendir'   : 'フォルダを開く', // from v2.1 added 13.1.2016
 			'cmdcolwidth'  : '列幅リセット', // from v2.1.13 added 12.06.2016
@@ -194,9 +194,9 @@
 			'ntfreload'   : 'フォルダを再読込しています',
 			'ntfmkdir'    : 'フォルダを作成しています',
 			'ntfmkfile'   : 'ファイルを作成しています',
-			'ntfrm'       : 'ファイルを削除しています',
-			'ntfcopy'     : 'ファイルをコピーしています',
-			'ntfmove'     : 'ファイルを移動しています',
+			'ntfrm'       : 'アイテムを削除しています',
+			'ntfcopy'     : 'アイテムをコピーしています',
+			'ntfmove'     : 'アイテムを移動しています',
 			'ntfprepare'  : '既存アイテムを確認しています',
 			'ntfrename'   : 'ファイル名を変更しています',
 			'ntfupload'   : 'ファイルをアップロードしています',
@@ -289,8 +289,8 @@
 
 			/********************************** messages **********************************/
 			'confirmReq'      : '処理を実行しますか？',
-			'confirmRm'       : 'アイテムを完全に削除してもよろしいですか？<br/>この操作は取り消せません！',
-			'confirmRepl'     : '古いアイテムを新しいアイテムで上書きしますか？',
+			'confirmRm'       : 'アイテムを完全に削除してもよろしいですか？<br/>この操作は取り消しできません！',
+			'confirmRepl'     : '古いファイルを新しいファイルで上書きしますか？ (フォルダが含まれている場合は統合されます。置き換える場合は「バックアップ」選択してください。)',
 			'confirmRest'     : '既存のアイテムをごみ箱のアイテムで上書きしますか？', // fromv2.1.24 added 5.5.2017
 			'confirmConvUTF8' : 'UTF-8 以外の文字が含まれています。<br/>UTF-8  に変換しますか？<br/>変換後の保存でコンテンツは UTF-8 になります。', // from v2.1 added 08.04.2014
 			'confirmNonUTF8'  : 'このファイルの文字エンコーディングを判別できませんでした。編集するには一時的に UTF-8 に変換する必要があります。<br/>文字エンコーディングを指定してください。', // from v2.1.19 added 28.11.2016
@@ -307,13 +307,13 @@
 			'noaccess'        : 'アクセス禁止',
 			'and'             : ',',
 			'unknown'         : '不明',
-			'selectall'       : '全てのファイルを選択',
-			'selectfiles'     : 'ファイル選択',
-			'selectffile'     : '最初のファイルを選択',
-			'selectlfile'     : '最後のファイルを選択',
+			'selectall'       : 'すべてのアイテムを選択',
+			'selectfiles'     : 'アイテム選択',
+			'selectffile'     : '最初のアイテムを選択',
+			'selectlfile'     : '最後のアイテムを選択',
 			'viewlist'        : 'リスト形式で表示',
 			'viewicons'       : 'アイコン形式で表示',
-			'places'          : 'お気に入り',
+			'places'          : 'よく使う項目',
 			'calc'            : '計算中',
 			'path'            : 'パス',
 			'aliasfor'        : 'エイリアス',
@@ -327,7 +327,7 @@
 			'link'            : 'リンク',
 			'searcresult'     : '検索結果',
 			'selected'        : '選択されたアイテム',
-			'about'           : 'アバウト',
+			'about'           : '概要',
 			'shortcuts'       : 'ショートカット',
 			'help'            : 'ヘルプ',
 			'webfm'           : 'ウェブファイルマネージャー',
@@ -432,6 +432,24 @@
 			'toolbarPref'     : 'ツールバー設定', // from v2.1.27 added 2.8.2017
 			'charsLeft'       : '... 残り $1 文字',  // from v2.1.29 added 30.8.2017
 			'sum'             : '合計', // from v2.1.29 added 28.9.2017
+			'roughFileSize'   : '大まかなファイルサイズ', // from v2.1.30 added 2.11.2017
+			'autoFocusDialog' : 'マウスオーバーでダイアログの要素にフォーカスする',  // from v2.1.30 added 2.11.2017
+			'select'          : '選択', // from v2.1.30 added 23.11.2017
+			'selectAction'    : 'ファイル選択時の動作', // from v2.1.30 added 23.11.2017
+			'useStoredEditor' : '前回使用したエディターで開く', // from v2.1.30 added 23.11.2017
+			'selectinvert'    : '選択アイテムを反転', // from v2.1.30 added 25.11.2017
+			'renameMultiple'  : '選択した $1 個のアイテムを $2 のようにリネームしますか？<br/>この操作は取り消しできません！', // from v2.1.31 added 4.12.2017
+			'batchRename'     : '一括リネーム', // from v2.1.31 added 8.12.2017
+			'plusNumber'      : '+ 連番', // from v2.1.31 added 8.12.2017
+			'asPrefix'        : '先頭に追加', // from v2.1.31 added 8.12.2017
+			'asSuffix'        : '末尾に追加', // from v2.1.31 added 8.12.2017
+			'changeExtention' : '拡張子変更', // from v2.1.31 added 8.12.2017
+			'columnPref'      : '列項目設定(リストビュー)', // from v2.1.32 added 6.2.2018
+			'reflectOnImmediate' : '全ての変更は、直ちにアーカイブに反映されます。', // from v2.1.33 added 2.3.2018
+			'reflectOnUnmount'   : 'このボリュームをアンマウントするまで、変更は反映されません。', // from v2.1.33 added 2.3.2018
+			'unmountChildren' : 'このボリュームにマウントされている以下のボリュームもアンマウントされます。アンマウントしますか？', // from v2.1.33 added 5.3.2018
+			'selectionInfo'   : '選択情報', // from v2.1.33 added 7.3.2018
+			'hashChecker'     : 'ファイルハッシュを表示するアルゴリズム', // from v2.1.33 added 10.3.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',

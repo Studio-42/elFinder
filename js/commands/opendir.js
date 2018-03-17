@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "opendir"
  * Enter parent folder
@@ -6,6 +5,7 @@
  * @author Naoki Sawada
  **/  
 elFinder.prototype.commands.opendir = function() {
+	"use strict";
 	this.alwaysEnabled = true;
 	
 	this.getstate = function() {
@@ -17,7 +17,7 @@ elFinder.prototype.commands.opendir = function() {
 		}
 		wz = this.fm.getUI('workzone');
 		return wz.hasClass('elfinder-search-result')? 0 : -1;
-	}
+	};
 	
 	this.exec = function(hashes) {
 		var fm    = this.fm,
@@ -39,6 +39,6 @@ elFinder.prototype.commands.opendir = function() {
 		});
 		
 		return dfrd;
-	}
+	};
 
 };

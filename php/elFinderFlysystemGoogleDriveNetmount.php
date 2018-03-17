@@ -26,6 +26,7 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Hypweb\elFinderFlysyst
         parent::__construct();
         
         $opts = array(
+            'acceptedName' => '#^[^/\\?*:|"<>]*[^./\\?*:|"<>]$#',
             'rootCssClass' => 'elfinder-navbar-root-googledrive',
             'gdAlias'        => '%s@GDrive',
             'gdCacheDir'     => __DIR__ . '/.tmp',
@@ -51,6 +52,8 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends \Hypweb\elFinderFlysyst
             if ($this->options['icon'] === true) {
                 unset($this->options['icon']);
             }
+            // enable command archive
+            $this->options['useRemoteArchive'] = true;
         }
         return $res;
     }

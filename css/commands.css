@@ -6,15 +6,21 @@
 .elfinder-dialog-resize  { margin-top:.3em; }
 .elfinder-resize-type    { float:left; margin-bottom: .4em; }
 .elfinder-resize-control { float: left; }
-.elfinder-resize-control input[type=text] {
+.elfinder-resize-control input[type=number] {
 	border:1px solid #aaa;
 	text-align: right;
-	width: 4em;
+	width: 4.5em;
+}
+.elfinder-mobile .elfinder-resize-control input[type=number] {
+	width: 3.5em;
 }
 .elfinder-resize-control input.elfinder-resize-bg { 
 	text-align: center;
 	width: 5em;
 	direction: ltr;
+}
+.elfinder-dialog-resize .elfinder-resize-control-panel {
+	margin-top: 10px;
 }
 .elfinder-dialog-resize .elfinder-resize-imgrotate,
 .elfinder-dialog-resize .elfinder-resize-pallet {
@@ -232,7 +238,11 @@
 }
 
 .elfinder-dialog-resize .elfinder-resize-degree input,
-.elfinder-dialog-resize .elfinder-resize-quality input {
+.elfinder-dialog-resize input.elfinder-resize-quality {
+	width: 3.5em;
+}
+.elfinder-mobile .elfinder-dialog-resize .elfinder-resize-degree input,
+.elfinder-mobile .elfinder-dialog-resize input.elfinder-resize-quality {
 	width: 2.5em;
 }
 .elfinder-dialog-resize .elfinder-resize-degree button.ui-button {
@@ -240,6 +250,9 @@
 }
 .elfinder-dialog-resize button.ui-button span {
 	padding: 0;
+}
+.elfinder-dialog-resize .elfinder-resize-jpgsize {
+	font-size: 90%;
 }
 
 .ui-widget-content .elfinder-dialog-resize .elfinder-resize-rotate-slider {
@@ -270,6 +283,10 @@
 }
 .elfinder-touch .elfinder-file-edit {
 	font-size: 16px;
+}
+/* edit area */
+.ui-dialog .ui-dialog-content.elfinder-edit-editor {
+	background-color: #fff;
 }
 /* bottom margen for softkeyboard on fullscreen mode */
 .elfinder-touch.elfinder-fullscreen-native textarea.elfinder-file-edit {
@@ -332,7 +349,16 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 
 .elfinder-help-separator { clear:both; padding:.5em;  }
 
-.elfinder-help-link { padding:2px; }
+.elfinder-help-link {
+	display:inline-block;
+	margin-right:12px;
+	padding:2px 0;
+	white-space:nowrap;
+}
+.elfinder-rtl .elfinder-help-link {
+	margin-right:0;
+	margin-left:12px;
+}
 
 .elfinder-help .ui-priority-secondary { font-size:.9em;}
 
@@ -459,11 +485,24 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-help-preference dd {
 	margin-bottom: 1em;
 }
+.elfinder-help-preference dt label {
+	cursor: pointer;
+}
 .elfinder-help-preference dd label,
 .elfinder-help-preference dd input[type=checkbox] {
 	white-space: nowrap;
 	display: inline-block;
 	cursor: pointer;
+}
+.elfinder-help-preference dt.elfinder-help-checkboxes {
+	width: 100%;
+	max-width: none;
+}
+.elfinder-help-preference dd.elfinder-help-checkboxes {
+	padding-top: 3ex;
+}
+.elfinder-help-preference select {
+	max-width: 100%;
 }
 
 /********************** COMMAND "INFO" ****************************/
@@ -504,3 +543,25 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-rm-title .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
 	content: none;
 }
+
+/********************** COMMAND "RENAME" ****************************/
+.elfinder-rename-batch div {
+	margin: 5px 8px;
+}
+.elfinder-rename-batch .elfinder-rename-batch-name input {
+	width: 100%;
+	font-size: 1.6em;
+}
+.elfinder-rename-batch-type {
+	text-align: center;
+}
+.elfinder-rename-batch .elfinder-rename-batch-type label {
+	margin: 2px;
+	font-size: .9em;
+}
+.elfinder-rename-batch-preview {
+	padding: 0 8px;
+	font-size: 1.1em;
+	min-height: 4ex;
+}
+

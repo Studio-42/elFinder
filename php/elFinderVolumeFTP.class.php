@@ -64,6 +64,13 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected $isPureFtpd = false;
 	
 	/**
+	 * Is connected server with FTPS?
+	 * 
+	 * @var bool
+	 */
+	protected $isFTPS = false;
+	
+	/**
 	 * Tmp folder path
 	 *
 	 * @var string
@@ -98,6 +105,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			'pass'          => '',
 			'port'          => 21,
 			'mode'        	=> 'passive',
+			'ssl'        	=> false,
 			'path'			=> '/',
 			'timeout'		=> 20,
 			'owner'         => true,
@@ -129,8 +137,12 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				$options['locale'] = $_REQUEST['locale'];
 			}
 		}
+		if (!empty($_REQUEST['FTPS'])) {
+			$options['ssl'] = true;
+		}
 		$options['statOwner'] = true;
 		$options['allowChmodReadOnly'] = true;
+		$options['acceptedName'] = '#^[^/\\?*:|"<>]*[^./\\?*:|"<>]$#';
 		return $options;
 	}
 	
@@ -243,12 +255,20 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function connect() {
-		if (!($this->connect = ftp_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
-			return $this->setError('Unable to connect to FTP server '.$this->options['host']);
+		$withSSL = empty($this->options['ssl'])? '' : ' with SSL';
+		if ($withSSL) {
+			if (!function_exists('ftp_ssl_connect') || !($this->connect = ftp_ssl_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
+				return $this->setError('Unable to connect to FTP server '.$this->options['host'].$withSSL);
+			}
+			$this->isFTPS = true;
+		} else {
+			if (!($this->connect = ftp_connect($this->options['host'], $this->options['port'], $this->options['timeout']))) {
+				return $this->setError('Unable to connect to FTP server '.$this->options['host']);
+			}
 		}
 		if (!ftp_login($this->connect, $this->options['user'], $this->options['pass'])) {
 			$this->umount();
-			return $this->setError('Unable to login into '.$this->options['host']);
+			return $this->setError('Unable to login into '.$this->options['host'].$withSSL);
 		}
 		
 		// try switch utf8 mode
@@ -984,7 +1004,10 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected function _dimensions($path, $mime) {
 		$ret = false;
 		if ($imgsize = $this->getImageSize($path, $mime)) {
-			$ret = $imgsize['dimensions'];
+			$ret = array('dim' => $imgsize['dimensions']);
+			if (!empty($imgsize['url'])) {
+				$ret['url'] = $imgsize['url'];
+			}
 		}
 		return $ret;
 	}
@@ -1022,8 +1045,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 */
 	protected function _fopen($path, $mode='rb') {
 		// try ftp stream wrapper
-		if ($this->options['mode'] == 'passive' && ini_get('allow_url_fopen')) {
-			$url = 'ftp://'.$this->options['user'].':'.$this->options['pass'].'@'.$this->options['host'].':'.$this->options['port'].$path;
+		if ($this->options['mode'] === 'passive' && ini_get('allow_url_fopen')) {
+			$url = ($this->isFTPS? 'ftps' : 'ftp').'://'.$this->options['user'].':'.$this->options['pass'].'@'.$this->options['host'].':'.$this->options['port'].$path;
 			if (strtolower($mode[0]) === 'w') {
 				$context = stream_context_create(array('ftp' => array('overwrite' => true)));
 				$fp = fopen($url, $mode, false, $context);
@@ -1059,7 +1082,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function _fclose($fp, $path='') {
-		fclose($fp);
+		is_resource($fp) && fclose($fp);
 		if ($path) {
 			unlink($this->getTempFile($path));
 		}
@@ -1348,10 +1371,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			// for several files - create new directory
 			// create unique name for directory
 			$src = $dir;
-			$name = basename($path);
-			if (preg_match('/\.((tar\.(gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(gz|bz2)|[a-z0-9]{1,4})$/i', $name, $m)) {
-				$name = substr($name, 0,  strlen($name)-strlen($m[0]));
-			}
+			$splits = elFinder::splitFileExtention(basename($path));
+			$name = $splits[0];
 			$test = $this->_joinPath(dirname($path), $name);
 			if ($this->stat($test)) {
 				$name = $this->uniqueName(dirname($path), $name, '-', false);

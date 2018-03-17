@@ -10,3 +10,4 @@ elFinderVolumeSVN.class.php
 connector-svn.php
 node_modules
 connector.php
+.jshintrc

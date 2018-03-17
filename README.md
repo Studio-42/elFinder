@@ -16,11 +16,13 @@ elFinder is an open-source file manager for web, written in JavaScript using
 jQuery UI. Creation is inspired by simplicity and convenience of Finder program
 used in Mac OS X operating system.
 
-[![Download now!](http://studio-42.github.io/elFinder/images/download-icon.png)](https://github.com/Studio-42/elFinder/releases/latest)
-[![Packagist License](https://poser.pugx.org/studio-42/elfinder/license.png)](http://choosealicense.com/licenses/bsd-3-clause/)
+[![Download now!](https://studio-42.github.io/elFinder/images/download-icon.png)](https://github.com/Studio-42/elFinder/releases/latest)
+[![Packagist License](https://poser.pugx.org/studio-42/elfinder/license.png)](https://choosealicense.com/licenses/bsd-3-clause/)
 [![Latest Stable Version](https://poser.pugx.org/studio-42/elfinder/version.png)](https://packagist.org/packages/studio-42/elfinder)
 [![Total Downloads](https://poser.pugx.org/studio-42/elfinder/d/total.png)](https://packagist.org/packages/studio-42/elfinder)
 [![CDNJS version](https://img.shields.io/cdnjs/v/elfinder.svg)](https://cdnjs.com/libraries/elfinder)
+[![Donate Paypal(nao-pon)](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FF5FKRSMKYDVA)
+[![Donate Bitcoin(nao-pon)](https://img.shields.io/badge/Donate-Bitcoin-orange.svg)](https://studio-42.github.io/elFinder/tools/donate-bitcoin/)
 
 Contents
 --------
@@ -101,6 +103,7 @@ Requirements
 ### Server
  * Any web server
  * PHP 5.2+ (Recommend PHP 5.4 or higher) And for thumbnails - GD / Imagick module / convert(imagemagick) require
+     * Recommend PHP 7.1 or higher to supports non-ASCII character of file path/name on the Windows server
 
 Installation
 ------------
@@ -125,7 +128,7 @@ Installation
 Downloads
 ------------
 **Stable releases** ([Changelog](https://github.com/Studio-42/elFinder/blob/master/Changelog))
- + [elFinder 2.1.29](https://github.com/Studio-42/elFinder/archive/2.1.29.zip)
+ + [elFinder 2.1.33](https://github.com/Studio-42/elFinder/archive/2.1.33.zip)
  + [elFinder 2.0.9](https://github.com/Studio-42/elFinder/archive/2.0.9.zip) (deprecated)
 
 **Nightly builds**
@@ -155,15 +158,13 @@ You can create or modify the language file to use translation tool. Please refer
 
 3rd party connectors
 --------------------
- * [ASP.NET](https://github.com/leniel/elFinder.Net)
  * [ASP.NET Core](https://github.com/gordon-matt/elFinder.NetCore)
+ * [ASP.NET](https://github.com/leniel/elFinder.Net)
  * [Java Servlet](https://github.com/trustsystems/elfinder-java-connector)
+ * [JavaScript/Efw](https://github.com/efwGrp/efw3.X/blob/master/help/api_efw_tag.md#elfinder-tag)
+ * [Nodejs](https://github.com/dekyfin/elfinder-node)
  * [Python](https://github.com/Studio-42/elfinder-python)
  * [Ruby/Rails](https://github.com/phallstrom/el_finder)
- * [Django](https://github.com/mikery/django-elfinder)
- * [Laravel](https://github.com/barryvdh/laravel-elfinder)
- * [JavaScript/Efw](https://github.com/efwGrp/efw3.X/blob/master/help/api_efw_tag.md#elfinder-tag)
- * [Symfony](https://github.com/helios-ag/FMElfinderBundle) 
 
 3rd party Volume Drivers
 --------------------
@@ -175,8 +176,21 @@ Hint: [How to load CSS with RequireJS?](https://github.com/Studio-42/elFinder/wi
 
  * [lokothodida/elfinder-theme-moono](https://github.com/lokothodida/elfinder-theme-moono)
  * [lokothodida/elfinder-theme-windows-10](https://github.com/lokothodida/elfinder-theme-windows-10)
- * [StudioJunkyard/elfinder-boostrap-theme](https://github.com/StudioJunkyard/LibreICONS/tree/master/themes/elFinder)
  * [RobiNN1/elFinder-Material-Theme](https://github.com/RobiNN1/elFinder-Material-Theme)
+ * [StudioJunkyard/elfinder-boostrap-theme](https://github.com/StudioJunkyard/LibreICONS/tree/master/themes/elFinder)
+
+3rd party Integrations
+--------------------
+ * [Django](https://github.com/mikery/django-elfinder)
+ * [Drupal](https://www.drupal.org/project/elfinder)
+ * [Laravel](https://github.com/barryvdh/laravel-elfinder)
+ * [Roundcube](https://github.com/Offerel/roundcube_elfinder)
+ * [Symfony](https://github.com/helios-ag/FMElfinderBundle)
+ * [Tiki Wiki](https://doc.tiki.org/elFinder)
+ * [WordPress](https://wordpress.org/plugins/file-manager/)
+ * [XOOPS](https://github.com/nao-pon/xelfinder)
+ * [Yii](http://www.yiiframework.com/extension/elfinder/)
+ * [Zenphoto](http://www.zenphoto.org/news/elfinder/)
 
 Support
 -------
@@ -192,7 +206,7 @@ Authors
 
  * Chief developer: Dmitry "dio" Levashov <dio@std42.ru>
  * Maintainer: Troex Nevelin <troex@fury.scancode.ru>
- * Developers: Alexey Sukhotin <strogg@yandex.ru>, Naoki Sawada <hypweb@gmail.com>
+ * Developers: Alexey Sukhotin <strogg@yandex.ru>, Naoki Sawada <hypweb+elfinder@gmail.com>
  * Icons: [PixelMixer](http://pixelmixer.ru), [Yusuke Kamiyamane](http://p.yusukekamiyamane.com)
 
 We hope our tools will be helpful for you.

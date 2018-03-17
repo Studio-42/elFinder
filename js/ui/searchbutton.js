@@ -1,21 +1,25 @@
-"use strict";
 /**
  * @class  elFinder toolbar search button widget.
  *
  * @author Dmitry (dio) Levashov
  **/
 $.fn.elfindersearchbutton = function(cmd) {
+	"use strict";
 	return this.each(function() {
 		var result = false,
 			fm     = cmd.fm,
 			isopts = cmd.options.incsearch || { enable: false },
-			id     = function(name){return fm.namespace + name},
+			id     = function(name){return fm.namespace + name;},
 			toolbar= fm.getUI('toolbar'),
 			btnCls = fm.res('class', 'searchbtn'),
-			button = $(this).hide().addClass('ui-widget-content elfinder-button '+btnCls),
+			button = $(this)
+				.hide()
+				.addClass('ui-widget-content elfinder-button '+btnCls)
+				.on('click', function(e) {
+					e.stopPropagation();
+				}),
 			search = function() {
 				input.data('inctm') && clearTimeout(input.data('inctm'));
-				opts && opts.slideUp();
 				var val = $.trim(input.val()),
 					from = !$('#' + id('SearchFromAll')).prop('checked'),
 					mime = $('#' + id('SearchMime')).prop('checked');
@@ -33,7 +37,6 @@ $.fn.elfindersearchbutton = function(cmd) {
 				if (val) {
 					cmd.exec(val, from, mime).done(function() {
 						result = true;
-						input.focus();
 					}).fail(function() {
 						abort();
 					});
@@ -44,7 +47,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 			},
 			abort = function() {
 				input.data('inctm') && clearTimeout(input.data('inctm'));
-				input.val('').blur();
+				input.val('').trigger('blur');
 				if (result || incVal) {
 					result = false;
 					incVal = '';
@@ -57,15 +60,25 @@ $.fn.elfindersearchbutton = function(cmd) {
 			input  = $('<input type="text" size="42"/>')
 				.on('focus', function() {
 					incVal = '';
-					opts && opts.slideDown();
+					button.addClass('ui-state-active');
+					fm.trigger('uiresize');
+					opts && opts.slideDown(function() {
+						// Care for on browser window re-active
+						button.addClass('ui-state-active');
+					});
 				})
-				.on('blur', function(){
+				.on('blur', function() {
 					if (opts) {
 						if (!opts.data('infocus')) {
-							opts.slideUp();
+							opts.slideUp(function() {
+								button.removeClass('ui-state-active');
+								fm.trigger('uiresize');
+							});
 						} else {
 							opts.data('infocus', false);
 						}
+					} else {
+						button.removeClass('ui-state-active');
 					}
 				})
 				.appendTo(button)
@@ -106,7 +119,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 								(incVal !== val) && fm.trigger('incsearchstart', { query: val });
 								incVal = val;
 								if (val === '' && fm.searchStatus.state > 1 && fm.searchStatus.query) {
-									input.val(fm.searchStatus.query).select();
+									input.val(fm.searchStatus.query).trigger('select');
 								} 
 							}
 						}, isopts.wait));
@@ -136,11 +149,27 @@ $.fn.elfindersearchbutton = function(cmd) {
 		
 		$('<span class="ui-icon ui-icon-search" title="'+cmd.title+'"/>')
 			.appendTo(button)
-			.click(search);
+			.on('mousedown', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				if (button.hasClass('ui-state-active')) {
+					search();
+				} else {
+					input.trigger('focus');
+				}
+			});
 		
 		$('<span class="ui-icon ui-icon-close"/>')
 			.appendTo(button)
-			.click(abort);
+			.on('mousedown', function(e) {
+				e.stopPropagation();
+				e.preventDefault();
+				if (input.val() === '' && !button.hasClass('ui-state-active')) {
+					input.trigger('focus');
+				} else {
+					abort();
+				}
+			});
 		
 		// wait when button will be added to DOM
 		fm.bind('toolbarload', function(){
@@ -160,8 +189,13 @@ $.fn.elfindersearchbutton = function(cmd) {
 		});
 		
 		fm
+			.one('init', function() {
+				fm.getUI('cwd').on('click', function() {
+					input.trigger('blur');
+				});
+			})
 			.one('open', function() {
-				opts = (fm.api < 2.1)? null : $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
+				opts = (fm.api < 2.1)? null : $('<div class="ui-front ui-widget ui-widget-content elfinder-button-search-menu ui-corner-all"/>')
 					.append(
 						$('<div class="buttonset"/>')
 							.append(
@@ -176,7 +210,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 							)
 					)
 					.hide()
-					.appendTo(button);
+					.appendTo(fm.getUI());
 				if (opts) {
 					opts.find('div.buttonset').buttonset();
 					$('#'+id('SearchFromAll')).next('label').attr('title', fm.i18n('searchTarget', fm.i18n('btnAll')));
@@ -187,12 +221,9 @@ $.fn.elfindersearchbutton = function(cmd) {
 						})
 						.on('click', 'input', function(e) {
 							e.stopPropagation();
-							$.trim(input.val()) && search();
+							$.trim(input.val())? search() : input.trigger('focus');
 						});
 				}
-			})
-			.select(function() {
-				input.blur();
 			})
 			.bind('searchend', function() {
 				input.val('');
@@ -230,7 +261,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 				pattern     : 'ctrl+f f3',
 				description : cmd.title,
 				callback    : function() { 
-					input.select().focus();
+					input.trigger('select').trigger('focus');
 				}
 			})
 			.shortcut({

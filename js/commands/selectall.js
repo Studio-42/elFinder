@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "selectall"
  * Select ALL of cwd items
@@ -6,6 +5,7 @@
  * @author Naoki Sawada
  **/
 elFinder.prototype.commands.selectall = function() {
+	"use strict";
 	var self = this,
 		state = 0;
 	
@@ -18,10 +18,10 @@ elFinder.prototype.commands.selectall = function() {
 	
 	this.getstate = function() {
 		return state;
-	}
+	};
 	
 	this.exec = function() {
 		$(document).trigger($.Event('keydown', { keyCode: 65, ctrlKey : true, shiftKey : false, altKey : false, metaKey : false }));
 		return $.Deferred().resolve();
-	}
+	};
 };

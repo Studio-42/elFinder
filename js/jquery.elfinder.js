@@ -10,7 +10,7 @@ if ($.ui) {
 				}
 				var rect = elem[0].getBoundingClientRect();
 				return document.elementFromPoint(rect.left, rect.top)? false : true;
-			}
+			};
 			
 			if (event.type === 'mousedown' || t.options.elfRefresh) {
 				var i, d,
@@ -31,6 +31,69 @@ if ($.ui) {
 	}
 }
 })();
+
+ /**
+ *
+ * jquery.binarytransport.js
+ *
+ * @description. jQuery ajax transport for making binary data type requests.
+ * @version 1.0 
+ * @author Henry Algus <henryalgus@gmail.com>
+ *
+ */
+
+// use this transport for "binary" data type
+$.ajaxTransport('+binary', function(options, originalOptions, jqXHR) {
+	// check for conditions and support for blob / arraybuffer response type
+	if (window.FormData && ((options.dataType && (options.dataType == 'binary')) || (options.data && ((window.ArrayBuffer && options.data instanceof ArrayBuffer) || (window.Blob && options.data instanceof Blob)))))
+	{
+		var xhr;
+		return {
+			// create new XMLHttpRequest
+			send: function(headers, callback){
+				// setup all variables
+				xhr = new XMLHttpRequest();
+				var url = options.url,
+					type = options.type,
+					async = options.async || true,
+					// blob or arraybuffer. Default is blob
+					dataType = options.responseType || 'blob',
+					data = options.data || null,
+					username = options.username,
+					password = options.password;
+					
+				xhr.addEventListener('load', function(){
+					var data = {};
+					data[options.dataType] = xhr.response;
+					// make callback and send data
+					callback(xhr.status, xhr.statusText, data, xhr.getAllResponseHeaders());
+				});
+
+				xhr.open(type, url, async, username, password);
+				
+				// setup custom headers
+				for (var i in headers ) {
+					xhr.setRequestHeader(i, headers[i] );
+				}
+
+				// setuo xhrFields
+				if (options.xhrFields) {
+					for (var key in options.xhrFields) {
+						if (key in xhr) {
+							xhr[key] = options.xhrFields[key];
+						}
+					}
+				}
+
+				xhr.responseType = dataType;
+				xhr.send(data);
+			},
+			abort: function(){
+				xhr.abort();
+			}
+		};
+	}
+});
 
 /*!
  * jQuery UI Touch Punch 0.2.3
@@ -309,10 +372,24 @@ $.fn.elfUiWidgetInstance = function(name) {
 if (! $.fn.scrollRight) {
 	$.fn.extend({
 		scrollRight: function (val) {
+			var node = this.get(0);
 			if (val === undefined) {
-				return Math.max(0, this[0].scrollWidth - (this[0].scrollLeft + this[0].clientWidth));
+				return Math.max(0, node.scrollWidth - (node.scrollLeft + node.clientWidth));
 			}
-			return this.scrollLeft(this[0].scrollWidth - this[0].clientWidth - val);
+			return this.scrollLeft(node.scrollWidth - node.clientWidth - val);
+		}
+	});
+}
+
+// function scrollBottom
+if (! $.fn.scrollBottom) {
+	$.fn.extend({
+		scrollBottom: function(val) { 
+			var node = this.get(0);
+			if (val === undefined) {
+				return Math.max(0, node.scrollHeight - (node.scrollTop + node.clientHeight));
+			}
+			return this.scrollTop(node.scrollHeight - node.clientHeight - val);
 		}
 	});
 }

@@ -6,6 +6,7 @@
  * @author Dmitry (dio) Levashov
  */
 elFinder.prototype.history = function(fm) {
+	"use strict";
 	var self = this,
 		/**
 		 * Update history on "open" event?
@@ -60,7 +61,7 @@ elFinder.prototype.history = function(fm) {
 	 */
 	this.canBack = function() {
 		return current > 0;
-	}
+	};
 	
 	/**
 	 * Return true if can go forward
@@ -69,7 +70,7 @@ elFinder.prototype.history = function(fm) {
 	 */
 	this.canForward = function() {
 		return current < history.length - 1;
-	}
+	};
 	
 	/**
 	 * Go back
@@ -85,7 +86,7 @@ elFinder.prototype.history = function(fm) {
 	 */
 	this.forward = function() {
 		return go(true);
-	}
+	};
 	
 	// bind to elfinder events
 	fm.open(function() {

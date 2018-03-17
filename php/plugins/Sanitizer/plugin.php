@@ -113,7 +113,7 @@ class elFinderPluginSanitizer extends elFinderPlugin
 		return true;
 	}
 	
-	private function sanitizeFileName($filename, $opts, $allows = array()) {
+	protected function sanitizeFileName($filename, $opts, $allows = array()) {
 		$targets = $allows? array_diff($opts['targets'], $allows) : $opts['targets'];
 		return str_replace($targets, $opts['replace'], $filename);
   	}

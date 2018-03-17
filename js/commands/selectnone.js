@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "selectnone"
  * Unselect ALL of cwd items
@@ -6,6 +5,7 @@
  * @author Naoki Sawada
  **/
 elFinder.prototype.commands.selectnone = function() {
+	"use strict";
 	var self = this,
 		fm = this.fm,
 		state = -1;
@@ -19,10 +19,10 @@ elFinder.prototype.commands.selectnone = function() {
 	
 	this.getstate = function() {
 		return state;
-	}
+	};
 	
 	this.exec = function() {
 		fm.getUI('cwd').trigger('unselectall');
 		return $.Deferred().resolve();
-	}
+	};
 };

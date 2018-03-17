@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class elFinder command "upload"
  * Upload files using iframe or XMLHttpRequest & FormData.
@@ -8,6 +7,7 @@
  * @author  Dmitry (dio) Levashov
  */
 elFinder.prototype.commands.upload = function() {
+	"use strict";
 	var hover = this.fm.res('class', 'hover');
 	
 	this.disableOnSearch = true;
@@ -23,9 +23,9 @@ elFinder.prototype.commands.upload = function() {
 	 *
 	 * @return Number
 	 **/
-	this.getstate = function(sel) {
+	this.getstate = function(select) {
 		var fm = this.fm, f,
-		sel = (sel || [fm.cwd().hash]);
+		sel = (select || [fm.cwd().hash]);
 		if (!this._disabled && sel.length == 1) {
 			f = fm.file(sel[0]);
 		}
@@ -120,20 +120,20 @@ elFinder.prototype.commands.upload = function() {
 									var title = base.children('.ui-dialog-titlebar:first').find('span.elfinder-upload-target');
 									targets = [ f.hash ];
 									title.html(' - ' + fm.escape(f.i18 || f.name));
-									$this.focus();
+									$this.trigger('focus');
 								},
 								options  : {
 									className : (targets && targets.length && f.hash === targets[0])? 'ui-state-active' : '',
 									iconClass : f.csscls || '',
 									iconImg   : f.icon   || ''
 								}
-							}
+							};
 						},
 						raw = [ getRaw(targetDir, 'opendir'), '|' ];
 					$.each(dirs, function(i, f) {
 						raw.push(getRaw(f, 'dir'));
 					});
-					$this.blur();
+					$this.trigger('blur');
 					fm.trigger('contextmenu', {
 						raw: raw,
 						x: e.pageX || $(this).offset().left,
@@ -146,7 +146,7 @@ elFinder.prototype.commands.upload = function() {
 			inputButton = function(type, caption) {
 				var button,
 					input = $('<input type="file" ' + type + '/>')
-					.change(function() {
+					.on('change', function() {
 						upload({input : input.get(0), type : 'files'});
 					})
 					.on('dragover', function(e) {
@@ -162,8 +162,8 @@ elFinder.prototype.commands.upload = function() {
 							input.click();
 						}
 					})
-					.hover(function() {
-						$(this).toggleClass(hover)
+					.on('mouseenter mouseleave', function(e) {
+						$(this).toggleClass(hover, e.type === 'mouseenter');
 					});
 			},
 			dfrd = $.Deferred(),
@@ -235,8 +235,8 @@ elFinder.prototype.commands.upload = function() {
 			return dfrd;
 		}
 		
-		paste = function(e) {
-			var e = e.originalEvent || e;
+		paste = function(ev) {
+			var e = ev.originalEvent || ev;
 			var files = [], items = [];
 			var file;
 			if (e.clipboardData) {
@@ -314,7 +314,7 @@ elFinder.prototype.commands.upload = function() {
 					paste(e);
 				})
 				.on('mousedown click', function(){
-					$(this).focus();
+					$(this).trigger('focus');
 				})
 				.on('focus', function(){
 					this.innerHTML = '';
@@ -355,7 +355,7 @@ elFinder.prototype.commands.upload = function() {
 					paste(e);
 				})
 				.on('mousedown click', function(){
-					$(this).focus();
+					$(this).trigger('focus');
 				})
 				.on('focus', function(){
 					this.innerHTML = '';

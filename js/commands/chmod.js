@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class elFinder command "chmod".
  * Chmod files.
@@ -7,6 +6,7 @@
  * @author Naoki Sawada
  */
 elFinder.prototype.commands.chmod = function() {
+	"use strict";
 	this.updateOnSelect = false;
 	var fm  = this.fm,
 		level = {
@@ -55,14 +55,15 @@ elFinder.prototype.commands.chmod = function() {
 	this.checkstate = function(sel) {
 		var cnt = sel.length;
 		if (!cnt) return false;
-		var chk = $.map(sel, function(f) {
-			return (f.isowner && f.perm && isPerm(f.perm) && (cnt == 1 || f.mime != 'directory')) ? f : null;
+		var chk = $.grep(sel, function(f) {
+			return (f.isowner && f.perm && isPerm(f.perm) && (cnt == 1 || f.mime != 'directory')) ? true : false;
 		}).length;
 		return (cnt == chk)? true : false;
 	};
 
-	this.exec = function(hashes) {
-		var files   = this.files(hashes);
+	this.exec = function(select) {
+		var hashes  = this.hashes(select),
+			files   = this.files(hashes);
 		if (! files.length) {
 			hashes = [ this.fm.cwd().hash ];
 			files   = this.files(hashes);
@@ -72,7 +73,6 @@ elFinder.prototype.commands.chmod = function() {
 			fm.enable();
 		}),
 		tpl     = this.tpl,
-		hashes  = this.hashes(hashes),
 		cnt     = files.length,
 		file    = files[0],
 		id = fm.namespace + '-perm-' + file.hash,
@@ -125,7 +125,7 @@ elFinder.prototype.commands.chmod = function() {
 							return fm.request({
 								data : reqData,
 								notify : {type : 'redo', cnt : hashes.length}
-							})
+							});
 						}
 					};
 				}
@@ -173,7 +173,7 @@ elFinder.prototype.commands.chmod = function() {
 			var perm = '777', ret = '', chk, _chk, _perm;
 			var len = files.length;
 			for (var i2 = 0; i2 < len; i2++) {
-				chk = getPerm(files[i2].perm);;
+				chk = getPerm(files[i2].perm);
 				if (! prevVals[chk]) {
 					prevVals[chk] = [];
 				}
@@ -252,7 +252,7 @@ elFinder.prototype.commands.chmod = function() {
 			
 				for (var j = 0, m = b_array.length; j < m; j++) {
 					var p = parseInt(b_array[j], 2).toString(8);
-					c.push(p)
+					c.push(p);
 				}
 
 				perm = c.join('');
@@ -307,10 +307,10 @@ elFinder.prototype.commands.chmod = function() {
 				return;
 			}
 		}).on('focus', function(e){
-			$(this).select();
+			$(this).trigger('select');
 		}).on('keyup', function(e) {
 			if ($(this).val().length == 3) {
-				$(this).select();
+				$(this).trigger('select');
 				setcheck($(this).val());
 			}
 		});

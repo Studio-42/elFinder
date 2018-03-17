@@ -5,7 +5,8 @@
  * @author Timo-Linde <info@timo-linde.de>
  * @author osworx.net
  * @author Maximilian Schwarz <info@deefuse.de>
- * @version 2017-08-07
+ * @author SF Webdesign <webdesign@stephan-frank.de>
+ * @version 2017-11-29
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,7 +18,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.de = {
-		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt;, tora60 from pragmaMx.org, Timo-Linde &lt;info@timo-linde.de&gt;, osworx.net, Maximilian Schwarz &lt;info@deefuse.de&gt;',
+		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt;, tora60 from pragmaMx.org, Timo-Linde &lt;info@timo-linde.de&gt;, osworx.net, Maximilian Schwarz &lt;info@deefuse.de&gt;, SF Webdesign &lt;webdesign@stephan-frank.de&gt;',
 		language   : 'Deutsch',
 		direction  : 'ltr',
 		dateFormat : 'd. M Y H:i', // Mar 13, 2012 05:27 PM
@@ -162,6 +163,9 @@
 			'cmdundo'      : 'Zückgängig', // from v2.1.27 added 31.07.2017
 			'cmdredo'      : 'Wiederholen', // from v2.1.27 added 31.07.2017
 			'cmdpreference': 'Einstellungen', // from v2.1.27 added 03.08.2017
+			'cmdselectall' : 'Alle auswählen', // from v2.1.28 added 15.08.2017
+			'cmdselectnone': 'Keine auswählen', // from v2.1.28 added 15.08.2017
+			'cmdselectinvert': 'Auswahl rückgängig machen', // from v2.1.28 added 15.08.2017
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Schließen',
@@ -172,7 +176,7 @@
 			'btnNo'     : 'Nein',
 			'btnYes'    : 'Ja',
 			'btnMount'  : 'Verbinden',  // added 18.04.2012
-			'btnApprove': 'Goto $1 & approve', // from v2.1 added 26.04.2012
+			'btnApprove': 'Gehe zu $1 und genehmige', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Auswerfen', // from v2.1 added 30.04.2012
 			'btnConv'   : 'Konvertieren', // from v2.1 added 08.04.2014
 			'btnCwd'    : 'Arbeitspfad',      // from v2.1 added 22.5.2015
@@ -291,7 +295,7 @@
 			'confirmReq'      : 'Bestätigung benötigt',
 			'confirmRm'       : 'Sollen die Dateien gelöscht werden?<br/>Dies kann nicht rückgängig gemacht werden!',
 			'confirmRepl'     : 'Datei ersetzen?',
-			'confirmRest'     : 'Replace existing item with the item in trash?', // fromv2.1.24 added 5.5.2017
+			'confirmRest'     : 'Vorhandenes Element durch das Element im Papierkorb ersetzen?', // fromv2.1.24 added 5.5.2017
 			'confirmConvUTF8' : 'Nicht in UTF-8<br/>Zu UTF-8 konvertieren?<br/>Inhalte werden zu UTF-8 konvertiert, wenn Sie speichern.', // from v2.1 added 08.04.2014
 			'confirmNonUTF8'  : 'Die Zeichencodierung dieser Datei konnte nicht erkannt werden. Es muss vorübergehend in UTF-8 zur Bearbeitung konvertiert werden. <br/> Bitte wähle eine Zeichenkodierung dieser Datei aus.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'Die Datei wurde geändert.<br/>Sie werden die Änderungen verlieren, wenn Sie nicht speichern.', // from v2.1 added 15.7.2015
@@ -387,7 +391,7 @@
 			'emptyFolderDrop' : 'Der Ordner ist leer\\A Fügen Sie Elemente durch Ziehen hinzu', // from v2.1.6 added 30.12.2015
 			'emptyFolderLTap' : 'Der Ordner ist leer\\A Fügen Sie Elemente durch langes Tippen hinzu', // from v2.1.6 added 30.12.2015
 			'quality'         : 'Qualität', // from v2.1.6 added 5.1.2016
-			'autoSync'        : 'Auto sync',  // from v2.1.6 added 10.1.2016
+			'autoSync'        : 'Automatische Synchronisation',  // from v2.1.6 added 10.1.2016
 			'moveUp'          : 'Nach oben bewegen',  // from v2.1.6 added 18.1.2016
 			'getLink'         : 'URL-Link holen', // from v2.1.7 added 9.2.2016
 			'selectedItems'   : 'Ausgewählte Objekte ($1)', // from v2.1.7 added 2.19.2016
@@ -414,27 +418,36 @@
 			'enabled'         : 'Ein', // from v2.1.16 added 4.10.2016
 			'disabled'        : 'Aus', // from v2.1.16 added 4.10.2016
 			'emptyIncSearch'  : 'Keine Ergebnisse in der aktuellen Anzeige', // from v2.1.16 added 5.10.2016
-			'emptyLetSearch'  : 'First letter search results is empty in current view.', // from v2.1.23 added 24.3.2017
-			'textLabel'       : 'Text label', // from v2.1.17 added 13.10.2016
-			'minsLeft'        : '$1 min linke´s', // from v2.1.17 added 13.11.2016
-			'openAsEncoding'  : 'Reopen with selected encoding', // from v2.1.19 added 2.12.2016
-			'saveAsEncoding'  : 'Save with the selected encoding', // from v2.1.19 added 2.12.2016
+			'emptyLetSearch'  : 'Die Ergebnisse der ersten Buchstabensuche sind in der aktuellen Ansicht leer.', // from v2.1.23 added 24.3.2017
+			'textLabel'       : 'Text Bezeichnung', // from v2.1.17 added 13.10.2016
+			'minsLeft'        : '$1 Minuten übrig', // from v2.1.17 added 13.11.2016
+			'openAsEncoding'  : 'Wiedereröffnen mit ausgewählter Codierung', // from v2.1.19 added 2.12.2016
+			'saveAsEncoding'  : 'Speichern mit der gewählten Kodierung', // from v2.1.19 added 2.12.2016
 			'selectFolder'    : 'Verzeichnis auswählen', // from v2.1.20 added 13.12.2016
 			'firstLetterSearch': 'Erster Buchstabe suche', // from v2.1.23 added 24.3.2017
 			'presets'         : 'Voreinstellungen', // from v2.1.25 added 26.5.2017
-			'tooManyToTrash'  : 'It\'s too many items so it can\'t into trash.', // from v2.1.25 added 9.6.2017
-			'TextArea'        : 'TextArea', // from v2.1.25 added 14.6.2017
+			'tooManyToTrash'  : 'Es sind zu viele Elemente, also kann es nicht in den Papierkorb.', // from v2.1.25 added 9.6.2017
+			'TextArea'        : 'Textbereich', // from v2.1.25 added 14.6.2017
 			'folderToEmpty'   : 'Leere den Ordner "$1".', // from v2.1.25 added 22.6.2017
-			'filderIsEmpty'   : 'There are no items in a folder "$1".', // from v2.1.25 added 22.6.2017
+			'filderIsEmpty'   : 'Es befinden sich keine Elemente im Ordner "$1".', // from v2.1.25 added 22.6.2017
 			'preference'      : 'Einstellungen', // from v2.1.26 added 28.6.2017
 			'language'        : 'Spracheinstellungen', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': 'Initialisiere die Einstellungen, welche in diesem Browser gespeichert sind', // from v2.1.26 added 28.6.2017
 			'toolbarPref'     : 'Toolbar einstellung', // from v2.1.27 added 2.8.2017
+			'charsLeft'       : '... $1 Zeichen übrig.',  // from v2.1.29 added 30.8.2017
+			'sum'             : 'Summe', // from v2.1.29 added 28.9.2017
+			'roughFileSize'   : 'Ungefähre Dateigröße', // from v2.1.30 added 2.11.2017
+			'autoFocusDialog' : 'Fokussierung auf das Element Dialog mit Mouseover',  // from v2.1.30 added 2.11.2017
+			'select'          : 'Auswählen', // from v2.1.30 added 23.11.2017
+			'selectAction'    : 'Aktion bei der Auswahl der Datei', // from v2.1.30 added 23.11.2017
+			'useStoredEditor' : 'Öffnen mit dem zuletzt verwendeten Editor', // from v2.1.30 added 23.11.2017
+			'selectinvert'    : 'Auswahl rückgängig machen', // from v2.1.30 added 25.11.2017
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unbekannt',
 			'kindRoot'        : 'Wurzelverzeichnis', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'Ordner',
+			'kindSelects'     : 'Auswahlkriterien', // from v2.1.29 added 29.8.2017
 			'kindAlias'       : 'Verknüpfung',
 			'kindAliasBroken' : 'Defekte Verknüpfung',
 			// applications
@@ -514,4 +527,3 @@
 		}
 	};
 }));
-

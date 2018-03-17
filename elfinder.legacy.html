@@ -2,8 +2,9 @@
 <html>
 	<head>
 		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 		<title>elFinder 2.1.x source version with PHP connector</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2" />
 
 		<!-- Section CSS -->
 		<!-- jQuery UI (REQUIRED) -->
@@ -49,16 +50,15 @@
 					function(fm, extraObj) {
 						// `init` event callback function
 						fm.bind('init', function() {
-							// Optional for Japanese decoder "extras/encoding-japanese.min"
-							delete fm.options.rawStringDecoder;
-							if (fm.lang === 'jp') {
+							// Optional for Japanese decoder "encoding-japanese.js"
+							if (fm.lang === 'ja') {
 								fm.loadScript(
-									[ fm.baseUrl + 'js/extras/encoding-japanese.min.js' ],
+									[ '//cdn.rawgit.com/polygonplanet/encoding.js/1.0.26/encoding.min.js' ],
 									function() {
 										if (window.Encoding && Encoding.convert) {
-											fm.options.rawStringDecoder = function(s) {
-												return Encoding.convert(s,{to:'UNICODE',type:'string'});
-											};
+											fm.registRawStringDecoder(function(s) {
+												return Encoding.convert(s, {to:'UNICODE',type:'string'});
+											});
 										}
 									},
 									{ loadType: 'tag' }

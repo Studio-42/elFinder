@@ -66,6 +66,7 @@
 .elfinder-navbar-root-googledrive.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_googledrive.png"); }
 .elfinder-navbar-root-onedrive.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_onedrive.png"); }
 .elfinder-navbar-root-box.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_box.png"); }
+.elfinder-navbar-root-zip.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_zip.png"); }
 
 /* text in item */
 .elfinder .elfinder-contextmenu .elfinder-contextmenu-item span { display:block; }

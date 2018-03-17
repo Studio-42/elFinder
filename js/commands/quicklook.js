@@ -1,4 +1,3 @@
-"use strict";
 /**
  * @class  elFinder command "quicklook"
  * Fast preview for some files types
@@ -6,6 +5,7 @@
  * @author Dmitry (dio) Levashov
  **/
 (elFinder.prototype.commands.quicklook = function() {
+	"use strict";
 	var self       = this,
 		fm         = self.fm,
 		/**
@@ -33,17 +33,25 @@
 		 **/
 		docked     = 3,
 		/**
+		 * window docked and hidden state
+		 *
+		 * @type Number
+		 **/
+		dockedhidden = 4,
+		/**
 		 * window state
 		 *
 		 * @type Number
 		 **/
 		state      = closed,
 		/**
-		 * next/prev event name (requied to cwd catch it)
-		 *
-		 * @type Number
+		 * Event name of update
+		 * for fix conflicts with Prototype.JS
+		 * 
+		 * `@see https://github.com/Studio-42/elFinder/pull/2346
+		 * @type String
 		 **/
-		// keydown    = fm.UA.Firefox || fm.UA.Opera ? 'keypress' : 'keydown',
+		evUpdate = Element.update? 'quicklookupdate' : 'update',
 		/**
 		 * navbar icon class
 		 *
@@ -79,15 +87,18 @@
 		 **/
 		closedCss = function(node) {
 			var elf = fm.getUI().offset(),
-				base = node.find('.elfinder-cwd-file-wrapper'),
+				base = (function() {
+					var target = node.find('.elfinder-cwd-file-wrapper');
+					return target.length? target : node;
+				})(),
 				baseOffset = base.offset() || { top: 0, left: 0 };
 			return {
 				opacity : 0,
 				width   : base.width(),
-				height  : base.height(),
+				height  : base.height() - 30,
 				top     : baseOffset.top - elf.top,
 				left    : baseOffset.left  - elf.left
-			}
+			};
 		},
 		/**
 		 * Return css for opened window
@@ -106,7 +117,7 @@
 				height : h,
 				top    : parseInt((win.height() - h - 60) / 2 + (contain? 0 : win.scrollTop() - elf.top)),
 				left   : parseInt((win.width() - w) / 2 + (contain? 0 : win.scrollLeft() - elf.left))
-			}
+			};
 		},
 		
 		support = function(codec, name) {
@@ -264,7 +275,7 @@
 				var collection = win;
 				if (parent.is('.ui-resizable')) {
 					collection = collection.add(parent);
-				};
+				}
 				collection.resizable(full ? 'enable' : 'disable').removeClass('ui-state-disabled');
 
 				win.trigger('viewchange');
@@ -278,15 +289,9 @@
 					cnt = files.length,
 					inDock = self.docked(),
 					getInfo = function() {
-						var size = 0, ts = 0, getSize;
+						var ts = 0;
 						$.each(files, function(i, f) {
-							var s = parseInt(f.size),
-								t = parseInt(f.ts);
-							if ((f.mime !== 'directory' || f.sizeInfo) && s >= 0 && size >= 0) {
-								size += s;
-							} else {
-								size = 'unknown';
-							}
+							var t = parseInt(f.ts);
 							if (ts >= 0) {
 								if (t > ts) {
 									ts = t;
@@ -295,15 +300,14 @@
 								ts = 'unknown';
 							}
 						});
-						getSize = (size === 'unknown');
 						return {
-							hash : +new Date(),
+							hash : files[0].hash  + '/' + (+new Date()),
 							name : fm.i18n('items') + ': ' + cnt,
 							mime : 'group',
-							size : getSize? spinner : size,
+							size : spinner,
 							ts   : ts,
 							files : $.map(files, function(f) { return f.hash; }),
-							getSize : getSize
+							getSize : true
 						};
 					};
 				if (! cnt) {
@@ -340,11 +344,11 @@
 			.append('<div class="elfinder-quicklook-navbar-separator"/>')
 			.append($('<div class="'+navicon+' '+navicon+'-close"/>').on('click touchstart', function(e) { ! navmove && self.window.trigger('close'); return false; }))
 		,
-		titleClose = $('<span class="ui-front ui-icon elfinder-icon-close ui-icon-closethick"/>').mousedown(function(e) {
+		titleClose = $('<span class="ui-front ui-icon elfinder-icon-close ui-icon-closethick"/>').on('mousedown', function(e) {
 			e.stopPropagation();
 			self.window.trigger('close');
 		}),
-		titleDock = $('<span class="ui-front ui-icon elfinder-icon-minimize ui-icon-minusthick"/>').mousedown(function(e) {
+		titleDock = $('<span class="ui-front ui-icon elfinder-icon-minimize ui-icon-minusthick"/>').on('mousedown', function(e) {
 			e.stopPropagation();
 			if (! self.docked()) {
 				self.window.trigger('navdockin');
@@ -355,10 +359,9 @@
 		spinner = '<span class="elfinder-info-spinner"/>' + fm.i18n('calc'),
 		navStyle = '',
 		init = true,
-		dockHeight,
-		getSize,
-		tm4cwd;
+		dockHeight,	getSize, tm4cwd, dockedNode, selectTm;
 
+	this.evUpdate = evUpdate,
 	(this.navbar = navbar)._show = navShow;
 	this.resize = 'resize.'+fm.namespace;
 	this.info = $('<div/>').addClass(infocls)
@@ -382,12 +385,13 @@
 			info.html('');
 		})
 		// update info/icon
-		.on('update', function(e) {
+		.on(evUpdate, function(e) {
 			var fm      = self.fm,
 				preview = self.preview,
 				file    = e.file,
 				tpl     = '<div class="elfinder-quicklook-info-data">{value}</div>',
 				update  = function() {
+					var win = self.window.css('overflow', 'hidden');
 					name = fm.escape(file.i18 || file.name);
 					!file.read && e.stopImmediatePropagation();
 					self.window.data('hash', file.hash);
@@ -396,7 +400,7 @@
 					
 					prev.css('visibility', '');
 					next.css('visibility', '');
-					if (file.hash === fm.cwdId2Hash(cwd.find('[id]:first').attr('id'))) {
+					if (file.hash === fm.cwdId2Hash(cwd.find('[id]:not(.elfinder-cwd-parent):first').attr('id'))) {
 						prev.css('visibility', 'hidden');
 					}
 					if (file.hash === fm.cwdId2Hash(cwd.find('[id]:last').attr('id'))) {
@@ -452,6 +456,7 @@
 					if (self.window.hasClass(fullscreen)) {
 						cover.trigger('mousemove');
 					}
+					win.css('overflow', '');
 				},
 				tmb, name, getSizeHashes = [];
 
@@ -480,56 +485,72 @@
 					titleClose, titleDock
 				)
 			),
-			self.info.hide(),
 			this.preview,
+			self.info.hide(),
 			cover.hide(),
 			navbar
 		)
 		.draggable({handle : 'div.elfinder-quicklook-titlebar'})
-		.on('open', function(e) {
+		.on('open', function(e, clcss) {
 			var win  = self.window, 
 				file = self.value,
-				node = fm.getUI('cwd');
+				node = fm.getUI('cwd'),
+				open = function(status) {
+					state = status;
+					self.update(1, self.value);
+					self.change();
+					win.trigger('resize.' + fm.namespace);
+				};
 
-			if (self.closed() && file && (file.hash === cwdHash || (node = $('#'+fm.cwdHash2Id(file.hash))).length)) {
+			if (!init && state === closed) {
+				if (file && file.hash !== cwdHash) {
+					node = $('#'+fm.cwdHash2Id(file.hash.split('/', 2)[0]));
+				}
 				navStyle = '';
 				navbar.attr('style', '');
 				state = animated;
 				node.trigger('scrolltoview');
 				coverHide();
-				win.css(closedCss(node))
+				win.css(clcss || closedCss(node))
 					.show()
 					.animate(openedCss(), 550, function() {
-						state = opened;
-						self.update(1, self.value);
-						self.change();
+						open(opened);
 						navShow();
 					});
+			} else if (state === dockedhidden) {
+				fm.getUI('navdock').data('addNode')(dockedNode);
+				open(docked);
+				self.preview.trigger('changesize');
+				fm.storage('previewDocked', '1');
 			}
 		})
 		.on('close', function(e, dfd) {
 			var win     = self.window,
 				preview = self.preview.trigger('change'),
 				file    = self.value,
-				hash    = win.data('hash'),
-				close   = function() {
-					state = closed;
-					win.hide();
+				hash    = (win.data('hash') || '').split('/', 2)[0],
+				close   = function(status, winhide) {
+					state = status;
+					winhide && win.hide();
 					preview.children().remove();
 					self.update(0, self.value);
+					win.data('hash', '');
 					dfd && dfd.resolve();
 				},
 				node;
 				
-			if (! self.docked()) {
-				win.data('hash', '');
-				if (self.opened()) {
-					getSize && getSize.state() === 'pending' && getSize.reject();
+			if (self.opened()) {
+				getSize && getSize.state() === 'pending' && getSize.reject();
+				if (! self.docked()) {
 					state = animated;
 					win.hasClass(fullscreen) && fsicon.click();
 					(hash && (node = cwd.find('#'+hash)).length)
-						? win.animate(closedCss(node), 500, close)
-						: close();
+						? win.animate(closedCss(node), 500, function() { close(closed, true); })
+						: close(closed, true);
+				} else {
+					dockedNode = fm.getUI('navdock').data('removeNode')(self.window.attr('id'), 'detach');
+					close(dockedhidden);
+					fm.storage('previewDocked', '2');
 				}
 			}
 		})
@@ -541,7 +562,6 @@
 			
 			if (init) {
 				opts.init = true;
-				init = false;
 			}
 			state = docked;
 			prevStyle = w.attr('style');
@@ -553,7 +573,6 @@
 				zIndex: 'unset'
 			});
 			navbar.hide();
-			titleClose.hide();
 			titleDock.toggleClass('ui-icon-plusthick ui-icon-minusthick elfinder-icon-full elfinder-icon-minimize');
 			
 			box.data('addNode')(w, opts);
@@ -565,23 +584,16 @@
 		.on('navdockout', function(e) {
 			var w   = self.window,
 				box = fm.getUI('navdock'),
-				dfd = $.Deferred();
-			
-			state = opened;
-			
-			box.data('removeNode')(w.attr('id'), fm.getUI());
+				dfd = $.Deferred(),
+				clcss = closedCss(self.preview);
 			
 			dockHeight = w.outerHeight();
+			box.data('removeNode')(w.attr('id'), fm.getUI());
 			w.toggleClass('ui-front').addClass('ui-widget').draggable('enable').resizable('enable').attr('style', prevStyle);
-			navbar.show();
-			titleClose.show();
 			titleDock.toggleClass('ui-icon-plusthick ui-icon-minusthick elfinder-icon-full elfinder-icon-minimize');
 			
-			w.data('hash', '');
-			w.trigger('close', dfd);
-			dfd.done(function() {
-				w.trigger('open');
-			});
+			state = closed;
+			w.trigger('open', clcss);
 			
 			fm.storage('previewDocked', '0');
 		})
@@ -605,8 +617,17 @@
 	
 	this.handlers = {
 		// save selected file
-		select : function() { this.opened() && updateOnSel(); },
-		error  : function() { self.window.is(':visible') && self.window.data('hash', '').trigger('close'); },
+		select : function(e, d) {
+			selectTm && clearTimeout(selectTm);
+			if (! e.data || ! e.data.selected || ! e.data.selected.length) {
+				selectTm = setTimeout(function() {
+					self.opened() && updateOnSel();
+				}, 0);
+			} else {
+				self.opened() && updateOnSel();
+			}
+		},
+		error  : function() { self.window.is(':visible') && self.window.trigger('close'); },
 		'searchshow searchhide' : function() { this.opened() && this.window.trigger('close'); },
 		navbarshow : function() {
 			setTimeout(function() {
@@ -643,7 +664,7 @@
 	 * @return Boolean
 	 **/
 	this.closed = function() {
-		return state == closed;
+		return (state == closed || state == dockedhidden);
 	};
 	
 	/**
@@ -723,55 +744,67 @@
 							// try re-get file object
 							self.value = Object.assign({}, fm.file(self.value.hash));
 						}
-						preview.trigger($.Event('update', {file : self.value}));
+						preview.trigger($.Event(evUpdate, {file : self.value}));
 					}
 				}
 			});
 			
-			preview.on('update', function(e) {
-				var file = e.file,
-					hash = file.hash,
+			preview.on(evUpdate, function(e) {
+				var file, hash, serach;
+				
+				if (file = e.file) {
+					hash = file.hash;
 					serach = (fm.searchStatus.mixed && fm.searchStatus.state > 1);
 				
-				if (file.mime !== 'directory') {
-					if (parseInt(file.size)) {
-						// set current dispInlineRegex
-						self.dispInlineRegex = cwdDispInlineRegex;
-						if (serach || fm.optionsByHashes[hash]) {
-							try {
-								self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', hash), 'i');
-							} catch(e) {
+					if (file.mime !== 'directory') {
+						if (parseInt(file.size) || file.mime.match(o.mimeRegexNotEmptyCheck)) {
+							// set current dispInlineRegex
+							self.dispInlineRegex = cwdDispInlineRegex;
+							if (serach || fm.optionsByHashes[hash]) {
 								try {
-									self.dispInlineRegex = new RegExp(!fm.isRoot(file)? fm.option('dispInlineRegex', file.phash) : fm.options.dispInlineRegex, 'i');
+									self.dispInlineRegex = new RegExp(fm.option('dispInlineRegex', hash), 'i');
 								} catch(e) {
-									self.dispInlineRegex = /^$/;
+									try {
+										self.dispInlineRegex = new RegExp(!fm.isRoot(file)? fm.option('dispInlineRegex', file.phash) : fm.options.dispInlineRegex, 'i');
+									} catch(e) {
+										self.dispInlineRegex = /^$/;
+									}
 								}
 							}
+						} else {
+							//  do not preview of file that size = 0
+							e.stopImmediatePropagation();
 						}
 					} else {
-						//  do not preview of file that size = 0
-						e.stopImmediatePropagation();
+						self.dispInlineRegex = /^$/;
 					}
+					
+					self.info.show();
 				} else {
-					self.dispInlineRegex = /^$/;
+					e.stopImmediatePropagation();
 				}
-				
-				self.info.show();
 			});
 
 			$.each(fm.commands.quicklook.plugins || [], function(i, plugin) {
 				if (typeof(plugin) == 'function') {
-					new plugin(self)
+					new plugin(self);
 				}
 			});
 		}).one('open', function() {
-			var dock = fm.storage('previewDocked') || (o.docked? 1 : 0);
+			var dock = Number(fm.storage('previewDocked') || o.docked),
+				win;
 			if (dockEnabled && dock >= 1) {
+				win = self.window;
 				self.exec();
-				self.window.trigger('navdockin', { init : true });
-				self.update(void(0), fm.cwd());
-				self.change();
+				win.trigger('navdockin', { init : true });
+				if (dock === 2) {
+					win.trigger('close');
+				} else {
+					self.update(void(0), fm.cwd());
+					self.change();
+				}
 			}
+			init = false;
 		}).bind('open', function() {
 			cwdHash = fm.cwd().hash;
 			self.value = fm.cwd();
@@ -786,7 +819,7 @@
 				$.each(e.data.changed, function() {
 					if (self.window.data('hash') === this.hash) {
 						self.window.data('hash', null);
-						self.preview.trigger('update');
+						self.preview.trigger(evUpdate);
 						return false;
 					}
 				});
@@ -801,10 +834,8 @@
 	};
 	
 	this.exec = function() {
-		if (state != docked) {
-			this.closed() && updateOnSel();
-			this.enabled() && this.window.trigger(this.opened() ? 'close' : 'open');
-		}
+		self.closed() && updateOnSel();
+		self.enabled() && self.window.trigger(self.opened() ? 'close' : 'open');
 		return $.Deferred().resolve();
 	};
 

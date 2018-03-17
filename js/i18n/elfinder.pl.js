@@ -2,8 +2,8 @@
  * Polski translation
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Wojciech Jabłoński <www.jablonski@gmail.com>
- * @author Bogusław Zięba <bobi@poczta.fm>
  * @version 2018-03-17
+ * @author Bogusław Zięba <bobi@poczta.fm>
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -15,7 +15,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.pl = {
-		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Wojciech Jabłoński &lt;www.jablonski@gmail.com&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;',
+		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Wojciech Jabłoński &lt;www.jablonski@gmail.com&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;',
 		language   : 'Polski',
 		direction  : 'ltr',
 		dateFormat : 'd.m.Y H:i', // Mar 13, 2012 05:27 PM

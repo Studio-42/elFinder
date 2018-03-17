@@ -19,7 +19,7 @@
  *				'maxHeight'      => 1024,       // Margin right pixel
  *				'quality'        => 95,         // JPEG image save quality
  *				'preserveExif'   => false,      // Preserve EXIF data (Imagick only)
- *				'forceEffect'    => false,      // For change quality of small images
+ *				'forceEffect'    => false,      // For change quality or make progressive JPEG of small images
  *				'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP, // Target image formats ( bit-field )
  *				'offDropWith'    => null        // To disable it if it is dropped with pressing the meta key
  *				                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
@@ -39,7 +39,7 @@
  *						'maxHeight'      => 1024,       // Margin right pixel
  *						'quality'        => 95,         // JPEG image save quality
  *						'preserveExif'   => false,      // Preserve EXIF data (Imagick only)
- *						'forceEffect'    => false,      // For change quality of small images
+ *						'forceEffect'    => false,      // For change quality or make progressive JPEG of small images
  *						'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP, // Target image formats ( bit-field )
  *						'offDropWith'    => null        // To disable it if it is dropped with pressing the meta key
  *						                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
@@ -63,7 +63,7 @@ class elFinderPluginAutoResize extends elFinderPlugin {
 			'maxHeight'      => 1024,       // Margin right pixel
 			'quality'        => 95,         // JPEG image save quality
 			'preserveExif'   => false,      // Preserve EXIF data (Imagick only)
-			'forceEffect'    => false,      // For change quality of small images
+			'forceEffect'    => false,      // For change quality or make progressive JPEG of small images
 			'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP, // Target image formats ( bit-field )
 			'offDropWith'    => null        // To disable it if it is dropped with pressing the meta key
 			                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value

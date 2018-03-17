@@ -1,4 +1,3 @@
-"use strict";
 /**
  * elFinder client options and main script for RequireJS
  *
@@ -6,8 +5,9 @@
  * e.g. `<script data-main="./main.js" src="./require.js"></script>`
  **/
 (function(){
+	"use strict";
 	var // jQuery and jQueryUI version
-		jqver = '3.2.1',
+		jqver = '3.3.1',
 		uiver = '1.12.1',
 		
 		// Detect language (optional)
@@ -22,8 +22,7 @@
 				fullLang = (navigator.browserLanguage || navigator.language || navigator.userLanguage);
 			}
 			lang = fullLang.substr(0,2);
-			if (lang === 'ja') lang = 'jp';
-			else if (lang === 'pt') lang = 'pt_BR';
+			if (lang === 'pt') lang = 'pt_BR';
 			else if (lang === 'ug') lang = 'ug_CN';
 			else if (lang === 'zh') lang = (fullLang.substr(0,5).toLowerCase() === 'zh-tw')? 'zh_TW' : 'zh_CN';
 			return lang;
@@ -62,16 +61,15 @@
 							function(fm, extraObj) {
 								// `init` event callback function
 								fm.bind('init', function() {
-									// Optional for Japanese decoder "extras/encoding-japanese.min"
-									delete fm.options.rawStringDecoder;
-									if (fm.lang === 'jp') {
+									// Optional for Japanese decoder "encoding-japanese"
+									if (fm.lang === 'ja') {
 										require(
-											[ 'extras/encoding-japanese.min' ],
+											[ 'encoding-japanese' ],
 											function(Encoding) {
-												if (Encoding.convert) {
-													fm.options.rawStringDecoder = function(s) {
-														return Encoding.convert(s,{to:'UNICODE',type:'string'});
-													};
+												if (Encoding && Encoding.convert) {
+													fm.registRawStringDecoder(function(s) {
+														return Encoding.convert(s, {to:'UNICODE',type:'string'});
+													});
 												}
 											}
 										);
@@ -111,7 +109,8 @@
 		paths : {
 			'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(ie8? '1.12.4' : jqver)+'/jquery.min',
 			'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/jquery-ui.min',
-			'elfinder' : 'elfinder.min'
+			'elfinder' : 'elfinder.min',
+			'encoding-japanese': '//cdn.rawgit.com/polygonplanet/encoding.js/1.0.26/encoding.min'
 		},
 		waitSeconds : 10 // optional
 	});

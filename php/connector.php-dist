@@ -80,9 +80,26 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // define('ELFINDER_BOX_CLIENTSECRET', '');
 // ===============================================
 
-function debug($o) {
-	echo '<pre>';
-	print_r($o);
+// // Zoho Office Editor APIKey
+// // https://www.zoho.com/docs/help/office-apis.html
+// define('ELFINDER_ZOHO_OFFICE_APIKEY', '');
+// ===============================================
+
+// // Zip Archive editor
+// // Installation by composer
+// // `composer require barryvdh/elfinder-flysystem-driver league/flysystem-ziparchive`
+// define('ELFINDER_DISABLE_ZIPEDITOR', false); // set `true` to disable zip editor
+// ===============================================
+
+function debug() {
+	$arg = func_get_args();
+	ob_start();
+	foreach($arg as $v) {
+		var_dump($v);
+	}
+	$o = ob_get_contents();
+	ob_end_clean();
+	file_put_contents('.debug.txt', $o, FILE_APPEND);
 }
 
 
@@ -240,15 +257,17 @@ class elFinderSimpleLogger {
 
 /**
  * Simple function to demonstrate how to control file access using "accessControl" callback.
- * This method will disable accessing files/folders starting from  '.' (dot)
+ * This method will disable accessing files/folders starting from '.' (dot)
  *
- * @param  string    $attr   attribute name (read|write|locked|hidden)
- * @param  string    $path   file path relative to volume root directory started with directory separator
- * @param  object    $volume elFinder volume driver object
- * @param  bool|null $isDir  path is directory (true: directory, false: file, null: unknown)
+ * @param  string    $attr    attribute name (read|write|locked|hidden)
+ * @param  string    $path    absolute file path
+ * @param  string    $data    value of volume option `accessControlData`
+ * @param  object    $volume  elFinder volume driver object
+ * @param  bool|null $isDir   path is directory (true: directory, false: file, null: unknown)
+ * @param  string    $relpath file path relative to volume root directory started with directory separator
  * @return bool|null
  **/
-function access($attr, $path, $data, $volume, $isDir) {
+function access($attr, $path, $data, $volume, $isDir, $relpath) {
 	$basename = basename($path);
 	return $basename[0] === '.'                  // if file/folder begins with '.' (dot)
 			 && strlen($relpath) !== 1           // but with out volume root
@@ -404,14 +423,14 @@ $opts = array(
 		// 		
 		// 	)
 		// ),
-		array(
-			'driver' => 'FTP',
-			'host' => 'work.std42.ru',
-			'user' => 'dio',
-			'pass' => 'wallrus',
-			'path' => '/',
-			'tmpPath' => '../files/ftp',
-		),
+		//array(
+		//	'driver' => 'FTP',
+		//	'host' => 'work.std42.ru',
+		//	'user' => 'dio',
+		//	'pass' => 'wallrus',
+		//	'path' => '/',
+		//	'tmpPath' => '../files/ftp',
+		//),
 		// array(
 		// 	'driver' => 'FTP',
 		// 	'host' => '10.0.1.3',

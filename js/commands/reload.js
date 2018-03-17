@@ -5,6 +5,7 @@
  * @author Dmitry (dio) Levashov
  **/
 (elFinder.prototype.commands.reload = function() {
+	"use strict";
 	var self   = this,
 		search = false;
 	

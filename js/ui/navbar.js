@@ -4,10 +4,10 @@
  * @author Dmitry (dio) Levashov
  **/
 $.fn.elfindernavbar = function(fm, opts) {
-
+	"use strict";
 	this.not('.elfinder-navbar').each(function() {
 		var nav    = $(this).hide().addClass('ui-state-default elfinder-navbar'),
-			parent = nav.parent(),
+			parent = nav.css('overflow', 'hidden').parent(),
 			wz     = parent.children('.elfinder-workzone').append(nav),
 			delta  = nav.outerHeight() - nav.height(),
 			ltr    = fm.direction == 'ltr',
@@ -22,6 +22,9 @@ $.fn.elfindernavbar = function(fm, opts) {
 
 			fm.one('cssloaded', function() {
 				delta = nav.outerHeight() - nav.height();
+			}).one('opendone',function() {
+				handle && handle.trigger('resize');
+				nav.css('overflow', 'auto');
 			}).bind('wzresize', function() {
 				var navdockH = 0;
 				if (! navdock) {
@@ -37,7 +40,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 		if (fm.UA.Touch) {
 			autoHide = fm.storage('autoHide') || {};
 			if (typeof autoHide.navbar === 'undefined') {
-				autoHide.navbar = (opts.autoHideUA && opts.autoHideUA.length > 0 && $.map(opts.autoHideUA, function(v){ return fm.UA[v]? true : null; }).length);
+				autoHide.navbar = (opts.autoHideUA && opts.autoHideUA.length > 0 && $.grep(opts.autoHideUA, function(v){ return fm.UA[v]? true : false; }).length);
 				fm.storage('autoHide', autoHide);
 			}
 			
@@ -124,10 +127,6 @@ $.fn.elfindernavbar = function(fm, opts) {
 					}, 50));
 				})
 				.children('.ui-resizable-handle').addClass('ui-front');
-
-			fm.one('opendone', function() {
-				handle.trigger('resize');
-			});
 		}
 
 		if (setWidth = fm.storage('navbarWidth')) {
@@ -144,7 +143,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 						}
 						nav.data('width', nav.width());
 						fm.trigger('wzresize');
-					}
+					};
 					nav.data('defWidth', nav.width());
 					$(window).on('resize.' + fm.namespace, set);
 					set();

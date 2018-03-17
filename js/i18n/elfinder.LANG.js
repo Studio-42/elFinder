@@ -55,7 +55,7 @@
 			'errWrite'             : 'Unable to write into "$1".',
 			'errPerm'              : 'Permission denied.',
 			'errLocked'            : '"$1" is locked and can not be renamed, moved or removed.',
-			'errExists'            : 'File named "$1" already exists.',
+			'errExists'            : 'Item named "$1" already exists.',
 			'errInvName'           : 'Invalid file name.',
 			'errInvDirname'        : 'Invalid folder name.',  // from v2.1.24 added 12.4.2017
 			'errFolderNotFound'    : 'Folder not found.',
@@ -200,9 +200,9 @@
 			'ntfreload'   : 'Reload folder content',
 			'ntfmkdir'    : 'Creating folder',
 			'ntfmkfile'   : 'Creating files',
-			'ntfrm'       : 'Delete files',
-			'ntfcopy'     : 'Copy files',
-			'ntfmove'     : 'Move files',
+			'ntfrm'       : 'Delete items',
+			'ntfcopy'     : 'Copy items',
+			'ntfmove'     : 'Move items',
 			'ntfprepare'  : 'Checking existing items',
 			'ntfrename'   : 'Rename files',
 			'ntfupload'   : 'Uploading files',
@@ -225,7 +225,7 @@
 			'ntfparents'  : 'Getting path infomation', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'Processing the uploaded file', // from v2.1.17 added 2.11.2016
 			'ntftrash'    : 'Doing throw in the trash', // from v2.1.24 added 2.5.2017
-			'ntfrestore'  : 'Doing restore from tha trash', // from v2.1.24 added 3.5.2017
+			'ntfrestore'  : 'Doing restore from the trash', // from v2.1.24 added 3.5.2017
 			'ntfchkdir'   : 'Checking destination folder', // from v2.1.24 added 3.5.2017
 			'ntfundo'     : 'Undoing previous operation', // from v2.1.27 added 31.07.2017
 			'ntfredo'     : 'Redoing previous undone', // from v2.1.27 added 31.07.2017
@@ -296,7 +296,7 @@
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation required',
 			'confirmRm'       : 'Are you sure you want to permanently remove items?<br/>This cannot be undone!',
-			'confirmRepl'     : 'Replace old item with new one?',
+			'confirmRepl'     : 'Replace old file with new one? (If it contains folders, it will be merged. To backup and replace, select Backup.)',
 			'confirmRest'     : 'Replace existing item with the item in trash?', // fromv2.1.24 added 5.5.2017
 			'confirmConvUTF8' : 'Not in UTF-8<br/>Convert to UTF-8?<br/>Contents become UTF-8 by saving after conversion.', // from v2.1 added 08.04.2014
 			'confirmNonUTF8'  : 'Character encoding of this file couldn\'t be detected. It need to temporarily convert to UTF-8 for editting.<br/>Please select character encoding of this file.', // from v2.1.19 added 28.11.2016
@@ -313,10 +313,10 @@
 			'noaccess'        : 'no access',
 			'and'             : 'and',
 			'unknown'         : 'unknown',
-			'selectall'       : 'Select all files',
-			'selectfiles'     : 'Select file(s)',
-			'selectffile'     : 'Select first file',
-			'selectlfile'     : 'Select last file',
+			'selectall'       : 'Select all items',
+			'selectfiles'     : 'Select item(s)',
+			'selectffile'     : 'Select first item',
+			'selectlfile'     : 'Select last item',
 			'viewlist'        : 'List view',
 			'viewicons'       : 'Icons view',
 			'places'          : 'Places',
@@ -435,9 +435,27 @@
 			'preference'      : 'Preference', // from v2.1.26 added 28.6.2017
 			'language'        : 'Language setting', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': 'Initialize the settings saved in this browser', // from v2.1.26 added 28.6.2017
-			'toolbarPref'     : 'Toolbar setting', // from v2.1.27 added 2.8.2017
+			'toolbarPref'     : 'Toolbar settings', // from v2.1.27 added 2.8.2017
 			'charsLeft'       : '... $1 chars left.',  // from v2.1.29 added 30.8.2017
 			'sum'             : 'Sum', // from v2.1.29 added 28.9.2017
+			'roughFileSize'   : 'Rough file size', // from v2.1.30 added 2.11.2017
+			'autoFocusDialog' : 'Focus on the element of dialog with mouseover',  // from v2.1.30 added 2.11.2017
+			'select'          : 'Select', // from v2.1.30 added 23.11.2017
+			'selectAction'    : 'Action when select file', // from v2.1.30 added 23.11.2017
+			'useStoredEditor' : 'Open with the editor used last time', // from v2.1.30 added 23.11.2017
+			'selectinvert'    : 'Invert selection', // from v2.1.30 added 25.11.2017
+			'renameMultiple'  : 'Are you sure you want to rename $1 selected items like $2?<br/>This cannot be undone!', // from v2.1.31 added 4.12.2017
+			'batchRename'     : 'Batch rename', // from v2.1.31 added 8.12.2017
+			'plusNumber'      : '+ Number', // from v2.1.31 added 8.12.2017
+			'asPrefix'        : 'Add prefix', // from v2.1.31 added 8.12.2017
+			'asSuffix'        : 'Add suffix', // from v2.1.31 added 8.12.2017
+			'changeExtention' : 'Change extention', // from v2.1.31 added 8.12.2017
+			'columnPref'      : 'Columns settings (List view)', // from v2.1.32 added 6.2.2018
+			'reflectOnImmediate' : 'All changes will reflect immediately to the archive.', // from v2.1.33 added 2.3.2018
+			'reflectOnUnmount'   : 'Any changes will not reflect until un-mount this volume.', // from v2.1.33 added 2.3.2018
+			'unmountChildren' : 'The following volume(s) mounted on this volume also unmounted. Are you sure to unmount it?', // from v2.1.33 added 5.3.2018
+			'selectionInfo'   : 'Selection Info', // from v2.1.33 added 7.3.2018
+			'hashChecker'     : 'Algorithms to show the file hash', // from v2.1.33 added 10.3.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',

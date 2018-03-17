@@ -545,6 +545,9 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
         // 'lsPlSleep' minmum 10 sec
         $this->options['lsPlSleep'] = max(10, $this->options['lsPlSleep']);
 
+        // enable command archive
+        $this->options['useRemoteArchive'] = true;
+
         return true;
     }
 
@@ -561,9 +564,6 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
         if (!$this->tmp && $this->tmbPathWritable) {
             $this->tmp = $this->tmbPath;
         }
-
-        $this->disabled[] = 'archive';
-        $this->disabled[] = 'extract';
 
         if ($this->isMyReload()) {
             //$this->_db_getDirectoryData(false);
@@ -1109,7 +1109,11 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
             file_put_contents($tmp, $data);
             $size = getimagesize($tmp);
             if ($size) {
-                return $size[0].'x'.$size[1];
+                $ret = array('dim' => $size[0].'x'.$size[1]);
+                $srcfp = fopen($tmp, 'rb');
+                if ($subImgLink = $this->getSubstituteImgLink(elFinder::$currentArgs['target'], $size, $srcfp)) {
+                	$ret['url'] = $subImgLink;
+                }
             }
         }
 
@@ -1335,11 +1339,8 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
             }
             $dropboxFile = new DropboxFile($filepath);
             if ($name === '') {
-                $dir = $this->_dirname($path);
-                $name = $this->_basename($path);
                 $fullpath = $path;
             } else {
-                $dir = $path;
                 $fullpath = $this->_db_joinName($path, $name);
             }
 
@@ -1390,7 +1391,14 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
             if (file_put_contents($local, $content, LOCK_EX) !== false
             && ($fp = fopen($local, 'rb'))) {
                 clearstatcache();
-                $res = $this->_save($fp, $path, '', []);
+                $name = '';
+                $stat = $this->stat($path);
+                if ($stat) {
+                    // keep real name
+                    $path = $this->_dirname($path);
+                    $name = $stat['name'];
+                }
+                $res = $this->_save($fp, $path, $name, []);
                 fclose($fp);
             }
             file_exists($local) && unlink($local);
