@@ -3,7 +3,7 @@
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Wojciech Jabłoński <www.jablonski@gmail.com>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2018-03-10
+ * @version 2018-03-17
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -448,8 +448,9 @@
 			'columnPref'      : 'Ustawienia kolumn (Widok listy)', // from v2.1.32 added 6.2.2018
 			'reflectOnImmediate' : 'Wszystkie zmiany widoczne natychmiast w archiwum.', // from v2.1.33 added 2.3.2018
 			'reflectOnUnmount'   : 'Wszelkie zmiany nie będą widoczne, dopóki nie odłączysz tego woluminu.', // from v2.1.33 added 2.3.2018
-			'unmountChildren' : 'Następujący wolumin(y) zostały zamontowane na tym woluminie również odmontowanym. Czy na pewno chcesz go odmontować?', // from v2.1.33 added 5.3.2018
+			'unmountChildren' : 'Następujący wolumin (y), zamontowany na tym urządzeniu również niezamontowany. Czy na pewno chcesz go odmontować?', // from v2.1.33 added 5.3.2018
 			'selectionInfo'   : 'Informacje Wyboru', // from v2.1.33 added 7.3.2018
+			'hashChecker'     : 'Algorytmy do pokazywania hash pliku', // from v2.1.33 added 10.3.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',
