@@ -474,9 +474,11 @@ $.fn.elfindercwd = function(fm, options) {
 			/**
 			 * Unselect all files
 			 *
+			 * @param  Object  options
 			 * @return void
 			 */
-			unselectAll = function() {
+			unselectAll = function(opts) {
+				var o = opts || {};
 				selectCheckbox && selectAllCheckbox.find('input').prop('checked', false);
 				if (Object.keys(selectedFiles).length) {
 					selectLock = false;
@@ -484,7 +486,7 @@ $.fn.elfindercwd = function(fm, options) {
 					cwd.find('[id].'+clSelected).trigger(evtUnselect);
 					selectCheckbox && cwd.find('input:checkbox').prop('checked', false);
 				}
-				trigger();
+				!o.notrigger && trigger();
 				selectCheckbox && selectAllCheckbox.data('pending', false);
 				cwd.removeClass('elfinder-cwd-allselected');
 			},
@@ -1694,7 +1696,7 @@ $.fn.elfindercwd = function(fm, options) {
 							fm.dblclick({file : fm.cwdId2Hash(this.id)});
 							return;
 						} else {
-							unselectAll();
+							unselectAll({ notrigger: true });
 							p.trigger(evtSelect);
 						}
 					}
