@@ -1257,7 +1257,7 @@ abstract class elFinderVolumeDriver {
 		// enabling archivers['create'] with options['useRemoteArchive']
 		if ($this->options['useRemoteArchive'] && empty($this->archivers['create']) && $this->getTempPath()) {
 			$_archivers = $this->getArchivers();
-			$this->archivers['create'] = $this->getArchivers()['create'];
+			$this->archivers['create'] = $_archivers['create'];
 		}
 
 		// manual control archive types to create
