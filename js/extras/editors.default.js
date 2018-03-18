@@ -679,7 +679,7 @@
 						editorBase = $(editor.getWrapperElement()).css({
 							// fix CSS conflict to SimpleMDE
 							padding: 0,
-					    	border: 'none'
+							border: 'none'
 						});
 						ta.data('cm', true);
 						
@@ -783,13 +783,13 @@
 					dfrd = $.Deferred(),
 					cdn  = fm.options.cdns.simplemde,
 					start = function(SimpleMDE) {
-						var h     = base.height(),
+						var h	 = base.height(),
 							delta = base.outerHeight(true) - h + 14,
 							editor, editorBase, opts;
 						
 						// fit height function
 						textarea._setHeight = function(height) {
-							var h    = height || base.height(),
+							var h	= height || base.height(),
 								ctrH = 0,
 								areaH;
 							base.children('.editor-toolbar,.editor-statusbar').each(function() {
@@ -1031,6 +1031,13 @@
 					fm   = this.fm,
 					dfrd = $.Deferred(),
 					mode = self.confObj.ckeditor5Mode || 'balloon',
+					lang = (function() {
+						var l = fm.lang.toLowerCase().replace('_', '-');
+						if (l.substr(0, 2) === 'zh' && l !== 'zh-cn') {
+							l = 'zh';
+						}
+						return l;
+					})(),
 					init = function(cEditor) {
 						var base = $(editnode).parent(),
 							opts;
@@ -1040,8 +1047,8 @@
 
 						// CKEditor5 configure options
 						opts = {
-							toolbar: ['heading', '|', 'bold', 'italic', 'link', 'imageUpload', 'bulletedList', 'numberedList', 'blockQuote', 'undo', 'redo' ]
-							// ,language: fm.lang // currently version this isn't support yet
+							toolbar: ['heading', '|', 'bold', 'italic', 'link', 'imageUpload', 'bulletedList', 'numberedList', 'blockQuote', 'undo', 'redo' ],
+							language: lang
 						};
 
 						// trigger event 'editEditorPrepare'
@@ -1105,13 +1112,67 @@
 					self.confObj.loader = $.Deferred();
 					self.fm.loadScript([
 						fm.options.cdns.ckeditor5 + '/' + mode + '/ckeditor.js'
-						// currently version this isn't support yet
-						//,fm.options.cdns.ckeditor5 + '/' + mode + '/translations/'+fm.lang+'.js'
 					], function(editor) {
 						if (!editor) {
 							editor = window.BalloonEditor || window.InlineEditor || window.ClassicEditor;
 						}
-						self.confObj.loader.resolve(editor);
+
+						// patch for a bug of CKEditor5 v1.0.0-beta.1
+						// https://github.com/ckeditor/ckeditor5/issues/914
+						CKEDITOR_TRANSLATIONS.add('en', {
+							a: "Cannot upload file:",
+							b: "Bold",
+							c: "Block quote",
+							d: "Italic",
+							e: "Enter image caption",
+							f: "image widget",
+							g: "Full size image",
+							h: "Side image",
+							i: "Left aligned image",
+							j: "Centered image",
+							k: "Right aligned image",
+							l: "Choose heading",
+							m: "Heading",
+							n: "Paragraph",
+							o: "Heading 1",
+							p: "Heading 2",
+							q: "Heading 3",
+							r: "Insert image",
+							s: "Upload failed",
+							t: "Link",
+							u: "Numbered List",
+							v: "Bulleted List",
+							w: "Change image text alternative",
+							x: "Unlink",
+							y: "Edit link",
+							z: "Open link in new tab",
+							aa: "This link has no URL",
+							ab: "Save",
+							ac: "Cancel",
+							ad: "Link URL",
+							ae: "Rich Text Editor, %0",
+							af: "Undo",
+							ag: "Redo",
+							ah: "Text alternative"
+						});
+						// End patch
+
+						if (fm.lang !== 'en') {
+							self.fm.loadScript([
+								fm.options.cdns.ckeditor5 + '/' + mode + '/translations/' + lang + '.js'
+							], function(obj) {
+								self.confObj.loader.resolve(editor);
+							}, {
+								tryRequire: true,
+								loadType: 'tag',
+								error: function(obj) {
+									lang = 'en';
+									self.confObj.loader.resolve(editor);
+								}
+							});
+						} else {
+							self.confObj.loader.resolve(editor);
+						}
 					}, {
 						tryRequire: true,
 						loadType: 'tag'
@@ -1172,7 +1233,7 @@
 						// fit height function
 						textarea._setHeight = function(height) {
 							var base = $(this).parent(),
-								h    = height || base.height(),
+								h	= height || base.height(),
 								ctrH = 0,
 								areaH;
 							base.find('.mce-container-body:first').children('.mce-toolbar,.mce-toolbar-grp,.mce-statusbar').each(function() {
