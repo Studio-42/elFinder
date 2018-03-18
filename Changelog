@@ -1,4 +1,4 @@
-2018-03-xx  Naoki Sawada  <hypweb+elfinder@gmail.com>
+2018-03-18  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.34):
 		- [VD:abstract] Fixed #2423 no longer running under PHP < 5.4
