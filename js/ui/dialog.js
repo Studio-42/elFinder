@@ -336,11 +336,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 					e.stopPropagation();
 				})
 				.on('mousedown', function(e) {
-					if (! dialog.hasClass('ui-front')) {
-						setTimeout(function() {
-							dialog.is(':visible') && dialog.trigger('totop');
-						}, 10);
-					}
+					setTimeout(function() {
+						dialog.is(':visible') && dialog.trigger('totop');
+					}, 10);
 				})
 				.on('open', function() {
 					var d = $(this);
@@ -448,8 +446,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 					} else {
 						fm.toFront(dialog);
 					}
-					elfNode.children('.'+cldialog+':not(.'+clmodal+')').removeClass(clactive+' ui-front');
-					dialog.addClass(clactive+' ui-front');
+					elfNode.children('.'+cldialog+':not(.'+clmodal+')').removeClass(clactive);
+					dialog.addClass(clactive);
 
 					! fm.UA.Mobile && tabstopNext().trigger('focus');
 				})
