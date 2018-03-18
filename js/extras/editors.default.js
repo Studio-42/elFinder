@@ -1040,7 +1040,7 @@
 
 						// CKEditor5 configure options
 						opts = {
-							toolbar: ['headings', '|', 'bold', 'italic', 'link', 'insertimage', 'bulletedList', 'numberedList', 'blockQuote', 'undo', 'redo' ]
+							toolbar: ['heading', '|', 'bold', 'italic', 'link', 'imageUpload', 'bulletedList', 'numberedList', 'blockQuote', 'undo', 'redo' ]
 							// ,language: fm.lang // currently version this isn't support yet
 						};
 
