@@ -449,7 +449,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					elfNode.children('.'+cldialog+':not(.'+clmodal+')').removeClass(clactive);
 					dialog.addClass(clactive);
 
-					! fm.UA.Mobile && tabstopNext().trigger('focus');
+					! fm.UA.Mobile && opts.getFocusOnToTop && tabstopNext().trigger('focus');
 				})
 				.on('posinit', function() {
 					var css = opts.position,
@@ -724,5 +724,6 @@ $.fn.elfinderdialog.defaults = {
 	allowMaximize : false,
 	headerBtnPos : 'auto',
 	headerBtnOrder : 'auto',
-	optimizeNumber : true
+	optimizeNumber : true,
+	getFocusOnToTop : true
 };
