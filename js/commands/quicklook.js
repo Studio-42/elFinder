@@ -476,7 +476,15 @@
 	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook touch-punch" style="position:absolute"/>')
 		.hide()
 		.addClass(fm.UA.Touch? 'elfinder-touch' : '')
-		.on('click', function(e) { e.stopPropagation();  })
+		.on('click', function(e) {
+			var win = this;
+			e.stopPropagation();
+			if (state === opened) {
+				setTimeout(function() {
+					state === opened && fm.toFront(win);
+				}, 10);
+			}
+		})
 		.append(
 			$('<div class="elfinder-quicklook-titlebar"/>')
 			.append(
@@ -517,6 +525,7 @@
 						open(opened);
 						navShow();
 					});
+				fm.toFront(win);
 			} else if (state === dockedhidden) {
 				fm.getUI('navdock').data('addNode')(dockedNode);
 				open(docked);

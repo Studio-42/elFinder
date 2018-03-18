@@ -3251,15 +3251,10 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @param  Object  target    Target jQuery node object
 	 */
 	this.toFront = function(target) {
-		var lastnode = node.children('.ui-front:last');
-		target = $(target);
-		/*if (lastnode.get(0) !== target.get(0)) {
-			target.trigger('beforedommove')
-				.insertAfter(lastnode)
-				.trigger('dommove');
-		}*/
-		node.children().css('z-index', '');
-		target.css('z-index', lastnode.css('z-index') + 1);
+		var nodes = node.children('.ui-front'),
+			lastnode = nodes.last();
+		nodes.css('z-index', '');
+		$(target).css('z-index', lastnode.css('z-index') + 1);
 	};
 	
 	/**
