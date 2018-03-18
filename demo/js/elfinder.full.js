@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.33 (2.1-src Nightly: 6a78ab8) (2018-03-17)
+ * Version 2.1.33 (2.1-src Nightly: 8321d2e) (2018-03-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -3282,15 +3282,10 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @param  Object  target    Target jQuery node object
 	 */
 	this.toFront = function(target) {
-		var lastnode = node.children('.ui-front:last');
-		target = $(target);
-		/*if (lastnode.get(0) !== target.get(0)) {
-			target.trigger('beforedommove')
-				.insertAfter(lastnode)
-				.trigger('dommove');
-		}*/
-		node.children().css('z-index', '');
-		target.css('z-index', lastnode.css('z-index') + 1);
+		var nodes = node.children('.ui-front'),
+			lastnode = nodes.last();
+		nodes.css('z-index', '');
+		$(target).css('z-index', lastnode.css('z-index') + 1);
 	};
 	
 	/**
@@ -9285,7 +9280,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.33 (2.1-src Nightly: 6a78ab8)';
+elFinder.prototype.version = '2.1.33 (2.1-src Nightly: 8321d2e)';
 
 
 
@@ -16069,11 +16064,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 					e.stopPropagation();
 				})
 				.on('mousedown', function(e) {
-					if (! dialog.hasClass('ui-front')) {
-						setTimeout(function() {
-							dialog.is(':visible') && dialog.trigger('totop');
-						}, 10);
-					}
+					setTimeout(function() {
+						dialog.is(':visible') && dialog.trigger('totop');
+					}, 10);
 				})
 				.on('open', function() {
 					var d = $(this);
@@ -16181,8 +16174,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 					} else {
 						fm.toFront(dialog);
 					}
-					elfNode.children('.'+cldialog+':not(.'+clmodal+')').removeClass(clactive+' ui-front');
-					dialog.addClass(clactive+' ui-front');
+					elfNode.children('.'+cldialog+':not(.'+clmodal+')').removeClass(clactive);
+					dialog.addClass(clactive);
 
 					! fm.UA.Mobile && tabstopNext().trigger('focus');
 				})
@@ -25329,7 +25322,15 @@ elFinder.prototype.commands.places = function() {
 	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook touch-punch" style="position:absolute"/>')
 		.hide()
 		.addClass(fm.UA.Touch? 'elfinder-touch' : '')
-		.on('click', function(e) { e.stopPropagation();  })
+		.on('click', function(e) {
+			var win = this;
+			e.stopPropagation();
+			if (state === opened) {
+				setTimeout(function() {
+					state === opened && fm.toFront(win);
+				}, 10);
+			}
+		})
 		.append(
 			$('<div class="elfinder-quicklook-titlebar"/>')
 			.append(
@@ -25370,6 +25371,7 @@ elFinder.prototype.commands.places = function() {
 						open(opened);
 						navShow();
 					});
+				fm.toFront(win);
 			} else if (state === dockedhidden) {
 				fm.getUI('navdock').data('addNode')(dockedNode);
 				open(docked);
