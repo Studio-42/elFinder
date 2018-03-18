@@ -50,7 +50,7 @@
 .elfinder-navbar .ui-state-active { background: #3875d7;    border-color:#3875d7; color:#fff; }
 .elfinder-navbar .elfinder-droppable-active {background:#A7C6E5 !important;}
 /* disabled elfinder */
-.elfinder-disabled .elfinder-navbar .ui-state-active { background: #dadada; border-color:#aaa; color:#fff; }
+.elfinder-disabled .elfinder-navbar .ui-state-active { background: #dadada; border-color:#aaa; color:#777; }
 
 /* workzone */
 .elfinder-workzone { background:#fff; }
