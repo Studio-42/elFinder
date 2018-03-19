@@ -84,6 +84,9 @@ elFinder.prototype.commands.upload = function() {
 								fm.toast({msg: fm.i18n(['complete', fm.i18n('cmdupload')]), extNode: node});
 							}
 						}
+					})
+					.progress(function() {
+						dfrd.notifyWith(this, Array.from(arguments));
 					});
 			},
 			upload = function(data) {
