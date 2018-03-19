@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.34 (2.1-src Nightly: 3c518d5) (2018-03-18)
+ * Version 2.1.34 (2.1-src Nightly: 774527a) (2018-03-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -5890,18 +5890,21 @@ elFinder.prototype = {
 				cancelBtn   = true,
 				abort       = false,
 				checkNotify = function() {
-					return (notify = notify || notifyElm.children('.elfinder-notify-upload').length);
+					if (!notify && (ntfUpload = notifyElm.children('.elfinder-notify-upload')).length) {
+						notify = true;
+					}
+					return notify;
 				},
 				fnAbort     = function(e, error) {
 					abort = true;
 					self.abortXHR(xhr, { quiet: true, abort: true });
 					dfrd.reject(error);
 					if (checkNotify()) {
-						self.notify({type : 'upload', cnt : notifyElm.children('.elfinder-notify-upload').data('cnt') * -1, progress : 0, size : 0});
+						self.notify({type : 'upload', cnt : ntfUpload.data('cnt') * -1, progress : 0, size : 0});
 					}
 				},
 				cancelToggle = function(show) {
-					notifyElm.children('.elfinder-notify-upload').children('.elfinder-notify-cancel')[show? 'show':'hide']();
+					ntfUpload.children('.elfinder-notify-cancel')[show? 'show':'hide']();
 				},
 				startNotify = function(size) {
 					if (!size) size = filesize;
@@ -5912,6 +5915,7 @@ elFinder.prototype = {
 								node.trigger('uploadabort', 'userabort');
 							}
 						});
+						ntfUpload = notifyElm.children('.elfinder-notify-upload');
 						prev = loaded;
 						if (data.multiupload) {
 							cancelBtn && cancelToggle(true);
@@ -5944,9 +5948,20 @@ elFinder.prototype = {
 						node.trigger('uploadabort', ['errAbort', 'errTimeout']);
 					}
 				},
+				progress = function() {
+					var node;
+					if (notify) {
+						dfrd.notifyWith(ntfUpload, [{
+							cnt: ntfUpload.data('cnt'),
+							progress: ntfUpload.data('progress'),
+							total: ntfUpload.data('total')
+						}]);
+					}
+				},
 				renames = (data.renames || null),
 				hashes = (data.hashes || null),
-				chunkMerge = false;
+				chunkMerge = false,
+				ntfUpload = $();
 			
 			// regist fnAbort function
 			node.one('uploadabort', fnAbort);
@@ -6005,6 +6020,7 @@ elFinder.prototype = {
 				
 				if (checkNotify() && (curr = loaded - prev)) {
 					self.notify({type : 'upload', cnt : 0, progress : curr, size : 0});
+					progress();
 				}
 
 				res = self.parseUploadData(xhr.responseText);
@@ -6029,7 +6045,7 @@ elFinder.prototype = {
 						abort = true;
 						self.uploads.xhrUploading = false;
 						notifyto && clearTimeout(notifyto);
-						if (notifyElm.children('.elfinder-notify-upload').length) {
+						if (ntfUpload.length) {
 							self.notify({type : 'upload', cnt : -cnt, progress : 0, size : 0});
 							dfrd.reject(res.error);
 						} else {
@@ -6055,6 +6071,7 @@ elFinder.prototype = {
 					if (checkNotify()) {
 						self.notify({type : 'upload', cnt : 0, progress : loaded - prev, size : data.multiupload? 0 : filesize});
 						prev = loaded;
+						progress();
 					}
 				}
 			}, false);
@@ -6087,6 +6104,7 @@ elFinder.prototype = {
 					if (checkNotify() && (curr/e.total) >= 0.05) {
 						self.notify({type : 'upload', cnt : 0, progress : curr, size : 0});
 						prev = loaded;
+						progress();
 					}
 					
 					if (! data.multiupload && loaded >= filesize) {
@@ -9269,6 +9287,34 @@ if (!String.prototype.repeat) {
 		return rpt;
 	};
 }
+// Array.apply
+(function () {
+	try {
+		Array.apply(null, {});
+		return;
+	} catch (e) { }
+
+	var toString = Object.prototype.toString,
+		arrayType = '[object Array]',
+		_apply = Function.prototype.apply,
+		slice = /*@cc_on @if (@_jscript_version <= 5.8)
+			function () {
+				var a = [], i = this.length;
+				while (i-- > 0) a[i] = this[i];
+				return a;
+			}@else@*/Array.prototype.slice/*@end@*/;
+
+	Function.prototype.apply = function apply(thisArg, argArray) {
+		return _apply.call(this, thisArg,
+			toString.call(argArray) === arrayType ? argArray : slice.call(argArray));
+	};
+})();
+// Array.from
+if (!Array.from) {
+	Array.from = function(obj) {
+		return obj.length === 1 ? [obj[0]] : Array.apply(null, obj);
+	};
+}
 
 
 /*
@@ -9280,7 +9326,7 @@ if (!String.prototype.repeat) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.34 (2.1-src Nightly: 3c518d5)';
+elFinder.prototype.version = '2.1.34 (2.1-src Nightly: 774527a)';
 
 
 
@@ -30600,6 +30646,9 @@ elFinder.prototype.commands.upload = function() {
 								fm.toast({msg: fm.i18n(['complete', fm.i18n('cmdupload')]), extNode: node});
 							}
 						}
+					})
+					.progress(function() {
+						dfrd.notifyWith(this, Array.from(arguments));
 					});
 			},
 			upload = function(data) {

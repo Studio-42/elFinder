@@ -1101,11 +1101,17 @@
 										}
 									})
 									.fail(function(error) {
-										reject(fm.i18n(error? error : 'errUploadNoFiles'));
+										reject(fm.i18n(error? (error === 'userabort'? 'errAbort' : error) : 'errUploadNoFiles'));
+									})
+									.progress(function(data) {
+										loader.uploadTotal = data.total;
+										loader.uploaded = data.progress;
 									});
 							});
 						};
-						this.abort = function() {};
+						this.abort = function() {
+							fm.getUI().trigger('uploadabort');
+						};
 					};
 
 				if (!self.confObj.loader) {
