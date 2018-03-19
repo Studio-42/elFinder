@@ -3,7 +3,7 @@
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
  * @author Alex Yashkin <alex@yashkin.by>
- * @version 2018-03-15
+ * @version 2018-03-19
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -446,10 +446,10 @@
 			'asSuffix'        : 'Добавить суффикс', // from v2.1.31 added 8.12.2017
 			'changeExtention' : 'Изменить расширение', // from v2.1.31 added 8.12.2017
 			'columnPref'      : 'Настройки колонок (для просмотра в виде списка)', // from v2.1.32 added 6.2.2018
-			'reflectOnImmediate' : 'Все изменения немедленно отражаются в архиве.', // from v2.1.33 added 2.3.2018
+			'reflectOnImmediate' : 'Все изменения будут немедленно отражены в архиве.', // from v2.1.33 added 2.3.2018
 			'reflectOnUnmount'   : 'Изменения не вступят в силу до тех пор, пока вы не размонтируете этот том.', // from v2.1.33 added 2.3.2018
 			'unmountChildren' : 'Тома, смонтированные на этом томе, также будут размонтированы. Вы хотите отключить его?', // from v2.1.33 added 5.3.2018
-			'selectionInfo'   : 'Информация о выборе', // from v2.1.33 added 7.3.2018
+			'selectionInfo'   : 'Свойства', // from v2.1.33 added 7.3.2018
 			'hashChecker'     : 'Алгоритмы для отображения хеш-сумм файлов', // from v2.1.33 added 10.3.2018
 
 			/********************************** mimetypes **********************************/
