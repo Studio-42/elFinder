@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.34 (2.1-src Nightly: 61ecd10) (2018-03-21)
+ * Version 2.1.34 (2.1-src Nightly: 339cf82) (2018-03-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9326,7 +9326,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.34 (2.1-src Nightly: 61ecd10)';
+elFinder.prototype.version = '2.1.34 (2.1-src Nightly: 339cf82)';
 
 
 
@@ -9759,7 +9759,7 @@ elFinder.prototype._options = {
 		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.35.0',
 		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.9.0',
 		//ckeditor5  : '//cdn.ckeditor.com/ckeditor5/1.0.0-beta.1',
-		ckeditor5  : '//rawgit.com/ckeditor/ckeditor5-build-',
+		ckeditor5  : '//cdn.rawgit.com/ckeditor/ckeditor5-build-',
 		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.7.9',
 		simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		// for quicklook etc.
