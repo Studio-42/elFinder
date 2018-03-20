@@ -990,6 +990,7 @@
 			exts : ['htm', 'html', 'xhtml'],
 			html : '<div class="edit-editor-ckeditor5"></div>',
 			setup : function(opts, fm) {
+				var confObj = this;
 				// check cdn and ES6 support
 				if (!fm.options.cdns.ckeditor5 || typeof window.Symbol !== 'function' || typeof Symbol() !== 'symbol') {
 					this.disabled = true;
@@ -998,6 +999,9 @@
 						this.ckeditor5Mode = opts.extraOptions.ckeditor5Mode;
 					}
 				}
+				fm.bind('destroy', function() {
+					confObj.editor = null;
+				});
 			},
 			// Prepare on before show dialog
 			prepare : function(base, dialogOpts, file) {
@@ -1063,7 +1067,6 @@
 							.create(editnode, opts)
 							.then(function(editor) {
 								var fileRepo = editor.plugins.get('FileRepository');
-								fileRepo.createAdapter = /* for <= 1.0.0-alpha.2 */
 								fileRepo.createUploadAdapter = function(loader) {
 									return new uploder(loader);
 								};
@@ -1112,79 +1115,47 @@
 						this.abort = function() {
 							fm.getUI().trigger('uploadabort');
 						};
-					};
+					}, loader;
 
-				if (!self.confObj.loader) {
-					self.confObj.loader = $.Deferred();
+				if (!self.confObj.editor) {
+					loader = $.Deferred();
 					self.fm.loadScript([
-						fm.options.cdns.ckeditor5 + '/' + mode + '/ckeditor.js'
+						//fm.options.cdns.ckeditor5 + '/' + mode + '/ckeditor.js'
+						// uses "t/ckeditor5/914" until next release
+						fm.options.cdns.ckeditor5 + mode + '/5c757fcc3e924454bf5f65c806f4a159aaafd293/build/ckeditor.js'
 					], function(editor) {
 						if (!editor) {
 							editor = window.BalloonEditor || window.InlineEditor || window.ClassicEditor;
 						}
-
-						// patch for a bug of CKEditor5 v1.0.0-beta.1
-						// https://github.com/ckeditor/ckeditor5/issues/914
-						CKEDITOR_TRANSLATIONS.add('en', {
-							a: "Cannot upload file:",
-							b: "Bold",
-							c: "Block quote",
-							d: "Italic",
-							e: "Enter image caption",
-							f: "image widget",
-							g: "Full size image",
-							h: "Side image",
-							i: "Left aligned image",
-							j: "Centered image",
-							k: "Right aligned image",
-							l: "Choose heading",
-							m: "Heading",
-							n: "Paragraph",
-							o: "Heading 1",
-							p: "Heading 2",
-							q: "Heading 3",
-							r: "Insert image",
-							s: "Upload failed",
-							t: "Link",
-							u: "Numbered List",
-							v: "Bulleted List",
-							w: "Change image text alternative",
-							x: "Unlink",
-							y: "Edit link",
-							z: "Open link in new tab",
-							aa: "This link has no URL",
-							ab: "Save",
-							ac: "Cancel",
-							ad: "Link URL",
-							ae: "Rich Text Editor, %0",
-							af: "Undo",
-							ag: "Redo",
-							ah: "Text alternative"
-						});
-						// End patch
-
 						if (fm.lang !== 'en') {
 							self.fm.loadScript([
-								fm.options.cdns.ckeditor5 + '/' + mode + '/translations/' + lang + '.js'
+								//fm.options.cdns.ckeditor5 + '/' + mode + '/translations/' + lang + '.js'
+								// uses "t/ckeditor5/914" until next release
+								fm.options.cdns.ckeditor5 + mode + '/5c757fcc3e924454bf5f65c806f4a159aaafd293/build/translations/' + lang + '.js'
 							], function(obj) {
-								self.confObj.loader.resolve(editor);
+								loader.resolve(editor);
 							}, {
 								tryRequire: true,
 								loadType: 'tag',
 								error: function(obj) {
 									lang = 'en';
-									self.confObj.loader.resolve(editor);
+									loader.resolve(editor);
 								}
 							});
 						} else {
-							self.confObj.loader.resolve(editor);
+							loader.resolve(editor);
 						}
 					}, {
 						tryRequire: true,
 						loadType: 'tag'
 					});
+					loader.done(function(editor) {
+						self.confObj.editor = editor;
+						init(editor);
+					});
+				} else {
+					init(self.confObj.editor);
 				}
-				self.confObj.loader.done(init);
 				return dfrd;
 			},
 			getContent : function() {
