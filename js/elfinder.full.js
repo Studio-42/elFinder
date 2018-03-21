@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.34 (2.1-src Nightly: e521c25) (2018-03-21)
+ * Version 2.1.34 (2.1-src Nightly: 120e8fb) (2018-03-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -3282,10 +3282,10 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @param  Object  target    Target jQuery node object
 	 */
 	this.toFront = function(target) {
-		var nodes = node.children('.ui-front'),
+		var nodes = node.children('.ui-front').removeClass('elfinder-frontmost'),
 			lastnode = nodes.last();
 		nodes.css('z-index', '');
-		$(target).css('z-index', lastnode.css('z-index') + 1);
+		$(target).addClass('ui-front elfinder-frontmost').css('z-index', lastnode.css('z-index') + 1);
 	};
 	
 	/**
@@ -9326,7 +9326,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.34 (2.1-src Nightly: e521c25)';
+elFinder.prototype.version = '2.1.34 (2.1-src Nightly: 120e8fb)';
 
 
 
@@ -16112,7 +16112,13 @@ $.fn.elfinderdialog = function(opts, fm) {
 				})
 				.on('mousedown', function(e) {
 					setTimeout(function() {
-						dialog.is(':visible') && dialog.trigger('totop');
+						if (dialog.is(':visible') && !dialog.hasClass('elfinder-frontmost')) {
+							toFocusNode = $(':focus');
+							if (!toFocusNode.length) {
+								toFocusNode = void(0);
+							}
+							dialog.trigger('totop');
+						}
 					}, 10);
 				})
 				.on('open', function() {
@@ -16154,8 +16160,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 					dialog.trigger('totop');
 
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
-					
-					fm.UA.Mobile && tabstopNext().trigger('focus');
 					
 					if (opts.closeOnEscape) {
 						$(document).on('keyup.'+id, function(e) {
@@ -16224,7 +16228,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 					elfNode.children('.'+cldialog+':not(.'+clmodal+')').removeClass(clactive);
 					dialog.addClass(clactive);
 
-					! fm.UA.Mobile && opts.getFocusOnToTop && tabstopNext().trigger('focus');
+					! fm.UA.Mobile && (toFocusNode || tabstopNext()).trigger('focus');
+
+					toFocusNode = void(0);
 				})
 				.on('posinit', function() {
 					var css = opts.position,
@@ -16326,7 +16332,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 				.on('mouseenter mouseleave', '.'+cltabstop, function(e) {
 					var $this = $(this);
 					if (opts.btnHoverFocus && dialog.data('focusOnMouseOver')) {
-						if (e.type == 'mouseenter' && ! $(':focus').data('keepFocus')) {
+						if (e.type === 'mouseenter' && ! $(':focus').data('keepFocus')) {
 							$this.trigger('focus');
 						}
 					} else {
@@ -16377,7 +16383,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					dialog.css('left', Math.max(Math.min(Math.max(pos.left, 0), node.width() - 200), 0));
 				}
 			},
-			maxSize, rotated;
+			maxSize, rotated, toFocusNode;
 		
 		dialog.prepend(titlebar);
 
@@ -16499,8 +16505,7 @@ $.fn.elfinderdialog.defaults = {
 	allowMaximize : false,
 	headerBtnPos : 'auto',
 	headerBtnOrder : 'auto',
-	optimizeNumber : true,
-	getFocusOnToTop : true
+	optimizeNumber : true
 };
 
 
@@ -21488,7 +21493,6 @@ elFinder.prototype.commands.edit = function() {
 					allowMaximize : true,
 					btnHoverFocus : false,
 					closeOnEscape : false,
-					getFocusOnToTop : false,
 					close   : function() {
 						var close = function(){
 							dfrd.resolve();
@@ -23900,7 +23904,6 @@ elFinder.prototype.commands.netmount = function() {
 						resizable      : false,
 						modal          : true,
 						destroyOnClose : false,
-						getFocusOnToTop : false,
 						open           : function() {
 							$(window).on('focus.'+fm.namespace, winFocus);
 							inputs.protocol.trigger('change');
