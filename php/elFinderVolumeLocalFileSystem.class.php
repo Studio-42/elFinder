@@ -1146,10 +1146,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @return array
 	 */
 	protected function isNameExists($path) {
-		$res = file_exists($this->convEncIn($path));
+		$exists = file_exists($this->convEncIn($path));
 		// restore locale
 		$this->convEncOut();
-		return $res;
+		return $exists? $this->stat($path) : false;
 	}
 
 	/******************** Over write (Optimized) functions *************************/
