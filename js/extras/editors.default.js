@@ -1089,7 +1089,7 @@
 					uploder = function(loader) {
 						this.upload = function() {
 							return new Promise(function(resolve, reject) {
-								fm.getCommand('upload').exec({files: [loader.file]})
+								fm.exec('upload', {files: [loader.file]})
 									.done(function(data){
 										if (data.added && data.added.length) {
 											fm.url(data.added[0].hash, { async: true }).done(function(url) {

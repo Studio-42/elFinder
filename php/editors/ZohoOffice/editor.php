@@ -84,10 +84,6 @@ class elFinderEditorZohoOffice extends elFinderEditor
                     'lang' => $lang,
                     'saveurl' => elFinder::getConnectorUrl().'?cmd=editor&name=ZohoOffice&method=save'.$cdata,
                 );
-                // patch for the Show API's bug
-                if ($srvsName === 'show') {
-                    $data['saveurl'] .= '&id=' . $hash;
-                }
                 if ($cfile) {
                     $data['content'] = $cfile;
                 }
@@ -126,8 +122,8 @@ class elFinderEditorZohoOffice extends elFinderEditor
 
     public function save()
     {
-        if (isset($_POST) && ! empty($_REQUEST['id'])) {
-            $hash = $_REQUEST['id'];
+        if (isset($_POST) && ! empty($_POST['id'])) {
+            $hash = $_POST['id'];
             if ($volume = $this->elfinder->getVolume($hash)) {
                 $content = file_get_contents($_FILES['content']['tmp_name']);
                 if ($volume->putContents($hash, $content)) {

@@ -6,16 +6,17 @@
  **/  
 (elFinder.prototype.commands.open = function() {
 	"use strict";
+	var fm = this.fm;
 	this.alwaysEnabled = true;
 	this.noChangeDirOnRemovedCwd = true;
 	
 	this._handlers = {
-		dblclick : function(e) { e.preventDefault(); this.exec(e.data && e.data.file? [ e.data.file ]: void(0)); },
+		dblclick : function(e) { e.preventDefault(); fm.exec('open', e.data && e.data.file? [ e.data.file ]: void(0)); },
 		'select enable disable reload' : function(e) { this.update(e.type == 'disable' ? -1 : void(0));  }
 	};
 	
 	this.shortcuts = [{
-		pattern     : 'ctrl+down numpad_enter'+(this.fm.OS != 'mac' && ' enter')
+		pattern     : 'ctrl+down numpad_enter'+(fm.OS != 'mac' && ' enter')
 	}];
 
 	this.getstate = function(select) {
@@ -24,12 +25,11 @@
 		
 		return cnt == 1 
 			? (sel[0].read? 0 : -1) 
-			: (cnt && !this.fm.UA.Mobile) ? ($.grep(sel, function(file) { return file.mime == 'directory' || ! file.read ? false : true;}).length == cnt ? 0 : -1) : -1;
+			: (cnt && !fm.UA.Mobile) ? ($.grep(sel, function(file) { return file.mime == 'directory' || ! file.read ? false : true;}).length == cnt ? 0 : -1) : -1;
 	};
 	
 	this.exec = function(hashes, cOpts) {
-		var fm    = this.fm, 
-			dfrd  = $.Deferred().fail(function(error) { error && fm.error(error); }),
+		var dfrd  = $.Deferred().fail(function(error) { error && fm.error(error); }),
 			files = this.files(hashes),
 			cnt   = files.length,
 			thash = (typeof cOpts == 'object')? cOpts.thash : false,
@@ -169,8 +169,7 @@
 					} else if (into !== 'window') {
 						wnd.location = url;
 					}
-					wnd.trigger('focus');
-					
+					$(wnd).trigger('focus');
 				}
 			}
 			link.remove();
@@ -212,7 +211,7 @@
 					cmd = null;
 				});
 				if (cmd) {
-					return cmd.exec();
+					return fm.exec(cmd.name);
 				}
 			}
 			doOpen();

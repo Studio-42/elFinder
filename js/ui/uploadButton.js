@@ -13,7 +13,7 @@ $.fn.elfinderuploadbutton = function(cmd) {
 				.on('change', function() {
 					var _input = $(this);
 					if (_input.val()) {
-						cmd.exec({input : _input.remove()[0]});
+						fm.exec(cmd.name, {input : _input.remove()[0]});
 						input.clone(true).appendTo(form);
 					} 
 				})
