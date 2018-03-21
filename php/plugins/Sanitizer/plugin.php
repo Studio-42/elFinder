@@ -21,6 +21,8 @@
  *		'plugin' => array(
  *			'Sanitizer' => array(
  *				'enable' => true,
+ *				'callBack' => array($this, 'methodName'), 
+ * 			//OR	'callBack' => 'functionName', 
  *				'targets'  => array('\\','/',':','*','?','"','<','>','|'), // target chars
  *				'replace'  => '_'    // replace to this
  *			)
@@ -34,6 +36,7 @@
  *				'plugin' => array(
  *					'Sanitizer' => array(
  *						'enable' => true,
+ *						'callBack' => array($this, 'methodName')
  *						'targets'  => array('\\','/',':','*','?','"','<','>','|'), // target chars
  *						'replace'  => '_'    // replace to this
  *					)
@@ -114,6 +117,8 @@ class elFinderPluginSanitizer extends elFinderPlugin
 	}
 	
 	protected function sanitizeFileName($filename, $opts, $allows = array()) {
+		if(isset($opts['callBack']))
+			return call_user_func($opts['callBack'], $filename);
 		$targets = $allows? array_diff($opts['targets'], $allows) : $opts['targets'];
 		return str_replace($targets, $opts['replace'], $filename);
   	}
