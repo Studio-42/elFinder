@@ -80,7 +80,7 @@ elFinder.prototype.commands.sort = function() {
 						if (! $(this).data('dragging')) {
 							e.stopPropagation();
 							if (! fm.getUI('cwd').data('longtap')) {
-								self.exec([], sort);
+								fm.exec('sort', [], sort);
 							}
 						}
 					})
