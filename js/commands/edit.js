@@ -176,7 +176,6 @@ elFinder.prototype.commands.edit = function() {
 					allowMaximize : true,
 					btnHoverFocus : false,
 					closeOnEscape : false,
-					getFocusOnToTop : false,
 					close   : function() {
 						var close = function(){
 							dfrd.resolve();

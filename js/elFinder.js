@@ -3251,10 +3251,10 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @param  Object  target    Target jQuery node object
 	 */
 	this.toFront = function(target) {
-		var nodes = node.children('.ui-front'),
+		var nodes = node.children('.ui-front').removeClass('elfinder-frontmost'),
 			lastnode = nodes.last();
 		nodes.css('z-index', '');
-		$(target).css('z-index', lastnode.css('z-index') + 1);
+		$(target).addClass('ui-front elfinder-frontmost').css('z-index', lastnode.css('z-index') + 1);
 	};
 	
 	/**
