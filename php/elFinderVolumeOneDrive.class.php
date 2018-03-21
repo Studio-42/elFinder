@@ -966,7 +966,8 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     {
         list($pid, $name) = $this->_od_splitPath($path);
 
-        return (bool) $this->_od_query($pid.'/children/'.rawurlencode($name).'?select=id', true);
+        $raw = $this->_od_query($pid.'/children/'.rawurlencode($name), true);
+        return $raw? $this->_od_parseRaw($raw) : false;
     }
 
     /**
