@@ -1,3 +1,12 @@
+2018-03-21  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.35):
+		- [cmd:upload] notify progress data to dfrd.progress in uploading
+		- [VD:LocalFileSystem,OneDrive] fix wrong result of isNameExists()
+		- [ui:dialog] Fixed #2431 form elements can not get focus with mouse down
+		- And some minor bug fixes
+
+
 2018-03-18  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.34):
