@@ -61,10 +61,8 @@ class elFinderPluginSanitizer extends elFinderPlugin
 			'enable'   => true,  // For control by volume driver
 			'targets'  => array('\\','/',':','*','?','"','<','>','|'), // target chars
 			'replace'  => '_',   // replace to this
-			'callBack' => null,  // Or callable sanitize function
-			'pathAllows' => array('/') // Characters allowed in path name of characters in `targets` array
+			'callBack' => null   // Or callable sanitize function
 		);
-	
 		$this->opts = array_merge($defaults, $opts);
 	}
 	
@@ -111,16 +109,14 @@ class elFinderPluginSanitizer extends elFinderPlugin
 		if (! $opts['enable']) {
 			return false;
 		}
-	
 		$name = $this->sanitizeFileName($name, $opts);
 		return true;
 	}
 	
-	protected function sanitizeFileName($filename, $opts, $allows = array()) {
+	protected function sanitizeFileName($filename, $opts) {
 		if(!empty($opts['callBack']) && is_callable($opts['callBack'])) {
 			return call_user_func_array($opts['callBack'], array($filename, $opts));
 		}
-		$targets = $allows? array_diff($opts['targets'], $allows) : $opts['targets'];
-		return str_replace($targets, $opts['replace'], $filename);
+		return str_replace($opts['targets'], $opts['replace'], $filename);
   	}
 }
