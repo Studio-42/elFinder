@@ -2002,36 +2002,38 @@ var elFinder = function(elm, opts, bootCallback) {
 						return dfrd.reject((response.norError || 'errResponse'), xhr, response);
 					}
 					
-					if (!self.api) {
-						self.api    = response.api || 1;
-						if (self.api == '2.0' && typeof response.options.uploadMaxSize !== 'undefined') {
-							self.api = '2.1';
+					if (isOpen) {
+						if (!self.api) {
+							self.api    = response.api || 1;
+							if (self.api == '2.0' && typeof response.options.uploadMaxSize !== 'undefined') {
+								self.api = '2.1';
+							}
+							self.newAPI = self.api >= 2;
+							self.oldAPI = !self.newAPI;
 						}
-						self.newAPI = self.api >= 2;
-						self.oldAPI = !self.newAPI;
-					}
-					
-					if (response.textMimes && Array.isArray(response.textMimes)) {
-						self.resources.mimes.text = response.textMimes;
-						setTextMimes();
-					}
-					!self.textMimes && setTextMimes();
-					
-					if (response.options) {
-						cwdOptions = Object.assign({}, cwdOptionsDefault, response.options);
-					}
+						
+						if (response.textMimes && Array.isArray(response.textMimes)) {
+							self.resources.mimes.text = response.textMimes;
+							setTextMimes();
+						}
+						!self.textMimes && setTextMimes();
+						
+						if (response.options) {
+							cwdOptions = Object.assign({}, cwdOptionsDefault, response.options);
+						}
 
-					if (response.netDrivers) {
-						self.netDrivers = response.netDrivers;
-					}
+						if (response.netDrivers) {
+							self.netDrivers = response.netDrivers;
+						}
 
-					if (response.maxTargets) {
-						self.maxTargets = response.maxTargets;
-					}
+						if (response.maxTargets) {
+							self.maxTargets = response.maxTargets;
+						}
 
-					if (isOpen && !!data.init) {
-						self.uplMaxSize = self.returnBytes(response.uplMaxSize);
-						self.uplMaxFile = !!response.uplMaxFile? parseInt(response.uplMaxFile) : 20;
+						if (!!data.init) {
+							self.uplMaxSize = self.returnBytes(response.uplMaxSize);
+							self.uplMaxFile = !!response.uplMaxFile? parseInt(response.uplMaxFile) : 20;
+						}
 					}
 
 					if (typeof prepare === 'function') {
