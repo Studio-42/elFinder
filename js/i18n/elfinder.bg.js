@@ -1,8 +1,8 @@
 /**
- * Български translation
+ * Bulgarian translation
  * @author Stamo Petkov <stamo.petkov@gmail.com>
- * @author Nikolay Petkov <nmpetkov@gmail.com>
- * @version 2018-02-17
+ * @author Nikolay Petkov <office@cmstory.com>
+ * @version 2018-02-18
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -14,8 +14,8 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.bg = {
-		translator : 'Stamo Petkov &lt;stamo.petkov@gmail.com&gt;, Nikolay Petkov &lt;nmpetkov@gmail.com&gt;',
-		language   : 'Български',
+		translator : 'Stamo Petkov &lt;stamo.petkov@gmail.com&gt;, Nikolay Petkov &lt;office@cmstory.com&gt;',
+		language   : 'Bulgarian',
 		direction  : 'ltr',
 		dateFormat : 'd.m.Y H:i', // 01.03.2018 15:27
 		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25
@@ -51,7 +51,7 @@
 			'errLocked'            : '"$1" е заключен и не може да бъде преименуван, местен или премахван.',
 			'errExists'            : 'Вече съществува файл с име "$1"',
 			'errInvName'           : 'Грешно име на файл.',
-			'errInvDirname'        : 'Невалидно име на папка..',  // from v2.1.24 added 12.4.2017
+			'errInvDirname'        : 'Невалидно име на папка.',  // from v2.1.24 added 12.4.2017
 			'errFolderNotFound'    : 'Папката не е открита.',
 			'errFileNotFound'      : 'Файлът не е открит.',
 			'errTrgFolderNotFound' : 'Целевата папка "$1" не е намерена.',
@@ -313,7 +313,7 @@
 			'selectlfile'     : 'Избери последният файл',
 			'viewlist'        : 'Изглед списък',
 			'viewicons'       : 'Изглед икони',
-			'places'          : 'Места',
+			'places'          : 'Избрани',
 			'calc'            : 'Изчисли',
 			'path'            : 'Път',
 			'aliasfor'        : 'Връзка към',
@@ -353,7 +353,7 @@
 			'moveFiles'       : 'Премести файлове',
 			'copyFiles'       : 'Копирай файлове',
 			'restoreFiles'    : 'Възстанови файлове', // from v2.1.24 added 5.5.2017
-			'rmFromPlaces'    : 'Премахни от Места',
+			'rmFromPlaces'    : 'Премахни от избрани',
 			'aspectRatio'     : 'Отношение',
 			'scale'           : 'Мащаб',
 			'width'           : 'Ширина',
