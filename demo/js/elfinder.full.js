@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.35 (2.1-src Nightly: a06c75b) (2018-03-22)
+ * Version 2.1.35 (2.1-src Nightly: 8843c1d) (2018-03-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9328,7 +9328,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.35 (2.1-src Nightly: a06c75b)';
+elFinder.prototype.version = '2.1.35 (2.1-src Nightly: 8843c1d)';
 
 
 
@@ -20196,14 +20196,15 @@ $.fn.elfindertree = function(fm, opts) {
  **/
 $.fn.elfinderuploadbutton = function(cmd) {
 		return this.each(function() {
-		var button = $(this).elfinderbutton(cmd)
+		var fm = cmd.fm,
+			button = $(this).elfinderbutton(cmd)
 				.off('click'), 
 			form = $('<form/>').appendTo(button),
 			input = $('<input type="file" multiple="true" title="'+cmd.fm.i18n('selectForUpload')+'"/>')
 				.on('change', function() {
 					var _input = $(this);
 					if (_input.val()) {
-						fm.exec(cmd.name, {input : _input.remove()[0]});
+						fm.exec('upload', {input : _input.remove()[0]}, void(0), fm.cwd().hash);
 						input.clone(true).appendTo(form);
 					} 
 				})
@@ -30607,10 +30608,10 @@ elFinder.prototype.commands.upload = function() {
 			getTargets = function() {
 				var tgts = data && (data instanceof Array)? data : null,
 					sel;
-				if (! data) {
+				if (! data || data instanceof Array) {
 					if (! tgts && (sel = fm.selected()).length === 1 && fm.file(sel[0]).mime === 'directory') {
 						tgts = sel;
-					} else {
+					} else if (!tgts || tgts.length !== 1 || fm.file(tgts[0]).mime !== 'directory') {
 						tgts = [ cwdHash ];
 					}
 				}
