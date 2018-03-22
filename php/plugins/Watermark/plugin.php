@@ -173,7 +173,7 @@ class elFinderPluginWatermark extends elFinderPlugin {
 	
 	private function watermarkPrint_imagick($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo, $opts) {
 		
-		try { throw new Exception("Error Processing Request", 1);
+		try {
 		
 			// Open the original image
 			$img = new Imagick($src);
