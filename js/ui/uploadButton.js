@@ -6,14 +6,15 @@
 $.fn.elfinderuploadbutton = function(cmd) {
 	"use strict";
 	return this.each(function() {
-		var button = $(this).elfinderbutton(cmd)
+		var fm = cmd.fm,
+			button = $(this).elfinderbutton(cmd)
 				.off('click'), 
 			form = $('<form/>').appendTo(button),
 			input = $('<input type="file" multiple="true" title="'+cmd.fm.i18n('selectForUpload')+'"/>')
 				.on('change', function() {
 					var _input = $(this);
 					if (_input.val()) {
-						fm.exec(cmd.name, {input : _input.remove()[0]});
+						fm.exec('upload', {input : _input.remove()[0]}, void(0), fm.cwd().hash);
 						input.clone(true).appendTo(form);
 					} 
 				})
