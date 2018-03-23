@@ -6367,10 +6367,10 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 */
 	protected static function localRmdirRecursive($dir) {
-		// try system command
+		// try system command for symlink to out of open_basedir
 		if (is_callable('exec')) {
 			$o = '';
-			$s = 1;
+			$r = 1;
 			if (substr(PHP_OS, 0, 3) === 'WIN') {
 				exec('rd /S /Q ' . escapeshellarg($dir), $o, $r);
 				if ($r === 0) {
