@@ -460,13 +460,13 @@ class elFinder {
 	public function __construct($opts) {
 		// set default_charset
 		if (version_compare(PHP_VERSION, '5.6', '>=')) {
-			if (ini_get('iconv.internal_encoding')) {
+			if (($_val = ini_get('iconv.internal_encoding')) && strtoupper($_val) !== 'UTF-8') {
 				ini_set('iconv.internal_encoding', '');
 			}
-			if (ini_get('mbstring.internal_encoding')) {
+			if (($_val = ini_get('mbstring.internal_encoding')) && strtoupper($_val) !== 'UTF-8') {
 				ini_set('mbstring.internal_encoding', '');
 			}
-			if (ini_get('internal_encoding')) {
+			if (($_val = ini_get('internal_encoding')) && strtoupper($_val) !== 'UTF-8') {
 				ini_set('internal_encoding', '');
 			}
 		} else {
