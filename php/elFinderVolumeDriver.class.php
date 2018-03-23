@@ -6263,6 +6263,13 @@ abstract class elFinderVolumeDriver {
 		if (is_dir($path)) {
 			foreach (self::localScandir($path) as $name) {
 				$p = $path.DIRECTORY_SEPARATOR.$name;
+				if (!is_readable($p)) {
+					// Perhaps a symbolic link to open_basedir restricted location
+					self::localRmdirRecursive($p);
+					$res['symlinks'][] = $p;
+					$res['rmNames'][] = $name;
+					continue;
+				}
 				if ($chkSymlink && is_link($p)) {
 					self::localRmdirRecursive($p);
 					$res['symlinks'][] = $p;
@@ -6360,6 +6367,22 @@ abstract class elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 */
 	protected static function localRmdirRecursive($dir) {
+		// try system command
+		if (is_callable('exec')) {
+			$o = '';
+			$s = 1;
+			if (substr(PHP_OS, 0, 3) === 'WIN') {
+				exec('rd /S /Q ' . escapeshellarg($dir), $o, $r);
+				if ($r === 0) {
+					exec('del /F /Q ' . escapeshellarg($dir), $o, $r);
+				}
+			} else {
+				exec('rm -rf ' . escapeshellarg($dir), $o, $r);
+			}
+			if ($r === 0) {
+				return true;
+			}
+		}
 		if (!is_link($dir) && is_dir($dir)) {
 			chmod($dir, 0777);
 			if ($handle = opendir($dir)) {
@@ -6379,7 +6402,7 @@ abstract class elFinderVolumeDriver {
 				closedir($handle);
 			}
 			return rmdir($dir);
-		} elseif (is_file($dir) || is_link($dir)) {
+		} else {
 			chmod($dir, 0666);
 			return unlink($dir);
 		}
