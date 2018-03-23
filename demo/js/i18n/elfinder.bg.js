@@ -1,8 +1,8 @@
 /**
- * Български translation
+ * Bulgarian translation
  * @author Stamo Petkov <stamo.petkov@gmail.com>
- * @author Nikolay Petkov <nmpetkov@gmail.com>
- * @version 2018-02-17
+ * @author Nikolay Petkov <office@cmstory.com>
+ * @version 2018-02-18
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -14,8 +14,8 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.bg = {
-		translator : 'Stamo Petkov &lt;stamo.petkov@gmail.com&gt;, Nikolay Petkov &lt;nmpetkov@gmail.com&gt;',
-		language   : 'Български',
+		translator : 'Stamo Petkov &lt;stamo.petkov@gmail.com&gt;, Nikolay Petkov &lt;office@cmstory.com&gt;',
+		language   : 'Bulgarian',
 		direction  : 'ltr',
 		dateFormat : 'd.m.Y H:i', // 01.03.2018 15:27
 		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25
@@ -42,70 +42,70 @@
 			'errDataNotJSON'       : 'Данните не са JSON.',
 			'errDataEmpty'         : 'Липсват данни.',
 			'errCmdReq'            : 'Запитването от сървъра изисква име на команда.',
-			'errOpen'              : 'Не мога да отворя "$1".',
+			'errOpen'              : 'Неуспешно отваряне на "$1".',
 			'errNotFolder'         : 'Обектът не е папка.',
 			'errNotFile'           : 'Обектът не е файл.',
-			'errRead'              : 'Не мога да прочета "$1".',
-			'errWrite'             : 'Не мога да пиша в "$1".',
+			'errRead'              : 'Неуспешно прочитане на "$1".',
+			'errWrite'             : 'Неуспешен запис в "$1".',
 			'errPerm'              : 'Разрешение отказано.',
 			'errLocked'            : '"$1" е заключен и не може да бъде преименуван, местен или премахван.',
 			'errExists'            : 'Вече съществува файл с име "$1"',
 			'errInvName'           : 'Грешно име на файл.',
-			'errInvDirname'        : 'Невалидно име на папка..',  // from v2.1.24 added 12.4.2017
+			'errInvDirname'        : 'Невалидно име на папка.',  // from v2.1.24 added 12.4.2017
 			'errFolderNotFound'    : 'Папката не е открита.',
 			'errFileNotFound'      : 'Файлът не е открит.',
 			'errTrgFolderNotFound' : 'Целевата папка "$1" не е намерена.',
 			'errPopup'             : 'Браузъра блокира отварянето на прозорец. За да отворите файла, разрешете отварянето в настройките на браузъра.',
-			'errMkdir'             : 'Не мога да създам папка "$1".',
-			'errMkfile'            : 'Не мога да създам файл "$1".',
-			'errRename'            : 'Не мога да преименувам "$1".',
+			'errMkdir'             : 'Неуспешно създаване на папка "$1".',
+			'errMkfile'            : 'Неуспешно създаване на файл "$1".',
+			'errRename'            : 'Неуспешно преименуване на "$1".',
 			'errCopyFrom'          : 'Копирането на файлове от том "$1" не е разрешено.',
 			'errCopyTo'            : 'Копирането на файлове в том "$1" не е разрешено.',
-			'errMkOutLink'         : 'Не мога да създам връзка извън началото на ресурса.', // from v2.1 added 03.10.2015
+			'errMkOutLink'         : 'Неуспех при създаване на връзка извън началото на ресурса.', // from v2.1 added 03.10.2015
 			'errUpload'            : 'Грешка при качване.',  // old name - errUploadCommon
-			'errUploadFile'        : 'Не мога да кача "$1".', // old name - errUpload
+			'errUploadFile'        : 'Неуспешно качване на "$1".', // old name - errUpload
 			'errUploadNoFiles'     : 'Не са намерени файлове за качване.',
 			'errUploadTotalSize'   : 'Данните превишават максимално допостумия размер.', // old name - errMaxSize
-			'errUploadFileSize'    : 'Файла превишава максимално допустимия размер.', //  old name - errFileMaxSize
+			'errUploadFileSize'    : 'Файлът превишава максимално допустимия размер.', //  old name - errFileMaxSize
 			'errUploadMime'        : 'Непозволен тип на файла.',
 			'errUploadTransfer'    : '"$1" грешка при предаване.',
-			'errUploadTemp'        : 'Не мога да създам временен файл за качване.', // from v2.1 added 26.09.2015
+			'errUploadTemp'        : 'Неуспешно създаване на временен файл за качване.', // from v2.1 added 26.09.2015
 			'errNotReplace'        : 'Обект "$1" вече съществува на това място и не може да бъде заменен от обект от друг тип.', // new
-			'errReplace'           : 'Не мога да заменя "$1".',
-			'errSave'              : 'Не мога да запиша "$1".',
-			'errCopy'              : 'Не мога да копирам "$1".',
-			'errMove'              : 'Не мога да преместя "$1".',
-			'errCopyInItself'      : 'Не мога да копирам "$1" върху самия него.',
-			'errRm'                : 'Не мога да премахна "$1".',
-			'errTrash'             : 'Не мога да преместя в кошчето', // from v2.1.24 added 30.4.2017
-			'errRmSrc'             : 'Не мога да премахна изходния файл(ове).',
-			'errExtract'           : 'Не мога да извлеча файловете от "$1".',
-			'errArchive'           : 'Не мога да създам архив.',
+			'errReplace'           : 'Не може да се замени "$1".',
+			'errSave'              : 'Не може да се запише "$1".',
+			'errCopy'              : 'Не може да се копира "$1".',
+			'errMove'              : 'Не може да се премести "$1".',
+			'errCopyInItself'      : 'Не може да се копира "$1" върху самия него.',
+			'errRm'                : 'Не може да се премахне "$1".',
+			'errTrash'             : 'Не може да се премести в кошчето', // from v2.1.24 added 30.4.2017
+			'errRmSrc'             : 'Не може да се премахне изходния файл(ове).',
+			'errExtract'           : 'Не може да се извлекат файловете от "$1".',
+			'errArchive'           : 'Не може да се създаде архив.',
 			'errArcType'           : 'Неподдържан тип на архива.',
 			'errNoArchive'         : 'Файлът не е архив или е от неподдържан тип.',
 			'errCmdNoSupport'      : 'Сървъра не поддържа тази команда.',
 			'errReplByChild'       : 'Папката “$1” не може да бъде заменена от съдържащ се в нея елемент.',
 			'errArcSymlinks'       : 'От съображения за сигурност няма да бъдат разопаковани архиви съдържащи symlinks.', // edited 24.06.2012
 			'errArcMaxSize'        : 'Архивните файлове превишават максимално допустимия размер.',
-			'errResize'            : 'Не мога да преоразмеря "$1".',
+			'errResize'            : 'Не може да се преоразмери "$1".',
 			'errResizeDegree'      : 'Невалиден градус за ротация.',  // added 7.3.2013
 			'errResizeRotate'      : 'Изображението не е ротирано.',  // added 7.3.2013
 			'errResizeSize'        : 'Невалиден размер на изображение.',  // added 7.3.2013
 			'errResizeNoChange'    : 'Размерът на изображението не е променен.',  // added 7.3.2013
 			'errUsupportType'      : 'Неподдържан тип на файл.',
 			'errNotUTF8Content'    : 'Файл "$1" не е в UTF-8 формат и не може да бъде редактиран.',  // added 9.11.2011
-			'errNetMount'          : 'Не мога да монтирам "$1".', // added 17.04.2012
+			'errNetMount'          : 'Не може да се монтира "$1".', // added 17.04.2012
 			'errNetMountNoDriver'  : 'Неподдържан протокол.',     // added 17.04.2012
 			'errNetMountFailed'    : 'Монтирането не е успешно.',         // added 17.04.2012
 			'errNetMountHostReq'   : 'Хост се изисква.', // added 18.04.2012
 			'errSessionExpires'    : 'Сесията ви изтече поради липса на активност.',
-			'errCreatingTempDir'   : 'Не мога да създам временна директория: "$1"',
-			'errFtpDownloadFile'   : 'Не мога да изтегля файл от FTP: "$1"',
-			'errFtpUploadFile'     : 'Не мога да кача файл на FTP: "$1"',
-			'errFtpMkdir'          : 'Не мога да създам директория на FTP: "$1"',
+			'errCreatingTempDir'   : 'Не може да се създаде временна директория: "$1"',
+			'errFtpDownloadFile'   : 'Не може да се изтегли файл от FTP: "$1"',
+			'errFtpUploadFile'     : 'Не може да се качи файл на FTP: "$1"',
+			'errFtpMkdir'          : 'Не може да се създаде директория на FTP: "$1"',
 			'errArchiveExec'       : 'Грешка при архивиране на файлове: "$1"',
 			'errExtractExec'       : 'Грешка при разархивиране на файлове: "$1"',
-			'errNetUnMount'        : 'Не мога да размонтирам', // from v2.1 added 30.04.2012
+			'errNetUnMount'        : 'Не може да се размонтира', // from v2.1 added 30.04.2012
 			'errConvUTF8'          : 'Не е конвертируем до UTF-8', // from v2.1 added 08.04.2014
 			'errFolderUpload'      : 'Опитайте Google Chrome, ако искате да качите папка.', // from v2.1 added 26.6.2015
 			'errSearchTimeout'     : 'Времето изтече при търсенето на "$1". Резултатът от търсенето е частичен.', // from v2.1 added 12.1.2016
@@ -179,7 +179,7 @@
 			'btnVolume' : 'Ресурс',    // from v2.1 added 22.5.2015
 			'btnAll'    : 'Всички',       // from v2.1 added 22.5.2015
 			'btnMime'   : 'MIME тип', // from v2.1 added 22.5.2015
-			'btnFileName':'Име на файл',  // from v2.1 added 22.5.2015
+			'btnFileName':'Име',  // from v2.1 added 22.5.2015
 			'btnSaveClose': 'Запази и затвори', // from v2.1 added 12.6.2015
 			'btnBackup' : 'Архивирай', // fromv2.1 added 28.11.2015
 			'btnRename'    : 'Преименувай',      // from v2.1.24 added 6.4.2017
@@ -192,31 +192,31 @@
 			'ntfopen'     : 'Отваряне на папка',
 			'ntffile'     : 'Отваряне на файл',
 			'ntfreload'   : 'Презареждане съдържанието на папка',
-			'ntfmkdir'    : 'Създавам директория',
-			'ntfmkfile'   : 'Създавам файл',
+			'ntfmkdir'    : 'Създава се директория',
+			'ntfmkfile'   : 'Създава се файл',
 			'ntfrm'       : 'Изтриване на файлове',
 			'ntfcopy'     : 'Копиране на файлове',
 			'ntfmove'     : 'Преместване на файлове',
 			'ntfprepare'  : 'Подготовка за копиране на файлове',
 			'ntfrename'   : 'Преименуване на файлове',
-			'ntfupload'   : 'Качвам файлове',
-			'ntfdownload' : 'Свалям файлове',
+			'ntfupload'   : 'Качват се файлове',
+			'ntfdownload' : 'Свалят се файлове',
 			'ntfsave'     : 'Запис на файлове',
-			'ntfarchive'  : 'Създавам архив',
-			'ntfextract'  : 'Извличам файловете от архив',
-			'ntfsearch'   : 'Търся файлове',
-			'ntfresize'   : 'Преоразмерявам изображения',
+			'ntfarchive'  : 'Създава се архив',
+			'ntfextract'  : 'Извличат се файловете от архив',
+			'ntfsearch'   : 'Търсят се файлове',
+			'ntfresize'   : 'Преоразмеряват се изображения',
 			'ntfsmth'     : 'Зает съм >_<',
-			'ntfloadimg'  : 'Зареждам изображения',
-			'ntfnetmount' : 'Монтирам мрежов ресурс', // added 18.04.2012
-			'ntfnetunmount': 'Размонтирам мрежов ресурс', // from v2.1 added 30.04.2012
-			'ntfdim'      : 'Извличам размерите на изображение', // added 20.05.2013
-			'ntfreaddir'  : 'Извличам информация за папка', // from v2.1 added 01.07.2013
-			'ntfurl'      : 'Взимам URL от връзка', // from v2.1 added 11.03.2014
-			'ntfchmod'    : 'Променям вида на файл', // from v2.1 added 20.6.2015
+			'ntfloadimg'  : 'Зареждат се изображения',
+			'ntfnetmount' : 'Монтира се мрежов ресурс', // added 18.04.2012
+			'ntfnetunmount': 'Размонтира се мрежов ресурс', // from v2.1 added 30.04.2012
+			'ntfdim'      : 'Извличат се размерите на изображение', // added 20.05.2013
+			'ntfreaddir'  : 'Извлича се информация за папка', // from v2.1 added 01.07.2013
+			'ntfurl'      : 'Взима се URL от връзка', // from v2.1 added 11.03.2014
+			'ntfchmod'    : 'Променя се вида на файл', // from v2.1 added 20.6.2015
 			'ntfpreupload': 'Проверка на името на файла за качване', // from v2.1 added 31.11.2015
 			'ntfzipdl'    : 'Създаване на файл за изтегляне', // from v2.1.7 added 23.1.2016
-			'ntfparents'  : 'Получаване на информация за пътя', // from v2.1.17 added 2.11.2016
+			'ntfparents'  : 'Получава се информация за пътя', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'Обработка на качения файл', // from v2.1.17 added 2.11.2016
 			'ntftrash'    : 'Прехвърлят се позиции в кошчето', // from v2.1.24 added 2.5.2017
 			'ntfrestore'  : 'Извършва се възстановяване от кошчето', // from v2.1.24 added 3.5.2017
@@ -313,7 +313,7 @@
 			'selectlfile'     : 'Избери последният файл',
 			'viewlist'        : 'Изглед списък',
 			'viewicons'       : 'Изглед икони',
-			'places'          : 'Места',
+			'places'          : 'Избрани',
 			'calc'            : 'Изчисли',
 			'path'            : 'Път',
 			'aliasfor'        : 'Връзка към',
@@ -353,7 +353,7 @@
 			'moveFiles'       : 'Премести файлове',
 			'copyFiles'       : 'Копирай файлове',
 			'restoreFiles'    : 'Възстанови файлове', // from v2.1.24 added 5.5.2017
-			'rmFromPlaces'    : 'Премахни от Места',
+			'rmFromPlaces'    : 'Премахни от избрани',
 			'aspectRatio'     : 'Отношение',
 			'scale'           : 'Мащаб',
 			'width'           : 'Ширина',
