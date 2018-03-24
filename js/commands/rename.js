@@ -78,6 +78,7 @@ elFinder.prototype.commands.rename = function() {
 					}
 				})
 				.done(function(data) {
+					var cwdHash;
 					if (data.added && data.added.length && cnt === 1) {
 						data.undo = {
 							cmd : 'rename',
@@ -99,8 +100,10 @@ elFinder.prototype.commands.rename = function() {
 						};
 					}
 					dfrd && dfrd.resolve(data);
-					if (fm.cwd().hash === file.hash) {
-						fm.exec('open', data.added[0].hash);
+					if (!(cwdHash = fm.cwd().hash) || cwdHash === file.hash) {
+						fm.exec('open', $.map(data.added, function(f) {
+							return (f.mime === 'directory')? f.hash : null;
+						})[0]);
 					}
 				})
 				.always(function() {
