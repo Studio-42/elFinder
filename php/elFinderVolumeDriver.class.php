@@ -6370,7 +6370,7 @@ abstract class elFinderVolumeDriver {
 		// try system command
 		if (is_callable('exec')) {
 			$o = '';
-			$s = 1;
+			$r = 1;
 			if (substr(PHP_OS, 0, 3) === 'WIN') {
 				exec('rd /S /Q ' . escapeshellarg($dir), $o, $r);
 				if ($r === 0) {
