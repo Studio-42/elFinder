@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.35 (2.1-src Nightly: a7a2417) (2018-03-23)
+ * Version 2.1.35 (2.1-src Nightly: 4a5027b) (2018-03-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9328,7 +9328,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.35 (2.1-src Nightly: a7a2417)';
+elFinder.prototype.version = '2.1.35 (2.1-src Nightly: 4a5027b)';
 
 
 
@@ -26973,8 +26973,8 @@ elFinder.prototype.commands.rename = function() {
 	var self = this,
 		fm = self.fm,
 		request = function(dfrd, targtes, file, name) {
-			var cnt = targtes? targtes.length : 0,
-				sel = targtes? [file.hash].concat(targtes) : [file.hash],
+			var sel = targtes? [file.hash].concat(targtes) : [file.hash],
+				cnt = sel.length,
 				data = {}, rootNames;
 			
 			fm.lockfiles({files : sel});
@@ -27018,7 +27018,7 @@ elFinder.prototype.commands.rename = function() {
 				target : file.hash
 			};
 
-			if (cnt > 0) {
+			if (cnt > 1) {
 				data['targets'] = targtes;
 				if (name.match(/\*/)) {
 					data['q'] = name;
