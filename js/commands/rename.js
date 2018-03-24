@@ -14,8 +14,8 @@ elFinder.prototype.commands.rename = function() {
 	var self = this,
 		fm = self.fm,
 		request = function(dfrd, targtes, file, name) {
-			var cnt = targtes? targtes.length : 0,
-				sel = targtes? [file.hash].concat(targtes) : [file.hash],
+			var sel = targtes? [file.hash].concat(targtes) : [file.hash],
+				cnt = sel.length,
 				data = {}, rootNames;
 			
 			fm.lockfiles({files : sel});
@@ -59,7 +59,7 @@ elFinder.prototype.commands.rename = function() {
 				target : file.hash
 			};
 
-			if (cnt > 0) {
+			if (cnt > 1) {
 				data['targets'] = targtes;
 				if (name.match(/\*/)) {
 					data['q'] = name;
