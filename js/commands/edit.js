@@ -336,7 +336,7 @@ elFinder.prototype.commands.edit = function() {
 							// reload to change encoding if not edited
 							if (! changed() && getContent() !== '') {
 								cancel();
-								edit(file, $(this).val(), editor);
+								edit(file, $(this).val(), editor).fail(function(err) { err && fm.error(err); });
 							}
 						}).on('mouseover', stateChange);
 						ta.parent().prev().find('.elfinder-titlebar-button:last')

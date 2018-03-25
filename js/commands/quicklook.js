@@ -361,7 +361,7 @@
 		init = true,
 		dockHeight,	getSize, tm4cwd, dockedNode, selectTm;
 
-	this.evUpdate = evUpdate,
+	this.evUpdate = evUpdate;
 	(this.navbar = navbar)._show = navShow;
 	this.resize = 'resize.'+fm.namespace;
 	this.info = $('<div/>').addClass(infocls)
@@ -386,8 +386,7 @@
 		})
 		// update info/icon
 		.on(evUpdate, function(e) {
-			var fm      = self.fm,
-				preview = self.preview,
+			var preview = self.preview,
 				file    = e.file,
 				tpl     = '<div class="elfinder-quicklook-info-data">{value}</div>',
 				update  = function() {
