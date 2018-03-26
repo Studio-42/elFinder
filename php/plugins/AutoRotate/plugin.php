@@ -16,7 +16,10 @@
  *			'AutoRotate' => array(
  *				'enable'         => true,       // For control by volume driver
  *				'quality'        => 95,         // JPEG image save quality
- *				'offDropWith'    => null        // To disable it if it is dropped with pressing the meta key
+ *				'offDropWith'    => null,       // Enabled by default. To disable it if it is dropped with pressing the meta key
+ *				                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
+ *				                                // In case of using any key, specify it as an array
+ *				'onDropWith'     => null        // Disabled by default. To enable it if it is dropped with pressing the meta key
  *				                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
  *				                                // In case of using any key, specify it as an array
  *			)
@@ -31,7 +34,10 @@
  *					'AutoRotate' => array(
  *						'enable'         => true,       // For control by volume driver
  *						'quality'        => 95,         // JPEG image save quality
- *						'offDropWith'    => null        // To disable it if it is dropped with pressing the meta key
+ *        				'offDropWith'    => null,       // Enabled by default. To disable it if it is dropped with pressing the meta key
+ *        				                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
+ *        				                                // In case of using any key, specify it as an array
+ *        				'onDropWith'     => null        // Disabled by default. To enable it if it is dropped with pressing the meta key
  *						                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
  *						                                // In case of using any key, specify it as an array
  *					)

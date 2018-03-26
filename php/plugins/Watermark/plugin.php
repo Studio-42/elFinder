@@ -23,7 +23,10 @@
  *				'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP, // Target image formats ( bit-field )
  *				'targetMinPixel' => 200,        // Target image minimum pixel size
  *				'interlace'      => IMG_GIF|IMG_JPG, // Set interlacebit image formats ( bit-field )
- *				'offDropWith'    => null        // To disable it if it is dropped with pressing the meta key
+ *				'offDropWith'    => null,       // Enabled by default. To disable it if it is dropped with pressing the meta key
+ *				                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
+ *				                                // In case of using any key, specify it as an array
+ *				'onDropWith'     => null        // Disabled by default. To enable it if it is dropped with pressing the meta key
  *				                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
  *				                                // In case of using any key, specify it as an array
  *			)
@@ -45,7 +48,10 @@
  *						'targetType'     => IMG_GIF|IMG_JPG|IMG_PNG|IMG_WBMP, // Target image formats ( bit-field )
  *						'targetMinPixel' => 200,        // Target image minimum pixel size
  *						'interlace'      => IMG_GIF|IMG_JPG, // Set interlacebit image formats ( bit-field )
- *						'offDropWith'    => null        // To disable it if it is dropped with pressing the meta key
+ *        				'offDropWith'    => null,       // Enabled by default. To disable it if it is dropped with pressing the meta key
+ *        				                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
+ *        				                                // In case of using any key, specify it as an array
+ *        				'onDropWith'     => null        // Disabled by default. To enable it if it is dropped with pressing the meta key
  *						                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
  *						                                // In case of using any key, specify it as an array
  *					)

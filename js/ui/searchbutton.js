@@ -35,6 +35,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 					val = '.';
 				}
 				if (val) {
+					input.trigger('focus');
 					cmd.exec(val, from, mime).done(function() {
 						result = true;
 					}).fail(function() {
@@ -59,6 +60,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 			incVal = '',
 			input  = $('<input type="text" size="42"/>')
 				.on('focus', function() {
+					inFocus = true;
 					incVal = '';
 					button.addClass('ui-state-active');
 					fm.trigger('uiresize');
@@ -68,6 +70,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 					});
 				})
 				.on('blur', function() {
+					inFocus = false;
 					if (opts) {
 						if (!opts.data('infocus')) {
 							opts.slideUp(function() {
@@ -96,7 +99,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 						abort();
 					}
 				}),
-			opts, cwdReady;
+			opts, cwdReady, inFocus;
 		
 		if (isopts.enable) {
 			isopts.minlen = isopts.minlen || 2;
@@ -190,8 +193,8 @@ $.fn.elfindersearchbutton = function(cmd) {
 		
 		fm
 			.one('init', function() {
-				fm.getUI('cwd').on('click', function() {
-					input.trigger('blur');
+				fm.getUI('cwd').on('touchstart click', function() {
+					inFocus && input.trigger('blur');
 				});
 			})
 			.one('open', function() {
