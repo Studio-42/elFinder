@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.35 (2.1-src Nightly: 2d2f874) (2018-03-25)
+ * Version 2.1.35 (2.1-src Nightly: c9e8132) (2018-03-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8835,17 +8835,19 @@ elFinder.prototype = {
 		if (typeof func === 'function' && Array.isArray(arr)) {
 			vars = arr.concat();
 			exec = function() {
+				var i, len, res;
 				if (abortFlg) {
 					return;
 				}
 				curVars = vars.splice(0, parms.numPerOnce);
-				$.each(curVars, function(i, v) {
+				len = curVars.length;
+				for (i = 0; i < len; i++) {
 					if (abortFlg) {
-						return false;
+						break;
 					}
-					var res = func(v);
+					res = func(curVars[i]);
 					(res !== null) && resArr.push(res);
-				});
+				}
 				if (abortFlg) {
 					return;
 				}
@@ -9328,7 +9330,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.35 (2.1-src Nightly: 2d2f874)';
+elFinder.prototype.version = '2.1.35 (2.1-src Nightly: c9e8132)';
 
 
 
@@ -12220,7 +12222,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'8pxgrid'         : '8px Grid', // from v2.1.16 added 4.10.2016
 			'enabled'         : 'Enabled', // from v2.1.16 added 4.10.2016
 			'disabled'        : 'Disabled', // from v2.1.16 added 4.10.2016
-			'emptyIncSearch'  : 'Search results is empty in current view.\\APress [Enter] to expand search target.', // from v2.1.16 added 5.10.2016
+			'emptyIncSearch'  : 'Search results is empty in current view.\\A Press [Enter] to expand search target.', // from v2.1.16 added 5.10.2016
 			'emptyLetSearch'  : 'First letter search results is empty in current view.', // from v2.1.23 added 24.3.2017
 			'textLabel'       : 'Text label', // from v2.1.17 added 13.10.2016
 			'minsLeft'        : '$1 mins left', // from v2.1.17 added 13.11.2016
@@ -13788,23 +13790,29 @@ $.fn.elfindercwd = function(fm, options) {
 					tgt = $(document.elementFromPoint(rec.left , rec.top)),
 					ids = {},
 					tmbs = {},
-					cnt = bufferExt.hpi? Math.ceil((wz.data('rectangle').height / bufferExt.hpi) * 1.5) : showFiles,
+					multi = 5,
+					cnt = Math.ceil((bufferExt.hpi? Math.ceil((wz.data('rectangle').height / bufferExt.hpi) * 1.5) : showFiles) / multi),
 					chk = function() {
-						var id = tgt.attr('id'),
-							hash, file;
-						if (id) {
-							bufferExt.getTmbs = [];
-							hash = fm.cwdId2Hash(id);
-							inViewHashes[hash] = id;
-							// for tmbs
-							if (bufferExt.attachTmbs[hash]) {
-								tmbs[hash] = bufferExt.attachTmbs[hash];
+						var id, hash, file, i;
+						for (i = 0; i < multi; i++) {
+							id = tgt.attr('id');
+							if (id) {
+								bufferExt.getTmbs = [];
+								hash = fm.cwdId2Hash(id);
+								inViewHashes[hash] = id;
+								// for tmbs
+								if (bufferExt.attachTmbs[hash]) {
+									tmbs[hash] = bufferExt.attachTmbs[hash];
+								}
+								// for selectable
+								selectable && (ids[id] = true);
 							}
-							// for selectable
-							selectable && (ids[id] = true);
+							// next node
+							tgt = tgt.next();
+							if (!tgt.length) {
+								break;
+							}
 						}
-						// next node
-						tgt = tgt.next();
 					},
 					done = function() {
 						var idsArr;
@@ -13821,15 +13829,25 @@ $.fn.elfindercwd = function(fm, options) {
 							attachThumbnails(tmbs);
 						}
 					},
-					arr;
+					arr, widget;
 				
 				inViewHashes = {};
 				selectable && cwd.selectable('option', 'disabled');
 				
 				if (tgt.length) {
+					if (tgt.hasClass('ui-widget')) {
+						// serach button etc.
+						widget = tgt;
+						widget.hide();
+						tgt = $(document.elementFromPoint(rec.left , rec.top));
+						widget.show();
+					}
 					if (! tgt.hasClass(clFile)) {
 						tgt = tgt.closest(fileSelector);
 					}
+				}
+
+				if (tgt.length) {
 					if (tgt.attr('id')) {
 						if (init) {
 							for (var i = 0; i < cnt; i++) {
@@ -13840,12 +13858,13 @@ $.fn.elfindercwd = function(fm, options) {
 							}
 							done();
 						} else {
-							bufferExt.repaintJob && bufferExt.repaintJob._abort();
+							bufferExt.repaintJob && bufferExt.repaintJob.state() === 'pending' && bufferExt.repaintJob.reject();
 							arr = new Array(cnt);
 							bufferExt.repaintJob = fm.asyncJob(function() {
 								chk();
 								if (! tgt.length) {
-									bufferExt.repaintJob && bufferExt.repaintJob._abort(true);
+									done();
+									bufferExt.repaintJob && bufferExt.repaintJob.state() === 'pending' && bufferExt.repaintJob.reject();
 								}
 							}, arr).done(done);
 						}
@@ -17783,6 +17802,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 					val = '.';
 				}
 				if (val) {
+					input.trigger('focus');
 					cmd.exec(val, from, mime).done(function() {
 						result = true;
 					}).fail(function() {
@@ -17807,6 +17827,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 			incVal = '',
 			input  = $('<input type="text" size="42"/>')
 				.on('focus', function() {
+					inFocus = true;
 					incVal = '';
 					button.addClass('ui-state-active');
 					fm.trigger('uiresize');
@@ -17816,6 +17837,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 					});
 				})
 				.on('blur', function() {
+					inFocus = false;
 					if (opts) {
 						if (!opts.data('infocus')) {
 							opts.slideUp(function() {
@@ -17844,7 +17866,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 						abort();
 					}
 				}),
-			opts, cwdReady;
+			opts, cwdReady, inFocus;
 		
 		if (isopts.enable) {
 			isopts.minlen = isopts.minlen || 2;
@@ -17938,8 +17960,8 @@ $.fn.elfindersearchbutton = function(cmd) {
 		
 		fm
 			.one('init', function() {
-				fm.getUI('cwd').on('click', function() {
-					input.trigger('blur');
+				fm.getUI('cwd').on('touchstart click', function() {
+					inFocus && input.trigger('blur');
 				});
 			})
 			.one('open', function() {
