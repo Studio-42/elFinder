@@ -92,11 +92,11 @@
 	background-color: transparent;
 	background-image: none;
 }
-.elfinder-touch .std42-dialog/*:not(.elfinder-dialog-minimized)*/ .ui-dialog-titlebar .elfinder-titlebar-button {
-	transform: scale(1.1);
+.elfinder-touch .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-button {
+	transform: scale(1.2);
 	zoom: 1.1;
-	margin-left: 5px;
-	margin-right: 5px;
+	padding-left: 6px;
+	padding-right: 6px;
 }
 .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-button-right {
 	float: right;

@@ -317,7 +317,10 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 }
 /********************** COMMAND "HELP" ****************************/
 /* help dialog */
-.elfinder-help { margin-bottom:.5em; }
+.elfinder-help { 
+	margin-bottom:.5em;
+	-webkit-overflow-scrolling: touch;
+}
 
 /* fix tabs */
 .elfinder-help .ui-tabs-panel {
