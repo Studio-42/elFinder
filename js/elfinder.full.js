@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.35 (2.1-src Nightly: c9e8132) (2018-03-26)
+ * Version 2.1.35 (2.1-src Nightly: 8d6abd0) (2018-03-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9330,7 +9330,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.35 (2.1-src Nightly: c9e8132)';
+elFinder.prototype.version = '2.1.35 (2.1-src Nightly: 8d6abd0)';
 
 
 
@@ -24692,16 +24692,19 @@ elFinder.prototype.commands.paste = function() {
 							cnt    = files.length,
 							groups = {},
 							args   = [],
-							src, targets, reqData;
+							targets, reqData;
 
 						if (!cnt) {
 							return dfrd.resolve();
 						}
 
-						//src = files[0].phash;
 						targets = $.map(files, function(f) { return f.hash; });
 						
 						reqData = {cmd : 'paste', dst : dst.hash, targets : targets, cut : cut ? 1 : 0, renames : renames, hashes : hashes, suffix : fm.options.backupSuffix};
+						if (fm.api < 2.1) {
+							reqData.src = files[0].phash;
+						}
+						
 						fm.request({
 								data   : reqData,
 								notify : {type : cmd, cnt : cnt},
