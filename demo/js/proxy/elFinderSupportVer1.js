@@ -271,7 +271,7 @@ window.elFinderSupportVer1 = function(upload) {
 		if (isCwd) {
 			diff = fm.diff($.map(files, filter));
 		} else {
-			if (data.tree) {
+			if (data.tree && cmd !== 'paste') {
 				diff = getTreeDiff(files);
 			} else {
 				diff = {
@@ -279,9 +279,9 @@ window.elFinderSupportVer1 = function(upload) {
 					removed : [],
 					changed : []
 				};
-			}
-			if (cmd === 'paste') {
-				diff.sync = true;
+				if (cmd === 'paste') {
+					diff.sync = true;
+				}
 			}
 		}
 		
