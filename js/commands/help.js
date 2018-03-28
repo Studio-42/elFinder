@@ -196,7 +196,7 @@
 	fm.bind('load', function() {
 		var setupPref = function() {
 				var tab = content.find('.elfinder-help-preference'),
-					forms = self.options.prefs || ['language', 'toolbarPref', 'columnPref', 'selectAction', 'useStoredEditor', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'],
+					forms = self.options.prefs || ['language', 'toolbarPref', 'columnPref', 'selectAction', 'useStoredEditor', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'],
 					dls = $();
 				
 				forms = fm.arrayFlip(forms, true);
@@ -353,6 +353,32 @@
 					fm.trigger('selectfiles', {files : fm.selected()});
 				}));
 				
+				forms.infoItems && (forms.infoItems = (function() {
+					var node = $('<div/>');
+					init(function() {
+						var items = fm.getCommand('info').items,
+							tags = [],
+							hides = fm.storage('infohides') || {};
+						$.each(items, function() {
+							var key = this,
+								name = fm.i18n(key);
+							tags.push('<span class="elfinder-help-info-item"><label><input type="checkbox" value="'+key+'" '+(hides[key]? '' : 'checked')+'/>'+name+'</label></span>');
+						});
+						node.replaceWith($(tags.join(' ')).on('change', 'input', function() {
+							var v = $(this).val(),
+								o = $(this).is(':checked');
+							if (!o && !hides[v]) {
+								hides[v] = true;
+							} else if (o && hides[v]) {
+								delete hides[v];
+							}
+							fm.storage('infohides', hides);
+							fm.trigger('infopref', { repaint: true });
+						}));
+					});
+					return node;
+				})());
+				
 				forms.hashChecker && fm.hashCheckers.length && (forms.hashChecker = (function() {
 					var node = $('<div/>');
 					init(function() {
@@ -393,7 +419,7 @@
 				}));
 				
 				$.each(forms, function(n, f) {
-					var checkboxes = fm.arrayFlip(['toolbarPref', 'columnPref', 'hashChecker'], ' elfinder-help-checkboxes'),
+					var checkboxes = fm.arrayFlip(['toolbarPref', 'columnPref', 'infoItems', 'hashChecker'], ' elfinder-help-checkboxes'),
 						title;
 					if (f && f !== true) {
 						title = fm.i18n(n);

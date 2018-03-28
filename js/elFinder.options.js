@@ -430,6 +430,9 @@ elFinder.prototype._options = {
 		// "info" command options.
 		info : {
 			nullUrlDirLinkSelf : true,
+			// Information items to be hidden by default
+			// These name are 'size', 'aliasfor', 'path', 'link', 'dim', 'modify', 'perms', 'locked', 'owner', 'group', 'perm' and your custom info items label
+			hideItems : [],
 			// Maximum file size (byte) to get file contents hash (md5, sha256 ...)
 			showHashMaxsize : 104857600, // 100 MB
 			// Array of hash algorisms to show on info dialog

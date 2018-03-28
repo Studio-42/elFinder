@@ -33,7 +33,14 @@
 			perm     : fm.i18n('perm'),
 			getlink  : fm.i18n('getLink')
 		};
-		
+	
+	this.items = ['size', 'aliasfor', 'path', 'link', 'dim', 'modify', 'perms', 'locked', 'owner', 'group', 'perm'];
+	if (this.options.custom && Object.keys(this.options.custom).length) {
+		$.each(this.options.custom, function(name, details) {
+			details.label && this.items.push(details.label);
+		});
+	}
+
 	this.tpl = {
 		main       : '<div class="ui-helper-clearfix elfinder-info-title {dirclass}"><span class="elfinder-cwd-icon {class} ui-corner-all"{style}/>{title}</div><table class="elfinder-info-tb">{content}</table>',
 		itemTitle  : '<strong>{name}</strong><span class="elfinder-info-kind">{kind}</span>',
@@ -97,7 +104,7 @@
 			customActions = [],
 			style = '',
 			hashClass = 'elfinder-font-mono elfinder-info-hash',
-			size, tmb, file, title, dcnt, rdcnt, path, getHashAlgorisms;
+			size, tmb, file, title, dcnt, rdcnt, path, getHashAlgorisms, hideItems;
 			
 		if (!cnt) {
 			return $.Deferred().reject();
@@ -108,6 +115,8 @@
 			return $.Deferred().resolve();
 		}
 		
+		hideItems = fm.storage('infohides') || fm.arrayFlip(o.hideItems, true);
+
 		if (cnt === 1) {
 			file = files[0];
 			
@@ -129,21 +138,23 @@
 				count.push(file.hash);
 			}
 			
-			content.push(row.replace(l, msg.size).replace(v, size));
-			file.alias && content.push(row.replace(l, msg.aliasfor).replace(v, file.alias));
-			if (path = fm.path(file.hash, true)) {
-				content.push(row.replace(l, msg.path).replace(v, fm.escape(path).replace(/(\/|\\)/g, "$1&#8203;")).replace('{class}', 'elfinder-info-path'));
-			} else {
-				content.push(row.replace(l, msg.path).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'path')).replace('{class}', 'elfinder-info-path'));
-				reqs.push(fm.path(file.hash, true, {notify: null})
-				.fail(function() {
-					replSpinner(msg.unknown, 'path');
-				})
-				.done(function(path) {
-					replSpinner(path.replace(/(\/|\\)/g, "$1&#8203;"), 'path');
-				}));
+			!hideItems.size && content.push(row.replace(l, msg.size).replace(v, size));
+			!hideItems.aleasfor && file.alias && content.push(row.replace(l, msg.aliasfor).replace(v, file.alias));
+			if (!hideItems.path) {
+				if (path = fm.path(file.hash, true)) {
+					content.push(row.replace(l, msg.path).replace(v, fm.escape(path).replace(/(\/|\\)/g, "$1&#8203;")).replace('{class}', 'elfinder-info-path'));
+				} else {
+					content.push(row.replace(l, msg.path).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'path')).replace('{class}', 'elfinder-info-path'));
+					reqs.push(fm.path(file.hash, true, {notify: null})
+					.fail(function() {
+						replSpinner(msg.unknown, 'path');
+					})
+					.done(function(path) {
+						replSpinner(path.replace(/(\/|\\)/g, "$1&#8203;"), 'path');
+					}));
+				}
 			}
-			if (file.read) {
+			if (!hideItems.link && file.read) {
 				var href,
 				name_esc = fm.escape(file.name);
 				if (file.url == '1') {
@@ -159,38 +170,40 @@
 				}
 			}
 			
-			if (file.dim) { // old api
-				content.push(row.replace(l, msg.dim).replace(v, file.dim));
-			} else if (file.mime.indexOf('image') !== -1) {
-				if (file.width && file.height) {
-					content.push(row.replace(l, msg.dim).replace(v, file.width+'x'+file.height));
-				} else {
-					content.push(row.replace(l, msg.dim).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'dim')));
-					reqs.push(fm.request({
-						data : {cmd : 'dim', target : file.hash},
-						preventDefault : true
-					})
-					.fail(function() {
-						replSpinner(msg.unknown, 'dim');
-					})
-					.done(function(data) {
-						replSpinner(data.dim || msg.unknown, 'dim');
-						if (data.dim) {
-							var dim = data.dim.split('x');
-							var rfile = fm.file(file.hash);
-							rfile.width = dim[0];
-							rfile.height = dim[1];
-						}
-					}));
+			if (!hideItems.dim) {
+				if (file.dim) { // old api
+					content.push(row.replace(l, msg.dim).replace(v, file.dim));
+				} else if (file.mime.indexOf('image') !== -1) {
+					if (file.width && file.height) {
+						content.push(row.replace(l, msg.dim).replace(v, file.width+'x'+file.height));
+					} else {
+						content.push(row.replace(l, msg.dim).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'dim')));
+						reqs.push(fm.request({
+							data : {cmd : 'dim', target : file.hash},
+							preventDefault : true
+						})
+						.fail(function() {
+							replSpinner(msg.unknown, 'dim');
+						})
+						.done(function(data) {
+							replSpinner(data.dim || msg.unknown, 'dim');
+							if (data.dim) {
+								var dim = data.dim.split('x');
+								var rfile = fm.file(file.hash);
+								rfile.width = dim[0];
+								rfile.height = dim[1];
+							}
+						}));
+					}
 				}
 			}
 			
-			content.push(row.replace(l, msg.modify).replace(v, fm.formatDate(file)));
-			content.push(row.replace(l, msg.perms).replace(v, fm.formatPermissions(file)));
-			content.push(row.replace(l, msg.locked).replace(v, file.locked ? msg.yes : msg.no));
-			file.owner && content.push(row.replace(l, msg.owner).replace(v, file.owner));
-			file.group && content.push(row.replace(l, msg.group).replace(v, file.group));
-			file.perm && content.push(row.replace(l, msg.perm).replace(v, fm.formatFileMode(file.perm)));
+			!hideItems.modify && content.push(row.replace(l, msg.modify).replace(v, fm.formatDate(file)));
+			!hideItems.perms && content.push(row.replace(l, msg.perms).replace(v, fm.formatPermissions(file)));
+			!hideItems.locked && content.push(row.replace(l, msg.locked).replace(v, file.locked ? msg.yes : msg.no));
+			!hideItems.owner && file.owner && content.push(row.replace(l, msg.owner).replace(v, file.owner));
+			!hideItems.group && file.group && content.push(row.replace(l, msg.group).replace(v, file.group));
+			!hideItems.perm && file.perm && content.push(row.replace(l, msg.perm).replace(v, fm.formatFileMode(file.perm)));
 			
 			// Get MD5 hash
 			if (window.ArrayBuffer && (fm.options.cdns.sparkmd5 || fm.options.cdns.jssha) && file.mime !== 'directory' && file.size > 0 && (!o.showHashMaxsize || file.size <= o.showHashMaxsize)) {
@@ -223,6 +236,8 @@
 			if (o.custom) {
 				$.each(o.custom, function(name, details) {
 					if (
+					  !hideItems[details.label]
+					    &&
 					  (!details.mimes || $.grep(details.mimes, function(m){return (file.mime === m || file.mime.indexOf(m+'/') === 0)? true : false;}).length)
 					    &&
 					  (!details.hashRegex || file.hash.match(details.hashRegex))
@@ -252,12 +267,12 @@
 					}
 				});
 				content.push(row.replace(l, msg.kind).replace(v, msg.files));
-				content.push(row.replace(l, msg.size).replace(v, fm.formatSize(size)));
+				!hideItems.size && content.push(row.replace(l, msg.size).replace(v, fm.formatSize(size)));
 			} else {
 				rdcnt = $.grep(files, function(f) { return f.mime === 'directory' && (! f.phash || f.isroot)? true : false ; }).length;
 				dcnt -= rdcnt;
 				content.push(row.replace(l, msg.kind).replace(v, (rdcnt === cnt || dcnt === cnt)? msg[rdcnt? 'roots' : 'folders'] : $.map({roots: rdcnt, folders: dcnt, files: cnt - rdcnt - dcnt}, function(c, t) { return c? msg[t]+' '+c : null; }).join(', ')));
-				content.push(row.replace(l, msg.size).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'size')));
+				!hideItems.size && content.push(row.replace(l, msg.size).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'size')));
 				count = $.map(files, function(f) { return f.hash; });
 				
 			}

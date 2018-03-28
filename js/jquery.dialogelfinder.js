@@ -69,7 +69,7 @@ $.fn.dialogelfinder = function(opts) {
 
 			setTimeout(function() {
 				// fix resize icon position and make elfinder active
-				node.trigger('resize').mousedown();
+				node.trigger('resize').trigger('mousedown');
 			}, 200);
 		}
 	} else if (opts == 'close') {
