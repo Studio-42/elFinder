@@ -31,7 +31,7 @@ class elFinder {
 	 * 
 	 * @var integer
 	 */
-	protected static $ApiRevision = 36;
+	protected static $ApiRevision = 37;
 	
 	/**
 	 * Storages (root dirs)
@@ -1624,7 +1624,7 @@ class elFinder {
 			}
 			$file = $targets[1];
 			// checking the validity of the file parameter
-			if (strpos($file, DIRECTORY_SEPARATOR) !== false) {
+			if (strpos(str_replace('/', DIRECTORY_SEPARATOR, $file), DIRECTORY_SEPARATOR) !== false) {
 				return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
 			}
 			$path = $volume->getTempPath().DIRECTORY_SEPARATOR.$file;
