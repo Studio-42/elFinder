@@ -1623,10 +1623,14 @@ class elFinder {
 				return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
 			}
 			$file = $targets[1];
+			// checking the validity of the file parameter
+			if (strpos($file, DIRECTORY_SEPARATOR) !== false) {
+				return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
+			}
 			$path = $volume->getTempPath().DIRECTORY_SEPARATOR.$file;
 			// register auto delete on shutdown
 			$GLOBALS['elFinderTempFiles'][$path] = true;
-			if (!is_readable($path)) {
+			if (!is_writable($path)) {
 				return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
 			}
 			$name = $targets[2];
