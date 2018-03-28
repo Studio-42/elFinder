@@ -1,3 +1,20 @@
+2018-03-28  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.36):
+		- [js:core] Fixed #2433 cwdOptions becomes trash folder's options when folder restoring
+		- [php:plugin:sanitizer] add on option `callBack` (#2432)
+		- [ui:uploadbutton] Fixed #2435 can't upload
+		- [cmd:upload] Fixed #2436 can’t upload with state that one file selected in cwd
+		- [VD:abstract] Fixed #2425 adjustment of `internal_encoding` setting
+		- [php:security] correction of symbolic link determination
+		- [cmd:rename] bugfix of undo/redo functions
+		- [php:plugin] add option onDropWith for plugin function iaEnabled (#2442)
+		- [cmd:paste] Fixed #2439 missing `src` param on API < 2.1
+		- [proxy:Ver1] correction of response data normalization on paste
+		- [php:security] fix directory traversal vulnerability
+		- And some minor bug fixes
+
+
 2018-03-21  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.35):
