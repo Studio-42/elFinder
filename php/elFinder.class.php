@@ -1593,7 +1593,7 @@ class elFinder {
 		$h404    = 'HTTP/1.x 404 Not Found';
 		
 		if (!$download) {
-			//1st: Return srrsy contains download archive file info
+			//1st: Return array contains download archive file info
 			$error = array(self::ERROR_ARCHIVE);
 			if (($volume = $this->volume($targets[0])) !== false) {
 				if ($dlres = $volume->zipdl($targets)) {
@@ -1605,9 +1605,11 @@ class elFinder {
 						$name = $dlres['prefix'].'_Files';
 					}
 					$name .= '.'.$dlres['ext'];
+					$uniqid = uniqid();
+					$this->session->set('zipdl' . $uniqid, basename($path));
 					$result = array(
 						'zipdl' => array(
-							'file' => basename($path),
+							'file' => $uniqid,
 							'name' => $name,
 							'mime' => $dlres['mime']
 						)
@@ -1618,21 +1620,21 @@ class elFinder {
 			}
 			return array('error' => $error);
 		} else {
-			// 2nd: Return array contains opened file pointer, root itself and required headers
-			if (count($targets) !== 4 || ($volume = $this->volume($targets[0])) == false) {
+			// 2nd: Return array contains opened file session key, root itself and required headers
+			if (count($targets) !== 4 || ($volume = $this->volume($targets[0])) == false || !($file = $this->session->get('zipdl' . $targets[1]))) {
 				return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
 			}
-			$file = $targets[1];
-			// checking the validity of the file parameter
-			if (strpos(str_replace('/', DIRECTORY_SEPARATOR, $file), DIRECTORY_SEPARATOR) !== false) {
+			$this->session->remove('zipdl' . $targets[1]);
+			if ($volume->commandDisabled('zipdl')) {
 				return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
 			}
-			$path = $volume->getTempPath().DIRECTORY_SEPARATOR.$file;
+			$path = $volume->getTempPath() . DIRECTORY_SEPARATOR . basename($file);
+			if (!is_readable($path) || !is_writable($path)) {
+				return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
+			}
 			// register auto delete on shutdown
 			$GLOBALS['elFinderTempFiles'][$path] = true;
-			if (!is_writable($path)) {
-				return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
-			}
+			// for HTTP headers
 			$name = $targets[2];
 			$mime = $targets[3];
 			
