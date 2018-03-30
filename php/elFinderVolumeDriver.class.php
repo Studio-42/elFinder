@@ -5708,8 +5708,8 @@ abstract class elFinderVolumeDriver {
 			$tmpout = '';
 			$tmperr = '';
 
-			$output = stream_get_contents($pipes[1]);
 			$error_output = stream_get_contents($pipes[2]);
+			$output = stream_get_contents($pipes[1]);
 
 			fclose($pipes[1]);
 			fclose($pipes[2]);
