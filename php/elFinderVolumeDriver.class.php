@@ -2453,18 +2453,21 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		$archivers = $archivers['create'];
+		if (!$archivers) {
+			return false;
+		}
 		foreach(array('zip', 'tgz') as $ext) {
-			$mime = self::$mimetypes[$ext];
+			$mime = $this->mimetype('file.'.$ext, true);
 			if (isset($archivers[$mime])) {
 				$cmd = $archivers[$mime];
 				break;
 			}
 		}
 		if (!$cmd) {
-			$cmd = $archivers[0];
-			$ext = $cmd['ext'];
+			$cmd = array_shift($archivers);
 			$mime = $this->mimetype('file.'.$ext, true);
 		}
+		$ext = $cmd['ext'];
 		$res = false;
 		$mixed = false;
 		$hashes = array_values($hashes);
@@ -2978,7 +2981,7 @@ abstract class elFinderVolumeDriver {
 			return false;
 		}
 		if (empty($file['url']) && $this->URL) {
-			$path = str_replace($this->separator, '/', substr($this->decode($hash), strlen($this->root) + 1));
+			$path = str_replace($this->separator, '/', substr($this->decode($hash), strlen(rtrim($this->root, '/'.$this->separator)) + 1));
 			if ($this->encoding) {
 				$path = $this->convEncIn($path, true);
 			}
@@ -5705,8 +5708,8 @@ abstract class elFinderVolumeDriver {
 			$tmpout = '';
 			$tmperr = '';
 
-			$output = stream_get_contents($pipes[1]);
 			$error_output = stream_get_contents($pipes[2]);
+			$output = stream_get_contents($pipes[1]);
 
 			fclose($pipes[1]);
 			fclose($pipes[2]);
@@ -6177,7 +6180,7 @@ abstract class elFinderVolumeDriver {
 			$cwd = getcwd();
 			if (chdir($dir)) {
 				foreach($files as $i => $file) {
-					$files[$i] = '.'.DIRECTORY_SEPARATOR.$file;
+					$files[$i] = '.'.DIRECTORY_SEPARATOR.basename($file);
 				}
 				$files = array_map('escapeshellarg', $files);
 				
