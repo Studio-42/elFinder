@@ -223,7 +223,7 @@ elFinder.prototype.commands.download = function() {
 						eachCancel : true,
 						preventDefault : true
 					}).done(function(e) {
-						var zipdl, dialog, btn = {}, dllink, form, iframe,
+						var zipdl, dialog, btn = {}, dllink, form, iframe, m,
 							uniq = 'dlw' + (+new Date());
 						if (e.error) {
 							fm.error(e.error);
@@ -231,7 +231,8 @@ elFinder.prototype.commands.download = function() {
 						} else if (e.zipdl) {
 							zipdl = e.zipdl;
 							if (dlName) {
-								dlName += '.zip';
+								m = fm.splitFileExtention(zipdl.name || '');
+								dlName += m[1]? ('.' + m[1]) : '.zip';
 							} else {
 								dlName = zipdl.name;
 							}
