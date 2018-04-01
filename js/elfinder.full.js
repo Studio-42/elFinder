@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 0be9614) (2018-04-01)
+ * Version 2.1.37 (2.1-src Nightly: 65ee877) (2018-04-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -4137,14 +4137,19 @@ var elFinder = function(elm, opts, bootCallback) {
 			.on('popstate.' + namespace, function(ev) {
 				var state = ev.originalEvent.state,
 					dialog = node.find('.elfinder-frontmost:visible'),
+					input = node.find('.elfinder-navbar-dir,.elfinder-cwd-filename').find('input,textarea'),
 					onOpen, toast, thash;
-				if (dialog.length) {
+				if (dialog.length || input.length) {
 					state = { thash: self.cwd().hash };
 					history.pushState(state, null, location.pathname + location.search + '#elf_' + state.thash);
-					if (dialog.hasClass('elfinder-dialog')) {
-						dialog.elfinderdialog('close');
+					if (dialog.length) {
+						if (dialog.hasClass('elfinder-dialog')) {
+							dialog.elfinderdialog('close');
+						} else {
+							dialog.trigger('close');
+						}
 					} else {
-						dialog.trigger('close');
+						input.trigger($.Event('keydown', { keyCode: $.ui.keyCode.ESCAPE, ctrlKey : false, shiftKey : false, altKey : false, metaKey : false }));
 					}
 				} else {
 					if (state && state.thash) {
@@ -9362,7 +9367,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 0be9614)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 65ee877)';
 
 
 
@@ -11475,7 +11480,7 @@ elFinder.prototype.resources = {
 				empty= wz.hasClass('elfinder-cwd-wrapper-empty'),
 				rest = function(){
 					if (!overlay.is(':hidden')) {
-						overlay.elfinderoverlay('hide').off('click', cancel);
+						overlay.elfinderoverlay('hide').off('click close', cancel);
 					}
 					node.removeClass('ui-front').css('position', '');
 					if (tarea) {
@@ -11669,7 +11674,7 @@ elFinder.prototype.resources = {
 				select = function() {
 					var name = fm.splitFileExtention(input.val())[0];
 					if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? (z-index not effect) so disable it
-						overlay.on('click', cancel).elfinderoverlay('show');
+						overlay.on('click close', cancel).elfinderoverlay('show');
 						pnode.css('z-index', overlay.css('z-index') + 1);
 					}
 					inError = false;
@@ -27396,7 +27401,7 @@ elFinder.prototype.commands.rename = function() {
 			},
 			rest     = function(){
 				if (!overlay.is(':hidden')) {
-					overlay.elfinderoverlay('hide').off('click', cancel);
+					overlay.elfinderoverlay('hide').off('click close', cancel);
 				}
 				pnode.removeClass('ui-front')
 					.css('position', '')
@@ -27547,7 +27552,7 @@ elFinder.prototype.commands.rename = function() {
 			select = function() {
 				var name = fm.splitFileExtention(input.val())[0];
 				if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? (z-index not effect) so disable it
-					overlay.on('click', cancel).elfinderoverlay('show');
+					overlay.on('click close', cancel).elfinderoverlay('show');
 					pnode.css('z-index', overlay.css('z-index') + 1);
 				}
 				! fm.enabled() && fm.enable();
