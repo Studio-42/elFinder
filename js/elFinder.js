@@ -4106,14 +4106,19 @@ var elFinder = function(elm, opts, bootCallback) {
 			.on('popstate.' + namespace, function(ev) {
 				var state = ev.originalEvent.state,
 					dialog = node.find('.elfinder-frontmost:visible'),
+					input = node.find('.elfinder-navbar-dir,.elfinder-cwd-filename').find('input,textarea'),
 					onOpen, toast, thash;
-				if (dialog.length) {
+				if (dialog.length || input.length) {
 					state = { thash: self.cwd().hash };
 					history.pushState(state, null, location.pathname + location.search + '#elf_' + state.thash);
-					if (dialog.hasClass('elfinder-dialog')) {
-						dialog.elfinderdialog('close');
+					if (dialog.length) {
+						if (dialog.hasClass('elfinder-dialog')) {
+							dialog.elfinderdialog('close');
+						} else {
+							dialog.trigger('close');
+						}
 					} else {
-						dialog.trigger('close');
+						input.trigger($.Event('keydown', { keyCode: $.ui.keyCode.ESCAPE, ctrlKey : false, shiftKey : false, altKey : false, metaKey : false }));
 					}
 				} else {
 					if (state && state.thash) {
