@@ -3,7 +3,7 @@
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
  * @author Alex Yashkin <alex@yashkin.by>
- * @version 2018-03-31
+ * @version 2018-04-01
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -452,6 +452,7 @@
 			'selectionInfo'   : 'Свойства', // from v2.1.33 added 7.3.2018
 			'hashChecker'     : 'Алгоритмы для отображения хеш-сумм файлов', // from v2.1.33 added 10.3.2018
 			'infoItems'       : 'Элементы в панели свойств', // from v2.1.38 added 28.3.2018
+			'pressAgainToExit': 'Нажмите снова для выхода.', // from v2.1.38 added 1.4.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
