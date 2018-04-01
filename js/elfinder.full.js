@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 107000f) (2018-04-01)
+ * Version 2.1.37 (2.1-src Nightly: 87fe394) (2018-04-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -4135,12 +4135,17 @@ var elFinder = function(elm, opts, bootCallback) {
 		// attach events to window
 		self.options.useBrowserHistory && $(window)
 			.on('popstate.' + namespace, function(ev) {
-				var state = ev.originalEvent.state,
+				var state = ev.originalEvent.state || {},
+					hasThash = state.thash? true : false,
 					dialog = node.find('.elfinder-frontmost:visible'),
 					input = node.find('.elfinder-navbar-dir,.elfinder-cwd-filename').find('input,textarea'),
-					onOpen, toast, thash;
-				if (dialog.length || input.length) {
+					onOpen, toast;
+				if (!hasThash) {
 					state = { thash: self.cwd().hash };
+					// scroll to elFinder node
+					$('html,body').animate({ scrollTop: node.offset().top });
+				}
+				if (dialog.length || input.length) {
 					history.pushState(state, null, location.pathname + location.search + '#elf_' + state.thash);
 					if (dialog.length) {
 						if (dialog.hasClass('elfinder-dialog')) {
@@ -4152,14 +4157,13 @@ var elFinder = function(elm, opts, bootCallback) {
 						input.trigger($.Event('keydown', { keyCode: $.ui.keyCode.ESCAPE, ctrlKey : false, shiftKey : false, altKey : false, metaKey : false }));
 					}
 				} else {
-					if (state && state.thash) {
+					if (hasThash) {
 						!$.isEmptyObject(self.files()) && self.request({
 							data   : {cmd  : 'open', target : state.thash, onhistory : 1},
 							notify : {type : 'open', cnt : 1, hideCnt : true},
 							syncOnFail : true
 						});
 					} else {
-						thash = self.cwd().hash;
 						onOpen = function() {
 							toast.trigger('click');
 						};
@@ -4168,12 +4172,9 @@ var elFinder = function(elm, opts, bootCallback) {
 							msg: self.i18n('pressAgainToExit'),
 							onHidden: function() {
 								self.unbind('open', onOpen);
-								state = { thash: thash };
-								history.pushState(state, null, location.pathname + location.search + '#elf_' + thash);
+								history.pushState(state, null, location.pathname + location.search + '#elf_' + state.thash);
 							}
 						});
-						// scroll to elFinder node 
-						$('html,body').animate({ scrollTop: node.offset().top });
 					}
 				}
 			});
@@ -9367,7 +9368,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 107000f)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 87fe394)';
 
 
 
