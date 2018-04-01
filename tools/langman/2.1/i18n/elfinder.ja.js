@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-03-28
+ * @version 2018-04-01
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -451,6 +451,7 @@
 			'selectionInfo'   : '選択情報', // from v2.1.33 added 7.3.2018
 			'hashChecker'     : 'ファイルハッシュを表示するアルゴリズム', // from v2.1.33 added 10.3.2018
 			'infoItems'       : '情報項目 (選択情報パネル)', // from v2.1.38 added 28.3.2018
+			'pressAgainToExit': 'もう一度押すと終了します。', // from v2.1.38 added 1.4.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
