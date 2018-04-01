@@ -2613,9 +2613,10 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * 
 	 * @param  String  event(s) name(s)
 	 * @param  Object  event handler
+	 * @param  Boolean priority first
 	 * @return elFinder
 	 */
-	this.bind = function(event, callback) {
+	this.bind = function(event, callback, priorityFirst) {
 		var i, len;
 		
 		if (typeof(callback) == 'function') {
@@ -2626,7 +2627,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				if (listeners[event[i]] === void(0)) {
 					listeners[event[i]] = [];
 				}
-				listeners[event[i]].push(callback);
+				listeners[event[i]][priorityFirst? 'unshift' : 'push'](callback);
 			}
 		}
 		return this;
@@ -4103,12 +4104,40 @@ var elFinder = function(elm, opts, bootCallback) {
 		// attach events to window
 		self.options.useBrowserHistory && $(window)
 			.on('popstate.' + namespace, function(ev) {
-				var target = ev.originalEvent.state && ev.originalEvent.state.thash;
-				target && !$.isEmptyObject(self.files()) && self.request({
-					data   : {cmd  : 'open', target : target, onhistory : 1},
-					notify : {type : 'open', cnt : 1, hideCnt : true},
-					syncOnFail : true
-				});
+				var state = ev.originalEvent.state,
+					dialog = node.find('.elfinder-frontmost:visible'),
+					onOpen, toast, thash;
+				if (dialog.length) {
+					state = { thash: self.cwd().hash };
+					history.pushState(state, null, location.pathname + location.search + '#elf_' + state.thash);
+					if (dialog.hasClass('elfinder-dialog')) {
+						dialog.elfinderdialog('close');
+					} else {
+						dialog.trigger('close');
+					}
+				} else {
+					if (state && state.thash) {
+						!$.isEmptyObject(self.files()) && self.request({
+							data   : {cmd  : 'open', target : state.thash, onhistory : 1},
+							notify : {type : 'open', cnt : 1, hideCnt : true},
+							syncOnFail : true
+						});
+					} else {
+						thash = self.cwd().hash;
+						onOpen = function() {
+							toast.trigger('click');
+						};
+						self.one('open', onOpen, true);
+						toast = self.toast({
+							msg: self.i18n('pressAgainToExit'),
+							onHidden: function() {
+								self.unbind('open', onOpen);
+								state = { thash: thash };
+								history.pushState(state, null, location.pathname + location.search + '#elf_' + thash);
+							}
+						});
+					}
+				}
 			});
 		
 		$(window).on('resize.' + namespace, function(e){
@@ -6795,9 +6824,10 @@ elFinder.prototype = {
 	 *
 	 * @param  String    event name
 	 * @param  Function  callback
+	 * @param  Boolan    priority first
 	 * @return elFinder
 	 */
-	one : function(ev, callback) {
+	one : function(ev, callback, priorityFirst) {
 		var self  = this,
 			event = ev.toLowerCase(),
 			h     = function(e, f) {
@@ -6810,7 +6840,7 @@ elFinder.prototype = {
 				});
 				return callback.apply(this, arguments);
 			};
-		return this.bind(event, h);
+		return this.bind(event, h, priorityFirst);
 	},
 	
 	/**
