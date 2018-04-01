@@ -4136,6 +4136,8 @@ var elFinder = function(elm, opts, bootCallback) {
 								history.pushState(state, null, location.pathname + location.search + '#elf_' + thash);
 							}
 						});
+						// scroll to elFinder node 
+						$('html,body').animate({ scrollTop: node.offset().top });
 					}
 				}
 			});
