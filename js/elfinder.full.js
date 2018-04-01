@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 11cc6e0) (2018-03-30)
+ * Version 2.1.37 (2.1-src Nightly: 0572475) (2018-04-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -2644,9 +2644,10 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * 
 	 * @param  String  event(s) name(s)
 	 * @param  Object  event handler
+	 * @param  Boolean priority first
 	 * @return elFinder
 	 */
-	this.bind = function(event, callback) {
+	this.bind = function(event, callback, priorityFirst) {
 		var i, len;
 		
 		if (typeof(callback) == 'function') {
@@ -2657,7 +2658,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				if (listeners[event[i]] === void(0)) {
 					listeners[event[i]] = [];
 				}
-				listeners[event[i]].push(callback);
+				listeners[event[i]][priorityFirst? 'unshift' : 'push'](callback);
 			}
 		}
 		return this;
@@ -4134,12 +4135,40 @@ var elFinder = function(elm, opts, bootCallback) {
 		// attach events to window
 		self.options.useBrowserHistory && $(window)
 			.on('popstate.' + namespace, function(ev) {
-				var target = ev.originalEvent.state && ev.originalEvent.state.thash;
-				target && !$.isEmptyObject(self.files()) && self.request({
-					data   : {cmd  : 'open', target : target, onhistory : 1},
-					notify : {type : 'open', cnt : 1, hideCnt : true},
-					syncOnFail : true
-				});
+				var state = ev.originalEvent.state,
+					dialog = node.find('.elfinder-frontmost:visible'),
+					onOpen, toast, thash;
+				if (dialog.length) {
+					state = { thash: self.cwd().hash };
+					history.pushState(state, null, location.pathname + location.search + '#elf_' + state.thash);
+					if (dialog.hasClass('elfinder-dialog')) {
+						dialog.elfinderdialog('close');
+					} else {
+						dialog.trigger('close');
+					}
+				} else {
+					if (state && state.thash) {
+						!$.isEmptyObject(self.files()) && self.request({
+							data   : {cmd  : 'open', target : state.thash, onhistory : 1},
+							notify : {type : 'open', cnt : 1, hideCnt : true},
+							syncOnFail : true
+						});
+					} else {
+						thash = self.cwd().hash;
+						onOpen = function() {
+							toast.trigger('click');
+						};
+						self.one('open', onOpen, true);
+						toast = self.toast({
+							msg: self.i18n('pressAgainToExit'),
+							onHidden: function() {
+								self.unbind('open', onOpen);
+								state = { thash: thash };
+								history.pushState(state, null, location.pathname + location.search + '#elf_' + thash);
+							}
+						});
+					}
+				}
 			});
 		
 		$(window).on('resize.' + namespace, function(e){
@@ -6826,9 +6855,10 @@ elFinder.prototype = {
 	 *
 	 * @param  String    event name
 	 * @param  Function  callback
+	 * @param  Boolan    priority first
 	 * @return elFinder
 	 */
-	one : function(ev, callback) {
+	one : function(ev, callback, priorityFirst) {
 		var self  = this,
 			event = ev.toLowerCase(),
 			h     = function(e, f) {
@@ -6841,7 +6871,7 @@ elFinder.prototype = {
 				});
 				return callback.apply(this, arguments);
 			};
-		return this.bind(event, h);
+		return this.bind(event, h, priorityFirst);
 	},
 	
 	/**
@@ -9330,7 +9360,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 11cc6e0)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 0572475)';
 
 
 
@@ -10940,6 +10970,16 @@ elFinder.prototype.history = function(fm) {
 				return fm.exec('open', history[fwd ? ++current : --current]).fail(reset);
 			}
 			return $.Deferred().reject();
+		},
+		/**
+		 * Sets the native history.
+		 *
+		 * @param String thash target hash
+		 */
+		setNativeHistory = function(thash) {
+			if (nativeHistory && (! nativeHistory.state || nativeHistory.state.thash !== thash)) {
+				nativeHistory.pushState({thash: thash}, null, location.pathname + location.search + (thash? '#elf_' + thash : ''));
+			}
 		};
 	
 	/**
@@ -10977,7 +11017,12 @@ elFinder.prototype.history = function(fm) {
 	};
 	
 	// bind to elfinder events
-	fm.open(function() {
+	fm.bind('init', function() {
+		if (nativeHistory && !nativeHistory.state) {
+			setNativeHistory(fm.startDir());
+		}
+	})
+	.open(function() {
 		var l = history.length,
 			cwd = fm.cwd().hash;
 
@@ -10988,13 +11033,7 @@ elFinder.prototype.history = function(fm) {
 		}
 		update = true;
 
-		if (nativeHistory) {
-			if (! nativeHistory.state) {
-				nativeHistory.replaceState({thash: cwd}, null, location.pathname + location.search + '#elf_' + cwd);
-			} else {
-				nativeHistory.state.thash != cwd && nativeHistory.pushState({thash: cwd}, null, location.pathname + location.search + '#elf_' + cwd);
-			}
-		}
+		setNativeHistory(cwd);
 	})
 	.reload(fm.options.reloadClearHistory && reset);
 	
@@ -11821,7 +11860,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-03-28
+ * @version 2018-04-01
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -12263,6 +12302,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'selectionInfo'   : 'Selection Info', // from v2.1.33 added 7.3.2018
 			'hashChecker'     : 'Algorithms to show the file hash', // from v2.1.33 added 10.3.2018
 			'infoItems'       : 'Info Items (Selection Info Panel)', // from v2.1.38 added 28.3.2018
+			'pressAgainToExit': 'Press again to exit.', // from v2.1.38 added 1.4.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -18356,6 +18396,8 @@ $.fn.elfindertoast = function(opts, fm) {
 		self.on('click', function(e) {
 			e.stopPropagation();
 			e.preventDefault();
+			rmTm && clearTimeout(rmTm);
+			opts.onHidden && opts.onHidden();
 			self.stop().remove();
 		}).on('mouseenter mouseleave', function(e) {
 			if (opts.timeOut) {
