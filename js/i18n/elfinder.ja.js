@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-04-01
+ * @version 2018-04-03
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -162,6 +162,7 @@
 			'cmdselectall' : 'すべて選択', // from v2.1.28 added 15.08.2017
 			'cmdselectnone': '選択解除', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': '選択を反転', // from v2.1.28 added 15.08.2017
+			'cmdopennew'   : '新しいウィンドウで開く', // from v2.1.38 added 3.4.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : '閉じる',
