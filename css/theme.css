@@ -97,7 +97,10 @@
 .elfinder .elfinder-statusbar a { text-decoration:none; color:#555;}
 
 
-.std42-dialog .elfinder-help, .std42-dialog .elfinder-help .ui-widget-content { background:#fff;}
+.std42-dialog .elfinder-help,
+.std42-dialog .elfinder-help .ui-widget-content,
+.std42-dialog .elfinder-preference,
+.std42-dialog .elfinder-preference .ui-widget-content { background:#fff;}
 
 /* contextmenu */
 .elfinder-contextmenu .ui-state-active { background: #6293df; color:#fff; }

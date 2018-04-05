@@ -46,14 +46,22 @@
 
 		// open folder
 		if (thash || (cnt == 1 && (file = files[0]) && file.mime == 'directory')) {
-			return !thash && file && !file.read
-				? dfrd.reject(['errOpen', file.name, 'errPerm'])
-				: fm.request({
-						data   : {cmd  : 'open', target : thash || file.hash},
-						notify : {type : 'open', cnt : 1, hideCnt : true},
-						syncOnFail : true,
-						lazy : false
-					});
+			if (!thash && file && !file.read) {
+				return dfrd.reject(['errOpen', file.name, 'errPerm']);
+			} else {
+				if (fm.keyState.ctrlKey && (fm.keyState.shiftKey || typeof fm.options.getFileCallback !== 'function')) {
+					if (fm.getCommand('opennew')) {
+						return fm.exec('opennew', [thash? thash : file.hash]);
+					}
+				}
+
+				return fm.request({
+					data   : {cmd  : 'open', target : thash || file.hash},
+					notify : {type : 'open', cnt : 1, hideCnt : true},
+					syncOnFail : true,
+					lazy : false
+				});
+			}
 		}
 		
 		files = $.grep(files, function(file) { return file.mime != 'directory' ? true : false; });
@@ -88,10 +96,12 @@
 				url = fm.openUrl(file.hash, !inline);
 				if (fm.UA.Mobile || !inline) {
 					if (html5dl) {
-						!inline && link.attr('download', file.name);
-						link.attr('href', url)
-						.attr('target', '_blank')
-						.get(0).click();
+						if (!inline) {
+							link.attr('download', file.name);
+						} else {
+							link.attr('target', '_blank');
+						}
+						link.attr('href', url).get(0).click();
 					} else {
 						wnd = window.open(url);
 						if (!wnd) {

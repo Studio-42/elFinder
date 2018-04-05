@@ -80,6 +80,13 @@ var elFinder = function(elm, opts, bootCallback) {
 		keypress = 'keypress.'+namespace,
 		
 		/**
+		 * Keypup event
+		 *
+		 * @type String
+		 **/
+		keyup    = 'keyup.'+namespace,
+
+		/**
 		 * Is shortcuts/commands enabled
 		 *
 		 * @type Boolean
@@ -578,7 +585,20 @@ var elFinder = function(elm, opts, bootCallback) {
 		execShortcut = function(e) {
 			var code    = e.keyCode,
 				ctrlKey = !!(e.ctrlKey || e.metaKey),
+				isMousedown = e.type === 'mousedown',
 				ddm;
+
+			!isMousedown && (self.keyState.keyCode = code);
+			self.keyState.ctrlKey  = ctrlKey;
+			self.keyState.shiftKey = e.shiftKey;
+			self.keyState.metaKey  = e.metaKey;
+			self.keyState.altKey   = e.altKey;
+			if (isMousedown) {
+				return;
+			} else if (e.type === 'keyup') {
+				self.keyState.keyCode = null;
+				return;
+			}
 
 			if (enabled) {
 
@@ -4099,7 +4119,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			// disable elfinder on click outside elfinder
 			.on('click.'+namespace, function(e) { enabled && ! self.options.enableAlways && !$(e.target).closest(node).length && self.disable(); })
 			// exec shortcuts
-			.on(keydown+' '+keypress, execShortcut);
+			.on(keydown+' '+keypress+' '+keyup+' '+mousedown, execShortcut);
 		
 		// attach events to window
 		self.options.useBrowserHistory && $(window)
@@ -5168,6 +5188,13 @@ elFinder.prototype = {
 	 * @type  String
 	 */
 	currentReqCmd : '',
+	
+	/**
+	 * Current keyboard state
+	 * 
+	 * @type  Object
+	 */
+	keyState : {},
 	
 	/**
 	 * Internationalization object
