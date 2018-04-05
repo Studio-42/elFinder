@@ -3,7 +3,7 @@
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
  * @author Alex Yashkin <alex@yashkin.by>
- * @version 2018-04-01
+ * @version 2018-04-05
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -163,6 +163,7 @@
 			'cmdselectall' : 'Выбрать все', // from v2.1.28 added 15.08.2017
 			'cmdselectnone': 'Отменить выбор', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': 'Инвертировать выбор', // from v2.1.28 added 15.08.2017
+			'cmdopennew'   : 'Открыть в новом окне', // from v2.1.38 added 3.4.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Закрыть',
@@ -336,9 +337,9 @@
 			'protocolver'     : 'версия протокола',
 			'homepage'        : 'Сайт проекта',
 			'docs'            : 'Документация',
-			'github'          : 'Форкните на Github',
-			'twitter'         : 'Следите в twitter',
-			'facebook'        : 'Присоединяйтесь на facebook',
+			'github'          : 'Форкните на GitHub',
+			'twitter'         : 'Следите в Twitter',
+			'facebook'        : 'Присоединяйтесь на Facebook',
 			'team'            : 'Команда',
 			'chiefdev'        : 'ведущий разработчик',
 			'developer'       : 'разработчик',
@@ -453,6 +454,10 @@
 			'hashChecker'     : 'Алгоритмы для отображения хеш-сумм файлов', // from v2.1.33 added 10.3.2018
 			'infoItems'       : 'Элементы в панели свойств', // from v2.1.38 added 28.3.2018
 			'pressAgainToExit': 'Нажмите снова для выхода.', // from v2.1.38 added 1.4.2018
+			'toolbar'         : 'Панель', // from v2.1.38 added 4.4.2018
+			'workspace'       : 'Рабочая область', // from v2.1.38 added 4.4.2018
+			'dialog'          : 'Диалог', // from v2.1.38 added 4.4.2018
+			'all'             : 'Все', // from v2.1.38 added 4.4.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
