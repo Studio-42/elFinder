@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 592c589) (2018-04-05)
+ * Version 2.1.37 (2.1-src Nightly: ec4e783) (2018-04-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9396,7 +9396,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 592c589)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: ec4e783)';
 
 
 
@@ -12227,9 +12227,9 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'protocolver'     : 'protocol version',
 			'homepage'        : 'Project home',
 			'docs'            : 'Documentation',
-			'github'          : 'Fork us on Github',
-			'twitter'         : 'Follow us on twitter',
-			'facebook'        : 'Join us on facebook',
+			'github'          : 'Fork us on GitHub',
+			'twitter'         : 'Follow us on Twitter',
+			'facebook'        : 'Join us on Facebook',
 			'team'            : 'Team',
 			'chiefdev'        : 'chief developer',
 			'developer'       : 'developer',
