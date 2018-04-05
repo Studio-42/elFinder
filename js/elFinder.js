@@ -4395,6 +4395,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				+(self.direction == 'rtl' ? 'rtl' : 'ltr')
 				+(self.UA.Touch? (' elfinder-touch' + (self.options.resizable ? ' touch-punch' : '')) : '')
 				+(self.UA.Mobile? ' elfinder-mobile' : '')
+				+(self.UA.iOS? ' elfinder-ios' : '')
 				+' '+self.options.cssClass;
 
 		// prepare node

@@ -17,6 +17,13 @@
 	font-family: Verdana,Arial,Helvetica,sans-serif;
 }
 
+/* prevent auto zoom on iOS */
+.elfinder-ios input,
+.elfinder-ios select,
+.elfinder-ios textarea {
+	font-size: 16px !important;
+}
+
 .elfinder-font-mono {
 	line-height: 2ex;
 }

@@ -298,11 +298,6 @@ elFinder.prototype.resources = {
 				nextAction = Object.assign({}, self.nextAction);
 			}
 			
-			if (fm.UA.iOS) {
-				// prevent auto zoom
-				input.css('font-size', '16px');
-			}
-			
 			if (tree) {
 				dst = $('#'+fm[find](phash));
 				collapsed = fm.res('class', 'navcollapse');

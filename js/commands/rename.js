@@ -507,11 +507,6 @@ elFinder.prototype.commands.rename = function() {
 			},
 			inError = false;
 		
-		if (fm.UA.iOS) {
-			// prevent auto zoom
-			input.css('font-size', '16px');
-		}
-		
 		pnode.addClass('ui-front')
 			.css('position', 'relative')
 			.on('unselect.'+fm.namespace, unselect);

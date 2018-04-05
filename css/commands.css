@@ -479,6 +479,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	padding: 0 10px;
 	overflow: auto;
 	box-sizing: border-box;
+	-webkit-overflow-scrolling: touch;
 }
 .elfinder-preference a.ui-state-hover,
 .elfinder-preference label.ui-state-hover {
@@ -486,6 +487,8 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 }
 .elfinder-preference dl {
 	width: 100%;
+	display: inline-block;
+	margin: .5em 0;
 }
 .elfinder-preference dt {
 	display: block;
