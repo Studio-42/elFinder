@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 578b261) (2018-04-05)
+ * Version 2.1.37 (2.1-src Nightly: 592c589) (2018-04-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -4426,6 +4426,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				+(self.direction == 'rtl' ? 'rtl' : 'ltr')
 				+(self.UA.Touch? (' elfinder-touch' + (self.options.resizable ? ' touch-punch' : '')) : '')
 				+(self.UA.Mobile? ' elfinder-mobile' : '')
+				+(self.UA.iOS? ' elfinder-ios' : '')
 				+' '+self.options.cssClass;
 
 		// prepare node
@@ -9395,7 +9396,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 578b261)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 592c589)';
 
 
 
@@ -11736,11 +11737,6 @@ elFinder.prototype.resources = {
 
 			if ($.isPlainObject(self.nextAction)){
 				nextAction = Object.assign({}, self.nextAction);
-			}
-			
-			if (fm.UA.iOS) {
-				// prevent auto zoom
-				input.css('font-size', '16px');
 			}
 			
 			if (tree) {
@@ -25114,7 +25110,7 @@ elFinder.prototype.commands.preference = function() {
 					ul.append(tab[r](/\{id\}/g, id)[r](/\{title\}/, fm.i18n(id)));
 					if (found === 2) {
 						tabs.append(
-							$('<div id="'+fm.namespace+'-preference-'+id+'" class="ui-tabs-panel ui-widget-content ui-corner-bottom"/>')
+							$('<div id="'+fm.namespace+'-preference-'+id+'" class="elfinder-preference-content"/>')
 							.hide()
 							.append($('<dl/>').append(dls))
 						);
@@ -25143,7 +25139,7 @@ elFinder.prototype.commands.preference = function() {
 
 			dialog = fm.dialog(base, {
 				title : self.title,
-				width : 530,
+				width : 600,
 				height: 400,
 				maxWidth: 'window',
 				maxHeight: 'window',
@@ -27767,11 +27763,6 @@ elFinder.prototype.commands.rename = function() {
 				target.trigger('scrolltoview', {blink : false});
 			},
 			inError = false;
-		
-		if (fm.UA.iOS) {
-			// prevent auto zoom
-			input.css('font-size', '16px');
-		}
 		
 		pnode.addClass('ui-front')
 			.css('position', 'relative')
