@@ -333,6 +333,7 @@ elFinder.prototype.commands.preference = function() {
 			}
 		}
 		dialog.elfinderdialog('open');
+		return $.Deferred().resolve();
 	};
 
 };
