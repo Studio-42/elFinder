@@ -252,7 +252,7 @@ elFinder.prototype.commands.preference = function() {
 					ul.append(tab[r](/\{id\}/g, id)[r](/\{title\}/, fm.i18n(id)));
 					if (found === 2) {
 						tabs.append(
-							$('<div id="'+fm.namespace+'-preference-'+id+'" class="ui-tabs-panel ui-widget-content ui-corner-bottom"/>')
+							$('<div id="'+fm.namespace+'-preference-'+id+'" class="elfinder-preference-content"/>')
 							.hide()
 							.append($('<dl/>').append(dls))
 						);
@@ -281,7 +281,7 @@ elFinder.prototype.commands.preference = function() {
 
 			dialog = fm.dialog(base, {
 				title : self.title,
-				width : 530,
+				width : 600,
 				height: 400,
 				maxWidth: 'window',
 				maxHeight: 'window',
