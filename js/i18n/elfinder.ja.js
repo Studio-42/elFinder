@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-04-03
+ * @version 2018-04-04
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -428,7 +428,7 @@
 			'folderToEmpty'   : 'フォルダ"$1"を空にします。', // from v2.1.25 added 22.6.2017
 			'filderIsEmpty'   : 'フォルダ"$1"にアイテムはありません。', // from v2.1.25 added 22.6.2017
 			'preference'      : '環境設定', // from v2.1.26 added 28.6.2017
-			'language'        : '言語設定', // from v2.1.26 added 28.6.2017
+			'language'        : '言語', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': 'ブラウザに保存された設定を初期化する', // from v2.1.26 added 28.6.2017
 			'toolbarPref'     : 'ツールバー設定', // from v2.1.27 added 2.8.2017
 			'charsLeft'       : '... 残り $1 文字',  // from v2.1.29 added 30.8.2017
@@ -453,6 +453,10 @@
 			'hashChecker'     : 'ファイルハッシュを表示するアルゴリズム', // from v2.1.33 added 10.3.2018
 			'infoItems'       : '情報項目 (選択情報パネル)', // from v2.1.38 added 28.3.2018
 			'pressAgainToExit': 'もう一度押すと終了します。', // from v2.1.38 added 1.4.2018
+			'toolbar'         : 'ツールバー', // from v2.1.38 added 4.4.2018
+			'workspace'       : 'ワークスペース', // from v2.1.38 added 4.4.2018
+			'dialog'          : 'ダイアログ', // from v2.1.38 added 4.4.2018
+			'all'             : 'すべて', // from v2.1.38 added 4.4.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
