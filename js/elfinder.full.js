@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 00c3e71) (2018-04-05)
+ * Version 2.1.37 (2.1-src Nightly: 260d35f) (2018-04-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9396,7 +9396,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 00c3e71)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 260d35f)';
 
 
 
@@ -12853,10 +12853,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			close = function() {
 				fm.getUI().off('click.' + fm.namespace, close);
 				$(document).off('keydown.' + fm.namespace, keyEvts);
-				if (prevSelected) {
-					fm.select({selected: prevSelected});
-					prevSelected = null;
-				}
+
 				currentType = currentTargets = null;
 				
 				if (menu.is(':visible') || menu.children().length) {
@@ -12904,11 +12901,6 @@ $.fn.elfindercontextmenu = function(fm) {
 					disabled = fm.getDisabledCmds(targets);
 				}
 				
-				if (type === 'navbar') {
-					prevSelected = fm.selected();
-					fm.select({selected: targets, origin: 'navbar'});
-				}
-
 				selcnt = fm.selected().length;
 				if (selcnt > 1) {
 					menu.append('<div class="ui-corner-top ui-widget-header elfinder-contextmenu-header"><span>'
@@ -13123,8 +13115,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			},
 			
 			currentType = null,
-			currentTargets = null,
-			prevSelected = null;
+			currentTargets = null;
 		
 		fm.one('load', function() {
 			base = fm.getUI();
@@ -23678,12 +23669,15 @@ elFinder.prototype.commands.mkdir = function() {
 		}
 	};
 	
-	fm.bind('select', function(e) {
-		var sel = (e.data && e.data.selected)? e.data.selected : [];
+	fm.bind('select contextmenucreate closecontextmenu', function(e) {
+		var sel = (e.data? (e.data.selected || e.data.targets) : null) || fm.selected();
 		
 		self.className = 'mkdir';
-		curOrg = sel.length? (e.data.origin || '') : '';
-		if (sel.length && curOrg !== 'navbar' && fm.cwd().hash !== sel[0]) {
+		curOrg = e.data && sel.length? (e.data.origin || e.data.type || '') : '';
+		if (!self.options.intoNewFolderToolbtn && curOrg === '') {
+			curOrg = 'cwd';
+		}
+		if (sel.length && curOrg !== 'navbar'  && curOrg !== 'cwd' && fm.cwd().hash !== sel[0]) {
 			self.title = fm.i18n('cmdmkdirin');
 			self.className += ' elfinder-button-icon-mkdirin';
 		} else {
