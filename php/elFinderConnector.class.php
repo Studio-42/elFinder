@@ -256,7 +256,13 @@ class elFinderConnector {
 
 			if ($sendData) {
 				if ($toEnd) {
-					fpassthru($fp);
+					// PHP < 5.6 has a bug of fpassthru
+					// see https://bugs.php.net/bug.php?id=66736
+					if (version_compare(PHP_VERSION, '5.6', '<')) {
+						file_put_contents('php://output', $fp);
+					} else {
+						fpassthru($fp);
+					}
 				} else {
 					$out = fopen('php://output', 'wb');
 					stream_copy_to_stream($fp, $out, $psize);
