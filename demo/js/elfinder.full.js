@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 043479a) (2018-04-09)
+ * Version 2.1.37 (2.1-src Nightly: 7437a1d) (2018-04-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -4168,10 +4168,12 @@ var elFinder = function(elm, opts, bootCallback) {
 				if (dialog.length || input.length) {
 					history.pushState(state, null, location.pathname + location.search + '#elf_' + state.thash);
 					if (dialog.length) {
-						if (dialog.hasClass('elfinder-dialog')) {
-							dialog.elfinderdialog('close');
-						} else {
-							dialog.trigger('close');
+						if (!dialog.hasClass(self.resources.class.preventback)) {
+							if (dialog.hasClass('elfinder-dialog')) {
+								dialog.elfinderdialog('close');
+							} else {
+								dialog.trigger('close');
+							}
 						}
 					} else {
 						input.trigger($.Event('keydown', { keyCode: $.ui.keyCode.ESCAPE, ctrlKey : false, shiftKey : false, altKey : false, metaKey : false }));
@@ -9396,7 +9398,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 043479a)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 7437a1d)';
 
 
 
@@ -11468,7 +11470,8 @@ elFinder.prototype.resources = {
 		treedir     : 'elfinder-tree-dir',
 		placedir    : 'elfinder-place-dir',
 		searchbtn   : 'elfinder-button-search',
-		editing     : 'elfinder-to-editing'
+		editing     : 'elfinder-to-editing',
+		preventback : 'elfinder-prevent-back'
 	},
 	tpl : {
 		perms      : '<span class="elfinder-perms"/>',
