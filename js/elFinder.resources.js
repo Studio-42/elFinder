@@ -26,7 +26,8 @@ elFinder.prototype.resources = {
 		treedir     : 'elfinder-tree-dir',
 		placedir    : 'elfinder-place-dir',
 		searchbtn   : 'elfinder-button-search',
-		editing     : 'elfinder-to-editing'
+		editing     : 'elfinder-to-editing',
+		preventback : 'elfinder-prevent-back'
 	},
 	tpl : {
 		perms      : '<span class="elfinder-perms"/>',

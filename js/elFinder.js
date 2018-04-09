@@ -4137,10 +4137,12 @@ var elFinder = function(elm, opts, bootCallback) {
 				if (dialog.length || input.length) {
 					history.pushState(state, null, location.pathname + location.search + '#elf_' + state.thash);
 					if (dialog.length) {
-						if (dialog.hasClass('elfinder-dialog')) {
-							dialog.elfinderdialog('close');
-						} else {
-							dialog.trigger('close');
+						if (!dialog.hasClass(self.resources.class.preventback)) {
+							if (dialog.hasClass('elfinder-dialog')) {
+								dialog.elfinderdialog('close');
+							} else {
+								dialog.trigger('close');
+							}
 						}
 					} else {
 						input.trigger($.Event('keydown', { keyCode: $.ui.keyCode.ESCAPE, ctrlKey : false, shiftKey : false, altKey : false, metaKey : false }));
