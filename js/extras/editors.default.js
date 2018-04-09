@@ -108,11 +108,13 @@
 					.data('loading')()
 					.data('resizeoff', function() {
 						$(window).off('resize.'+node.attr('id'));
+						dialog.addClass(fm.resources.class.preventback);
 						return node;
 					})
 					.on('click', function() {
 						launch();
 					}),
+				dialog = $(base).closest('.ui-dialog'),
 				elfNode = fm.getUI(),
 				container = $('<iframe class="ui-front" allowtransparency="true">'),
 				file = this.file,
@@ -166,6 +168,7 @@
 									error('Please disable your ad blocker.');
 								}
 							}, 1000);
+							dialog.addClass(fm.resources.class.preventback);
 							fm.toFront(container);
 						})
 						.on('error', error)
@@ -306,6 +309,7 @@
 				var self = this,
 					fm = this.fm,
 					node = $(base).children('img:first'),
+					dialog = $(base).closest('.ui-dialog'),
 					elfNode = fm.getUI(),
 					dfrd = $.Deferred(),
 					container = $('#elfinder-aviary-container'),
@@ -358,7 +362,10 @@
 								featherEditor.close();
 							},
 							onLoad: onload || function(){},
-							onClose: function() { $(container).hide(); },
+							onClose: function() { 
+								dialog.removeClass(fm.resources.class.preventback);
+								$(container).hide();
+							},
 							appendTo: container.get(0),
 							maxSize: 2048,
 							language: getLang()
@@ -376,6 +383,7 @@
 						dfrd.resolve(featherEditor);
 					},
 					launch = function() {
+						dialog.addClass(fm.resources.class.preventback);
 						$(container).show();
 						featherEditor.launch({
 							image: node.attr('id'),
