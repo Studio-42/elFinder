@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 7437a1d) (2018-04-09)
+ * Version 2.1.37 (2.1-src Nightly: f7e74c8) (2018-04-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9359,6 +9359,12 @@ if (!String.prototype.repeat) {
 		return rpt;
 	};
 }
+// String.trim
+if (!String.prototype.trim) {
+	String.prototype.trim = function() {
+		return this.replace(/^\s+|\s+$/g, '');
+	};
+}
 // Array.apply
 (function () {
 	try {
@@ -9398,7 +9404,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 7437a1d)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: f7e74c8)';
 
 
 
@@ -11170,11 +11176,33 @@ elFinder.prototype.command = function(fm) {
 	 */
 	this._disabled = false;
 	
+	/**
+	 * If true, this command is disabled on serach results
+	 * 
+	 * @type  Boolean
+	 */
 	this.disableOnSearch = false;
 	
+	/**
+	 * Call update() when event select fired
+	 * 
+	 * @type  Boolean
+	 */
 	this.updateOnSelect = true;
 	
+	/**
+	 * Sync toolbar button title on change
+	 * 
+	 * @type  Boolean
+	 */
 	this.syncTitleOnChange = false;
+
+	/**
+	 * Keep display of the context menu when command execution
+	 * 
+	 * @type  Boolean
+	 */
+	this.keepContextmenu = false;
 	
 	/**
 	 * elFinder events defaults handlers.
@@ -12572,10 +12600,11 @@ $.fn.elfindercontextmenu = function(fm) {
 			cmItem = 'elfinder-contextmenu-item',
 			smItem = 'elfinder-contextsubmenu-item',
 			exIcon = 'elfinder-contextmenu-extra-icon',
+			cHover = fm.res('class', 'hover'),
 			dragOpt = {
 				distance: 8,
 				start: function() {
-					menu.data('drag', true).data('touching') && menu.find('.ui-state-hover').removeClass('ui-state-hover');
+					menu.data('drag', true).data('touching') && menu.find('.'+cHover).removeClass(cHover);
 				},
 				stop: function() {
 					menu.data('draged', true).removeData('drag');
@@ -12584,19 +12613,19 @@ $.fn.elfindercontextmenu = function(fm) {
 			menu = $(this).addClass('touch-punch ui-helper-reset ui-front ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
 				.on('touchstart', function(e) {
-					menu.data('touching', true).children().removeClass('ui-state-hover');
+					menu.data('touching', true).children().removeClass(cHover);
 				})
 				.on('touchend', function(e) {
 					menu.removeData('touching');
 				})
 				.on('mouseenter mouseleave', '.'+cmItem, function(e) {
-					$(this).toggleClass('ui-state-hover', (e.type === 'mouseenter' || (! menu.data('draged') && menu.data('submenuKeep'))? true : false));
+					$(this).toggleClass(cHover, (e.type === 'mouseenter' || (! menu.data('draged') && menu.data('submenuKeep'))? true : false));
 					if (menu.data('draged') && menu.data('submenuKeep')) {
-						menu.find('.elfinder-contextmenu-sub:visible').parent().addClass('ui-state-hover');
+						menu.find('.elfinder-contextmenu-sub:visible').parent().addClass(cHover);
 					}
 				})
 				.on('mouseenter mouseleave', '.'+exIcon, function(e) {
-					$(this).parent().toggleClass('ui-state-hover', e.type === 'mouseleave');
+					$(this).parent().toggleClass(cHover, e.type === 'mouseleave');
 				})
 				.on('mouseenter mouseleave', '.'+cmItem+',.'+smItem, function(e) {
 					var setIndex = function(target, sub) {
@@ -12616,7 +12645,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						var target = $(this),
 							unHover = function() {
 								if (selected && !selected.children('div.elfinder-contextmenu-sub:visible').length) {
-									selected.removeClass('ui-state-hover');
+									selected.removeClass(cHover);
 								}
 							};
 						if (e.type === 'mouseenter') {
@@ -12624,7 +12653,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							if (target.hasClass(smItem)) {
 								// submenu
 								if (subselected) {
-									subselected.removeClass('ui-state-hover');
+									subselected.removeClass(cHover);
 								}
 								if (selected) {
 									subnodes = selected.find('div.'+smItem);
@@ -12759,7 +12788,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					if (code == ESC || code === sublev) {
 						if (selected && subnodes && subselected) {
 							subselected.trigger('mouseleave');
-							selected.addClass('ui-state-hover');
+							selected.addClass(cHover);
 							subnodes = null;
 							subselected = null;
 						} else {
@@ -12786,7 +12815,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							} else if (code == UP && (! selected || --nodes._cur < 0)) {
 								nodes._cur = nodes.length - 1;
 							}
-							selected = nodes.eq(nodes._cur).addClass('ui-state-hover');
+							selected = nodes.eq(nodes._cur).addClass(cHover);
 						}
 					} else if (selected && (code == ENT || code === subent)) {
 						if (selected.hasClass('elfinder-contextmenu-group')) {
@@ -12796,7 +12825,7 @@ $.fn.elfindercontextmenu = function(fm) {
 								selected.trigger('mouseenter');
 								subnodes = selected.find('div.'+smItem);
 								subnodes._cur = 0;
-								subselected = subnodes.first().addClass('ui-state-hover');
+								subselected = subnodes.first().addClass(cHover);
 							}
 						} else {
 							code == ENT && selected.click();
@@ -12995,8 +13024,13 @@ $.fn.elfindercontextmenu = function(fm) {
 									var opts, $this;
 									e.stopPropagation();
 									if (! menu.data('draged')) {
-										menu.hide();
 										$this = $(this);
+										if (!cmd.keepContextmenu) {
+											menu.hide();
+										} else {
+											$this.removeClass(cHover);
+											node.addClass(cHover);
+										}
 										opts = $this.data('exec');
 										if (typeof opts === 'undefined') {
 											opts = {};
@@ -13006,7 +13040,7 @@ $.fn.elfindercontextmenu = function(fm) {
 											opts._currentType = type;
 											opts._currentNode = $this;
 										}
-										close();
+										!cmd.keepContextmenu && close();
 										fm.exec(cmd.name, targets, opts);
 									}
 								})
@@ -13017,7 +13051,7 @@ $.fn.elfindercontextmenu = function(fm) {
 									}
 								})
 								.on('mouseenter mouseleave', function(e){
-									if (! menu.data('touching')) {
+									if (! menu.data('touching') && !$(e.target).closest('.elfinder-contextmenu-sub', menu).length) {
 										if (node.data('timer')) {
 											clearTimeout(node.data('timer'));
 											node.removeData('timer');
@@ -13057,7 +13091,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						} else {
 							node = item(cmd.title, cmd.className? cmd.className : cmd.name, function() {
 								if (! menu.data('draged')) {
-									close();
+									!cmd.keepContextmenu && close();
 									fm.exec(cmd.name, targets, {_userAction: true, _currentType: type, _currentNode: node});
 								}
 							});
@@ -18185,7 +18219,7 @@ $.fn.elfindersortbutton = function(cmd) {
 			button   = $(this).addClass('ui-state-default elfinder-button elfinder-menubutton elfiner-button-'+name)
 				.attr('title', cmd.title)
 				.append('<span class="elfinder-button-icon elfinder-button-icon-'+name+'"/>', text)
-				.on('mouseenter mouseleave', function(e) { !button.hasClass(disabled) && button.toggleClass(hover); })
+				.on('mouseenter mouseleave', function(e) { !button.hasClass(disabled) && button.toggleClass(hover, e.type === 'mouseenter'); })
 				.on('click', function(e) {
 					if (!button.hasClass(disabled)) {
 						e.stopPropagation();
@@ -18196,11 +18230,10 @@ $.fn.elfindersortbutton = function(cmd) {
 			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
 				.hide()
 				.appendTo(fm.getUI())
-				.on('mouseenter mouseleave', '.'+item, function() { $(this).toggleClass(hover); })
-				.on('click', '.'+item, function(e) {
+				.on('mouseenter mouseleave', '.'+item, function(e) { $(this).toggleClass(hover, e.type === 'mouseenter'); })
+				.on('click', function(e) {
 					e.preventDefault();
 					e.stopPropagation();
-					hide();
 				}),
 			update = function() {
 				menu.children('[rel]').removeClass(selected+' '+asc+' '+desc)
@@ -18227,33 +18260,31 @@ $.fn.elfindersortbutton = function(cmd) {
 		});
 		
 		menu.children().on('click', function(e) {
-			var type = $(this).attr('rel');
-			
-			cmd.exec([], {
-				type  : type, 
-				order : type == fm.sortType ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder, 
-				stick : fm.sortStickFolders,
-				tree  : fm.sortAlsoTreeview
-			});
+			cmd.exec([], $(this).removeClass(hover).attr('rel'));
 		});
 		
 		$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-stick"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortFoldersFirst')+'</div>')
 			.appendTo(menu)
 			.on('click', function() {
-				cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : !fm.sortStickFolders, tree : fm.sortAlsoTreeview});
+				cmd.exec([], 'stick');
 			});
 
 		if ($.fn.elfindertree && $.inArray('tree', fm.options.ui) !== -1) {
 			$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-tree"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortAlsoTreeview')+'</div>')
 				.appendTo(menu)
 				.on('click', function() {
-					cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : fm.sortStickFolders, tree : !fm.sortAlsoTreeview});
+					cmd.exec([], 'tree');
 				});
 		}
 		
 		fm.bind('disable select', hide).getUI().on('click', hide);
 			
-		fm.bind('sortchange', update);
+		fm.bind('open', function() {
+			menu.children('[rel]').each(function() {
+				var $this = $(this);
+				$this.toggle($.inArray($this.attr('rel'), fm.sorters) !== -1);
+			});
+		}).bind('sortchange', update);
 		
 		if (menu.children().length > 1) {
 			cmd.change(function() {
@@ -30521,38 +30552,52 @@ elFinder.prototype.commands.sort = function() {
 		setVar = function() {
 			self.variants = [];
 			$.each(fm.sortRules, function(name, value) {
-				var sort = {
-						type  : name,
-						order : name == fm.sortType ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder
-					};
 				if ($.inArray(name, fm.sorters) !== -1) {
-					var arr = name == fm.sortType ? (sort.order == 'asc'? 's' : 'n') : '';
-					self.variants.push([sort, (arr? '<span class="ui-icon ui-icon-arrowthick-1-'+arr+'"></span>' : '') + '&nbsp;' + fm.i18n('sort'+name)]);
+					var arr = (name === fm.sortType)? (fm.sortOrder === 'asc'? 'n' : 's') : '';
+					self.variants.push([name, (arr? '<span class="ui-icon ui-icon-arrowthick-1-'+arr+'"></span>' : '') + '&nbsp;' + fm.i18n('sort'+name)]);
 				}
 			});
 			self.variants.push('|');
 			self.variants.push([
-				{
-					type  : fm.sortType,
-					order : fm.sortOrder,
-					stick : !fm.sortStickFolders,
-					tree  : fm.sortAlsoTreeview
-				},
+				'stick',
 				(fm.sortStickFolders? '<span class="ui-icon ui-icon-check"/>' : '') + '&nbsp;' + fm.i18n('sortFoldersFirst')
 			]);
 			if (fm.ui.tree) {
 				self.variants.push('|');
 				self.variants.push([
-					{
-						type  : fm.sortType,
-						order : fm.sortOrder,
-						stick : fm.sortStickFolders,
-						tree  : !fm.sortAlsoTreeview
-					},
+					'tree',
 					(fm.sortAlsoTreeview? '<span class="ui-icon ui-icon-check"/>' : '') + '&nbsp;' + fm.i18n('sortAlsoTreeview')
 				]);
 			}
-		};
+			updateContextmenu();
+		},
+		updateContextmenu = function() {
+			var cm = fm.getUI('contextmenu'),
+				icon, sub;
+			if (cm.is(':visible')) {
+				icon = cm.find('span.elfinder-button-icon-sort');
+				sub = icon.siblings('div.elfinder-contextmenu-sub');
+				sub.find('span.ui-icon').remove();
+				sub.children('div.elfinder-contextsubmenu-item').each(function() {
+					var tgt = $(this).children('span'),
+						name = tgt.text().trim(),
+						arr;
+					if (name === (i18Name.stick || (i18Name.stick = fm.i18n('sortFoldersFirst')))) {
+						if (fm.sortStickFolders) {
+							tgt.prepend('<span class="ui-icon ui-icon-check"/>');
+						}
+					} else if (name === (i18Name.tree || (i18Name.tree = fm.i18n('sortAlsoTreeview')))) {
+						if (fm.sortAlsoTreeview) {
+							tgt.prepend('<span class="ui-icon ui-icon-check"/>');
+						}
+					} else if (name === (i18Name[fm.sortType] || (i18Name[fm.sortType] = fm.i18n('sort' + fm.sortType)))) {
+						arr = fm.sortOrder === 'asc'? 'n' : 's';
+						tgt.prepend('<span class="ui-icon ui-icon-arrowthick-1-'+arr+'"></span>');
+					}
+				});
+			}
+		},
+		i18Name = {};
 	
 	/**
 	 * Command options
@@ -30561,6 +30606,8 @@ elFinder.prototype.commands.sort = function() {
 	 */
 	this.options = {ui : 'sortbutton'};
 	
+	this.keepContextmenu = true;
+
 	fm.bind('open sortchange', setVar)
 	.bind('open', function() {
 		fm.unbind('add', setVar).one('add', setVar);
@@ -30607,8 +30654,24 @@ elFinder.prototype.commands.sort = function() {
 		return 0;
 	};
 	
-	this.exec = function(hashes, sortopt) {
+	this.exec = function(hashes, cOpt) {
 		var fm = this.fm,
+			sortopt = $.isPlainObject(cOpt)? cOpt : (function() {
+				cOpt += '';
+				var sOpts = {};
+				if (cOpt === 'stick') {
+					sOpts.stick = !fm.sortStickFolders;
+				} else if (cOpt === 'tree') {
+					sOpts.tree = !fm.sortAlsoTreeview;
+				} else if ($.inArray(cOpt, fm.sorters) !== -1) {
+					if (fm.sortType === cOpt) {
+						sOpts.order = fm.sortOrder === 'asc'? 'desc' : 'asc';
+					} else {
+						sOpts.type = cOpt;
+					}
+				}
+				return sOpts;
+			})(),
 			sort = Object.assign({
 				type  : fm.sortType,
 				order : fm.sortOrder,
