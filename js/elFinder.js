@@ -9328,6 +9328,12 @@ if (!String.prototype.repeat) {
 		return rpt;
 	};
 }
+// String.trim
+if (!String.prototype.trim) {
+	String.prototype.trim = function() {
+		return this.replace(/^\s+|\s+$/g, '');
+	};
+}
 // Array.apply
 (function () {
 	try {

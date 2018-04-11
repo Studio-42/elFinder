@@ -19,7 +19,7 @@ $.fn.elfindersortbutton = function(cmd) {
 			button   = $(this).addClass('ui-state-default elfinder-button elfinder-menubutton elfiner-button-'+name)
 				.attr('title', cmd.title)
 				.append('<span class="elfinder-button-icon elfinder-button-icon-'+name+'"/>', text)
-				.on('mouseenter mouseleave', function(e) { !button.hasClass(disabled) && button.toggleClass(hover); })
+				.on('mouseenter mouseleave', function(e) { !button.hasClass(disabled) && button.toggleClass(hover, e.type === 'mouseenter'); })
 				.on('click', function(e) {
 					if (!button.hasClass(disabled)) {
 						e.stopPropagation();
@@ -30,11 +30,10 @@ $.fn.elfindersortbutton = function(cmd) {
 			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
 				.hide()
 				.appendTo(fm.getUI())
-				.on('mouseenter mouseleave', '.'+item, function() { $(this).toggleClass(hover); })
-				.on('click', '.'+item, function(e) {
+				.on('mouseenter mouseleave', '.'+item, function(e) { $(this).toggleClass(hover, e.type === 'mouseenter'); })
+				.on('click', function(e) {
 					e.preventDefault();
 					e.stopPropagation();
-					hide();
 				}),
 			update = function() {
 				menu.children('[rel]').removeClass(selected+' '+asc+' '+desc)
@@ -61,33 +60,31 @@ $.fn.elfindersortbutton = function(cmd) {
 		});
 		
 		menu.children().on('click', function(e) {
-			var type = $(this).attr('rel');
-			
-			cmd.exec([], {
-				type  : type, 
-				order : type == fm.sortType ? fm.sortOrder == 'asc' ? 'desc' : 'asc' : fm.sortOrder, 
-				stick : fm.sortStickFolders,
-				tree  : fm.sortAlsoTreeview
-			});
+			cmd.exec([], $(this).removeClass(hover).attr('rel'));
 		});
 		
 		$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-stick"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortFoldersFirst')+'</div>')
 			.appendTo(menu)
 			.on('click', function() {
-				cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : !fm.sortStickFolders, tree : fm.sortAlsoTreeview});
+				cmd.exec([], 'stick');
 			});
 
 		if ($.fn.elfindertree && $.inArray('tree', fm.options.ui) !== -1) {
 			$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-tree"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortAlsoTreeview')+'</div>')
 				.appendTo(menu)
 				.on('click', function() {
-					cmd.exec([], {type : fm.sortType, order : fm.sortOrder, stick : fm.sortStickFolders, tree : !fm.sortAlsoTreeview});
+					cmd.exec([], 'tree');
 				});
 		}
 		
 		fm.bind('disable select', hide).getUI().on('click', hide);
 			
-		fm.bind('sortchange', update);
+		fm.bind('open', function() {
+			menu.children('[rel]').each(function() {
+				var $this = $(this);
+				$this.toggle($.inArray($this.attr('rel'), fm.sorters) !== -1);
+			});
+		}).bind('sortchange', update);
 		
 		if (menu.children().length > 1) {
 			cmd.change(function() {
