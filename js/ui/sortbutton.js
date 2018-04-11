@@ -82,7 +82,7 @@ $.fn.elfindersortbutton = function(cmd) {
 		fm.bind('open', function() {
 			menu.children('[rel]').each(function() {
 				var $this = $(this);
-				$this.toggle($.inArray($this.attr('rel'), fm.sorters) !== -1);
+				$this.toggle(fm.sorters[$this.attr('rel')]);
 			});
 		}).bind('sortchange', update);
 		
@@ -92,7 +92,6 @@ $.fn.elfindersortbutton = function(cmd) {
 					update();
 				})
 				.change();
-			
 		} else {
 			button.addClass(disabled);
 		}
