@@ -15,8 +15,7 @@ elFinder.prototype._options = {
 		ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.3.1',
 		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.35.0',
 		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.9.0',
-		//ckeditor5  : '//cdn.ckeditor.com/ckeditor5/1.0.0-beta.1',
-		ckeditor5  : '//cdn.rawgit.com/ckeditor/ckeditor5-build-',
+		ckeditor5  : '//cdn.ckeditor.com/ckeditor5/1.0.0-beta.3',
 		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.7.9',
 		simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		// for quicklook etc.
