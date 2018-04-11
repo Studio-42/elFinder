@@ -10,10 +10,11 @@ $.fn.elfindercontextmenu = function(fm) {
 			cmItem = 'elfinder-contextmenu-item',
 			smItem = 'elfinder-contextsubmenu-item',
 			exIcon = 'elfinder-contextmenu-extra-icon',
+			cHover = fm.res('class', 'hover'),
 			dragOpt = {
 				distance: 8,
 				start: function() {
-					menu.data('drag', true).data('touching') && menu.find('.ui-state-hover').removeClass('ui-state-hover');
+					menu.data('drag', true).data('touching') && menu.find('.'+cHover).removeClass(cHover);
 				},
 				stop: function() {
 					menu.data('draged', true).removeData('drag');
@@ -22,19 +23,19 @@ $.fn.elfindercontextmenu = function(fm) {
 			menu = $(this).addClass('touch-punch ui-helper-reset ui-front ui-widget ui-state-default ui-corner-all elfinder-contextmenu elfinder-contextmenu-'+fm.direction)
 				.hide()
 				.on('touchstart', function(e) {
-					menu.data('touching', true).children().removeClass('ui-state-hover');
+					menu.data('touching', true).children().removeClass(cHover);
 				})
 				.on('touchend', function(e) {
 					menu.removeData('touching');
 				})
 				.on('mouseenter mouseleave', '.'+cmItem, function(e) {
-					$(this).toggleClass('ui-state-hover', (e.type === 'mouseenter' || (! menu.data('draged') && menu.data('submenuKeep'))? true : false));
+					$(this).toggleClass(cHover, (e.type === 'mouseenter' || (! menu.data('draged') && menu.data('submenuKeep'))? true : false));
 					if (menu.data('draged') && menu.data('submenuKeep')) {
-						menu.find('.elfinder-contextmenu-sub:visible').parent().addClass('ui-state-hover');
+						menu.find('.elfinder-contextmenu-sub:visible').parent().addClass(cHover);
 					}
 				})
 				.on('mouseenter mouseleave', '.'+exIcon, function(e) {
-					$(this).parent().toggleClass('ui-state-hover', e.type === 'mouseleave');
+					$(this).parent().toggleClass(cHover, e.type === 'mouseleave');
 				})
 				.on('mouseenter mouseleave', '.'+cmItem+',.'+smItem, function(e) {
 					var setIndex = function(target, sub) {
@@ -54,7 +55,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						var target = $(this),
 							unHover = function() {
 								if (selected && !selected.children('div.elfinder-contextmenu-sub:visible').length) {
-									selected.removeClass('ui-state-hover');
+									selected.removeClass(cHover);
 								}
 							};
 						if (e.type === 'mouseenter') {
@@ -62,7 +63,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							if (target.hasClass(smItem)) {
 								// submenu
 								if (subselected) {
-									subselected.removeClass('ui-state-hover');
+									subselected.removeClass(cHover);
 								}
 								if (selected) {
 									subnodes = selected.find('div.'+smItem);
@@ -197,7 +198,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					if (code == ESC || code === sublev) {
 						if (selected && subnodes && subselected) {
 							subselected.trigger('mouseleave');
-							selected.addClass('ui-state-hover');
+							selected.addClass(cHover);
 							subnodes = null;
 							subselected = null;
 						} else {
@@ -224,7 +225,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							} else if (code == UP && (! selected || --nodes._cur < 0)) {
 								nodes._cur = nodes.length - 1;
 							}
-							selected = nodes.eq(nodes._cur).addClass('ui-state-hover');
+							selected = nodes.eq(nodes._cur).addClass(cHover);
 						}
 					} else if (selected && (code == ENT || code === subent)) {
 						if (selected.hasClass('elfinder-contextmenu-group')) {
@@ -234,7 +235,7 @@ $.fn.elfindercontextmenu = function(fm) {
 								selected.trigger('mouseenter');
 								subnodes = selected.find('div.'+smItem);
 								subnodes._cur = 0;
-								subselected = subnodes.first().addClass('ui-state-hover');
+								subselected = subnodes.first().addClass(cHover);
 							}
 						} else {
 							code == ENT && selected.click();
@@ -433,8 +434,13 @@ $.fn.elfindercontextmenu = function(fm) {
 									var opts, $this;
 									e.stopPropagation();
 									if (! menu.data('draged')) {
-										menu.hide();
 										$this = $(this);
+										if (!cmd.keepContextmenu) {
+											menu.hide();
+										} else {
+											$this.removeClass(cHover);
+											node.addClass(cHover);
+										}
 										opts = $this.data('exec');
 										if (typeof opts === 'undefined') {
 											opts = {};
@@ -444,7 +450,7 @@ $.fn.elfindercontextmenu = function(fm) {
 											opts._currentType = type;
 											opts._currentNode = $this;
 										}
-										close();
+										!cmd.keepContextmenu && close();
 										fm.exec(cmd.name, targets, opts);
 									}
 								})
@@ -455,7 +461,7 @@ $.fn.elfindercontextmenu = function(fm) {
 									}
 								})
 								.on('mouseenter mouseleave', function(e){
-									if (! menu.data('touching')) {
+									if (! menu.data('touching') && !$(e.target).closest('.elfinder-contextmenu-sub', menu).length) {
 										if (node.data('timer')) {
 											clearTimeout(node.data('timer'));
 											node.removeData('timer');
@@ -495,7 +501,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						} else {
 							node = item(cmd.title, cmd.className? cmd.className : cmd.name, function() {
 								if (! menu.data('draged')) {
-									close();
+									!cmd.keepContextmenu && close();
 									fm.exec(cmd.name, targets, {_userAction: true, _currentType: type, _currentNode: node});
 								}
 							});
