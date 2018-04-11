@@ -259,7 +259,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		 * @type String
 		 * @default ./sounds/
 		 **/
-		soundPath = './sounds/',
+		soundPath = 'sounds/',
 				
 		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
@@ -870,10 +870,6 @@ var elFinder = function(elm, opts, bootCallback) {
 	
 	if (! inFrame && ! this.options.enableAlways && $('body').children().length === 2) { // only node and beeper
 		this.options.enableAlways = true;
-	}
-	
-	if (this.baseUrl === '') {
-		this.baseUrl = this.options.baseUrl? this.options.baseUrl : '';
 	}
 	
 	// make options.debug
@@ -4112,6 +4108,8 @@ var elFinder = function(elm, opts, bootCallback) {
 	
 	if (this.options.soundPath) {
 		soundPath = this.options.soundPath.replace(/\/+$/, '') + '/';
+	} else {
+		soundPath = this.baseUrl + soundPath;
 	}
 	
 	self.one('opendone', function() {
