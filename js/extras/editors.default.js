@@ -1097,7 +1097,7 @@
 					uploder = function(loader) {
 						this.upload = function() {
 							return new Promise(function(resolve, reject) {
-								fm.exec('upload', {files: [loader.file]})
+								fm.exec('upload', {files: [loader.file]}, void(0), fm.cwd().hash)
 									.done(function(data){
 										if (data.added && data.added.length) {
 											fm.url(data.added[0].hash, { async: true }).done(function(url) {
@@ -1128,18 +1128,14 @@
 				if (!self.confObj.editor) {
 					loader = $.Deferred();
 					self.fm.loadScript([
-						//fm.options.cdns.ckeditor5 + '/' + mode + '/ckeditor.js'
-						// uses "t/ckeditor5/914" until next release
-						fm.options.cdns.ckeditor5 + mode + '/5c757fcc3e924454bf5f65c806f4a159aaafd293/build/ckeditor.js'
+						fm.options.cdns.ckeditor5 + '/' + mode + '/ckeditor.js'
 					], function(editor) {
 						if (!editor) {
 							editor = window.BalloonEditor || window.InlineEditor || window.ClassicEditor;
 						}
 						if (fm.lang !== 'en') {
 							self.fm.loadScript([
-								//fm.options.cdns.ckeditor5 + '/' + mode + '/translations/' + lang + '.js'
-								// uses "t/ckeditor5/914" until next release
-								fm.options.cdns.ckeditor5 + mode + '/5c757fcc3e924454bf5f65c806f4a159aaafd293/build/translations/' + lang + '.js'
+								fm.options.cdns.ckeditor5 + '/' + mode + '/translations/' + lang + '.js'
 							], function(obj) {
 								loader.resolve(editor);
 							}, {
