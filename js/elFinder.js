@@ -353,7 +353,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				});
 			}
 
-			self.sorters = [];
+			self.sorters = {};
 			cwd = data.cwd.hash;
 			cache(data.files);
 			if (!files[cwd]) {
@@ -373,16 +373,18 @@ var elFinder = function(elm, opts, bootCallback) {
 		 **/
 		cache = function(data, type) {
 			var defsorter = { name: true, perm: true, date: true,  size: true, kind: true },
-				sorterChk = (self.sorters.length === 0),
+				sorterChk = !self.sorters._checked,
 				l         = data.length,
 				setSorter = function(file) {
-					var f = file || {};
-					self.sorters = [];
+					var f = file || {},
+						sorters = [];
 					$.each(self.sortRules, function(key) {
 						if (defsorter[key] || typeof f[key] !== 'undefined' || (key === 'mode' && typeof f.perm !== 'undefined')) {
-							self.sorters.push(key);
+							sorters.push(key);
 						}
 					});
+					self.sorters = self.arrayFlip(sorters, true);
+					self.sorters._checked = true;
 				},
 				keeps = ['sizeInfo'],
 				changedParents = {},
@@ -7450,9 +7452,9 @@ elFinder.prototype = {
 	/**
 	 * Valid sort rule names
 	 * 
-	 * @type Array
+	 * @type Object
 	 */
-	sorters : [],
+	sorters : {},
 	
 	/**
 	 * Compare strings for natural sort

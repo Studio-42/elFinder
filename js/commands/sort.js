@@ -11,7 +11,7 @@ elFinder.prototype.commands.sort = function() {
 		setVar = function() {
 			self.variants = [];
 			$.each(fm.sortRules, function(name, value) {
-				if ($.inArray(name, fm.sorters) !== -1) {
+				if (fm.sorters[name]) {
 					var arr = (name === fm.sortType)? (fm.sortOrder === 'asc'? 'n' : 's') : '';
 					self.variants.push([name, (arr? '<span class="ui-icon ui-icon-arrowthick-1-'+arr+'"></span>' : '') + '&nbsp;' + fm.i18n('sort'+name)]);
 				}
@@ -67,13 +67,13 @@ elFinder.prototype.commands.sort = function() {
 	
 	this.keepContextmenu = true;
 
-	fm.bind('open sortchange', setVar)
+	fm.bind('sortchange', setVar)
 	.bind('open', function() {
-		fm.unbind('add', setVar).one('add', setVar);
+		setVar();
 		fm.getUI('toolbar').find('.elfiner-button-sort .elfinder-button-menu .elfinder-button-menu-item').each(function() {
 			var tgt = $(this),
 				rel = tgt.attr('rel');
-			tgt.toggle(! rel || $.inArray(rel, fm.sorters) !== -1);
+			tgt.toggle(! rel || fm.sorters[rel]);
 		});
 	})
 	.bind('cwdrender', function() {
@@ -122,7 +122,7 @@ elFinder.prototype.commands.sort = function() {
 					sOpts.stick = !fm.sortStickFolders;
 				} else if (cOpt === 'tree') {
 					sOpts.tree = !fm.sortAlsoTreeview;
-				} else if ($.inArray(cOpt, fm.sorters) !== -1) {
+				} else if (fm.sorters[cOpt]) {
 					if (fm.sortType === cOpt) {
 						sOpts.order = fm.sortOrder === 'asc'? 'desc' : 'asc';
 					} else {
