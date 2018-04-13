@@ -3,7 +3,7 @@
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Wojciech Jabłoński <www.jablonski@gmail.com>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2018-04-02
+ * @version 2018-04-13
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -163,6 +163,7 @@
 			'cmdselectall' : 'Zaznacz wszystko', // from v2.1.28 added 15.08.2017
 			'cmdselectnone': 'Odznacz wszystko', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': 'Odwróć wybór', // from v2.1.28 added 15.08.2017
+			'cmdopennew'   : 'Otwórz w nowym oknie', // from v2.1.38 added 3.4.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zamknij',
@@ -453,6 +454,10 @@
 			'hashChecker'     : 'Algorytmy do pokazywania hash pliku', // from v2.1.33 added 10.3.2018
 			'infoItems'       : 'Info Elementów (Wybór Panelu Informacyjnego)', // from v2.1.38 added 28.3.2018
 			'pressAgainToExit': 'Naciśnij ponownie, aby wyjść.', // from v2.1.38 added 1.4.2018
+			'toolbar'         : 'Pasek narzędziowy', // from v2.1.38 added 4.4.2018
+			'workspace'       : 'Obszar Pracy', // from v2.1.38 added 4.4.2018
+			'dialog'          : 'Dialog', // from v2.1.38 added 4.4.2018
+			'all'             : 'Wszystko', // from v2.1.38 added 4.4.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',
