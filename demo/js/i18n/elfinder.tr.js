@@ -3,7 +3,7 @@
  * @author I.Taskinoglu & A.Kaya <alikaya@armsyazilim.com>
  * @author Abdullah ELEN <abdullahelen@msn.com>
  * @author Osman KAYAN <osmnkayan@gmail.com>
- * @version 2018-01-10
+ * @version 2018-04-13
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -108,7 +108,7 @@
 			'errExtractExec'       : '"$1" Dosyaları arşivden çıkartılırken hata oluştu.',
 			'errNetUnMount'        : 'Bağlantı kaldırılamıyor.', // from v2.1 added 30.04.2012
 			'errConvUTF8'          : 'UTF-8\'e dönüştürülemez.', // from v2.1 added 08.04.2014
-			'errFolderUpload'      : 'Try Google Chrome, If you\'d like to upload the folder.', // from v2.1 added 26.6.2015
+			'errFolderUpload'      : 'Klasör yükleyebilmek için daha modern bir tarayıcıya ihtiyacınız var.', // from v2.1 added 26.6.2015
 			'errSearchTimeout'     : '"$1" araması zaman aşımına uğradı. Kısmi arama sonuçları listeleniyor.', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : 'Yeniden yetkilendirme gerekiyor.', // from v2.1.10 added 24.3.2016
 			'errMaxTargets'        : 'Maksimum seçilebilir öge sayısı $1 adettir', // from v2.1.17 added 17.10.2016
@@ -131,8 +131,8 @@
 			'cmdhelp'      : 'Bu yazılım hakkında',
 			'cmdhome'      : 'Anasayfa',
 			'cmdinfo'      : 'Bilgi göster',
-			'cmdmkdir'     : 'Yeni Klasör',
-			'cmdmkdirin'   : 'Into new folder', // from v2.1.7 added 19.2.2016
+			'cmdmkdir'     : 'Yeni klasör',
+			'cmdmkdirin'   : 'Yeni Klasör / aç', // from v2.1.7 added 19.2.2016
 			'cmdmkfile'    : 'Yeni metin dosyası',
 			'cmdopen'      : 'Aç',
 			'cmdpaste'     : 'Yapıştır',
@@ -163,6 +163,7 @@
 			'cmdselectall' : 'Tümünü seç', // from v2.1.28 added 15.08.2017
 			'cmdselectnone': 'Seçimi temizle', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': 'Diğerlerini seç', // from v2.1.28 added 15.08.2017
+			'cmdopennew'   : 'Yeni Sekmede aç', // from v2.1.38 added 3.4.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Kapat',
@@ -207,7 +208,7 @@
 			'ntfextract'  : 'Arşivden dosyalar çıkartılıyor',
 			'ntfsearch'   : 'Dosyalar aranıyor',
 			'ntfresize'   : 'Resimler boyutlandırılıyor',
-			'ntfsmth'     : 'İşlem yapılıyor >_<',
+			'ntfsmth'     : 'İşlem yapılıyor',
 			'ntfloadimg'  : 'Resim yükleniyor',
 			'ntfnetmount' : 'Ağ birimine bağlanılıyor', // added 18.04.2012
 			'ntfnetunmount': 'Ağ birimi bağlantısı kesiliyor', // from v2.1 added 30.04.2012
@@ -220,8 +221,8 @@
 			'ntfparents'  : 'Dosya yolu bilgileri alınıyor', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'Yüklenen dosya işleniyor', // from v2.1.17 added 2.11.2016
 			'ntftrash'    : 'Çöp kutusuna atma', // from v2.1.24 added 2.5.2017
-			'ntfrestore'  : 'Doing restore from the trash	', // from v2.1.24 added 3.5.2017
-			'ntfchkdir'   : 'Çöp kutusundan geri yükleme', // from v2.1.24 added 3.5.2017
+			'ntfrestore'  : 'Çöp kutusundan geri yükle', // from v2.1.24 added 3.5.2017
+			'ntfchkdir'   : 'Hedef klasör kontrol ediliyor', // from v2.1.24 added 3.5.2017
 			'ntfundo'     : 'Önceki işlemi geri alma', // from v2.1.27 added 31.07.2017
 			'ntfredo'     : 'Önceki geri almayı tekrarlama', // from v2.1.27 added 31.07.2017
 
@@ -398,8 +399,8 @@
 			'nowLoading'      : 'Şimdi yükleniyor...', // from v2.1.12 added 4.26.2016
 			'openMulti'       : 'Çoklu dosya aç', // from v2.1.12 added 5.14.2016
 			'openMultiConfirm': '$1 dosyalarını açmaya çalışıyorsunuz. Tarayıcıda açmak istediğinizden emin misiniz?', // from v2.1.12 added 5.14.2016
-			'emptySearch'     : 'No match results in search targets', // from v2.1.12 added 5.16.2016
-			'editingFile'     : 'You are editing a file.', // from v2.1.13 added 6.3.2016
+			'emptySearch'     : 'Arama hedefinde eşleşen sonuç bulunamadı.', // from v2.1.12 added 5.16.2016
+			'editingFile'     : 'Dosya düzenleniyor.', // from v2.1.13 added 6.3.2016
 			'hasSelected'     : '$1 öğe seçtiniz.', // from v2.1.13 added 6.3.2016
 			'hasClipboard'    : 'Panonuzda $1 öğeniz var.', // from v2.1.13 added 6.3.2016
 			'incSearchOnly'   : 'Artan arama yalnızca geçerli görünümden yapılır.', // from v2.1.13 added 6.30.2016
@@ -411,7 +412,7 @@
 			'reset'           : 'Sıfırla', // from v2.1.16 added 1.10.2016
 			'bgcolor'         : 'Arkaplan rengi', // from v2.1.16 added 1.10.2016
 			'colorPicker'     : 'Renk seçici', // from v2.1.16 added 1.10.2016
-			'8pxgrid'         : '8px tablo', // from v2.1.16 added 4.10.2016
+			'8pxgrid'         : '8px Izgara', // from v2.1.16 added 4.10.2016
 			'enabled'         : 'Etkin', // from v2.1.16 added 4.10.2016
 			'disabled'        : 'Engelli', // from v2.1.16 added 4.10.2016
 			'emptyIncSearch'  : 'Geçerli görünümde arama sonucu bulunamadı. Arama sonucunu genişletmek için \\APress [Enter]  yapın', // from v2.1.16 added 5.10.2016
@@ -445,6 +446,18 @@
 			'asPrefix'        : 'Ön ek kele', // from v2.1.31 added 8.12.2017
 			'asSuffix'        : 'Son ek ekle', // from v2.1.31 added 8.12.2017
 			'changeExtention' : 'Uzantıyı değiştir', // from v2.1.31 added 8.12.2017
+			'columnPref'      : 'Sütun ayarları (Liste görünümü)', // from v2.1.32 added 6.2.2018
+			'reflectOnImmediate' : 'Tüm değişiklikler hemen arşive yansıtılacaktır.', // from v2.1.33 added 2.3.2018
+			'reflectOnUnmount'   : 'Herhangi bir değişiklik, bu birimi kaldırılıncaya kadar yansıtılmayacaktır.', // from v2.1.33 added 2.3.2018
+			'unmountChildren' : 'Bu cihaza monte edilen aşağıdaki birim (ler) de bağlanmamıştır. Çıkardığınızdan emin misiniz?', // from v2.1.33 added 5.3.2018
+			'selectionInfo'   : 'Seçim Bilgisi', // from v2.1.33 added 7.3.2018
+			'hashChecker'     : 'Dosya imza(hash) algoritmaları', // from v2.1.33 added 10.3.2018
+			'infoItems'       : 'öğelerin bilgisi (Seçim Bilgi Paneli)', // from v2.1.38 added 28.3.2018
+			'pressAgainToExit': 'Çıkmak için tekrar basın.', // from v2.1.38 added 1.4.2018
+			'toolbar'         : 'Araç Çubuğu', // from v2.1.38 added 4.4.2018
+			'workspace'       : 'Çalışma alanı', // from v2.1.38 added 4.4.2018
+			'dialog'          : 'Diyalog', // from v2.1.38 added 4.4.2018
+			'all'             : 'Tümü', // from v2.1.38 added 4.4.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Bilinmiyor',
