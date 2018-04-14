@@ -68,7 +68,27 @@ elFinder.prototype.commands.edit = function() {
 				return res;
 			});
 		},
-		
+
+		fileSync = function(hash) {
+			var old = fm.file(hash),
+				f;
+			fm.request({
+				cmd: 'info',
+				targets: [hash],
+				preventDefault: true
+			}).done(function(data) {
+				var changed;
+				if (data && data.files && data.files.length) {
+					f = data.files[0];
+					if (old.ts != f.ts || old.size != f.size) {
+						changed = { changed: [ f ] };
+						fm.updateCache(changed);
+						fm.change(changed);
+					}
+				}
+			});
+		},
+
 		/**
 		 * Open dialog with textarea to edit file
 		 *
@@ -177,9 +197,16 @@ elFinder.prototype.commands.edit = function() {
 					btnHoverFocus : false,
 					closeOnEscape : false,
 					close   : function() {
-						var close = function(){
+						var close = function() {
+							var conf;
 							dfrd.resolve();
-							ta.editor && ta.editor.close(ta[0], ta.editor.instance);
+							if (ta.editor) {
+								ta.editor.close(ta[0], ta.editor.instance);
+								conf = ta.editor.confObj;
+								if (conf.info && conf.info.syncInterval) {
+									fileSync(file.hash);
+								}
+							}
 							ta.elfinderdialog('destroy');
 						};
 						if (changed()) {
@@ -209,7 +236,7 @@ elFinder.prototype.commands.edit = function() {
 						}
 					},
 					open    : function() {
-						var loadRes;
+						var loadRes, conf, interval;
 						ta.initEditArea.call(ta, id, file, content, fm);
 						old = getContent();
 						if (ta.editor) {
@@ -222,6 +249,7 @@ elFinder.prototype.commands.edit = function() {
 								}).fail(function(error) {
 									error && fm.error(error);
 									ta.elfinderdialog('destroy');
+									return;
 								});
 							} else {
 								if (loadRes && (typeof loadRes === 'string' || Array.isArray(loadRes))) {
@@ -233,6 +261,14 @@ elFinder.prototype.commands.edit = function() {
 								ta.editor.focus(ta[0], ta.editor.instance);
 								old = getContent();
 							}
+							conf = ta.editor.confObj;
+							if (conf.info && conf.info.syncInterval) {
+								if (interval = parseInt(conf.info.syncInterval)) {
+									setTimeout(function() {
+										autoSync(interval);
+									}, interval);
+								}
+							}
 						}
 					},
 					resize : function(e, data) {
@@ -242,8 +278,16 @@ elFinder.prototype.commands.edit = function() {
 				getContent = function() {
 					return ta.getContent.call(ta, ta[0]);
 				},
+				autoSync = function(interval) {
+					if (dialogNode.is(':visible')) {
+						fileSync(file.hash);
+						setTimeout(function() {
+							autoSync(interval);
+						}, interval);
+					}
+				},
 				clsEditing = fm.res('class', 'editing'),
-				ta, old, dialogNode, selEncoding, extEditor, maxW;
+				ta, old, dialogNode, selEncoding, extEditor, maxW, syncInterval;
 				
 			if (editor) {
 				if (editor.html) {
@@ -435,38 +479,40 @@ elFinder.prototype.commands.edit = function() {
 				return dfrd.reject(error);
 			}
 			
-			if (editor && editor.info && typeof editor.info.edit === 'function') {
-				res = editor.info.edit.call(fm, file, editor);
-				if (res.promise) {
-					res.done(function() {
-						dfrd.resolve();
-					}).fail(function(error) {
-						dfrd.reject(error);
-					});
-				} else {
-					res? dfrd.resolve() : dfrd.reject();
+			if (editor && editor.info) {
+				if (typeof editor.info.edit === 'function') {
+					res = editor.info.edit.call(fm, file, editor);
+					if (res.promise) {
+						res.done(function() {
+							dfrd.resolve();
+						}).fail(function(error) {
+							dfrd.reject(error);
+						});
+					} else {
+						res? dfrd.resolve() : dfrd.reject();
+					}
+					return dfrd;
 				}
-				return dfrd;
+
+				if (editor.info.urlAsContent || editor.info.preventGet) {
+					req = $.Deferred();
+					if (! editor.info.preventGet) {
+						fm.url(hash, { async: true, temporary: true }).done(function(url) {
+							req.resolve({content: url});
+						});
+					} else {
+						req.resolve({});
+					}
+				} else {
+					req = fm.request({
+						data           : {cmd : 'get', target : hash, conv : conv, _t : file.ts},
+						options        : {type: 'get', cache : true},
+						notify         : {type : 'file', cnt : 1},
+						preventDefault : true
+					});
+				}
 			}
 
-			if (editor && editor.info && (editor.info.urlAsContent || editor.info.preventGet)) {
-				req = $.Deferred();
-				if (! editor.info.preventGet) {
-					fm.url(hash, { async: true, temporary: true }).done(function(url) {
-						req.resolve({content: url});
-					});
-				} else {
-					req.resolve({});
-				}
-			} else {
-				req = fm.request({
-					data           : {cmd : 'get', target : hash, conv : conv, _t : file.ts},
-					options        : {type: 'get', cache : true},
-					notify         : {type : 'file', cnt : 1},
-					preventDefault : true
-				});
-			}
-			
 			req.done(function(data) {
 				var selEncoding, reg, m, res;
 				if (data.doconv) {
@@ -661,6 +707,9 @@ elFinder.prototype.commands.edit = function() {
 		getStoredEditor = function(mime) {
 			var name = stored[mime];
 			return name && Object.keys(editors).length? editors[getStoreId(name)] : void(0);
+		},
+		infoRequest = function() {
+
 		},
 		stored;
 	
