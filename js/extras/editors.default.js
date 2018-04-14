@@ -1343,7 +1343,8 @@
 				iconImg : 'img/edit_zohooffice.png',
 				cmdCheck : 'ZohoOffice',
 				preventGet: true,
-				hideButtons: true
+				hideButtons: true,
+				syncInterval : 15000
 			},
 			mimes : [
 				'application/msword',
@@ -1466,8 +1467,6 @@
 					xhr = $(ta).data('xhr');
 				if (xhr.state() === 'pending') {
 					xhr.reject();
-				} else {
-					fm.sync(fm.cwd().hash);
 				}
 			}
 		},
