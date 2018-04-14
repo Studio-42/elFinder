@@ -3013,6 +3013,13 @@ class elFinder {
 				'bind' => 'upload'
 			);
 		}
+		
+		// do hook function 'upload.postsave'
+		if (! empty($this->listeners['upload.postsave'])) {
+			foreach($this->listeners['upload.postsave'] as $handler)
+				call_user_func_array($handler, array(&$result, $this));
+		} 	
+		
 		return $result;
 	}
 		
