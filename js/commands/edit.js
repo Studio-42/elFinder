@@ -435,38 +435,40 @@ elFinder.prototype.commands.edit = function() {
 				return dfrd.reject(error);
 			}
 			
-			if (editor && editor.info && typeof editor.info.edit === 'function') {
-				res = editor.info.edit.call(fm, file, editor);
-				if (res.promise) {
-					res.done(function() {
-						dfrd.resolve();
-					}).fail(function(error) {
-						dfrd.reject(error);
-					});
-				} else {
-					res? dfrd.resolve() : dfrd.reject();
+			if (editor && editor.info) {
+				if (typeof editor.info.edit === 'function') {
+					res = editor.info.edit.call(fm, file, editor);
+					if (res.promise) {
+						res.done(function() {
+							dfrd.resolve();
+						}).fail(function(error) {
+							dfrd.reject(error);
+						});
+					} else {
+						res? dfrd.resolve() : dfrd.reject();
+					}
+					return dfrd;
 				}
-				return dfrd;
+
+				if (editor.info.urlAsContent || editor.info.preventGet) {
+					req = $.Deferred();
+					if (! editor.info.preventGet) {
+						fm.url(hash, { async: true, temporary: true }).done(function(url) {
+							req.resolve({content: url});
+						});
+					} else {
+						req.resolve({});
+					}
+				} else {
+					req = fm.request({
+						data           : {cmd : 'get', target : hash, conv : conv, _t : file.ts},
+						options        : {type: 'get', cache : true},
+						notify         : {type : 'file', cnt : 1},
+						preventDefault : true
+					});
+				}
 			}
 
-			if (editor && editor.info && (editor.info.urlAsContent || editor.info.preventGet)) {
-				req = $.Deferred();
-				if (! editor.info.preventGet) {
-					fm.url(hash, { async: true, temporary: true }).done(function(url) {
-						req.resolve({content: url});
-					});
-				} else {
-					req.resolve({});
-				}
-			} else {
-				req = fm.request({
-					data           : {cmd : 'get', target : hash, conv : conv, _t : file.ts},
-					options        : {type: 'get', cache : true},
-					notify         : {type : 'file', cnt : 1},
-					preventDefault : true
-				});
-			}
-			
 			req.done(function(data) {
 				var selEncoding, reg, m, res;
 				if (data.doconv) {
@@ -661,6 +663,9 @@ elFinder.prototype.commands.edit = function() {
 		getStoredEditor = function(mime) {
 			var name = stored[mime];
 			return name && Object.keys(editors).length? editors[getStoreId(name)] : void(0);
+		},
+		infoRequest = function() {
+
 		},
 		stored;
 	
