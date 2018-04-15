@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 165e1e5) (2018-04-15)
+ * Version 2.1.37 (2.1-src Nightly: a794d6d) (2018-04-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -2593,6 +2593,8 @@ button.elfinder-info-button {
 	top: 0;
 	left: 0;
 	position: absolute;
+}
+.elfinder-quicklook-cover.elfinder-quicklook-coverbg {
 	/* background need to catch mouse event over browser plugin (eg PDF preview) */
 	background-color: #fff;
 	opacity: 0.000001;
