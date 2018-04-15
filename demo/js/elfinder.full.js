@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 165e1e5) (2018-04-15)
+ * Version 2.1.37 (2.1-src Nightly: a794d6d) (2018-04-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9404,7 +9404,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 165e1e5)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: a794d6d)';
 
 
 
@@ -25635,6 +25635,7 @@ elFinder.prototype.commands.preference = function() {
 		init = true,
 		dockHeight,	getSize, tm4cwd, dockedNode, selectTm;
 
+	this.cover = cover;
 	this.evUpdate = evUpdate;
 	(this.navbar = navbar)._show = navShow;
 	this.resize = 'resize.'+fm.namespace;
@@ -25655,6 +25656,7 @@ elFinder.prototype.commands.preference = function() {
 			self.docked() && navbar.hide();
 			self.preview.attr('style', '').removeClass('elfinder-overflow-auto');
 			self.info.attr('style', '').hide();
+			self.cover.removeClass('elfinder-quicklook-coverbg');
 			icon.removeAttr('class').attr('style', '');
 			info.html('');
 		})
@@ -26602,6 +26604,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			if (file.mime === mime && ql.dispInlineRegex.test(file.mime)) {
 				e.stopImmediatePropagation();
 				ql.hideinfo();
+				ql.cover.addClass('elfinder-quicklook-coverbg');
 				node = $('<object class="elfinder-quicklook-preview-pdf" data="'+fm.openUrl(file.hash)+'" type="application/pdf" />')
 					.appendTo(preview);
 			}
