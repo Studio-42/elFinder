@@ -68,6 +68,10 @@
 	top: 0;
 	left: 0;
 	position: absolute;
+	/* background need to catch mouse event over browser plugin (eg PDF preview) */
+	background-color: #fff;
+	opacity: 0.000001;
+	filter:Alpha(Opacity=0.0001);
 }
 
 /* quicklook titlebar */
