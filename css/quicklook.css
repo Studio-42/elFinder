@@ -68,6 +68,8 @@
 	top: 0;
 	left: 0;
 	position: absolute;
+}
+.elfinder-quicklook-cover.elfinder-quicklook-coverbg {
 	/* background need to catch mouse event over browser plugin (eg PDF preview) */
 	background-color: #fff;
 	opacity: 0.000001;
