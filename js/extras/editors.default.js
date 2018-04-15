@@ -104,11 +104,12 @@
 		pixlrLoad = function(mode, base) {
 			var self = this,
 				fm = this.fm,
+				clPreventBack = fm.res('class', 'preventback'),
 				node = $(base).children('img:first')
 					.data('loading')()
 					.data('resizeoff', function() {
 						$(window).off('resize.'+node.attr('id'));
-						dialog.addClass(fm.resources.class.preventback);
+						dialog.addClass(clPreventBack);
 						return node;
 					})
 					.on('click', function() {
@@ -168,7 +169,7 @@
 									error('Please disable your ad blocker.');
 								}
 							}, 1000);
-							dialog.addClass(fm.resources.class.preventback);
+							dialog.addClass(clPreventBack);
 							fm.toFront(container);
 						})
 						.on('error', error)
@@ -363,7 +364,7 @@
 							},
 							onLoad: onload || function(){},
 							onClose: function() { 
-								dialog.removeClass(fm.resources.class.preventback);
+								dialog.removeClass(fm.res('class', 'preventback'));
 								$(container).hide();
 							},
 							appendTo: container.get(0),
@@ -383,7 +384,7 @@
 						dfrd.resolve(featherEditor);
 					},
 					launch = function() {
-						dialog.addClass(fm.resources.class.preventback);
+						dialog.addClass(fm.res('class', 'preventback'));
 						$(container).show();
 						featherEditor.launch({
 							image: node.attr('id'),

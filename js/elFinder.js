@@ -2002,7 +2002,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					},
 					setTextMimes = function() {
 						self.textMimes = {};
-						$.each(self.resources.mimes.text, function() {
+						$.each(self.res('mimes', 'text'), function() {
 							self.textMimes[this] = true;
 						});
 					},
@@ -4137,7 +4137,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				if (dialog.length || input.length) {
 					history.pushState(state, null, location.pathname + location.search + '#elf_' + state.thash);
 					if (dialog.length) {
-						if (!dialog.hasClass(self.resources.class.preventback)) {
+						if (!dialog.hasClass(self.res('class', 'preventback'))) {
 							if (dialog.hasClass('elfinder-dialog')) {
 								dialog.elfinderdialog('close');
 							} else {
