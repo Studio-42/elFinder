@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: a794d6d) (2018-04-15)
+ * Version 2.1.37 (2.1-src Nightly: 23e9ebd) (2018-04-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9404,7 +9404,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: a794d6d)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 23e9ebd)';
 
 
 
@@ -15378,6 +15378,10 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			winScrTm;
 
+		if (!fm.UA.IE) {
+			cwd.after($('<div class="elfinder-cwd-message-board"/>').append($('<div class="elfinder-cwd-trash" />').html(fm.i18n('volume_Trash'))));
+		}
+
 		// setup by options
 		replacement = Object.assign(replacement, options.replacement || {});
 		
@@ -15446,7 +15450,7 @@ $.fn.elfindercwd = function(fm, options) {
 					document.head.appendChild(style);
 					sheet = style.sheet;
 					sheet.insertRule('.elfinder-cwd-wrapper-empty .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', i++);
-					sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder'+(mobile? 'LTap' : 'Drop'))+'" }', i++);
+					sheet.insertRule('.elfinder-cwd-wrapper-empty .native-droppable .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder'+(mobile? 'LTap' : 'Drop'))+'" }', i++);
 					sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable-disabled .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', i++);
 					sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result .elfinder-cwd:after{ content:"'+fm.i18n('emptySearch')+'" }', i++);
 					sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-incsearch-result .elfinder-cwd:after{ content:"'+fm.i18n('emptyIncSearch')+'" }', i++);
