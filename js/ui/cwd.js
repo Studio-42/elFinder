@@ -2134,6 +2134,10 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			winScrTm;
 
+		if (!fm.UA.IE) {
+			cwd.after($('<div class="elfinder-cwd-message-board"/>').append($('<div class="elfinder-cwd-trash" />').html(fm.i18n('volume_Trash'))));
+		}
+
 		// setup by options
 		replacement = Object.assign(replacement, options.replacement || {});
 		
@@ -2202,7 +2206,7 @@ $.fn.elfindercwd = function(fm, options) {
 					document.head.appendChild(style);
 					sheet = style.sheet;
 					sheet.insertRule('.elfinder-cwd-wrapper-empty .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', i++);
-					sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder'+(mobile? 'LTap' : 'Drop'))+'" }', i++);
+					sheet.insertRule('.elfinder-cwd-wrapper-empty .native-droppable .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder'+(mobile? 'LTap' : 'Drop'))+'" }', i++);
 					sheet.insertRule('.elfinder-cwd-wrapper-empty .ui-droppable-disabled .elfinder-cwd:after{ content:"'+fm.i18n('emptyFolder')+'" }', i++);
 					sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result .elfinder-cwd:after{ content:"'+fm.i18n('emptySearch')+'" }', i++);
 					sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-incsearch-result .elfinder-cwd:after{ content:"'+fm.i18n('emptyIncSearch')+'" }', i++);

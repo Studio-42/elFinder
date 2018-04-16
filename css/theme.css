@@ -58,7 +58,7 @@
 /* current directory */
 /* Is in trash */
 .elfinder-cwd-wrapper.elfinder-cwd-wrapper-trash {
-	background-color: #f0efef;
+	background-color: #f0f0f0;
 }
 
 /* selected file in "icons" view */
