@@ -366,12 +366,6 @@ elFinder.prototype.commands.rm = function() {
 	this.shortcuts = [{
 		pattern     : 'delete ctrl+backspace shift+delete'
 	}];
-	this.handlers = {
-		'select' : function(e) {
-			var targets = e.data && e.data.selected && e.data.selected.length? e.data.selected : null;
-			self.update(void(0), (targets? getTHash(targets) : fm.option('trashHash'))? 'trash' : 'rm');
-		}
-	};
 	this.value = 'rm';
 	
 	this.init = function() {
@@ -472,5 +466,12 @@ elFinder.prototype.commands.rm = function() {
 			
 		return dfrd;
 	};
+
+	fm.bind('select contextmenucreate closecontextmenu', function(e) {
+		var targets = (e.data? (e.data.selected || e.data.targets) : null) || fm.selected();
+		if (targets && targets.length) {
+			self.update(void(0), (targets? getTHash(targets) : fm.option('trashHash'))? 'trash' : 'rm');
+		}
+	});
 
 };
