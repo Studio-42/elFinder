@@ -2134,7 +2134,8 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			winScrTm;
 
-		if (!fm.UA.IE) {
+		// IE < 11 not support CSS `pointer-events: none`
+		if (!fm.UA.ltIE10) {
 			cwd.after($('<div class="elfinder-cwd-message-board"/>').append($('<div class="elfinder-cwd-trash" />').html(fm.i18n('volume_Trash'))));
 		}
 
