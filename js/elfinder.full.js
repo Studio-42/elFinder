@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 23e9ebd) (2018-04-16)
+ * Version 2.1.37 (2.1-src Nightly: 08b9947) (2018-04-17)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9404,7 +9404,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 23e9ebd)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 08b9947)';
 
 
 
@@ -15378,7 +15378,8 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			winScrTm;
 
-		if (!fm.UA.IE) {
+		// IE < 11 not support CSS `pointer-events: none`
+		if (!fm.UA.ltIE10) {
 			cwd.after($('<div class="elfinder-cwd-message-board"/>').append($('<div class="elfinder-cwd-trash" />').html(fm.i18n('volume_Trash'))));
 		}
 
@@ -30239,12 +30240,6 @@ elFinder.prototype.commands.rm = function() {
 	this.shortcuts = [{
 		pattern     : 'delete ctrl+backspace shift+delete'
 	}];
-	this.handlers = {
-		'select' : function(e) {
-			var targets = e.data && e.data.selected && e.data.selected.length? e.data.selected : null;
-			self.update(void(0), (targets? getTHash(targets) : fm.option('trashHash'))? 'trash' : 'rm');
-		}
-	};
 	this.value = 'rm';
 	
 	this.init = function() {
@@ -30345,6 +30340,13 @@ elFinder.prototype.commands.rm = function() {
 			
 		return dfrd;
 	};
+
+	fm.bind('select contextmenucreate closecontextmenu', function(e) {
+		var targets = (e.data? (e.data.selected || e.data.targets) : null) || fm.selected();
+		if (targets && targets.length) {
+			self.update(void(0), (targets? getTHash(targets) : fm.option('trashHash'))? 'trash' : 'rm');
+		}
+	});
 
 };
 
