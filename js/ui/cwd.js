@@ -1594,6 +1594,7 @@ $.fn.elfindercwd = function(fm, options) {
 								+ ':first');
 							
 							ui.element
+								.data('dragging', true)
 								.data('resizeTarget', target)
 								.data('targetWidth', target.width());
 							colResizing = true;
@@ -1607,7 +1608,7 @@ $.fn.elfindercwd = function(fm, options) {
 						resize: function(e, ui) {
 							ui.element.data('resizeTarget').width(ui.element.data('targetWidth') - (ui.originalSize.width - ui.size.width));
 						},
-						stop : function() {
+						stop : function(e, ui) {
 							colResizing = false;
 							fixTableHeader({fitWidth: true});
 							colWidth = {};
@@ -1616,6 +1617,9 @@ $.fn.elfindercwd = function(fm, options) {
 								colWidth[name] = $(this).width();
 							});
 							fm.storage('cwdColWidth', colWidth);
+							setTimeout(function() {
+								ui.element.removeData('dragging');
+							}, 100);
 						}
 					})
 					.find('.ui-resizable-handle').addClass('ui-icon ui-icon-grip-dotted-vertical');
