@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 4c1c089) (2018-04-18)
+ * Version 2.1.37 (2.1-src Nightly: 4a85994) (2018-04-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -3310,6 +3310,29 @@ var elFinder = function(elm, opts, bootCallback) {
 	};
 	
 	/**
+	 * Remove class 'elfinder-frontmost' and hide() to target ui node
+	 *
+	 * @param      Object   target  Target jQuery node object
+	 * @param      Boolean  nohide  Do not hide
+	 */
+	this.toHide =function(target, nohide) {
+		var tgt = $(target),
+			last;
+
+		!nohide && tgt.hide();
+		if (tgt.hasClass('elfinder-frontmost')) {
+			tgt.removeClass('elfinder-frontmost');
+			last = node.children('.ui-front:visible:not(.elfinder-frontmost)').last();
+			if (last.length) {
+				setTimeout(function() {
+					self.toFront(last);
+					last.trigger('frontmost');
+				}, 20);
+			}
+		}
+	};
+
+	/**
 	 * Return css object for maximize
 	 * 
 	 * @return Object
@@ -4169,7 +4192,9 @@ var elFinder = function(elm, opts, bootCallback) {
 					history.pushState(state, null, location.pathname + location.search + '#elf_' + state.thash);
 					if (dialog.length) {
 						if (!dialog.hasClass(self.res('class', 'preventback'))) {
-							if (dialog.hasClass('elfinder-dialog')) {
+							if (dialog.hasClass('elfinder-contextmenu')) {
+								$(document).trigger($.Event('keydown', { keyCode: $.ui.keyCode.ESCAPE, ctrlKey : false, shiftKey : false, altKey : false, metaKey : false }));
+							} else if (dialog.hasClass('elfinder-dialog')) {
 								dialog.elfinderdialog('close');
 							} else {
 								dialog.trigger('close');
@@ -9404,7 +9429,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 4c1c089)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 4a85994)';
 
 
 
@@ -12888,7 +12913,8 @@ $.fn.elfindercontextmenu = function(fm) {
 				currentType = currentTargets = null;
 				
 				if (menu.is(':visible') || menu.children().length) {
-					menu.removeAttr('style').hide().empty().removeData('submenuKeep');
+					fm.toHide(menu);
+					menu.removeAttr('style').empty().removeData('submenuKeep');
 					try {
 						if (! menu.draggable('instance')) {
 							menu.draggable(dragOpt);
@@ -16317,8 +16343,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 					
 					if (opts.closeOnEscape) {
-						$(document).on('keyup.'+id, function(e) {
-							if (e.keyCode == $.ui.keyCode.ESCAPE && dialog.hasClass(clactive)) {
+						$(document).on('keydown.'+id, function(e) {
+							if (e.keyCode == $.ui.keyCode.ESCAPE && dialog.hasClass('elfinder-frontmost')) {
 								self.elfinderdialog('close');
 							}
 						});
@@ -16348,8 +16374,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 							fm.toggleMaximize(dialog, false);
 						}
 						
-						dialog.hide().data('modal') && fm.getUI('overlay').elfinderoverlay('hide');
-	
+						fm.toHide(dialog);
+						dialog.data('modal') && fm.getUI('overlay').elfinderoverlay('hide');
+						
 						if (typeof(opts.close) == 'function') {
 							$.proxy(opts.close, self[0])();
 						}
@@ -16359,14 +16386,11 @@ $.fn.elfinderdialog = function(opts, fm) {
 						
 						// get focus to next dialog
 						dialogs = elfNode.children('.'+cldialog+':visible');
-						if (dialogs.length) {
-							dialogs.filter(':last').trigger('totop');
-						}
 						
 						dialog.hasClass(fm.res('class', 'editing')) && checkEditing();
 					});
 				})
-				.on('totop', function() {
+				.on('totop frontmost', function() {
 					var s = fm.storage('autoFocusDialog');
 					
 					dialog.data('focusOnMouseOver', s? (s > 0) : fm.options.uiOptions.dialog.focusOnMouseOver);
@@ -24957,7 +24981,7 @@ elFinder.prototype.commands.preference = function() {
 	var self    = this,
 		fm      = this.fm,
 		r       = 'replace',
-		tab     = '<li class="ui-state-default ui-corner-top elfinder-preference-tab-{id}"><a href="#'+fm.namespace+'-preference-{id}" id="'+fm.namespace+'-preference-tab-{id}">{title}</a></li>',
+		tab     = '<li class="ui-state-default ui-corner-top elfinder-preference-tab-{id}"><a href="#'+fm.namespace+'-preference-{id}" id="'+fm.namespace+'-preference-tab-{id}" class="{class}">{title}</a></li>',
 		base    = $('<div class="ui-tabs ui-widget ui-widget-content ui-corner-all elfinder-preference">'), 
 		ul      = $('<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">'),
 		tabs    = $('<div class="elfinder-preference-tabs ui-tabs-panel ui-widget-content ui-corner-bottom"/>'),
@@ -25198,7 +25222,7 @@ elFinder.prototype.commands.preference = function() {
 					});
 				}
 				if (found) {
-					ul.append(tab[r](/\{id\}/g, id)[r](/\{title\}/, fm.i18n(id)));
+					ul.append(tab[r](/\{id\}/g, id)[r](/\{title\}/, fm.i18n(id))[r](/\{class\}/, openTab === id? 'elfinder-focus' : ''));
 					if (found === 2) {
 						tabs.append(
 							$('<div id="'+fm.namespace+'-preference-'+id+'" class="elfinder-preference-content"/>')
@@ -25833,7 +25857,7 @@ elFinder.prototype.commands.preference = function() {
 				hash    = (win.data('hash') || '').split('/', 2)[0],
 				close   = function(status, winhide) {
 					state = status;
-					winhide && win.hide();
+					winhide && fm.toHide(win);
 					preview.children().remove();
 					self.update(0, self.value);
 					win.data('hash', '');
@@ -25877,6 +25901,7 @@ elFinder.prototype.commands.preference = function() {
 			navbar.hide();
 			titleDock.toggleClass('ui-icon-plusthick ui-icon-minusthick elfinder-icon-full elfinder-icon-minimize');
 			
+			fm.toHide(w, true);
 			box.data('addNode')(w, opts);
 			
 			self.preview.trigger('changesize');
@@ -26025,7 +26050,7 @@ elFinder.prototype.commands.preference = function() {
 			
 			// close window on escape
 			$(document).on('keydown.'+fm.namespace, function(e) {
-				e.keyCode == $.ui.keyCode.ESCAPE && self.opened() && ! self.docked() && win.trigger('close');
+				e.keyCode == $.ui.keyCode.ESCAPE && self.opened() && ! self.docked() && win.hasClass('elfinder-frontmost') && win.trigger('close');
 			});
 			
 			win.resizable({ 
