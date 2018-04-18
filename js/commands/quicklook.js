@@ -541,7 +541,7 @@
 				hash    = (win.data('hash') || '').split('/', 2)[0],
 				close   = function(status, winhide) {
 					state = status;
-					winhide && win.hide();
+					winhide && fm.toHide(win);
 					preview.children().remove();
 					self.update(0, self.value);
 					win.data('hash', '');
@@ -585,6 +585,7 @@
 			navbar.hide();
 			titleDock.toggleClass('ui-icon-plusthick ui-icon-minusthick elfinder-icon-full elfinder-icon-minimize');
 			
+			fm.toHide(w, true);
 			box.data('addNode')(w, opts);
 			
 			self.preview.trigger('changesize');
@@ -733,7 +734,7 @@
 			
 			// close window on escape
 			$(document).on('keydown.'+fm.namespace, function(e) {
-				e.keyCode == $.ui.keyCode.ESCAPE && self.opened() && ! self.docked() && win.trigger('close');
+				e.keyCode == $.ui.keyCode.ESCAPE && self.opened() && ! self.docked() && win.hasClass('elfinder-frontmost') && win.trigger('close');
 			});
 			
 			win.resizable({ 
