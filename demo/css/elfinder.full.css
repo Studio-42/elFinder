@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 08b9947) (2018-04-17)
+ * Version 2.1.37 (2.1-src Nightly: e186c94) (2018-04-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -967,7 +967,11 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	-ms-touch-action: auto;
 	touch-action: auto;
 	min-width: 100%;
-	min-height: 100%;
+}
+
+/* fixed table header container */
+.elfinder-cwd-fixheader .elfinder-cwd {
+	position: relative;
 }
 
 /* container active on dropenter */

@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 08b9947) (2018-04-17)
+ * Version 2.1.37 (2.1-src Nightly: e186c94) (2018-04-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9404,7 +9404,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 08b9947)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: e186c94)';
 
 
 
@@ -14235,7 +14235,7 @@ $.fn.elfindercwd = function(fm, options) {
 					tableHeader.data('widthTimer') && clearTimeout(tableHeader.data('widthTimer'));
 					tableHeader.data('widthTimer', setTimeout(function() {
 						if (tableHeader) {
-							tableHeader.css('width', cwd.outerWidth() + 'px');
+							tableHeader.css('width', mBoard.width() + 'px');
 							if (fm.direction === 'rtl') {
 								tableHeader.css('left', (wrapper.data('width') - wrapper.width()) + 'px');
 							}
@@ -15373,6 +15373,9 @@ $.fn.elfindercwd = function(fm, options) {
 			// workzone node 
 			wz = parent.children('.elfinder-workzone').append(wrapper.append(this).append(bottomMarker)),
 			
+			// message board
+			mBoard = $('<div class="elfinder-cwd-message-board"/>').insertAfter(cwd),
+
 			// has UI tree
 			hasUiTree,
 			
@@ -15380,7 +15383,7 @@ $.fn.elfindercwd = function(fm, options) {
 
 		// IE < 11 not support CSS `pointer-events: none`
 		if (!fm.UA.ltIE10) {
-			cwd.after($('<div class="elfinder-cwd-message-board"/>').append($('<div class="elfinder-cwd-trash" />').html(fm.i18n('volume_Trash'))));
+			mBoard.append($('<div class="elfinder-cwd-trash" />').html(fm.i18n('volume_Trash')));
 		}
 
 		// setup by options
