@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: e186c94) (2018-04-18)
+ * Version 2.1.37 (2.1-src Nightly: 93157e3) (2018-04-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9404,7 +9404,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: e186c94)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 93157e3)';
 
 
 
@@ -14838,6 +14838,7 @@ $.fn.elfindercwd = function(fm, options) {
 								+ ':first');
 							
 							ui.element
+								.data('dragging', true)
 								.data('resizeTarget', target)
 								.data('targetWidth', target.width());
 							colResizing = true;
@@ -14851,7 +14852,7 @@ $.fn.elfindercwd = function(fm, options) {
 						resize: function(e, ui) {
 							ui.element.data('resizeTarget').width(ui.element.data('targetWidth') - (ui.originalSize.width - ui.size.width));
 						},
-						stop : function() {
+						stop : function(e, ui) {
 							colResizing = false;
 							fixTableHeader({fitWidth: true});
 							colWidth = {};
@@ -14860,6 +14861,9 @@ $.fn.elfindercwd = function(fm, options) {
 								colWidth[name] = $(this).width();
 							});
 							fm.storage('cwdColWidth', colWidth);
+							setTimeout(function() {
+								ui.element.removeData('dragging');
+							}, 100);
 						}
 					})
 					.find('.ui-resizable-handle').addClass('ui-icon ui-icon-grip-dotted-vertical');
@@ -20926,6 +20930,7 @@ elFinder.prototype.commands.colwidth = function() {
 	
 	this.exec = function() {
 		this.fm.getUI('cwd').trigger('colwidth');
+		return $.Deferred().resolve();
 	};
 	
 };
