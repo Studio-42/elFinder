@@ -3279,6 +3279,29 @@ var elFinder = function(elm, opts, bootCallback) {
 	};
 	
 	/**
+	 * Remove class 'elfinder-frontmost' and hide() to target ui node
+	 *
+	 * @param      Object   target  Target jQuery node object
+	 * @param      Boolean  nohide  Do not hide
+	 */
+	this.toHide =function(target, nohide) {
+		var tgt = $(target),
+			last;
+
+		!nohide && tgt.hide();
+		if (tgt.hasClass('elfinder-frontmost')) {
+			tgt.removeClass('elfinder-frontmost');
+			last = node.children('.ui-front:visible:not(.elfinder-frontmost)').last();
+			if (last.length) {
+				setTimeout(function() {
+					self.toFront(last);
+					last.trigger('frontmost');
+				}, 20);
+			}
+		}
+	};
+
+	/**
 	 * Return css object for maximize
 	 * 
 	 * @return Object
@@ -4138,7 +4161,9 @@ var elFinder = function(elm, opts, bootCallback) {
 					history.pushState(state, null, location.pathname + location.search + '#elf_' + state.thash);
 					if (dialog.length) {
 						if (!dialog.hasClass(self.res('class', 'preventback'))) {
-							if (dialog.hasClass('elfinder-dialog')) {
+							if (dialog.hasClass('elfinder-contextmenu')) {
+								$(document).trigger($.Event('keydown', { keyCode: $.ui.keyCode.ESCAPE, ctrlKey : false, shiftKey : false, altKey : false, metaKey : false }));
+							} else if (dialog.hasClass('elfinder-dialog')) {
 								dialog.elfinderdialog('close');
 							} else {
 								dialog.trigger('close');

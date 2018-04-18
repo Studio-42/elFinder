@@ -390,8 +390,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 					
 					if (opts.closeOnEscape) {
-						$(document).on('keyup.'+id, function(e) {
-							if (e.keyCode == $.ui.keyCode.ESCAPE && dialog.hasClass(clactive)) {
+						$(document).on('keydown.'+id, function(e) {
+							if (e.keyCode == $.ui.keyCode.ESCAPE && dialog.hasClass('elfinder-frontmost')) {
 								self.elfinderdialog('close');
 							}
 						});
@@ -421,8 +421,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 							fm.toggleMaximize(dialog, false);
 						}
 						
-						dialog.hide().data('modal') && fm.getUI('overlay').elfinderoverlay('hide');
-	
+						fm.toHide(dialog);
+						dialog.data('modal') && fm.getUI('overlay').elfinderoverlay('hide');
+						
 						if (typeof(opts.close) == 'function') {
 							$.proxy(opts.close, self[0])();
 						}
@@ -432,14 +433,11 @@ $.fn.elfinderdialog = function(opts, fm) {
 						
 						// get focus to next dialog
 						dialogs = elfNode.children('.'+cldialog+':visible');
-						if (dialogs.length) {
-							dialogs.filter(':last').trigger('totop');
-						}
 						
 						dialog.hasClass(fm.res('class', 'editing')) && checkEditing();
 					});
 				})
-				.on('totop', function() {
+				.on('totop frontmost', function() {
 					var s = fm.storage('autoFocusDialog');
 					
 					dialog.data('focusOnMouseOver', s? (s > 0) : fm.options.uiOptions.dialog.focusOnMouseOver);
