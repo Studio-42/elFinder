@@ -8,7 +8,7 @@ elFinder.prototype.commands.preference = function() {
 	var self    = this,
 		fm      = this.fm,
 		r       = 'replace',
-		tab     = '<li class="ui-state-default ui-corner-top elfinder-preference-tab-{id}"><a href="#'+fm.namespace+'-preference-{id}" id="'+fm.namespace+'-preference-tab-{id}">{title}</a></li>',
+		tab     = '<li class="ui-state-default ui-corner-top elfinder-preference-tab-{id}"><a href="#'+fm.namespace+'-preference-{id}" id="'+fm.namespace+'-preference-tab-{id}" class="{class}">{title}</a></li>',
 		base    = $('<div class="ui-tabs ui-widget ui-widget-content ui-corner-all elfinder-preference">'), 
 		ul      = $('<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">'),
 		tabs    = $('<div class="elfinder-preference-tabs ui-tabs-panel ui-widget-content ui-corner-bottom"/>'),
@@ -249,7 +249,7 @@ elFinder.prototype.commands.preference = function() {
 					});
 				}
 				if (found) {
-					ul.append(tab[r](/\{id\}/g, id)[r](/\{title\}/, fm.i18n(id)));
+					ul.append(tab[r](/\{id\}/g, id)[r](/\{title\}/, fm.i18n(id))[r](/\{class\}/, openTab === id? 'elfinder-focus' : ''));
 					if (found === 2) {
 						tabs.append(
 							$('<div id="'+fm.namespace+'-preference-'+id+'" class="elfinder-preference-content"/>')
