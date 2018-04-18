@@ -15,6 +15,7 @@ elFinder.prototype.commands.colwidth = function() {
 	
 	this.exec = function() {
 		this.fm.getUI('cwd').trigger('colwidth');
+		return $.Deferred().resolve();
 	};
 	
 };
