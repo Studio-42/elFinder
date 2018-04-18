@@ -22,7 +22,11 @@
 	-ms-touch-action: auto;
 	touch-action: auto;
 	min-width: 100%;
-	min-height: 100%;
+}
+
+/* fixed table header container */
+.elfinder-cwd-fixheader .elfinder-cwd {
+	position: relative;
 }
 
 /* container active on dropenter */
