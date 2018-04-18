@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 93157e3) (2018-04-18)
+ * Version 2.1.37 (2.1-src Nightly: 4c1c089) (2018-04-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9404,7 +9404,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 93157e3)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 4c1c089)';
 
 
 
@@ -12786,7 +12786,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					e.stopImmediatePropagation();
 					if (code == ESC || code === sublev) {
 						if (selected && subnodes && subselected) {
-							subselected.trigger('mouseleave');
+							subselected.trigger('mouseleave').trigger('submenuclose');
 							selected.addClass(cHover);
 							subnodes = null;
 							subselected = null;
@@ -13019,6 +13019,9 @@ $.fn.elfindercontextmenu = function(fm) {
 										menu.removeData('submenuKeep');
 									}
 								})
+								.on('submenuclose', '.elfinder-contextmenu-sub', function(e) {
+									hover(false);
+								})
 								.on('click', '.'+smItem, function(e){
 									var opts, $this;
 									e.stopPropagation();
@@ -13050,23 +13053,25 @@ $.fn.elfindercontextmenu = function(fm) {
 									}
 								})
 								.on('mouseenter mouseleave', function(e){
-									if (! menu.data('touching') && !$(e.target).closest('.elfinder-contextmenu-sub', menu).length) {
+									if (! menu.data('touching')) {
 										if (node.data('timer')) {
 											clearTimeout(node.data('timer'));
 											node.removeData('timer');
 										}
-										if (e.type === 'mouseleave') {
-											if (! menu.data('submenuKeep')) {
+										if (!$(e.target).closest('.elfinder-contextmenu-sub', menu).length) {
+											if (e.type === 'mouseleave') {
+												if (! menu.data('submenuKeep')) {
+													node.data('timer', setTimeout(function() {
+														node.removeData('timer');
+														hover(false);
+													}, 250));
+												}
+											} else {
 												node.data('timer', setTimeout(function() {
 													node.removeData('timer');
-													hover(false);
-												}, 250));
+													hover(true);
+												}, nodes.find('div.elfinder-contextmenu-sub:visible').length? 250 : 0));
 											}
-										} else {
-											node.data('timer', setTimeout(function() {
-												node.removeData('timer');
-												hover(true);
-											}, nodes.find('div.elfinder-contextmenu-sub:visible').length? 250 : 0));
 										}
 									}
 								});
