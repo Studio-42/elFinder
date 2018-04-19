@@ -634,7 +634,7 @@ var elFinder = function(elm, opts, bootCallback) {
 						ddm && ddm.helper && ddm.cancel();
 					}
 					// button menus
-					node.find('.ui-widget.elfinder-button-menu').hide();
+					self.toHide(node.find('.ui-widget.elfinder-button-menu.elfinder-frontmost:visible'));
 					// trigger keydownEsc
 					self.trigger('keydownEsc', e);
 				}
@@ -3294,8 +3294,10 @@ var elFinder = function(elm, opts, bootCallback) {
 			last = node.children('.ui-front:visible:not(.elfinder-frontmost)').last();
 			if (last.length) {
 				setTimeout(function() {
-					self.toFront(last);
-					last.trigger('frontmost');
+					if (!node.children('.elfinder-frontmost:visible').length) {
+						self.toFront(last);
+						last.trigger('frontmost');
+					}
 				}, 20);
 			}
 		}

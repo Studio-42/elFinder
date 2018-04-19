@@ -148,7 +148,8 @@ $.fn.elfindercontextmenu = function(fm) {
 						if (e.originalEvent.touches.length > 1) {
 							return;
 						}
-						menu.stop().show();
+						menu.stop();
+						fm.toFront(menu);
 						menu.data('hideTm') && clearTimeout(menu.data('hideTm'));
 					})
 					.data('hideTm', setTimeout(function() {
@@ -173,6 +174,9 @@ $.fn.elfindercontextmenu = function(fm) {
 								duration: 300,
 								fail: function() {
 									menu.css('opacity', '1').show();
+								},
+								done: function() {
+									fm.toHide(menu);
 								}
 							});
 						}
