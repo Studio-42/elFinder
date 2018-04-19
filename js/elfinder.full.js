@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 4a85994) (2018-04-19)
+ * Version 2.1.37 (2.1-src Nightly: 8e6985f) (2018-04-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -665,7 +665,7 @@ var elFinder = function(elm, opts, bootCallback) {
 						ddm && ddm.helper && ddm.cancel();
 					}
 					// button menus
-					node.find('.ui-widget.elfinder-button-menu').hide();
+					self.toHide(node.find('.ui-widget.elfinder-button-menu.elfinder-frontmost:visible'));
 					// trigger keydownEsc
 					self.trigger('keydownEsc', e);
 				}
@@ -3325,8 +3325,10 @@ var elFinder = function(elm, opts, bootCallback) {
 			last = node.children('.ui-front:visible:not(.elfinder-frontmost)').last();
 			if (last.length) {
 				setTimeout(function() {
-					self.toFront(last);
-					last.trigger('frontmost');
+					if (!node.children('.elfinder-frontmost:visible').length) {
+						self.toFront(last);
+						last.trigger('frontmost');
+					}
 				}, 20);
 			}
 		}
@@ -9429,7 +9431,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 4a85994)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 8e6985f)';
 
 
 
@@ -12523,7 +12525,12 @@ $.fn.elfinderbutton = function(cmd) {
 							// close other menus
 							menu.is(':hidden') && fm.getUI().click();
 							e.stopPropagation();
-							menu.css(getMenuOffset()).slideToggle(100);
+							menu.css(getMenuOffset()).slideToggle({
+								duration: 100,
+								done: function(e) {
+									fm[menu.is(':visible')? 'toFront' : 'toHide'](menu);
+								}
+							});
 						} else {
 							fm.exec(cmd.name, getSelected(), {_userAction: true, _currentType: 'toolbar', _currentNode: button });
 						}
@@ -12531,7 +12538,7 @@ $.fn.elfinderbutton = function(cmd) {
 					}
 				}),
 			hideMenu = function() {
-				menu.hide();
+				fm.toHide(menu);
 			},
 			getMenuOffset = function() {
 				var baseOffset = fm.getUI().offset(),
@@ -12572,7 +12579,7 @@ $.fn.elfinderbutton = function(cmd) {
 					e.preventDefault();
 					e.stopPropagation();
 					button.removeClass(hover);
-					menu.hide();
+					fm.toHide(menu);
 					if (typeof opts === 'undefined') {
 						opts = {};
 					}
@@ -12580,7 +12587,8 @@ $.fn.elfinderbutton = function(cmd) {
 						opts._userAction = true;
 					}
 					fm.exec(cmd.name, getSelected(), opts);
-				});
+				})
+				.on('close', hideMenu);
 
 			fm.bind('disable select', hideMenu).getUI().on('click', hideMenu);
 			
@@ -12762,7 +12770,8 @@ $.fn.elfindercontextmenu = function(fm) {
 						if (e.originalEvent.touches.length > 1) {
 							return;
 						}
-						menu.stop().show();
+						menu.stop();
+						fm.toFront(menu);
 						menu.data('hideTm') && clearTimeout(menu.data('hideTm'));
 					})
 					.data('hideTm', setTimeout(function() {
@@ -12787,6 +12796,9 @@ $.fn.elfindercontextmenu = function(fm) {
 								duration: 300,
 								fail: function() {
 									menu.css('opacity', '1').show();
+								},
+								done: function() {
+									fm.toHide(menu);
 								}
 							});
 						}
@@ -18262,9 +18274,15 @@ $.fn.elfindersortbutton = function(cmd) {
 					if (!button.hasClass(disabled)) {
 						e.stopPropagation();
 						menu.is(':hidden') && fm.getUI().click();
-						menu.css(getMenuOffset()).slideToggle(100);
+						menu.css(getMenuOffset()).slideToggle({
+							duration: 100,
+							done: function(e) {
+								fm[menu.is(':visible')? 'toFront' : 'toHide'](menu);
+							}
+						});
 					}
 				}),
+			hide = function() { fm.toHide(menu); },
 			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
 				.hide()
 				.appendTo(fm.getUI())
@@ -18272,7 +18290,8 @@ $.fn.elfindersortbutton = function(cmd) {
 				.on('click', function(e) {
 					e.preventDefault();
 					e.stopPropagation();
-				}),
+				})
+				.on('close', hide),
 			update = function() {
 				menu.children('[rel]').removeClass(selected+' '+asc+' '+desc)
 					.filter('[rel="'+fm.sortType+'"]')
@@ -18281,7 +18300,6 @@ $.fn.elfindersortbutton = function(cmd) {
 				menu.children('.elfinder-sort-stick').toggleClass(selected, fm.sortStickFolders);
 				menu.children('.elfinder-sort-tree').toggleClass(selected, fm.sortAlsoTreeview);
 			},
-			hide = function() { menu.hide(); },
 			getMenuOffset = function() {
 				var baseOffset = fm.getUI().offset(),
 					buttonOffset = button.offset();
