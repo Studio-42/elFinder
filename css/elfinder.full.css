@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 8e6985f) (2018-04-19)
+ * Version 2.1.37 (2.1-src Nightly: 10212c2) (2018-04-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -960,13 +960,18 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-cwd { 
 	position:absolute;
 	top: 0;
-	left: 0;
 	cursor:default;
 	padding:0;
 	margin:0;
 	-ms-touch-action: auto;
 	touch-action: auto;
 	min-width: 100%;
+}
+.elfinder-ltr .elfinder-cwd {
+	left: 0;
+}
+.elfinder-rtl .elfinder-cwd {
+	right: 0;
 }
 
 /* fixed table header container */
@@ -2824,7 +2829,7 @@ button.elfinder-info-button {
 	left: -14px;
 }
 .elfinder-ltr .elfinder-quicklook .elfinder-cwd-icon:after {
-	left: -40px;
+	left: -20px;
 }
 .elfinder-ltr .elfinder-navdock .elfinder-quicklook .elfinder-cwd-icon:after {
     left: -12px;
@@ -2835,7 +2840,7 @@ button.elfinder-info-button {
 }
 .elfinder-rtl .elfinder-quicklook .elfinder-cwd-icon:after {
 	left: auto;
-	right: 40px;
+	right: 46px;
 }
 
 /* image in preview */

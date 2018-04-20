@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 8e6985f) (2018-04-19)
+ * Version 2.1.37 (2.1-src Nightly: 10212c2) (2018-04-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9431,7 +9431,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 8e6985f)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 10212c2)';
 
 
 
@@ -9862,9 +9862,9 @@ elFinder.prototype._options = {
 		// for editor etc.
 		ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.3.3',
 		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.36.0',
-		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.9.1',
+		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.9.2',
 		ckeditor5  : '//cdn.ckeditor.com/ckeditor5/1.0.0-beta.3',
-		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.7.10',
+		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.7.11',
 		simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		// for quicklook etc.
 		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.9.1/hls.min.js',
@@ -14211,10 +14211,11 @@ $.fn.elfindercwd = function(fm, options) {
 					return;
 				}
 				var setPos = function() {
-					var val;
-					val = (fm.direction === 'ltr')? wrapper.scrollLeft() * -1 : table.outerWidth(true) - wrapper.width() - wrapper.scrollLeft();
-					if (base.css('left') !== val) {
-						base.css('left', val);
+					var val, pos;
+					pos = (fm.direction === 'ltr')? 'left' : 'right';
+					val = ((fm.direction === 'ltr')? wrapper.scrollLeft() : table.outerWidth(true) - wrapper.width() - wrapper.scrollLeft()) * -1;
+					if (base.css(pos) !== val) {
+						base.css(pos, val);
 					}
 				},
 				opts = optsArg || {},
