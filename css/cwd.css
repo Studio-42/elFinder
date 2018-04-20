@@ -15,13 +15,18 @@
 .elfinder-cwd { 
 	position:absolute;
 	top: 0;
-	left: 0;
 	cursor:default;
 	padding:0;
 	margin:0;
 	-ms-touch-action: auto;
 	touch-action: auto;
 	min-width: 100%;
+}
+.elfinder-ltr .elfinder-cwd {
+	left: 0;
+}
+.elfinder-rtl .elfinder-cwd {
+	right: 0;
 }
 
 /* fixed table header container */
