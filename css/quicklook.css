@@ -254,7 +254,7 @@
 	left: -14px;
 }
 .elfinder-ltr .elfinder-quicklook .elfinder-cwd-icon:after {
-	left: -40px;
+	left: -20px;
 }
 .elfinder-ltr .elfinder-navdock .elfinder-quicklook .elfinder-cwd-icon:after {
     left: -12px;
@@ -265,7 +265,7 @@
 }
 .elfinder-rtl .elfinder-quicklook .elfinder-cwd-icon:after {
 	left: auto;
-	right: 40px;
+	right: 46px;
 }
 
 /* image in preview */
