@@ -924,10 +924,11 @@ $.fn.elfindercwd = function(fm, options) {
 					return;
 				}
 				var setPos = function() {
-					var val;
-					val = (fm.direction === 'ltr')? wrapper.scrollLeft() * -1 : table.outerWidth(true) - wrapper.width() - wrapper.scrollLeft();
-					if (base.css('left') !== val) {
-						base.css('left', val);
+					var val, pos;
+					pos = (fm.direction === 'ltr')? 'left' : 'right';
+					val = ((fm.direction === 'ltr')? wrapper.scrollLeft() : table.outerWidth(true) - wrapper.width() - wrapper.scrollLeft()) * -1;
+					if (base.css(pos) !== val) {
+						base.css(pos, val);
 					}
 				},
 				opts = optsArg || {},
