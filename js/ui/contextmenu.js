@@ -303,8 +303,7 @@ $.fn.elfindercontextmenu = function(fm) {
 				currentType = currentTargets = null;
 				
 				if (menu.is(':visible') || menu.children().length) {
-					fm.toHide(menu);
-					menu.removeAttr('style').empty().removeData('submenuKeep');
+					fm.toHide(menu.removeAttr('style').empty().removeData('submenuKeep'));
 					try {
 						if (! menu.draggable('instance')) {
 							menu.draggable(dragOpt);
