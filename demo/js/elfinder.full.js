@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 425d7c2) (2018-04-21)
+ * Version 2.1.37 (2.1-src Nightly: 6691f9e) (2018-04-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9441,7 +9441,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 425d7c2)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 6691f9e)';
 
 
 
@@ -12935,8 +12935,7 @@ $.fn.elfindercontextmenu = function(fm) {
 				currentType = currentTargets = null;
 				
 				if (menu.is(':visible') || menu.children().length) {
-					fm.toHide(menu);
-					menu.removeAttr('style').empty().removeData('submenuKeep');
+					fm.toHide(menu.removeAttr('style').empty().removeData('submenuKeep'));
 					try {
 						if (! menu.draggable('instance')) {
 							menu.draggable(dragOpt);
@@ -16245,12 +16244,12 @@ $.fn.elfinderdialog = function(opts, fm) {
 									doffset = dialog.data('minimized', true).position();
 									mnode = dialog.clone().on('mousedown', function() {
 										$this.trigger('mousedown');
-									}).removeClass('ui-draggable ui-resizable');
+									}).removeClass('ui-draggable ui-resizable elfinder-frontmost');
 									tray.append(dum);
 									Object.assign(pos, dum.offset(), dumStyle);
 									dum.remove();
 									mnode.height(dialog.height()).children('.ui-dialog-content:first').empty();
-									dialog.before(mnode).hide();
+									fm.toHide(dialog.before(mnode));
 									mnode.children('.ui-dialog-content:first,.ui-dialog-buttonpane,.ui-resizable-handle').remove();
 									mnode.find('.elfinder-titlebar-minimize,.elfinder-titlebar-full').remove();
 									mnode.find('.ui-dialog-titlebar-close').on('mousedown', function(e) {
