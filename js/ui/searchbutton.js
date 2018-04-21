@@ -67,6 +67,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 					opts && opts.slideDown(function() {
 						// Care for on browser window re-active
 						button.addClass('ui-state-active');
+						fm.toFront(opts);
 					});
 				})
 				.on('blur', function() {
@@ -76,6 +77,7 @@ $.fn.elfindersearchbutton = function(cmd) {
 							opts.slideUp(function() {
 								button.removeClass('ui-state-active');
 								fm.trigger('uiresize');
+								fm.toHide(opts);
 							});
 						} else {
 							opts.data('infocus', false);
@@ -225,6 +227,9 @@ $.fn.elfindersearchbutton = function(cmd) {
 						.on('click', 'input', function(e) {
 							e.stopPropagation();
 							$.trim(input.val())? search() : input.trigger('focus');
+						})
+						.on('close', function() {
+							input.trigger('blur');
 						});
 				}
 			})
