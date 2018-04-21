@@ -255,12 +255,12 @@ $.fn.elfinderdialog = function(opts, fm) {
 									doffset = dialog.data('minimized', true).position();
 									mnode = dialog.clone().on('mousedown', function() {
 										$this.trigger('mousedown');
-									}).removeClass('ui-draggable ui-resizable');
+									}).removeClass('ui-draggable ui-resizable elfinder-frontmost');
 									tray.append(dum);
 									Object.assign(pos, dum.offset(), dumStyle);
 									dum.remove();
 									mnode.height(dialog.height()).children('.ui-dialog-content:first').empty();
-									dialog.before(mnode).hide();
+									fm.toHide(dialog.before(mnode));
 									mnode.children('.ui-dialog-content:first,.ui-dialog-buttonpane,.ui-resizable-handle').remove();
 									mnode.find('.elfinder-titlebar-minimize,.elfinder-titlebar-full').remove();
 									mnode.find('.ui-dialog-titlebar-close').on('mousedown', function(e) {
