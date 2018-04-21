@@ -29,6 +29,34 @@
 	right: 0;
 }
 
+.elfinder-cwd.elfinder-table-header-sticky {
+	position: -webkit-sticky;
+	position: -ms-sticky;
+	position: sticky;
+	top: 0;
+	left: auto;
+	right: auto;
+	width: -webkit-max-content;
+	width: -moz-max-content;
+	width: -ms-max-content;
+	width: max-content;
+	height: 0;
+	overflow: visible;
+}
+
+.elfinder-cwd.elfinder-table-header-sticky table {
+	border-top: 2px solid;
+	padding-top: 0;
+}
+
+.elfinder-cwd.elfinder-table-header-sticky td {
+	display: inline-block;
+}
+
+.elfinder-droppable-active .elfinder-cwd.elfinder-table-header-sticky table {
+	border-top: 2px solid transparent;
+}
+
 /* fixed table header container */
 .elfinder-cwd-fixheader .elfinder-cwd {
 	position: relative;
@@ -691,7 +719,7 @@
 }
 
 .elfinder-touch .elfinder-cwd thead .elfinder-cwd-selectall {
-	padding-top: 5px;
+	padding-top: 4px;
 }
 
 .elfinder .elfinder-cwd table thead tr { border-left:0 solid; border-top:0 solid; border-right:0 solid; }
@@ -704,6 +732,11 @@
 }
 .elfinder-rtl .elfinder-cwd.elfinder-has-checkbox table thead td:first-child {
 	padding: 4px 22px 4px 14px;
+}
+.elfinder-touch .elfinder-cwd table thead td,
+.elfinder-touch .elfinder-cwd.elfinder-has-checkbox table thead td:first-child {
+	padding-top: 8px;
+	padding-bottom: 8px;
 }
 
 .elfinder .elfinder-cwd table thead td.ui-state-active {
@@ -745,10 +778,6 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 
 .elfinder-touch .elfinder-cwd tr td {
 	padding: 10px 12px;
-}
-
-.elfinder-touch .elfinder-cwd table thead td {
-	padding: 8px 14px;
 }
 
 .elfinder-touch .elfinder-cwd tr.elfinder-cwd-file td {
@@ -805,10 +834,10 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 /* table header resize handle */
 .elfinder-cwd-view-list thead td .ui-resizable-handle {
 	height: 100%;
-	top: 3px;
+	top: 6px;
 }
 .elfinder-touch .elfinder-cwd-view-list thead td .ui-resizable-handle {
-	top: -5px;
+	top: -4px;
 	margin: 10px;
 }
 .elfinder-cwd-view-list thead td .ui-resizable-e {
@@ -835,7 +864,7 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 	position: -webkit-sticky;
 	position: sticky;
 	width: 100%;
-	height: 100%;
+	height: calc(100% - 0.01px); /* for Firefox scroll problem */
 	top: 0;
 	left: 0;
 	margin: 0;
