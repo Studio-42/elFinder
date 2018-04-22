@@ -764,7 +764,7 @@ $.fn.elfindertree = function(fm, opts) {
 							parent.animate({
 								scrollTop : parent.scrollTop() + tgtTop - top - treeH / 3
 							}, {
-								duration : 'fast',
+								duration : opts.durations.autoScroll,
 								complete : function() {	dfrd.resolve(); }
 							});
 						} else {
@@ -1204,7 +1204,7 @@ $.fn.elfindertree = function(fm, opts) {
 								fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
 								checkSubdirs();
 							} else {
-								stree.stop(true, true)[link.hasClass(expanded)? 'slideDown' : 'slideUp']('normal', function(){
+								stree.stop(true, true)[link.hasClass(expanded)? 'slideDown' : 'slideUp'](opts.durations.slideUpDown, function(){
 									fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
 									checkSubdirs();
 								});
@@ -1227,7 +1227,7 @@ $.fn.elfindertree = function(fm, opts) {
 										fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
 										checkSubdirs();
 									} else {
-										stree.stop(true, true).slideDown('normal', function(){
+										stree.stop(true, true).slideDown(opts.durations.slideUpDown, function(){
 											fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
 											checkSubdirs();
 										});
