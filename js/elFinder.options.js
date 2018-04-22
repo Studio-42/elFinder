@@ -654,7 +654,12 @@ elFinder.prototype._options = {
 			// Numbar of max connctions of subdirs request
 			subdirsMaxConn : 2,
 			// Number of max simultaneous processing directory of subdirs
-			subdirsAtOnce : 5
+			subdirsAtOnce : 5,
+			// Durations of each animations
+			durations : {
+				slideUpDown : 'fast',
+				autoScroll : 'fast'
+			}
 			// ,
 			// /**
 			//  * Add CSS class name to navbar directories (optional)
