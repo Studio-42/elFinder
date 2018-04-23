@@ -754,6 +754,20 @@ elFinder.prototype._options = {
 		dialog : {
 			// Enable to auto focusing on mouse over in the target form element
 			focusOnMouseOver : true
+		},
+		toast : {
+			animate : {
+				// to show
+				showMethod: 'fadeIn', // fadeIn, slideDown, and show are built into jQuery
+				showDuration: 300,    // milliseconds
+				showEasing: 'swing',  // swing and linear are built into jQuery
+				// timeout to hide
+				timeOut: 3000,
+				// to hide
+				hideMethod: 'fadeOut',
+				hideDuration: 1500,
+				hideEasing: 'swing'
+			}
 		}
 	},
 

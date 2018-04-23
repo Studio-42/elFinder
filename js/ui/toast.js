@@ -8,7 +8,7 @@
  **/
 $.fn.elfindertoast = function(opts, fm) {
 	"use strict";
-	var defOpts = {
+	var defOpts = Object.assign({
 		mode: 'success',
 		msg: '',
 		showMethod: 'fadeIn', //fadeIn, slideDown, and show are built into jQuery
@@ -21,7 +21,7 @@ $.fn.elfindertoast = function(opts, fm) {
 		onHidden: undefined,
 		timeOut: 3000,
 		extNode: undefined
-	};
+	}, $.isPlainObject(fm.options.uiOptions.toast.defaults)? fm.options.uiOptions.toast.defaults : {});
 	return this.each(function() {
 		opts = Object.assign({}, defOpts, opts || {});
 		
