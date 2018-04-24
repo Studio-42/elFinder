@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 7318392) (2018-04-23)
+ * Version 2.1.37 (2.1-src Nightly: 9154066) (2018-04-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9441,7 +9441,7 @@ if (!Array.from) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 7318392)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 9154066)';
 
 
 
@@ -11794,6 +11794,10 @@ elFinder.prototype.resources = {
 								dfrd.reject();
 							});
 						}
+					})
+					.on('dragenter dragleave dragover drop', function(e) {
+						// stop bubbling to prevent upload with native drop event
+						e.stopPropagation();
 					}),
 				select = function() {
 					var name = fm.splitFileExtention(input.val())[0];
@@ -15077,7 +15081,7 @@ $.fn.elfindercwd = function(fm, options) {
 						nodeName = e.target.nodeName,
 						sel;
 					
-					if (nodeName === 'INPUT' || nodeName === 'TEXTAREA') {
+					if ((nodeName === 'INPUT' && e.target.type === 'text') || nodeName === 'TEXTAREA') {
 						e.stopPropagation();
 						return;
 					}
@@ -15091,7 +15095,6 @@ $.fn.elfindercwd = function(fm, options) {
 					
 					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 					if (selectCheckbox && (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select'))) {
-						e.stopPropagation();
 						return;
 					}
 					
@@ -15115,11 +15118,16 @@ $.fn.elfindercwd = function(fm, options) {
 					}, 500));
 				})
 				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, fileSelector, function(e) {
-					if (e.target.nodeName == 'INPUT' || e.target.nodeName == 'TEXTAREA' || $(e.target).hasClass('elfinder-cwd-select')) {
+					var tgt = $(e.target),
+						p;
+					if (selectCheckbox && (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select'))) {
+						return;
+					}
+					if (e.target.nodeName == 'INPUT' || e.target.nodeName == 'TEXTAREA') {
 						e.stopPropagation();
 						return;
 					}
-					var p = this.id ? $(this) : $(this).parents('[id]:first');
+					p = this.id ? $(this) : $(this).parents('[id]:first');
 					clearTimeout(p.data('tmlongtap'));
 					if (e.type === 'touchmove') {
 						wrapper.data('touching', null);
@@ -27914,7 +27922,11 @@ elFinder.prototype.commands.rename = function() {
 						e.preventDefault();
 					}
 				})
-				.on('blur', blur),
+				.on('blur', blur)
+				.on('dragenter dragleave dragover drop', function(e) {
+					// stop bubbling to prevent upload with native drop event
+					e.stopPropagation();
+				}),
 			select = function() {
 				var name = fm.splitFileExtention(input.val())[0];
 				if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? (z-index not effect) so disable it
