@@ -471,7 +471,11 @@ elFinder.prototype.commands.rename = function() {
 						e.preventDefault();
 					}
 				})
-				.on('blur', blur),
+				.on('blur', blur)
+				.on('dragenter dragleave dragover drop', function(e) {
+					// stop bubbling to prevent upload with native drop event
+					e.stopPropagation();
+				}),
 			select = function() {
 				var name = fm.splitFileExtention(input.val())[0];
 				if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? (z-index not effect) so disable it
