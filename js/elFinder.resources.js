@@ -268,6 +268,10 @@ elFinder.prototype.resources = {
 								dfrd.reject();
 							});
 						}
+					})
+					.on('dragenter dragleave dragover drop', function(e) {
+						// stop bubbling to prevent upload with native drop event
+						e.stopPropagation();
 					}),
 				select = function() {
 					var name = fm.splitFileExtention(input.val())[0];
