@@ -1762,7 +1762,7 @@ $.fn.elfindercwd = function(fm, options) {
 						nodeName = e.target.nodeName,
 						sel;
 					
-					if (nodeName === 'INPUT' || nodeName === 'TEXTAREA') {
+					if ((nodeName === 'INPUT' && e.target.type === 'text') || nodeName === 'TEXTAREA') {
 						e.stopPropagation();
 						return;
 					}
@@ -1776,7 +1776,6 @@ $.fn.elfindercwd = function(fm, options) {
 					
 					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 					if (selectCheckbox && (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select'))) {
-						e.stopPropagation();
 						return;
 					}
 					
@@ -1800,11 +1799,16 @@ $.fn.elfindercwd = function(fm, options) {
 					}, 500));
 				})
 				.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace, fileSelector, function(e) {
-					if (e.target.nodeName == 'INPUT' || e.target.nodeName == 'TEXTAREA' || $(e.target).hasClass('elfinder-cwd-select')) {
+					var tgt = $(e.target),
+						p;
+					if (selectCheckbox && (tgt.is('input:checkbox') || tgt.hasClass('elfinder-cwd-select'))) {
+						return;
+					}
+					if (e.target.nodeName == 'INPUT' || e.target.nodeName == 'TEXTAREA') {
 						e.stopPropagation();
 						return;
 					}
-					var p = this.id ? $(this) : $(this).parents('[id]:first');
+					p = this.id ? $(this) : $(this).parents('[id]:first');
 					clearTimeout(p.data('tmlongtap'));
 					if (e.type === 'touchmove') {
 						wrapper.data('touching', null);
