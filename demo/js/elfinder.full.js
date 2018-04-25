@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: bb1e9ad) (2018-04-25)
+ * Version 2.1.37 (2.1-src Nightly: 2cef031) (2018-04-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9482,7 +9482,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: bb1e9ad)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 2cef031)';
 
 
 
@@ -16109,10 +16109,12 @@ $.fn.elfinderdialog = function(opts, fm) {
 	if (typeof opts  === 'string') {
 		if ((dialog = this.closest('.ui-dialog')).length) {
 			if (opts === 'open') {
-				dialog.css('display') === 'none' && dialog.fadeIn(120, function() {
-					dialog.trigger('open');
-					fm.trigger('dialogopened', {dialog: dialog});
-				});
+				if (dialog.css('display') === 'none') {
+					dialog.trigger('posinit').fadeIn(120, function() {
+						dialog.trigger('open');
+						fm.trigger('dialogopened', {dialog: dialog});
+					});
+				}
 			} else if (opts === 'close' || opts === 'destroy') {
 				dialog.stop(true);
 				if (dialog.is(':visible') || elfNode.is(':hidden')) {
