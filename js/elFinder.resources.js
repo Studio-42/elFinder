@@ -120,9 +120,9 @@ elFinder.prototype.resources = {
 				data = this.data || {},
 				node = ui.trigger('create.'+fm.namespace, file).find('#'+fm[find](id))
 					.on('unselect.'+fm.namespace, function() {
-						setTimeout(function() {
+						requestAnimationFrame(function() {
 							input && input.trigger('blur');
-						}, 50);
+						});
 					}),
 				nnode, pnode,
 				overlay = fm.getUI('overlay'),
@@ -131,13 +131,13 @@ elFinder.prototype.resources = {
 						input.off();
 						node.hide();
 						fm.unselectfiles({files : [id]}).unbind('resize', resize);
-						setTimeout(function() {
+						requestAnimationFrame(function() {
 							if (tree) {
 								node.closest('.elfinder-navbar-wrapper').remove();
 							} else {
 								node.remove();
 							}
-						}, 0);
+						});
 					}
 				},
 				cancel = function(e) { 

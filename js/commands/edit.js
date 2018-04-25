@@ -227,7 +227,7 @@ elFinder.prototype.commands.edit = function() {
 								buttons : [{
 									label    : 'btnSaveAs',
 									callback : function() {
-										setTimeout(saveAs, 10);
+										requestAnimationFrame(saveAs);
 									}
 								}]
 							});
@@ -386,10 +386,10 @@ elFinder.prototype.commands.edit = function() {
 						ta.parent().prev().find('.elfinder-titlebar-button:last')
 							.after($('<span class="elfinder-titlebar-button-right"/>').append(selEncoding));
 						
-						setTimeout(function() {
+						requestAnimationFrame(function() {
 							ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
 							ta.trigger('focus');
-						}, 10);
+						});
 					};
 				})();
 			}
@@ -583,10 +583,10 @@ elFinder.prototype.commands.edit = function() {
 								ta.trigger('_savefail');
 							})
 							.done(function(data) {
-								setTimeout(function(){
+								requestAnimationFrame(function(){
 									ta.trigger('focus');
 									ta.editor && ta.editor.focus(ta[0], ta.editor.instance);
-								}, 50);
+								});
 								ta.trigger('_savedone');
 							});
 						})
@@ -877,11 +877,11 @@ elFinder.prototype.commands.edit = function() {
 						y: node.offset().top + 22,
 						opened: function() {
 							fm.one('closecontextmenu',function() {
-								setTimeout(function() {
+								requestAnimationFrame(function() {
 									if (dfd.state() === 'pending') {
 										dfd.reject();
 									}
-								}, 10);
+								});
 							});
 						}
 					});
