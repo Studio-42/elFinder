@@ -253,7 +253,7 @@ $.fn.elfindertree = function(fm, opts) {
 			execSubdirs = function() {
 				var cnt = opts.subdirsMaxConn - subdirsPending,
 					i, ids;
-				execSubdirsTm && clearTimeout(execSubdirsTm);
+				execSubdirsTm && cancelAnimationFrame(execSubdirsTm);
 				if (subdirsExecQue.length) {
 					if (cnt > 0) {
 						for (i = 0; i < cnt; i++) {
@@ -266,9 +266,9 @@ $.fn.elfindertree = function(fm, opts) {
 							}
 						}
 					} else {
-						execSubdirsTm = setTimeout(function() {
+						execSubdirsTm = requestAnimationFrame(function() {
 							subdirsExecQue.length && execSubdirs();
-						}, 50);
+						});
 					}
 				}
 			},
@@ -323,7 +323,7 @@ $.fn.elfindertree = function(fm, opts) {
 						}
 					}
 					dst.hasClass(dropover) && helper.addClass(status);
-					setTimeout(function(){ dst.hasClass(dropover) && helper.addClass(status); }, 20);
+					requestAnimationFrame(function(){ dst.hasClass(dropover) && helper.addClass(status); });
 				},
 				out : function(e, ui) {
 					var dst    = $(this),
@@ -1295,11 +1295,11 @@ $.fn.elfindertree = function(fm, opts) {
 			// move tree into navbar
 			navbar = fm.getUI('navbar').append(tree).show().on('scroll', function() {
 				scrolling = true;
-				navbarScrTm && clearTimeout(navbarScrTm);
-				navbarScrTm = setTimeout(function() {
+				navbarScrTm && cancelAnimationFrame(navbarScrTm);
+				navbarScrTm = requestAnimationFrame(function() {
 					scrolling = false;
 					checkSubdirs();
-				}, 50);
+				});
 			}),
 			
 			prevSortTreeview = fm.sortAlsoTreeview;

@@ -260,7 +260,7 @@ elFinder.prototype.commands.upload = function() {
 				}
 			}
 			var my = e.target || e.srcElement;
-			setTimeout(function () {
+			requestAnimationFrame(function() {
 				var type = 'text',
 					src;
 				if (my.innerHTML) {
@@ -280,7 +280,7 @@ elFinder.prototype.commands.upload = function() {
 					my.innerHTML = '';
 					upload({files : [ src ], type : type});
 				}
-			}, 1);
+			});
 		};
 		
 		dialog = $('<div class="elfinder-upload-dialog-wrapper"/>')

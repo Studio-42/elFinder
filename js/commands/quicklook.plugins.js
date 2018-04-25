@@ -150,7 +150,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					PSD.fromURL(url).then(function(psd) {
 						var prop;
 						img.attr('src', psd.image.toBase64());
-						setTimeout(function() {
+						requestAnimationFrame(function() {
 							prop = (img.width()/img.height()).toFixed(2);
 							preview.on('changesize', function() {
 								var pw = parseInt(preview.width()),
@@ -172,7 +172,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							ql.hideinfo();
 							//show image
 							img.fadeIn(100);
-						}, 1);
+						});
 					}, function() {
 						loading.remove();
 						img.remove();
@@ -366,10 +366,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 					} else {
 						if (typeof window.PR === 'object') {
 							node.css('cursor', 'wait');
-							setTimeout(function() {
+							requestAnimationFrame(function() {
 								PR.prettyPrint && PR.prettyPrint(null, node.get(0));
 								node.css('cursor', '');
-							}, 0);
+							});
 						} else {
 							prettify = function() { return false; };
 						}

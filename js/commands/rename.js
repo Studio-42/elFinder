@@ -318,9 +318,9 @@ elFinder.prototype.commands.rename = function() {
 				return [name.substr(0, name.length - ext.length - 1), ext];
 			},
 			unselect = function() {
-				setTimeout(function() {
+				requestAnimationFrame(function() {
 					input && input.trigger('blur');
-				}, 50);
+				});
 			},
 			rest     = function(){
 				if (!overlay.is(':hidden')) {
@@ -345,7 +345,7 @@ elFinder.prototype.commands.rename = function() {
 					if (tarea) {
 						name = name.replace(/([_.])/g, '&#8203;$1');
 					}
-					setTimeout(function() {
+					requestAnimationFrame(function() {
 						if (navbar) {
 							input.replaceWith(name);
 						} else {
@@ -356,7 +356,7 @@ elFinder.prototype.commands.rename = function() {
 								target.find(filename).html(name);
 							}
 						}
-					}, 0);
+					});
 					error && fm.error(error);
 				})
 				.always(function() {

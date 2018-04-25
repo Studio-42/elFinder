@@ -291,9 +291,9 @@ $.fn.elfindercontextmenu = function(fm) {
 				
 				fm.UA.Mobile && autoToggle();
 				
-				setTimeout(function() {
+				requestAnimationFrame(function() {
 					fm.getUI().one('click.' + fm.namespace, close);
-				}, 0);
+				});
 			},
 			
 			close = function() {

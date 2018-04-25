@@ -265,9 +265,9 @@
 						stop: function() {
 							navdrag = false;
 							navStyle = self.navbar.attr('style');
-							setTimeout(function() {
+							requestAnimationFrame(function() {
 								navmove = false;
-							}, 20);
+							});
 						}
 					});
 				}
@@ -481,9 +481,9 @@
 			var win = this;
 			e.stopPropagation();
 			if (state === opened) {
-				setTimeout(function() {
+				requestAnimationFrame(function() {
 					state === opened && fm.toFront(win);
-				}, 10);
+				});
 			}
 		})
 		.append(
@@ -629,11 +629,11 @@
 	this.handlers = {
 		// save selected file
 		select : function(e, d) {
-			selectTm && clearTimeout(selectTm);
+			selectTm && cancelAnimationFrame(selectTm);
 			if (! e.data || ! e.data.selected || ! e.data.selected.length) {
-				selectTm = setTimeout(function() {
+				selectTm = requestAnimationFrame(function() {
 					self.opened() && updateOnSel();
-				}, 0);
+				});
 			} else {
 				self.opened() && updateOnSel();
 			}
@@ -641,9 +641,9 @@
 		error  : function() { self.window.is(':visible') && self.window.trigger('close'); },
 		'searchshow searchhide' : function() { this.opened() && this.window.trigger('close'); },
 		navbarshow : function() {
-			setTimeout(function() {
+			requestAnimationFrame(function() {
 				self.docked() && self.preview.trigger('changesize');
-			}, 0);
+			});
 		},
 		destroy : function() { self.window.remove(); }
 	};
