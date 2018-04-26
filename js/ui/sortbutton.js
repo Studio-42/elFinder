@@ -57,7 +57,8 @@ $.fn.elfindersortbutton = function(cmd) {
 					top : buttonOffset.top - baseOffset.top,
 					left : buttonOffset.left - baseOffset.left
 				};
-			};
+			},
+			tm;
 			
 		text.hide();
 		
@@ -94,8 +95,11 @@ $.fn.elfindersortbutton = function(cmd) {
 		
 		if (menu.children().length > 1) {
 			cmd.change(function() {
-					button.toggleClass(disabled, cmd.disabled());
-					update();
+					tm && cancelAnimationFrame(tm);
+					tm = requestAnimationFrame(function() {
+						button.toggleClass(disabled, cmd.disabled());
+						update();
+					});
 				})
 				.change();
 		} else {

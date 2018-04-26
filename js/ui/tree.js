@@ -738,18 +738,23 @@ $.fn.elfindertree = function(fm, opts) {
 			},
 
 			/**
+			 * Timer ID of autoScroll
+			 * 
+			 * @type  Integer
+			 */
+			autoScrTm,
+
+			/**
 			 * Auto scroll to cwd
 			 *
-			 * @return void
+			 * @return Object  jQuery Deferred
 			 */
 			autoScroll = function(target) {
-				var self = $(this),
-					dfrd = $.Deferred(),
+				var dfrd = $.Deferred(),
 					current, parent, top, treeH, bottom, tgtTop;
-				self.data('autoScrTm') && clearTimeout(self.data('autoScrTm'));
-				self.data('autoScrTm', setTimeout(function() {
+				autoScrTm && clearTimeout(autoScrTm);
+				autoScrTm = setTimeout(function() {
 					current = $('#'+(target || fm.navHash2Id(fm.cwd().hash)));
-					
 					if (current.length) {
 						// expand parents directory
 						(openCwd? current : current.parent()).parents('.elfinder-navbar-wrapper').children('.'+loaded).addClass(expanded).next('.'+subtree).show();
@@ -773,7 +778,7 @@ $.fn.elfindertree = function(fm, opts) {
 					} else {
 						dfrd.reject();
 					}
-				}, 100));
+				}, 100);
 				return dfrd;
 			},
 			/**

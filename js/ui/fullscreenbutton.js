@@ -8,11 +8,15 @@ $.fn.elfinderfullscreenbutton = function(cmd) {
 	"use strict";
 	return this.each(function() {
 		var button = $(this).elfinderbutton(cmd),
-			icon   = button.children('.elfinder-button-icon');
+			icon   = button.children('.elfinder-button-icon'),
+			tm;
 		cmd.change(function() {
-			var fullscreen = cmd.value;
-			icon.toggleClass('elfinder-button-icon-unfullscreen', fullscreen);
-			cmd.className = fullscreen? 'unfullscreen' : '';
+			tm && cancelAnimationFrame(tm);
+			tm = requestAnimationFrame(function() {
+				var fullscreen = cmd.value;
+				icon.toggleClass('elfinder-button-icon-unfullscreen', fullscreen);
+				cmd.className = fullscreen? 'unfullscreen' : '';
+			});
 		});
 	});
 };
