@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: d514c2f) (2018-04-26)
+ * Version 2.1.37 (2.1-src Nightly: 292052f) (2018-04-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9496,7 +9496,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: d514c2f)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 292052f)';
 
 
 
@@ -12647,7 +12647,8 @@ $.fn.elfinderbutton = function(cmd) {
 					}
 				}
 				return sel;
-			};
+			},
+			tm;
 			
 		text.hide();
 		
@@ -12689,16 +12690,19 @@ $.fn.elfinderbutton = function(cmd) {
 		}	
 			
 		cmd.change(function() {
-			if (cmd.disabled()) {
-				button.removeClass(active+' '+hover).addClass(disabled);
-			} else {
-				button.removeClass(disabled);
-				button[cmd.active() ? 'addClass' : 'removeClass'](active);
-			}
-			if (cmd.syncTitleOnChange) {
-				text.html(cmd.title);
-				button.attr('title', cmd.title);
-			}
+			tm && cancelAnimationFrame(tm);
+			tm = requestAnimationFrame(function() {
+				if (cmd.disabled()) {
+					button.removeClass(active+' '+hover).addClass(disabled);
+				} else {
+					button.removeClass(disabled);
+					button[cmd.active() ? 'addClass' : 'removeClass'](active);
+				}
+				if (cmd.syncTitleOnChange) {
+					text.html(cmd.title);
+					button.attr('title', cmd.title);
+				}
+			});
 		})
 		.change();
 	});
@@ -16825,11 +16829,15 @@ $.fn.elfinderdialog.defaults = {
 $.fn.elfinderfullscreenbutton = function(cmd) {
 		return this.each(function() {
 		var button = $(this).elfinderbutton(cmd),
-			icon   = button.children('.elfinder-button-icon');
+			icon   = button.children('.elfinder-button-icon'),
+			tm;
 		cmd.change(function() {
-			var fullscreen = cmd.value;
-			icon.toggleClass('elfinder-button-icon-unfullscreen', fullscreen);
-			cmd.className = fullscreen? 'unfullscreen' : '';
+			tm && cancelAnimationFrame(tm);
+			tm = requestAnimationFrame(function() {
+				var fullscreen = cmd.value;
+				icon.toggleClass('elfinder-button-icon-unfullscreen', fullscreen);
+				cmd.className = fullscreen? 'unfullscreen' : '';
+			});
 		});
 	});
 };
@@ -18418,7 +18426,8 @@ $.fn.elfindersortbutton = function(cmd) {
 					top : buttonOffset.top - baseOffset.top,
 					left : buttonOffset.left - baseOffset.left
 				};
-			};
+			},
+			tm;
 			
 		text.hide();
 		
@@ -18455,8 +18464,11 @@ $.fn.elfindersortbutton = function(cmd) {
 		
 		if (menu.children().length > 1) {
 			cmd.change(function() {
-					button.toggleClass(disabled, cmd.disabled());
-					update();
+					tm && cancelAnimationFrame(tm);
+					tm = requestAnimationFrame(function() {
+						button.toggleClass(disabled, cmd.disabled());
+						update();
+					});
 				})
 				.change();
 		} else {
@@ -19714,18 +19726,23 @@ $.fn.elfindertree = function(fm, opts) {
 			},
 
 			/**
+			 * Timer ID of autoScroll
+			 * 
+			 * @type  Integer
+			 */
+			autoScrTm,
+
+			/**
 			 * Auto scroll to cwd
 			 *
-			 * @return void
+			 * @return Object  jQuery Deferred
 			 */
 			autoScroll = function(target) {
-				var self = $(this),
-					dfrd = $.Deferred(),
+				var dfrd = $.Deferred(),
 					current, parent, top, treeH, bottom, tgtTop;
-				self.data('autoScrTm') && clearTimeout(self.data('autoScrTm'));
-				self.data('autoScrTm', setTimeout(function() {
+				autoScrTm && clearTimeout(autoScrTm);
+				autoScrTm = setTimeout(function() {
 					current = $('#'+(target || fm.navHash2Id(fm.cwd().hash)));
-					
 					if (current.length) {
 						// expand parents directory
 						(openCwd? current : current.parent()).parents('.elfinder-navbar-wrapper').children('.'+loaded).addClass(expanded).next('.'+subtree).show();
@@ -19749,7 +19766,7 @@ $.fn.elfindertree = function(fm, opts) {
 					} else {
 						dfrd.reject();
 					}
-				}, 100));
+				}, 100);
 				return dfrd;
 			},
 			/**
@@ -20529,17 +20546,21 @@ $.fn.elfinderuploadbutton = function(cmd) {
 				})
 				.on('dragover', function(e) {
 					e.originalEvent.dataTransfer.dropEffect = 'copy';
-				});
+				}),
+			tm;
 
 		form.append(input.clone(true));
 				
 		cmd.change(function() {
-			var toShow = cmd.disabled();
-			if (form.is('visible')) {
-				!toShow && form.hide();
-			} else {
-				toShow && form.show();
-			}
+			tm && cancelAnimationFrame(tm);
+			tm = requestAnimationFrame(function() {
+				var toShow = cmd.disabled();
+				if (form.is('visible')) {
+					!toShow && form.hide();
+				} else {
+					toShow && form.show();
+				}
+			});
 		})
 		.change();
 	});
@@ -20558,15 +20579,19 @@ $.fn.elfinderuploadbutton = function(cmd) {
 $.fn.elfinderviewbutton = function(cmd) {
 		return this.each(function() {
 		var button = $(this).elfinderbutton(cmd),
-			icon   = button.children('.elfinder-button-icon');
+			icon   = button.children('.elfinder-button-icon'),
+			tm;
 
 		cmd.change(function() {
-			var icons = cmd.value == 'icons';
+			tm && cancelAnimationFrame(tm);
+			tm = requestAnimationFrame(function() {
+				var icons = cmd.value == 'icons';
 
-			icon.toggleClass('elfinder-button-icon-view-list', icons);
-			cmd.className = icons? 'view-list' : '';
-			cmd.title = cmd.fm.i18n(icons ? 'viewlist' : 'viewicons');
-			button.attr('title', cmd.title);
+				icon.toggleClass('elfinder-button-icon-view-list', icons);
+				cmd.className = icons? 'view-list' : '';
+				cmd.title = cmd.fm.i18n(icons ? 'viewlist' : 'viewicons');
+				button.attr('title', cmd.title);
+			});
 		});
 	});
 };
