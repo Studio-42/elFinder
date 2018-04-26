@@ -20,17 +20,21 @@ $.fn.elfinderuploadbutton = function(cmd) {
 				})
 				.on('dragover', function(e) {
 					e.originalEvent.dataTransfer.dropEffect = 'copy';
-				});
+				}),
+			tm;
 
 		form.append(input.clone(true));
 				
 		cmd.change(function() {
-			var toShow = cmd.disabled();
-			if (form.is('visible')) {
-				!toShow && form.hide();
-			} else {
-				toShow && form.show();
-			}
+			tm && cancelAnimationFrame(tm);
+			tm = requestAnimationFrame(function() {
+				var toShow = cmd.disabled();
+				if (form.is('visible')) {
+					!toShow && form.hide();
+				} else {
+					toShow && form.show();
+				}
+			});
 		})
 		.change();
 	});
