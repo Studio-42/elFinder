@@ -25,7 +25,12 @@ $.fn.elfinderuploadbutton = function(cmd) {
 		form.append(input.clone(true));
 				
 		cmd.change(function() {
-			form[cmd.disabled() ? 'hide' : 'show']();
+			var toShow = cmd.disabled();
+			if (form.is('visible')) {
+				!toShow && form.hide();
+			} else {
+				toShow && form.show();
+			}
 		})
 		.change();
 	});

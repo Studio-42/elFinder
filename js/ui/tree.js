@@ -1130,12 +1130,16 @@ $.fn.elfindertree = function(fm, opts) {
 						hash = fm.navId2Hash(link.attr('id')),
 						file = fm.file(hash);
 					
-						if (link.data('longtap')) {
-							link.removeData('longtap');
-							e.stopPropagation();
+					if (link.data('longtap')) {
+						link.removeData('longtap');
+						e.stopPropagation();
 						return;
 					}
 					
+					if (!link.hasClass(active)) {
+						tree.find(selNavdir+'.'+active).removeClass(active);
+						link.addClass(active);
+					}
 					if (hash != fm.cwd().hash && !link.hasClass(disabled)) {
 						fm.exec('open', hash).done(function() {
 							fm.one('opendone', function() {

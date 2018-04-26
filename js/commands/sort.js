@@ -68,7 +68,7 @@ elFinder.prototype.commands.sort = function() {
 	this.keepContextmenu = true;
 
 	fm.bind('sortchange', setVar)
-	.bind('open', function() {
+	.bind('sorterupdate', function() {
 		setVar();
 		fm.getUI('toolbar').find('.elfiner-button-sort .elfinder-button-menu .elfinder-button-menu-item').each(function() {
 			var tgt = $(this),

@@ -260,7 +260,13 @@ var elFinder = function(elm, opts, bootCallback) {
 		 * @default ./sounds/
 		 **/
 		soundPath = 'sounds/',
-				
+		
+		/**
+		 * JSON.stringify of previous fm.sorters
+		 * @type String
+		 */
+		prevSorterStr = '',
+
 		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
 		syncInterval,
@@ -274,7 +280,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			// NOTES: Do not touch data object
 		
 			var volumeid, contextmenu, emptyDirs = {}, stayDirs = {},
-				rmClass, hashes, calc, gc, collapsed, prevcwd;
+				rmClass, hashes, calc, gc, collapsed, prevcwd, sorterStr;
 			
 			if (self.api >= 2.1) {
 				// support volume driver option `uiCmdMap`
@@ -359,6 +365,14 @@ var elFinder = function(elm, opts, bootCallback) {
 			if (!files[cwd]) {
 				cache([data.cwd]);
 			}
+
+			// trigger event 'sorterupdate'
+			sorterStr = JSON.stringify(self.sorters);
+			if (prevSorterStr !== sorterStr) {
+				self.trigger('sorterupdate');
+				prevSorterStr = sorterStr;
+			}
+
 			self.lastDir(cwd);
 			
 			self.autoSync();
