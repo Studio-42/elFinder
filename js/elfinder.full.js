@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 2cef031) (2018-04-26)
+ * Version 2.1.37 (2.1-src Nightly: d514c2f) (2018-04-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -291,7 +291,13 @@ var elFinder = function(elm, opts, bootCallback) {
 		 * @default ./sounds/
 		 **/
 		soundPath = 'sounds/',
-				
+		
+		/**
+		 * JSON.stringify of previous fm.sorters
+		 * @type String
+		 */
+		prevSorterStr = '',
+
 		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
 		syncInterval,
@@ -305,7 +311,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			// NOTES: Do not touch data object
 		
 			var volumeid, contextmenu, emptyDirs = {}, stayDirs = {},
-				rmClass, hashes, calc, gc, collapsed, prevcwd;
+				rmClass, hashes, calc, gc, collapsed, prevcwd, sorterStr;
 			
 			if (self.api >= 2.1) {
 				// support volume driver option `uiCmdMap`
@@ -390,6 +396,14 @@ var elFinder = function(elm, opts, bootCallback) {
 			if (!files[cwd]) {
 				cache([data.cwd]);
 			}
+
+			// trigger event 'sorterupdate'
+			sorterStr = JSON.stringify(self.sorters);
+			if (prevSorterStr !== sorterStr) {
+				self.trigger('sorterupdate');
+				prevSorterStr = sorterStr;
+			}
+
 			self.lastDir(cwd);
 			
 			self.autoSync();
@@ -9482,7 +9496,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 2cef031)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: d514c2f)';
 
 
 
@@ -14272,6 +14286,8 @@ $.fn.elfindercwd = function(fm, options) {
 							bufferExt.rendering = false;
 						});
 					}
+				} else {
+					resize();
 				}
 			},
 			
@@ -14790,21 +14806,23 @@ $.fn.elfindercwd = function(fm, options) {
 			},
 			
 			bottomMarkerShow = function(place, cnt) {
-				var ph, col = 1;
-				place = place || (list ? cwd.find('tbody') : cwd);
+				var ph,
+					col = 1,
+					place = place || (list ? cwd.find('tbody') : cwd),
+					elm;
 
 				if (buffer.length > 0) {
-					place.css({height: 'auto'});
-					ph = place.height();
-					if (cnt) {
+					if (!bufferExt.hpi) {
 						if (! list) {
-							col = Math.floor(place.width()/place.find('[id]:first').width());
-							cnt = Math.ceil(cnt/col) * col;
+							elm = place.find('[id]:first');
+							col = Math.floor(place.width() / elm.width());
+							bufferExt.hpi = elm.outerHeight(true) / col;
+						} else {
+							bufferExt.hpi = place.find('tr:first').outerHeight(true);
 						}
-						bufferExt.hpi = ph / cnt;
 						bufferExt.row = bufferExt.hpi * col;
 					}
-					bottomMarker.css({top: (bufferExt.hpi * buffer.length + ph) + 'px'}).show();
+					bottomMarker.css({top: (bufferExt.hpi * (buffer.length + cnt)) + 'px'}).show();
 				}
 			},
 			
@@ -14861,146 +14879,146 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			content = function() {
-				var phash, emptyMethod, thtr;
+				fm.lazy(function() {
+					var phash, emptyMethod, thtr;
 
-				wz.append(selectAllCheckbox).removeClass('elfinder-cwd-wrapper-empty elfinder-search-result elfinder-incsearch-result elfinder-letsearch-result');
-				if (fm.searchStatus.state > 1 || fm.searchStatus.ininc) {
-					wz.addClass('elfinder-search-result' + (fm.searchStatus.ininc? ' elfinder-'+(query.substr(0,1) === '/' ? 'let':'inc')+'search-result' : ''));
-				}
-				
-				// abort attachThumbJob
-				bufferExt.attachThumbJob && bufferExt.attachThumbJob._abort();
-				
-				// destroy selectable for GC
-				cwd.data('selectable') && cwd.selectable('disable').selectable('destroy').removeData('selectable');
-				
-				// notify cwd init
-				fm.trigger('cwdinit');
-				
-				selectedNext = $();
-				try {
-					// to avoid problem with draggable
-					cwd.empty();
-				} catch (e) {
-					cwd.html('');
-				}
-				
-				if (tableHeader) {
-					wrapper.off('scroll.fixheader resize.fixheader');
-					tableHeader.remove();
-					tableHeader = null;
-				}
-
-				cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
-					.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
-					.attr('style', '')
-					.css('height', 'auto');
-				bottomMarker.hide();
-
-				wrapper[list ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-list')
-					._padding = parseInt(wrapper.css('padding-top')) + parseInt(wrapper.css('padding-bottom'));
-				if (fm.UA.iOS) {
-					wrapper.removeClass('overflow-scrolling-touch').addClass('overflow-scrolling-touch');
-				}
-
-				if (list) {
-					cwd.html('<table><thead/><tbody/></table>');
-					thtr = $('<tr class="ui-state-default"><td class="elfinder-cwd-view-th-name">'+fm.getColumnName('name')+'</td>'+customColsNameBuild()+'</tr>');
-					cwd.find('thead').hide().append(
-						thtr
-						.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
-						.on('touchstart.'+fm.namespace, 'td', wrapperContextMenu.touchstart)
-						.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace+' mouseup.'+fm.namespace, 'td', wrapperContextMenu.touchend)
-						.on('click.'+fm.namespace,'td', wrapperContextMenu.click)
-					).find('td:first').append(selectAllCheckbox);
-
-					if ($.fn.sortable) {
-						thtr.addClass('touch-punch touch-punch-keep-default')
-							.sortable({
-							axis: 'x',
-							distance: 8,
-							items: '> .sortable-item',
-							start: function(e, ui) {
-								$(ui.item[0]).data('dragging', true);
-								ui.placeholder
-									.width(ui.helper.removeClass('ui-state-hover').width())
-									.removeClass('ui-state-active')
-									.addClass('ui-state-hover')
-									.css('visibility', 'visible');
-							},
-							update: function(e, ui){
-								var target = $(ui.item[0]).attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', ''),
-									prev, done;
-								customCols = $.map($(this).children(), function(n) {
-									var name = $(n).attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '');
-									if (! done) {
-										if (target === name) {
-											done = true;
-										} else {
-											prev = name;
-										}
-									}
-									return (name === 'name')? null : name;
-								});
-								templates.row = makeTemplateRow();
-								fm.storage('cwdCols', customCols);
-								prev = '.elfinder-col-'+prev+':first';
-								target = '.elfinder-col-'+target+':first';
-								fm.lazy(function() {
-									cwd.find('tbody tr').each(function() {
-										var $this = $(this);
-										$this.children(prev).after($this.children(target));
-									});
-								});
-							},
-							stop: function(e, ui) {
-								setTimeout(function() {
-									$(ui.item[0]).removeData('dragging');
-								}, 100);
-							}
-						});
+					wz.append(selectAllCheckbox).removeClass('elfinder-cwd-wrapper-empty elfinder-search-result elfinder-incsearch-result elfinder-letsearch-result');
+					if (fm.searchStatus.state > 1 || fm.searchStatus.ininc) {
+						wz.addClass('elfinder-search-result' + (fm.searchStatus.ininc? ' elfinder-'+(query.substr(0,1) === '/' ? 'let':'inc')+'search-result' : ''));
+					}
+					
+					// abort attachThumbJob
+					bufferExt.attachThumbJob && bufferExt.attachThumbJob._abort();
+					
+					// destroy selectable for GC
+					cwd.data('selectable') && cwd.selectable('disable').selectable('destroy').removeData('selectable');
+					
+					// notify cwd init
+					fm.trigger('cwdinit');
+					
+					selectedNext = $();
+					try {
+						// to avoid problem with draggable
+						cwd.empty();
+					} catch (e) {
+						cwd.html('');
+					}
+					
+					if (tableHeader) {
+						wrapper.off('scroll.fixheader resize.fixheader');
+						tableHeader.remove();
+						tableHeader = null;
 					}
 
-					thtr.find('td').addClass('touch-punch').resizable({
-						handles: fm.direction === 'ltr'? 'e' : 'w',
-						start: function(e, ui) {
-							var target = cwd.find('td.elfinder-col-'
-								+ ui.element.attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '')
-								+ ':first');
-							
-							ui.element
-								.data('dragging', true)
-								.data('resizeTarget', target)
-								.data('targetWidth', target.width());
-							colResizing = true;
-							if (cwd.find('table').css('table-layout') !== 'fixed') {
-								cwd.find('tbody tr:first td').each(function() {
-									$(this).width($(this).width());
-								});
-								cwd.find('table').css('table-layout', 'fixed');
-							}
-						},
-						resize: function(e, ui) {
-							ui.element.data('resizeTarget').width(ui.element.data('targetWidth') - (ui.originalSize.width - ui.size.width));
-						},
-						stop : function(e, ui) {
-							colResizing = false;
-							fixTableHeader({fitWidth: true});
-							colWidth = {};
-							cwd.find('tbody tr:first td').each(function() {
-								var name = $(this).attr('class').split(' ')[0].replace('elfinder-col-', '');
-								colWidth[name] = $(this).width();
-							});
-							fm.storage('cwdColWidth', colWidth);
-							setTimeout(function() {
-								ui.element.removeData('dragging');
-							}, 100);
-						}
-					})
-					.find('.ui-resizable-handle').addClass('ui-icon ui-icon-grip-dotted-vertical');
-				}
+					cwd.removeClass('elfinder-cwd-view-icons elfinder-cwd-view-list')
+						.addClass('elfinder-cwd-view-'+(list ? 'list' :'icons'))
+						.attr('style', '')
+						.css('height', 'auto');
+					bottomMarker.hide();
 
-				fm.lazy(function() {
+					wrapper[list ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-list')
+						._padding = parseInt(wrapper.css('padding-top')) + parseInt(wrapper.css('padding-bottom'));
+					if (fm.UA.iOS) {
+						wrapper.removeClass('overflow-scrolling-touch').addClass('overflow-scrolling-touch');
+					}
+
+					if (list) {
+						cwd.html('<table><thead/><tbody/></table>');
+						thtr = $('<tr class="ui-state-default"><td class="elfinder-cwd-view-th-name">'+fm.getColumnName('name')+'</td>'+customColsNameBuild()+'</tr>');
+						cwd.find('thead').hide().append(
+							thtr
+							.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
+							.on('touchstart.'+fm.namespace, 'td', wrapperContextMenu.touchstart)
+							.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace+' mouseup.'+fm.namespace, 'td', wrapperContextMenu.touchend)
+							.on('click.'+fm.namespace,'td', wrapperContextMenu.click)
+						).find('td:first').append(selectAllCheckbox);
+
+						if ($.fn.sortable) {
+							thtr.addClass('touch-punch touch-punch-keep-default')
+								.sortable({
+								axis: 'x',
+								distance: 8,
+								items: '> .sortable-item',
+								start: function(e, ui) {
+									$(ui.item[0]).data('dragging', true);
+									ui.placeholder
+										.width(ui.helper.removeClass('ui-state-hover').width())
+										.removeClass('ui-state-active')
+										.addClass('ui-state-hover')
+										.css('visibility', 'visible');
+								},
+								update: function(e, ui){
+									var target = $(ui.item[0]).attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', ''),
+										prev, done;
+									customCols = $.map($(this).children(), function(n) {
+										var name = $(n).attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '');
+										if (! done) {
+											if (target === name) {
+												done = true;
+											} else {
+												prev = name;
+											}
+										}
+										return (name === 'name')? null : name;
+									});
+									templates.row = makeTemplateRow();
+									fm.storage('cwdCols', customCols);
+									prev = '.elfinder-col-'+prev+':first';
+									target = '.elfinder-col-'+target+':first';
+									fm.lazy(function() {
+										cwd.find('tbody tr').each(function() {
+											var $this = $(this);
+											$this.children(prev).after($this.children(target));
+										});
+									});
+								},
+								stop: function(e, ui) {
+									setTimeout(function() {
+										$(ui.item[0]).removeData('dragging');
+									}, 100);
+								}
+							});
+						}
+
+						thtr.find('td').addClass('touch-punch').resizable({
+							handles: fm.direction === 'ltr'? 'e' : 'w',
+							start: function(e, ui) {
+								var target = cwd.find('td.elfinder-col-'
+									+ ui.element.attr('class').split(' ')[0].replace('elfinder-cwd-view-th-', '')
+									+ ':first');
+								
+								ui.element
+									.data('dragging', true)
+									.data('resizeTarget', target)
+									.data('targetWidth', target.width());
+								colResizing = true;
+								if (cwd.find('table').css('table-layout') !== 'fixed') {
+									cwd.find('tbody tr:first td').each(function() {
+										$(this).width($(this).width());
+									});
+									cwd.find('table').css('table-layout', 'fixed');
+								}
+							},
+							resize: function(e, ui) {
+								ui.element.data('resizeTarget').width(ui.element.data('targetWidth') - (ui.originalSize.width - ui.size.width));
+							},
+							stop : function(e, ui) {
+								colResizing = false;
+								fixTableHeader({fitWidth: true});
+								colWidth = {};
+								cwd.find('tbody tr:first td').each(function() {
+									var name = $(this).attr('class').split(' ')[0].replace('elfinder-col-', '');
+									colWidth[name] = $(this).width();
+								});
+								fm.storage('cwdColWidth', colWidth);
+								setTimeout(function() {
+									ui.element.removeData('dragging');
+								}, 100);
+							}
+						})
+						.find('.ui-resizable-handle').addClass('ui-icon ui-icon-grip-dotted-vertical');
+					}
+
 					buffer = $.map(incHashes || cwdHashes, function(hash) { return fm.file(hash) || null; });
 					
 					buffer = fm.sortFiles(buffer);
@@ -15675,7 +15693,6 @@ $.fn.elfindercwd = function(fm, options) {
 					incHashes = void 0;
 					unselectAll({ notrigger: true });
 					content();
-					resize();
 				}
 			})
 			.bind('search', function(e) {
@@ -15685,7 +15702,6 @@ $.fn.elfindercwd = function(fm, options) {
 				fm.searchStatus.ininc = false;
 				content();
 				fm.autoSync('stop');
-				resize();
 			})
 			.bind('searchend', function(e) {
 				if (query || incHashes) {
@@ -15699,7 +15715,6 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 				}
 				fm.autoSync();
-				resize();
 			})
 			.bind('searchstart', function(e) {
 				unselectAll();
@@ -15728,7 +15743,6 @@ $.fn.elfindercwd = function(fm, options) {
 					} else {
 						fm.trigger('incsearchend');
 					}
-					resize();
 				});
 			})
 			.bind('incsearchend', function(e) {
@@ -15751,7 +15765,6 @@ $.fn.elfindercwd = function(fm, options) {
 						selectedFiles = fm.arrayFlip(incHashes || cwdHashes, true);
 					}
 					(allsel || Object.keys(selectedFiles).length) && trigger();
-					resize();
 				});
 			})
 			.bind('viewchange', function() {
@@ -15769,7 +15782,6 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 					Object.keys(selectedFiles).length && trigger();
 				}
-				resize();
 			})
 			.bind('wzresize', function() {
 				var place = list ? cwd.find('tbody') : cwd,
@@ -20094,12 +20106,16 @@ $.fn.elfindertree = function(fm, opts) {
 						hash = fm.navId2Hash(link.attr('id')),
 						file = fm.file(hash);
 					
-						if (link.data('longtap')) {
-							link.removeData('longtap');
-							e.stopPropagation();
+					if (link.data('longtap')) {
+						link.removeData('longtap');
+						e.stopPropagation();
 						return;
 					}
 					
+					if (!link.hasClass(active)) {
+						tree.find(selNavdir+'.'+active).removeClass(active);
+						link.addClass(active);
+					}
 					if (hash != fm.cwd().hash && !link.hasClass(disabled)) {
 						fm.exec('open', hash).done(function() {
 							fm.one('opendone', function() {
@@ -20518,7 +20534,12 @@ $.fn.elfinderuploadbutton = function(cmd) {
 		form.append(input.clone(true));
 				
 		cmd.change(function() {
-			form[cmd.disabled() ? 'hide' : 'show']();
+			var toShow = cmd.disabled();
+			if (form.is('visible')) {
+				!toShow && form.hide();
+			} else {
+				toShow && form.show();
+			}
 		})
 		.change();
 	});
@@ -30822,7 +30843,7 @@ elFinder.prototype.commands.sort = function() {
 	this.keepContextmenu = true;
 
 	fm.bind('sortchange', setVar)
-	.bind('open', function() {
+	.bind('sorterupdate', function() {
 		setVar();
 		fm.getUI('toolbar').find('.elfiner-button-sort .elfinder-button-menu .elfinder-button-menu-item').each(function() {
 			var tgt = $(this),
