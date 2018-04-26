@@ -1431,24 +1431,42 @@ $.fn.elfindercwd = function(fm, options) {
 				return customColsName;
 			},
 			
+			setItemBoxSize = function(boxSize) {
+				var place, elm;
+				if (!boxSize.height) {
+					place = (list ? cwd.find('tbody') : cwd);
+					elm = place.find(list? 'tr:first' : '[id]:first');
+					boxSize.height = elm.outerHeight(true);
+					if (!list) {
+						boxSize.width = elm.outerWidth(true);
+					}
+				}
+			},
+
 			bottomMarkerShow = function(place, cnt) {
-				var ph,
+				var place = place || (list ? cwd.find('tbody') : cwd),
+					boxSize = itemBoxSize[fm.viewType],
 					col = 1,
-					place = place || (list ? cwd.find('tbody') : cwd),
-					elm;
+					row;
 
 				if (buffer.length > 0) {
 					if (!bufferExt.hpi) {
+						setItemBoxSize(boxSize);
 						if (! list) {
-							elm = place.find('[id]:first');
-							col = Math.floor(place.width() / elm.width());
-							bufferExt.hpi = elm.outerHeight(true) / col;
+							col = Math.floor(place.width() / boxSize.width);
+							bufferExt.row = boxSize.height;
+							bufferExt.hpi = bufferExt.row / col;
 						} else {
-							bufferExt.hpi = place.find('tr:first').outerHeight(true);
+							bufferExt.row = bufferExt.hpi = boxSize.height;
 						}
-						bufferExt.row = bufferExt.hpi * col;
+					} else if (!list) {
+						col = Math.floor(place.width() / boxSize.width);
 					}
-					bottomMarker.css({top: (bufferExt.hpi * (buffer.length + cnt)) + 'px'}).show();
+					row = Math.ceil((buffer.length + (cnt || 0)) / col);
+					if (list && tableHeader) {
+						++row;
+					}
+					bottomMarker.css({top: (bufferExt.row * row) + 'px'}).show();
 				}
 			},
 			
@@ -2158,6 +2176,12 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			// message board
 			mBoard = $('<div class="elfinder-cwd-message-board"/>').insertAfter(cwd),
+
+			// each item box size
+			itemBoxSize = {
+				icons : {},
+				list : {}
+			},
 
 			// has UI tree
 			hasUiTree,
