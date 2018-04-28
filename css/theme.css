@@ -62,7 +62,8 @@
 }
 
 /* selected file in "icons" view */
-.elfinder-cwd-view-icons .elfinder-cwd-file .ui-state-hover { background:#ccc; }
+.elfinder-cwd-view-icons .elfinder-cwd-file .ui-state-hover,
+.elfinder-cwd-view-icons .elfinder-cwd-file .ui-state-active { background:#ccc; }
 
 /* type badge in "icons" view */
 .elfinder-cwd-icon:before { 

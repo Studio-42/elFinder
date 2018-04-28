@@ -149,19 +149,11 @@
 	padding-bottom:2px;
 	cursor:default;
 	border:none;
-/*	overflow:hidden;*/
 	position:relative;
 }
-
-/*.elfinder-cwd-view-icons .elfinder-cwd-file .elfinder-cwd-select {
-	top: 0px;
-	left: 0px;
-}*/
-
-/*.elfinder-rtl .elfinder-cwd-view-icons .elfinder-cwd-file .elfinder-cwd-select {
-	left: auto;
-	right: 7px;
-}*/
+.elfinder-cwd-view-icons .elfinder-cwd-file .ui-state-active {
+	border:none;
+}
 
 /* ltr/rtl enviroment */
 .elfinder-ltr .elfinder-cwd-view-icons .elfinder-cwd-file { float:left;  margin:0 3px 2px 0; }
