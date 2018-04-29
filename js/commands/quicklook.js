@@ -532,6 +532,9 @@
 				open(docked);
 				self.preview.trigger('changesize');
 				fm.storage('previewDocked', '1');
+				if (fm.getUI('navdock').width() === 0) {
+					win.trigger('navdockout');
+				}
 			}
 		})
 		.on('close', function(e, dfd) {
