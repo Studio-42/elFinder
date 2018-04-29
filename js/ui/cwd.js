@@ -657,7 +657,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 * 
 			 * @return void
 			 */
-			wrapperRepaint = function(init) {
+			wrapperRepaint = function(init, recnt) {
 				var selectable = cwd.data('selectable'),
 					rec = (function() {
 						var wos = wrapper.offset(),
@@ -747,6 +747,14 @@ $.fn.elfindercwd = function(fm, options) {
 								}
 							}, arr).done(done);
 						}
+					}
+				} else if (init && bufferExt.renderd) {
+					// In initial request, cwd DOM not renderd so doing lazy check
+					recnt = recnt || 0;
+					if (recnt < 10) { // Prevent infinite loop
+						requestAnimationFrame(function() {
+							wrapperRepaint(init, ++recnt);
+						});
 					}
 				}
 			},
@@ -888,7 +896,7 @@ $.fn.elfindercwd = function(fm, options) {
 							}
 							wrapperRepaint(true);
 						}
-						
+
 						! scrolling && wrapper.trigger(scrollEvent);
 					};
 				
