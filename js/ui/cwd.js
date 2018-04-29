@@ -1526,7 +1526,9 @@ $.fn.elfindercwd = function(fm, options) {
 							wrapper.data('touching', null);
 						}
 					} else {
-						cwd.removeData('longtap');
+						requestAnimationFrame(function() {
+							cwd.removeData('longtap');
+						});
 					}
 					clearTimeout(cwd.data('tmlongtap'));
 				},
@@ -1868,7 +1870,9 @@ $.fn.elfindercwd = function(fm, options) {
 							wrapper.data('touching', null);
 							fm.dblclick({file : fm.cwdId2Hash(this.id)});
 						}
-						cwd.removeData('longtap');
+						requestAnimationFrame(function() {
+							cwd.removeData('longtap');
+						});
 					}
 				})
 				// attach draggable
