@@ -1480,7 +1480,7 @@ $.fn.elfindercwd = function(fm, options) {
 			wrapperContextMenu = {
 				contextmenu : function(e) {
 					e.preventDefault();
-					if (cwd.data('longtap') === null) {
+					if (cwd.data('longtap') !== void(0)) {
 						e.stopPropagation();
 						return;
 					}
@@ -1495,18 +1495,20 @@ $.fn.elfindercwd = function(fm, options) {
 					if (e.originalEvent.touches.length > 1) {
 						return;
 					}
+					if (cwd.data('longtap') !== false) {
+						wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
+						cwd.data('tmlongtap', setTimeout(function(){
+							// long tap
+							cwd.data('longtap', true);
+							fm.trigger('contextmenu', {
+								'type'    : 'cwd',
+								'targets' : [fm.cwd().hash],
+								'x'       : wrapper.data('touching').x,
+								'y'       : wrapper.data('touching').y
+							});
+						}, 500));
+					}
 					cwd.data('longtap', null);
-					wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
-					cwd.data('tmlongtap', setTimeout(function(){
-						// long tap
-						cwd.data('longtap', true);
-						fm.trigger('contextmenu', {
-							'type'    : 'cwd',
-							'targets' : [fm.cwd().hash],
-							'x'       : wrapper.data('touching').x,
-							'y'       : wrapper.data('touching').y
-						});
-					}, 500));
 				},
 				touchend : function(e) {
 					if (e.type === 'touchmove') {
@@ -1515,6 +1517,8 @@ $.fn.elfindercwd = function(fm, options) {
 								+ Math.abs(wrapper.data('touching').y - e.originalEvent.touches[0].pageY)) > 4) {
 							wrapper.data('touching', null);
 						}
+					} else {
+						cwd.removeData('longtap');
 					}
 					clearTimeout(cwd.data('tmlongtap'));
 				},
@@ -1819,7 +1823,7 @@ $.fn.elfindercwd = function(fm, options) {
 						||
 						(!list && this !== e.target)
 					) {
-						e.stopPropagation();
+						cwd.data('longtap', false);
 						p.addClass(clHover);
 						p.data('tmlongtap', setTimeout(function(){
 							// long tap
@@ -1850,10 +1854,13 @@ $.fn.elfindercwd = function(fm, options) {
 					if (e.type === 'touchmove') {
 						wrapper.data('touching', null);
 						p.removeClass(clHover);
-					} else if (wrapper.data('touching') && !cwd.data('longtap') && p.hasClass(clSelected)) {
-						e.preventDefault();
-						wrapper.data('touching', null);
-						fm.dblclick({file : fm.cwdId2Hash(this.id)});
+					} else {
+						if (wrapper.data('touching') && !cwd.data('longtap') && p.hasClass(clSelected)) {
+							e.preventDefault();
+							wrapper.data('touching', null);
+							fm.dblclick({file : fm.cwdId2Hash(this.id)});
+						}
+						cwd.removeData('longtap');
 					}
 				})
 				// attach draggable
