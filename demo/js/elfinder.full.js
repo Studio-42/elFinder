@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 9d5d097) (2018-04-29)
+ * Version 2.1.37 (2.1-src Nightly: 29be09b) (2018-04-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9496,7 +9496,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 9d5d097)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 29be09b)';
 
 
 
@@ -14905,7 +14905,9 @@ $.fn.elfindercwd = function(fm, options) {
 							wrapper.data('touching', null);
 						}
 					} else {
-						cwd.removeData('longtap');
+						requestAnimationFrame(function() {
+							cwd.removeData('longtap');
+						});
 					}
 					clearTimeout(cwd.data('tmlongtap'));
 				},
@@ -15247,7 +15249,9 @@ $.fn.elfindercwd = function(fm, options) {
 							wrapper.data('touching', null);
 							fm.dblclick({file : fm.cwdId2Hash(this.id)});
 						}
-						cwd.removeData('longtap');
+						requestAnimationFrame(function() {
+							cwd.removeData('longtap');
+						});
 					}
 				})
 				// attach draggable
