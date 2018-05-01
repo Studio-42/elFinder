@@ -1,3 +1,23 @@
+2018-05-xx  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.38):
+		- [js:dialogelfinder] Re-fixed #2401 remove deprecated functions of jQuery
+		- [cmd:info,help] Fixed #2445 add user preference `Info Items (Selection Info Panel)`
+		- [php:core] More secure processing of `zipdl()`
+		- [VD:abstract] Fixed #2450 correction of `getContentUrl()` (when $this->root is "/")
+		- [js:core] Fixed #2453 handling back button press to close dialog
+		- [cmd:opennew] Fixed #2457 new command "Open in new window" for the folder
+		- [cmd:preference] Fixed #2458 move settings from "Preference" tab
+		- [cmd:mkdir] Fixed #2466 'Into new folder' always on (toolbar button)
+		- [css:common] Fixed #2469 to disable resizable in fullscreen mode
+		- [cmd:sort] Fixed #2472 keep stay the context menu when choosing the sort menu
+		- [VD:GoogleDrive] Fixed #2473 not use undefined variable
+		- [ui:tree] Fixed #2485 add an option `uiOptions.tree.durations`
+		- [ui:toast] Fixed #2487 add an option `uiOptions.toast.defaults`
+		- [js] Performance tuning
+		- And some minor bug fixes
+
+
 2018-03-28  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.37):
