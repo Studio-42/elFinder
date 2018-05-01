@@ -4424,6 +4424,7 @@ abstract class elFinderVolumeDriver {
 			}
 			if (! empty($res['dirs']) && is_numeric($res['dirs'])) {
 				$result['dirs'] += $res['dirs'];
+				--$result['dirs'];
 			}
 		}
 		$this->options['checkSubfolders'] = $subdirs;
