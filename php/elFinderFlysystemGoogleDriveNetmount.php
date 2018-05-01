@@ -1,12 +1,13 @@
 <?php
 
-use \League\Flysystem\Filesystem;
-use \League\Flysystem\Adapter\Local;
-use \League\Flysystem\Cached\CachedAdapter;
-use \League\Flysystem\Cached\Storage\Adapter as ACache;
-use \Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
-use \Hypweb\Flysystem\Cached\Extra\Hasdir;
-use \Hypweb\Flysystem\Cached\Extra\DisableEnsureParentDirectories;
+use League\Flysystem\Filesystem;
+use League\Flysystem\Adapter\Local;
+use League\Flysystem\Cached\CachedAdapter;
+use League\Flysystem\Cached\Storage\Adapter as ACache;
+use Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
+use Hypweb\Flysystem\Cached\Extra\Hasdir;
+use Hypweb\Flysystem\Cached\Extra\DisableEnsureParentDirectories;
+use Hypweb\elFinderFlysystemDriverExt\Driver as ExtDriver;
 
 elFinder::$netDrivers['googledrive'] = 'FlysystemGoogleDriveNetmount';
 
@@ -18,7 +19,7 @@ if (! class_exists('elFinderVolumeFlysystemGoogleDriveCache', false)) {
     }
 }
 
-class elFinderVolumeFlysystemGoogleDriveNetmount extends \Hypweb\elFinderFlysystemDriverExt\Driver
+class elFinderVolumeFlysystemGoogleDriveNetmount extends ExtDriver
 {
 
     public function __construct()
