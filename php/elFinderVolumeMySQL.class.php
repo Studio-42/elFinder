@@ -401,7 +401,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				}
 			}
 		}
-		debug($result);
 		return $result;
 	}
 
