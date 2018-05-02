@@ -431,6 +431,14 @@ elFinder.prototype._options = {
 				enable : true, // is enable true or false
 				minlen : 1,    // minimum number of characters
 				wait   : 500   // wait milliseconds
+			},
+			// Additional search types
+			searchTypes : {
+				// "SearchMime" is implemented in default
+				SearchMime : {           // The key is search type that send to the connector
+					name : 'btnMime',    // Button text to be processed in i18n()
+					title : 'searchMime' // Button title to be processed in i18n()
+				}
 			}
 		},
 		// "info" command options.

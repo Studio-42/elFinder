@@ -322,6 +322,11 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * @author Dmitry (dio) Levashov
 	 **/
 	protected function doSearch($path, $q, $mimes) {
+		if (!empty($this->doSearchCurrentQuery['matchMethod'])) {
+			// has custom match method use elFinderVolumeDriver::doSearch()
+			return parent::doSearch($path, $q, $mimes);
+		}
+
 		$dirs = array();
 		$timeout = $this->options['searchTimeout']? $this->searchStart + $this->options['searchTimeout'] : 0;
 		
@@ -401,7 +406,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 				}
 			}
 		}
-		debug($result);
 		return $result;
 	}
 
