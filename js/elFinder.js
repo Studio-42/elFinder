@@ -8969,6 +8969,7 @@ elFinder.prototype = {
 	getSize : function(targets) {
 		var self = this,
 			reqs = [],
+			tgtlen = targets.length,
 			dfrd = $.Deferred().fail(function() {
 				$.each(reqs, function(i, req) {
 					if (req) {
@@ -9127,7 +9128,7 @@ elFinder.prototype = {
 				changed.length && self.change({changed: changed});
 				
 				if (dirCnt !== false){
-					cnts.push(self.i18n('folders') + ': ' + (dirCnt - (targets.length > 1? 0 : 1)));
+					cnts.push(self.i18n('folders') + ': ' + (dirCnt - (tgtlen > 1? 0 : 1)));
 				}
 				if (fileCnt !== false){
 					cnts.push(self.i18n('files') + ': ' + fileCnt);
