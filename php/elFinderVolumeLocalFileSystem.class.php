@@ -1165,8 +1165,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @author Naoki Sawada
 	 **/
 	protected function doSearch($path, $q, $mimes) {
-		if ($this->encoding || ! class_exists('FilesystemIterator', false)) {
-			// non UTF-8 use elFinderVolumeDriver::doSearch()
+		if (!empty($this->doSearchCurrentQuery['matchMethod']) || $this->encoding || ! class_exists('FilesystemIterator', false)) {
+			// has custom match method or non UTF-8, use elFinderVolumeDriver::doSearch()
 			return parent::doSearch($path, $q, $mimes);
 		}
 		
