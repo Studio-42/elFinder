@@ -524,7 +524,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 **/
 	function(ql) {
 		"use strict";
-		var preview  = ql.preview,
+		var fm       = ql.fm,
+			preview  = ql.preview,
 			mimes    = {
 				'audio/mpeg'    : 'mp3',
 				'audio/mpeg3'   : 'mp3',
@@ -539,45 +540,116 @@ elFinder.prototype.commands.quicklook.plugins = [
 				'audio/x-mp4'   : 'm4a',
 				'audio/ogg'     : 'ogg',
 				'audio/flac'    : 'flac',
-				'audio/x-flac'  : 'flac'
+				'audio/x-flac'  : 'flac',
+				'audio/amr'     : 'amr'
 			},
-			node,
+			node, curHash,
 			win  = ql.window,
-			navi = ql.navbar;
+			navi = ql.navbar,
+			autoplay,
+			setNavi = function() {
+				navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
+			},
+			amrToWavUrl = function(hash) {
+				var dfd = $.Deferred(),
+					loader = $.Deferred().done(function() {
+						fm.getContents(hash).done(function(data) {
+							try {
+								var buffer = AMR.toWAV(new Uint8Array(data));
+								if (buffer) {
+									dfd.resolve(URL.createObjectURL(new Blob([buffer], { type: 'audio/x-wav' })));
+								} else {
+									dfd.reject();
+								}
+							} catch(e) {
+								dfd.reject();
+							}
+						}).fail(function() {
+							dfd.reject();
+						});
+					}).fail(function() {
+						dfd.reject();
+					});
+				if (!window.AMR) {
+					fm.loadScript(
+						[ fm.options.cdns.amr ],
+						function() { 
+							loader[window.AMR? 'resolve' : 'reject']();
+						},
+						{
+							error: function() {
+								dfd.reject();
+							}
+						}
+					);
+				} else {
+					loader.resolve();
+				}
+				return dfd;
+			};
 
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file,
 				type = mimes[file.mime],
-				autoplay = ql.autoPlay(),
-				setNavi = function() {
-					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
-				};
+				html5, srcUrl, aborted;
 
-			if (ql.dispInlineRegex.test(file.mime) && ql.support.audio[type]) {
-				e.stopImmediatePropagation();
-				
-				node = $('<audio class="elfinder-quicklook-preview-audio" controls preload="auto" autobuffer><source src="'+ql.fm.openUrl(file.hash)+'" /></audio>')
+			if (mimes[file.mime] && ql.dispInlineRegex.test(file.mime) && ((html5 = ql.support.audio[type]) || (type === 'amr'))) {
+				autoplay = ql.autoPlay();
+				curHash = file.hash;
+				srcUrl = html5? fm.openUrl(curHash) : '';
+				node = $('<audio class="elfinder-quicklook-preview-audio" controls preload="auto" autobuffer><source src="'+srcUrl+'" /></audio>')
 					.on('change', function(e) {
 						// Firefox fire change event on seek or volume change
 						e.stopPropagation();
 					})
 					.appendTo(preview);
-				autoplay && node[0].play();
-				
-				win.on('viewchange.audio', setNavi);
-				setNavi();
+				if (!html5) {
+					if (fm.options.cdns.amr && type === 'amr') {
+						e.stopImmediatePropagation();
+						amrToWavUrl(file.hash).done(function(url) {
+							if (curHash === file.hash) {
+								var elm = node[0];
+								try {
+									node.children('source').attr('src', url);
+									elm.pause();
+									elm.load();
+									autoplay && elm.play();
+									win.on('viewchange.audio', setNavi);
+									setNavi();
+								} catch(e) {
+									URL.revokeObjectURL(url);
+									node.remove();
+								}
+							} else {
+								URL.revokeObjectURL(url);
+							}
+						}).fail(function() {
+							node.remove();
+						});
+					}
+				} else {
+					e.stopImmediatePropagation();
+					autoplay && node[0].play();
+					win.on('viewchange.audio', setNavi);
+					setNavi();
+				}
 			}
 		}).on('change', function() {
 			if (node && node.parent().length) {
-				var elm = node[0];
+				var elm = node[0],
+					url = node.children('source').attr('src');
 				win.off('viewchange.audio');
 				try {
 					elm.pause();
+					node.empty();
+					if (url.match(/^blob:/)) {
+						URL.revokeObjectURL(url);
+					}
 					elm.src = '';
 					elm.load();
 				} catch(e) {}
 				node.remove();
-				node= null;
+				node = null;
 			}
 		});
 	},
