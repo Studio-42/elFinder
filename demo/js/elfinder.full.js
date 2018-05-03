@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: b6c048d) (2018-05-03)
+ * Version 2.1.37 (2.1-src Nightly: f20d4fe) (2018-05-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9497,7 +9497,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: b6c048d)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: f20d4fe)';
 
 
 
@@ -26982,6 +26982,14 @@ elFinder.prototype.commands.quicklook.plugins = [
 			setNavi = function() {
 				navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
 			},
+			getNode = function(src) {
+				return $('<audio class="elfinder-quicklook-preview-audio" controls preload="auto" autobuffer><source src="'+src+'" /></audio>')
+					.on('change', function(e) {
+						// Firefox fire change event on seek or volume change
+						e.stopPropagation();
+					})
+					.appendTo(preview);
+			},
 			amrToWavUrl = function(hash) {
 				var dfd = $.Deferred(),
 					loader = $.Deferred().done(function() {
@@ -27004,7 +27012,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						dfd.reject();
 					}),
 					_AMR;
-				if (typeof AMR === 'undefined') {
+				if (window.TextEncoder && window.URL && URL.createObjectURL && typeof AMR === 'undefined') {
 					// previous window.AMR
 					_AMR = window.AMR;
 					delete window.AMR;
@@ -27037,15 +27045,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 				autoplay = ql.autoPlay();
 				curHash = file.hash;
 				srcUrl = html5? fm.openUrl(curHash) : '';
-				node = $('<audio class="elfinder-quicklook-preview-audio" controls preload="auto" autobuffer><source src="'+srcUrl+'" /></audio>')
-					.on('change', function(e) {
-						// Firefox fire change event on seek or volume change
-						e.stopPropagation();
-					})
-					.appendTo(preview);
 				if (!html5) {
 					if (fm.options.cdns.amr && type === 'amr' && AMR !== false) {
 						e.stopImmediatePropagation();
+						node = getNode(srcUrl);
 						amrToWavUrl(file.hash).done(function(url) {
 							if (curHash === file.hash) {
 								var elm = node[0];
@@ -27069,6 +27072,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					}
 				} else {
 					e.stopImmediatePropagation();
+					node = getNode(srcUrl);
 					autoplay && node[0].play();
 					win.on('viewchange.audio', setNavi);
 					setNavi();
