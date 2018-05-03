@@ -591,7 +591,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file,
 				type = mimes[file.mime],
-				html5, srcUrl, aborted;
+				html5, srcUrl;
 
 			if (mimes[file.mime] && ql.dispInlineRegex.test(file.mime) && ((html5 = ql.support.audio[type]) || (type === 'amr'))) {
 				autoplay = ql.autoPlay();
@@ -677,77 +677,78 @@ elFinder.prototype.commands.quicklook.plugins = [
 			node,
 			win  = ql.window,
 			navi = ql.navbar,
-			cHls, cDash;
+			cHls, cDash, autoplay,
+			setNavi = function() {
+				if (fm.UA.iOS) {
+					if (win.hasClass('elfinder-quicklook-fullscreen')) {
+						preview.css('height', '-webkit-calc(100% - 50px)');
+						navi._show();
+					} else {
+						preview.css('height', '');
+					}
+				} else {
+					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
+				}
+			},
+			render = function(file, opts) {
+				opts = opts || {};
+				ql.hideinfo();
+				node = $('<video class="elfinder-quicklook-preview-video" controls preload="auto" autobuffer playsinline>'
+						+'</video>')
+					.on('change', function(e) {
+						// Firefox fire change event on seek or volume change
+						e.stopPropagation();
+					});
+				if (opts.src) {
+					node.append('<source src="'+opts.src+'" type="'+file.mime+'"/><source src="'+opts.src+'"/>');
+				}
+				
+				node.appendTo(preview);
+
+				win.on('viewchange.video', setNavi);
+				setNavi();
+			},
+			loadHls = function(file) {
+				var hls;
+				render(file);
+				hls = new cHls();
+				hls.loadSource(fm.openUrl(file.hash));
+				hls.attachMedia(node[0]);
+				if (autoplay) {
+					hls.on(cHls.Events.MANIFEST_PARSED,function() {
+						node[0].play();
+					});
+				}
+			},
+			loadDash = function(file) {
+				var player;
+				render(file);
+				player = cDash.MediaPlayer().create();
+				player.initialize(node[0], fm.openUrl(file.hash), autoplay);
+			};
 
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file,
-				autoplay = ql.autoPlay(),
-				type = mimes[file.mime.toLowerCase()],
-				setNavi = function() {
-					if (fm.UA.iOS) {
-						if (win.hasClass('elfinder-quicklook-fullscreen')) {
-							preview.css('height', '-webkit-calc(100% - 50px)');
-							navi._show();
-						} else {
-							preview.css('height', '');
-						}
-					} else {
-						navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
-					}
-				},
-				render = function(opts) {
-					opts = opts || {};
-					ql.hideinfo();
-					node = $('<video class="elfinder-quicklook-preview-video" controls preload="auto" autobuffer playsinline>'
-							+'</video>')
-						.on('change', function(e) {
-							// Firefox fire change event on seek or volume change
-							e.stopPropagation();
-						});
-					if (opts.src) {
-						node.append('<source src="'+opts.src+'" type="'+file.mime+'"/><source src="'+opts.src+'"/>');
-					}
-					
-					node.appendTo(preview);
-
-					win.on('viewchange.video', setNavi);
-					setNavi();
-				},
-				loadHls = function() {
-					var hls;
-					render();
-					hls = new cHls();
-					hls.loadSource(fm.openUrl(file.hash));
-					hls.attachMedia(node[0]);
-					if (autoplay) {
-						hls.on(cHls.Events.MANIFEST_PARSED,function() {
-							node[0].play();
-						});
-					}
-				},
-				loadDash = function() {
-					var player;
-					render();
-					player = cDash.MediaPlayer().create();
-					player.initialize(node[0], fm.openUrl(file.hash), autoplay);
-				};
+				mime = file.mime.toLowerCase(),
+				type = mimes[mime];
 			
-			if (ql.dispInlineRegex.test(file.mime) && (((type === 'm3u8' || type === 'mpd') && !fm.UA.ltIE10) || ql.support.video[type])) {
+			if (mimes[mime] && ql.dispInlineRegex.test(file.mime) && (((type === 'm3u8' || type === 'mpd') && !fm.UA.ltIE10) || ql.support.video[type])) {
+				autoplay = ql.autoPlay();
 				if (ql.support.video[type] && (type !== 'm3u8' || fm.UA.Safari)) {
 					e.stopImmediatePropagation();
-					render({ src: fm.openUrl(file.hash) });
+					render(file, { src: fm.openUrl(file.hash) });
 					autoplay && node[0].play();
 				} else {
 					if (fm.options.cdns.hls && type === 'm3u8') {
 						e.stopImmediatePropagation();
 						if (cHls) {
-							loadHls();
+							loadHls(file);
 						} else {
 							fm.loadScript(
 								[ fm.options.cdns.hls ],
 								function(res) { 
 									cHls = res || window.Hls;
-									loadHls();
+									loadHls(file);
 								},
 								{tryRequire: true}
 							);
@@ -755,13 +756,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 					} else if (fm.options.cdns.dash && type === 'mpd') {
 						e.stopImmediatePropagation();
 						if (cDash) {
-							loadDash();
+							loadDash(file);
 						} else {
 							fm.loadScript(
 								[ fm.options.cdns.dash ],
 								function() { 
 									cDash = window.dashjs;
-									loadDash();
+									loadDash(file);
 								},
 								{tryRequire: true}
 							);
@@ -775,6 +776,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				win.off('viewchange.video');
 				try {
 					elm.pause();
+					node.empty();
 					elm.src = '';
 					elm.load();
 				} catch(e) {}
