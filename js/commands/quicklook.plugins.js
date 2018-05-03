@@ -546,7 +546,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			node, curHash,
 			win  = ql.window,
 			navi = ql.navbar,
-			autoplay,
+			AMR, autoplay,
 			setNavi = function() {
 				navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
 			},
@@ -568,22 +568,30 @@ elFinder.prototype.commands.quicklook.plugins = [
 							dfd.reject();
 						});
 					}).fail(function() {
+						AMR = false;
 						dfd.reject();
-					});
-				if (!window.AMR) {
+					}),
+					_AMR;
+				if (typeof AMR === 'undefined') {
+					// previous window.AMR
+					_AMR = window.AMR;
+					delete window.AMR;
 					fm.loadScript(
 						[ fm.options.cdns.amr ],
 						function() { 
-							loader[window.AMR? 'resolve' : 'reject']();
+							AMR = window.AMR? window.AMR : false;
+							// restore previous window.AMR
+							window.AMR = _AMR;
+							loader[AMR? 'resolve':'reject']();
 						},
 						{
 							error: function() {
-								dfd.reject();
+								loader.reject();
 							}
 						}
 					);
 				} else {
-					loader.resolve();
+					loader[AMR? 'resolve':'reject']();
 				}
 				return dfd;
 			};
@@ -604,7 +612,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					})
 					.appendTo(preview);
 				if (!html5) {
-					if (fm.options.cdns.amr && type === 'amr') {
+					if (fm.options.cdns.amr && type === 'amr' && AMR !== false) {
 						e.stopImmediatePropagation();
 						amrToWavUrl(file.hash).done(function(url) {
 							if (curHash === file.hash) {
