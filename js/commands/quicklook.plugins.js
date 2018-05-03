@@ -551,7 +551,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
 			},
 			getNode = function(src) {
-				return $('<audio class="elfinder-quicklook-preview-audio" controls preload="auto" autobuffer><source src="'+src+'" /></audio>')
+				return $('<audio class="elfinder-quicklook-preview-audio ui-front" controls preload="auto" autobuffer><source src="'+src+'" /></audio>')
 					.on('change', function(e) {
 						// Firefox fire change event on seek or volume change
 						e.stopPropagation();
