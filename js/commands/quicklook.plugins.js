@@ -539,6 +539,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				'audio/mp4'     : 'm4a',
 				'audio/x-mp4'   : 'm4a',
 				'audio/ogg'     : 'ogg',
+				'audio/webm'    : 'webm',
 				'audio/flac'    : 'flac',
 				'audio/x-flac'  : 'flac',
 				'audio/amr'     : 'amr'
@@ -682,6 +683,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 				'video/ogg'       : 'ogg',
 				'application/ogg' : 'ogg',
 				'video/webm'      : 'webm',
+				'video/x-matroska': 'mkv',
+				'video/3gpp'      : '3gp',
 				'application/vnd.apple.mpegurl' : 'm3u8',
 				'application/x-mpegurl' : 'm3u8',
 				'application/dash+xml'  : 'mpd'
