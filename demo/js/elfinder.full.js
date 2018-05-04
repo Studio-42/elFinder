@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 60a086a) (2018-05-04)
+ * Version 2.1.37 (2.1-src Nightly: 47655d9) (2018-05-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9497,7 +9497,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 60a086a)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 47655d9)';
 
 
 
@@ -9935,6 +9935,7 @@ elFinder.prototype._options = {
 		// for quicklook etc.
 		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.9.1/hls.min.js',
 		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.7/dash.all.min.js',
+		flv        : '//cdnjs.cloudflare.com/ajax/libs/flv.js/1.4.2/flv.min.js',
 		prettify   : '//cdn.rawgit.com/google/code-prettify/fbd527e9f76914e36f730ec9849f2115473a65d8/loader/run_prettify.js',
 		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js',
 		rar        : '//cdn.rawgit.com/nao-pon/rar.js/6cef13ec66dd67992fc7f3ea22f132d770ebaf8b/rar.min.js',
@@ -27124,12 +27125,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 				'video/3gpp'      : '3gp',
 				'application/vnd.apple.mpegurl' : 'm3u8',
 				'application/x-mpegurl' : 'm3u8',
-				'application/dash+xml'  : 'mpd'
+				'application/dash+xml'  : 'mpd',
+				'video/x-flv'     : 'flv'
 			},
 			node,
 			win  = ql.window,
 			navi = ql.navbar,
-			cHls, cDash, autoplay,
+			cHls, cDash, cFlv, autoplay,
 			setNavi = function() {
 				if (fm.UA.iOS) {
 					if (win.hasClass('elfinder-quicklook-fullscreen')) {
@@ -27175,16 +27177,38 @@ elFinder.prototype.commands.quicklook.plugins = [
 			loadDash = function(file) {
 				var player;
 				render(file);
-				player = cDash.MediaPlayer().create();
+				player = window.dashjs.MediaPlayer().create();
 				player.initialize(node[0], fm.openUrl(file.hash), autoplay);
+			},
+			loadFlv = function(file) {
+				if (!cFlv || !cFlv.isSupported()) {
+					cFlv = false;
+					return;
+				}
+				var player = cFlv.createPlayer({
+					type: 'flv',
+					url: fm.openUrl(file.hash)
+				});
+				render(file);
+				player.on(cFlv.Events.ERROR, function() {
+					win.off('viewchange.video');
+					player.destroy();
+					node.remove();
+					ql.info.show();
+					node = null;
+				});
+				player.attachMediaElement(node[0]);
+				player.load();
+				autoplay && player.play();
 			};
 
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file,
 				mime = file.mime.toLowerCase(),
-				type = mimes[mime];
+				type = mimes[mime],
+				stock;
 			
-			if (mimes[mime] && ql.dispInlineRegex.test(file.mime) && (((type === 'm3u8' || type === 'mpd') && !fm.UA.ltIE10) || ql.support.video[type])) {
+			if (mimes[mime] && ql.dispInlineRegex.test(file.mime) && (((type === 'm3u8' || type === 'mpd' || type === 'flv') && !fm.UA.ltIE10) || ql.support.video[type])) {
 				autoplay = ql.autoPlay();
 				if (ql.support.video[type] && (type !== 'm3u8' || fm.UA.Safari)) {
 					e.stopImmediatePropagation();
@@ -27196,10 +27220,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 						if (cHls) {
 							loadHls(file);
 						} else {
+							stock = window.Hls;
+							delete window.Hls;
 							fm.loadScript(
 								[ fm.options.cdns.hls ],
 								function(res) { 
 									cHls = res || window.Hls;
+									window.Hls = stock;
 									loadHls(file);
 								},
 								{tryRequire: true}
@@ -27212,9 +27239,27 @@ elFinder.prototype.commands.quicklook.plugins = [
 						} else {
 							fm.loadScript(
 								[ fm.options.cdns.dash ],
-								function() { 
-									cDash = window.dashjs;
+								function() {
+									// dashjs require window.dashjs in global scope
+									cDash = true;
 									loadDash(file);
+								},
+								{tryRequire: true}
+							);
+						}
+					} else if (cFlv !== false && fm.options.cdns.flv && type === 'flv') {
+						e.stopImmediatePropagation();
+						if (cFlv) {
+							loadFlv(file);
+						} else {
+							stock = window.flvjs;
+							delete window.flvjs;
+							fm.loadScript(
+								[ fm.options.cdns.flv ],
+								function(res) { 
+									cFlv = res || window.flvjs;
+									window.flvjs = stock;
+									loadFlv(file);
 								},
 								{tryRequire: true}
 							);
