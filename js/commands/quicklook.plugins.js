@@ -687,12 +687,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 				'video/3gpp'      : '3gp',
 				'application/vnd.apple.mpegurl' : 'm3u8',
 				'application/x-mpegurl' : 'm3u8',
-				'application/dash+xml'  : 'mpd'
+				'application/dash+xml'  : 'mpd',
+				'video/x-flv'     : 'flv'
 			},
 			node,
 			win  = ql.window,
 			navi = ql.navbar,
-			cHls, cDash, autoplay,
+			cHls, cDash, cFlv, autoplay,
 			setNavi = function() {
 				if (fm.UA.iOS) {
 					if (win.hasClass('elfinder-quicklook-fullscreen')) {
@@ -738,16 +739,38 @@ elFinder.prototype.commands.quicklook.plugins = [
 			loadDash = function(file) {
 				var player;
 				render(file);
-				player = cDash.MediaPlayer().create();
+				player = window.dashjs.MediaPlayer().create();
 				player.initialize(node[0], fm.openUrl(file.hash), autoplay);
+			},
+			loadFlv = function(file) {
+				if (!cFlv || !cFlv.isSupported()) {
+					cFlv = false;
+					return;
+				}
+				var player = cFlv.createPlayer({
+					type: 'flv',
+					url: fm.openUrl(file.hash)
+				});
+				render(file);
+				player.on(cFlv.Events.ERROR, function() {
+					win.off('viewchange.video');
+					player.destroy();
+					node.remove();
+					ql.info.show();
+					node = null;
+				});
+				player.attachMediaElement(node[0]);
+				player.load();
+				autoplay && player.play();
 			};
 
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file,
 				mime = file.mime.toLowerCase(),
-				type = mimes[mime];
+				type = mimes[mime],
+				stock;
 			
-			if (mimes[mime] && ql.dispInlineRegex.test(file.mime) && (((type === 'm3u8' || type === 'mpd') && !fm.UA.ltIE10) || ql.support.video[type])) {
+			if (mimes[mime] && ql.dispInlineRegex.test(file.mime) && (((type === 'm3u8' || type === 'mpd' || type === 'flv') && !fm.UA.ltIE10) || ql.support.video[type])) {
 				autoplay = ql.autoPlay();
 				if (ql.support.video[type] && (type !== 'm3u8' || fm.UA.Safari)) {
 					e.stopImmediatePropagation();
@@ -759,10 +782,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 						if (cHls) {
 							loadHls(file);
 						} else {
+							stock = window.Hls;
+							delete window.Hls;
 							fm.loadScript(
 								[ fm.options.cdns.hls ],
 								function(res) { 
 									cHls = res || window.Hls;
+									window.Hls = stock;
 									loadHls(file);
 								},
 								{tryRequire: true}
@@ -775,9 +801,27 @@ elFinder.prototype.commands.quicklook.plugins = [
 						} else {
 							fm.loadScript(
 								[ fm.options.cdns.dash ],
-								function() { 
-									cDash = window.dashjs;
+								function() {
+									// dashjs require window.dashjs in global scope
+									cDash = true;
 									loadDash(file);
+								},
+								{tryRequire: true}
+							);
+						}
+					} else if (cFlv !== false && fm.options.cdns.flv && type === 'flv') {
+						e.stopImmediatePropagation();
+						if (cFlv) {
+							loadFlv(file);
+						} else {
+							stock = window.flvjs;
+							delete window.flvjs;
+							fm.loadScript(
+								[ fm.options.cdns.flv ],
+								function(res) { 
+									cFlv = res || window.flvjs;
+									window.flvjs = stock;
+									loadFlv(file);
 								},
 								{tryRequire: true}
 							);
