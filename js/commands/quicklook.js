@@ -120,15 +120,15 @@
 			};
 		},
 		
+		mediaNode = {},
 		support = function(codec, name) {
-			var media = document.createElement(name || codec.substr(0, codec.indexOf('/'))),
+			var node  = name || codec.substr(0, codec.indexOf('/')),
+				media = mediaNode[node]? mediaNode[node] : (mediaNode[node] = document.createElement(node)),
 				value = false;
 			
 			try {
 				value = media.canPlayType && media.canPlayType(codec);
-			} catch (e) {
-				
-			}
+			} catch(e) {}
 			
 			return (value && value !== '' && value != 'no')? true : false;
 		},
@@ -657,20 +657,26 @@
 	
 	this.support = {
 		audio : {
-			ogg : support('audio/ogg; codecs="vorbis"') || support('audio/ogg; codecs="flac"'),
+			ogg : support('audio/ogg;'),
+			webm: support('audio/webm;'),
 			mp3 : support('audio/mpeg;'),
-			wav : support('audio/wav; codecs="1"'),
+			wav : support('audio/wav;'),
 			m4a : support('audio/mp4;') || support('audio/x-m4a;') || support('audio/aac;'),
-			flac: support('audio/flac;')
+			flac: support('audio/flac;'),
+			amr : support('audio/amr;')
 		},
 		video : {
-			ogg  : support('video/ogg; codecs="theora"'),
-			webm : support('video/webm; codecs="vp8, vorbis"') || support('video/webm; codecs="vp9"'),
-			mp4  : support('video/mp4; codecs="avc1.42E01E"') || support('video/mp4; codecs="avc1.42E01E, mp4a.40.2"'),
+			ogg  : support('video/ogg;'),
+			webm : support('video/webm;'),
+			mp4  : support('video/mp4;'),
+			mkv  : support('video/x-matroska;'),
+			'3gp': support('video/3gpp;'),
 			m3u8 : support('application/x-mpegURL', 'video') || support('application/vnd.apple.mpegURL', 'video'),
 			mpd  : support('application/dash+xml', 'video')
 		}
 	};
+	// for GC
+	mediaNode = {};
 	
 	/**
 	 * Return true if quickLoock window is hiddenReturn true if quickLoock window is visible and not animated
