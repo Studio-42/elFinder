@@ -15,6 +15,8 @@
 		- [ui:tree] Fixed #2485 add an option `uiOptions.tree.durations`
 		- [ui:toast] Fixed #2487 add an option `uiOptions.toast.defaults`
 		- [js] Performance tuning
+		- [VD,cmd:search] Fixed #2490 support custom search method
+		- [cmd:quicklook] support AMR Audio, FLV Video preview
 		- And some minor bug fixes
 
 
