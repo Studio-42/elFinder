@@ -1,17 +1,28 @@
 /**
  * Bulgarian translation
  * @author Stamo Petkov <stamo.petkov@gmail.com>
+<<<<<<< HEAD:tools/langman/2.0/i18n/elfinder.bg.js
  * @version 2014-12-19
+=======
+ * @author Nikolay Petkov <office@cmstory.com>
+ * @version 2018-02-18
+>>>>>>> b8b5d90e019d8aa0fa249ab984a2ad29f317e323:js/i18n/elfinder.bg.js
  */
 if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object') {
 	elFinder.prototype.i18.bg = {
-		translator : 'Stamo Petkov &lt;stamo.petkov@gmail.com&gt;',
-		language   : 'Български',
+		translator : 'Stamo Petkov &lt;stamo.petkov@gmail.com&gt;, Nikolay Petkov &lt;office@cmstory.com&gt;',
+		language   : 'Bulgarian',
 		direction  : 'ltr',
+<<<<<<< HEAD:tools/langman/2.0/i18n/elfinder.bg.js
 		dateFormat : 'M d, Y h:i A', // Mar 13, 2012 05:27 PM
 		fancyDateFormat : '$1 h:i A', // will produce smth like: Today 12:25 PM
+=======
+		dateFormat : 'd.m.Y H:i', // 01.03.2018 15:27
+		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25
+		nonameDateFormat : 'Ymd-His', // to apply if upload file is noname: 120513172700
+>>>>>>> b8b5d90e019d8aa0fa249ab984a2ad29f317e323:js/i18n/elfinder.bg.js
 		messages   : {
-			
+
 			/********************************** errors **********************************/
 			'error'                : 'Грешка',
 			'errUnknown'           : 'Непозната грешка.',
@@ -23,17 +34,18 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errConnect'           : 'Няма връзка със сървъра.',
 			'errAbort'             : 'Връзката е прекъсната.',
 			'errTimeout'           : 'Просрочена връзка.',
-			'errNotFound'          : 'Сървърът не е намерен.', 
+			'errNotFound'          : 'Сървърът не е намерен.',
 			'errResponse'          : 'Грешен отговор от сървъра.',
-			'errConf'              : 'Грешни настройки на сървъра.', 
+			'errConf'              : 'Грешни настройки на сървъра.',
 			'errJSON'              : 'Не е инсталиран модул на PHP за JSON.',
 			'errNoVolumes'         : 'Няма дялове достъпни за четене.',
 			'errCmdParams'         : 'Грешни параметри на командата "$1".',
 			'errDataNotJSON'       : 'Данните не са JSON.',
 			'errDataEmpty'         : 'Липсват данни.',
 			'errCmdReq'            : 'Запитването от сървъра изисква име на команда.',
-			'errOpen'              : 'Не мога да отворя "$1".',
+			'errOpen'              : 'Неуспешно отваряне на "$1".',
 			'errNotFolder'         : 'Обектът не е папка.',
+<<<<<<< HEAD:tools/langman/2.0/i18n/elfinder.bg.js
 			'errNotFile'           : 'Обектът не е фаил.',
 			'errRead'              : 'Не мога да прочета "$1".',
 			'errWrite'             : 'Не мога да пиша в "$1".',
@@ -41,15 +53,26 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errLocked'            : '"$1" е заключен и не може да бъде преименуван, местен или премахван.',
 			'errExists'            : 'Вече съществува файл с име "$1"',
 			'errInvName'           : 'Грешно име на фаил.',
+=======
+			'errNotFile'           : 'Обектът не е файл.',
+			'errRead'              : 'Неуспешно прочитане на "$1".',
+			'errWrite'             : 'Неуспешен запис в "$1".',
+			'errPerm'              : 'Разрешение отказано.',
+			'errLocked'            : '"$1" е заключен и не може да бъде преименуван, местен или премахван.',
+			'errExists'            : 'Вече съществува файл с име "$1"',
+			'errInvName'           : 'Грешно име на файл.',
+			'errInvDirname'        : 'Невалидно име на папка.',  // from v2.1.24 added 12.4.2017
+>>>>>>> b8b5d90e019d8aa0fa249ab984a2ad29f317e323:js/i18n/elfinder.bg.js
 			'errFolderNotFound'    : 'Папката не е открита.',
 			'errFileNotFound'      : 'Фаилът не е открит.',
 			'errTrgFolderNotFound' : 'Целевата папка "$1" не е намерена.',
 			'errPopup'             : 'Браузъра блокира отварянето на прозорец. За да отворите файла, разрешете отварянето в настройките на браузъра.',
-			'errMkdir'             : 'Не мога да създам папка"$1".',
-			'errMkfile'            : 'Не мога да създам файл "$1".',
-			'errRename'            : 'Не мога да преименувам "$1".',
+			'errMkdir'             : 'Неуспешно създаване на папка "$1".',
+			'errMkfile'            : 'Неуспешно създаване на файл "$1".',
+			'errRename'            : 'Неуспешно преименуване на "$1".',
 			'errCopyFrom'          : 'Копирането на файлове от том "$1" не е разрешено.',
 			'errCopyTo'            : 'Копирането на файлове в том "$1" не е разрешено.',
+<<<<<<< HEAD:tools/langman/2.0/i18n/elfinder.bg.js
 			'errUpload'            : 'Грешка при качване.',
 			'errUploadFile'        : 'Не мога да кача "$1".',
 			'errUploadNoFiles'     : 'Не са намерени файлове за качване.',
@@ -67,12 +90,35 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errRmSrc'             : 'Unable remove source file(s).',
 			'errExtract'           : 'Не мога да извлеча файловете от "$1".',
 			'errArchive'           : 'Не мога да създам архив.',
+=======
+			'errMkOutLink'         : 'Неуспех при създаване на връзка извън началото на ресурса.', // from v2.1 added 03.10.2015
+			'errUpload'            : 'Грешка при качване.',  // old name - errUploadCommon
+			'errUploadFile'        : 'Неуспешно качване на "$1".', // old name - errUpload
+			'errUploadNoFiles'     : 'Не са намерени файлове за качване.',
+			'errUploadTotalSize'   : 'Данните превишават максимално допостумия размер.', // old name - errMaxSize
+			'errUploadFileSize'    : 'Файлът превишава максимално допустимия размер.', //  old name - errFileMaxSize
+			'errUploadMime'        : 'Непозволен тип на файла.',
+			'errUploadTransfer'    : '"$1" грешка при предаване.',
+			'errUploadTemp'        : 'Неуспешно създаване на временен файл за качване.', // from v2.1 added 26.09.2015
+			'errNotReplace'        : 'Обект "$1" вече съществува на това място и не може да бъде заменен от обект от друг тип.', // new
+			'errReplace'           : 'Не може да се замени "$1".',
+			'errSave'              : 'Не може да се запише "$1".',
+			'errCopy'              : 'Не може да се копира "$1".',
+			'errMove'              : 'Не може да се премести "$1".',
+			'errCopyInItself'      : 'Не може да се копира "$1" върху самия него.',
+			'errRm'                : 'Не може да се премахне "$1".',
+			'errTrash'             : 'Не може да се премести в кошчето', // from v2.1.24 added 30.4.2017
+			'errRmSrc'             : 'Не може да се премахне изходния файл(ове).',
+			'errExtract'           : 'Не може да се извлекат файловете от "$1".',
+			'errArchive'           : 'Не може да се създаде архив.',
+>>>>>>> b8b5d90e019d8aa0fa249ab984a2ad29f317e323:js/i18n/elfinder.bg.js
 			'errArcType'           : 'Неподдържан тип на архива.',
 			'errNoArchive'         : 'Файлът не е архив или е от неподдържан тип.',
-			'errCmdNoSupport'      : 'Сървъра не поддържа тази команда.', 
+			'errCmdNoSupport'      : 'Сървъра не поддържа тази команда.',
 			'errReplByChild'       : 'Папката “$1” не може да бъде заменена от съдържащ се в нея елемент.',
-			'errArcSymlinks'       : 'От съображения за сигурност няма да бъдат разопаковани архиви съдържащи symlinks.',
+			'errArcSymlinks'       : 'От съображения за сигурност няма да бъдат разопаковани архиви съдържащи symlinks.', // edited 24.06.2012
 			'errArcMaxSize'        : 'Архивните файлове превишават максимално допустимия размер.',
+<<<<<<< HEAD:tools/langman/2.0/i18n/elfinder.bg.js
 			'errResize'            : 'Не мога да преоразмеря "$1".',
 			'errResizeDegree'      : 'Invalid rotate degree.',
 			'errResizeRotate'      : 'Unable to rotate image.',
@@ -92,6 +138,37 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'errArchiveExec'       : 'Error while archiving files: "$1"',
 			'errExtractExec'       : 'Error while extracting files: "$1"',
 			
+=======
+			'errResize'            : 'Не може да се преоразмери "$1".',
+			'errResizeDegree'      : 'Невалиден градус за ротация.',  // added 7.3.2013
+			'errResizeRotate'      : 'Изображението не е ротирано.',  // added 7.3.2013
+			'errResizeSize'        : 'Невалиден размер на изображение.',  // added 7.3.2013
+			'errResizeNoChange'    : 'Размерът на изображението не е променен.',  // added 7.3.2013
+			'errUsupportType'      : 'Неподдържан тип на файл.',
+			'errNotUTF8Content'    : 'Файл "$1" не е в UTF-8 формат и не може да бъде редактиран.',  // added 9.11.2011
+			'errNetMount'          : 'Не може да се монтира "$1".', // added 17.04.2012
+			'errNetMountNoDriver'  : 'Неподдържан протокол.',     // added 17.04.2012
+			'errNetMountFailed'    : 'Монтирането не е успешно.',         // added 17.04.2012
+			'errNetMountHostReq'   : 'Хост се изисква.', // added 18.04.2012
+			'errSessionExpires'    : 'Сесията ви изтече поради липса на активност.',
+			'errCreatingTempDir'   : 'Не може да се създаде временна директория: "$1"',
+			'errFtpDownloadFile'   : 'Не може да се изтегли файл от FTP: "$1"',
+			'errFtpUploadFile'     : 'Не може да се качи файл на FTP: "$1"',
+			'errFtpMkdir'          : 'Не може да се създаде директория на FTP: "$1"',
+			'errArchiveExec'       : 'Грешка при архивиране на файлове: "$1"',
+			'errExtractExec'       : 'Грешка при разархивиране на файлове: "$1"',
+			'errNetUnMount'        : 'Не може да се размонтира', // from v2.1 added 30.04.2012
+			'errConvUTF8'          : 'Не е конвертируем до UTF-8', // from v2.1 added 08.04.2014
+			'errFolderUpload'      : 'Опитайте Google Chrome, ако искате да качите папка.', // from v2.1 added 26.6.2015
+			'errSearchTimeout'     : 'Времето изтече при търсенето на "$1". Резултатът от търсенето е частичен.', // from v2.1 added 12.1.2016
+			'errReauthRequire'     : 'Необходимо е повторно оторизиране.', // from v2.1.10 added 24.3.2016
+			'errMaxTargets'        : 'Максималният брой избрани файлове е $ 1.', // from v2.1.17 added 17.10.2016
+			'errRestore'           : 'Не може да се възстанови от кошчето. Не може да се определи местоположението за възстановяване.', // from v2.1.24 added 3.5.2017
+			'errEditorNotFound'    : 'Не е намерен редактор за този тип файл.', // from v2.1.25 added 23.5.2017
+			'errServerError'       : 'Възникна грешка на сървъра.', // from v2.1.25 added 16.6.2017
+			'errEmpty'             : 'Папката "$1" не може да се изпразни.', // from v2.1.25 added 22.6.2017
+
+>>>>>>> b8b5d90e019d8aa0fa249ab984a2ad29f317e323:js/i18n/elfinder.bg.js
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Създай архив',
 			'cmdback'      : 'Назад',
@@ -107,6 +184,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdhome'      : 'Начало',
 			'cmdinfo'      : 'Информация',
 			'cmdmkdir'     : 'Нова папка',
+			'cmdmkdirin'   : 'В нова папка', // from v2.1.7 added 19.2.2016
 			'cmdmkfile'    : 'Нов текстови файл',
 			'cmdopen'      : 'Отвори',
 			'cmdpaste'     : 'Вмъкни',
@@ -114,15 +192,37 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'cmdreload'    : 'Презареди',
 			'cmdrename'    : 'Преименувай',
 			'cmdrm'        : 'Изтрий',
+			'cmdtrash'     : 'В кошчето', //from v2.1.24 added 29.4.2017
+			'cmdrestore'   : 'Възстанови', //from v2.1.24 added 3.5.2017
 			'cmdsearch'    : 'Намери файлове',
 			'cmdup'        : 'Една директория нагоре',
 			'cmdupload'    : 'Качи файловете',
 			'cmdview'      : 'Виж',
-			'cmdresize'    : 'Размер на изображение',
+			'cmdresize'    : 'Промени изображение',
 			'cmdsort'      : 'Подреди',
+<<<<<<< HEAD:tools/langman/2.0/i18n/elfinder.bg.js
 			'cmdnetmount'  : 'Mount network volume',
 			
 			/*********************************** buttons ***********************************/ 
+=======
+			'cmdnetmount'  : 'Монтирай мрежов ресурс', // added 18.04.2012
+			'cmdnetunmount': 'Размонтирай', // from v2.1 added 30.04.2012
+			'cmdplaces'    : 'Към избрани', // added 28.12.2014
+			'cmdchmod'     : 'Промяна на вид', // from v2.1 added 20.6.2015
+			'cmdopendir'   : 'Отвори папка', // from v2.1 added 13.1.2016
+			'cmdcolwidth'  : 'Нулирай ширината на колоната', // from v2.1.13 added 12.06.2016
+			'cmdfullscreen': 'Цял екран', // from v2.1.15 added 03.08.2016
+			'cmdmove'      : 'Премести', // from v2.1.15 added 21.08.2016
+			'cmdempty'     : 'Изпразни папката', // from v2.1.25 added 22.06.2017
+			'cmdundo'      : 'Отмени', // from v2.1.27 added 31.07.2017
+			'cmdredo'      : 'Преправи', // from v2.1.27 added 31.07.2017
+			'cmdpreference': 'Настройки', // from v2.1.27 added 03.08.2017
+			'cmdselectall' : 'Избери всичко', // from v2.1.28 added 15.08.2017
+			'cmdselectnone': 'Избери нищо', // from v2.1.28 added 15.08.2017
+			'cmdselectinvert': 'Обърни селекцията', // from v2.1.28 added 15.08.2017
+
+			/*********************************** buttons ***********************************/
+>>>>>>> b8b5d90e019d8aa0fa249ab984a2ad29f317e323:js/i18n/elfinder.bg.js
 			'btnClose'  : 'Затвори',
 			'btnSave'   : 'Запиши',
 			'btnRm'     : 'Премахни',
@@ -130,22 +230,43 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'btnCancel' : 'Отказ',
 			'btnNo'     : 'Не',
 			'btnYes'    : 'Да',
+<<<<<<< HEAD:tools/langman/2.0/i18n/elfinder.bg.js
 			'btnMount'  : 'Mount',
 			
+=======
+			'btnMount'  : 'Монтирай',  // added 18.04.2012
+			'btnApprove': 'Отиди на $1 и одобри', // from v2.1 added 26.04.2012
+			'btnUnmount': 'Размонтирай', // from v2.1 added 30.04.2012
+			'btnConv'   : 'Конвертирай', // from v2.1 added 08.04.2014
+			'btnCwd'    : 'Тук',      // from v2.1 added 22.5.2015
+			'btnVolume' : 'Ресурс',    // from v2.1 added 22.5.2015
+			'btnAll'    : 'Всички',       // from v2.1 added 22.5.2015
+			'btnMime'   : 'MIME тип', // from v2.1 added 22.5.2015
+			'btnFileName':'Име',  // from v2.1 added 22.5.2015
+			'btnSaveClose': 'Запази и затвори', // from v2.1 added 12.6.2015
+			'btnBackup' : 'Архивирай', // fromv2.1 added 28.11.2015
+			'btnRename'    : 'Преименувай',      // from v2.1.24 added 6.4.2017
+			'btnRenameAll' : 'Преименувай(Всички)', // from v2.1.24 added 6.4.2017
+			'btnPrevious' : 'Пред ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnNext'     : 'След ($1/$2)', // from v2.1.24 added 11.5.2017
+			'btnSaveAs'   : 'Запази като', // from v2.1.25 added 24.5.2017
+
+>>>>>>> b8b5d90e019d8aa0fa249ab984a2ad29f317e323:js/i18n/elfinder.bg.js
 			/******************************** notifications ********************************/
 			'ntfopen'     : 'Отваряне на папка',
 			'ntffile'     : 'Отваряне на файл',
 			'ntfreload'   : 'Презареждане съдържанието на папка',
-			'ntfmkdir'    : 'Създавам директория',
-			'ntfmkfile'   : 'Създавам файл',
+			'ntfmkdir'    : 'Създава се директория',
+			'ntfmkfile'   : 'Създава се файл',
 			'ntfrm'       : 'Изтриване на файлове',
 			'ntfcopy'     : 'Копиране на файлове',
 			'ntfmove'     : 'Преместване на файлове',
 			'ntfprepare'  : 'Подготовка за копиране на файлове',
 			'ntfrename'   : 'Преименуване на файлове',
-			'ntfupload'   : 'Качвам файлове',
-			'ntfdownload' : 'Свалям файлове',
+			'ntfupload'   : 'Качват се файлове',
+			'ntfdownload' : 'Свалят се файлове',
 			'ntfsave'     : 'Запис на файлове',
+<<<<<<< HEAD:tools/langman/2.0/i18n/elfinder.bg.js
 			'ntfarchive'  : 'Създавам архив',
 			'ntfextract'  : 'Извличам файловете от архив',
 			'ntfsearch'   : 'Търся файлове',
@@ -198,22 +319,116 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'Fri'         : 'Fri', 
 			'Sat'         : 'Sat',
 			
+=======
+			'ntfarchive'  : 'Създава се архив',
+			'ntfextract'  : 'Извличат се файловете от архив',
+			'ntfsearch'   : 'Търсят се файлове',
+			'ntfresize'   : 'Преоразмеряват се изображения',
+			'ntfsmth'     : 'Зает съм >_<',
+			'ntfloadimg'  : 'Зареждат се изображения',
+			'ntfnetmount' : 'Монтира се мрежов ресурс', // added 18.04.2012
+			'ntfnetunmount': 'Размонтира се мрежов ресурс', // from v2.1 added 30.04.2012
+			'ntfdim'      : 'Извличат се размерите на изображение', // added 20.05.2013
+			'ntfreaddir'  : 'Извлича се информация за папка', // from v2.1 added 01.07.2013
+			'ntfurl'      : 'Взима се URL от връзка', // from v2.1 added 11.03.2014
+			'ntfchmod'    : 'Променя се вида на файл', // from v2.1 added 20.6.2015
+			'ntfpreupload': 'Проверка на името на файла за качване', // from v2.1 added 31.11.2015
+			'ntfzipdl'    : 'Създаване на файл за изтегляне', // from v2.1.7 added 23.1.2016
+			'ntfparents'  : 'Получава се информация за пътя', // from v2.1.17 added 2.11.2016
+			'ntfchunkmerge': 'Обработка на качения файл', // from v2.1.17 added 2.11.2016
+			'ntftrash'    : 'Прехвърлят се позиции в кошчето', // from v2.1.24 added 2.5.2017
+			'ntfrestore'  : 'Извършва се възстановяване от кошчето', // from v2.1.24 added 3.5.2017
+			'ntfchkdir'   : 'Проверка на целевата папка', // from v2.1.24 added 3.5.2017
+			'ntfundo'     : 'Отмяна на предишната операция', // from v2.1.27 added 31.07.2017
+			'ntfredo'     : 'Възстановяване на предходните отменени', // from v2.1.27 added 31.07.2017
+
+			/*********************************** volumes *********************************/
+			'volume_Trash' : 'Кошче', //from v2.1.24 added 29.4.2017
+
+			/************************************ dates **********************************/
+			'dateUnknown' : 'неизвестна',
+			'Today'       : 'днес',
+			'Yesterday'   : 'вчера',
+			'msJan'       : 'яну',
+			'msFeb'       : 'фев',
+			'msMar'       : 'мар',
+			'msApr'       : 'апр',
+			'msMay'       : 'май',
+			'msJun'       : 'юни',
+			'msJul'       : 'юли',
+			'msAug'       : 'авг',
+			'msSep'       : 'сеп',
+			'msOct'       : 'окт',
+			'msNov'       : 'ное',
+			'msDec'       : 'дек',
+			'January'     : 'януари',
+			'February'    : 'февруари',
+			'March'       : 'март',
+			'April'       : 'април',
+			'May'         : 'май',
+			'June'        : 'юни',
+			'July'        : 'юли',
+			'August'      : 'август',
+			'September'   : 'септември',
+			'October'     : 'октомври',
+			'November'    : 'ноември',
+			'December'    : 'декември',
+			'Sunday'      : 'неделя',
+			'Monday'      : 'понеделник',
+			'Tuesday'     : 'вторник',
+			'Wednesday'   : 'сряда',
+			'Thursday'    : 'четвъртък',
+			'Friday'      : 'петък',
+			'Saturday'    : 'събота',
+			'Sun'         : 'нед',
+			'Mon'         : 'пон',
+			'Tue'         : 'вто',
+			'Wed'         : 'сря',
+			'Thu'         : 'чет',
+			'Fri'         : 'пет',
+			'Sat'         : 'съб',
+
+>>>>>>> b8b5d90e019d8aa0fa249ab984a2ad29f317e323:js/i18n/elfinder.bg.js
 			/******************************** sort variants ********************************/
-			'sortname'          : 'по име', 
-			'sortkind'          : 'по вид', 
+			'sortname'          : 'по име',
+			'sortkind'          : 'по вид',
 			'sortsize'          : 'по размер',
 			'sortdate'          : 'по дата',
+<<<<<<< HEAD:tools/langman/2.0/i18n/elfinder.bg.js
 			'sortFoldersFirst'  : 'Folders first',
 			
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Изисква се подтвърждение',
 			'confirmRm'       : 'Сигурни ли сте, че желаете да премахнете файловете?<br/>Това действие е необратимо!',
 			'confirmRepl'     : 'Да заменя ли стария фаил с новия?',
+=======
+			'sortFoldersFirst'  : 'Папките първи',
+			'sortperm'          : 'по права', // from v2.1.13 added 13.06.2016
+			'sortmode'          : 'по вид',       // from v2.1.13 added 13.06.2016
+			'sortowner'         : 'по собственик',      // from v2.1.13 added 13.06.2016
+			'sortgroup'         : 'по група',      // from v2.1.13 added 13.06.2016
+			'sortAlsoTreeview'  : 'Също дървовиден изглед',  // from v2.1.15 added 01.08.2016
+
+			/********************************** new items **********************************/
+			'untitled file.txt' : 'NewFile.txt', // added 10.11.2015
+			'untitled folder'   : 'NewFolder',   // added 10.11.2015
+			'Archive'           : 'NewArchive',  // from v2.1 added 10.11.2015
+
+			/********************************** messages **********************************/
+			'confirmReq'      : 'Изисква се подтвърждение',
+			'confirmRm'       : 'Сигурни ли сте, че желаете да премахнете файловете?<br/>Това действие е необратимо!',
+			'confirmRepl'     : 'Да заменя ли стария файл с новия?',
+			'confirmRest'     : 'Да се замени ли съществуващата позиция с тази в кошчето?', // fromv2.1.24 added 5.5.2017
+			'confirmConvUTF8' : 'Не е в UTF-8 формат<br/>Конвертиране до UTF-8?<br/>Съдържанието става в UTF-8 формат при запазване след конверсията.', // from v2.1 added 08.04.2014
+			'confirmNonUTF8'  : 'Кодирането на този файл не може да бъде открито. Необходимо е временно да се преобразува в UTF-8 за редактиране. <br/> Моля, изберете кодиране на този файл.', // from v2.1.19 added 28.11.2016
+			'confirmNotSave'  : 'Има направени промени.<br/>Те ще бъдат загубени, ако не запишете промените.', // from v2.1 added 15.7.2015
+			'confirmTrash'    : 'Наистина ли искате да преместите позиции в кошчето за боклук?', //from v2.1.24 added 29.4.2017
+>>>>>>> b8b5d90e019d8aa0fa249ab984a2ad29f317e323:js/i18n/elfinder.bg.js
 			'apllyAll'        : 'Приложи за всички',
 			'name'            : 'Име',
 			'size'            : 'Размер',
-			'perms'           : 'Привилегии',
-			'modify'          : 'Променен',
+			'perms'           : 'Права',
+			'modify'          : 'Променено',
 			'kind'            : 'Вид',
 			'read'            : 'четене',
 			'write'           : 'запис',
@@ -226,26 +441,26 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'selectlfile'     : 'Избери последният файл',
 			'viewlist'        : 'Изглед списък',
 			'viewicons'       : 'Изглед икони',
-			'places'          : 'Места',
-			'calc'            : 'Изчисли', 
+			'places'          : 'Избрани',
+			'calc'            : 'Изчисли',
 			'path'            : 'Път',
 			'aliasfor'        : 'Връзка към',
 			'locked'          : 'Заключен',
 			'dim'             : 'Размери',
 			'files'           : 'Файлове',
 			'folders'         : 'Папки',
-			'items'           : 'Елементи',
+			'items'           : 'Позиции',
 			'yes'             : 'да',
 			'no'              : 'не',
 			'link'            : 'Връзка',
-			'searcresult'     : 'Резултати от търсенето',  
-			'selected'        : 'Избрани елементи',
+			'searcresult'     : 'Резултати от търсенето',
+			'selected'        : 'Избрани позиции',
 			'about'           : 'За',
 			'shortcuts'       : 'преки пътища',
 			'help'            : 'Помощ',
 			'webfm'           : 'Файлов менаджер за web',
 			'ver'             : 'Версия',
-			'protocolver'        : 'версия на протокола',
+			'protocolver'     : 'версия на протокола',
 			'homepage'        : 'Начало',
 			'docs'            : 'Документация',
 			'github'          : 'Разклонение в Github',
@@ -262,10 +477,15 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'shortcutsof'     : 'Преките пътища са изключени',
 			'dropFiles'       : 'Пуснете файловете тук',
 			'or'              : 'или',
+<<<<<<< HEAD:tools/langman/2.0/i18n/elfinder.bg.js
 			'selectForUpload' : 'Изберете файлове за качване',
+=======
+			'selectForUpload' : 'Избери файлове',
+>>>>>>> b8b5d90e019d8aa0fa249ab984a2ad29f317e323:js/i18n/elfinder.bg.js
 			'moveFiles'       : 'Премести файлове',
 			'copyFiles'       : 'Копирай файлове',
-			'rmFromPlaces'    : 'Премахни от Места',
+			'restoreFiles'    : 'Възстанови файлове', // from v2.1.24 added 5.5.2017
+			'rmFromPlaces'    : 'Премахни от избрани',
 			'aspectRatio'     : 'Отношение',
 			'scale'           : 'Мащаб',
 			'width'           : 'Ширина',
@@ -276,6 +496,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'rotate-cw'       : 'Rotate 90 degrees CW',
 			'rotate-ccw'      : 'Rotate 90 degrees CCW',
 			'degree'          : '°',
+<<<<<<< HEAD:tools/langman/2.0/i18n/elfinder.bg.js
 			'netMountDialogTitle' : 'Mount network volume',
 			'protocol'        : 'Protocol',
 			'host'            : 'Host',
@@ -283,9 +504,95 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'user'            : 'User',
 			'pass'            : 'Password',
 			
+=======
+			'netMountDialogTitle' : 'Монтиране на мрежов ресурс', // added 18.04.2012
+			'protocol'            : 'Протокол', // added 18.04.2012
+			'host'                : 'Хост', // added 18.04.2012
+			'port'                : 'Порт', // added 18.04.2012
+			'user'                : 'Потребител', // added 18.04.2012
+			'pass'                : 'Парола', // added 18.04.2012
+			'confirmUnmount'      : 'Ще размонтирате $1?',  // from v2.1 added 30.04.2012
+			'dropFilesBrowser': 'Пусни или вмъкни файлове от браузера', // from v2.1 added 30.05.2012
+			'dropPasteFiles'  : 'Тук поснете файловете, URL адресите или изображенията от клипборда', // from v2.1 added 07.04.2014
+			'encoding'        : 'Кодировка', // from v2.1 added 19.12.2014
+			'locale'          : 'Локали',   // from v2.1 added 19.12.2014
+			'searchTarget'    : 'Цел: $1',                // from v2.1 added 22.5.2015
+			'searchMime'      : 'Търсене по въведен MIME тип', // from v2.1 added 22.5.2015
+			'owner'           : 'Собственик', // from v2.1 added 20.6.2015
+			'group'           : 'Група', // from v2.1 added 20.6.2015
+			'other'           : 'Други', // from v2.1 added 20.6.2015
+			'execute'         : 'Изпълнява', // from v2.1 added 20.6.2015
+			'perm'            : 'Разрешение', // from v2.1 added 20.6.2015
+			'mode'            : 'Вид', // from v2.1 added 20.6.2015
+			'emptyFolder'     : 'Папката е празна', // from v2.1.6 added 30.12.2015
+			'emptyFolderDrop' : 'Папката е празна\\A Влачи и пусни за да добавите файлове', // from v2.1.6 added 30.12.2015
+			'emptyFolderLTap' : 'Папката е празна\\A Докоснете дълго за да добавите позиции', // from v2.1.6 added 30.12.2015
+			'quality'         : 'Качество', // from v2.1.6 added 5.1.2016
+			'autoSync'        : 'Автоматично синхронизиране',  // from v2.1.6 added 10.1.2016
+			'moveUp'          : 'Премести нагоре',  // from v2.1.6 added 18.1.2016
+			'getLink'         : 'Вземи URL връзка', // from v2.1.7 added 9.2.2016
+			'selectedItems'   : 'Избрани позиции ($1)', // from v2.1.7 added 2.19.2016
+			'folderId'        : 'Папка ID', // from v2.1.10 added 3.25.2016
+			'offlineAccess'   : 'Позволи офлайн достъп', // from v2.1.10 added 3.25.2016
+			'reAuth'          : 'За повторно удостоверяване', // from v2.1.10 added 3.25.2016
+			'nowLoading'      : 'Сега се зарежда...', // from v2.1.12 added 4.26.2016
+			'openMulti'       : 'Отваряне на няколко файла', // from v2.1.12 added 5.14.2016
+			'openMultiConfirm': 'Опитвате се да отворите $1 файла. Наистина ли искате да ги отворите в браузъра?', // from v2.1.12 added 5.14.2016
+			'emptySearch'     : 'Няма резултат от търсенето.', // from v2.1.12 added 5.16.2016
+			'editingFile'     : 'Редактира се файл.', // from v2.1.13 added 6.3.2016
+			'hasSelected'     : 'Вие сте избрали $1 позиции.', // from v2.1.13 added 6.3.2016
+			'hasClipboard'    : 'Имате $1 позиции в клипборда.', // from v2.1.13 added 6.3.2016
+			'incSearchOnly'   : 'Инкременталното търсене е само от текущия изглед.', // from v2.1.13 added 6.30.2016
+			'reinstate'       : 'Възстановяване', // from v2.1.15 added 3.8.2016
+			'complete'        : '$1 завършени', // from v2.1.15 added 21.8.2016
+			'contextmenu'     : 'Контекстно меню', // from v2.1.15 added 9.9.2016
+			'pageTurning'     : 'Завъртане на страницата', // from v2.1.15 added 10.9.2016
+			'volumeRoots'     : 'Начала на ресурси', // from v2.1.16 added 16.9.2016
+			'reset'           : 'Нулиране', // from v2.1.16 added 1.10.2016
+			'bgcolor'         : 'Цвят на фона', // from v2.1.16 added 1.10.2016
+			'colorPicker'     : 'Средство за избиране на цвят', // from v2.1.16 added 1.10.2016
+			'8pxgrid'         : '8px мрежа', // from v2.1.16 added 4.10.2016
+			'enabled'         : 'Активно', // from v2.1.16 added 4.10.2016
+			'disabled'        : 'Неактивно', // from v2.1.16 added 4.10.2016
+			'emptyIncSearch'  : 'Няма резултат от търсенето в текущия изглед.\\AНатиснете [Enter] за да разширите целта на търсене.', // from v2.1.16 added 5.10.2016
+			'emptyLetSearch'  : 'Резултатите от търсенето на първата буква са празни в текущия изглед.', // from v2.1.23 added 24.3.2017
+			'textLabel'       : 'Текстов етикет', // from v2.1.17 added 13.10.2016
+			'minsLeft'        : '$1 мин остават', // from v2.1.17 added 13.11.2016
+			'openAsEncoding'  : 'Отваряне отново с избрано кодиране', // from v2.1.19 added 2.12.2016
+			'saveAsEncoding'  : 'Запазете с избраното кодиране', // from v2.1.19 added 2.12.2016
+			'selectFolder'    : 'Избери папка', // from v2.1.20 added 13.12.2016
+			'firstLetterSearch': 'Търсене по първа буква', // from v2.1.23 added 24.3.2017
+			'presets'         : 'Мостри', // from v2.1.25 added 26.5.2017
+			'tooManyToTrash'  : 'Прекалено много позиции, не може да премести в кошчето.', // from v2.1.25 added 9.6.2017
+			'TextArea'        : 'Ттекстово поле', // from v2.1.25 added 14.6.2017
+			'folderToEmpty'   : 'Изпразнете папка "$1".', // from v2.1.25 added 22.6.2017
+			'filderIsEmpty'   : 'В папка "$1" няма позиции.', // from v2.1.25 added 22.6.2017
+			'preference'      : 'Настройки', // from v2.1.26 added 28.6.2017
+			'language'        : 'Настройка на езика', // from v2.1.26 added 28.6.2017
+			'clearBrowserData': 'Инициализирайте настройките запаметени в този браузър', // from v2.1.26 added 28.6.2017
+			'toolbarPref'     : 'Настройки на лентата с инструменти', // from v2.1.27 added 2.8.2017
+			'charsLeft'       : '... $1 символа остават.',  // from v2.1.29 added 30.8.2017
+			'sum'             : 'Сумарно', // from v2.1.29 added 28.9.2017
+			'roughFileSize'   : 'Груб размер на файла', // from v2.1.30 added 2.11.2017
+			'autoFocusDialog' : 'Фокусирайте върху елемента в диалоговия прозорец с мишката',  // from v2.1.30 added 2.11.2017
+			'select'          : 'Избери', // from v2.1.30 added 23.11.2017
+			'selectAction'    : 'Действие при избор на файл', // from v2.1.30 added 23.11.2017
+			'useStoredEditor' : 'Отворете с редактора, използван за последен път', // from v2.1.30 added 23.11.2017
+			'selectinvert'    : 'Обърнете селекцията', // from v2.1.30 added 25.11.2017
+			'renameMultiple'  : 'Наистина ли искате да преименувате $1 избрани позиции като $2? <br/> Това не може да бъде отменено!', // from v2.1.31 added 4.12.2017
+			'batchRename'     : 'Групово преименуване', // from v2.1.31 added 8.12.2017
+			'plusNumber'      : '+ Номер', // from v2.1.31 added 8.12.2017
+			'asPrefix'        : 'Добави префикс', // from v2.1.31 added 8.12.2017
+			'asSuffix'        : 'Добави суфикс', // from v2.1.31 added 8.12.2017
+			'changeExtention' : 'Промени разширение', // from v2.1.31 added 8.12.2017
+			'columnPref'      : 'Настройки за колони (Изглед в списък)', // from v2.1.32 added 6.2.2018
+
+>>>>>>> b8b5d90e019d8aa0fa249ab984a2ad29f317e323:js/i18n/elfinder.bg.js
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Непознат',
+			'kindRoot'        : 'Начало на ресурс', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'Папка',
+			'kindSelects'     : 'Селекции', // from v2.1.29 added 29.8.2017
 			'kindAlias'       : 'Връзка',
 			'kindAliasBroken' : 'Счупена връзка',
 			// applications
@@ -322,7 +629,7 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindCHeader'     : 'C header изходен код',
 			'kindCPP'         : 'C++ изходен код',
 			'kindCPPHeader'   : 'C++ header изходен код',
-			'kindShell'       : 'Unix shell script',
+			'kindShell'       : 'Unix shell изходен код',
 			'kindPython'      : 'Python изходен код',
 			'kindJava'        : 'Java изходен код',
 			'kindRuby'        : 'Ruby изходен код',
@@ -332,6 +639,10 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindAWK'         : 'AWK изходен код',
 			'kindCSV'         : 'CSV стойности разделени със запетая',
 			'kindDOCBOOK'     : 'Docbook XML документ',
+<<<<<<< HEAD:tools/langman/2.0/i18n/elfinder.bg.js
+=======
+			'kindMarkdown'    : 'Markdown текст', // added 20.7.2015
+>>>>>>> b8b5d90e019d8aa0fa249ab984a2ad29f317e323:js/i18n/elfinder.bg.js
 			// images
 			'kindImage'       : 'Изображение',
 			'kindBMP'         : 'BMP изображение',
@@ -363,5 +674,9 @@ if (elFinder && elFinder.prototype && typeof(elFinder.prototype.i18) == 'object'
 			'kindVideoOGG'    : 'Ogg филм'
 		}
 	};
+<<<<<<< HEAD:tools/langman/2.0/i18n/elfinder.bg.js
 }
 
+=======
+}));
+>>>>>>> b8b5d90e019d8aa0fa249ab984a2ad29f317e323:js/i18n/elfinder.bg.js
