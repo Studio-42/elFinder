@@ -453,7 +453,7 @@
 			'hashChecker'     : 'Algoritmy na zobrazenie hashu súborov', // from v2.1.33 added 10.3.2018
 			'infoItems'       : 'Informačné položky (panel s informáciami o výbere)', // from v2.1.38 added 28.3.2018
 			'pressAgainToExit': 'Opätovným stlačením opustíte.', // from v2.1.38 added 1.4.2018
-			'toolbar'         : 'Toolbar', // from v2.1.38 added 4.4.2018
+			'toolbar'         : 'Panel nástrojov', // from v2.1.38 added 4.4.2018
 			'workspace'       : 'Pracovný priestor', // from v2.1.38 added 4.4.2018
 			'dialog'          : 'Dialóg', // from v2.1.38 added 4.4.2018
 			'all'             : 'Všetko', // from v2.1.38 added 4.4.2018
