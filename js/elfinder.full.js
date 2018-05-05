@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.37 (2.1-src Nightly: 47655d9) (2018-05-04)
+ * Version 2.1.37 (2.1-src Nightly: d29a40f) (2018-05-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9497,7 +9497,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.37 (2.1-src Nightly: 47655d9)';
+elFinder.prototype.version = '2.1.37 (2.1-src Nightly: d29a40f)';
 
 
 
@@ -26996,6 +26996,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						// Firefox fire change event on seek or volume change
 						e.stopPropagation();
 					})
+					.on('error', reset)
 					.appendTo(preview);
 			},
 			amrToWavUrl = function(hash) {
@@ -27042,6 +27043,24 @@ elFinder.prototype.commands.quicklook.plugins = [
 					loader[AMR? 'resolve':'reject']();
 				}
 				return dfd;
+			},
+			reset = function() {
+				if (node && node.parent().length) {
+					var elm = node[0],
+						url = node.children('source').attr('src');
+					win.off('viewchange.audio');
+					try {
+						elm.pause();
+						node.empty();
+						if (url.match(/^blob:/)) {
+							URL.revokeObjectURL(url);
+						}
+						elm.src = '';
+						elm.load();
+					} catch(e) {}
+					node.remove();
+					node = null;
+				}
 			};
 
 		preview.on(ql.evUpdate, function(e) {
@@ -27086,24 +27105,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					setNavi();
 				}
 			}
-		}).on('change', function() {
-			if (node && node.parent().length) {
-				var elm = node[0],
-					url = node.children('source').attr('src');
-				win.off('viewchange.audio');
-				try {
-					elm.pause();
-					node.empty();
-					if (url.match(/^blob:/)) {
-						URL.revokeObjectURL(url);
-					}
-					elm.src = '';
-					elm.load();
-				} catch(e) {}
-				node.remove();
-				node = null;
-			}
-		});
+		}).on('change', reset);
 	},
 	
 	/**
@@ -27152,6 +27154,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 					.on('change', function(e) {
 						// Firefox fire change event on seek or volume change
 						e.stopPropagation();
+					})
+					.on('error', function() {
+						reset(true);
 					});
 				if (opts.src) {
 					node.append('<source src="'+opts.src+'" type="'+file.mime+'"/><source src="'+opts.src+'"/>');
@@ -27181,7 +27186,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				player.initialize(node[0], fm.openUrl(file.hash), autoplay);
 			},
 			loadFlv = function(file) {
-				if (!cFlv || !cFlv.isSupported()) {
+				if (!cFlv.isSupported()) {
 					cFlv = false;
 					return;
 				}
@@ -27191,15 +27196,27 @@ elFinder.prototype.commands.quicklook.plugins = [
 				});
 				render(file);
 				player.on(cFlv.Events.ERROR, function() {
-					win.off('viewchange.video');
 					player.destroy();
-					node.remove();
-					ql.info.show();
-					node = null;
+					reset(true);
 				});
 				player.attachMediaElement(node[0]);
 				player.load();
 				autoplay && player.play();
+			},
+			reset = function(showInfo) {
+				if (node && node.parent().length) {
+					var elm = node[0];
+					win.off('viewchange.video');
+					try {
+						elm.pause();
+						node.empty();
+						elm.src = '';
+						elm.load();
+					} catch(e) {}
+					node.remove();
+					node= null;
+				}
+				showInfo && ql.info.show();
 			};
 
 		preview.on(ql.evUpdate, function(e) {
@@ -27215,7 +27232,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					render(file, { src: fm.openUrl(file.hash) });
 					autoplay && node[0].play();
 				} else {
-					if (fm.options.cdns.hls && type === 'm3u8') {
+					if (cHls !== false && fm.options.cdns.hls && type === 'm3u8') {
 						e.stopImmediatePropagation();
 						if (cHls) {
 							loadHls(file);
@@ -27225,14 +27242,19 @@ elFinder.prototype.commands.quicklook.plugins = [
 							fm.loadScript(
 								[ fm.options.cdns.hls ],
 								function(res) { 
-									cHls = res || window.Hls;
+									cHls = res || window.Hls || false;
 									window.Hls = stock;
-									loadHls(file);
+									cHls && loadHls(file);
 								},
-								{tryRequire: true}
+								{
+									tryRequire: true,
+									error : function() {
+										cHls = false;
+									}
+								}
 							);
 						}
-					} else if (fm.options.cdns.dash && type === 'mpd') {
+					} else if (cDash !== false && fm.options.cdns.dash && type === 'mpd') {
 						e.stopImmediatePropagation();
 						if (cDash) {
 							loadDash(file);
@@ -27241,10 +27263,15 @@ elFinder.prototype.commands.quicklook.plugins = [
 								[ fm.options.cdns.dash ],
 								function() {
 									// dashjs require window.dashjs in global scope
-									cDash = true;
-									loadDash(file);
+									cDash = window.dashjs? true : false;
+									cDash && loadDash(file);
 								},
-								{tryRequire: true}
+								{
+									tryRequire: true,
+									error : function() {
+										cDash = false;
+									}
+								}
 							);
 						}
 					} else if (cFlv !== false && fm.options.cdns.flv && type === 'flv') {
@@ -27257,30 +27284,22 @@ elFinder.prototype.commands.quicklook.plugins = [
 							fm.loadScript(
 								[ fm.options.cdns.flv ],
 								function(res) { 
-									cFlv = res || window.flvjs;
+									cFlv = res || window.flvjs || false;
 									window.flvjs = stock;
-									loadFlv(file);
+									cFlv && loadFlv(file);
 								},
-								{tryRequire: true}
+								{
+									tryRequire: true,
+									error : function() {
+										cFlv = false;
+									}
+								}
 							);
 						}
 					}
 				}
 			}
-		}).on('change', function() {
-			if (node && node.parent().length) {
-				var elm = node[0];
-				win.off('viewchange.video');
-				try {
-					elm.pause();
-					node.empty();
-					elm.src = '';
-					elm.load();
-				} catch(e) {}
-				node.remove();
-				node= null;
-			}
-		});
+		}).on('change', reset);
 	},
 	
 	/**
