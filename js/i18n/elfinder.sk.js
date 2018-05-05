@@ -2,7 +2,7 @@
  * Slovak translation
  * @author RobiNN <kelcakrobo@gmail.com>
  * @author Jakub Ďuraš <jkblmr@gmail.com>
- * @version 2018-03-28
+ * @version 2018-05-05
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -162,6 +162,7 @@
 			'cmdselectall' : 'Vybrať všetko', // from v2.1.28 added 15.08.2017
 			'cmdselectnone': 'Nič nevyberať', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': 'Invertovať výber', // from v2.1.28 added 15.08.2017
+			'cmdopennew'   : 'Otvoriť v novom okne', // from v2.1.38 added 3.4.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zavrieť',
@@ -451,6 +452,11 @@
 			'selectionInfo'   : 'Informácie o výbere', // from v2.1.33 added 7.3.2018
 			'hashChecker'     : 'Algoritmy na zobrazenie hashu súborov', // from v2.1.33 added 10.3.2018
 			'infoItems'       : 'Informačné položky (panel s informáciami o výbere)', // from v2.1.38 added 28.3.2018
+			'pressAgainToExit': 'Opätovným stlačením opustíte.', // from v2.1.38 added 1.4.2018
+			'toolbar'         : 'Panel nástrojov', // from v2.1.38 added 4.4.2018
+			'workspace'       : 'Pracovný priestor', // from v2.1.38 added 4.4.2018
+			'dialog'          : 'Dialóg', // from v2.1.38 added 4.4.2018
+			'all'             : 'Všetko', // from v2.1.38 added 4.4.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
