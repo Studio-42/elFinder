@@ -1,4 +1,4 @@
-2018-05-xx  Naoki Sawada  <hypweb+elfinder@gmail.com>
+2018-05-05  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.38):
 		- [js:dialogelfinder] Re-fixed #2401 remove deprecated functions of jQuery
