@@ -324,7 +324,8 @@ elFinder.prototype.commands.preference = function() {
 			dialog.closest('.ui-dialog')
 			.css({
 				overflow: 'hidden'
-			});
+			})
+			.addClass('elfinder-bg-translucent');
 			
 			openTab = 'all';
 		},
