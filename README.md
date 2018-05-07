@@ -92,7 +92,7 @@ Requirements
 ------------
 ### jQuery / jQuery UI
  * jQuery 1.8.0+
- * jQuery UI 1.9.0+ (require selectable, draggable, droppable and resizable)
+ * jQuery UI 1.9.0+ (require draggable, droppable, resizable, selectable and slider)
 
 **However, we recommend newest version.**
 
