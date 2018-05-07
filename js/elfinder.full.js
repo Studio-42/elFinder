@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: 5702c47) (2018-05-08)
+ * Version 2.1.38 (2.1-src Nightly: a9fe0d4) (2018-05-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9497,7 +9497,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.38 (2.1-src Nightly: 5702c47)';
+elFinder.prototype.version = '2.1.38 (2.1-src Nightly: a9fe0d4)';
 
 
 
@@ -25591,7 +25591,8 @@ elFinder.prototype.commands.preference = function() {
 			dialog.closest('.ui-dialog')
 			.css({
 				overflow: 'hidden'
-			});
+			})
+			.addClass('elfinder-bg-translucent');
 			
 			openTab = 'all';
 		},
