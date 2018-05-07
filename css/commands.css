@@ -523,6 +523,12 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-preference select {
 	max-width: 100%;
 }
+.elfinder-preference dd.elfinder-preference-iconSize .ui-slider {
+	width: 50%;
+	max-width: 100px;
+	display: inline-block;
+	margin: 0 10px;
+}
 
 /********************** COMMAND "INFO" ****************************/
 .elfinder-rtl .elfinder-info-title .elfinder-cwd-icon:before {

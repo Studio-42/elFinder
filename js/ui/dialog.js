@@ -574,36 +574,42 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 				})
 				.on('keydown', '.'+cltabstop, function(e) {
-					var $this = $(this);
+					var $this = $(this),
+						esc, move, moveTo;
 					if ($this.is(':focus')) {
-						e.stopPropagation();
-						if (e.keyCode == $.ui.keyCode.ENTER) {
+						esc = e.keyCode === $.ui.keyCode.ESCAPE;
+						if (e.keyCode === $.ui.keyCode.ENTER) {
 							e.preventDefault();
 							$this.trigger('click');
-						}  else if ((e.keyCode == $.ui.keyCode.TAB && e.shiftKey) || e.keyCode == $.ui.keyCode.LEFT || e.keyCode == $.ui.keyCode.UP) {
-							if ($this.is('input:text') && (!(e.ctrlKey || e.metaKey) && e.keyCode == $.ui.keyCode.LEFT)) {
-								return;
+						}  else if (((e.keyCode === $.ui.keyCode.TAB) && e.shiftKey) || e.keyCode === $.ui.keyCode.LEFT || e.keyCode == $.ui.keyCode.UP) {
+							move = 'prev';
+						}  else if (e.keyCode === $.ui.keyCode.TAB || e.keyCode == $.ui.keyCode.RIGHT || e.keyCode == $.ui.keyCode.DOWN) {
+							move = 'next';
+						}
+						if (move
+								&&
+							(
+								($this.is('textarea') && !(e.ctrlKey || e.metaKey))
+									||
+								($this.is('select,span.ui-slider-handle') && e.keyCode !== $.ui.keyCode.TAB)
+									||
+								($this.is('input:not(:checkbox,:radio)') && (!(e.ctrlKey || e.metaKey) && e.keyCode === $.ui.keyCode[move === 'prev'? 'LEFT':'RIGHT']))
+							)
+						) {
+							e.stopPropagation();
+							return;
+						}
+						if (!esc) {
+							e.stopPropagation();
+						} else if ($this.is('input:not(:checkbox,:radio),textarea')) {
+							if ($this.val() !== '') {
+								$this.val('');
+								e.stopPropagation();
 							}
-							if ($this.is('select') && e.keyCode != $.ui.keyCode.TAB) {
-								return;
-							}
-							if ($this.is('textarea') && !(e.ctrlKey || e.metaKey)) {
-								return;
-							}
+						}
+						if (move) {
 							e.preventDefault();
-							tabstopPrev(this).trigger('focus');
-						}  else if (e.keyCode == $.ui.keyCode.TAB || e.keyCode == $.ui.keyCode.RIGHT || e.keyCode == $.ui.keyCode.DOWN) {
-							if ($this.is('input:text') && (!(e.ctrlKey || e.metaKey) && e.keyCode == $.ui.keyCode.RIGHT)) {
-								return;
-							}
-							if ($this.is('select') && e.keyCode != $.ui.keyCode.TAB) {
-								return;
-							}
-							if ($this.is('textarea') && !(e.ctrlKey || e.metaKey)) {
-								return;
-							}
-							e.preventDefault();
-							tabstopNext(this).trigger('focus');
+							(move === 'prev'? tabstopPrev : tabstopNext)(this).trigger('focus');
 						}
 					}
 				})
