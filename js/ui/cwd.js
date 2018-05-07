@@ -1458,8 +1458,8 @@ $.fn.elfindercwd = function(fm, options) {
 				}
 			},
 
-			bottomMarkerShow = function(place, cnt) {
-				var place = place || (list ? cwd.find('tbody') : cwd),
+			bottomMarkerShow = function(cur, cnt) {
+				var place = cur || (list ? cwd.find('tbody') : cwd),
 					boxSize = itemBoxSize[fm.viewType],
 					col = 1,
 					row;
@@ -2130,6 +2130,22 @@ $.fn.elfindercwd = function(fm, options) {
 						fixTableHeader({fitWidth: true});
 						fm.storage('cwdColWidth', colWidth = null);
 					}
+				})
+				.on('iconpref', function(e, data) {
+					if (!list) {
+						var size = data? (parseInt(data.size) || 0) : 0;
+						cwd.removeClass(function(i, cName) {
+							return (cName.match(/\belfinder-cwd-size\S+/g) || []).join(' ');
+						});
+						if (size > 0) {
+							cwd.addClass('elfinder-cwd-size' + size);
+						}
+						if (bufferExt.renderd) {
+							itemBoxSize.icons = {};
+							bufferExt.hpi = null;
+							bottomMarkerShow(cwd, bufferExt.renderd);
+						}
+					}
 				}),
 			wrapper = $('<div class="elfinder-cwd-wrapper"/>')
 				// make cwd itself droppable for folders from nav panel
@@ -2300,7 +2316,7 @@ $.fn.elfindercwd = function(fm, options) {
 		fm
 			.one('init', function(){
 				var style = document.createElement('style'),
-				sheet, node, base, resizeTm, i = 0;
+				sheet, node, base, resizeTm, iconSize, i = 0;
 				if (document.head) {
 					document.head.appendChild(style);
 					sheet = style.sheet;
@@ -2310,6 +2326,9 @@ $.fn.elfindercwd = function(fm, options) {
 					sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result .elfinder-cwd:not(.elfinder-table-header-sticky):after{ content:"'+fm.i18n('emptySearch')+'" }', i++);
 					sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-incsearch-result .elfinder-cwd:not(.elfinder-table-header-sticky):after{ content:"'+fm.i18n('emptyIncSearch')+'" }', i++);
 					sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-letsearch-result .elfinder-cwd:not(.elfinder-table-header-sticky):after{ content:"'+fm.i18n('emptyLetSearch')+'" }', i++);
+				}
+				if (iconSize = fm.storage('iconsize') || 0) {
+					cwd.trigger('iconpref', {size: iconSize});
 				}
 				if (! mobile) {
 					fm.one('open', function() {

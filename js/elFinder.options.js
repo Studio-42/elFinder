@@ -722,7 +722,16 @@ elFinder.prototype._options = {
 				columnsCustomName : {},
 				// fixed list header colmun
 				fixedHeader : true
-			}
+			},
+
+			// icons view setting
+			iconsView : {
+				// default icon size (0-3 in default CSS (cwd.css - elfinder-cwd-size[number]))
+				size: 0,
+				// number of maximum size (3 in default CSS (cwd.css - elfinder-cwd-size[number]))
+				// uses in preference.js
+				sizeMax: 3
+			},
 
 			// /**
 			//  * Add CSS class name to cwd directories (optional)

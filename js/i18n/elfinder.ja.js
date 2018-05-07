@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-04-04
+ * @version 2018-05-07
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -457,6 +457,7 @@
 			'workspace'       : 'ワークスペース', // from v2.1.38 added 4.4.2018
 			'dialog'          : 'ダイアログ', // from v2.1.38 added 4.4.2018
 			'all'             : 'すべて', // from v2.1.38 added 4.4.2018
+			'iconSize'        : 'アイコンサイズ (アイコンビュー)', // form v2.1.39 added 7.5.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
