@@ -15,6 +15,13 @@
 
 /* dialogs */
 .std42-dialog, .std42-dialog .ui-widget-content { background-color:#ededed; background-image:none; background-clip: content-box; }
+.std42-dialog.elfinder-bg-translucent {
+	background-color: #fff;
+	background-color: rgb(255, 255, 255, 0.9);
+}
+.std42-dialog.elfinder-bg-translucent .ui-widget-content {
+	background-color: transparent;
+}
 .elfinder-quicklook-titlebar-icon .ui-icon {
 	background-color: #d4d4d4;
 	border-color: #8a8a8a;
@@ -43,6 +50,8 @@
 	border-color: #13ae10;
 	background-image: url("../img/ui-icons_ffffff_256x240.png");
 }
+.std42-dialog .elfinder-help,
+.std42-dialog .elfinder-help .ui-widget-content { background:#fff; }
 
 /* navbar */
 .elfinder .elfinder-navbar { background:#dde4eb; }
@@ -101,12 +110,6 @@
 /* statusbar */
 .elfinder .elfinder-statusbar { color:#555; }
 .elfinder .elfinder-statusbar a { text-decoration:none; color:#555;}
-
-
-.std42-dialog .elfinder-help,
-.std42-dialog .elfinder-help .ui-widget-content,
-.std42-dialog .elfinder-preference,
-.std42-dialog .elfinder-preference .ui-widget-content { background:#fff;}
 
 /* contextmenu */
 .elfinder-contextmenu .ui-state-active { background: #6293df; color:#fff; }
