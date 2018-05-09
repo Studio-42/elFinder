@@ -709,6 +709,16 @@ elFinder.prototype.commands.quicklook.plugins = [
 				}
 			},
 			render = function(file, opts) {
+				var errTm = function(e) {
+						if (err > 1) {
+							tm && clearTimeout(tm);
+							tm = setTimeout(function() {
+								!canPlay && reset(true);
+							}, 800);
+						}
+					},
+					err = 0, 
+					canPlay, tm;
 				opts = opts || {};
 				ql.hideinfo();
 				node = $('<video class="elfinder-quicklook-preview-video" controls preload="auto" autobuffer playsinline>'
@@ -717,9 +727,16 @@ elFinder.prototype.commands.quicklook.plugins = [
 						// Firefox fire change event on seek or volume change
 						e.stopPropagation();
 					})
-					.on('error', function() {
-						reset(true);
+					.on('timeupdate progress', errTm)
+					.on('canplay', function() {
+						canPlay = true;
 					});
+				// can not handling error event with jQuery `on` event handler
+				node[0].addEventListener('error', function() {
+					++err;
+					errTm();
+				}, true);
+
 				if (opts.src) {
 					node.append('<source src="'+opts.src+'" type="'+file.mime+'"/><source src="'+opts.src+'"/>');
 				}
