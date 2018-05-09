@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: c86c25a) (2018-05-09)
+ * Version 2.1.38 (2.1-src Nightly: 78e02b0) (2018-05-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9497,7 +9497,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.38 (2.1-src Nightly: c86c25a)';
+elFinder.prototype.version = '2.1.38 (2.1-src Nightly: 78e02b0)';
 
 
 
@@ -27224,9 +27224,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 						canPlay = true;
 					});
 				// can not handling error event with jQuery `on` event handler
-				node[0].addEventListener('error', function() {
-					++err;
-					errTm();
+				node[0].addEventListener('error', function(e) {
+					if (opts.src && fm.convAbsUrl(opts.src) === fm.convAbsUrl(e.target.src)) {
+						++err;
+						errTm();
+					}
 				}, true);
 
 				if (opts.src) {
