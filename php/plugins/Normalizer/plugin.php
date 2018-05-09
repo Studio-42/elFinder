@@ -99,7 +99,7 @@ class elFinderPluginNormalizer extends elFinderPlugin
 		return true;
 	}
 	
-	public function cmdPostprocess($cmd, &$result, $args, $elfinder) {
+	public function cmdPostprocess($cmd, &$result, $args, $elfinder, $volume) {
 		if ($cmd === 'ls') {
 			if (! empty($result['list']) && ! empty($this->replaced['ls'])) {
 				foreach($result['list'] as $hash => $name) {

@@ -732,9 +732,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 						canPlay = true;
 					});
 				// can not handling error event with jQuery `on` event handler
-				node[0].addEventListener('error', function() {
-					++err;
-					errTm();
+				node[0].addEventListener('error', function(e) {
+					if (opts.src && fm.convAbsUrl(opts.src) === fm.convAbsUrl(e.target.src)) {
+						++err;
+						errTm();
+					}
 				}, true);
 
 				if (opts.src) {
