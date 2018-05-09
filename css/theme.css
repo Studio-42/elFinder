@@ -17,7 +17,7 @@
 .std42-dialog, .std42-dialog .ui-widget-content { background-color:#ededed; background-image:none; background-clip: content-box; }
 .std42-dialog.elfinder-bg-translucent {
 	background-color: #fff;
-	background-color: rgb(255, 255, 255, 0.9);
+	background-color: rgba(255, 255, 255, 0.9);
 }
 .std42-dialog.elfinder-bg-translucent .ui-widget-content {
 	background-color: transparent;

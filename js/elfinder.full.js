@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: a9fe0d4) (2018-05-08)
+ * Version 2.1.38 (2.1-src Nightly: c86c25a) (2018-05-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9497,7 +9497,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.38 (2.1-src Nightly: a9fe0d4)';
+elFinder.prototype.version = '2.1.38 (2.1-src Nightly: c86c25a)';
 
 
 
@@ -9930,11 +9930,11 @@ elFinder.prototype._options = {
 		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.37.0',
 		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.9.2',
 		ckeditor5  : '//cdn.ckeditor.com/ckeditor5/10.0.0',
-		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.7.11',
+		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.7.12',
 		simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		// for quicklook etc.
 		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.9.1/hls.min.js',
-		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.7/dash.all.min.js',
+		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.8/dash.all.min.js',
 		flv        : '//cdnjs.cloudflare.com/ajax/libs/flv.js/1.4.2/flv.min.js',
 		prettify   : '//cdn.rawgit.com/google/code-prettify/fbd527e9f76914e36f730ec9849f2115473a65d8/loader/run_prettify.js',
 		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js',
@@ -26298,7 +26298,7 @@ elFinder.prototype.commands.preference = function() {
 			ogg  : support('video/ogg;'),
 			webm : support('video/webm;'),
 			mp4  : support('video/mp4;'),
-			mkv  : support('video/x-matroska;'),
+			mkv  : support('video/x-matroska;') || support('video/webm;'),
 			'3gp': support('video/3gpp;'),
 			m3u8 : support('application/x-mpegURL', 'video') || support('application/vnd.apple.mpegURL', 'video'),
 			mpd  : support('application/dash+xml', 'video')
@@ -27201,6 +27201,16 @@ elFinder.prototype.commands.quicklook.plugins = [
 				}
 			},
 			render = function(file, opts) {
+				var errTm = function(e) {
+						if (err > 1) {
+							tm && clearTimeout(tm);
+							tm = setTimeout(function() {
+								!canPlay && reset(true);
+							}, 800);
+						}
+					},
+					err = 0, 
+					canPlay, tm;
 				opts = opts || {};
 				ql.hideinfo();
 				node = $('<video class="elfinder-quicklook-preview-video" controls preload="auto" autobuffer playsinline>'
@@ -27209,9 +27219,16 @@ elFinder.prototype.commands.quicklook.plugins = [
 						// Firefox fire change event on seek or volume change
 						e.stopPropagation();
 					})
-					.on('error', function() {
-						reset(true);
+					.on('timeupdate progress', errTm)
+					.on('canplay', function() {
+						canPlay = true;
 					});
+				// can not handling error event with jQuery `on` event handler
+				node[0].addEventListener('error', function() {
+					++err;
+					errTm();
+				}, true);
+
 				if (opts.src) {
 					node.append('<source src="'+opts.src+'" type="'+file.mime+'"/><source src="'+opts.src+'"/>');
 				}

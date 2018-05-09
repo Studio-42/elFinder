@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: a9fe0d4) (2018-05-08)
+ * Version 2.1.38 (2.1-src Nightly: c86c25a) (2018-05-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -486,7 +486,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 /********************** COMMAND "PREFERENCE" ****************************/
 /* fix tabs */
 .elfinder-preference .ui-tabs-panel {
-	padding: 0 10px;
+	padding: 10px 10px 0;
 	overflow: auto;
 	box-sizing: border-box;
 	-webkit-overflow-scrolling: touch;
