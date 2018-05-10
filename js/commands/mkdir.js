@@ -32,7 +32,8 @@ elFinder.prototype.commands.mkdir = function() {
 		if (! select && ! this.options.intoNewFolderToolbtn) {
 			fm.getUI('cwd').trigger('unselectall');
 		}
-		this.move = (!onCwd && curOrg !== 'navbar' && fm.selected().length)? true : false;
+		//this.move = (!onCwd && curOrg !== 'navbar' && fm.selected().length)? true : false;
+		this.move = this.value === fm.i18n('cmdmkdirin');
 		return $.proxy(fm.res('mixin', 'make'), self)();
 	};
 	
@@ -54,13 +55,19 @@ elFinder.prototype.commands.mkdir = function() {
 		if (!self.options.intoNewFolderToolbtn && curOrg === '') {
 			curOrg = 'cwd';
 		}
-		if (sel.length && curOrg !== 'navbar'  && curOrg !== 'cwd' && fm.cwd().hash !== sel[0]) {
+		if (sel.length && curOrg !== 'navbar' && curOrg !== 'cwd' && fm.cwd().hash !== sel[0]) {
 			self.title = fm.i18n('cmdmkdirin');
 			self.className += ' elfinder-button-icon-mkdirin';
 		} else {
 			self.title = fm.i18n('cmdmkdir');
 		}
-		self.update(void(0), self.title);
+		if (e.type !== 'closecontextmenu') {
+			self.update(void(0), self.title);
+		} else {
+			requestAnimationFrame(function() {
+				self.update(void(0), self.title);
+			});
+		}
 	});
 	
 	this.getstate = function(select) {
