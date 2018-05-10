@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: c250917) (2018-05-10)
+ * Version 2.1.38 (2.1-src Nightly: dbacbe2) (2018-05-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9497,7 +9497,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.38 (2.1-src Nightly: c250917)';
+elFinder.prototype.version = '2.1.38 (2.1-src Nightly: dbacbe2)';
 
 
 
@@ -25470,7 +25470,7 @@ elFinder.prototype.commands.preference = function() {
 			forms.infoItems && (forms.infoItems = (function() {
 				var items = fm.getCommand('info').items,
 					tags = [],
-					hides = fm.storage('infohides') || {};
+					hides = fm.storage('infohides') || fm.arrayFlip(fm.options.commandsOptions.info.hideItems, true);
 				$.each(items, function() {
 					var key = this,
 						name = fm.i18n(key);
