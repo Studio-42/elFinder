@@ -109,7 +109,7 @@ elFinder.prototype.commands.login = function() {
 			dfd = $.Deferred();
 			user = $('<input class="elfinder-tabstop" type="text" placeholder="demouser">');
 			pass = $('<input class="elfinder-tabstop" type="password" placeholder="demouser">');
-			form = $('<div style="text-align:center;">').append($('<p>').append('Username: ', user), $('<p>').append('Password: ', pass))
+			form = $('<form style="text-align:center;">').append($('<p>').append('Username: ', user), $('<p>').append('Password: ', pass))
 				.on('keyup keydown keypress', function(e) {
 					e.key !== 'Escape' && e.key !== 'Tab' && e.stopPropagation();
 					if (e.type === 'keypress' && e.key === 'Enter') {
