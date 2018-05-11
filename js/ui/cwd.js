@@ -1526,9 +1526,9 @@ $.fn.elfindercwd = function(fm, options) {
 							wrapper.data('touching', null);
 						}
 					} else {
-						requestAnimationFrame(function() {
+						setTimeout(function() {
 							cwd.removeData('longtap');
-						});
+						}, 80);
 					}
 					clearTimeout(cwd.data('tmlongtap'));
 				},
@@ -1870,9 +1870,9 @@ $.fn.elfindercwd = function(fm, options) {
 							wrapper.data('touching', null);
 							fm.dblclick({file : fm.cwdId2Hash(this.id)});
 						}
-						requestAnimationFrame(function() {
+						setTimeout(function() {
 							cwd.removeData('longtap');
-						});
+						}, 80);
 					}
 				})
 				// attach draggable
