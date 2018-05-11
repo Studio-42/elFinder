@@ -24,7 +24,8 @@ elFinder.prototype.commands.login = function() {
 		aopt = {
 			dataType: 'json',
 			headers: fm.options.customHeaders,
-			xhrFields: fm.options.xhrFields
+			xhrFields: fm.options.xhrFields,
+			cache: false
 		};
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
@@ -39,9 +40,10 @@ elFinder.prototype.commands.login = function() {
 	this.handlers = {
 		'open': function(){
 			if (self.value === null) {
+				self.value = '';
 				$.ajax(self.options.statusUrl, aopt).done(function(res){
 					var val = res.uname? res.uname : '';
-					self.title = val? fm.i18n('logout', val) : fm.i18n('login');
+					self.title = val? fm.i18n('logout', val) : fm.i18n('cmdlogin');
 					self.className = val? 'login elfinder-button-icon-logout' : 'login';
 					self.update(void(0), val);
 				});
@@ -54,23 +56,95 @@ elFinder.prototype.commands.login = function() {
 	};
 	
 	this.exec = function() {
-		$.ajax(self.options[self.value? 'logoutUrl' : 'loginUrl'], aopt).done(function(res){
-			var val;
-			if (res.error) {
-				fm.error(res.error);
-			} else {
-				val = res.uname? res.uname : '';
-				self.title = val? fm.i18n('logout', val) : fm.i18n('login');
-				self.className = val? 'login elfinder-button-icon-logout' : 'login';
-				self.update(void(0), val);
-				fm.sync();
-			}
-		});
+		var dologin = (! self.value),
+			getAjax = function(opt) {
+				return $.ajax(self.options[dologin? 'loginUrl' : 'logoutUrl'], opt).done(function(res){
+					if (res.error) {
+						fm.error(res.error);
+					} else {
+						var val = res.uname? res.uname : '';
+						self.title = val? fm.i18n('logout', val) : fm.i18n('cmdlogin');
+						self.className = val? 'login elfinder-button-icon-logout' : 'login';
+						self.update(void(0), val);
+						var tm,
+							dfd = fm.sync().always(function() { 
+								tm && clearTimeout(tm); 
+							});
+							
+						tm = setTimeout(function() {
+							fm.notify({type : 'reload', cnt : 1, hideCnt : true});
+							dfd.always(function() { fm.notify({type : 'reload', cnt  : -1}); });
+						}, fm.notifyDelay);
+					}
+				}).fail(function(e) {
+					var res = e.responseText;
+					try {
+						res = JSON.parse(res);
+					} catch(e) {
+						res = {};
+					}
+					res.error && fm.error(res.error);
+				});
+			},
+			btn = {},
+			req = function() {
+				if (user.val() && pass.val()) {
+					if (window.btoa) {
+						aopt['headers']['Authorization'] = 'Basic ' + btoa(unescape(encodeURIComponent(user.val()+':'+pass.val())));
+					} else {
+						aopt['username'] = user.val();
+						aopt['password'] = pass.val();
+					}
+				}
+				getAjax(aopt).done(function() {
+					dfd.resolve();
+				}).fail(function(e) {
+					dfd.reject();
+				}).always(function() {
+					dialog.elfinderdialog('destroy');
+				});
+			},
+			dfd, dialog, user, pass, form;
+		if (dologin) {
+			dfd = $.Deferred();
+			user = $('<input class="elfinder-tabstop" type="text" placeholder="demouser">');
+			pass = $('<input class="elfinder-tabstop" type="password" placeholder="demouser">');
+			form = $('<div style="text-align:center;">').append($('<p>').append('Username: ', user), $('<p>').append('Password: ', pass))
+				.on('keyup keydown keypress', function(e) {
+					e.key !== 'Escape' && e.key !== 'Tab' && e.stopPropagation();
+					if (e.type === 'keypress' && e.key === 'Enter') {
+						if (user.val() !== '' && pass.val() !== '') {
+							req();
+						} else {
+							(user.val()? pass : user).focus();
+						}
+					}
+				});
+			btn[fm.i18n('cmdlogin')] = req;
+			btn[fm.i18n('btnCancel')] = function() {
+				dialog.elfinderdialog('destroy');
+			};
+			dialog = fm.dialog(form, {
+				title: fm.i18n('cmdlogin'),
+				buttons: btn,
+				allowMinimize: false,
+				destroyOnClose: true,
+				open: function() {
+					user.focus();
+				},
+				close: function() {
+					(dfd.state() !== 'resolved') && dfd.reject();
+				}
+			});
+			return dfd;
+		} else {
+			return getAjax(aopt);
+		}
 	};
 }
 elFinder.prototype._options.commands.push('login');
 elFinder.prototype._options.uiOptions.toolbar.push(['login']);
-elFinder.prototype.i18.en.messages.login = 'Login';
+elFinder.prototype.i18.en.messages.cmdlogin = 'Login';
 elFinder.prototype.i18.en.messages.logout = '$1: Logout';
 
 } catch(e) {}
