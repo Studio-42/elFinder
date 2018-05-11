@@ -26,7 +26,7 @@
 
 /* button */
 .elfinder .elfinder-button {
-	/*width:16px;*/
+	min-width:16px;
 	height:16px;
 	margin:0;
 	padding:4px;
@@ -41,7 +41,7 @@
 	cursor: default;
 }
 .elfinder-touch .elfinder-button {
-	/*width:20px;*/
+	min-width:20px;
 	height:20px;
 }
 
@@ -77,7 +77,7 @@
 }
 
 .elfinder-touch .elfinder-toolbar-button-separator {
-	height:20px;
+	height: 28px;
 }
 
 /* change icon opacity^ not button */
@@ -105,11 +105,12 @@
 }
 
 .elfinder-touch .elfinder-button-icon {
-	zoom: 1.25;
 	-moz-transform-origin: top left;
 	-moz-transform: scale(1.25);
+	zoom: 1.25;
 }
 .elfinder-touch .elfinder-button-text {
+	-moz-transform: translate(3px, 3px);
 	top: -5px;
 }
 

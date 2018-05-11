@@ -79,9 +79,9 @@
 	right:0;
 }
 .elfinder-touch .elfinder-navbar-arrow {
-	zoom: 1.4;
 	-moz-transform-origin: top left;
 	-moz-transform: scale(1.4);
+	zoom: 1.4;
 	margin-bottom: 7px;
 }
 .elfinder-ltr.elfinder-touch .elfinder-navbar-arrow {

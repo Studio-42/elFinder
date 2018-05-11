@@ -93,8 +93,8 @@
 	background-image: none;
 }
 .elfinder-touch .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-button {
-	transform: scale(1.2);
-	zoom: 1.1;
+	-moz-transform: scale(1.2);
+	zoom: 1.2;
 	padding-left: 6px;
 	padding-right: 6px;
 }
@@ -138,6 +138,8 @@
 .elfinder-touch .std42-dialog.ui-dialog:not(ui-resizable-disabled) .ui-resizable-se {
 	width: 12px;
 	height: 12px;
+	-moz-transform-origin: bottom right;
+	-moz-transform: scale(1.5);
 	zoom: 1.5;
 	right: -7px;
 	bottom: -7px;

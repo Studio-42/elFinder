@@ -28,6 +28,8 @@
 	background:url("../img/toolbar.png") 0 -496px no-repeat;
 }
 .elfinder-quicklook.elfinder-touch .ui-resizable-se {
+	-moz-transform-origin: bottom right;
+	-moz-transform: scale(1.5);
 	zoom: 1.5;
 }
 
@@ -155,8 +157,9 @@
 }
 
 .elfinder-touch .elfinder-quicklook-titlebar .ui-icon {
-	transform: scale(1.1);
-	zoom: 1.1;
+	-moz-transform-origin: center center;
+	-moz-transform: scale(1.2);
+	zoom: 1.2;
 }
 .elfinder-touch .elfinder-quicklook-titlebar-icon .ui-icon {
 	margin-right: 10px;
