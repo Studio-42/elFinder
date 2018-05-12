@@ -235,7 +235,7 @@ abstract class elFinderVolumeDriver {
 		'encoding'        => '',
 		// for convert character encoding (default is '': Not change locale)
 		'locale'          => '',
-		// URL of volume icon (16x16 pixel image file)
+		// URL of volume icon image
 		'icon'            => '',
 		// CSS Class of volume root in tree
 		'rootCssClass'    => '',
