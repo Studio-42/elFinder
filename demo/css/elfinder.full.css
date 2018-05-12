@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: 40654dc) (2018-05-11)
+ * Version 2.1.38 (2.1-src Nightly: d403243) (2018-05-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -1130,10 +1130,22 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	width: 74px;
 	height: 74px;
 }
-.elfinder-cwd-size1 .elfinder-cwd-icon {
+.elfinder-cwd-size1 .elfinder-cwd-icon,
+.elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl:before,
+.elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
 	-moz-transform-origin: top center;
 	-moz-transform: scale(1.5);
 	zoom: 1.5;
+}
+.elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl {
+	-moz-transform-origin: center center;
+	-moz-transform: scale(1);
+	zoom: 1;
+	width: 72px;
+	height: 72px;
+	-moz-border-radius: 6px; 
+	-webkit-border-radius: 6px; 
+	border-radius: 6px;
 }
 .elfinder-cwd-size2.elfinder-cwd-view-icons .elfinder-cwd-file {
 	width: 140px;
@@ -1143,10 +1155,22 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	width: 98px;
 	height: 98px;
 }
-.elfinder-cwd-size2 .elfinder-cwd-icon {
+.elfinder-cwd-size2 .elfinder-cwd-icon,
+.elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-bgurl:before,
+.elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
 	-moz-transform-origin: top center;
 	-moz-transform: scale(2);
 	zoom: 2;
+}
+.elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-bgurl {
+	-moz-transform-origin: center center;
+	-moz-transform: scale(1);
+	zoom: 1;
+	width: 96px;
+	height: 96px;
+	-moz-border-radius: 8px; 
+	-webkit-border-radius: 8px; 
+	border-radius: 8px;
 }
 .elfinder-cwd-size3.elfinder-cwd-view-icons .elfinder-cwd-file {
 	width: 174px;
@@ -1156,11 +1180,24 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	width: 122px;
 	height: 122px;
 }
-.elfinder-cwd-size3 .elfinder-cwd-icon {
+.elfinder-cwd-size3 .elfinder-cwd-icon,
+.elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-bgurl:before,
+.elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
 	-moz-transform-origin: top center;
 	-moz-transform: scale(2.5);
 	zoom: 2.5;
 }
+.elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-bgurl {
+	-moz-transform-origin: center center;
+	-moz-transform: scale(1);
+	zoom: 1;
+	width: 120px;
+	height: 120px;
+	-moz-border-radius: 10px; 
+	-webkit-border-radius: 10px; 
+	border-radius: 10px;
+}
+.el
 .elfinder-cwd-size1 .elfinder-cwd-icon-video:after,
 .elfinder-cwd-size2 .elfinder-cwd-icon-video:after,
 .elfinder-cwd-size3 .elfinder-cwd-icon-video:after {
@@ -1310,7 +1347,7 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	min-width: 20px;
 	max-width: 84px;
 	text-align: center;
-	padding: 1px 4px;
+	padding: 0px 4px 1px;
 	border-radius: 4px;
 	font-family: Verdana;
 	font-size: 10px;
@@ -1411,7 +1448,8 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 /* thumbnail image and draging icon overlay none */
 .elfinder-cwd-icon.elfinder-cwd-icon-drag:before,
 .elfinder-cwd-icon.elfinder-cwd-icon-drag:after,
-.elfinder-cwd-icon-image.elfinder-cwd-bgurl:after {
+.elfinder-cwd-icon-image.elfinder-cwd-bgurl:after,
+.elfinder-cwd-icon-directory.elfinder-cwd-bgurl:after {
 	content: none;
 }
 /* thumbnail image video overlay */
