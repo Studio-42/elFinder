@@ -36,7 +36,7 @@ var dirmode = 0755,
 
 		'elfinder.full.css': grep(path.join(src, 'css'), '\\.css$', 'elfinder|theme'),
 
-		'images':	grep(path.join(src, 'img'), '\\.png|\\.gif'),
+		'images':	grep(path.join(src, 'img'), '\\.png|\\.gif|\\.svg'),
 
 		'sounds':	grep(path.join(src, 'sounds'), '\\.wav'),
 
