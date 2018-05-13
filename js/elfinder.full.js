@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: d403243) (2018-05-12)
+ * Version 2.1.38 (2.1-src Nightly: 9273960) (2018-05-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9497,7 +9497,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.38 (2.1-src Nightly: d403243)';
+elFinder.prototype.version = '2.1.38 (2.1-src Nightly: 9273960)';
 
 
 
@@ -24232,6 +24232,9 @@ elFinder.prototype.commands.netmount = function() {
 					},
 					inputs = {
 						protocol : $('<select/>')
+						.on('mousedown', function(e) {
+							e.stopPropagation();
+						})
 						.on('change', function(e, data){
 							var protocol = this.value;
 							content.find('.elfinder-netmount-tr').hide();

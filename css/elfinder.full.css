@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: d403243) (2018-05-12)
+ * Version 2.1.38 (2.1-src Nightly: 9273960) (2018-05-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -872,14 +872,16 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 }
 
 /* root icon of each volume */
-.elfinder-navbar-root-local.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_local.png"); }
-.elfinder-navbar-root-ftp.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_ftp.png"); }
-.elfinder-navbar-root-sql.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_sql.png"); }
-.elfinder-navbar-root-dropbox.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_dropbox.png"); }
-.elfinder-navbar-root-googledrive.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_googledrive.png"); }
-.elfinder-navbar-root-onedrive.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_onedrive.png"); }
-.elfinder-navbar-root-box.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_box.png"); }
-.elfinder-navbar-root-zip.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_zip.png"); }
+.elfinder-navbar-root-local.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_local.svg"); background-size: contain; }
+.elfinder-navbar-root-trash.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_trash.svg"); background-size: contain; }
+.elfinder-navbar-root-ftp.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_ftp.svg"); background-size: contain; }
+.elfinder-navbar-root-sql.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_sql.svg"); background-size: contain; }
+.elfinder-navbar-root-dropbox.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_dropbox.svg"); background-size: contain; }
+.elfinder-navbar-root-googledrive.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_googledrive.svg"); background-size: contain; }
+.elfinder-navbar-root-onedrive.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_onedrive.svg"); background-size: contain; }
+.elfinder-navbar-root-box.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_box.svg"); background-size: contain; }
+.elfinder-navbar-root-zip.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_zip.svg"); background-size: contain; }
+.elfinder-navbar-root-network.elfinder-contextmenu-icon { background-image:url("../img/volume_icon_network.svg"); background-size: contain; }
 
 /* text in item */
 .elfinder .elfinder-contextmenu .elfinder-contextmenu-item span { display:block; }
@@ -1197,7 +1199,6 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	-webkit-border-radius: 10px; 
 	border-radius: 10px;
 }
-.el
 .elfinder-cwd-size1 .elfinder-cwd-icon-video:after,
 .elfinder-cwd-size2 .elfinder-cwd-icon-video:after,
 .elfinder-cwd-size3 .elfinder-cwd-icon-video:after {
@@ -1247,7 +1248,8 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-navbar-root-local .elfinder-cwd-icon,
 .elfinder-cwd .elfinder-navbar-root-local.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd-view-list .elfinder-navbar-root-local td .elfinder-cwd-icon {
-	background-image:url("../img/volume_icon_local.png");
+	background-image:url("../img/volume_icon_local.svg");
+	background-image:url("../img/volume_icon_local.png")\9;
 	background-position:0 0;
 	background-size: contain;
 }
@@ -1257,7 +1259,8 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-navbar-root-trash .elfinder-cwd-icon,
 .elfinder-cwd .elfinder-navbar-root-trash.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd-view-list .elfinder-navbar-root-trash td .elfinder-cwd-icon {
-	background-image:url("../img/volume_icon_trash.png");
+	background-image:url("../img/volume_icon_trash.svg");
+	background-image:url("../img/volume_icon_trash.png")\9;
 	background-position:0 0;
 	background-size: contain;
 }
@@ -1267,7 +1270,8 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-navbar-root-ftp .elfinder-cwd-icon,
 .elfinder-cwd .elfinder-navbar-root-ftp.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd-view-list .elfinder-navbar-root-ftp td .elfinder-cwd-icon  {
-	background-image:url("../img/volume_icon_ftp.png");
+	background-image:url("../img/volume_icon_ftp.svg");
+	background-image:url("../img/volume_icon_ftp.png")\9;
 	background-position:0 0;
 	background-size: contain;
 }
@@ -1277,7 +1281,8 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-navbar-root-sql .elfinder-cwd-icon,
 .elfinder-cwd .elfinder-navbar-root-sql.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd-view-list .elfinder-navbar-root-sql td .elfinder-cwd-icon  {
-	background-image:url("../img/volume_icon_sql.png");
+	background-image:url("../img/volume_icon_sql.svg");
+	background-image:url("../img/volume_icon_sql.png")\9;
 	background-position:0 0;
 	background-size: contain;
 }
@@ -1287,7 +1292,8 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-navbar-root-dropbox .elfinder-cwd-icon,
 .elfinder-cwd .elfinder-navbar-root-dropbox.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd-view-list .elfinder-navbar-root-dropbox td .elfinder-cwd-icon  {
-	background-image:url("../img/volume_icon_dropbox.png");
+	background-image:url("../img/volume_icon_dropbox.svg");
+	background-image:url("../img/volume_icon_dropbox.png")\9;
 	background-position:0 0;
 	background-size: contain;
 }
@@ -1297,28 +1303,32 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-navbar-root-googledrive .elfinder-cwd-icon,
 .elfinder-cwd .elfinder-navbar-root-googledrive.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd-view-list .elfinder-navbar-root-googledrive td .elfinder-cwd-icon  {
-	background-image:url("../img/volume_icon_googledrive.png");
+	background-image:url("../img/volume_icon_googledrive.svg");
+	background-image:url("../img/volume_icon_googledrive.png")\9;
 	background-position:0 0;
 	background-size: contain;
 }
 .elfinder-navbar-root-onedrive .elfinder-cwd-icon,
 .elfinder-cwd .elfinder-navbar-root-onedrive.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd-view-list .elfinder-navbar-root-onedrive td .elfinder-cwd-icon  {
-	background-image:url("../img/volume_icon_onedrive.png");
+	background-image:url("../img/volume_icon_onedrive.svg");
+	background-image:url("../img/volume_icon_onedrive.png")\9;
 	background-position:0 0;
 	background-size: contain;
 }
 .elfinder-navbar-root-box .elfinder-cwd-icon,
 .elfinder-cwd .elfinder-navbar-root-box.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd-view-list .elfinder-navbar-root-box td .elfinder-cwd-icon  {
-	background-image:url("../img/volume_icon_box.png");
+	background-image:url("../img/volume_icon_box.svg");
+	background-image:url("../img/volume_icon_box.png")\9;
 	background-position:0 0;
 	background-size: contain;
 }
 .elfinder-navbar-root-zip .elfinder-cwd-icon,
 .elfinder-cwd .elfinder-navbar-root-zip.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd-view-list .elfinder-navbar-root-zip td .elfinder-cwd-icon  {
-	background-image:url("../img/volume_icon_zip.png");
+	background-image:url("../img/volume_icon_zip.svg");
+	background-image:url("../img/volume_icon_zip.svg")\9;
 	background-position:0 0;
 	background-size: contain;
 }
@@ -1330,9 +1340,10 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 .elfinder-navbar-root-network .elfinder-cwd-icon,
 .elfinder-cwd .elfinder-navbar-root-network.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd-view-list .elfinder-navbar-root-network td .elfinder-cwd-icon  {
-	background-image:url("../img/toolbar.png");
-	background-position: 0 70.5%; /* Don't forget change % when toolbar.png edited */
-	background-size: cover;
+	background-image:url("../img/volume_icon_network.svg");
+	background-image:url("../img/volume_icon_network.png")\9;
+	background-position:0 0;
+	background-size: contain;
 }
 .elfinder-cwd .elfinder-navbar-root-network.elfinder-droppable-active .elfinder-cwd-icon {
 	background-position:1px -1px;
@@ -2541,20 +2552,23 @@ button.elfinder-info-button {
 .elfinder-rtl .elfinder-navbar-icon { right:14px; }
 
 /* root folder */
-.elfinder-tree   .elfinder-navbar-root .elfinder-navbar-icon { background-position:0 0; }
+.elfinder-tree   .elfinder-navbar-root .elfinder-navbar-icon {
+	background-position: 0 0;
+	background-size: contain;
+}
 .elfinder-places .elfinder-navbar-root .elfinder-navbar-icon { background-position:0 -704px; }
 
 /* root icon of each volume */
-.elfinder-tree .elfinder-navbar-root-local   .elfinder-navbar-icon { background-image:url("../img/volume_icon_local.png"); background-position:0 0; }
-.elfinder-tree .elfinder-navbar-root-trash   .elfinder-navbar-icon { background-image:url("../img/volume_icon_trash.png"); background-position:0 0; }
-.elfinder-tree .elfinder-navbar-root-ftp     .elfinder-navbar-icon { background-image:url("../img/volume_icon_ftp.png"); background-position:0 0; }
-.elfinder-tree .elfinder-navbar-root-sql     .elfinder-navbar-icon { background-image:url("../img/volume_icon_sql.png"); background-position:0 0; }
-.elfinder-tree .elfinder-navbar-root-dropbox .elfinder-navbar-icon { background-image:url("../img/volume_icon_dropbox.png"); background-position:0 0; }
-.elfinder-tree .elfinder-navbar-root-googledrive .elfinder-navbar-icon { background-image:url("../img/volume_icon_googledrive.png"); background-position:0 0; }
-.elfinder-tree .elfinder-navbar-root-onedrive .elfinder-navbar-icon { background-image:url("../img/volume_icon_onedrive.png"); background-position:0 0; }
-.elfinder-tree .elfinder-navbar-root-box .elfinder-navbar-icon { background-image:url("../img/volume_icon_box.png"); background-position:0 0; }
-.elfinder-tree .elfinder-navbar-root-zip .elfinder-navbar-icon { background-image:url("../img/volume_icon_zip.png"); background-position:0 0; }
-.elfinder-tree .elfinder-navbar-root-network .elfinder-navbar-icon { background-image:url("../img/toolbar.png"); background-position: 0 -688px; }
+.elfinder-tree .elfinder-navbar-root-local   .elfinder-navbar-icon { background-image:url("../img/volume_icon_local.svg"); background-image:url("../img/volume_icon_local.png")\9; }
+.elfinder-tree .elfinder-navbar-root-trash   .elfinder-navbar-icon { background-image:url("../img/volume_icon_trash.svg"); background-image:url("../img/volume_icon_trash.png")\9; }
+.elfinder-tree .elfinder-navbar-root-ftp     .elfinder-navbar-icon { background-image:url("../img/volume_icon_ftp.svg"); background-image:url("../img/volume_icon_ftp.png")\9; }
+.elfinder-tree .elfinder-navbar-root-sql     .elfinder-navbar-icon { background-image:url("../img/volume_icon_sql.svg"); background-image:url("../img/volume_icon_sql.png")\9; }
+.elfinder-tree .elfinder-navbar-root-dropbox .elfinder-navbar-icon { background-image:url("../img/volume_icon_dropbox.svg"); background-image:url("../img/volume_icon_dropbox.png")\9; }
+.elfinder-tree .elfinder-navbar-root-googledrive .elfinder-navbar-icon { background-image:url("../img/volume_icon_googledrive.svg"); background-image:url("../img/volume_icon_googledrive.png")\9; }
+.elfinder-tree .elfinder-navbar-root-onedrive .elfinder-navbar-icon { background-image:url("../img/volume_icon_onedrive.svg"); background-image:url("../img/volume_icon_onedrive.png")\9; }
+.elfinder-tree .elfinder-navbar-root-box .elfinder-navbar-icon { background-image:url("../img/volume_icon_box.svg"); background-image:url("../img/volume_icon_box.png")\9; }
+.elfinder-tree .elfinder-navbar-root-zip .elfinder-navbar-icon { background-image:url("../img/volume_icon_zip.svg"); background-image:url("../img/volume_icon_zip.png")\9; }
+.elfinder-tree .elfinder-navbar-root-network .elfinder-navbar-icon { background-image:url("../img/volume_icon_network.svg"); background-image:url("../img/volume_icon_network.png")\9; }
 
 /* icon in active/hove/dropactive state */
 .ui-state-active           .elfinder-navbar-icon, 
@@ -2592,12 +2606,12 @@ button.elfinder-info-button {
 .elfinder-navbar .elfinder-lock { top:-2px; }
 
 /* permissions/symlink markers ltr/rtl enviroment */
-.elfinder-ltr .elfinder-navbar .elfinder-perms   { left:  20px; }
-.elfinder-rtl .elfinder-navbar .elfinder-perms   { right: 20px; }
-.elfinder-ltr .elfinder-navbar .elfinder-lock    { left:  20px; }
-.elfinder-rtl .elfinder-navbar .elfinder-lock    { right: 20px; }
-.elfinder-ltr .elfinder-navbar .elfinder-symlink { left:  8px; }
-.elfinder-rtl .elfinder-navbar .elfinder-symlink { right: 8px; }
+.elfinder-ltr .elfinder-navbar .elfinder-perms   { left:  20px; transform: scale(0.8); }
+.elfinder-rtl .elfinder-navbar .elfinder-perms   { right: 20px; transform: scale(0.8); }
+.elfinder-ltr .elfinder-navbar .elfinder-lock    { left:  20px; transform: scale(0.8); }
+.elfinder-rtl .elfinder-navbar .elfinder-lock    { right: 20px; transform: scale(0.8); }
+.elfinder-ltr .elfinder-navbar .elfinder-symlink { left:  8px; transform: scale(0.8); }
+.elfinder-rtl .elfinder-navbar .elfinder-symlink { right: 8px; transform: scale(0.8); }
 
 /* navbar input */
 .elfinder-navbar input { width:100%; border:0px solid; margin:0; padding:0; }
