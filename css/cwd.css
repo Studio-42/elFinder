@@ -259,6 +259,12 @@
 	top: 26px;
 	left: -24px;
 }
+.elfinder-cwd-size1 .elfinder-cwd-icon:before,
+.elfinder-cwd-size2 .elfinder-cwd-icon:before,
+.elfinder-cwd-size3 .elfinder-cwd-icon:before {
+	display: block;
+}
+
 /* file name place */
 .elfinder-cwd-view-icons .elfinder-cwd-filename {
 	text-align: center;
@@ -407,7 +413,7 @@
 .elfinder-cwd-icon:before {
 	content: none;
 	position: absolute;
-	left: 0px;
+	left: 1px;
 	top: 5px;
 	min-width: 20px;
 	max-width: 84px;
@@ -426,11 +432,48 @@
 	left: -10px;
 }
 
+/* icon image has type */
+.elfinder-cwd-icon-x-empty:before,
+.elfinder-cwd-icon-plain:before,
+.elfinder-cwd-icon-rtf:before,
+.elfinder-cwd-icon-rtfd:before,
+.elfinder-cwd-icon-pdf:before,
+.elfinder-cwd-icon-html:before,
+.elfinder-cwd-icon-css:before,
+.elfinder-cwd-icon-javascript:before,
+.elfinder-cwd-icon-x-javascript:before,
+.elfinder-cwd-icon-x-perl:before,
+.elfinder-cwd-icon-x-python:before,
+.elfinder-cwd-icon-x-ruby:before,
+.elfinder-cwd-icon-x-sh:before,
+.elfinder-cwd-icon-x-shellscript:before,
+.elfinder-cwd-icon-x-c:before,
+.elfinder-cwd-icon-x-csrc:before,
+.elfinder-cwd-icon-x-chdr:before,
+.elfinder-cwd-icon-x-c--:before,
+.elfinder-cwd-icon-x-c--src:before,
+.elfinder-cwd-icon-x-c--hdr:before,
+.elfinder-cwd-icon-x-java:before,
+.elfinder-cwd-icon-x-java-source:before,
+.elfinder-cwd-icon-x-php:before,
+.elfinder-cwd-icon-xml:before,
+.elfinder-cwd-icon-zip:before,
+.elfinder-cwd-icon-x-zip:before,
+.elfinder-cwd-icon-x-xz:before,
+.elfinder-cwd-icon-x-7z-compressed:before,
+.elfinder-cwd-icon-x-gzip:before,
+.elfinder-cwd-icon-x-tar:before,
+.elfinder-cwd-icon-x-bzip:before,
+.elfinder-cwd-icon-x-bzip2:before,
+.elfinder-cwd-icon-x-rar:before,
+.elfinder-cwd-icon-x-rar-compressed:before,
+.elfinder-cwd-icon-x-shockwave-flash:before { display: none }
+
 /* addtional type badge name */
 .elfinder-cwd-icon.elfinder-cwd-icon-mp2t:before { content: 'ts' }
 .elfinder-cwd-icon.elfinder-cwd-icon-dash-xml:before { content: 'dash' }
 .elfinder-cwd-icon.elfinder-cwd-icon-x-mpegurl:before { content: 'hls' }
-.elfinder-cwd-icon.elfinder-cwd-icon-x-c:before { content: 'c' }
+.elfinder-cwd-icon.elfinder-cwd-icon-x-c:before { content: 'c++' }
 
 /* thumbnail image */
 .elfinder-cwd-icon.elfinder-cwd-bgurl {
