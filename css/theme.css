@@ -75,14 +75,52 @@
 .elfinder-cwd-view-icons .elfinder-cwd-file .ui-state-active { background:#ccc; }
 
 /* type badge in "icons" view */
+/* default */
 .elfinder-cwd-icon:before { 
 	color: white;
 	background-color: #798da7;
 }
+/* type */
 .elfinder-cwd-icon-text:before  { background-color: #6f99e6 }
 .elfinder-cwd-icon-image:before { background-color: #2ea26c }
 .elfinder-cwd-icon-audio:before { background-color: #7bad2a }
 .elfinder-cwd-icon-video:before { background-color: #322aad }
+/* subtype */
+.elfinder-cwd-icon-x-empty:before,
+.elfinder-cwd-icon-plain:before { background-color: #719be6 }
+.elfinder-cwd-icon-rtf:before,
+.elfinder-cwd-icon-rtfd:before { background-color: #83aae7 }
+.elfinder-cwd-icon-pdf:before { background-color: #db7424 }
+.elfinder-cwd-icon-html:before { background-color: #82bc12 }
+.elfinder-cwd-icon-xml:before { background-color: #919190 }
+.elfinder-cwd-icon-css:before { background-color: #888d96 }
+.elfinder-cwd-icon-x-shockwave-flash:before { background-color: #D76C1B }
+.elfinder-cwd-icon-zip:before,
+.elfinder-cwd-icon-x-zip:before,
+.elfinder-cwd-icon-x-xz:before,
+.elfinder-cwd-icon-x-7z-compressed:before,
+.elfinder-cwd-icon-x-gzip:before,
+.elfinder-cwd-icon-x-tar:before,
+.elfinder-cwd-icon-x-bzip:before,
+.elfinder-cwd-icon-x-bzip2:before,
+.elfinder-cwd-icon-x-rar:before,
+.elfinder-cwd-icon-x-rar-compressed:before { background-color: #97638e }
+.elfinder-cwd-icon-javascript:before,
+.elfinder-cwd-icon-x-javascript:before,
+.elfinder-cwd-icon-x-perl:before,
+.elfinder-cwd-icon-x-python:before,
+.elfinder-cwd-icon-x-ruby:before,
+.elfinder-cwd-icon-x-sh:before,
+.elfinder-cwd-icon-x-shellscript:before,
+.elfinder-cwd-icon-x-c:before,
+.elfinder-cwd-icon-x-csrc:before,
+.elfinder-cwd-icon-x-chdr:before,
+.elfinder-cwd-icon-x-c--:before,
+.elfinder-cwd-icon-x-c--src:before,
+.elfinder-cwd-icon-x-c--hdr:before,
+.elfinder-cwd-icon-x-java:before,
+.elfinder-cwd-icon-x-java-source:before,
+.elfinder-cwd-icon-x-php:before { background-color: #7c607c }
 
 /* list view*/
 .elfinder-cwd table thead td.ui-state-hover { background:#ddd; }
