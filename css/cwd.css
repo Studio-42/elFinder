@@ -247,12 +247,18 @@
 	-webkit-border-radius: 10px; 
 	border-radius: 10px;
 }
+.elfinder-cwd-size1 .elfinder-cwd-bgurl:after,
+.elfinder-cwd-size2 .elfinder-cwd-bgurl:after,
+.elfinder-cwd-size3 .elfinder-cwd-bgurl:after {
+	top: 32px;
+	left: -32px;
+}
 .elfinder-cwd-size1 .elfinder-cwd-icon-video:after,
 .elfinder-cwd-size2 .elfinder-cwd-icon-video:after,
 .elfinder-cwd-size3 .elfinder-cwd-icon-video:after {
-	top: 24px;
+	top: 26px;
+	left: -24px;
 }
-
 /* file name place */
 .elfinder-cwd-view-icons .elfinder-cwd-filename {
 	text-align: center;
