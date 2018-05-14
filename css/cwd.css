@@ -413,7 +413,7 @@
 .elfinder-cwd-icon:before {
 	content: none;
 	position: absolute;
-	left: 1px;
+	left: 0px;
 	top: 5px;
 	min-width: 20px;
 	max-width: 84px;
