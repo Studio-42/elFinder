@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: e6e9258) (2018-05-15)
+ * Version 2.1.38 (2.1-src Nightly: 89f4332) (2018-05-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9497,7 +9497,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.38 (2.1-src Nightly: e6e9258)';
+elFinder.prototype.version = '2.1.38 (2.1-src Nightly: 89f4332)';
 
 
 
@@ -15583,6 +15583,38 @@ $.fn.elfindercwd = function(fm, options) {
 								bottomMarkerShow(cwd, bufferExt.renderd);
 								wrapperRepaint();
 							});
+						}
+					}
+				})
+				// Change icon size with mouse wheel event
+				.on('onwheel' in document ? 'wheel' : 'mousewheel', function(e) {
+					var tm, size, delta;
+					if (!list && ((e.ctrlKey && !e.metaKey) || (!e.ctrlKey && e.metaKey))) {
+						e.stopPropagation();
+						e.preventDefault();
+						tm = cwd.data('wheelTm');
+						if (typeof tm !== 'undefined') {
+							clearTimeout(tm);
+							cwd.data('wheelTm', setTimeout(function() {
+								cwd.removeData('wheelTm');
+							}, 200));
+						} else {
+							cwd.data('wheelTm', false);
+							size = iconSize || 0;
+							delta = e.originalEvent.deltaY ? e.originalEvent.deltaY : -(e.originalEvent.wheelDelta);
+							if (delta > 0) {
+								if (iconSize > 0) {
+									size = iconSize - 1;
+								}
+							} else {
+								if (iconSize < options.iconsView.sizeMax) {
+									size = iconSize + 1;
+								}
+							}
+							if (size !== iconSize) {
+								fm.storage('iconsize', size);
+								cwd.trigger('iconpref', {size: size});
+							}
 						}
 					}
 				}),
