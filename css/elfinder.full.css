@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: e6e9258) (2018-05-15)
+ * Version 2.1.38 (2.1-src Nightly: 89f4332) (2018-05-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -1132,24 +1132,37 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	width: 74px;
 	height: 74px;
 }
-.elfinder-cwd-size1 .elfinder-cwd-icon,
-.elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl:before,
-.elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
-	-moz-transform-origin: top center;
-	-moz-transform: scale(1.5);
-	zoom: 1.5;
+.elfinder-cwd-size1 .elfinder-cwd-icon {
+	-ms-transform-origin: top center;
+	-ms-transform: scale(1.5);
+	-webkit-transform-origin: top center;
+	-webkit-transform: scale(1.5);
+	transform-origin: top center;
+	transform: scale(1.5);
 }
 .elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl:before {
-	-moz-transform-origin: top left;
-	-moz-transform: scale(1.5) translate(-4px, 15%);
+	-ms-transform-origin: top left;
+	-ms-transform: scale(1.5) translate(-4px, 15%);
+	-webkit-transform-origin: top left;
+	-webkit-transform: scale(1.5) translate(-4px, 15%);
+	transform-origin: top left;
+	transform: scale(1.5) translate(-4px, 15%);
 }
 .elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
-	-moz-transform-origin: top left;
-	-moz-transform: scale(1.5) translate(-12px, 9px);
-}.elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl {
-	-moz-transform-origin: center center;
-	-moz-transform: scale(1);
-	zoom: 1;
+	-ms-transform-origin: top left;
+	-ms-transform: scale(1.5) translate(-12px, 9px);
+	-webkit-transform-origin: top left;
+	-webkit-transform: scale(1.5) translate(-12px, 9px);
+	transform-origin: top left;
+	transform: scale(1.5) translate(-12px, 9px);
+}
+.elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl {
+	-ms-transform-origin: center center;
+	-ms-transform: scale(1);
+	-webkit-transform-origin: center center;
+	-webkit-transform: scale(1);
+	transform-origin: center center;
+	transform: scale(1);
 	width: 72px;
 	height: 72px;
 	-moz-border-radius: 6px; 
@@ -1164,25 +1177,37 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	width: 98px;
 	height: 98px;
 }
-.elfinder-cwd-size2 .elfinder-cwd-icon,
-.elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-bgurl:before,
-.elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
-	-moz-transform-origin: top center;
-	-moz-transform: scale(2);
-	zoom: 2;
+.elfinder-cwd-size2 .elfinder-cwd-icon {
+	-ms-transform-origin: top center;
+	-ms-transform: scale(2);
+	-webkit-transform-origin: top center;
+	-webkit-transform: scale(2);
+	transform-origin: top center;
+	transform: scale(2);
 }
 .elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-bgurl:before {
-	-moz-transform-origin: top left;
-	-moz-transform: scale(2) translate(-5px, 15%);
+	-ms-transform-origin: top left;
+	-ms-transform: scale(2) translate(-5px, 15%);
+	-webkit-transform-origin: top left;
+	-webkit-transform: scale(2) translate(-5px, 15%);
+	transform-origin: top left;
+	transform: scale(2) translate(-5px, 15%);
 }
 .elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
-	-moz-transform-origin: top left;
-	-moz-transform: scale(2) translate(-16px, 13px);
+	-ms-transform-origin: top left;
+	-ms-transform: scale(2) translate(-16px, 13px);
+	-webkit-transform-origin: top left;
+	-webkit-transform: scale(2) translate(-16px, 13px);
+	transform-origin: top left;
+	transform: scale(2) translate(-16px, 13px);
 }
 .elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-bgurl {
-	-moz-transform-origin: center center;
-	-moz-transform: scale(1);
-	zoom: 1;
+	-ms-transform-origin: center center;
+	-ms-transform: scale(1);
+	-webkit-transform-origin: center center;
+	-webkit-transform: scale(1);
+	transform-origin: center center;
+	transform: scale(1);
 	width: 96px;
 	height: 96px;
 	-moz-border-radius: 8px; 
@@ -1197,25 +1222,37 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
 	width: 122px;
 	height: 122px;
 }
-.elfinder-cwd-size3 .elfinder-cwd-icon,
-.elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-bgurl:before,
-.elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
-	-moz-transform-origin: top center;
-	-moz-transform: scale(2.5);
-	zoom: 2.5;
+.elfinder-cwd-size3 .elfinder-cwd-icon {
+	-ms-transform-origin: top center;
+	-ms-transform: scale(2.5);
+	-webkit-transform-origin: top center;
+	-webkit-transform: scale(2.5);
+	transform-origin: top center;
+	transform: scale(2.5);
 }
 .elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-bgurl:before {
-	-moz-transform-origin: top left;
-	-moz-transform: scale(2.5) translate(-6px, 15%);
+	-ms-transform-origin: top left;
+	-ms-transform: scale(2.5) translate(-6px, 15%);
+	-webkit-transform-origin: top left;
+	-webkit-transform: scale(2.5) translate(-6px, 15%);
+	transform-origin: top left;
+	transform: scale(2.5) translate(-6px, 15%);
 }
 .elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
-	-moz-transform-origin: top left;
-	-moz-transform: scale(2.5) translate(-20px, 15px);
+	-ms-transform-origin: top left;
+	-ms-transform: scale(2.5) translate(-20px, 15px);
+	-webkit-transform-origin: top left;
+	-webkit-transform: scale(2.5) translate(-20px, 15px);
+	transform-origin: top left;
+	transform: scale(2.5) translate(-20px, 15px);
 }
 .elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-bgurl {
-	-moz-transform-origin: center center;
-	-moz-transform: scale(1);
-	zoom: 1;
+	-ms-transform-origin: center center;
+	-ms-transform: scale(1);
+	-webkit-transform-origin: center center;
+	-webkit-transform: scale(1);
+	transform-origin: center center;
+	transform: scale(1);
 	width: 120px;
 	height: 120px;
 	-moz-border-radius: 10px; 
