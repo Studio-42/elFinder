@@ -6,7 +6,7 @@
  * @author osworx.net
  * @author Maximilian Schwarz <info@deefuse.de>
  * @author SF Webdesign <webdesign@stephan-frank.de>
- * @version 2017-11-29
+ * @version 2018-05-15
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -166,6 +166,7 @@
 			'cmdselectall' : 'Alle auswählen', // from v2.1.28 added 15.08.2017
 			'cmdselectnone': 'Keine auswählen', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': 'Auswahl rückgängig machen', // from v2.1.28 added 15.08.2017
+			'cmdopennew'   : 'In neuem Fenster öffnen', // from v2.1.38 added 3.4.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Schließen',
@@ -441,7 +442,26 @@
 			'select'          : 'Auswählen', // from v2.1.30 added 23.11.2017
 			'selectAction'    : 'Aktion bei der Auswahl der Datei', // from v2.1.30 added 23.11.2017
 			'useStoredEditor' : 'Öffnen mit dem zuletzt verwendeten Editor', // from v2.1.30 added 23.11.2017
-			'selectinvert'    : 'Auswahl rückgängig machen', // from v2.1.30 added 25.11.2017
+			'selectinvert'    : 'Auswahl umkehren', // from v2.1.30 added 25.11.2017
+			'renameMultiple'  : 'Sind Sie sicher, dass Sie $1 ausgewählte Elemente in $2 umbenennen möchten?<br/>Das kann nicht rückgängig gemacht werden!', // from v2.1.31 added 4.12.2017
+			'batchRename'     : 'Stapelumbenennung', // from v2.1.31 added 8.12.2017
+			'plusNumber'      : '+ Nummer', // from v2.1.31 added 8.12.2017
+			'asPrefix'        : 'Präfix hinzufügen', // from v2.1.31 added 8.12.2017
+			'asSuffix'        : 'Suffix hinzufügen', // from v2.1.31 added 8.12.2017
+			'changeExtention' : 'Erweiterung ändern', // from v2.1.31 added 8.12.2017
+			'columnPref'      : 'Spalteneinstellungen (Listenansicht)', // from v2.1.32 added 6.2.2018
+			'reflectOnImmediate' : 'Alle Änderungen werden sofort im Archiv angewendet.', // from v2.1.33 added 2.3.2018
+			'reflectOnUnmount'   : 'Alle Änderungen werden nicht angewendet, bis Sie dieses Volume entfernen.', // from v2.1.33 added 2.3.2018
+			'unmountChildren' : 'Die folgenden Datenträger, die auf diesem Datenträger eingehängt sind, werden ebenfalls ausgehängt. Sind Sie sicher, dass Sie alle aushängen wollen?', // from v2.1.33 added 5.3.2018
+			'selectionInfo'   : 'Auswahl Info', // from v2.1.33 added 7.3.2018
+			'hashChecker'     : 'Datei-Hash-Algorithmen', // from v2.1.33 added 10.3.2018
+			'infoItems'       : 'Info-Elemente (Auswahl-Info-Panel)', // from v2.1.38 added 28.3.2018
+			'pressAgainToExit': 'Drücken Sie erneut, um zu beenden.', // from v2.1.38 added 1.4.2018
+			'toolbar'         : 'Symbolleiste', // from v2.1.38 added 4.4.2018
+			'workspace'       : 'Arbeitsplatz', // from v2.1.38 added 4.4.2018
+			'dialog'          : 'Dialog', // from v2.1.38 added 4.4.2018
+			'all'             : 'Alle', // from v2.1.38 added 4.4.2018
+			'iconSize'        : 'Symbolgröße (Symbol Ansicht)', // form v2.1.39 added 7.5.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unbekannt',
@@ -527,3 +547,4 @@
 		}
 	};
 }));
+
