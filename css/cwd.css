@@ -187,7 +187,14 @@
 	-moz-transform: scale(1.5);
 	zoom: 1.5;
 }
-.elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl {
+.elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl:before {
+	-moz-transform-origin: top left;
+	-moz-transform: scale(1.5) translate(-4px, 15%);
+}
+.elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
+	-moz-transform-origin: top left;
+	-moz-transform: scale(1.5) translate(-12px, 9px);
+}.elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl {
 	-moz-transform-origin: center center;
 	-moz-transform: scale(1);
 	zoom: 1;
@@ -211,6 +218,14 @@
 	-moz-transform-origin: top center;
 	-moz-transform: scale(2);
 	zoom: 2;
+}
+.elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-bgurl:before {
+	-moz-transform-origin: top left;
+	-moz-transform: scale(2) translate(-5px, 15%);
+}
+.elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
+	-moz-transform-origin: top left;
+	-moz-transform: scale(2) translate(-16px, 13px);
 }
 .elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-bgurl {
 	-moz-transform-origin: center center;
@@ -236,6 +251,14 @@
 	-moz-transform-origin: top center;
 	-moz-transform: scale(2.5);
 	zoom: 2.5;
+}
+.elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-bgurl:before {
+	-moz-transform-origin: top left;
+	-moz-transform: scale(2.5) translate(-6px, 15%);
+}
+.elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
+	-moz-transform-origin: top left;
+	-moz-transform: scale(2.5) translate(-20px, 15px);
 }
 .elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-bgurl {
 	-moz-transform-origin: center center;
