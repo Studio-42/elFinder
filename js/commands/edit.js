@@ -511,95 +511,95 @@ elFinder.prototype.commands.edit = function() {
 						preventDefault : true
 					});
 				}
-			}
 
-			req.done(function(data) {
-				var selEncoding, reg, m, res;
-				if (data.doconv) {
-					fm.confirm({
-						title  : self.title,
-						text   : data.doconv === 'unknown'? 'confirmNonUTF8' : 'confirmConvUTF8',
-						accept : {
-							label    : 'btnConv',
-							callback : function() {  
-								dfrd = edit(file, selEncoding.val(), editor);
-							}
-						},
-						cancel : {
-							label    : 'btnCancel',
-							callback : function() { dfrd.reject(); }
-						},
-						optionsCallback : function(options) {
-							options.create = function() {
-								var base = $('<div class="elfinder-dialog-confirm-encoding"/>'),
-									head = {value: data.doconv},
-									detected;
-								
-								if (data.doconv === 'unknown') {
-									head.caption = '-';
+				req.done(function(data) {
+					var selEncoding, reg, m, res;
+					if (data.doconv) {
+						fm.confirm({
+							title  : self.title,
+							text   : data.doconv === 'unknown'? 'confirmNonUTF8' : 'confirmConvUTF8',
+							accept : {
+								label    : 'btnConv',
+								callback : function() {  
+									dfrd = edit(file, selEncoding.val(), editor);
 								}
-								selEncoding = getEncSelect([head]);
-								$(this).next().find('.ui-dialog-buttonset')
-									.prepend(base.append($('<label>'+fm.i18n('encoding')+' </label>').append(selEncoding)));
-							};
-						}
-					});
-				} else {
-					if ((!editor || !editor.info || !editor.info.preventGet) && fm.mimeIsText(file.mime)) {
-						reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i');
-						if (window.atob && (m = data.content.match(reg))) {
-							data.content = atob(data.content.substr(m[1].length));
-						}
-					}
-					dialog(id, file, data.content, data.encoding, editor)
-						.done(function(data) {
-							dfrd.resolve(data);
-						})
-						.progress(function(encoding, newHash) {
-							var ta = this;
-							if (newHash) {
-								hash = newHash;
-							}
-							fm.request({
-								options : {type : 'post'},
-								data : {
-									cmd     : 'put',
-									target  : hash,
-									encoding : encoding || data.encoding,
-									content : ta.getContent.call(ta, ta[0])
-								},
-								notify : {type : 'save', cnt : 1},
-								syncOnFail : true,
-								preventFail : true,
-								navigate : {
-									target : 'changed',
-									toast : {
-										inbuffer : {msg: fm.i18n(['complete', fm.i18n('btnSave')])}
+							},
+							cancel : {
+								label    : 'btnCancel',
+								callback : function() { dfrd.reject(); }
+							},
+							optionsCallback : function(options) {
+								options.create = function() {
+									var base = $('<div class="elfinder-dialog-confirm-encoding"/>'),
+										head = {value: data.doconv},
+										detected;
+									
+									if (data.doconv === 'unknown') {
+										head.caption = '-';
 									}
+									selEncoding = getEncSelect([head]);
+									$(this).next().find('.ui-dialog-buttonset')
+										.prepend(base.append($('<label>'+fm.i18n('encoding')+' </label>').append(selEncoding)));
+								};
+							}
+						});
+					} else {
+						if ((!editor || !editor.info || !editor.info.preventGet) && fm.mimeIsText(file.mime)) {
+							reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i');
+							if (window.atob && (m = data.content.match(reg))) {
+								data.content = atob(data.content.substr(m[1].length));
+							}
+						}
+						dialog(id, file, data.content, data.encoding, editor)
+							.done(function(data) {
+								dfrd.resolve(data);
+							})
+							.progress(function(encoding, newHash) {
+								var ta = this;
+								if (newHash) {
+									hash = newHash;
 								}
+								fm.request({
+									options : {type : 'post'},
+									data : {
+										cmd     : 'put',
+										target  : hash,
+										encoding : encoding || data.encoding,
+										content : ta.getContent.call(ta, ta[0])
+									},
+									notify : {type : 'save', cnt : 1},
+									syncOnFail : true,
+									preventFail : true,
+									navigate : {
+										target : 'changed',
+										toast : {
+											inbuffer : {msg: fm.i18n(['complete', fm.i18n('btnSave')])}
+										}
+									}
+								})
+								.fail(function(error) {
+									dfrd.reject(error);
+									ta.trigger('_savefail');
+								})
+								.done(function(data) {
+									requestAnimationFrame(function(){
+										ta.trigger('focus');
+										ta.editor && ta.editor.focus(ta[0], ta.editor.instance);
+									});
+									ta.trigger('_savedone');
+								});
 							})
 							.fail(function(error) {
 								dfrd.reject(error);
-								ta.trigger('_savefail');
-							})
-							.done(function(data) {
-								requestAnimationFrame(function(){
-									ta.trigger('focus');
-									ta.editor && ta.editor.focus(ta[0], ta.editor.instance);
-								});
-								ta.trigger('_savedone');
 							});
-						})
-						.fail(function(error) {
-							dfrd.reject(error);
-						});
-				}
-			})
-			.fail(function(error) {
-				var err = Array.isArray(error)? error[0] : error;
-				(err !== 'errConvUTF8') && fm.sync();
-				dfrd.reject(error);
-			});
+					}
+				})
+				.fail(function(error) {
+					var err = Array.isArray(error)? error[0] : error;
+					(err !== 'errConvUTF8') && fm.sync();
+					dfrd.reject(error);
+				});
+			}
 
 			return dfrd.promise();
 		},
@@ -611,6 +611,30 @@ elFinder.prototype.commands.edit = function() {
 		 */
 		editors = {},
 		
+		/**
+		 * Fallback editor (Simple text editor)
+		 * 
+		 * @type Object
+		 */
+		fallbackEditor = {
+			// Simple Text (basic textarea editor)
+			info : {
+				id : 'textarea',
+				name : 'TextArea',
+				useTextAreaEvent : true
+			},
+			load : function(textarea) {
+				// trigger event 'editEditorPrepare'
+				this.trigger('Prepare', {
+					node: textarea,
+					editorObj: void(0),
+					instance: void(0),
+					opts: {}
+				});
+			},
+			save : function(){}
+		},
+
 		/**
 		 * Set current editors
 		 * 
@@ -649,11 +673,15 @@ elFinder.prototype.commands.edit = function() {
 						}
 					}
 					return false;
-				};
+				},
+				optEditors = self.options.editors || [];
 			
 			stored = fm.storage('storedEditors') || {};
 			editors = {};
-			$.each(self.options.editors || [], function(i, editor) {
+			if (!optEditors.length) {
+				optEditors = [fallbackEditor];
+			}
+			$.each(optEditors, function(i, editor) {
 				var name;
 				if ((cnt === 1 || !editor.info || !editor.info.single)
 						&& mimeMatch(file.mime, editor.mimes || null)
