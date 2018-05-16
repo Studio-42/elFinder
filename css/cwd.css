@@ -190,19 +190,19 @@
 }
 .elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl:before {
 	-ms-transform-origin: top left;
-	-ms-transform: scale(1.5) translate(-4px, 15%);
+	-ms-transform: scale(1.35) translate(-4px, 15%);
 	-webkit-transform-origin: top left;
-	-webkit-transform: scale(1.5) translate(-4px, 15%);
+	-webkit-transform: scale(1.35) translate(-4px, 15%);
 	transform-origin: top left;
-	transform: scale(1.5) translate(-4px, 15%);
+	transform: scale(1.35) translate(-4px, 15%);
 }
 .elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
 	-ms-transform-origin: top left;
-	-ms-transform: scale(1.5) translate(-12px, 9px);
+	-ms-transform: scale(1.35) translate(-12px, 9px);
 	-webkit-transform-origin: top left;
-	-webkit-transform: scale(1.5) translate(-12px, 9px);
+	-webkit-transform: scale(1.35) translate(-12px, 9px);
 	transform-origin: top left;
-	transform: scale(1.5) translate(-12px, 9px);
+	transform: scale(1.35) translate(-12px, 9px);
 }
 .elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl {
 	-ms-transform-origin: center center;
@@ -235,19 +235,19 @@
 }
 .elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-bgurl:before {
 	-ms-transform-origin: top left;
-	-ms-transform: scale(2) translate(-5px, 15%);
+	-ms-transform: scale(1.8) translate(-5px, 15%);
 	-webkit-transform-origin: top left;
-	-webkit-transform: scale(2) translate(-5px, 15%);
+	-webkit-transform: scale(1.8) translate(-5px, 15%);
 	transform-origin: top left;
-	transform: scale(2) translate(-5px, 15%);
+	transform: scale(1.8) translate(-5px, 15%);
 }
 .elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
 	-ms-transform-origin: top left;
-	-ms-transform: scale(2) translate(-16px, 13px);
+	-ms-transform: scale(1.8) translate(-16px, 13px);
 	-webkit-transform-origin: top left;
-	-webkit-transform: scale(2) translate(-16px, 13px);
+	-webkit-transform: scale(1.8) translate(-16px, 13px);
 	transform-origin: top left;
-	transform: scale(2) translate(-16px, 13px);
+	transform: scale(1.8) translate(-16px, 13px);
 }
 .elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-bgurl {
 	-ms-transform-origin: center center;
@@ -280,19 +280,19 @@
 }
 .elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-bgurl:before {
 	-ms-transform-origin: top left;
-	-ms-transform: scale(2.5) translate(-6px, 15%);
+	-ms-transform: scale(2.25) translate(-6px, 15%);
 	-webkit-transform-origin: top left;
-	-webkit-transform: scale(2.5) translate(-6px, 15%);
+	-webkit-transform: scale(2.25) translate(-6px, 15%);
 	transform-origin: top left;
-	transform: scale(2.5) translate(-6px, 15%);
+	transform: scale(2.25) translate(-6px, 15%);
 }
 .elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-bgurl:after {
 	-ms-transform-origin: top left;
-	-ms-transform: scale(2.5) translate(-20px, 15px);
+	-ms-transform: scale(2.25) translate(-20px, 15px);
 	-webkit-transform-origin: top left;
-	-webkit-transform: scale(2.5) translate(-20px, 15px);
+	-webkit-transform: scale(2.25) translate(-20px, 15px);
 	transform-origin: top left;
-	transform: scale(2.5) translate(-20px, 15px);
+	transform: scale(2.25) translate(-20px, 15px);
 }
 .elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-bgurl {
 	-ms-transform-origin: center center;
@@ -322,6 +322,7 @@
 .elfinder-cwd-size1 .elfinder-cwd-icon:before,
 .elfinder-cwd-size2 .elfinder-cwd-icon:before,
 .elfinder-cwd-size3 .elfinder-cwd-icon:before {
+	top: 3px;
 	display: block;
 }
 
