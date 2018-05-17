@@ -133,7 +133,7 @@
 			/*********************************** buttons ***********************************/ 
 			'btnClose'  : 'Zatvori',
 			'btnSave'   : 'Sačuvaj',
-			'btnRm'     : 'Preimenuj',
+			'btnRm'     : 'Obriši',
 			'btnApply'  : 'Potvrdi',
 			'btnCancel' : 'Prekini',
 			'btnNo'     : 'Ne',
