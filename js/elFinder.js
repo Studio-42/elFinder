@@ -5033,7 +5033,9 @@ var elFinder = function(elm, opts, bootCallback) {
 						node.data('cssautoloadHide').remove();
 						node.removeData('cssautoloadHide');
 						self.cssloaded = true;
-						self.trigger('cssloaded');
+						requestAnimationFrame(function() {
+							self.trigger('cssloaded');
+						});
 					},
 					cnt, fi;
 				if (node.css('visibility') === 'hidden') {
