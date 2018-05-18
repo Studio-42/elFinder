@@ -144,8 +144,10 @@
 			);
 		},
 		
-		// is IE8? for determine the jQuery version to use (optional)
-		ie8 = (typeof window.addEventListener === 'undefined' && typeof document.getElementsByClassName === 'undefined'),
+		// is IE8 or Safari < 6? for determine the jQuery version to use (optional)
+		old = (typeof window.addEventListener === 'undefined' && typeof document.getElementsByClassName === 'undefined')
+		        ||
+	    	      (!document.unqueID && !window.opera && !window.sidebar && 'WebkitAppearance' in document.documentElement.style && typeof document.body.style.webkitFilter === 'undefined'),
 		xhr, xdr = null;
 
 	// load jquery.xdr.js for old IE
@@ -161,7 +163,7 @@
 	require.config({
 		baseUrl : rootPath+'/js',
 		paths : {
-			'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(ie8? '1.12.4' : jqver)+'/jquery.min',
+			'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(old? '1.12.4' : jqver)+'/jquery.min',
 			'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/jquery-ui.min',
 			'elfinder' : 'elfinder.min',
 			'i18nfmsg' : '../../i18nFolderMsgs',
