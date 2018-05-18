@@ -147,7 +147,7 @@
 		// is IE8 or Safari < 6? for determine the jQuery version to use (optional)
 		old = (typeof window.addEventListener === 'undefined' && typeof document.getElementsByClassName === 'undefined')
 		        ||
-	    	      (!document.unqueID && !window.opera && !window.sidebar && 'WebkitAppearance' in document.documentElement.style && typeof document.body.style.webkitFilter === 'undefined'),
+	    	      (!window.chrome && !document.unqueID && !window.opera && !window.sidebar && 'WebkitAppearance' in document.documentElement.style && typeof document.body.style.webkitFilter === 'undefined'),
 		xhr, xdr = null;
 
 	// load jquery.xdr.js for old IE
