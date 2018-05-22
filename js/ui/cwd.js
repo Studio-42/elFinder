@@ -934,6 +934,7 @@ $.fn.elfindercwd = function(fm, options) {
 					if (list) {
 						colWidth && setColwidth();
 						fixTableHeader({fitWidth: true});
+						resize();
 					}
 					bufferExt.itemH = (list? place.find('tr:first') : place.find('[id]:first')).outerHeight(true);
 					fm.trigger('cwdrender');
