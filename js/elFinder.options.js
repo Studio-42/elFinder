@@ -730,7 +730,14 @@ elFinder.prototype._options = {
 				size: 0,
 				// number of maximum size (3 in default CSS (cwd.css - elfinder-cwd-size[number]))
 				// uses in preference.js
-				sizeMax: 3
+				sizeMax: 3,
+				// Name of each size
+				sizeNames: {
+					0: 'viewSmall',
+					1: 'viewMedium',
+					2: 'viewLarge',
+					3: 'viewExtraLarge' 
+				}
 			},
 
 			// /**
