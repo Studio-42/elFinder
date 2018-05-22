@@ -6,7 +6,9 @@
  **/
 elFinder.prototype.commands.view = function() {
 	"use strict";
-	var fm = this.fm;
+	var self = this,
+		fm = this.fm,
+		subMenuRaw;
 	this.value          = fm.viewType;
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
@@ -17,6 +19,25 @@ elFinder.prototype.commands.view = function() {
 		return 0;
 	};
 	
+	this.extra = {
+		icon: 'menu',
+		node: $('<span/>')
+			.attr({title: fm.i18n('viewtype')})
+			.on('click touchstart', function(e){
+				if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+					return;
+				}
+				var node = $(this);
+				e.stopPropagation();
+				e.preventDefault();
+				fm.trigger('contextmenu', {
+					raw: getSubMenuRaw(),
+					x: node.offset().left,
+					y: node.offset().top
+				});
+			})
+	};
+
 	this.exec = function() {
 		var self  = this,
 			value = fm.storage('view', this.value == 'list' ? 'icons' : 'list');
@@ -26,5 +47,72 @@ elFinder.prototype.commands.view = function() {
 			this.resolve();
 		});
 	};
+
+	fm.bind('init', function() {
+		subMenuRaw = (function() {
+			var cwd = fm.getUI('cwd'),
+				raws = [];
+			$.each(fm.options.uiOptions.cwd.iconsView.sizeNames, function(i, n) {
+				raws.push(
+					{
+						label    : fm.i18n(n),
+						icon     : 'view',
+						callback : function() {
+							cwd.trigger('iconpref', {size: i});
+							fm.storage('iconsize', i);
+							if (self.value === 'list') {
+								self.exec();
+							}
+						}
+					}		
+				);
+			});
+			raws.push('|');
+			raws.push(
+				{
+					label    : fm.i18n('viewlist'),
+					icon     : 'view-list',
+					callback : function() {
+						if (self.value !== 'list') {
+							self.exec();
+						}
+					}
+				}		
+			);
+			return raws;
+		})();
+	}).bind('contextmenucreate', function() {
+		self.extra = {
+			icon: 'menu',
+			node: $('<span/>')
+				.attr({title: fm.i18n('cmdview')})
+				.on('click touchstart', function(e){
+					if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+						return;
+					}
+					var node = $(this),
+						raw = subMenuRaw.concat(),
+						idx, i;
+					if (self.value === 'list') {
+						idx = subMenuRaw.length - 1;
+					} else {
+						idx = parseInt(fm.storage('iconsize') || 0);
+					}
+					for (i = 0; i < subMenuRaw.length; i++) {
+						if (subMenuRaw[i] !== '|') {
+							subMenuRaw[i].options = (i === idx? {'className': 'ui-state-active'} : void(0))
+							;
+						}
+					}
+					e.stopPropagation();
+					e.preventDefault();
+					fm.trigger('contextmenu', {
+						raw: subMenuRaw,
+						x: node.offset().left,
+						y: node.offset().top
+					});
+				})
+		};
+	});
 
 };

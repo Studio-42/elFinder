@@ -101,7 +101,8 @@ $.fn.elfindercontextmenu = function(fm) {
 					}, 100);
 				})
 				.draggable(dragOpt),
-			subpos  = fm.direction == 'ltr' ? 'left' : 'right',
+			ltr = fm.direction === 'ltr',
+			subpos = ltr? 'left' : 'right',
 			types = Object.assign({}, fm.options.contextmenu),
 			tpl     = '<div class="'+cmItem+'{className}"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"{style}/><span>{label}</span></div>',
 			item = function(label, icon, callback, opts) {
@@ -421,18 +422,44 @@ $.fn.elfindercontextmenu = function(fm) {
 										baseOffset = base.offset(),
 										wwidth     = baseOffset.left + base.width(),
 										wheight    = baseOffset.top + base.height(),
-										x, y, over;
+										cltr       = ltr, 
+										x          = nodewidth,
+										y, over;
 	
-									over = (nodeleft + nodewidth + width) - wwidth;
-									x = (nodeleft > width && over > 0)? (fm.UA.Mobile? 10 - width : nodewidth - over) : nodewidth;
-									if (subpos === 'right' && nodeleft < width) {
-										x = fm.UA.Mobile? 30 - nodewidth : nodewidth - (width - nodeleft);
+									if (ltr) {
+										over = (nodeleft + nodewidth + width) - wwidth;
+										if (over > 10) {
+											if (nodeleft > width - 5) {
+												x = x - 5;
+												cltr = false;
+											} else {
+												if (!fm.UA.Mobile) {
+													x = nodewidth - over;
+												}
+											}
+										}
+									} else {
+										over = width - nodeleft;
+										if (over > 0) {
+											if ((nodeleft + nodewidth + width - 15) < wwidth) {
+												x = x - 5;
+												cltr = true;
+											} else {
+												if (!fm.UA.Mobile) {
+													x = nodewidth - over;
+												}
+											}
+										}
 									}
 									over = (nodetop + 5 + height) - wheight;
 									y = (over > 0 && nodetop < wheight)? 5 - over : (over > 0? 30 - height : 5);
 	
 									menu.find('.elfinder-contextmenu-sub:visible').hide();
-									submenu.css({ top : y }).css(subpos, x).show();
+									submenu.css({
+										top : y,
+										left : cltr? x : 'auto',
+										right: cltr? 'auto' : x
+									}).show();
 									base.attr('style', bstyle);
 								}
 							};

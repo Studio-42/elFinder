@@ -320,6 +320,10 @@
 			'selectlfile'     : 'Select last item',
 			'viewlist'        : 'List view',
 			'viewicons'       : 'Icons view',
+			'viewSmall'       : 'Small icons', // from v2.1.39 added 22.5.2018
+			'viewMedium'      : 'Medium icons', // from v2.1.39 added 22.5.2018
+			'viewLarge'       : 'Large icons', // from v2.1.39 added 22.5.2018
+			'viewExtraLarge'  : 'Extra large icons', // from v2.1.39 added 22.5.2018
 			'places'          : 'Places',
 			'calc'            : 'Calculate',
 			'path'            : 'Path',

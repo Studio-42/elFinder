@@ -2,7 +2,7 @@
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-05-07
+ * @version 2018-05-22
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -307,6 +307,10 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'selectlfile'     : 'Select last item',
 			'viewlist'        : 'List view',
 			'viewicons'       : 'Icons view',
+			'viewSmall'       : 'Small icons', // from v2.1.39 added 22.5.2018
+			'viewMedium'      : 'Medium icons', // from v2.1.39 added 22.5.2018
+			'viewLarge'       : 'Large icons', // from v2.1.39 added 22.5.2018
+			'viewExtraLarge'  : 'Extra large icons', // from v2.1.39 added 22.5.2018
 			'places'          : 'Places',
 			'calc'            : 'Calculate',
 			'path'            : 'Path',
