@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: 78196e7) (2018-05-18)
+ * Version 2.1.38 (2.1-src Nightly: 05b8d71) (2018-05-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -4594,7 +4594,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					if (! helper.data('droped')) {
 						files = $.grep(helper.data('files')||[], function(h) { return h? true : false ;});
 						self.trigger('unlockfiles', {files : files});
-						self.trigger('selectfiles', {files : files});
+						self.trigger('selectfiles', {files : self.selected()});
 					}
 					self.enable();
 					
@@ -9499,7 +9499,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.38 (2.1-src Nightly: 78196e7)';
+elFinder.prototype.version = '2.1.38 (2.1-src Nightly: 05b8d71)';
 
 
 
@@ -10646,7 +10646,14 @@ elFinder.prototype._options = {
 				size: 0,
 				// number of maximum size (3 in default CSS (cwd.css - elfinder-cwd-size[number]))
 				// uses in preference.js
-				sizeMax: 3
+				sizeMax: 3,
+				// Name of each size
+				sizeNames: {
+					0: 'viewSmall',
+					1: 'viewMedium',
+					2: 'viewLarge',
+					3: 'viewExtraLarge' 
+				}
 			},
 
 			// /**
@@ -12067,7 +12074,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-05-07
+ * @version 2018-05-22
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -12372,6 +12379,10 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'selectlfile'     : 'Select last item',
 			'viewlist'        : 'List view',
 			'viewicons'       : 'Icons view',
+			'viewSmall'       : 'Small icons', // from v2.1.39 added 22.5.2018
+			'viewMedium'      : 'Medium icons', // from v2.1.39 added 22.5.2018
+			'viewLarge'       : 'Large icons', // from v2.1.39 added 22.5.2018
+			'viewExtraLarge'  : 'Extra large icons', // from v2.1.39 added 22.5.2018
 			'places'          : 'Places',
 			'calc'            : 'Calculate',
 			'path'            : 'Path',
@@ -12845,7 +12856,8 @@ $.fn.elfindercontextmenu = function(fm) {
 					}, 100);
 				})
 				.draggable(dragOpt),
-			subpos  = fm.direction == 'ltr' ? 'left' : 'right',
+			ltr = fm.direction === 'ltr',
+			subpos = ltr? 'left' : 'right',
 			types = Object.assign({}, fm.options.contextmenu),
 			tpl     = '<div class="'+cmItem+'{className}"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"{style}/><span>{label}</span></div>',
 			item = function(label, icon, callback, opts) {
@@ -13165,18 +13177,44 @@ $.fn.elfindercontextmenu = function(fm) {
 										baseOffset = base.offset(),
 										wwidth     = baseOffset.left + base.width(),
 										wheight    = baseOffset.top + base.height(),
-										x, y, over;
+										cltr       = ltr, 
+										x          = nodewidth,
+										y, over;
 	
-									over = (nodeleft + nodewidth + width) - wwidth;
-									x = (nodeleft > width && over > 0)? (fm.UA.Mobile? 10 - width : nodewidth - over) : nodewidth;
-									if (subpos === 'right' && nodeleft < width) {
-										x = fm.UA.Mobile? 30 - nodewidth : nodewidth - (width - nodeleft);
+									if (ltr) {
+										over = (nodeleft + nodewidth + width) - wwidth;
+										if (over > 10) {
+											if (nodeleft > width - 5) {
+												x = x - 5;
+												cltr = false;
+											} else {
+												if (!fm.UA.Mobile) {
+													x = nodewidth - over;
+												}
+											}
+										}
+									} else {
+										over = width - nodeleft;
+										if (over > 0) {
+											if ((nodeleft + nodewidth + width - 15) < wwidth) {
+												x = x - 5;
+												cltr = true;
+											} else {
+												if (!fm.UA.Mobile) {
+													x = nodewidth - over;
+												}
+											}
+										}
 									}
 									over = (nodetop + 5 + height) - wheight;
 									y = (over > 0 && nodetop < wheight)? 5 - over : (over > 0? 30 - height : 5);
 	
 									menu.find('.elfinder-contextmenu-sub:visible').hide();
-									submenu.css({ top : y }).css(subpos, x).show();
+									submenu.css({
+										top : y,
+										left : cltr? x : 'auto',
+										right: cltr? 'auto' : x
+									}).show();
 									base.attr('style', bstyle);
 								}
 							};
@@ -14351,6 +14389,7 @@ $.fn.elfindercwd = function(fm, options) {
 					if (list) {
 						colWidth && setColwidth();
 						fixTableHeader({fitWidth: true});
+						resize();
 					}
 					bufferExt.itemH = (list? place.find('tr:first') : place.find('[id]:first')).outerHeight(true);
 					fm.trigger('cwdrender');
@@ -32057,7 +32096,9 @@ elFinder.prototype.commands.upload = function() {
  **/
 elFinder.prototype.commands.view = function() {
 	"use strict";
-	var fm = this.fm;
+	var self = this,
+		fm = this.fm,
+		subMenuRaw;
 	this.value          = fm.viewType;
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
@@ -32068,6 +32109,25 @@ elFinder.prototype.commands.view = function() {
 		return 0;
 	};
 	
+	this.extra = {
+		icon: 'menu',
+		node: $('<span/>')
+			.attr({title: fm.i18n('viewtype')})
+			.on('click touchstart', function(e){
+				if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+					return;
+				}
+				var node = $(this);
+				e.stopPropagation();
+				e.preventDefault();
+				fm.trigger('contextmenu', {
+					raw: getSubMenuRaw(),
+					x: node.offset().left,
+					y: node.offset().top
+				});
+			})
+	};
+
 	this.exec = function() {
 		var self  = this,
 			value = fm.storage('view', this.value == 'list' ? 'icons' : 'list');
@@ -32077,6 +32137,73 @@ elFinder.prototype.commands.view = function() {
 			this.resolve();
 		});
 	};
+
+	fm.bind('init', function() {
+		subMenuRaw = (function() {
+			var cwd = fm.getUI('cwd'),
+				raws = [];
+			$.each(fm.options.uiOptions.cwd.iconsView.sizeNames, function(i, n) {
+				raws.push(
+					{
+						label    : fm.i18n(n),
+						icon     : 'view',
+						callback : function() {
+							cwd.trigger('iconpref', {size: i});
+							fm.storage('iconsize', i);
+							if (self.value === 'list') {
+								self.exec();
+							}
+						}
+					}		
+				);
+			});
+			raws.push('|');
+			raws.push(
+				{
+					label    : fm.i18n('viewlist'),
+					icon     : 'view-list',
+					callback : function() {
+						if (self.value !== 'list') {
+							self.exec();
+						}
+					}
+				}		
+			);
+			return raws;
+		})();
+	}).bind('contextmenucreate', function() {
+		self.extra = {
+			icon: 'menu',
+			node: $('<span/>')
+				.attr({title: fm.i18n('cmdview')})
+				.on('click touchstart', function(e){
+					if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+						return;
+					}
+					var node = $(this),
+						raw = subMenuRaw.concat(),
+						idx, i;
+					if (self.value === 'list') {
+						idx = subMenuRaw.length - 1;
+					} else {
+						idx = parseInt(fm.storage('iconsize') || 0);
+					}
+					for (i = 0; i < subMenuRaw.length; i++) {
+						if (subMenuRaw[i] !== '|') {
+							subMenuRaw[i].options = (i === idx? {'className': 'ui-state-active'} : void(0))
+							;
+						}
+					}
+					e.stopPropagation();
+					e.preventDefault();
+					fm.trigger('contextmenu', {
+						raw: subMenuRaw,
+						x: node.offset().left,
+						y: node.offset().top
+					});
+				})
+		};
+	});
 
 };
 
