@@ -8,6 +8,7 @@ $.fn.elfinderviewbutton = function(cmd) {
 	return this.each(function() {
 		var button = $(this).elfinderbutton(cmd),
 			icon   = button.children('.elfinder-button-icon'),
+			text   = button.children('.elfinder-button-text'),
 			tm;
 
 		cmd.change(function() {
@@ -19,6 +20,7 @@ $.fn.elfinderviewbutton = function(cmd) {
 				cmd.className = icons? 'view-list' : '';
 				cmd.title = cmd.fm.i18n(icons ? 'viewlist' : 'viewicons');
 				button.attr('title', cmd.title);
+				text.html(cmd.title);
 			});
 		});
 	});
