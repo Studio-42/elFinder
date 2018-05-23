@@ -51,22 +51,27 @@ elFinder.prototype.commands.view = function() {
 	fm.bind('init', function() {
 		subMenuRaw = (function() {
 			var cwd = fm.getUI('cwd'),
-				raws = [];
-			$.each(fm.options.uiOptions.cwd.iconsView.sizeNames, function(i, n) {
+				raws = [],
+				sizeNames = fm.options.uiOptions.cwd.iconsView.sizeNames,
+				max = fm.options.uiOptions.cwd.iconsView.sizeMax,
+				i, size;
+			for (i = 0; i <= max; i++) {
 				raws.push(
 					{
-						label    : fm.i18n(n),
+						label    : fm.i18n(sizeNames[i] || ('Size-' + i + ' icons')),
 						icon     : 'view',
-						callback : function() {
-							cwd.trigger('iconpref', {size: i});
-							fm.storage('iconsize', i);
-							if (self.value === 'list') {
-								self.exec();
-							}
-						}
-					}		
+						callback : (function(s) {
+							return function() {
+								cwd.trigger('iconpref', {size: s});
+								fm.storage('iconsize', s);
+								if (self.value === 'list') {
+									self.exec();
+								}
+							};
+						})(i)
+					}
 				);
-			});
+			}
 			raws.push('|');
 			raws.push(
 				{
