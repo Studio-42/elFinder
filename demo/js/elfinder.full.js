@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: 05b8d71) (2018-05-23)
+ * Version 2.1.38 (2.1-src Nightly: 14d735a) (2018-05-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9499,7 +9499,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.38 (2.1-src Nightly: 05b8d71)';
+elFinder.prototype.version = '2.1.38 (2.1-src Nightly: 14d735a)';
 
 
 
@@ -20842,6 +20842,7 @@ $.fn.elfinderviewbutton = function(cmd) {
 		return this.each(function() {
 		var button = $(this).elfinderbutton(cmd),
 			icon   = button.children('.elfinder-button-icon'),
+			text   = button.children('.elfinder-button-text'),
 			tm;
 
 		cmd.change(function() {
@@ -20853,6 +20854,7 @@ $.fn.elfinderviewbutton = function(cmd) {
 				cmd.className = icons? 'view-list' : '';
 				cmd.title = cmd.fm.i18n(icons ? 'viewlist' : 'viewicons');
 				button.attr('title', cmd.title);
+				text.html(cmd.title);
 			});
 		});
 	});
@@ -32141,22 +32143,27 @@ elFinder.prototype.commands.view = function() {
 	fm.bind('init', function() {
 		subMenuRaw = (function() {
 			var cwd = fm.getUI('cwd'),
-				raws = [];
-			$.each(fm.options.uiOptions.cwd.iconsView.sizeNames, function(i, n) {
+				raws = [],
+				sizeNames = fm.options.uiOptions.cwd.iconsView.sizeNames,
+				max = fm.options.uiOptions.cwd.iconsView.sizeMax,
+				i, size;
+			for (i = 0; i <= max; i++) {
 				raws.push(
 					{
-						label    : fm.i18n(n),
+						label    : fm.i18n(sizeNames[i] || ('Size-' + i + ' icons')),
 						icon     : 'view',
-						callback : function() {
-							cwd.trigger('iconpref', {size: i});
-							fm.storage('iconsize', i);
-							if (self.value === 'list') {
-								self.exec();
-							}
-						}
-					}		
+						callback : (function(s) {
+							return function() {
+								cwd.trigger('iconpref', {size: s});
+								fm.storage('iconsize', s);
+								if (self.value === 'list') {
+									self.exec();
+								}
+							};
+						})(i)
+					}
 				);
-			});
+			}
 			raws.push('|');
 			raws.push(
 				{
