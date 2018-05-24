@@ -1926,7 +1926,8 @@ $.fn.elfindercwd = function(fm, options) {
 							} else {
 								if (!$this.hasClass(clSelected)) {
 									if (list) {
-										disable = $(e.target).closest('.elfinder-cwd-file-wrapper,tr').is('tr');
+										fm.log($(e.target));
+										disable = $(e.target).closest('span,tr').is('tr');
 									} else {
 										disable = $(e.target).hasClass('elfinder-cwd-file');
 									}
