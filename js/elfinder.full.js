@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: b8901cf) (2018-05-24)
+ * Version 2.1.38 (2.1-src Nightly: 5ebacfa) (2018-05-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9499,7 +9499,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.38 (2.1-src Nightly: b8901cf)';
+elFinder.prototype.version = '2.1.38 (2.1-src Nightly: 5ebacfa)';
 
 
 
@@ -15381,7 +15381,8 @@ $.fn.elfindercwd = function(fm, options) {
 							} else {
 								if (!$this.hasClass(clSelected)) {
 									if (list) {
-										disable = $(e.target).closest('.elfinder-cwd-file-wrapper,tr').is('tr');
+										fm.log($(e.target));
+										disable = $(e.target).closest('span,tr').is('tr');
 									} else {
 										disable = $(e.target).hasClass('elfinder-cwd-file');
 									}
