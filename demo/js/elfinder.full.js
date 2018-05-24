@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: 091ddbb) (2018-05-23)
+ * Version 2.1.38 (2.1-src Nightly: b8901cf) (2018-05-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9499,7 +9499,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.38 (2.1-src Nightly: 091ddbb)';
+elFinder.prototype.version = '2.1.38 (2.1-src Nightly: b8901cf)';
 
 
 
@@ -14389,7 +14389,6 @@ $.fn.elfindercwd = function(fm, options) {
 					if (list) {
 						colWidth && setColwidth();
 						fixTableHeader({fitWidth: true});
-						resize();
 					}
 					bufferExt.itemH = (list? place.find('tr:first') : place.find('[id]:first')).outerHeight(true);
 					fm.trigger('cwdrender');
@@ -14403,6 +14402,8 @@ $.fn.elfindercwd = function(fm, options) {
 							go(chk);
 							bufferExt.rendering = false;
 						});
+					} else {
+						!fm.enabled() && resize();
 					}
 				} else {
 					resize();
@@ -15355,18 +15356,18 @@ $.fn.elfindercwd = function(fm, options) {
 				// attach draggable
 				.on('mouseenter.'+fm.namespace, fileSelector, function(e) {
 					if (scrolling) { return; }
-					var $this = $(this), helper = null,
-						target = list ? $this : $this.children('div.elfinder-cwd-file-wrapper,div.elfinder-cwd-filename');
+					var $this = $(this), helper = null;
 
-					if (!mobile && !$this.data('dragRegisted') && !$this.hasClass(clTmp) && !target.hasClass(clDraggable) && !target.hasClass(clDisabled)) {
+					if (!mobile && !$this.data('dragRegisted') && !$this.hasClass(clTmp) && !$this.hasClass(clDraggable) && !$this.hasClass(clDisabled)) {
 						$this.data('dragRegisted', true);
 						if (!fm.isCommandEnabled('copy', fm.searchStatus.state > 1? fm.cwdId2Hash($this.attr('id')) : void 0)) {
 							return;
 						}
-						target.on('mousedown', function(e) {
+						$this.on('mousedown', function(e) {
 							// shiftKey or altKey + drag start for HTML5 native drag function
 							// Note: can no use shiftKey with the Google Chrome 
-							var metaKey = e.shiftKey || e.altKey;
+							var metaKey = e.shiftKey || e.altKey,
+								disable = false;
 							if (metaKey && !fm.UA.IE && cwd.data('selectable')) {
 								// destroy jQuery-ui selectable while trigger native drag
 								cwd.selectable('disable').selectable('destroy').removeData('selectable');
@@ -15374,12 +15375,24 @@ $.fn.elfindercwd = function(fm, options) {
 									cwd.selectable(selectableOption).selectable('option', {disabled: false}).selectable('refresh').data('selectable', true);
 								});
 							}
-							target.draggable('option', 'disabled', metaKey).removeClass('ui-state-disabled');
+							$this.removeClass('ui-state-disabled');
 							if (metaKey) {
-								target.attr('draggable', 'true');
+								$this.draggable('option', 'disabled', true).attr('draggable', 'true');
 							} else {
-								target.removeAttr('draggable')
-								      .draggable('option', 'cursorAt', {left: 50 - parseInt($(e.currentTarget).css('margin-left')), top: 47});
+								if (!$this.hasClass(clSelected)) {
+									if (list) {
+										disable = $(e.target).closest('.elfinder-cwd-file-wrapper,tr').is('tr');
+									} else {
+										disable = $(e.target).hasClass('elfinder-cwd-file');
+									}
+								}
+								if (disable) {
+									$this.draggable('option', 'disabled', true);
+								} else {
+									$this.draggable('option', 'disabled', false)
+										  .removeAttr('draggable')
+									      .draggable('option', 'cursorAt', {left: 50 - parseInt($(e.currentTarget).css('margin-left')), top: 47});
+								}
 							}
 						})
 						.on('dragstart', function(e) {
