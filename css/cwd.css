@@ -87,11 +87,13 @@
 	position: absolute;
 	top: 0px;
 	left: 0px;
-	width: 30px;
-	height: 30px;
 	background-color: transparent;
 	opacity: .4;
 	filter:Alpha(Opacity=40);
+}
+.elfinder-mobile .elfinder-cwd-file .elfinder-cwd-select {
+	width: 30px;
+	height: 30px;
 }
 
 .elfinder-cwd-file.ui-selected .elfinder-cwd-select {
@@ -934,8 +936,10 @@
 }
 
 tr.elfinder-cwd-file td .elfinder-cwd-select {
-	width: 40px;
 	padding-top: 3px;
+}
+.elfinder-mobile tr.elfinder-cwd-file td .elfinder-cwd-select {
+	width: 40px;
 }
 
 .elfinder-touch tr.elfinder-cwd-file td .elfinder-cwd-select {
