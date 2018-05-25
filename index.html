@@ -71,19 +71,18 @@
 					<form id="elfinder-donate">
 						<input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
 					</form>
-					<div id="elfinder-donate-select" style="display:none;">
+					<div id="elfinder-donate-select" style="display:none;text-align:center">
 						<h4>Which do you want to donate to?</h4>
 
 						<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
 						<input type="hidden" name="cmd" value="_s-xclick">
-						<table>
-						<tr><td><input type="hidden" name="on0" value="Current developer (nao-pon)">Current developer (nao-pon)</td></tr><tr><td><select name="os0">
+						<p><input type="hidden" name="on0" value="Current developer (nao-pon)">Current developer (nao-pon)</td></tr><tr><td><select name="os0">
 							<option value="1.">$5.00 USD</option>
 							<option value="2.">$10.00 USD</option>
 							<option value="3.">$50.00 USD</option>
 							<option value="4.">$100.00 USD</option>
-						</select> </td></tr>
-						</table>
+						</select>
+						</p>
 						<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
 						">
 						<input type="image" src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" alt="PayPal – The safer, easier way to pay online!">
