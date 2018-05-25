@@ -2955,7 +2955,18 @@ class elFinder {
 					$_target = $thash;
 					if (! isset($addedDirs[$thash])) {
 						$addedDirs[$thash] = true;
-						$result['added'][] =$dir;
+						$result['added'][] = $dir;
+						// to support multi-level directory creation
+						$_phash = isset($dir['phash'])? $dir['phash'] : null;
+						while($_phash && ! isset($addedDirs[$_phash]) && $_phash !== $target) {
+							if ($_dir = $volume->dir($_phash)) {
+								$addedDirs[$_phash] = true;
+								$result['added'][] = $_dir;
+								$_phash = isset($_dir['phash'])? $_dir['phash'] : null;
+							} else {
+								break;
+							}
+						}
 					}
 				} else {
 					$result['error'] = $this->error(self::ERROR_UPLOAD, self::ERROR_TRGDIR_NOT_FOUND, 'hash@'.$thash);
