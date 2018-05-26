@@ -3,7 +3,7 @@
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
  * @author Alex Yashkin <alex@yashkin.by>
- * @version 2018-05-11
+ * @version 2018-05-27
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -315,6 +315,10 @@
 			'selectlfile'     : 'Выбрать последний файл',
 			'viewlist'        : 'В виде списка',
 			'viewicons'       : 'В виде иконок',
+			'viewSmall'       : 'Маленькие иконки', // from v2.1.39 added 22.5.2018
+			'viewMedium'      : 'Средние иконки', // from v2.1.39 added 22.5.2018
+			'viewLarge'       : 'Большие иконки', // from v2.1.39 added 22.5.2018
+			'viewExtraLarge'  : 'Очень большие иконки', // from v2.1.39 added 22.5.2018
 			'places'          : 'Избранное',
 			'calc'            : 'Вычислить',
 			'path'            : 'Путь',
