@@ -158,6 +158,10 @@ class elFinderConnector {
 			// connection aborted
 			// unlock session data for multiple access
 			$this->elFinder->getSession()->close();
+			// HTTP response code
+			header('HTTP/1.0 204 No Content');
+			// clear output buffer
+			while(ob_get_level() && ob_end_clean()){}
 			exit();
 		}
 	}
