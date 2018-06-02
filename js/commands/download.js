@@ -176,7 +176,7 @@ elFinder.prototype.commands.download = function() {
 		if (fm.api >= 2.1012) {
 			czipdl = fm.getCommand('zipdl');
 		}
-		dlntf = fm.api > 2.1038;
+		dlntf = fm.api > 2.1038 && !fm.isCORS;
 	});
 	
 	this.exec = function(select) {
@@ -320,6 +320,7 @@ elFinder.prototype.commands.download = function() {
 					parts;
 				parts = document.cookie.split(name + "=");
 				if (parts.length === 2) {
+					ntftm && clearTimeout(ntftm);
 					document.cookie = name + '=; path=' + cpath + '; max-age=0';
 					closeNotify();
 				} else {
