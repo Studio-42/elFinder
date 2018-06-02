@@ -13,6 +13,8 @@ elFinder.prototype.commands.download = function() {
 		czipdl = null,
 		zipOn  = false,
 		mixed  = false,
+		dlntf  = false,
+		cpath  = window.location.pathname || '/',
 		filter = function(hashes, inExec) {
 			var volumeid, mixedCmd;
 			
@@ -174,6 +176,7 @@ elFinder.prototype.commands.download = function() {
 		if (fm.api >= 2.1012) {
 			czipdl = fm.getCommand('zipdl');
 		}
+		dlntf = fm.api > 2.1038;
 	});
 	
 	this.exec = function(select) {
@@ -312,7 +315,27 @@ elFinder.prototype.commands.download = function() {
 				}
 				a.dispatchEvent(clickEv);
 			},
-			link, html5dl, fileCnt, clickEv;
+			checkCookie = function(id) {
+				var name = 'elfdl' + id,
+					parts;
+				parts = document.cookie.split(name + "=");
+				if (parts.length === 2) {
+					document.cookie = name + '=; path=' + cpath + '; max-age=0';
+					closeNotify();
+				} else {
+					setTimeout(function() { checkCookie(id); }, 200);
+				}
+			},
+			closeNotify = function() {
+				if (fm.ui.notify.children('.elfinder-notify-download').length) {
+					fm.notify({
+						type : 'download',
+						cnt : -1
+					});
+				}
+			},
+			reqids = [],
+			link, html5dl, fileCnt, clickEv, cid, ntftm, reqid;
 			
 		if (!files.length) {
 			return dfrd.reject();
@@ -348,8 +371,35 @@ elFinder.prototype.commands.download = function() {
 			);
 			return dfrd;
 		} else {
+			reqids = [];
 			for (i = 0; i < files.length; i++) {
 				url = fm.openUrl(files[i].hash, true);
+				if (dlntf && url.substr(0, fm.options.url.length) === fm.options.url) {
+					reqid = fm.getRequestId();
+					reqids.push(reqid);
+					url += '&cpath=' + cpath + '&reqid=' + reqid;
+					ntftm = setTimeout(function() {
+						fm.notify({
+							type : 'download',
+							cnt : 1,
+							cancel : (fm.UA.IE || fm.UA.Edge)? void(0) : function() {
+								if (reqids.length) {
+									$.each(reqids, function() {
+										fm.request({
+											data: {
+												cmd: 'abort',
+												id: this
+											},
+											preventDefault: true
+										});
+									});
+								}
+								reqids = [];
+							}
+						});
+					}, fm.notifyDelay);
+					checkCookie(reqid);
+				}
 				if (html5dl && (!fm.UA.Safari || fm.isSameOrigin(url))) {
 					click(link.attr('href', url)
 						.attr('download', fm.escape(files[i].name))
@@ -360,6 +410,8 @@ elFinder.prototype.commands.download = function() {
 						setTimeout(function(){
 							if (! window.open(url)) {
 								fm.error('errPopup');
+								ntftm && cleaerTimeout(ntftm);
+								closeNotify();
 							}
 						}, 100);
 					} else {
