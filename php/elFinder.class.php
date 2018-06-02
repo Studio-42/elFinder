@@ -31,7 +31,7 @@ class elFinder {
 	 * 
 	 * @var integer
 	 */
-	protected static $ApiRevision = 38;
+	protected static $ApiRevision = 39;
 	
 	/**
 	 * Storages (root dirs)
@@ -231,7 +231,7 @@ class elFinder {
 		'tree'      => array('target' => true),
 		'parents'   => array('target' => true, 'until' => false),
 		'tmb'       => array('targets' => true),
-		'file'      => array('target' => true, 'download' => false),
+		'file'      => array('target' => true, 'download' => false, 'cpath' => false),
 		'zipdl'     => array('targets' => true, 'download' => false),
 		'size'      => array('targets' => true),
 		'mkdir'     => array('target' => true, 'name' => false, 'dirs' => false),
@@ -1700,6 +1700,9 @@ class elFinder {
 			return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
 		}
 
+		// check aborted by user
+		elFinder::checkAborted();
+
 		// allow change MIME type by 'file.pre' callback functions
 		$mime = isset($args['mime'])? $args['mime'] : $file['mime'];
 		if ($download) {
@@ -1735,6 +1738,10 @@ class elFinder {
 			}
 		}
 		
+		if ($args['cpath'] && $args['reqid']) {
+			setcookie('elfdl' . $args['reqid'], '1', 0, $args['cpath']);
+		}
+
 		$result = array(
 			'volume'  => $volume,
 			'pointer' => $fp,
@@ -4183,13 +4190,10 @@ class elFinder {
 			$url = parse_url($dlurl);
 			$ports = array(
 				'http'  => '80',
-				'ssl'   => '443',
+				'https' => '443',
 				'ftp'   => '21'
 			);
 			$url['scheme'] = strtolower($url['scheme']);
-			if ($url['scheme'] === 'https') {
-				$url['scheme'] = 'ssl';
-			}
 			if (! isset($url['port']) && isset($ports[$url['scheme']])) {
 				$url['port'] = $ports[$url['scheme']];
 			}
@@ -4205,8 +4209,9 @@ class elFinder {
 				}
 			}
 
+			$transport = ($url['scheme'] === 'https')? 'tls' : 'tcp';
 			$query = isset($url['query']) ? '?'.$url['query'] : '';
-			$stream = stream_socket_client($url['scheme'].'://'.$url['host'].':'.$url['port']);
+			$stream = stream_socket_client($transport.'://'.$url['host'].':'.$url['port']);
 			stream_set_timeout($stream, 300);
 			fputs($stream, "GET {$url['path']}{$query} HTTP/1.1\r\n");
 			fputs($stream, "Host: {$url['host']}\r\n");
