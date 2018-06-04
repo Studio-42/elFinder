@@ -9,200 +9,220 @@
 
 /* common container */
 .elfinder {
-	padding: 0;
-	position:relative;
-	display:block;
-	visibility: visible;
-	font-size: 18px;
-	font-family: Verdana,Arial,Helvetica,sans-serif;
+    padding: 0;
+    position: relative;
+    display: block;
+    visibility: visible;
+    font-size: 18px;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
 }
 
 /* prevent auto zoom on iOS */
 .elfinder-ios input,
 .elfinder-ios select,
 .elfinder-ios textarea {
-	font-size: 16px !important;
+    font-size: 16px !important;
 }
 
 /* full screen mode */
 .elfinder.elfinder-fullscreen > .ui-resizable-handle {
-	display: none;
+    display: none;
 }
 
 .elfinder-font-mono {
-	line-height: 2ex;
+    line-height: 2ex;
 }
 
 /* in lazy execution status */
 .elfinder.elfinder-processing * {
-	cursor: progress !important
+    cursor: progress !important
 }
+
 .elfinder.elfinder-processing.elfinder-touch .elfinder-workzone:after {
-	position: absolute;
-	top: 0;
-	width: 100%;
-	height: 3px;
-	content: '';
-	left: 0;
-	background-image: url(../img/progress.gif);
-	opacity: .6;
-	pointer-events: none;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 3px;
+    content: '';
+    left: 0;
+    background-image: url(../img/progress.gif);
+    opacity: .6;
+    pointer-events: none;
 }
 
 /* for disable select of Touch devices */
 .elfinder *:not(input):not(textarea):not(select):not([contenteditable=true]),
 .elfinder-contextmenu *:not(input):not(textarea):not(select):not([contenteditable=true]) {
-	-webkit-tap-highlight-color: rgba(0,0,0,0);
-	/*-webkit-touch-callout:none;*/
-	-webkit-user-select:  none;
-	-moz-user-select:     none;
-	-khtml-user-select:   none;
-	user-select:          none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    /*-webkit-touch-callout:none;*/
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
 }
 
 .elfinder .overflow-scrolling-touch {
-	-webkit-overflow-scrolling: touch;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* right to left enviroment */
-.elfinder-rtl { text-align:right; direction:rtl; }
+.elfinder-rtl {
+    text-align: right;
+    direction: rtl;
+}
 
 /* nav and cwd container */
 .elfinder-workzone {
-	padding: 0;
-	position:relative;
-	overflow:hidden;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
 }
 
 /* dir/file permissions and symlink markers */
 .elfinder-lock,
 .elfinder-perms,
 .elfinder-symlink {
-	position:absolute;
-	width:16px;
-	height:16px;
-	background-image:url(../img/toolbar.png);
-	background-repeat:no-repeat;
-	background-position:0 -528px;
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background-image: url(../img/toolbar.png);
+    background-repeat: no-repeat;
+    background-position: 0 -528px;
 }
 
-.elfinder-symlink { }
+.elfinder-symlink {
+}
 
 /* noaccess */
-.elfinder-na .elfinder-perms { background-position:0 -96px; }
+.elfinder-na .elfinder-perms {
+    background-position: 0 -96px;
+}
 
 /* read only */
-.elfinder-ro .elfinder-perms { background-position:0 -64px;}
+.elfinder-ro .elfinder-perms {
+    background-position: 0 -64px;
+}
 
 /* write only */
-.elfinder-wo .elfinder-perms { background-position:0 -80px;}
+.elfinder-wo .elfinder-perms {
+    background-position: 0 -80px;
+}
 
 /* volume type group */
-.elfinder-group .elfinder-perms { background-position:0 0px;}
+.elfinder-group .elfinder-perms {
+    background-position: 0 0px;
+}
 
 /* locked */
 .elfinder-lock {
-	background-position:0 -656px;
+    background-position: 0 -656px;
 }
 
 /* drag helper */
 .elfinder-drag-helper {
-	top: 0px;
-	left: 0px;
-	width:70px;
-	height:60px;
-	padding:0 0 0 25px;
-	z-index:100000;
-	will-change: left, top;
+    top: 0px;
+    left: 0px;
+    width: 70px;
+    height: 60px;
+    padding: 0 0 0 25px;
+    z-index: 100000;
+    will-change: left, top;
 }
+
 .elfinder-drag-helper.html5-native {
-	position: absolute;
-	top: -1000px;
-	left: -1000px;
+    position: absolute;
+    top: -1000px;
+    left: -1000px;
 }
 
 /* drag helper status icon (default no-drop) */
 .elfinder-drag-helper-icon-status {
-	position:absolute;
-	width:16px;
-	height:16px;
-	left:42px;
-	top:60px;
-	background:url('../img/toolbar.png') 0 -96px no-repeat;
-	display: block;
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 42px;
+    top: 60px;
+    background: url('../img/toolbar.png') 0 -96px no-repeat;
+    display: block;
 }
 
 /* show "up-arrow" icon for move item */
 .elfinder-drag-helper-move .elfinder-drag-helper-icon-status {
-	background-position:0 -720px;
+    background-position: 0 -720px;
 }
+
 /* show "plus" icon when ctrl/shift pressed */
 .elfinder-drag-helper-plus .elfinder-drag-helper-icon-status {
-	background-position:0 -544px;
+    background-position: 0 -544px;
 }
 
 /* files num in drag helper */
 .elfinder-drag-num {
-	display: inline-box;
-	position:absolute;
-	top:0;
-	left:0;
-	width:auto;
-	height:14px;
-	text-align:center;
-	padding:1px 3px 1px 3px;
-	
-	font-weight:bold;
-	color:#fff;
-	background-color:red;
-	-moz-border-radius: 8px; 
-	-webkit-border-radius: 8px; 
-	border-radius: 8px;
+    display: inline-box;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: auto;
+    height: 14px;
+    text-align: center;
+    padding: 1px 3px 1px 3px;
+
+    font-weight: bold;
+    color: #fff;
+    background-color: red;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    border-radius: 8px;
 }
 
 /* icon in drag helper */
-.elfinder-drag-helper .elfinder-cwd-icon { margin:0 0 0 -24px; float:left; }
+.elfinder-drag-helper .elfinder-cwd-icon {
+    margin: 0 0 0 -24px;
+    float: left;
+}
 
 /* transparent overlay */
 .elfinder-overlay {
-	position: absolute;
-	opacity: .2;
-	filter: Alpha(Opacity=20);
+    position: absolute;
+    opacity: .2;
+    filter: Alpha(Opacity=20);
 }
 
 /* panels under/below cwd (for search field etc) */
 .elfinder .elfinder-panel {
-	position:relative;
-	background-image:none;
-	padding:7px 12px;
+    position: relative;
+    background-image: none;
+    padding: 7px 12px;
 }
 
 /* for html5 drag and drop */
 [draggable=true] {
-	-khtml-user-drag: element;
+    -khtml-user-drag: element;
 }
 
-/* for place holder to content editable elements */ 
+/* for place holder to content editable elements */
 .elfinder [contentEditable=true]:empty:not(:focus):before {
-	content:attr(data-ph);
+    content: attr(data-ph);
 }
 
 /* bottom tray */
 .elfinder div.elfinder-bottomtray {
-	position: fixed;
-	bottom: 0;
-	max-width:100%;
-	opacity: .8;
+    position: fixed;
+    bottom: 0;
+    max-width: 100%;
+    opacity: .8;
 }
+
 .elfinder.elfinder-ltr div.elfinder-bottomtray {
-	left: 0;
+    left: 0;
 }
+
 .elfinder.elfinder-rtl div.elfinder-bottomtray {
-	right: 0;
+    right: 0;
 }
 
 /* tooltip */
 .elfinder-ui-tooltip {
-	font-size: 0.78em;
-	padding: 2px;
+    font-size: 0.78em;
+    padding: 2px;
 }
