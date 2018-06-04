@@ -14,7 +14,7 @@ $.fn.elfinderfullscreenbutton = function(cmd) {
 			tm && cancelAnimationFrame(tm);
 			tm = requestAnimationFrame(function() {
 				var fullscreen = cmd.value;
-				icon.toggleClass('elfinder-button-icon-unfullscreen', fullscreen);
+				icon.addClass('elfinder-button-icon-fullscreen').toggleClass('elfinder-button-icon-unfullscreen', fullscreen);
 				cmd.className = fullscreen? 'unfullscreen' : '';
 			});
 		});
