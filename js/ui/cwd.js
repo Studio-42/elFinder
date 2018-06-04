@@ -865,7 +865,7 @@ $.fn.elfindercwd = function(fm, options) {
 									dirs = true;
 								}
 								if (f.tmb || (stmb && f.mime.indexOf('image/') === 0)) {
-									atmb[f.hash] = f.tmb;
+									atmb[f.hash] = f.tmb || 'self';
 								}
 								clipCuts[f.hash] && locks.push(f.hash);
 								return itemhtml(f);
