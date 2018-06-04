@@ -210,9 +210,14 @@ elFinder.prototype.commands.upload = function() {
 							type = 'html';
 						}
 					} catch(e) {}
-					if (! file && (data = trf.getData('text'))) {
-						file = [ data ];
-						type = 'text';
+					if (! file) {
+						if (data = trf.getData('text')) {
+							file = [ data ];
+							type = 'text';
+						} else if (trf && trf.files) {
+							// maybe folder uploading but this UA dose not support it
+							kind = 'file';
+						}
 					}
 				}
 			}
