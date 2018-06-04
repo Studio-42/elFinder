@@ -1721,7 +1721,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				url = file.tmb;
 			}
 			if (url) {
-				if (file.ts) {
+				if (file.ts && tmbUrl !== 'self') {
 					url += (url.match(/\?/)? '&' : '?') + '_t=' + file.ts;
 				}
 				return { url: url, className: cls };

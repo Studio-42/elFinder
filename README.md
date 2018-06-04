@@ -97,8 +97,8 @@ Requirements
 **However, we recommend newest version.**
 
 ### Client
- * Modern browser. elFinder was tested in Internet Explorer 8
-   and newest Firefox, Chrome, IE, Edge and Opera
+ * Modern browsers both of desktop or mobile. elFinder was tested in newest Chrome, Edge, Firefox, IE and Opera
+     - **Caution**: Web App mode ("apple-mobile-web-app-capable" meta tag) on iOS is not work perfectly in elFinder
 
 ### Server
  * Any web server
