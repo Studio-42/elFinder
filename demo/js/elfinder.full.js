@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: d81c8c1) (2018-06-04)
+ * Version 2.1.38 (2.1-src Nightly: e00ec76) (2018-06-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9510,7 +9510,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.38 (2.1-src Nightly: d81c8c1)';
+elFinder.prototype.version = '2.1.38 (2.1-src Nightly: e00ec76)';
 
 
 
@@ -17094,7 +17094,7 @@ $.fn.elfinderfullscreenbutton = function(cmd) {
 			tm && cancelAnimationFrame(tm);
 			tm = requestAnimationFrame(function() {
 				var fullscreen = cmd.value;
-				icon.toggleClass('elfinder-button-icon-unfullscreen', fullscreen);
+				icon.addClass('elfinder-button-icon-fullscreen').toggleClass('elfinder-button-icon-unfullscreen', fullscreen);
 				cmd.className = fullscreen? 'unfullscreen' : '';
 			});
 		});
@@ -31980,9 +31980,14 @@ elFinder.prototype.commands.upload = function() {
 							type = 'html';
 						}
 					} catch(e) {}
-					if (! file && (data = trf.getData('text'))) {
-						file = [ data ];
-						type = 'text';
+					if (! file) {
+						if (data = trf.getData('text')) {
+							file = [ data ];
+							type = 'text';
+						} else if (trf && trf.files) {
+							// maybe folder uploading but this UA dose not support it
+							kind = 'file';
+						}
 					}
 				}
 			}
