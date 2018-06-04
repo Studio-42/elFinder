@@ -2,101 +2,131 @@
 /*                           STATUSBAR STYLES                     */
 /******************************************************************/
 
-
 /* statusbar container */
-.elfinder-statusbar { 
-	cursor: default;
-	text-align:center; 
-	font-weight:normal;
-	padding:.2em .5em;
-	
-	border-right:0 solid transparent;
-	border-bottom:0 solid transparent;
-	border-left:0 solid transparent;
+.elfinder-statusbar {
+    cursor: default;
+    text-align: center;
+    font-weight: normal;
+    padding: .2em .5em;
+
+    border-right: 0 solid transparent;
+    border-bottom: 0 solid transparent;
+    border-left: 0 solid transparent;
 }
 
 .elfinder-statusbar span {
-	vertical-align: bottom;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	-o-text-overflow: ellipsis;
-	text-overflow: "..";
-	-o-text-overflow: "..";
+    vertical-align: bottom;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    text-overflow: "..";
+    -o-text-overflow: "..";
 }
+
 .elfinder-statusbar span.ui-state-hover,
-.elfinder-statusbar span.ui-state-active { border: none; }
-.elfinder-statusbar span.elfinder-path-cwd { cursor: default; }
+.elfinder-statusbar span.ui-state-active {
+    border: none;
+}
 
-
+.elfinder-statusbar span.elfinder-path-cwd {
+    cursor: default;
+}
 
 /* path in statusbar */
 .elfinder-path {
-	cursor: pointer;
-	max-width:30%;
-	white-space:nowrap;
-	overflow:hidden;
-	text-overflow:ellipsis;
-	-o-text-overflow:ellipsis;
+    cursor: pointer;
+    max-width: 30%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
 }
-.elfinder-ltr .elfinder-path { float:left;  }
-.elfinder-rtl .elfinder-path { float:right; }
+
+.elfinder-ltr .elfinder-path {
+    float: left;
+}
+
+.elfinder-rtl .elfinder-path {
+    float: right;
+}
 
 /* path in workzone (case of swipe to navbar close) */
 .elfinder-workzone-path {
-	position: relative;
+    position: relative;
 }
+
 .elfinder-workzone-path .elfinder-path {
-	position: relative;
-	font-size: .75em;
-	font-weight: normal;
-	float: none;
-	max-width: none;
-	overflow: hidden;
-	overflow-x: hidden;
-	text-overflow: initial;
-	-o-text-overflow: initial;
+    position: relative;
+    font-size: .75em;
+    font-weight: normal;
+    float: none;
+    max-width: none;
+    overflow: hidden;
+    overflow-x: hidden;
+    text-overflow: initial;
+    -o-text-overflow: initial;
 }
+
 .elfinder-mobile .elfinder-workzone-path .elfinder-path {
-	overflow: auto;
-	overflow-x: scroll;
+    overflow: auto;
+    overflow-x: scroll;
 }
+
 .elfinder-ltr .elfinder-workzone-path .elfinder-path {
-	margin-left: 24px;
+    margin-left: 24px;
 }
+
 .elfinder-rtl .elfinder-workzone-path .elfinder-path {
-	margin-right: 24px;
+    margin-right: 24px;
 }
+
 .elfinder-workzone-path .elfinder-path span {
-	display: inline-block;
-	padding: 5px 3px;
+    display: inline-block;
+    padding: 5px 3px;
 }
+
 .elfinder-workzone-path .elfinder-path span.elfinder-path-cwd {
-	font-weight: bold;
+    font-weight: bold;
 }
+
 .elfinder-workzone-path .elfinder-path span.ui-state-hover,
-.elfinder-workzone-path .elfinder-path span.ui-state-active { border: none; }
+.elfinder-workzone-path .elfinder-path span.ui-state-active {
+    border: none;
+}
 
 .elfinder-workzone-path .elfinder-path-roots {
-	position: absolute;
-	top: 0;
-	width: 24px;
-	height: 20px;
-	padding: 2px;
+    position: absolute;
+    top: 0;
+    width: 24px;
+    height: 20px;
+    padding: 2px;
     border: none;
     overflow: hidden;
 }
-.elfinder-ltr .elfinder-workzone-path .elfinder-path-roots {
-	left: 0;
-}
-.elfinder-rtl .elfinder-workzone-path .elfinder-path-roots {
-	right: 0;
-}
-/* total/selected size in statusbar */
-.elfinder-stat-size { 
-	overflow: hidden;
-	text-wrap: none;
-}
-.elfinder-ltr .elfinder-stat-size { float:right; }
-.elfinder-rtl .elfinder-stat-size { float:left; }
 
-.elfinder-stat-selected { white-space:nowrap; overflow:hidden; }
+.elfinder-ltr .elfinder-workzone-path .elfinder-path-roots {
+    left: 0;
+}
+
+.elfinder-rtl .elfinder-workzone-path .elfinder-path-roots {
+    right: 0;
+}
+
+/* total/selected size in statusbar */
+.elfinder-stat-size {
+    overflow: hidden;
+    text-wrap: none;
+}
+
+.elfinder-ltr .elfinder-stat-size {
+    float: right;
+}
+
+.elfinder-rtl .elfinder-stat-size {
+    float: left;
+}
+
+.elfinder-stat-selected {
+    white-space: nowrap;
+    overflow: hidden;
+}
