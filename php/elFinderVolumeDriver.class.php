@@ -2231,7 +2231,7 @@ abstract class elFinderVolumeDriver {
 		
 		$mimeByName = '';
 		if ($this->mimeDetect === 'internal') {
-			$mime = $this->mimetype($name, true);
+			$mime = $this->mimetype($tmpname, $name);
 		} else {
 			$mime = $this->mimetype($tmpname, $name);
 			$mimeByName = $this->mimetype($name, true);
@@ -4287,7 +4287,7 @@ abstract class elFinderVolumeDriver {
 			$nameCheck = true;
 		}
 		$ext = (false === $pos = strrpos($name, '.')) ? '' : substr($name, $pos + 1);
-		$size = file_exists($path)? filesize($path) : 0;
+		$size = file_exists($path)? filesize($path) : -1;
 		if (! $nameCheck && is_readable($path) && $size > 0) {
 			// detecting by contents
 			if ($this->mimeDetect === 'finfo') {
@@ -6309,7 +6309,7 @@ abstract class elFinderVolumeDriver {
 					$res['rmNames'][] = $name;
 					continue;
 				}
-				if ($chkMime && ($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && $mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName)) {
+				if ($chkMime && ($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && !$this->allowPutMime($mimeByName)) {
 					self::localRmdirRecursive($p);
 					$res['mimes'][] = $p;
 					$res['rmNames'][] = $name;
@@ -6342,7 +6342,7 @@ abstract class elFinderVolumeDriver {
 				unlink($path);
 				$res['writables'][] = $path;
 				$res['rmNames'][] = $name;
-			} else if ($chkMime && ($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && $mimeByName !== 'unknown' && !$this->allowPutMime($mimeByName)) {
+			} else if ($chkMime && ($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && !$this->allowPutMime($mimeByName)) {
 				unlink($path);
 				$res['mimes'][] = $path;
 				$res['rmNames'][] = $name;
