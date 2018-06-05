@@ -256,9 +256,11 @@ abstract class elFinderVolumeDriver {
 		// Static extension/MIME of general server side scripts to security issues
 		'staticMineMap'   => array(
 			'php:*'                        => 'text/x-php',
+			'pht:*'                        => 'text/x-php',
 			'php3:*'                       => 'text/x-php',
 			'php4:*'                       => 'text/x-php',
 			'php5:*'                       => 'text/x-php',
+			'php7:*'                       => 'text/x-php',
 			'phtml:*'                      => 'text/x-php',
 			'cgi:*'                        => 'text/x-httpd-cgi',
 			'pl:*'                         => 'text/x-perl',
