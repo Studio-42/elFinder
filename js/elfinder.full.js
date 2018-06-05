@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: e00ec76) (2018-06-04)
+ * Version 2.1.38 (2.1-src Nightly: 3e8aa63) (2018-06-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9510,7 +9510,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.38 (2.1-src Nightly: e00ec76)';
+elFinder.prototype.version = '2.1.38 (2.1-src Nightly: 3e8aa63)';
 
 
 
@@ -31919,20 +31919,32 @@ elFinder.prototype.commands.upload = function() {
 			inputButton = function(type, caption) {
 				var button,
 					input = $('<input type="file" ' + type + '/>')
+					.on('click', function() {
+						// for IE's bug
+						if (fm.UA.IE) {
+							setTimeout(function() {
+								form.css('display', 'none').css('position', 'relative');
+								requestAnimationFrame(function() {
+									form.css('display', '').css('position', '');
+								});
+							}, 100);
+						}
+					})
 					.on('change', function() {
 						upload({input : input.get(0), type : 'files'});
 					})
 					.on('dragover', function(e) {
 						e.originalEvent.dataTransfer.dropEffect = 'copy';
-					});
+					}),
+					form = $('<form/>').append(input);
 
 				return $('<div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only elfinder-tabstop elfinder-focus"><span class="ui-button-text">'+fm.i18n(caption)+'</span></div>')
-					.append($('<form/>').append(input))
+					.append(form)
 					.on('click', function(e) {
 						if (e.target === this) {
 							e.stopPropagation();
 							e.preventDefault();
-							input.click();
+							input.trigger('click');
 						}
 					})
 					.on('mouseenter mouseleave', function(e) {

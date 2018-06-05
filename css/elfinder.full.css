@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.38 (2.1-src Nightly: e00ec76) (2018-06-04)
+ * Version 2.1.38 (2.1-src Nightly: 3e8aa63) (2018-06-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -3013,14 +3013,15 @@ button.elfinder-info-button {
     position: absolute;
     right: 0;
     top: 0;
+    width: 100%;
     opacity: 0;
     filter: Alpha(Opacity=0);
 }
 
 .elfinder-upload-dialog-wrapper .ui-button form input {
-    padding: 0 20px;
+    padding: 50px 0 0;
     font-size: 3em;
-
+    width: 100%;
 }
 
 /* dialog for elFinder itself */
