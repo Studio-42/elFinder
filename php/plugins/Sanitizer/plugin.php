@@ -10,9 +10,6 @@
  *			'upload.pre mkdir.pre mkfile.pre rename.pre archive.pre ls.pre' => array(
  *				'Plugin.Sanitizer.cmdPreprocess'
  *			),
- *			'ls' => array(
- *				'Plugin.Sanitizer.cmdPostprocess'
- *			),
  *			'upload.presave' => array(
  *				'Plugin.Sanitizer.onUpLoadPreSave'
  *			)
@@ -53,7 +50,8 @@ class elFinderPluginSanitizer extends elFinderPlugin
 	private $replaced = array();
 	private $keyMap = array(
 		'ls' => 'intersect',
-		'upload' => 'renames'
+		'upload' => 'renames',
+		'mkdir' => array('name', 'dirs')
 	);
 
 	public function __construct($opts) {
@@ -74,14 +72,37 @@ class elFinderPluginSanitizer extends elFinderPlugin
 		$this->replaced[$cmd] = array();
 		$key = (isset($this->keyMap[$cmd]))? $this->keyMap[$cmd] : 'name';
 		
-		if (isset($args[$key])) {
-			if (is_array($args[$key])) {
-				foreach($args[$key] as $i => $name) {
-					$this->replaced[$cmd][$name] = $args[$key][$i] = $this->sanitizeFileName($name, $opts);
+		if (is_array($key)) {
+			$keys = $key;
+		} else {
+			$keys = array($key);
+		}
+		foreach($keys as $key) {
+			if (isset($args[$key])) {
+				if (is_array($args[$key])) {
+					foreach($args[$key] as $i => $name) {
+						if ($cmd === 'mkdir' && $key === 'dirs') {
+							$_names = explode('/', $name);
+							$_res = array();
+							foreach($_names as $_name) {
+								$_res[] = $this->sanitizeFileName($_name, $opts);
+							}
+							$this->replaced[$cmd][$name] = $args[$key][$i] = join('/', $_res);
+						} else {
+							$this->replaced[$cmd][$name] = $args[$key][$i] = $this->sanitizeFileName($name, $opts);
+						}
+					}
+				} else {
+					$name = $args[$key];
+					$this->replaced[$cmd][$name] = $args[$key] = $this->sanitizeFileName($name, $opts);
 				}
-			} else {
-				$name = $args[$key];
-				$this->replaced[$cmd][$name] = $args[$key] = $this->sanitizeFileName($name, $opts);
+			}
+		}
+		if ($cmd === 'ls' || $cmd === 'mkdir') {
+			if (! empty($this->replaced[$cmd])) {
+				// un-regist for legacy settings
+				$elfinder->unbind($cmd, array($this, 'cmdPostprocess'));
+				$elfinder->bind($cmd, array($this, 'cmdPostprocess'));
 			}
 		}
 		return true;
@@ -97,6 +118,14 @@ class elFinderPluginSanitizer extends elFinderPlugin
 						} else {
 							$result['list'][$hash] = $keys;
 						}
+					}
+				}
+			}
+		} else if ($cmd === 'mkdir') {
+			if (! empty($result['hashes']) && ! empty($this->replaced['mkdir'])) {
+				foreach($result['hashes'] as $name => $hash) {
+					if ($keys = array_keys($this->replaced['mkdir'], $name)) {
+						$result['hashes'][$keys[0]] = $hash;
 					}
 				}
 			}
