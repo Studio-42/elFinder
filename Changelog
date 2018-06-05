@@ -1,3 +1,23 @@
+2018-06-05  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.39):
+		- [cmd:preference] Fixed #2497 add a preference "Icon Size (Icons View)"
+		- [cmd:mkdir] Fixed #2466 mkdir 'Into new folder' always on
+		- [css] Fixed #2499 style correction to the Firefox browser
+		- [css] replace volume_icon_* to SVG image
+		- [cmd:edit] Fixed #2507 not work if the "commandsOptions.edit.editors" is empty
+		- [php:core] Fixed #2515 support multi Level directory creation when uploading
+		- [VD:abstract] Fixed #2523 thumbnail file name may exceed 255 bytes
+		- [VD:abstract] re-Fixed #2523 add volume id as prefix to tmbname of fallback
+		- [API,cmd:download] Fixed #2525 show notification dialog until browser starts downloading
+		- [ui:cwd] Fixed #2526 connector option `'tmbURL' => 'self'` does not work currently
+		- [cmd:upload] Fixed #2528 show error message "errFolderUpload"
+		- [ui:fullscreenbutton] Fixed #2530 wrong toolbar icon of re-fullscreen
+		- [VD:abstract,security] add "pht:*", "php7:*" to default option `staticMineMap`
+		- [cmd:upload] Fixed #2531 upload buttons are not working in Firefox
+		- And some minor bug fixes
+
+
 2018-05-05  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.38):
