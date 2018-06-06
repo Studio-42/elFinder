@@ -2,7 +2,8 @@
  * française translation
  * @author Régis Guyomarch <regisg@gmail.com>
  * @author Benoit Delachaux <benorde33@gmail.com>
- * @version 2017-07-13
+ * @author Jonathan Grunder <jonathan.grunder@gmail.com>
+ * @version 2018-06-06
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -14,10 +15,10 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.fr = {
-		translator : 'Régis Guyomarch &lt;regisg@gmail.com&gt;, Benoit Delachaux &lt;benorde33@gmail.com&gt;',
+		translator : 'Régis Guyomarch &lt;regisg@gmail.com&gt;, Benoit Delachaux &lt;benorde33@gmail.com&gt;, Jonathan Grunder &lt;jonathan.grunder@gmail.com&gt;',
 		language   : 'française',
 		direction  : 'ltr',
-		dateFormat : 'd M, Y H:i', // Mar 13, 2012 05:27 PM
+		dateFormat : 'd/M/Y H:i', // Mar 13, 2012 05:27 PM
 		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
 		nonameDateFormat : 'ymd-His', // to apply if upload file is noname: 120513172700
 		messages   : {
@@ -28,7 +29,7 @@
 			'errUnknownCmd'        : 'Commande inconnue.',
 			'errJqui'              : 'Mauvaise configuration de jQuery UI. Les composants Selectable, draggable et droppable doivent être inclus.',
 			'errNode'              : 'elFinder requiert que l\'élément DOM ait été créé.',
-			'errURL'               : 'Mauvaise configuration d\'elFinder ! L\'option URL na pas été définie.',
+			'errURL'               : 'Mauvaise configuration d\'elFinder ! L\'option URL n\'a pas été définie.',
 			'errAccess'            : 'Accès refusé.',
 			'errConnect'           : 'Impossible de se connecter au backend.',
 			'errAbort'             : 'Connexion interrompue.',
@@ -38,7 +39,7 @@
 			'errConf'              : 'Mauvaise configuration du backend.',
 			'errJSON'              : 'Le module PHP JSON n\'est pas installé.',
 			'errNoVolumes'         : 'Aucun volume lisible.',
-			'errCmdParams'         : 'Mauvais Paramétrage de la commande "$1".',
+			'errCmdParams'         : 'Mauvais paramétrage de la commande "$1".',
 			'errDataNotJSON'       : 'Les données ne sont pas au format JSON.',
 			'errDataEmpty'         : 'Données inexistantes.',
 			'errCmdReq'            : 'La requête au Backend doit comporter le nom de la commande.',
@@ -49,7 +50,7 @@
 			'errWrite'             : 'Impossible d\'écrire dans "$1".',
 			'errPerm'              : 'Permission refusée.',
 			'errLocked'            : '"$1" est verrouillé et ne peut être déplacé ou supprimé.',
-			'errExists'            : 'Un fichier nommé "$1" existe déjà.',
+			'errExists'            : 'Un élément nommé "$1" existe déjà.',
 			'errInvName'           : 'Nom de fichier incorrect.',
 			'errInvDirname'        : 'Nom de dossier incorrect.',  // from v2.1.24 added 12.4.2017
 			'errFolderNotFound'    : 'Dossier non trouvé.',
@@ -57,7 +58,7 @@
 			'errTrgFolderNotFound' : 'Dossier destination "$1" non trouvé.',
 			'errPopup'             : 'Le navigateur web a empêché l\'ouverture d\'une fenêtre "popup". Pour ouvrir le fichier, modifiez les options du navigateur web.',
 			'errMkdir'             : 'Impossible de créer le dossier "$1".',
-			'errMkfile'            : 'impossible de créer le fichier "$1".',
+			'errMkfile'            : 'Impossible de créer le fichier "$1".',
 			'errRename'            : 'Impossible de renommer "$1".',
 			'errCopyFrom'          : 'Interdiction de copier des fichiers depuis le volume "$1".',
 			'errCopyTo'            : 'Interdiction de copier des fichiers vers le volume "$1".',
@@ -77,7 +78,7 @@
 			'errMove'              : 'Impossible de déplacer "$1".',
 			'errCopyInItself'      : 'Impossible de copier "$1" sur lui-même.',
 			'errRm'                : 'Impossible de supprimer "$1".',
-			'errTrash'             : 'Unable into trash.', // from v2.1.24 added 30.4.2017
+			'errTrash'             : 'Impossible de déplacer dans la corbeille', // from v2.1.24 added 30.4.2017
 			'errRmSrc'             : 'Impossible de supprimer le(s) fichier(s) source(s).',
 			'errExtract'           : 'Imbossible d\'extraire les fichiers à partir de "$1".',
 			'errArchive'           : 'Impossible de créer l\'archive.',
@@ -85,7 +86,7 @@
 			'errNoArchive'         : 'Le fichier n\'est pas une archive, ou c\'est un type d\'archive non supporté.',
 			'errCmdNoSupport'      : 'Le Backend ne prend pas en charge cette commande.',
 			'errReplByChild'       : 'Le dossier “$1” ne peut pas être remplacé par un élément qu\'il contient.',
-			'errArcSymlinks'       : 'Par mesure de sécurité, il est défendu d\'extraire une archive contenant des liens symboliques.', // edited 24.06.2012
+			'errArcSymlinks'       : 'Par mesure de sécurité, il est défendu d\'extraire une archive contenant des liens symboliques ou des noms de fichier non autorisés.', // edited 24.06.2012
 			'errArcMaxSize'        : 'Les fichiers de l\'archive excèdent la taille maximale autorisée.',
 			'errResize'            : 'Impossible de redimensionner "$1".',
 			'errResizeDegree'      : 'Degré de rotation invalide.',  // added 7.3.2013
@@ -95,25 +96,25 @@
 			'errUsupportType'      : 'Type de fichier non supporté.',
 			'errNotUTF8Content'    : 'Le fichier "$1" n\'est pas en UTF-8, il ne peut être édité.',  // added 9.11.2011
 			'errNetMount'          : 'Impossible de monter "$1".', // added 17.04.2012
-			'errNetMountNoDriver'  : 'Protocol non supporté.',     // added 17.04.2012
+			'errNetMountNoDriver'  : 'Protocole non supporté.',     // added 17.04.2012
 			'errNetMountFailed'    : 'Echec du montage.',         // added 17.04.2012
 			'errNetMountHostReq'   : 'Hôte requis.', // added 18.04.2012
-			'errSessionExpires'    : 'Votre session a expiré en raison de son inactivité',
+			'errSessionExpires'    : 'Votre session a expiré en raison de son inactivité.',
 			'errCreatingTempDir'   : 'Impossible de créer le répertoire temporaire : "$1"',
 			'errFtpDownloadFile'   : 'Impossible de télécharger le file depuis l\'accès FTP : "$1"',
 			'errFtpUploadFile'     : 'Impossible d\'envoyer le fichier vers l\'accès FTP : "$1"',
 			'errFtpMkdir'          : 'Impossible de créer un répertoire distant sur l\'accès FTP :"$1"',
 			'errArchiveExec'       : 'Erreur lors de l\'archivage des fichiers : "$1"',
 			'errExtractExec'       : 'Erreur lors de l\'extraction des fichiers : "$1"',
-			'errNetUnMount'        : 'Impossible de démonter', // from v2.1 added 30.04.2012
+			'errNetUnMount'        : 'Impossible de démonter.', // from v2.1 added 30.04.2012
 			'errConvUTF8'          : 'Conversion en UTF-8 impossible', // from v2.1 added 08.04.2014
 			'errFolderUpload'      : 'Essayez Google Chrome, si voulez envoyer le dossier.', // from v2.1 added 26.6.2015
 			'errSearchTimeout'     : 'Délai d’attente dépassé pour la recherche "$1". Le résultat de la recherche est partiel.', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : 'Réauthorisation requise.', // from v2.1.10 added 24.3.2016
-			'errMaxTargets'        : 'Le nombre maximal de fichiers pouvant être sélectionné est $1.', // from v2.1.17 added 17.10.2016
+			'errMaxTargets'        : 'Le nombre maximal d\'éléments pouvant être sélectionnés est $1.', // from v2.1.17 added 17.10.2016
 			'errRestore'           : 'Impossible de restorer la corbeille. La destination de la restoration n\'a pu être identifiée.', // from v2.1.24 added 3.5.2017
 			'errEditorNotFound'    : 'Aucun éditeur n\'a été trouvé pour ce type de fichier.', // from v2.1.25 added 23.5.2017
-			'errServerError'       : 'Un erreur est survenue du côté serveur.', // from v2.1.25 added 16.6.2017
+			'errServerError'       : 'Une erreur est survenue du côté serveur.', // from v2.1.25 added 16.6.2017
 			'errEmpty'             : 'Impossible de vider le dossier "$1".', // from v2.1.25 added 22.6.2017
 
 			/******************************* commands names ********************************/
@@ -156,6 +157,13 @@
 			'cmdfullscreen': 'Plein écran', // from v2.1.15 added 03.08.2016
 			'cmdmove'      : 'Déplacer', // from v2.1.15 added 21.08.2016
 			'cmdempty'     : 'Vider le dossier', // from v2.1.25 added 22.06.2017
+			'cmdundo'      : 'Annuler', // from v2.1.27 added 31.07.2017
+			'cmdredo'      : 'Refaire', // from v2.1.27 added 31.07.2017
+			'cmdpreference': 'Préférences', // from v2.1.27 added 03.08.2017
+			'cmdselectall' : 'Tout sélectionner', // from v2.1.28 added 15.08.2017
+			'cmdselectnone': 'Tout désélectionner', // from v2.1.28 added 15.08.2017
+			'cmdselectinvert': 'Inverser la sélection', // from v2.1.28 added 15.08.2017
+			'cmdopennew'   : 'Ouvrir dans une nouvelle fenêtre', // from v2.1.38 added 3.4.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Fermer',
@@ -188,20 +196,20 @@
 			'ntfreload'   : 'Actualiser le contenu du dossier',
 			'ntfmkdir'    : 'Création du dossier',
 			'ntfmkfile'   : 'Création des fichiers',
-			'ntfrm'       : 'Supprimer les fichiers',
-			'ntfcopy'     : 'Copier les fichiers',
-			'ntfmove'     : 'Déplacer les fichiers',
-			'ntfprepare'  : 'Préparation de la copie des fichiers',
-			'ntfrename'   : 'Renommer les fichier',
-			'ntfupload'   : 'Envoyer les fichiers',
-			'ntfdownload' : 'Télécharger les fichiers',
-			'ntfsave'     : 'Sauvegarde des fichiers',
+			'ntfrm'       : 'Supprimer les éléments',
+			'ntfcopy'     : 'Copier les éléments',
+			'ntfmove'     : 'Déplacer les éléments',
+			'ntfprepare'  : 'Préparation de la copie des éléments',
+			'ntfrename'   : 'Renommer les fichiers',
+			'ntfupload'   : 'Envoi des fichiers',
+			'ntfdownload' : 'Téléchargement des fichiers',
+			'ntfsave'     : 'Sauvegarder les fichiers',
 			'ntfarchive'  : 'Création de l\'archive',
 			'ntfextract'  : 'Extraction des fichiers de l\'archive',
 			'ntfsearch'   : 'Recherche des fichiers',
-			'ntfresize'   : 'Re-tailler les images',
+			'ntfresize'   : 'Redimensionner les images',
 			'ntfsmth'     : 'Fait quelque chose',
-			'ntfloadimg'  : 'Chargement de l\' image',
+			'ntfloadimg'  : 'Chargement de l\'image',
 			'ntfnetmount' : 'Monte le volume réseau', // added 18.04.2012
 			'ntfnetunmount': 'Démonte le volume réseau', // from v2.1 added 30.04.2012
 			'ntfdim'      : 'Calcule la dimension de l\'image', // added 20.05.2013
@@ -212,9 +220,11 @@
 			'ntfzipdl'    : 'Création d’un fichier pour le téléchargement', // from v2.1.7 added 23.1.2016
 			'ntfparents'  : 'Traitement de l\'information du chemin', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'Traitement du fichier envoyé', // from v2.1.17 added 2.11.2016
-			'ntftrash'    : 'Doing throw in the trash', // from v2.1.24 added 2.5.2017
-			'ntfrestore'  : 'Doing restore from tha trash', // from v2.1.24 added 3.5.2017
+			'ntftrash'    : 'Mettre à la corbeille', // from v2.1.24 added 2.5.2017
+			'ntfrestore'  : 'Restorer depuis la corbeille', // from v2.1.24 added 3.5.2017
 			'ntfchkdir'   : 'Validation du dossier de destination', // from v2.1.24 added 3.5.2017
+			'ntfundo'     : 'Annuler l\'opération précédente', // from v2.1.27 added 31.07.2017
+			'ntfredo'     : 'Refaire l\'opération annulée', // from v2.1.27 added 31.07.2017
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : 'Corbeille', //from v2.1.24 added 29.4.2017
@@ -270,24 +280,24 @@
 			'sortFoldersFirst'  : 'Dossiers en premier',
 			'sortperm'          : 'par permission', // from v2.1.13 added 13.06.2016
 			'sortmode'          : 'par mode',       // from v2.1.13 added 13.06.2016
-			'sortowner'         : 'by owner',      // from v2.1.13 added 13.06.2016
+			'sortowner'         : 'par propriétaire',      // from v2.1.13 added 13.06.2016
 			'sortgroup'         : 'par groupe',      // from v2.1.13 added 13.06.2016
-			'sortAlsoTreeview'  : 'Also Treeview',  // from v2.1.15 added 01.08.2016
+			'sortAlsoTreeview'  : 'Egalement arborescence',  // from v2.1.15 added 01.08.2016
 
 			/********************************** new items **********************************/
-			'untitled file.txt' : 'NewFile.txt', // added 10.11.2015
-			'untitled folder'   : 'NewFolder',   // added 10.11.2015
-			'Archive'           : 'NewArchive',  // from v2.1 added 10.11.2015
+			'untitled file.txt' : 'NouveauFichier.txt', // added 10.11.2015
+			'untitled folder'   : 'NouveauDossier',   // added 10.11.2015
+			'Archive'           : 'NouvelleArchive',  // from v2.1 added 10.11.2015
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation requise',
-			'confirmRm'       : 'Êtes-vous certain de vouloir supprimer les fichiers?<br/>Cela ne peut être annulé!',
-			'confirmRepl'     : 'Supprimer l\'ancien fichier par le nouveau?',
-			'confirmRest'     : 'Remplacer le fichier existant par le fichier dans la corbeille?', // fromv2.1.24 added 5.5.2017
-			'confirmConvUTF8' : 'L\'encodage n\'est pas UTf-8<br/>Convertir en UTF-8?<br/>Les contenus deviendront UTF-8 en sauvegardant après la conversion.', // from v2.1 added 08.04.2014
-			'confirmNonUTF8'  : 'Character encoding of this file couldn\'t be detected. It need to temporarily convert to UTF-8 for editting.<br/>Please select character encoding of this file.', // from v2.1.19 added 28.11.2016
+			'confirmRm'       : 'Êtes-vous certain de vouloir supprimer les éléments ?<br/>Cela ne peut être annulé !',
+			'confirmRepl'     : 'Supprimer l\'ancien fichier par le nouveau ?',
+			'confirmRest'     : 'Remplacer l\'élément existant par l\'élément de la corbeille ?', // fromv2.1.24 added 5.5.2017
+			'confirmConvUTF8' : 'L\'encodage n\'est pas UTf-8<br/>Convertir en UTF-8 ?<br/>Les contenus deviendront UTF-8 en sauvegardant après la conversion.', // from v2.1 added 08.04.2014
+			'confirmNonUTF8'  : 'Impossible de détecter l\'encodage de ce fichier. Pour être modifié, il doit être temporairement convertit en UTF-8.<br/>Veuillez s\'il vous plaît sélectionner un encodage pour ce fichier.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'Ce fichier a été modifié.<br/>Les données seront perdues si les changements ne sont pas sauvegardés.', // from v2.1 added 15.7.2015
-			'confirmTrash'    : 'Êtes-vous certain de vouloir déplacer les fichiers vers la corbeille?', //from v2.1.24 added 29.4.2017
+			'confirmTrash'    : 'Êtes-vous certain de vouloir déplacer les éléments vers la corbeille?', //from v2.1.24 added 29.4.2017
 			'apllyAll'        : 'Appliquer à tous',
 			'name'            : 'Nom',
 			'size'            : 'Taille',
@@ -299,12 +309,16 @@
 			'noaccess'        : 'Pas d\'accès',
 			'and'             : 'et',
 			'unknown'         : 'inconnu',
-			'selectall'       : 'Sélectionner tous les fichiers',
-			'selectfiles'     : 'Sélectionner le(s) fichier(s)',
-			'selectffile'     : 'Sélectionner le premier fichier',
-			'selectlfile'     : 'Sélectionner le dernier fichier',
+			'selectall'       : 'Sélectionner tous les éléments',
+			'selectfiles'     : 'Sélectionner le(s) élément(s)',
+			'selectffile'     : 'Sélectionner le premier élément',
+			'selectlfile'     : 'Sélectionner le dernier élément',
 			'viewlist'        : 'Vue par liste',
 			'viewicons'       : 'Vue par icônes',
+			'viewSmall'       : 'Petites icônes', // from v2.1.39 added 22.5.2018
+			'viewMedium'      : 'Moyennes icônes', // from v2.1.39 added 22.5.2018
+			'viewLarge'       : 'Grandes icônes', // from v2.1.39 added 22.5.2018
+			'viewExtraLarge'  : 'Très grandes icônes', // from v2.1.39 added 22.5.2018
 			'places'          : 'Places',
 			'calc'            : 'Calculer',
 			'path'            : 'Chemin',
@@ -317,7 +331,7 @@
 			'yes'             : 'oui',
 			'no'              : 'non',
 			'link'            : 'Lien',
-			'searcresult'     : 'Résultat de la recherche',
+			'searcresult'     : 'Résultats de la recherche',
 			'selected'        : 'Éléments sélectionnés',
 			'about'           : 'À propos',
 			'shortcuts'       : 'Raccourcis',
@@ -327,7 +341,7 @@
 			'protocolver'     : 'Version du protocole',
 			'homepage'        : 'Page du projet',
 			'docs'            : 'Documentation',
-			'github'          : 'Forker-nous sur Github',
+			'github'          : 'Forkez-nous sur Github',
 			'twitter'         : 'Suivez nous sur twitter',
 			'facebook'        : 'Joignez-nous facebook',
 			'team'            : 'Équipe',
@@ -342,10 +356,10 @@
 			'dropFiles'       : 'Déposez les fichiers ici',
 			'or'              : 'ou',
 			'selectForUpload' : 'Sélectionner les fichiers à envoyer',
-			'moveFiles'       : 'Déplacer les fichiers',
-			'copyFiles'       : 'Copier les fichiers',
-			'restoreFiles'    : 'Restorer les fichiers', // from v2.1.24 added 5.5.2017
-			'rmFromPlaces'    : 'Retirer de Places',
+			'moveFiles'       : 'Déplacer les éléments',
+			'copyFiles'       : 'Copier les éléments',
+			'restoreFiles'    : 'Restorer les éléments', // from v2.1.24 added 5.5.2017
+			'rmFromPlaces'    : 'Retirer des places',
 			'aspectRatio'     : 'Ratio d’affichage',
 			'scale'           : 'Mise à l\'échelle',
 			'width'           : 'Largeur',
@@ -377,27 +391,27 @@
 			'mode'            : 'Mode', // from v2.1 added 20.6.2015
 			'emptyFolder'     : 'Le dossier est vide', // from v2.1.6 added 30.12.2015
 			'emptyFolderDrop' : 'Le dossier est vide.\\ Glissez-déposez pour ajouter des éléments.', // from v2.1.6 added 30.12.2015
-			'emptyFolderLTap' : 'Le dossier est vide.\\ Un appui long pour ajouter des éléments.', // from v2.1.6 added 30.12.2015
+			'emptyFolderLTap' : 'Le dossier est vide.\\ Appuyez longuement pour ajouter des éléments.', // from v2.1.6 added 30.12.2015
 			'quality'         : 'Qualité', // from v2.1.6 added 5.1.2016
 			'autoSync'        : 'Synchronisation automatique',  // from v2.1.6 added 10.1.2016
 			'moveUp'          : 'Déplacer vers le haut',  // from v2.1.6 added 18.1.2016
 			'getLink'         : 'Obtenir le lien d’URL', // from v2.1.7 added 9.2.2016
 			'selectedItems'   : 'Éléments sélectionnés ($1)', // from v2.1.7 added 2.19.2016
 			'folderId'        : 'ID du dossier', // from v2.1.10 added 3.25.2016
-			'offlineAccess'   : 'Permettre l\'accès offline', // from v2.1.10 added 3.25.2016
+			'offlineAccess'   : 'Permettre l\'accès hors-ligne', // from v2.1.10 added 3.25.2016
 			'reAuth'          : 'Pour se réauthentifier', // from v2.1.10 added 3.25.2016
 			'nowLoading'      : 'En cours de chargement...', // from v2.1.12 added 4.26.2016
 			'openMulti'       : 'Ouvrir multiples fichiers', // from v2.1.12 added 5.14.2016
-			'openMultiConfirm': 'You are trying to open the $1 files. Are you sure you want to open in browser?', // from v2.1.12 added 5.14.2016
-			'emptySearch'     : 'Search results is empty in search target.', // from v2.1.12 added 5.16.2016
-			'editingFile'     : 'It is editing a file.', // from v2.1.13 added 6.3.2016
-			'hasSelected'     : 'Vous avez sélectionné $1 fichier.', // from v2.1.13 added 6.3.2016
-			'hasClipboard'    : 'Vous avez $1 items dans le clipboard.', // from v2.1.13 added 6.3.2016
-			'incSearchOnly'   : 'La recherche incrémentale est seulement pour la vue active.', // from v2.1.13 added 6.30.2016
-			'reinstate'       : 'Reinstate', // from v2.1.15 added 3.8.2016
+			'openMultiConfirm': 'Vous allez ouvrir $1 fichiers. Êtes-vous sûr de vouloir les ouvrir dans le navigateur ?', // from v2.1.12 added 5.14.2016
+			'emptySearch'     : 'Aucun résultat trouvé avec les paramètres de recherche.', // from v2.1.12 added 5.16.2016
+			'editingFile'     : 'Modification d\'un fichier.', // from v2.1.13 added 6.3.2016
+			'hasSelected'     : 'Vous avez sélectionné $1 éléments.', // from v2.1.13 added 6.3.2016
+			'hasClipboard'    : 'Vous avez $1 éléments dans le presse-papier.', // from v2.1.13 added 6.3.2016
+			'incSearchOnly'   : 'Recherche incrémentale disponible uniquement pour la vue active.', // from v2.1.13 added 6.30.2016
+			'reinstate'       : 'Rétablir', // from v2.1.15 added 3.8.2016
 			'complete'        : '$1 complété', // from v2.1.15 added 21.8.2016
-			'contextmenu'     : 'Context menu', // from v2.1.15 added 9.9.2016
-			'pageTurning'     : 'Page turning', // from v2.1.15 added 10.9.2016
+			'contextmenu'     : 'Menu contextuel', // from v2.1.15 added 9.9.2016
+			'pageTurning'     : 'Tourner la page', // from v2.1.15 added 10.9.2016
 			'volumeRoots'     : 'Volumes principaux', // from v2.1.16 added 16.9.2016
 			'reset'           : 'Réinitialiser', // from v2.1.16 added 1.10.2016
 			'bgcolor'         : 'Couleur de fond', // from v2.1.16 added 1.10.2016
@@ -405,27 +419,56 @@
 			'8pxgrid'         : 'Grille 8px', // from v2.1.16 added 4.10.2016
 			'enabled'         : 'Actif', // from v2.1.16 added 4.10.2016
 			'disabled'        : 'Inactif', // from v2.1.16 added 4.10.2016
-			'emptyIncSearch'  : 'Search results is empty in current view.\\APress [Enter] to expand search target.', // from v2.1.16 added 5.10.2016
-			'emptyLetSearch'  : 'First letter search results is empty in current view.', // from v2.1.23 added 24.3.2017
-			'textLabel'       : 'Text label', // from v2.1.17 added 13.10.2016
-			'minsLeft'        : '$1 mins restants', // from v2.1.17 added 13.11.2016
+			'emptyIncSearch'  : 'Aucun résultat trouvé.\\AAppuyez sur [Entrée] pour développer la cible de recherche.', // from v2.1.16 added 5.10.2016
+			'emptyLetSearch'  : 'Aucun résultat trouvé pour la recherche par première lettre.', // from v2.1.23 added 24.3.2017
+			'textLabel'       : 'Label texte', // from v2.1.17 added 13.10.2016
+			'minsLeft'        : '$1 mins restantes', // from v2.1.17 added 13.11.2016
 			'openAsEncoding'  : 'Réouvrir avec l\'encodage sélectionné', // from v2.1.19 added 2.12.2016
 			'saveAsEncoding'  : 'Sauvegarder avec l\'encodage sélectionné', // from v2.1.19 added 2.12.2016
 			'selectFolder'    : 'Choisir le dossier', // from v2.1.20 added 13.12.2016
 			'firstLetterSearch': 'Recherche par première lettre', // from v2.1.23 added 24.3.2017
-			'presets'         : 'Presets', // from v2.1.25 added 26.5.2017
-			'tooManyToTrash'  : 'It\'s too many items so it can\'t into trash.', // from v2.1.25 added 9.6.2017
-			'TextArea'        : 'TextArea', // from v2.1.25 added 14.6.2017
-			'folderToEmpty'   : 'Empty the folder "$1".', // from v2.1.25 added 22.6.2017
-			'filderIsEmpty'   : 'There are no items in a folder "$1".', // from v2.1.25 added 22.6.2017
+			'presets'         : 'Présélections', // from v2.1.25 added 26.5.2017
+			'tooManyToTrash'  : 'Impossible de mettre autant d\'éléments à la corbeille.', // from v2.1.25 added 9.6.2017
+			'TextArea'        : 'Zone de texte', // from v2.1.25 added 14.6.2017
+			'folderToEmpty'   : 'Vider le dossier "$1".', // from v2.1.25 added 22.6.2017
+			'filderIsEmpty'   : 'Il n\'y a pas d\'élément dans le dossier "$1".', // from v2.1.25 added 22.6.2017
 			'preference'      : 'Préférence', // from v2.1.26 added 28.6.2017
 			'language'        : 'Configuration de langue', // from v2.1.26 added 28.6.2017
-			'clearBrowserData': 'Initialisation des configurations sauvegardés dans ce navigateur', // from v2.1.26 added 28.6.2017
+			'clearBrowserData': 'Initialisation des configurations sauvegardées dans ce navigateur', // from v2.1.26 added 28.6.2017
+			'toolbarPref'     : 'Paramètres de la barre d\'outils', // from v2.1.27 added 2.8.2017
+			'charsLeft'       : '... $1 caractères restants.',  // from v2.1.29 added 30.8.2017
+			'sum'             : 'Somme', // from v2.1.29 added 28.9.2017
+			'roughFileSize'   : 'Taille de fichier brute', // from v2.1.30 added 2.11.2017
+			'autoFocusDialog' : 'Focus on the element of dialog with mouseover',  // from v2.1.30 added 2.11.2017
+			'select'          : 'Sélectionner', // from v2.1.30 added 23.11.2017
+			'selectAction'    : 'Action lors de la sélection d\'un fichier', // from v2.1.30 added 23.11.2017
+			'useStoredEditor' : 'Ouvrir avec le dernier éditeur utilisé', // from v2.1.30 added 23.11.2017
+			'selectinvert'    : 'Inverser la sélection', // from v2.1.30 added 25.11.2017
+			'renameMultiple'  : 'Êtes-vous sûr de vouloir renommer les éléments sélectionnés $1 en $2 ?<br/>L\'action est définitive !', // from v2.1.31 added 4.12.2017
+			'batchRename'     : 'Renommer le Batch', // from v2.1.31 added 8.12.2017
+			'plusNumber'      : '+ Nombre', // from v2.1.31 added 8.12.2017
+			'asPrefix'        : 'Ajouter un préfixe', // from v2.1.31 added 8.12.2017
+			'asSuffix'        : 'Ajouter un suffixe', // from v2.1.31 added 8.12.2017
+			'changeExtention' : 'Modifier l\'extention', // from v2.1.31 added 8.12.2017
+			'columnPref'      : 'Paramètres des colonnes (List view)', // from v2.1.32 added 6.2.2018
+			'reflectOnImmediate' : 'Les changements seront immédiatement appliqués à l\'archive.', // from v2.1.33 added 2.3.2018
+			'reflectOnUnmount'   : 'Aucun changement ne sera appliqué tant que ce volume n\'a pas été démonté.', // from v2.1.33 added 2.3.2018
+			'unmountChildren' : 'Le(s) volume(s) suivant(s) montés sur ce volume seront également démontés. Êtes-vous sûr de vouloir le démonter ?', // from v2.1.33 added 5.3.2018
+			'selectionInfo'   : 'Informations sur la sélection', // from v2.1.33 added 7.3.2018
+			'hashChecker'     : 'Algorithme de hachage de fichier', // from v2.1.33 added 10.3.2018
+			'infoItems'       : 'Info Items (Selection Info Panel)', // from v2.1.38 added 28.3.2018
+			'pressAgainToExit': 'Appuyez à nouveau pour quitter.', // from v2.1.38 added 1.4.2018
+			'toolbar'         : 'Barre d\'outils', // from v2.1.38 added 4.4.2018
+			'workspace'       : 'Espace de travail', // from v2.1.38 added 4.4.2018
+			'dialog'          : 'Dialogue', // from v2.1.38 added 4.4.2018
+			'all'             : 'Tout', // from v2.1.38 added 4.4.2018
+			'iconSize'        : 'Icon Size (Icons view)', // form v2.1.39 added 7.5.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Inconnu',
 			'kindRoot'        : 'Volume principal', // from v2.1.16 added 16.10.2016
 			'kindFolder'      : 'Dossier',
+			'kindSelects'     : 'Sélections', // from v2.1.29 added 29.8.2017
 			'kindAlias'       : 'Raccourci',
 			'kindAliasBroken' : 'Raccourci cassé',
 			// applications
