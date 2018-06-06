@@ -4612,7 +4612,7 @@ abstract class elFinderVolumeDriver {
 	 **/
 	protected function doSearch($path, $q, $mimes) {
 		$result = array();
-		$matchMethod = empty($this->doSearchCurrentQuery['matchMethod'])? 'stripos' : $this->doSearchCurrentQuery['matchMethod'];
+		$matchMethod = empty($this->doSearchCurrentQuery['matchMethod'])? 'searchMatchName' : $this->doSearchCurrentQuery['matchMethod'];
 		$timeout = $this->options['searchTimeout']? $this->searchStart + $this->options['searchTimeout'] : 0;
 		if ($timeout && $timeout < time()) {
 			$this->setError(elFinder::ERROR_SEARCH_TIMEOUT, $this->path($this->encode($path)));
@@ -6005,6 +6005,19 @@ abstract class elFinderVolumeDriver {
 			return mb_strpos(mb_strtolower($haystack, 'UTF-8'), mb_strtolower($needle, 'UTF-8'), $offset);
 		} 
 		return stripos($haystack , $needle , $offset);
+	}
+
+	/**
+	 * Default serach match method (name match)
+	 *
+	 * @param  String  $name  Item name
+	 * @param  String  $query Query word
+	 * @param  String  $path  Item path
+	 *
+	 * @return @return bool
+	 */
+	protected function searchMatchName($name , $query , $path) {
+		return (bool)$this->stripos($name , $query);
 	}
 
 	/**
