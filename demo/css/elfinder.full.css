@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: c1579b3) (2018-06-06)
+ * Version 2.1.39 (2.1-src Nightly: 58be9dd) (2018-06-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -2484,6 +2484,24 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 .elfinder-cwd-wrapper-trash .elfinder-cwd-message-board .elfinder-cwd-trash {
     display: block;
     opacity: .3;
+}
+
+/* overlay message board for expires */
+.elfinder-cwd-message-board .elfinder-cwd-expires {
+    position: absolute;
+    bottom: 0;
+    font-size: 24px;
+    width: 100%;
+    text-align: right;
+    opacity: .25;
+}
+
+.elfinder-rtl .elfinder-cwd-message-board .elfinder-cwd-expires {
+    text-align: left;
+}
+
+.elfinder-mobile .elfinder-cwd-message-board .elfinder-cwd-expires {
+    font-size: 20px;
 }
 
 /* File: /css/dialog.css */
