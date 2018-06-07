@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: c1579b3) (2018-06-06)
+ * Version 2.1.39 (2.1-src Nightly: 58be9dd) (2018-06-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -2231,6 +2231,10 @@ var elFinder = function(elm, opts, bootCallback) {
 						}
 					}
 					xhrAbort();
+					if (isOpen) {
+						openDir = self.file(data.target);
+						openDir && openDir.volumeid && self.isRoot(openDir) && delete self.volumeExpires[openDir.volumeid];
+					}
 					self.trigger(cmd + 'fail', response);
 					if (error) {
 						deffail ? self.error(error) : self.debug('error', self.i18n(error));
@@ -2367,7 +2371,8 @@ var elFinder = function(elm, opts, bootCallback) {
 					return dfrd;
 				}
 			},
-			bindData = {opts: opts, result: true};
+			bindData = {opts: opts, result: true},
+			openDir;
 		
 		// prevent request initial request is completed
 		if (!self.api && !data.init) {
@@ -4089,6 +4094,8 @@ var elFinder = function(elm, opts, bootCallback) {
 	 */
 	this.leafRoots = {};
 	
+	this.volumeExpires = {};
+
 	/**
 	 * Loaded commands
 	 *
@@ -7307,6 +7314,11 @@ elFinder.prototype = {
 								if (type !== 'cwd') {
 									self.roots[vid] = file.hash;
 								}
+
+								// regist fm.volumeExpires
+								if (file.expires) {
+									self.volumeExpires[vid] = file.expires;
+								}
 							}
 							
 							if (prevId !== vid) {
@@ -9510,7 +9522,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: c1579b3)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 58be9dd)';
 
 
 
@@ -15773,6 +15785,26 @@ $.fn.elfindercwd = function(fm, options) {
 			// message board
 			mBoard = $('<div class="elfinder-cwd-message-board"/>').insertAfter(cwd),
 
+			// Volume expires
+			vExpires = $('<div class="elfinder-cwd-expires" />'),
+
+			vExpiresTm,
+
+			showVolumeExpires = function() {
+				var remain, sec, int;
+				vExpiresTm && clearTimeout(vExpiresTm);
+				if (curVolId && fm.volumeExpires[curVolId]) {
+					sec = fm.volumeExpires[curVolId] - ((+new Date()) / 1000);
+					int = (sec % 60) + 0.1;
+					fm.log([int,fm.volumeExpires,curVolId]);
+					remain = Math.floor(sec / 60);
+					vExpires.html(fm.i18n(['minsLeft', remain])).show();
+					if (remain) {
+						vExpiresTm = setTimeout(showVolumeExpires, int * 1000);
+					}
+				}
+			},
+
 			// each item box size
 			itemBoxSize = {
 				icons : {},
@@ -15784,12 +15816,16 @@ $.fn.elfindercwd = function(fm, options) {
 
 			// Icon size of icons view
 			iconSize,
+
+			// Current volume id
+			curVolId,
 			
 			winScrTm;
 
 		// IE < 11 not support CSS `pointer-events: none`
 		if (!fm.UA.ltIE10) {
-			mBoard.append($('<div class="elfinder-cwd-trash" />').html(fm.i18n('volume_Trash')));
+			mBoard.append($('<div class="elfinder-cwd-trash" />').html(fm.i18n('volume_Trash')))
+			      .append(vExpires);
 		}
 
 		// setup by options
@@ -15937,9 +15973,21 @@ $.fn.elfindercwd = function(fm, options) {
 										return dfd;
 									})()
 								) : null
-							) : null;
+							) : null,
+						cwdObj = fm.cwd();
+					// add/remove volume id class
+					if (cwdObj.volumeid !== curVolId) {
+						vExpires.empty().hide();
+						if (curVolId) {
+							wrapper.removeClass('elfinder-cwd-wrapper-' + curVolId);
+						}
+						curVolId = cwdObj.volumeid;
+						showVolumeExpires();
+						wrapper.addClass('elfinder-cwd-wrapper-' + curVolId);
+					}
+					// add/remove trash class
 					$.when(req).done(function() {
-						cwdParents = fm.parents(fm.cwd().hash);
+						cwdParents = fm.parents(cwdObj.hash);
 						wrapper[inTrash()? 'addClass':'removeClass']('elfinder-cwd-wrapper-trash');
 					});
 					incHashes = void 0;
@@ -24670,6 +24718,7 @@ elFinder.prototype.commands.netunmount = function() {
 										dfrd.reject(error);
 									})
 									.done(function(data) {
+										drive.volumeid && delete fm.volumeExpires[drive.volumeid];
 										dfrd.resolve();
 									});
 								}).fail(function(error) {
@@ -24702,6 +24751,7 @@ elFinder.prototype.commands.netunmount = function() {
 													preventDefault : true
 												}).done(function(data) {
 													if (data.removed) {
+														d.volumeid && delete fm.volumeExpires[d.volumeid];
 														removed = removed.concat(data.removed);
 													}
 												}));
