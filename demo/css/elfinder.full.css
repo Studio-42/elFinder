@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: 58be9dd) (2018-06-07)
+ * Version 2.1.39 (2.1-src Nightly: d493e34) (2018-06-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -2201,6 +2201,11 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
     box-sizing: padding-box;
     padding: 2px;
     position: relative;
+}
+
+.elfinder-cwd table td {
+    /* fix conflict with Bootstrap CSS */
+    box-sizing: content-box;
 }
 
 .elfinder-cwd-wrapper-list.elfinder-cwd-fixheader {
