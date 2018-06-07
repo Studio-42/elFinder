@@ -79,6 +79,13 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     protected $queryOptions = array();
 
     /**
+     * Current token expires
+     * 
+     * @var integer
+     **/
+    private $expires;
+
+    /**
      * Constructor
      * Extend options with required fields.
      *
@@ -874,6 +881,8 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             return $this->setError($e->getMessage());
         }
 
+        $this->expires = empty($this->token->data->refresh_token) ? (int) $this->token->expires : 0;
+
         if (empty($options['netkey'])) {
             // make net mount key
             $_tokenKey = isset($this->token->data->refresh_token) ? $this->token->data->refresh_token : $this->token->data->access_token;
@@ -1389,7 +1398,11 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     protected function _stat($path)
     {
         if ($raw = $this->_od_getFileRaw($path)) {
-            return $this->_od_parseRaw($raw);
+            $stat = $this->_od_parseRaw($raw);
+            if ($path === $this->root) {
+                $stat['expires'] = $this->expires;
+            }
+            return $stat;
         }
 
         return false;

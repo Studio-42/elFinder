@@ -1277,3 +1277,21 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
     display: block;
     opacity: .3;
 }
+
+/* overlay message board for expires */
+.elfinder-cwd-message-board .elfinder-cwd-expires {
+    position: absolute;
+    bottom: 0;
+    font-size: 24px;
+    width: 100%;
+    text-align: right;
+    opacity: .25;
+}
+
+.elfinder-rtl .elfinder-cwd-message-board .elfinder-cwd-expires {
+    text-align: left;
+}
+
+.elfinder-mobile .elfinder-cwd-message-board .elfinder-cwd-expires {
+    font-size: 20px;
+}

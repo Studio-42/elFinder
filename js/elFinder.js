@@ -2200,6 +2200,10 @@ var elFinder = function(elm, opts, bootCallback) {
 						}
 					}
 					xhrAbort();
+					if (isOpen) {
+						openDir = self.file(data.target);
+						openDir && openDir.volumeid && self.isRoot(openDir) && delete self.volumeExpires[openDir.volumeid];
+					}
 					self.trigger(cmd + 'fail', response);
 					if (error) {
 						deffail ? self.error(error) : self.debug('error', self.i18n(error));
@@ -2336,7 +2340,8 @@ var elFinder = function(elm, opts, bootCallback) {
 					return dfrd;
 				}
 			},
-			bindData = {opts: opts, result: true};
+			bindData = {opts: opts, result: true},
+			openDir;
 		
 		// prevent request initial request is completed
 		if (!self.api && !data.init) {
@@ -4058,6 +4063,8 @@ var elFinder = function(elm, opts, bootCallback) {
 	 */
 	this.leafRoots = {};
 	
+	this.volumeExpires = {};
+
 	/**
 	 * Loaded commands
 	 *
@@ -7275,6 +7282,11 @@ elFinder.prototype = {
 								// regist fm.roots
 								if (type !== 'cwd') {
 									self.roots[vid] = file.hash;
+								}
+
+								// regist fm.volumeExpires
+								if (file.expires) {
+									self.volumeExpires[vid] = file.expires;
 								}
 							}
 							
