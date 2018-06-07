@@ -2307,6 +2307,26 @@ $.fn.elfindercwd = function(fm, options) {
 			// message board
 			mBoard = $('<div class="elfinder-cwd-message-board"/>').insertAfter(cwd),
 
+			// Volume expires
+			vExpires = $('<div class="elfinder-cwd-expires" />'),
+
+			vExpiresTm,
+
+			showVolumeExpires = function() {
+				var remain, sec, int;
+				vExpiresTm && clearTimeout(vExpiresTm);
+				if (curVolId && fm.volumeExpires[curVolId]) {
+					sec = fm.volumeExpires[curVolId] - ((+new Date()) / 1000);
+					int = (sec % 60) + 0.1;
+					fm.log([int,fm.volumeExpires,curVolId]);
+					remain = Math.floor(sec / 60);
+					vExpires.html(fm.i18n(['minsLeft', remain])).show();
+					if (remain) {
+						vExpiresTm = setTimeout(showVolumeExpires, int * 1000);
+					}
+				}
+			},
+
 			// each item box size
 			itemBoxSize = {
 				icons : {},
@@ -2318,12 +2338,16 @@ $.fn.elfindercwd = function(fm, options) {
 
 			// Icon size of icons view
 			iconSize,
+
+			// Current volume id
+			curVolId,
 			
 			winScrTm;
 
 		// IE < 11 not support CSS `pointer-events: none`
 		if (!fm.UA.ltIE10) {
-			mBoard.append($('<div class="elfinder-cwd-trash" />').html(fm.i18n('volume_Trash')));
+			mBoard.append($('<div class="elfinder-cwd-trash" />').html(fm.i18n('volume_Trash')))
+			      .append(vExpires);
 		}
 
 		// setup by options
@@ -2471,9 +2495,21 @@ $.fn.elfindercwd = function(fm, options) {
 										return dfd;
 									})()
 								) : null
-							) : null;
+							) : null,
+						cwdObj = fm.cwd();
+					// add/remove volume id class
+					if (cwdObj.volumeid !== curVolId) {
+						vExpires.empty().hide();
+						if (curVolId) {
+							wrapper.removeClass('elfinder-cwd-wrapper-' + curVolId);
+						}
+						curVolId = cwdObj.volumeid;
+						showVolumeExpires();
+						wrapper.addClass('elfinder-cwd-wrapper-' + curVolId);
+					}
+					// add/remove trash class
 					$.when(req).done(function() {
-						cwdParents = fm.parents(fm.cwd().hash);
+						cwdParents = fm.parents(cwdObj.hash);
 						wrapper[inTrash()? 'addClass':'removeClass']('elfinder-cwd-wrapper-trash');
 					});
 					incHashes = void 0;

@@ -281,6 +281,7 @@ elFinder.prototype.commands.netunmount = function() {
 										dfrd.reject(error);
 									})
 									.done(function(data) {
+										drive.volumeid && delete fm.volumeExpires[drive.volumeid];
 										dfrd.resolve();
 									});
 								}).fail(function(error) {
@@ -313,6 +314,7 @@ elFinder.prototype.commands.netunmount = function() {
 													preventDefault : true
 												}).done(function(data) {
 													if (data.removed) {
+														d.volumeid && delete fm.volumeExpires[d.volumeid];
 														removed = removed.concat(data.removed);
 													}
 												}));
