@@ -995,6 +995,11 @@
     position: relative;
 }
 
+.elfinder-cwd table td {
+    /* fix conflict with Bootstrap CSS */
+    box-sizing: content-box;
+}
+
 .elfinder-cwd-wrapper-list.elfinder-cwd-fixheader {
     position: absolute;
     overflow: hidden;
