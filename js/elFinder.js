@@ -8510,7 +8510,9 @@ elFinder.prototype = {
 				if (cnt) {
 					select = $('<select class="ui-corner-all elfinder-tabstop" style="max-width:200px;">').append(
 						$($.map(folders, function(n,i){return '<option value="'+fm.escape((i+'').trim())+'">'+fm.escape(n)+'</option>';}).join(''))
-					).on('change click', function(e){
+					).on('mousedown', function(e) {
+						e.stopPropagation();
+					}).on('change click', function(e){
 						var node = $(this),
 							path = node.val(),
 							spn;
