@@ -2318,7 +2318,6 @@ $.fn.elfindercwd = function(fm, options) {
 				if (curVolId && fm.volumeExpires[curVolId]) {
 					sec = fm.volumeExpires[curVolId] - ((+new Date()) / 1000);
 					int = (sec % 60) + 0.1;
-					fm.log([int,fm.volumeExpires,curVolId]);
 					remain = Math.floor(sec / 60);
 					vExpires.html(fm.i18n(['minsLeft', remain])).show();
 					if (remain) {
