@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: d493e34) (2018-06-07)
+ * Version 2.1.39 (2.1-src Nightly: f130f79) (2018-06-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8541,7 +8541,9 @@ elFinder.prototype = {
 				if (cnt) {
 					select = $('<select class="ui-corner-all elfinder-tabstop" style="max-width:200px;">').append(
 						$($.map(folders, function(n,i){return '<option value="'+fm.escape((i+'').trim())+'">'+fm.escape(n)+'</option>';}).join(''))
-					).on('change click', function(e){
+					).on('mousedown', function(e) {
+						e.stopPropagation();
+					}).on('change click', function(e){
 						var node = $(this),
 							path = node.val(),
 							spn;
@@ -9522,7 +9524,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: d493e34)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: f130f79)';
 
 
 
@@ -15796,7 +15798,6 @@ $.fn.elfindercwd = function(fm, options) {
 				if (curVolId && fm.volumeExpires[curVolId]) {
 					sec = fm.volumeExpires[curVolId] - ((+new Date()) / 1000);
 					int = (sec % 60) + 0.1;
-					fm.log([int,fm.volumeExpires,curVolId]);
 					remain = Math.floor(sec / 60);
 					vExpires.html(fm.i18n(['minsLeft', remain])).show();
 					if (remain) {
