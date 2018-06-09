@@ -2,7 +2,7 @@
  * Slovak translation
  * @author RobiNN <kelcakrobo@gmail.com>
  * @author Jakub Ďuraš <jkblmr@gmail.com>
- * @version 2018-05-05
+ * @version 2018-06-09
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -314,6 +314,10 @@
 			'selectlfile'     : 'Vybrať poslednú položku',
 			'viewlist'        : 'Zoznam',
 			'viewicons'       : 'Ikony',
+			'viewSmall'       : 'Malé ikony', // from v2.1.39 added 22.5.2018
+			'viewMedium'      : 'Stredné ikony', // from v2.1.39 added 22.5.2018
+			'viewLarge'       : 'Veľké ikony', // from v2.1.39 added 22.5.2018
+			'viewExtraLarge'  : 'Extra veľké ikony', // from v2.1.39 added 22.5.2018
 			'places'          : 'Miesta',
 			'calc'            : 'Prepočítavanie',
 			'path'            : 'Cesta',
@@ -457,6 +461,7 @@
 			'workspace'       : 'Pracovný priestor', // from v2.1.38 added 4.4.2018
 			'dialog'          : 'Dialóg', // from v2.1.38 added 4.4.2018
 			'all'             : 'Všetko', // from v2.1.38 added 4.4.2018
+			'iconSize'        : 'Veľkosť ikony (zobrazenie ikon)', // form v2.1.39 added 7.5.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
