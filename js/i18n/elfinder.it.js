@@ -3,7 +3,8 @@
  * @author Alberto Tocci (alberto.tocci@gmail.com)
  * @author Claudio Nicora (coolsoft.ita@gmail.com)
  * @author Stefano Galeazzi <stefano.galeazzi@probanet.it>
- * @version 2017-11-06
+ * @author Thomas Camaran <camaran@gmail.com>
+ * @version 2018-06-08
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -15,7 +16,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.it = {
-		translator : 'Alberto Tocci (alberto.tocci@gmail.com), Claudio Nicora (coolsoft.ita@gmail.com), Stefano Galeazzi &lt;stefano.galeazzi@probanet.it&gt;',
+		translator : 'Alberto Tocci (alberto.tocci@gmail.com), Claudio Nicora (coolsoft.ita@gmail.com), Stefano Galeazzi &lt;stefano.galeazzi@probanet.it&gt;, Thomas Camaran &lt;camaran@gmail.com&gt;',
 		language   : 'Italiano',
 		direction  : 'ltr',
 		dateFormat : 'd/m/Y H:i', // Mar 13, 2012 05:27 PM
@@ -30,7 +31,7 @@
 			'errJqui'              : 'Configurazione JQuery UI non valida. Devono essere inclusi i plugin Selectable, Draggable e Droppable.',
 			'errNode'              : 'elFinder necessita dell\'elemento DOM per essere inizializzato.',
 			'errURL'               : 'Configurazione non valida.Il parametro URL non è settato.',
-			'errAccess'            : 'Accesso non consentito.',
+			'errAccess'            : 'Accesso negato.',
 			'errConnect'           : 'Impossibile collegarsi al backend.',
 			'errAbort'             : 'Connessione annullata.',
 			'errTimeout'           : 'Timeout di connessione.',
@@ -98,7 +99,7 @@
 			'errNetMount'          : 'Impossibile montare "$1".', // added 17.04.2012
 			'errNetMountNoDriver'  : 'Protocollo non supportato.',     // added 17.04.2012
 			'errNetMountFailed'    : 'Mount fallito.',         // added 17.04.2012
-			'errNetMountHostReq'   : 'Necessario host.', // added 18.04.2012
+			'errNetMountHostReq'   : 'Host richiesto.', // added 18.04.2012
 			'errSessionExpires'    : 'La sessione è scaduta a causa di inattività.',
 			'errCreatingTempDir'   : 'Impossibile creare la cartella temporanea: "$1"',
 			'errFtpDownloadFile'   : 'Impossibile scaricare il file tramite FTP: "$1"',
@@ -128,7 +129,7 @@
 			'cmdextract'   : 'Estrai Archivio',
 			'cmdforward'   : 'Avanti',
 			'cmdgetfile'   : 'Seleziona File',
-			'cmdhelp'      : 'About',
+			'cmdhelp'      : 'Informazioni su...',
 			'cmdhome'      : 'Home',
 			'cmdinfo'      : 'Informazioni',
 			'cmdmkdir'     : 'Nuova cartella',
@@ -163,6 +164,7 @@
 			'cmdselectall' : 'Seleziona tutto', // from v2.1.28 added 15.08.2017
 			'cmdselectnone': 'Annulla selezione', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': 'Inverti selezione', // from v2.1.28 added 15.08.2017
+			'cmdopennew'   : 'Apri in una nuova finestra', // from v2.1.38 added 3.4.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Chiudi',
@@ -314,6 +316,10 @@
 			'selectlfile'     : 'Seleziona l\'ultimo file',
 			'viewlist'        : 'Visualizza Elenco',
 			'viewicons'       : 'Visualizza Icone',
+			'viewSmall'       : 'Icone piccole', // from v2.1.39 added 22.5.2018
+			'viewMedium'      : 'Icone medie', // from v2.1.39 added 22.5.2018
+			'viewLarge'       : 'Icone grandi', // from v2.1.39 added 22.5.2018
+			'viewExtraLarge'  : 'Icone molto grandi', // from v2.1.39 added 22.5.2018
 			'places'          : 'Cartelle',
 			'calc'            : 'Calcola',
 			'path'            : 'Percorso',
@@ -435,6 +441,29 @@
 			'sum'             : 'Somma', // from v2.1.29 added 28.9.2017
 			'roughFileSize'   : 'Dimensione file approssimativa', // from v2.1.30 added 2.11.2017
 			'autoFocusDialog' : 'Fuoco sull\'elemento sotto al mouse',  // from v2.1.30 added 2.11.2017
+			'select'          : 'Seleziona', // from v2.1.30 added 23.11.2017
+			'selectAction'    : 'Azione quando un file è selezionato', // from v2.1.30 added 23.11.2017
+			'useStoredEditor' : 'Apri con l\'editor usato l\'ultima volta', // from v2.1.30 added 23.11.2017
+			'selectinvert'    : 'Inverti selezione', // from v2.1.30 added 25.11.2017
+			'renameMultiple'  : 'Sei sicuro di voler rinominare $1 selezionati come $2?<br/>Questo non può essere annullato!', // from v2.1.31 added 4.12.2017
+			'batchRename'     : 'Batch rename', // from v2.1.31 added 8.12.2017
+			'plusNumber'      : '+ Numero', // from v2.1.31 added 8.12.2017
+			'asPrefix'        : 'Aggiungi prefisso', // from v2.1.31 added 8.12.2017
+			'asSuffix'        : 'Aggiungi sufisso', // from v2.1.31 added 8.12.2017
+			'changeExtention' : 'Cambia estensione', // from v2.1.31 added 8.12.2017
+			'columnPref'      : 'Impostazioni delle colonne (visualizzazione elenco)', // from v2.1.32 added 6.2.2018
+			'reflectOnImmediate' : 'Tutti i cambiamenti saranno immeditamente applicati.', // from v2.1.33 added 2.3.2018
+			'reflectOnUnmount'   : 'Qualsiasi modifica non sarà visibile fino a quando non si monta questo volume.', // from v2.1.33 added 2.3.2018
+			'unmountChildren' : 'The following volume(s) mounted on this volume also unmounted. Are you sure to unmount it?', // from v2.1.33 added 5.3.2018
+			'selectionInfo'   : 'Seleziona Info', // from v2.1.33 added 7.3.2018
+			'hashChecker'     : 'Algoritmi per visualizzare l\'hash del file', // from v2.1.33 added 10.3.2018
+			'infoItems'       : 'Informazioni (pannello di informazioni sulla selezione)', // from v2.1.38 added 28.3.2018
+			'pressAgainToExit': 'Premi di nuovo per uscire.', // from v2.1.38 added 1.4.2018
+			'toolbar'         : 'Toolbar', // from v2.1.38 added 4.4.2018
+			'workspace'       : 'Spazio di lavoro', // from v2.1.38 added 4.4.2018
+			'dialog'          : 'Dialog', // from v2.1.38 added 4.4.2018
+			'all'             : 'Tutti', // from v2.1.38 added 4.4.2018
+			'iconSize'        : 'Dimensione icona (Visualizzazione icone)', // form v2.1.39 added 7.5.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Sconosciuto',
