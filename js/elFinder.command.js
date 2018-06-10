@@ -145,6 +145,13 @@ elFinder.prototype.command = function(fm) {
 	this.options = {ui : 'button'};
 	
 	/**
+	 * Callback functions on `change` event
+	 * 
+	 * @type  Array
+	 */
+	this.listeners = [];
+
+	/**
 	 * Prepare object -
 	 * bind events and shortcuts
 	 *
