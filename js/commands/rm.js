@@ -56,7 +56,7 @@ elFinder.prototype.commands.rm = function() {
 					label    : 'btnRm',
 					callback : function() {  
 						if (tHash) {
-							toTrash(dfrd, targets, tHash);
+							self.toTrash(dfrd, targets, tHash);
 						} else {
 							remove(dfrd, targets);
 						}
@@ -101,7 +101,7 @@ elFinder.prototype.commands.rm = function() {
 				req, dirs, cnt;
 			
 			if (itemCnt > maxCnt) {
-				confirm(dfrd, targets, self.files(targets), null, [fm.i18n('tooManyToTrash')]);
+				self.confirm(dfrd, targets, self.files(targets), null, [fm.i18n('tooManyToTrash')]);
 				return;
 			}
 			
@@ -320,7 +320,7 @@ elFinder.prototype.commands.rm = function() {
 					fm.unlockfiles({files : targets});
 				}
 			}).fail(function() {
-				confirm(dfrd, targets, self.files(targets), null, [fm.i18n('tooManyToTrash')]);
+				self.confirm(dfrd, targets, self.files(targets), null, [fm.i18n('tooManyToTrash')]);
 			});
 		},
 		remove = function(dfrd, targets, quiet) {
@@ -361,6 +361,11 @@ elFinder.prototype.commands.rm = function() {
 		},
 		getSize = false;
 	
+	// for to be able to overwrite
+	this.confirm = confirm;
+	this.toTrash = toTrash;
+	this.remove = remove;
+
 	this.syncTitleOnChange = true;
 	this.updateOnSelect = false;
 	this.shortcuts = [{
@@ -369,6 +374,10 @@ elFinder.prototype.commands.rm = function() {
 	this.value = 'rm';
 	
 	this.init = function() {
+		// re-assign for extended command
+		self = this;
+		fm = this.fm;
+		// bind function of change
 		self.change(function() {
 			var targets;
 			delete self.extra;
@@ -454,12 +463,12 @@ elFinder.prototype.commands.rm = function() {
 			fm.lockfiles({files : targets});
 			
 			if (tHash && self.options.quickTrash) {
-				toTrash(dfrd, targets, tHash);
+				self.toTrash(dfrd, targets, tHash);
 			} else {
 				if (quiet) {
 					remove(dfrd, targets, quiet);
 				} else {
-					confirm(dfrd, targets, files, tHash, addTexts);
+					self.confirm(dfrd, targets, files, tHash, addTexts);
 				}
 			}
 		}
