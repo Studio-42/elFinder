@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: 25e0ad1) (2018-06-09)
+ * Version 2.1.39 (2.1-src Nightly: 569f4fd) (2018-06-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -2946,6 +2946,11 @@ var elFinder = function(elm, opts, bootCallback) {
 	this.exec = function(cmd, files, opts, dstHash) {
 		var dfrd, resType;
 		
+		// apply commandMap for keyboard shortcut
+		if (!dstHash && this.commandMap[cmd] && this.commandMap[cmd] !== 'hidden') {
+			cmd = this.commandMap[cmd];
+		}
+
 		if (cmd === 'open') {
 			if (this.searchStatus.state || this.searchStatus.ininc) {
 				this.trigger('searchend', { noupdate: true });
@@ -9524,7 +9529,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 25e0ad1)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 569f4fd)';
 
 
 
@@ -11406,6 +11411,13 @@ elFinder.prototype.command = function(fm) {
 	 */
 	this.options = {ui : 'button'};
 	
+	/**
+	 * Callback functions on `change` event
+	 * 
+	 * @type  Array
+	 */
+	this.listeners = [];
+
 	/**
 	 * Prepare object -
 	 * bind events and shortcuts
@@ -19225,7 +19237,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 							btn = buttons[from];
 							if (btn) {
 								if (! buttons[to] && $.fn[button]) {
-									buttons[to] = $('<div/>')[button](fm._commands[to]);
+									buttons[to] = $('<div/>')[button](cmd);
 									if (buttons[to]) {
 										buttons[to].children('.elfinder-button-text')[textLabel? 'show' : 'hide']();
 										if (cmd.extendsCmd) {
@@ -30660,12 +30672,18 @@ elFinder.prototype.commands.resize = function() {
 			});
 		};
 	
+	// for to be able to overwrite
+	this.restore = restore;
+
 	this.linkedCmds = ['copy', 'paste', 'mkdir', 'rm'];
 	this.updateOnSelect = false;
-	//this.shortcuts = [{
-	//	pattern     : 'ctrl+z'
-	//}];
 	
+	this.init = function() {
+		// re-assign for extended command
+		self = this;
+		fm = this.fm;
+	};
+
 	this.getstate = function(sel, e) {
 		sel = sel || fm.selected();
 		return sel.length && $.grep(sel, function(h) {var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? true : false; }).length == sel.length
@@ -30693,7 +30711,7 @@ elFinder.prototype.commands.resize = function() {
 		});
 
 		if (dfrd.state() === 'pending') {
-			restore(dfrd, files, hashes, opts);
+			this.restore(dfrd, files, hashes, opts);
 		}
 			
 		return dfrd;
@@ -30764,7 +30782,7 @@ elFinder.prototype.commands.rm = function() {
 					label    : 'btnRm',
 					callback : function() {  
 						if (tHash) {
-							toTrash(dfrd, targets, tHash);
+							self.toTrash(dfrd, targets, tHash);
 						} else {
 							remove(dfrd, targets);
 						}
@@ -30809,7 +30827,7 @@ elFinder.prototype.commands.rm = function() {
 				req, dirs, cnt;
 			
 			if (itemCnt > maxCnt) {
-				confirm(dfrd, targets, self.files(targets), null, [fm.i18n('tooManyToTrash')]);
+				self.confirm(dfrd, targets, self.files(targets), null, [fm.i18n('tooManyToTrash')]);
 				return;
 			}
 			
@@ -31028,7 +31046,7 @@ elFinder.prototype.commands.rm = function() {
 					fm.unlockfiles({files : targets});
 				}
 			}).fail(function() {
-				confirm(dfrd, targets, self.files(targets), null, [fm.i18n('tooManyToTrash')]);
+				self.confirm(dfrd, targets, self.files(targets), null, [fm.i18n('tooManyToTrash')]);
 			});
 		},
 		remove = function(dfrd, targets, quiet) {
@@ -31069,6 +31087,11 @@ elFinder.prototype.commands.rm = function() {
 		},
 		getSize = false;
 	
+	// for to be able to overwrite
+	this.confirm = confirm;
+	this.toTrash = toTrash;
+	this.remove = remove;
+
 	this.syncTitleOnChange = true;
 	this.updateOnSelect = false;
 	this.shortcuts = [{
@@ -31077,6 +31100,10 @@ elFinder.prototype.commands.rm = function() {
 	this.value = 'rm';
 	
 	this.init = function() {
+		// re-assign for extended command
+		self = this;
+		fm = this.fm;
+		// bind function of change
 		self.change(function() {
 			var targets;
 			delete self.extra;
@@ -31162,12 +31189,12 @@ elFinder.prototype.commands.rm = function() {
 			fm.lockfiles({files : targets});
 			
 			if (tHash && self.options.quickTrash) {
-				toTrash(dfrd, targets, tHash);
+				self.toTrash(dfrd, targets, tHash);
 			} else {
 				if (quiet) {
 					remove(dfrd, targets, quiet);
 				} else {
-					confirm(dfrd, targets, files, tHash, addTexts);
+					self.confirm(dfrd, targets, files, tHash, addTexts);
 				}
 			}
 		}

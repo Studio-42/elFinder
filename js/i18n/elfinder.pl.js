@@ -3,7 +3,7 @@
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Wojciech Jabłoński <www.jablonski@gmail.com>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2018-04-13
+ * @version 2018-06-10
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -315,6 +315,10 @@
 			'selectlfile'     : 'Zaznacz ostatni plik',
 			'viewlist'        : 'Widok listy',
 			'viewicons'       : 'Widok ikon',
+			'viewSmall'       : 'Małe ikony', // from v2.1.39 added 22.5.2018
+			'viewMedium'      : 'Średnie ikony', // from v2.1.39 added 22.5.2018
+			'viewLarge'       : 'Duże ikony', // from v2.1.39 added 22.5.2018
+			'viewExtraLarge'  : 'Bardzo duże ikony', // from v2.1.39 added 22.5.2018
 			'places'          : 'Ulubione',
 			'calc'            : 'Obliczanie',
 			'path'            : 'Ścieżka',
@@ -458,6 +462,7 @@
 			'workspace'       : 'Obszar Pracy', // from v2.1.38 added 4.4.2018
 			'dialog'          : 'Dialog', // from v2.1.38 added 4.4.2018
 			'all'             : 'Wszystko', // from v2.1.38 added 4.4.2018
+			'iconSize'        : 'Rozmiar Ikony (Podgląd ikon)', // form v2.1.39 added 7.5.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',
@@ -543,3 +548,4 @@
 		}
 	};
 }));
+
