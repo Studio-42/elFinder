@@ -5076,7 +5076,12 @@ abstract class elFinderVolumeDriver {
 			}
 			if (! $result) {
 				file_exists($tmb) && unlink($tmb);
-				return false;
+				// fallback imgLib to GD
+				if (function_exists('gd_info')) {
+					$this->imgLib = 'gd';
+				} else {
+					return false;
+				}
 			}
 			$result = false;
 		}
