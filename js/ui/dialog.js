@@ -338,6 +338,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					e.stopPropagation();
 				})
 				.on('mousedown', function(e) {
+					e.stopPropagation();
 					requestAnimationFrame(function() {
 						if (dialog.is(':visible') && !dialog.hasClass('elfinder-frontmost')) {
 							toFocusNode = $(':focus');

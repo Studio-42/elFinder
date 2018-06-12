@@ -34,9 +34,6 @@ elFinder.prototype.commands.netmount = function() {
 					},
 					inputs = {
 						protocol : $('<select/>')
-						.on('mousedown', function(e) {
-							e.stopPropagation();
-						})
 						.on('change', function(e, data){
 							var protocol = this.value;
 							content.find('.elfinder-netmount-tr').hide();
