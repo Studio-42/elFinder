@@ -146,7 +146,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 				}
 			},
 			tabstopNext = function(cur) {
-				var elms = tabstops.filter(':visible :enabled'),
+				var elms = tabstops.filter(':visible:enabled'),
 					node = cur? null : elms.filter('.'+cl1stfocus+':first');
 					
 				if (! node || ! node.length) {
@@ -163,7 +163,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 				return node;
 			},
 			tabstopPrev = function(cur) {
-				var elms = tabstops.filter(':visible :enabled'),
+				var elms = tabstops.filter(':visible:enabled'),
 					node = elms.last();
 				$.each(elms, function(i, elm) {
 					if (elm === cur && elms[i-1]) {
