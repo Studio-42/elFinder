@@ -301,8 +301,8 @@ elFinder.prototype.commands.chmod = function() {
 		$('#' + id + '-table-perm :checkbox').on('click', function(){setperm('perm');});
 		$('#' + id + '-perm').on('keydown', function(e) {
 			var c = e.keyCode;
-			e.stopPropagation();
 			if (c == $.ui.keyCode.ENTER) {
+				e.stopPropagation();
 				save();
 				return;
 			}
