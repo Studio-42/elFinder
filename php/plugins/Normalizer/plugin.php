@@ -156,7 +156,7 @@ class elFinderPluginNormalizer extends elFinderPlugin
 		return true;
 	}
 	
-	private function normalize($str, $opts) {
+	protected function normalize($str, $opts) {
 		if ($opts['nfc'] || $opts['nfkc']) {
 			if (class_exists('Normalizer', false)) {
 				if ($opts['nfc'] && ! Normalizer::isNormalized($str, Normalizer::FORM_C))
