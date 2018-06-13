@@ -1428,7 +1428,7 @@ elFinder.prototype.commands.resize = function() {
 						if (api2) {
 							imgr.on('mousedown touchstart', rotate.start)
 								.on('touchend', rotate.stop);
-							$(document).on('mouseup', rotate.stop);
+							base.on('mouseup', rotate.stop);
 						}
 						if (hasSize && !substituteImg) {
 							return init();
