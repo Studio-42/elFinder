@@ -872,7 +872,7 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
                     return $url;
                 }
             } catch (DropboxClientException $e) {
-                return $this->$this->setError('Dropbox error: '.$e->getMessage());
+                return $this->setError('Dropbox error: '.$e->getMessage());
             }
         }
 
