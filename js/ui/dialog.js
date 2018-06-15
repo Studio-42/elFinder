@@ -336,7 +336,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					maxWidth  : opts.maxWidth,
 					maxHeight : opts.maxHeight
 				})
-				.on('touchstart touchmove touchend click mouseup mouseenter mouseleave mouseout mouseover mousemove', function(e) {
+				.on('touchstart touchmove touchend click dblclick mouseup mouseenter mouseleave mouseout mouseover mousemove', function(e) {
 					// stopPropagation of user action events
 					!propagationEvents[e.type] && e.stopPropagation();
 				})
@@ -750,5 +750,5 @@ $.fn.elfinderdialog.defaults = {
 	headerBtnPos : 'auto',
 	headerBtnOrder : 'auto',
 	optimizeNumber : true,
-	propagationEvents : ['mousemove']
+	propagationEvents : ['mousemove', 'mouseup']
 };
