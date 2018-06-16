@@ -2,7 +2,8 @@
  * Korea-한국어 translation
  * @author Hwang Ahreum; <luckmagic@naver.com>
  * @author Park Sungyong; <sungyong@gmail.com>
- * @version 2017-12-07
+ * @author Yeonjeong Woo <eat_sweetly@naver.com>
+ * @version 2018-06-16
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -14,7 +15,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.ko = {
-		translator : 'Hwang Ahreum; &lt;luckmagic@naver.com&gt;, Park Sungyong; &lt;sungyong@gmail.com&gt;',
+		translator : 'Hwang Ahreum; &lt;luckmagic@naver.com&gt;, Park Sungyong; &lt;sungyong@gmail.com&gt;, Yeonjeong Woo &lt;eat_sweetly@naver.com&gt;',
 		language   : 'Korea-한국어',
 		direction  : 'ltr',
 		dateFormat : 'd.m.Y H:i', // Mar 13, 2012 05:27 PM
@@ -149,7 +150,7 @@
 			'cmdsort'      : '정렬',
 			'cmdnetmount'  : '네트웍 볼륨 마운트', // added 18.04.2012
 			'cmdnetunmount': '마운트 해제', // from v2.1 added 30.04.2012
-			'cmdplaces'    : 'To Places', // added 28.12.2014
+			'cmdplaces'    : '즐겨찾기로', // added 28.12.2014
 			'cmdchmod'     : '모드 변경', // from v2.1 added 20.6.2015
 			'cmdopendir'   : '폴더 열기', // from v2.1 added 13.1.2016
 			'cmdcolwidth'  : '컬럼 넓이 초기화', // from v2.1.13 added 12.06.2016
@@ -162,6 +163,7 @@
 			'cmdselectall' : '전체 선택', // from v2.1.28 added 15.08.2017
 			'cmdselectnone': '선택 취소', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': '선택 반전', // from v2.1.28 added 15.08.2017
+			'cmdopennew'   : '새 창으로 열기', // from v2.1.38 added 3.4.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : '닫기',
@@ -313,7 +315,11 @@
 			'selectlfile'     : '마지막 파일 선택',
 			'viewlist'        : '리스트 보기',
 			'viewicons'       : '아이콘 보기',
-			'places'          : '위치',
+			'viewSmall'       : '작은 아이콘', // from v2.1.39 added 22.5.2018
+			'viewMedium'      : '중간 아이콘', // from v2.1.39 added 22.5.2018
+			'viewLarge'       : '큰 아이콘', // from v2.1.39 added 22.5.2018
+			'viewExtraLarge'  : '아주 큰 아이콘', // from v2.1.39 added 22.5.2018
+			'places'          : '즐겨찾기',
 			'calc'            : '계산',
 			'path'            : '경로',
 			'aliasfor'        : '별명',
@@ -439,6 +445,24 @@
 			'useStoredEditor' : '마지막 사용한 에디터로 열기', // from v2.1.30 added 23.11.2017
 			'selectinvert'    : '선택 반전', // from v2.1.30 added 25.11.2017
 			'renameMultiple'  : '선택한 $1 을(를) $2와 같이 바꾸겠습니까?<br/>이 작업은 원복할 수 없습니다!', // from v2.1.31 added 4.12.2017
+			'batchRename'     : '일괄 이름 바꾸기', // from v2.1.31 added 8.12.2017
+			'plusNumber'      : '+ 숫자', // from v2.1.31 added 8.12.2017
+			'asPrefix'        : '접두사 추가', // from v2.1.31 added 8.12.2017
+			'asSuffix'        : '접미사 추가', // from v2.1.31 added 8.12.2017
+			'changeExtention' : '확장자 변경', // from v2.1.31 added 8.12.2017
+			'columnPref'      : '사이드바 설정 (리스트 보기)', // from v2.1.32 added 6.2.2018
+			'reflectOnImmediate' : '모든 변경은 아카이브에 즉시 반영됩니다.', // from v2.1.33 added 2.3.2018
+			'reflectOnUnmount'   : '이 볼륨을 언마운트할 때까지는 어떤 변경도 반영되지 않습니다.', // from v2.1.33 added 2.3.2018
+			'unmountChildren' : '아래의 볼륨들도 이 볼륨과 함께 언마운트됩니다. 계속하시겠습니까?', // from v2.1.33 added 5.3.2018
+			'selectionInfo'   : '선택 정보', // from v2.1.33 added 7.3.2018
+			'hashChecker'     : '파일 해쉬 알고리즘', // from v2.1.33 added 10.3.2018
+			'infoItems'       : '정보 (선택 정보 패널)', // from v2.1.38 added 28.3.2018
+			'pressAgainToExit': '나가기 위해서 한 번 더 누르세요.', // from v2.1.38 added 1.4.2018
+			'toolbar'         : '툴바', // from v2.1.38 added 4.4.2018
+			'workspace'       : '작업공간', // from v2.1.38 added 4.4.2018
+			'dialog'          : '대화상자', // from v2.1.38 added 4.4.2018
+			'all'             : '전체', // from v2.1.38 added 4.4.2018
+			'iconSize'        : '아이콘 크기 (아이콘 보기)', // form v2.1.39 added 7.5.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '알수없음',
