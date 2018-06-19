@@ -1218,7 +1218,7 @@
 								h	= height || base.height(),
 								ctrH = 0,
 								areaH;
-							base.find('.mce-container-body:first').children('.mce-toolbar,.mce-toolbar-grp,.mce-statusbar').each(function() {
+							base.find('.mce-container-body:first').children('.mce-top-part,.mce-statusbar').each(function() {
 								ctrH += $(this).outerHeight(true);
 							});
 							areaH = h - ctrH - delta;
@@ -1308,9 +1308,6 @@
 						// TinyMCE configure
 						tinymce.init(opts);
 					};
-				
- 				// impossible launch TineMCE in native fullscreen mode
- 				fm.getUI().hasClass('elfinder-fullscreen-native') && fm.exec('fullscreen');
 				
 				if (!self.confObj.loader) {
 					self.confObj.loader = $.Deferred();
