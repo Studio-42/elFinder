@@ -54,8 +54,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 		if ((dialog = this.closest('.ui-dialog')).length) {
 			if (opts === 'open') {
 				if (dialog.css('display') === 'none') {
-					dialog.trigger('posinit').fadeIn(120, function() {
-						dialog.trigger('open');
+					// Need dialog.show() and hide() to detect elements size in open() callbacks
+					dialog.trigger('posinit').show().trigger('open').hide();
+					dialog.fadeIn(120, function() {
 						fm.trigger('dialogopened', {dialog: dialog});
 					});
 				}
@@ -353,8 +354,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 					});
 				})
 				.on('open', function() {
-					var d = $(this);
-
 					if (syncSize.enabled) {
 						if (opts.height && opts.height !== 'auto') {
 							dialog.trigger('resize', {init: true});
@@ -392,6 +391,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 					
 					dialog.trigger('totop');
+
+					fm.trigger('dialogopen', {dialog: dialog});
 
 					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
 					
@@ -687,7 +688,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 			overflow   : dialog.css('overflow')
 		};
 		
-		dialog.trigger('posinit').data('margin-y', self.outerHeight(true) - self.height());
+		dialog.data('margin-y', self.outerHeight(true) - self.height());
 		
 		if (opts.resizable) {
 			dialog.resizable({
@@ -714,11 +715,11 @@ $.fn.elfinderdialog = function(opts, fm) {
 			}).data('hasResizable', true);
 		} 
 		
-		typeof(opts.create) == 'function' && $.proxy(opts.create, this)();
-		
 		numberToTel();
 		
 		tabstopsInit();
+		
+		typeof(opts.create) == 'function' && $.proxy(opts.create, this)();
 		
 		opts.autoOpen && self.elfinderdialog('open');
 

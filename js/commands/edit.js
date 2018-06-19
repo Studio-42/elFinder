@@ -9,6 +9,7 @@ elFinder.prototype.commands.edit = function() {
 	var self  = this,
 		fm    = this.fm,
 		dlcls = 'elfinder-dialog-edit',
+		clsEditing = fm.res('class', 'editing'),
 		mimesSingle = [],
 		mimes = [],
 		rtrim = function(str){
@@ -190,6 +191,7 @@ elFinder.prototype.commands.edit = function() {
 					title   : fm.escape(file.name),
 					width   : getDlgWidth(),
 					buttons : {},
+					cssClass  : dlcls  + ' ' + clsEditing,
 					maxWidth  : 'window',
 					maxHeight : 'window',
 					allowMinimize : true,
@@ -286,7 +288,6 @@ elFinder.prototype.commands.edit = function() {
 						}, interval);
 					}
 				},
-				clsEditing = fm.res('class', 'editing'),
 				ta, old, dialogNode, selEncoding, extEditor, maxW, syncInterval;
 				
 			if (editor) {
@@ -442,7 +443,7 @@ elFinder.prototype.commands.edit = function() {
 				})
 				.css({ overflow: 'hidden', minHeight: '7em' })
 				.addClass('elfinder-edit-editor')
-				.closest('.ui-dialog').addClass(dlcls  + ' ' + clsEditing);
+				.closest('.ui-dialog');
 			
 			// care to viewport scale change with mobile devices
 			maxW = (fm.options.dialogContained? elfNode : $(window)).width();
