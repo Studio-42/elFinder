@@ -9281,7 +9281,7 @@ elFinder.prototype = {
 	 */
 	splitFileExtention : function(name) {
 		var m;
-		if (m = name.match(/^(.+?)?\.((?:tar\.(?:gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(?:gz|bz2)|[a-z0-9]{1,4})$/i)) {
+		if (m = name.match(/^(.+?)?\.((?:tar\.(?:gz|bz|bz2|z|lzo))|cpio\.gz|ps\.gz|xcf\.(?:gz|bz2)|[a-z0-9]{1,10})$/i)) {
 			if (typeof m[1] === 'undefined') {
 				m[1] = '';
 			}
