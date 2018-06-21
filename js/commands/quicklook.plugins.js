@@ -695,7 +695,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			node,
 			win  = ql.window,
 			navi = ql.navbar,
-			cHls, cDash, cFlv, autoplay,
+			cHls, cDash, pDash, cFlv, autoplay,
 			setNavi = function() {
 				if (fm.UA.iOS) {
 					if (win.hasClass('elfinder-quicklook-fullscreen')) {
@@ -719,6 +719,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					},
 					err = 0, 
 					canPlay, tm;
+				pDash = null;
 				opts = opts || {};
 				ql.hideinfo();
 				node = $('<video class="elfinder-quicklook-preview-video" controls preload="auto" autobuffer playsinline>'
@@ -761,10 +762,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 				}
 			},
 			loadDash = function(file) {
-				var player;
 				render(file);
-				player = window.dashjs.MediaPlayer().create();
-				player.initialize(node[0], fm.openUrl(file.hash), autoplay);
+				pDash = window.dashjs.MediaPlayer().create();
+				pDash.getDebug().setLogToBrowserConsole(false);
+				pDash.initialize(node[0], fm.openUrl(file.hash), autoplay);
 			},
 			loadFlv = function(file) {
 				if (!cFlv.isSupported()) {
@@ -788,6 +789,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				if (node && node.parent().length) {
 					var elm = node[0];
 					win.off('viewchange.video');
+					pDash && pDash.reset();
 					try {
 						elm.pause();
 						node.empty();
