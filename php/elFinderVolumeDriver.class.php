@@ -6046,7 +6046,7 @@ abstract class elFinderVolumeDriver {
 	 * @return @return bool
 	 */
 	protected function searchMatchName($name , $query , $path) {
-		return (bool)$this->stripos($name , $query);
+		return $this->stripos($name , $query) !== false;
 	}
 
 	/**

@@ -721,7 +721,15 @@ $.fn.elfinderdialog = function(opts, fm) {
 		
 		typeof(opts.create) == 'function' && $.proxy(opts.create, this)();
 		
-		opts.autoOpen && self.elfinderdialog('open');
+		if (opts.autoOpen) {
+			if (opts.open) {
+				requestAnimationFrame(function() {
+					self.elfinderdialog('open');
+				});
+			} else {
+				self.elfinderdialog('open');
+			}
+		}
 
 	});
 	
