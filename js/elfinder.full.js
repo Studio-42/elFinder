@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: 0749283) (2018-06-21)
+ * Version 2.1.39 (2.1-src Nightly: 3a4ac61) (2018-06-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9527,7 +9527,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 0749283)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 3a4ac61)';
 
 
 
@@ -9957,14 +9957,14 @@ elFinder.prototype._options = {
 	cdns : {
 		// for editor etc.
 		ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.3.3',
-		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.38.0',
+		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.39.0',
 		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.9.2',
-		ckeditor5  : '//cdn.ckeditor.com/ckeditor5/10.0.1',
+		ckeditor5  : '//cdn.ckeditor.com/ckeditor5/10.1.0',
 		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.7.13',
 		simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		// for quicklook etc.
-		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.9.1/hls.min.js',
-		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.6.8/dash.all.min.js',
+		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.10.1/hls.min.js',
+		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.7.0/dash.all.min.js',
 		flv        : '//cdnjs.cloudflare.com/ajax/libs/flv.js/1.4.2/flv.min.js',
 		prettify   : '//cdn.rawgit.com/google/code-prettify/fbd527e9f76914e36f730ec9849f2115473a65d8/loader/run_prettify.js',
 		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js',
@@ -27508,7 +27508,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			node,
 			win  = ql.window,
 			navi = ql.navbar,
-			cHls, cDash, cFlv, autoplay,
+			cHls, cDash, pDash, cFlv, autoplay,
 			setNavi = function() {
 				if (fm.UA.iOS) {
 					if (win.hasClass('elfinder-quicklook-fullscreen')) {
@@ -27532,6 +27532,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					},
 					err = 0, 
 					canPlay, tm;
+				pDash = null;
 				opts = opts || {};
 				ql.hideinfo();
 				node = $('<video class="elfinder-quicklook-preview-video" controls preload="auto" autobuffer playsinline>'
@@ -27574,10 +27575,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 				}
 			},
 			loadDash = function(file) {
-				var player;
 				render(file);
-				player = window.dashjs.MediaPlayer().create();
-				player.initialize(node[0], fm.openUrl(file.hash), autoplay);
+				pDash = window.dashjs.MediaPlayer().create();
+				pDash.getDebug().setLogToBrowserConsole(false);
+				pDash.initialize(node[0], fm.openUrl(file.hash), autoplay);
 			},
 			loadFlv = function(file) {
 				if (!cFlv.isSupported()) {
@@ -27601,6 +27602,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				if (node && node.parent().length) {
 					var elm = node[0];
 					win.off('viewchange.video');
+					pDash && pDash.reset();
 					try {
 						elm.pause();
 						node.empty();
