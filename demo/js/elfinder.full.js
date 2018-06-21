@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: 07de860) (2018-06-20)
+ * Version 2.1.39 (2.1-src Nightly: 0749283) (2018-06-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9527,7 +9527,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 07de860)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 0749283)';
 
 
 
@@ -17106,7 +17106,15 @@ $.fn.elfinderdialog = function(opts, fm) {
 		
 		typeof(opts.create) == 'function' && $.proxy(opts.create, this)();
 		
-		opts.autoOpen && self.elfinderdialog('open');
+		if (opts.autoOpen) {
+			if (opts.open) {
+				requestAnimationFrame(function() {
+					self.elfinderdialog('open');
+				});
+			} else {
+				self.elfinderdialog('open');
+			}
+		}
 
 	});
 	
@@ -28999,7 +29007,7 @@ elFinder.prototype.commands.resize = function() {
 								width.val(w);
 								height.val(h);
 							}
-						}),
+						}).addClass('elfinder-focus'),
 					height  = $(input)
 						.on('change', function() {
 							var h = round(parseInt(height.val())),
@@ -29415,7 +29423,7 @@ elFinder.prototype.commands.resize = function() {
 						rfile.height = dim[1];
 					},
 					init    = function() {
-						var elm, memSize, r_scale, inputFirst, imgRatio;
+						var elm, memSize, r_scale, imgRatio;
 						
 						if (inited) {
 							return;
@@ -29487,7 +29495,7 @@ elFinder.prototype.commands.resize = function() {
 						setupimg();
 						
 						uitype[ctrgrup]('enable');
-						inputFirst = control.find('input,select').prop('disabled', false)
+						control.find('input,select').prop('disabled', false)
 							.filter(':text').on('keydown', function(e) {
 								var cOpts;
 								if (e.keyCode == $.ui.keyCode.ENTER) {
@@ -29533,7 +29541,7 @@ elFinder.prototype.commands.resize = function() {
 							.filter(':first');
 						
 						setStep8();
-						!fm.UA.Mobile && inputFirst.trigger('focus');
+						!fm.UA.Mobile && width.trigger('focus');
 						resizable();
 					},
 					img     = $('<img/>')
