@@ -627,7 +627,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file,
 				type = mimes[file.mime],
-				html5, srcUrl;
+				html5, srcUrl, playPromise;
 
 			if (mimes[file.mime] && ql.dispInlineRegex.test(file.mime) && ((html5 = ql.support.audio[type]) || (type === 'amr'))) {
 				autoplay = ql.autoPlay();
@@ -661,7 +661,12 @@ elFinder.prototype.commands.quicklook.plugins = [
 				} else {
 					e.stopImmediatePropagation();
 					node = getNode(srcUrl);
-					autoplay && node[0].play();
+					autoplay && (playPromise = node[0].play());
+					if (playPromise && playPromise.catch) {
+						playPromise.catch(function() {
+							reset();
+						});
+					}
 					win.on('viewchange.audio', setNavi);
 					setNavi();
 				}
@@ -806,14 +811,19 @@ elFinder.prototype.commands.quicklook.plugins = [
 			var file = e.file,
 				mime = file.mime.toLowerCase(),
 				type = mimes[mime],
-				stock;
+				stock, playPromise;
 			
 			if (mimes[mime] && ql.dispInlineRegex.test(file.mime) && (((type === 'm3u8' || type === 'mpd' || type === 'flv') && !fm.UA.ltIE10) || ql.support.video[type])) {
 				autoplay = ql.autoPlay();
 				if (ql.support.video[type] && (type !== 'm3u8' || fm.UA.Safari)) {
 					e.stopImmediatePropagation();
 					render(file, { src: fm.openUrl(file.hash) });
-					autoplay && node[0].play();
+					autoplay && (playPromise = node[0].play());
+					if (playPromise && playPromise.catch) {
+						playPromise.catch(function() {
+							reset(true);
+						});
+					}
 				} else {
 					if (cHls !== false && fm.options.cdns.hls && type === 'm3u8') {
 						e.stopImmediatePropagation();
