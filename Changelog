@@ -1,3 +1,19 @@
+2018-0x-xx  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.40):
+		- [php:plugin] Fixed #2532 perform folder name filtering on folder upload
+		- [VD:abstract] Fixed #2534 bugfix of `doSerach()` method
+		- [API,ui:cwd] Fixed #2535 show the remaining time until the volume expires into cwd
+		- [js:core] bugfix of click problem of select element of netmount oauth dialog
+		- [cmd:rm] Fixed #2541 to be able to customize the action of to put in the trash
+		- [VD:abstract] fallback imgLib to 'gd' when error in Imagick (#2544)
+		- [ui:dialog] Fixed #2545 problem of the mousedown event of the form element
+		- [VD:abstract] Fixed #2549 freezes while creating and extracting a zip/7zip archive
+		- [ui:dialog] Fixed #2551 trigger `dialogopen` event before open the dialog
+		- [ui:dialog] Fixed #2558 autoopen after creation of dialog if it has open callback
+		- And some minor bug fixes
+
+
 2018-06-05  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.39):
