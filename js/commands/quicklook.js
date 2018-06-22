@@ -670,7 +670,7 @@
 			webm : support('video/webm;'),
 			mp4  : support('video/mp4;'),
 			mkv  : support('video/x-matroska;') || support('video/webm;'),
-			'3gp': support('video/3gpp;'),
+			'3gp': support('video/3gpp;') || support('video/mp4;'), // try as mp4
 			m3u8 : support('application/x-mpegURL', 'video') || support('application/vnd.apple.mpegURL', 'video'),
 			mpd  : support('application/dash+xml', 'video')
 		}
