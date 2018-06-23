@@ -107,6 +107,7 @@
     zoom: 1.2;
     padding-left: 6px;
     padding-right: 6px;
+    height: 24px;
 }
 
 .std42-dialog .ui-dialog-titlebar .elfinder-titlebar-button-right {
