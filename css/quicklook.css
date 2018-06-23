@@ -138,6 +138,9 @@
     margin-top: -9px;
     height: 16px;
 }
+.elfinder-touch .elfinder-quicklook-titlebar-icon {
+    height: 22px;
+}
 
 .elfinder-quicklook-titlebar-icon .ui-icon {
     position: relative;
@@ -159,7 +162,7 @@
 }
 
 .elfinder-touch .elfinder-quicklook-titlebar-icon .ui-icon {
-    margin-top: -3px;
+    margin-top: -5px;
 }
 
 .elfinder-quicklook-titlebar-icon.elfinder-platformWin {
