@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: 2021db7) (2018-06-23)
+ * Version 2.1.39 (2.1-src Nightly: 782e628) (2018-06-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9527,7 +9527,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 2021db7)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 782e628)';
 
 
 
@@ -27514,7 +27514,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			node,
 			win  = ql.window,
 			navi = ql.navbar,
-			cHls, cDash, pDash, cFlv, autoplay,
+			cHls, cDash, pDash, cFlv, autoplay, tm,
 			setNavi = function() {
 				if (fm.UA.iOS) {
 					if (win.hasClass('elfinder-quicklook-fullscreen')) {
@@ -27537,7 +27537,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 						}
 					},
 					err = 0, 
-					canPlay, tm;
+					canPlay;
+				//reset();
 				pDash = null;
 				opts = opts || {};
 				ql.hideinfo();
@@ -27550,7 +27551,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 					.on('timeupdate progress', errTm)
 					.on('canplay', function() {
 						canPlay = true;
-					});
+					})
+					.data('hash', file.hash);
 				// can not handling error event with jQuery `on` event handler
 				node[0].addEventListener('error', function(e) {
 					if (opts.src && fm.convAbsUrl(opts.src) === fm.convAbsUrl(e.target.src)) {
@@ -27608,15 +27610,17 @@ elFinder.prototype.commands.quicklook.plugins = [
 				play(player);
 			},
 			play = function(player) {
-				var playPromise;
+				var hash = node.data('hash'),
+					playPromise;
 				autoplay && (playPromise = player.play());
 				if (playPromise && playPromise.catch) {
 					playPromise.catch(function() {
-						reset(true);
+						node && node.data('hash') === hash && reset(true);
 					});
 				}
 			},
 			reset = function(showInfo) {
+				tm && clearTimeout(tm);
 				if (node && node.parent().length) {
 					var elm = node[0];
 					win.off('viewchange.video');
