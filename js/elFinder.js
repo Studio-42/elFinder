@@ -6540,7 +6540,7 @@ elFinder.prototype = {
 								data.overwrite = 0;
 								formData.append('name[]', fm.date(fm.nonameDateFormat) + '.png');
 							}
-							if (fm.UA.iOS) {
+							if (file.name && fm.UA.iOS) {
 								if (file.name.match(/^image\.jpe?g$/i)) {
 									data.overwrite = 0;
 									formData.append('name[]', fm.date(fm.nonameDateFormat) + '.jpg');
