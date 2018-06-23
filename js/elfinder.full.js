@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: 782e628) (2018-06-23)
+ * Version 2.1.39 (2.1-src Nightly: 320a3ec) (2018-06-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9527,7 +9527,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 782e628)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 320a3ec)';
 
 
 
@@ -27366,13 +27366,16 @@ elFinder.prototype.commands.quicklook.plugins = [
 			setNavi = function() {
 				navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
 			},
-			getNode = function(src) {
+			getNode = function(src, hash) {
 				return $('<audio class="elfinder-quicklook-preview-audio ui-front" controls preload="auto" autobuffer><source src="'+src+'" /></audio>')
 					.on('change', function(e) {
 						// Firefox fire change event on seek or volume change
 						e.stopPropagation();
 					})
-					.on('error', reset)
+					.on('error', function(e) {
+						node && node.data('hash') === hash && reset();
+					})
+					.data('hash', hash)
 					.appendTo(preview);
 			},
 			amrToWavUrl = function(hash) {
@@ -27420,6 +27423,18 @@ elFinder.prototype.commands.quicklook.plugins = [
 				}
 				return dfd;
 			},
+			play = function(player) {
+				var hash = node.data('hash'),
+					playPromise;
+				autoplay && (playPromise = player.play());
+				if (playPromise && playPromise.catch) {
+					playPromise.catch(function(e) {
+						if (!player.paused) {
+							node && node.data('hash') === hash && reset();
+						}
+					});
+				}
+			},
 			reset = function() {
 				if (node && node.parent().length) {
 					var elm = node[0],
@@ -27442,7 +27457,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file,
 				type = mimes[file.mime],
-				html5, srcUrl, playPromise;
+				html5, srcUrl;
 
 			if (mimes[file.mime] && ql.dispInlineRegex.test(file.mime) && ((html5 = ql.support.audio[type]) || (type === 'amr'))) {
 				autoplay = ql.autoPlay();
@@ -27451,7 +27466,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				if (!html5) {
 					if (fm.options.cdns.amr && type === 'amr' && AMR !== false) {
 						e.stopImmediatePropagation();
-						node = getNode(srcUrl);
+						node = getNode(srcUrl, curHash);
 						amrToWavUrl(file.hash).done(function(url) {
 							if (curHash === file.hash) {
 								var elm = node[0];
@@ -27459,7 +27474,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 									node.children('source').attr('src', url);
 									elm.pause();
 									elm.load();
-									autoplay && elm.play();
+									play(elm);
 									win.on('viewchange.audio', setNavi);
 									setNavi();
 								} catch(e) {
@@ -27475,13 +27490,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 					}
 				} else {
 					e.stopImmediatePropagation();
-					node = getNode(srcUrl);
-					autoplay && (playPromise = node[0].play());
-					if (playPromise && playPromise.catch) {
-						playPromise.catch(function() {
-							reset();
-						});
-					}
+					node = getNode(srcUrl, curHash);
+					play(node[0]);
 					win.on('viewchange.audio', setNavi);
 					setNavi();
 				}
@@ -27614,8 +27624,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 					playPromise;
 				autoplay && (playPromise = player.play());
 				if (playPromise && playPromise.catch) {
-					playPromise.catch(function() {
-						node && node.data('hash') === hash && reset(true);
+					playPromise.catch(function(e) {
+						if (!player.paused) {
+							node && node.data('hash') === hash && reset(true);
+						}
 					});
 				}
 			},
