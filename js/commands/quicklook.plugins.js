@@ -761,8 +761,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 				hls.loadSource(fm.openUrl(file.hash));
 				hls.attachMedia(node[0]);
 				if (autoplay) {
-					hls.on(cHls.Events.MANIFEST_PARSED,function() {
-						node[0].play();
+					hls.on(cHls.Events.MANIFEST_PARSED, function() {
+						play(node[0]);
 					});
 				}
 			},
@@ -771,6 +771,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 				pDash = window.dashjs.MediaPlayer().create();
 				pDash.getDebug().setLogToBrowserConsole(false);
 				pDash.initialize(node[0], fm.openUrl(file.hash), autoplay);
+				pDash.on('error', function(e) {
+					reset(true);
+				});
 			},
 			loadFlv = function(file) {
 				if (!cFlv.isSupported()) {
@@ -788,7 +791,16 @@ elFinder.prototype.commands.quicklook.plugins = [
 				});
 				player.attachMediaElement(node[0]);
 				player.load();
-				autoplay && player.play();
+				play(player);
+			},
+			play = function(player) {
+				var playPromise;
+				autoplay && (playPromise = player.play());
+				if (playPromise && playPromise.catch) {
+					playPromise.catch(function() {
+						reset(true);
+					});
+				}
 			},
 			reset = function(showInfo) {
 				if (node && node.parent().length) {
@@ -802,7 +814,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						elm.load();
 					} catch(e) {}
 					node.remove();
-					node= null;
+					node = null;
 				}
 				showInfo && ql.info.show();
 			};
@@ -813,17 +825,12 @@ elFinder.prototype.commands.quicklook.plugins = [
 				type = mimes[mime],
 				stock, playPromise;
 			
-			if (mimes[mime] && ql.dispInlineRegex.test(file.mime) && (((type === 'm3u8' || type === 'mpd' || type === 'flv') && !fm.UA.ltIE10) || ql.support.video[type])) {
+			if (mimes[mime] && ql.dispInlineRegex.test(file.mime) && (((type === 'm3u8' || (type === 'mpd' && !fm.UA.iOS) || type === 'flv') && !fm.UA.ltIE10) || ql.support.video[type])) {
 				autoplay = ql.autoPlay();
 				if (ql.support.video[type] && (type !== 'm3u8' || fm.UA.Safari)) {
 					e.stopImmediatePropagation();
 					render(file, { src: fm.openUrl(file.hash) });
-					autoplay && (playPromise = node[0].play());
-					if (playPromise && playPromise.catch) {
-						playPromise.catch(function() {
-							reset(true);
-						});
-					}
+					play(node[0]);
 				} else {
 					if (cHls !== false && fm.options.cdns.hls && type === 'm3u8') {
 						e.stopImmediatePropagation();
