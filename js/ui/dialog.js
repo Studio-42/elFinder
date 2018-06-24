@@ -222,7 +222,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 										dialog.hasClass('ui-resizable') && dialog.resizable('enable');
 									} catch(e) {}
 								}
-								dialog.trigger('resize');
+								dialog.trigger('resize', {init: true});
 							}
 						});
 						titlebar.prepend($('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-full"><span class="ui-icon ui-icon-plusthick"/></span>')
@@ -291,7 +291,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 										dialog.show();
 										fm.toFront(dialog);
 										mnode.remove();
+										posCheck();
 										checkEditing();
+										dialog.trigger('resize', {init: true});
 									});
 								}
 							})
