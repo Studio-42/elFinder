@@ -7,8 +7,7 @@
  */
 elFinder.prototype.commands.empty = function() {
 	"use strict";
-	var fm = this.fm,
-		self = this,
+	var self, fm,
 		selFiles = function(select) {
 			var sel = self.files(select);
 			if (!sel.length) {
@@ -19,6 +18,12 @@ elFinder.prototype.commands.empty = function() {
 	
 	this.linkedCmds = ['rm'];
 	
+	this.init = function() {
+		// lazy assign to make possible to become superclass
+		self = this;
+		fm = this.fm;
+	};
+
 	this.getstate = function(select) {
 		var sel = selFiles(select),
 			cnt;
