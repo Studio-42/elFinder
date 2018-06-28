@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: 6ce228c) (2018-06-24)
+ * Version 2.1.39 (2.1-src Nightly: eeab1ea) (2018-06-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9527,7 +9527,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 6ce228c)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: eeab1ea)';
 
 
 
@@ -23058,8 +23058,7 @@ elFinder.prototype.commands.edit = function() {
  * @author  Naoki Sawada
  */
 elFinder.prototype.commands.empty = function() {
-		var fm = this.fm,
-		self = this,
+		var self, fm,
 		selFiles = function(select) {
 			var sel = self.files(select);
 			if (!sel.length) {
@@ -23070,6 +23069,12 @@ elFinder.prototype.commands.empty = function() {
 	
 	this.linkedCmds = ['rm'];
 	
+	this.init = function() {
+		// lazy assign to make possible to become superclass
+		self = this;
+		fm = this.fm;
+	};
+
 	this.getstate = function(select) {
 		var sel = selFiles(select),
 			cnt;
