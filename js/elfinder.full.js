@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: fb71ed1) (2018-06-30)
+ * Version 2.1.39 (2.1-src Nightly: 66d4f39) (2018-07-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9527,7 +9527,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: fb71ed1)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 66d4f39)';
 
 
 
@@ -10263,9 +10263,12 @@ elFinder.prototype._options = {
 			// list of allowed mimetypes to edit of text files
 			// if empty - any text files can be edited
 			mimes : [],
-			// Use the editor stored in the browser (do not display the choices)
+			// Use the editor stored in the browser
 			// This value allowd overwrite with user preferences
 			useStoredEditor : false,
+			// Open the maximized editor window
+			// This value allowd overwrite with user preferences
+			editorMaximized : false,
 			// edit files in wysisyg's
 			editors : [
 				// {
@@ -12114,7 +12117,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-05-22
+ * @version 2018-06-30
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -12566,7 +12569,8 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'workspace'       : 'Work Space', // from v2.1.38 added 4.4.2018
 			'dialog'          : 'Dialog', // from v2.1.38 added 4.4.2018
 			'all'             : 'All', // from v2.1.38 added 4.4.2018
-			'iconSize'        : 'Icon Size (Icons view)', // form v2.1.39 added 7.5.2018
+			'iconSize'        : 'Icon Size (Icons view)', // from v2.1.39 added 7.5.2018
+			'editorMaximized' : 'Open the maximized editor window', // from v2.1.40 added 30.6.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -16481,6 +16485,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 	if (opts.allowMinimize && opts.allowMinimize === 'auto') {
 		opts.allowMinimize = this.find('textarea,input').length? true : false; 
 	}
+	opts.openMaximized = opts.allowMinimize && opts.openMaximized;
 	if (opts.headerBtnPos && opts.headerBtnPos === 'auto') {
 		opts.headerBtnPos = platformWin? 'right' : 'left';
 	}
@@ -16783,6 +16788,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 					
 					dialog.trigger('totop');
+					
+					opts.openMaximized && fm.toggleMaximize(dialog);
 
 					fm.trigger('dialogopen', {dialog: dialog});
 
@@ -17148,6 +17155,7 @@ $.fn.elfinderdialog.defaults = {
 	maxHeight : null,
 	allowMinimize : 'auto',
 	allowMaximize : false,
+	openMaximized : false,
 	headerBtnPos : 'auto',
 	headerBtnOrder : 'auto',
 	optimizeNumber : true,
@@ -22287,6 +22295,7 @@ elFinder.prototype.commands.edit = function() {
 					maxHeight : 'window',
 					allowMinimize : true,
 					allowMaximize : true,
+					openMaximized : editorMaximized(),
 					btnHoverFocus : false,
 					closeOnEscape : false,
 					close   : function() {
@@ -22802,6 +22811,10 @@ elFinder.prototype.commands.edit = function() {
 		useStoredEditor = function() {
 			var d = fm.storage('useStoredEditor');
 			return d? (d > 0) : self.options.useStoredEditor;
+		},
+		editorMaximized = function() {
+			var d = fm.storage('editorMaximized');
+			return d? (d > 0) : self.options.editorMaximized;
 		},
 		getSubMenuRaw = function(files, callback) {
 			var subMenuRaw = [];
@@ -25623,13 +25636,13 @@ elFinder.prototype.commands.preference = function() {
 			var cats = self.options.categories || {
 					'language' : ['language'],
 					'toolbar' : ['toolbarPref'],
-					'workspace' : ['iconSize','columnPref', 'selectAction', 'useStoredEditor'],
+					'workspace' : ['iconSize','columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized'],
 					'dialog' : ['autoFocusDialog'],
 					'selectionInfo' : ['infoItems', 'hashChecker'],
 					'reset' : ['clearBrowserData'],
 					'all' : true
 				},
-				forms = self.options.prefs || ['language', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'useStoredEditor', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
+				forms = self.options.prefs || ['language', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
 			
 			forms = fm.arrayFlip(forms, true);
 			
@@ -25784,7 +25797,13 @@ elFinder.prototype.commands.preference = function() {
 				return s? (s > 0) : fm.options.commandsOptions.edit.useStoredEditor;
 			})()).on('change', function(e) {
 				fm.storage('useStoredEditor', $(this).is(':checked')? 1 : -1);
-				fm.trigger('selectfiles', {files : fm.selected()});
+			}));
+
+			forms.editorMaximized && (forms.editorMaximized = $('<input type="checkbox"/>').prop('checked', (function() {
+				var s = fm.storage('editorMaximized');
+				return s? (s > 0) : fm.options.commandsOptions.edit.editorMaximized;
+			})()).on('change', function(e) {
+				fm.storage('editorMaximized', $(this).is(':checked')? 1 : -1);
 			}));
 			
 			forms.infoItems && (forms.infoItems = (function() {

@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-05-22
+ * @version 2018-06-30
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -461,7 +461,8 @@
 			'workspace'       : 'ワークスペース', // from v2.1.38 added 4.4.2018
 			'dialog'          : 'ダイアログ', // from v2.1.38 added 4.4.2018
 			'all'             : 'すべて', // from v2.1.38 added 4.4.2018
-			'iconSize'        : 'アイコンサイズ (アイコンビュー)', // form v2.1.39 added 7.5.2018
+			'iconSize'        : 'アイコンサイズ (アイコンビュー)', // from v2.1.39 added 7.5.2018
+			'editorMaximized' : 'エディターウィンドウを最大化して開く', // from v2.1.40 added 30.6.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
