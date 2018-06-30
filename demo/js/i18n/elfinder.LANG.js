@@ -467,7 +467,8 @@
 			'workspace'       : 'Work Space', // from v2.1.38 added 4.4.2018
 			'dialog'          : 'Dialog', // from v2.1.38 added 4.4.2018
 			'all'             : 'All', // from v2.1.38 added 4.4.2018
-			'iconSize'        : 'Icon Size (Icons view)', // form v2.1.39 added 7.5.2018
+			'iconSize'        : 'Icon Size (Icons view)', // from v2.1.39 added 7.5.2018
+			'editorMaximized' : 'Open the maximized editor window', // from v2.1.40 added 30.6.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
