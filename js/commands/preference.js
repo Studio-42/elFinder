@@ -22,13 +22,13 @@ elFinder.prototype.commands.preference = function() {
 			var cats = self.options.categories || {
 					'language' : ['language'],
 					'toolbar' : ['toolbarPref'],
-					'workspace' : ['iconSize','columnPref', 'selectAction', 'useStoredEditor'],
+					'workspace' : ['iconSize','columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized'],
 					'dialog' : ['autoFocusDialog'],
 					'selectionInfo' : ['infoItems', 'hashChecker'],
 					'reset' : ['clearBrowserData'],
 					'all' : true
 				},
-				forms = self.options.prefs || ['language', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'useStoredEditor', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
+				forms = self.options.prefs || ['language', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
 			
 			forms = fm.arrayFlip(forms, true);
 			
@@ -183,7 +183,13 @@ elFinder.prototype.commands.preference = function() {
 				return s? (s > 0) : fm.options.commandsOptions.edit.useStoredEditor;
 			})()).on('change', function(e) {
 				fm.storage('useStoredEditor', $(this).is(':checked')? 1 : -1);
-				fm.trigger('selectfiles', {files : fm.selected()});
+			}));
+
+			forms.editorMaximized && (forms.editorMaximized = $('<input type="checkbox"/>').prop('checked', (function() {
+				var s = fm.storage('editorMaximized');
+				return s? (s > 0) : fm.options.commandsOptions.edit.editorMaximized;
+			})()).on('change', function(e) {
+				fm.storage('editorMaximized', $(this).is(':checked')? 1 : -1);
 			}));
 			
 			forms.infoItems && (forms.infoItems = (function() {
