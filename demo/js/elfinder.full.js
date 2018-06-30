@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: eeab1ea) (2018-06-28)
+ * Version 2.1.39 (2.1-src Nightly: fb71ed1) (2018-06-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9527,7 +9527,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: eeab1ea)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: fb71ed1)';
 
 
 
@@ -11721,14 +11721,21 @@ elFinder.prototype.resources = {
 				sel  = fm.selected(),
 				move = this.move || false,
 				empty= wz.hasClass('elfinder-cwd-wrapper-empty'),
+				unselect = function() {
+					requestAnimationFrame(function() {
+						input && input.trigger('blur');
+					});
+				},
 				rest = function(){
 					if (!overlay.is(':hidden')) {
 						overlay.elfinderoverlay('hide').off('click close', cancel);
 					}
-					node.removeClass('ui-front').css('position', '');
+					pnode.removeClass('ui-front')
+						.css('position', '')
+						.off('unselect.'+fm.namespace, unselect);
 					if (tarea) {
 						nnode && nnode.css('max-height', '');
-					} else if (pnode) {
+					} else if (!tree) {
 						pnode.css('width', '')
 							.parent('td').css('overflow', '');
 					}
@@ -11763,12 +11770,7 @@ elFinder.prototype.resources = {
 					move  : move
 				},
 				data = this.data || {},
-				node = ui.trigger('create.'+fm.namespace, file).find('#'+fm[find](id))
-					.on('unselect.'+fm.namespace, function() {
-						requestAnimationFrame(function() {
-							input && input.trigger('blur');
-						});
-					}),
+				node = ui.trigger('create.'+fm.namespace, file).find('#'+fm[find](id)),
 				nnode, pnode,
 				overlay = fm.getUI('overlay'),
 				cleanup = function() {
@@ -11968,12 +11970,12 @@ elFinder.prototype.resources = {
 					});
 				}
 				nnode = node.contents().filter(function(){ return this.nodeType==3 && $(this).parent().attr('id') === fm.navHash2Id(file.hash); });
+				pnode = nnode.parent();
 				nnode.replaceWith(input.val(file.name));
 			} else {
 				empty && wz.removeClass('elfinder-cwd-wrapper-empty');
 				nnode = node.find('.elfinder-cwd-filename');
 				pnode = nnode.parent();
-				node.css('position', 'relative').addClass('ui-front');
 				if (tarea) {
 					nnode.css('max-height', 'none');
 				} else {
@@ -11983,6 +11985,9 @@ elFinder.prototype.resources = {
 				}
 				nnode.empty().append(input.val(file.name));
 			}
+			pnode.addClass('ui-front')
+				.css('position', 'relative')
+				.on('unselect.'+fm.namespace, unselect);
 			
 			fm.bind('resize', resize).one('open', openCallback);
 			
