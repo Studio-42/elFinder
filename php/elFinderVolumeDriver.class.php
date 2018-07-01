@@ -299,7 +299,8 @@ abstract class elFinderVolumeDriver {
 			'yml:text/plain'               => 'text/x-yaml',
 			'docx:application/zip'         => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 			'xlsx:application/zip'         => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet xlsx',
-			'pptx:application/zip'         => 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+			'pptx:application/zip'         => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+			'ai:application/pdf'           => 'application/postscript'
 		),
 		// An option to add MimeMap to the `mimeMap` option
 		// Array '[ext]:[detected mime type]' => '[normalized mime]'
