@@ -1249,28 +1249,51 @@ elFinder.prototype.commands.quicklook.plugins = [
 	},
 
 	/**
-	 * Any supported files preview plugin using Google docs online viewer
+	 * Any supported files preview plugin using (Google docs | MS Office) online viewer
 	 *
 	 * @param elFinder.commands.quicklook
 	 **/
 	function(ql) {
 		"use strict";
 		var fm      = ql.fm,
-			mimes   = fm.arrayFlip(ql.options.googleDocsMimes || []),
+			mimes   = Object.assign(fm.arrayFlip(ql.options.googleDocsMimes || [], 'g'), fm.arrayFlip(ql.options.officeOnlineMimes || [], 'm')),
 			preview = ql.preview,
 			win     = ql.window,
 			navi    = ql.navbar,
+			urls    = {
+				g: 'docs.google.com/gview?embedded=true&url=',
+				m: 'view.officeapps.live.com/op/embed.aspx?wdStartOn=0&src='
+			},
+			navBottom = {
+				g: '56px',
+				m: '24px'
+			},
+			mLimits = {
+				xls  : 5242880, // 5MB
+				xlsb : 5242880,
+				xlsx : 5242880,
+				xlsm : 5242880,
+				other: 10485760 // 10MB
+			},
 			node;
 			
 		preview.on(ql.evUpdate, function(e) {
-			var file = e.file;
-			if (mimes[file.mime]) {
+			var file = e.file,
+				type;
+			// 25MB is maximum filesize of Google Docs prevew
+			if (file.size <= 26214400 && (type = mimes[file.mime])) {
 				var win     = ql.window,
 					setNavi = function() {
-						navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '56px' : '');
+						navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? navBottom[type] : '');
 					},
-					loading;
+					ext     = fm.mimeTypes[file.mime],
+					loading, url;
 				
+				if (type === 'm') {
+					if ((mLimits[ext] && file.size > mLimits[ext]) || file.size > mLimits.other) {
+						type = 'g';
+					}
+				}
 				if (file.url == '1') {
 					preview.hide();
 					$('<div class="elfinder-quicklook-info-data"><button class="elfinder-info-button">'+fm.i18n('getLink')+'</button></div>').appendTo(ql.info.find('.elfinder-quicklook-info'))
@@ -1308,6 +1331,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 					
 					loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 					
+					url = fm.convAbsUrl(fm.url(file.hash));
+					if (file.ts) {
+						url += (url.match(/\?/)? '&' : '?') + '_t=' + file.ts;
+					}
 					node = $('<iframe class="elfinder-quicklook-preview-iframe"/>')
 						.css('background-color', 'transparent')
 						.appendTo(preview)
@@ -1321,7 +1348,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							loading.remove();
 							ql.preview.after(ql.info);
 						})
-						.attr('src', '//docs.google.com/gview?embedded=true&url=' + encodeURIComponent(fm.convAbsUrl(fm.url(file.hash))));
+						.attr('src', 'https://' + urls[type] + encodeURIComponent(url));
 					
 					win.on('viewchange.googledocs', setNavi);
 					setNavi();
