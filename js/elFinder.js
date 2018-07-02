@@ -9193,13 +9193,13 @@ elFinder.prototype = {
 			};
 		}
 		// set lock
+		dir.locked = 1;
 		if (!prev.locked) {
-			dir.locked = 1;
 			change = true;
 		}
 		// has leaf root to `dirs: 1`
+		dir.dirs = 1;
 		if (!prev.dirs) {
-			dir.dirs = 1;
 			change = true;
 		}
 		// set ts
