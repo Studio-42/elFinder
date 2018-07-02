@@ -292,14 +292,10 @@ abstract class elFinderVolumeDriver {
 			'mpd:application/xml'          => 'application/dash+xml',
 			'xml:application/xml'          => 'text/xml',
 			'*:application/x-dosexec'      => 'application/x-executable',
-			'webp:application/octet-stream'=> 'image/webp',
 			'doc:application/vnd.ms-office'=> 'application/msword',
 			'xls:application/vnd.ms-office'=> 'application/vnd.ms-excel',
 			'ppt:application/vnd.ms-office'=> 'application/vnd.ms-powerpoint',
 			'yml:text/plain'               => 'text/x-yaml',
-			'docx:application/zip'         => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-			'xlsx:application/zip'         => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet xlsx',
-			'pptx:application/zip'         => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 			'ai:application/pdf'           => 'application/postscript'
 		),
 		// An option to add MimeMap to the `mimeMap` option
@@ -4298,6 +4294,10 @@ abstract class elFinderVolumeDriver {
 			}
 			if ($type) {
 				if ($ext && preg_match('~^application/(?:octet-stream|(?:x-)?zip)~', $type)) {
+					// load default MIME table file "mime.types"
+					if (!elFinderVolumeDriver::$mimetypesLoaded) {
+						elFinderVolumeDriver::loadMimeTypes();
+					}
 					if (isset(elFinderVolumeDriver::$mimetypes[$ext])) {
 						$type = elFinderVolumeDriver::$mimetypes[$ext];
 					}
