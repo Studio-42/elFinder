@@ -5870,15 +5870,15 @@ elFinder.prototype = {
 					});
 					atag = $('a[href]', tmp);
 					atag.each(function(){
-						var loc,
+						var text, loc,
 							parseUrl = function(url) {
 								var a = document.createElement('a');
 								a.href = url;
 								return a;
 							};
-						if ($(this).text()) {
+						if (text = $(this).text()) {
 							loc = parseUrl($(this).attr('href'));
-							if (loc.href && (atag.length === 1 || ! loc.pathname.match(/(?:\.html?|\/[^\/.]*)$/i))) {
+							if (loc.href && (atag.length === 1 || ! loc.pathname.match(/(?:\.html?|\/[^\/.]*)$/i) || $.trim(text).match(/\.[a-z0-9-]{1,10}$/i))) {
 								if ($.inArray(loc.href, ret) == -1 && $.inArray(loc.href, check) == -1) ret.push(loc.href);
 							}
 						}
