@@ -20,7 +20,8 @@ $.fn.elfindertoast = function(opts, fm) {
 		hideEasing: 'swing',
 		onHidden: undefined,
 		timeOut: 3000,
-		extNode: undefined
+		extNode: undefined,
+		width: null
 	}, $.isPlainObject(fm.options.uiOptions.toast.defaults)? fm.options.uiOptions.toast.defaults : {});
 	return this.each(function() {
 		opts = Object.assign({}, defOpts, opts || {});
@@ -28,6 +29,7 @@ $.fn.elfindertoast = function(opts, fm) {
 		var self = $(this),
 			show = function(notm) {
 				self.stop();
+				fm.toFront(self);
 				self[opts.showMethod]({
 					duration: opts.showDuration,
 					easing: opts.showEasing,
@@ -73,6 +75,10 @@ $.fn.elfindertoast = function(opts, fm) {
 		
 		if (opts.extNode) {
 			self.append(opts.extNode);
+		}
+
+		if (opts.width) {
+			self.css('width', opts.width);
 		}
 		
 		show();
