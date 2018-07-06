@@ -12,6 +12,7 @@ elFinder.prototype.commands.edit = function() {
 		clsEditing = fm.res('class', 'editing'),
 		mimesSingle = [],
 		mimes = [],
+		allowAll = false,
 		rtrim = function(str){
 			return str.replace(/\s+$/, '');
 		},
@@ -55,10 +56,10 @@ elFinder.prototype.commands.edit = function() {
 			}
 			return $.grep(files, function(file) {
 				var res;
-				if (skip) {
+				if (skip || file.mime === 'directory') {
 					return false;
 				}
-				res = (fm.mimeIsText(file.mime) || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
+				res = (allowAll || fm.mimeIsText(file.mime) || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
 					&& (!self.onlyMimes.length || $.inArray(file.mime, self.onlyMimes) !== -1)
 					&& file.read && file.write
 					&& (cnt === 1 || (file.mime === mime && file.name.substr(ext.length * -1) === ext))
@@ -649,7 +650,7 @@ elFinder.prototype.commands.edit = function() {
 					if (!editorMimes) {
 						return fm.mimeIsText(fileMime);
 					} else {
-						if ($.inArray(fileMime, editorMimes) !== -1 ) {
+						if (editorMimes[0] === '*' || $.inArray(fileMime, editorMimes) !== -1) {
 							return true;
 						}
 						var i, l;
@@ -811,6 +812,9 @@ elFinder.prototype.commands.edit = function() {
 								if (!editor.info || !editor.info.single) {
 									mimes = mimes.concat(editor.mimes);
 								}
+							}
+							if (!allowAll && editor.mimes && editor.mimes[0] === '*') {
+								allowAll = true;
 							}
 						}
 					});

@@ -383,6 +383,13 @@
     font-size: 12px;
 }
 
+.elfinder-edit-onlineconvert-button {
+    display: inline-block;
+    width: 180px;
+    min-height: 30px;
+    vertical-align: top;
+}
+
 /********************** COMMAND "SORT" ****************************/
 /* for list table header sort triangle icon */
 div.elfinder-cwd-wrapper-list tr.ui-state-default td {

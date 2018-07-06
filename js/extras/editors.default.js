@@ -1516,6 +1516,384 @@
 			save : function(){}
 		},
 		{
+			info : {
+				id : 'onlineconvert',
+				name : 'Online Convert',
+				iconImg : 'img/edit_onlineconvert.png',
+				preventGet: true,
+				hideButtons: true
+			},
+			mimes : ['*'],
+			html : '<iframe style="width:100%;max-height:100%;border:none;"></iframe>',
+			// Prepare on before show dialog
+			prepare : function(base, dialogOpts, file) {
+				var elfNode = base.editor.fm.getUI();
+				$(base).height(elfNode.height());
+				dialogOpts.width = Math.max(dialogOpts.width || 0, elfNode.width() * 0.8);
+			},
+			// Initialization of editing node (this: this editors HTML node)
+			init : function(id, file, dum, fm) {
+				var ta = this,
+					confObj = ta.editor.confObj,
+					idxs = {},
+					converter = 'https://%s.online-convert.com%s?external_url=',
+					conv = {
+						Archive: ['7Z', 'BZ2', 'GZ', 'ZIP'],
+						Audio: ['MP3', 'OGG', 'WAV', 'WMA', 'AAC', 'AIFF', 'FLAC', 'M4A', 'MMF', 'OPUS'],
+						Document: ['DOC', 'DOCX', 'HTML', 'ODT', 'PDF', 'PPT', 'PPTX', 'RTF', 'SWF', 'TXT'],
+						EBook: ['AZW3', 'ePub', 'FB2', 'LIT', 'LRF', 'MOBI', 'PDB', 'PDF','PDF-eBook', 'TCR'],
+						Hash: ['Adler32',  'Apache-htpasswd', 'Blowfish', 'CRC32', 'CRC32B', 'Gost', 'Haval128','MD4', 'MD5', 'RIPEMD128', 'RIPEMD160', 'SHA1', 'SHA256', 'SHA384', 'SHA512', 'Snefru', 'Std-DES', 'Tiger128', 'Tiger128-calculator', 'Tiger128-converter', 'Tiger160', 'Tiger192', 'Whirlpool'],
+						Image: ['BMP', 'EPS', 'GIF', 'EXR', 'ICO', 'JPG', 'PNG', 'SVG', 'TGA', 'TIFF', 'WBMP', 'WebP'],
+						Video: ['3G2', '3GP', 'AVI', 'FLV', 'HLS', 'MKV', 'MOV', 'MP4', 'MPEG-1', 'MPEG-2', 'OGG', 'OGV', 'WebM', 'WMV', 'Android', 'Blackberry', 'DPG', 'iPad', 'iPhone', 'iPod', 'Nintendo-3DS', 'Nintendo-DS', 'PS3', 'Wii', 'Xbox']
+					},
+					btns = (function() {
+						var btns = $('<div/>').on('click', 'button', function() {
+								var b = $(this),
+									opts = b.data('opts') || null,
+									cat = b.closest('.onlineconvert-category').data('cname'),
+									con = b.data('conv');
+								if (confObj.api === true) {
+									api({
+										category: cat,
+										convert: con,
+										options: opts
+									});
+								} else {
+									open(cat, con);
+								}
+							}).on('change', function(e) {
+								var t = $(e.target),
+									p = t.parent(), 
+									b = t.closest('.elfinder-edit-onlineconvert-button').children('button:first'),
+									o = b.data('opts') || {},
+									v = p.data('type') === 'boolean'? t.is(':checked') : t.val();
+								e.stopPropagation();
+								if (v) {
+									if (p.data('type') === 'integer') {
+										v = parseInt(v);
+									}
+									if (p.data('pattern')) {
+										var reg = new RegExp(p.data('pattern'));
+										if (!reg.test(v)) {
+											requestAnimationFrame(function() {
+												fm.error('"' + fm.escape(v) + '" is not match to "/' + fm.escape(p.data('pattern')) + '/"');
+											});
+											v = null;
+										}
+									}
+								}
+								if (v) {
+									o[t.parent().data('optkey')] = v;
+								} else {
+									delete o[p.data('optkey')];
+								}
+								b.data('opts', o);
+							}),
+							ul = $('<ul/>'),
+							oform = function(n, o) {
+								var f = $('<p/>').data('optkey', n).data('type', o.type),
+									checked = '',
+									elm;
+								if (o.description) {
+									f.attr('title', fm.i18n(o.description));
+								}
+								if (o.pattern) {
+									f.data('pattern', o.pattern);
+								}
+								f.append($('<span/>').text(fm.i18n(n) + ' : '));
+								if (o.type === 'boolean') {
+									if (o.default) {
+										checked = ' checked';
+									}
+									f.append($('<input type="checkbox" value="true"'+checked+'/>'));
+								} else if (o.enum){
+									elm = $('<select/>').append($('<option value=""/>').text('Select...'));
+									$.each(o.enum, function(i, v) {
+										elm.append($('<option value="'+v+'"/>').text(v));
+									});
+									f.append(elm);
+								} else {
+									f.append($('<input type="text" value=""/>'));
+								}
+								return f;
+							},
+							makeOption = function(o) {
+								var b = $('<span class="elfinder-button-icon elfinder-button-icon-preference"/>').on('click', function() {
+										f.toggle();
+									}),
+									f = $('<div class="elfinder-edit-onlinconvert-options"/>').hide();
+								if (o.options) {
+									$.each(o.options, function(k, v) {
+										k !== 'download_password' && f.append(oform(k, v));
+									});
+								}
+								this.append(b, f);
+							},
+							setOptions = function(cat) {
+								var type, dfdInit, dfd;
+								if (typeof confObj.api === 'undefined') {
+									dfdInit = fm.request({
+										data: {
+											cmd: 'editor',
+											name: 'OnlineConvert',
+											method: 'init'
+										},
+										preventDefault : true
+									});
+								} else {
+									dfdInit = $.Deferred().resolve({api: confObj.api});
+								}
+								dfdInit.done(function(data) {
+									confObj.api = data.api;
+									if (confObj.api) {
+										if (cat) {
+											type = '?category=' + cat;
+										} else {
+											type = '';
+											cat = 'all';
+										}
+										if (!confObj.conversions) {
+											confObj.conversions = {};
+										}
+										if (!confObj.conversions[cat]) {
+											dfd = $.getJSON('https://api2.online-convert.com/conversions' + type);
+										} else {
+											dfd = $.Deferred().resolve(confObj.conversions[cat]);
+										}
+										dfd.done(function(d) {
+											confObj.conversions[cat] = d;
+											$.each(d, function(i, o) {
+												btns.children('.onlineconvert-category-'+o.category).children('.onlineconvert-'+o.target).trigger('makeoption', o);
+											});
+										});
+									}
+								}).fail(function() {
+
+								});
+							},
+							i = 0;
+						$.each(conv, function(t, c) {
+							var cname = t.toLowerCase(),
+								id = 'elfinder-' + fm.namespace + '-edit-onlineconvert-' + cname,
+								type = $('<div id="' + id + '" class="onlineconvert-category onlineconvert-category-'+cname+'"/>').data('cname', cname);
+							$.each(c, function(i, n) {
+								var nl = n.toLowerCase();
+								type.append($('<div class="elfinder-edit-onlineconvert-button onlineconvert-'+nl+'"/>').on('makeoption', function(e, data) {
+									var elm = $(this);
+									if (!elm.children('.elfinder-button-icon-preference').length) {
+										makeOption.call(elm, data);
+									}
+								}).append($('<button/>').text(n).data('conv', nl)));
+							});
+							ul.append($('<li/>').append($('<a/>').attr('href', '#' + id).text(t)));
+							btns.append(type);
+							idxs[cname] = i++;
+						});
+						btns.prepend(ul).tabs({
+							beforeActivate: function(e, ui) {
+								setOptions(ui.newPanel.data('cname'));
+							}
+						});
+						return btns;
+					})(),
+					ifm = $(this).hide(),
+					select = $('<div/>')
+						.append(
+							btns,
+							$('<div/>').append($('<button/>').html('Open online-convert.com').on('click', function() {
+								open();
+							}))
+						)
+						.appendTo(ifm.parent().css({overflow: 'auto'})),
+					spnr = $('<div class="elfinder-edit-spiner elfinder-edit-online-convert"/>')
+						.hide()
+						.css({
+							position: 'absolute',
+							top: '50%',
+							textAlign: 'center',
+							width: '100%',
+							fontSize: '16pt'
+						})
+						.html('<span class="elfinder-edit-loadingmsg">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
+						.appendTo(ifm.parent()),
+					url = function() {
+						spnr.show();
+						return fm.url(file.hash, {
+							async: true,
+							temporary: true
+						}).fail(function(error) {
+							error && fm.error(error);
+							ta.elfinderdialog('destroy');
+						}).always(function() {
+							spnr.hide();
+						});
+					},
+					api = function(opts) {
+						$(ta).data('dfrd', url().done(function(url) {
+							select.fadeOut();
+							setStatus({info: 'Start conversion request.'});
+							fm.request({
+								data: {
+									cmd: 'editor',
+									name: 'OnlineConvert',
+									method: 'api',
+									'args[category]': opts.category,
+									'args[convert]': opts.convert,
+									'args[options]': JSON.stringify(opts.options),
+									'args[source]' : fm.convAbsUrl(url)
+								},
+								preventDefault : true
+							}).done(function(data) {
+								checkRes(data.apires, opts.category, opts.convert);
+							}).fail(function(error) {
+								error && fm.error(error);
+								ta.elfinderdialog('destroy');
+							});
+						}));
+					},
+					checkRes = function(res, cat, con) {
+						var status, err = [];
+						if (res && res.id) {
+							status = res.status;
+							if (status.code === 'failed') {
+								spnr.hide();
+								if (res.errors && res.errors.length) {
+									$.each(res.errors, function(i, o) {
+										o.message && err.push(o.message);
+									});
+								}
+								fm.error(err.length? err : status.info);
+							} else if (status.code === 'completed') {
+								upload(res.output);
+							} else {
+								setStatus(status);
+								setTimeout(function() {
+									polling(res.id);
+								}, 1000);
+							}
+						} else {
+							if (res.message) {
+								fm.error(res.message);
+							}
+							open(cat, con);
+						}
+					},
+					setStatus = function(status) {
+						spnr.show().children('.elfinder-edit-loadingmsg').text(status.info);
+					},
+					polling = function(jobid) {
+						fm.request({
+							data: {
+								cmd: 'editor',
+								name: 'OnlineConvert',
+								method: 'api',
+								'args[jobid]': jobid
+							},
+							preventDefault : true
+						}).done(function(data) {
+							checkRes(data.apires);
+						}).fail(function(error) {
+							error && fm.error(error);
+							ta.elfinderdialog('destroy');
+						});
+					},
+					upload = function(output) {
+						var url = '';
+						spnr.hide();
+						if (output && output.length) {
+							ta.elfinderdialog('destroy');
+							$.each(output, function(i, o) {
+								if (o.uri) {
+									url += o.uri + '\n';
+								}
+							});
+							fm.upload({
+								target: file.phash,
+								files: [url],
+								type: 'text'
+							});
+						}
+					},
+					open = function(cat, con) {
+						var link;
+						if (cat && con) {
+							link = converter.replace('%s', cat).replace('%s', cat === 'hash'? ('/' + con + '-generator') : ('/convert-to-' + con));
+						} else {
+							link = converter.replace('%s', mode + '-conversion').replace('%s', '');
+						}
+						select.hide();
+						ifm.parent().css({overflow: 'hidden'});
+						$(ta).data('dfrd', url().done(function(url) {
+							var opts;
+							if (url) {
+								fm.toast({
+									msg: 'After conversion, you must be upload with the item URL or a downloaded file to save the converted file.',
+									timeOut: 5000,
+									width: 280
+								});
+								opts = {
+									css: {
+										height: '100%'
+									}
+								};
+								// trigger event 'editEditorPrepare'
+								ta.editor.trigger('Prepare', {
+									node: ta,
+									editorObj: void(0),
+									instance: ifm,
+									opts: opts
+								});
+
+								url = link + encodeURIComponent(fm.convAbsUrl(url).replace(/%20/g, '+'))/*.replace(/%2520/g, '%252520')*/;
+								ifm.attr('src', url).show().css(opts.css);
+							} else {
+								data.error && fm.error(data.error);
+								ta.elfinderdialog('destroy');
+							}
+						}));
+					},
+					mode = 'document',
+					m;
+				if (m = file.mime.match(/^(audio|image|video)/)) {
+					mode = m[1];
+				}
+				if (idxs[mode]) {
+					btns.tabs('option', 'active', idxs[mode]);
+				}
+			},
+			load : function() {},
+			getContent : function() {},
+			save : function() {},
+			// Before dialog close
+			beforeclose : function(base) {
+				var dfd = $.Deferred(),
+					ab = 'about:blank';
+				base.src = ab;
+				setTimeout(function() {
+					var src;
+					try {
+						src = base.contentWindow.location.href;
+					} catch(e) {
+						src = null;
+					}
+					if (src === ab) {
+						dfd.resolve();
+					} else {
+						dfd.reject();
+					}
+				}, 100);
+				return dfd;
+			},
+			// On dialog closed
+			close : function(ta) {
+				var fm = this.fm,
+					dfrd = $(ta).data('dfrd');
+				if (dfrd && dfrd.state() === 'pending') {
+					dfrd.reject();
+				}
+			}
+		},
+		{
 			// Simple Text (basic textarea editor)
 			info : {
 				id : 'textarea',
