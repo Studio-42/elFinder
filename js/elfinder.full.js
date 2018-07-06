@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: 5add684) (2018-07-02)
+ * Version 2.1.39 (2.1-src Nightly: b22a20e) (2018-07-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -5901,15 +5901,15 @@ elFinder.prototype = {
 					});
 					atag = $('a[href]', tmp);
 					atag.each(function(){
-						var loc,
+						var text, loc,
 							parseUrl = function(url) {
 								var a = document.createElement('a');
 								a.href = url;
 								return a;
 							};
-						if ($(this).text()) {
+						if (text = $(this).text()) {
 							loc = parseUrl($(this).attr('href'));
-							if (loc.href && (atag.length === 1 || ! loc.pathname.match(/(?:\.html?|\/[^\/.]*)$/i))) {
+							if (loc.href && (atag.length === 1 || ! loc.pathname.match(/(?:\.html?|\/[^\/.]*)$/i) || $.trim(text).match(/\.[a-z0-9-]{1,10}$/i))) {
 								if ($.inArray(loc.href, ret) == -1 && $.inArray(loc.href, check) == -1) ret.push(loc.href);
 							}
 						}
@@ -9527,7 +9527,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 5add684)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: b22a20e)';
 
 
 
@@ -10249,10 +10249,10 @@ elFinder.prototype._options = {
 			// media auto play when docked
 			dockAutoplay : false,
 			// MIME types to use Google Docs online viewer
-			// Example ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/postscript']
+			// Example ['application/pdf', 'image/tiff', 'application/vnd.ms-office', 'application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/postscript', 'application/rtf']
 			googleDocsMimes : [],
 			// MIME types to use Microsoft Office Online viewer
-			// Example ['application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+			// Example ['application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
 			// These MIME types override "googleDocsMimes"
 			officeOnlineMimes : [],
 			// File size (byte) threshold when using the dim command for obtain the image size necessary to image preview
@@ -18988,7 +18988,8 @@ $.fn.elfindertoast = function(opts, fm) {
 		hideEasing: 'swing',
 		onHidden: undefined,
 		timeOut: 3000,
-		extNode: undefined
+		extNode: undefined,
+		width: null
 	}, $.isPlainObject(fm.options.uiOptions.toast.defaults)? fm.options.uiOptions.toast.defaults : {});
 	return this.each(function() {
 		opts = Object.assign({}, defOpts, opts || {});
@@ -18996,6 +18997,7 @@ $.fn.elfindertoast = function(opts, fm) {
 		var self = $(this),
 			show = function(notm) {
 				self.stop();
+				fm.toFront(self);
 				self[opts.showMethod]({
 					duration: opts.showDuration,
 					easing: opts.showEasing,
@@ -19041,6 +19043,10 @@ $.fn.elfindertoast = function(opts, fm) {
 		
 		if (opts.extNode) {
 			self.append(opts.extNode);
+		}
+
+		if (opts.width) {
+			self.css('width', opts.width);
 		}
 		
 		show();
