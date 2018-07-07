@@ -11,8 +11,6 @@ class elFinderEditorOnlineConvert extends elFinderEditor
 
     public function api()
     {
-        //return array('apires' => array('message' => 'now in test mode...'));
-        $debug = false;
         $endpoint = 'https://api2.online-convert.com/jobs';
         $category = $this->argValue('category');
         $convert = $this->argValue('convert');
@@ -36,7 +34,6 @@ class elFinderEditorOnlineConvert extends elFinderEditor
             if ($options && $options !== 'null' && ($options = json_decode($options, true))) {
             	$request['conversion'][0]['options'] = $options;
             }
-            //debug(json_encode($request));
 
             $ch = curl_init($endpoint);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
@@ -58,18 +55,10 @@ class elFinderEditorOnlineConvert extends elFinderEditor
         }
 
         if ($ch) {
-            if ($debug) {
-                curl_setopt($ch, CURLOPT_HEADER, TRUE);
-                curl_setopt($ch, CURLINFO_HEADER_OUT, TRUE);
-            }
-
             $response = curl_exec($ch);
             $info = curl_getinfo($ch);
             $error =  curl_error($ch);
             curl_close($ch);
-            if ($debug) {
-                debug($info);
-            }
 
             if (! empty($error)) {
                 $res = array('error' => $error);

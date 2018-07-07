@@ -389,6 +389,14 @@
     min-height: 30px;
     vertical-align: top;
 }
+.elfinder-edit-onlineconvert-button button {
+    cursor: pointer;
+}
+.elfinder-edit-onlineconvert-button .elfinder-button-icon {
+    margin: 0 10px;
+    vertical-align: middle;
+    cursor: pointer;
+}
 
 /********************** COMMAND "SORT" ****************************/
 /* for list table header sort triangle icon */

@@ -1521,7 +1521,9 @@
 				name : 'Online Convert',
 				iconImg : 'img/edit_onlineconvert.png',
 				preventGet: true,
-				hideButtons: true
+				hideButtons: true,
+				single: true,
+				converter: true
 			},
 			mimes : ['*'],
 			html : '<iframe style="width:100%;max-height:100%;border:none;"></iframe>',
@@ -1538,14 +1540,18 @@
 					idxs = {},
 					converter = 'https://%s.online-convert.com%s?external_url=',
 					conv = {
-						Archive: ['7Z', 'BZ2', 'GZ', 'ZIP'],
-						Audio: ['MP3', 'OGG', 'WAV', 'WMA', 'AAC', 'AIFF', 'FLAC', 'M4A', 'MMF', 'OPUS'],
-						Document: ['DOC', 'DOCX', 'HTML', 'ODT', 'PDF', 'PPT', 'PPTX', 'RTF', 'SWF', 'TXT'],
-						EBook: ['AZW3', 'ePub', 'FB2', 'LIT', 'LRF', 'MOBI', 'PDB', 'PDF','PDF-eBook', 'TCR'],
-						Hash: ['Adler32',  'Apache-htpasswd', 'Blowfish', 'CRC32', 'CRC32B', 'Gost', 'Haval128','MD4', 'MD5', 'RIPEMD128', 'RIPEMD160', 'SHA1', 'SHA256', 'SHA384', 'SHA512', 'Snefru', 'Std-DES', 'Tiger128', 'Tiger128-calculator', 'Tiger128-converter', 'Tiger160', 'Tiger192', 'Whirlpool'],
-						Image: ['BMP', 'EPS', 'GIF', 'EXR', 'ICO', 'JPG', 'PNG', 'SVG', 'TGA', 'TIFF', 'WBMP', 'WebP'],
-						Video: ['3G2', '3GP', 'AVI', 'FLV', 'HLS', 'MKV', 'MOV', 'MP4', 'MPEG-1', 'MPEG-2', 'OGG', 'OGV', 'WebM', 'WMV', 'Android', 'Blackberry', 'DPG', 'iPad', 'iPhone', 'iPod', 'Nintendo-3DS', 'Nintendo-DS', 'PS3', 'Wii', 'Xbox']
+						Archive: {'7Z':{}, 'BZ2':{ext:'bz'}, 'GZ':{}, 'ZIP':{}},
+						Audio: {'MP3':{}, 'OGG':{}, 'WAV':{}, 'WMA':{}, 'AAC':{}, 'AIFF':{ext:'aif'}, 'FLAC':{}, 'M4A':{}, 'MMF':{}, 'OPUS':{ext:'ogg'}},
+						Document: {'DOC':{}, 'DOCX':{}, 'HTML':{}, 'ODT':{}, 'PDF':{}, 'PPT':{}, 'PPTX':{}, 'RTF':{}, 'SWF':{}, 'TXT':{}},
+						EBook: {'AZW3':{ext:'azw'}, 'ePub':{}, 'FB2':{ext:'xml'}, 'LIT':{}, 'LRF':{}, 'MOBI':{}, 'PDB':{}, 'PDF':{},'PDF-eBook':{ext:'pdf'}, 'TCR':{}},
+						Hash: {'Adler32':{},  'Apache-htpasswd':{}, 'Blowfish':{}, 'CRC32':{}, 'CRC32B':{}, 'Gost':{}, 'Haval128':{},'MD4':{}, 'MD5':{}, 'RIPEMD128':{}, 'RIPEMD160':{}, 'SHA1':{}, 'SHA256':{}, 'SHA384':{}, 'SHA512':{}, 'Snefru':{}, 'Std-DES':{}, 'Tiger128':{}, 'Tiger128-calculator':{}, 'Tiger128-converter':{}, 'Tiger160':{}, 'Tiger192':{}, 'Whirlpool':{}},
+						Image: {'BMP':{}, 'EPS':{}, 'GIF':{}, 'EXR':{}, 'ICO':{}, 'JPG':{}, 'PNG':{}, 'SVG':{}, 'TGA':{}, 'TIFF':{ext:'tif'}, 'WBMP':{}, 'WebP':{}},
+						Video: {'3G2':{}, '3GP':{}, 'AVI':{}, 'FLV':{}, 'HLS':{}, 'MKV':{}, 'MOV':{}, 'MP4':{}, 'MPEG-1':{}, 'MPEG-2':{}, 'OGG':{}, 'OGV':{}, 'WebM':{}, 'WMV':{}, 'Android':{link:'/convert-video-for-%s'}, 'Blackberry':{}, 'DPG':{}, 'iPad':{}, 'iPhone':{}, 'iPod':{}, 'Nintendo-3DS':{}, 'Nintendo-DS':{}, 'PS3':{}, 'Wii':{}, 'Xbox':{}}
 					},
+					catExts = {
+						Hash: 'txt'
+					},
+					allowZip = fm.uploadMimeCheck('application/zip', file.phash),
 					btns = (function() {
 						var btns = $('<div/>').on('click', 'button', function() {
 								var b = $(this),
@@ -1593,7 +1599,9 @@
 							oform = function(n, o) {
 								var f = $('<p/>').data('optkey', n).data('type', o.type),
 									checked = '',
-									elm;
+									disabled = '',
+									nozip = false,
+									opts, btn, elm;
 								if (o.description) {
 									f.attr('title', fm.i18n(o.description));
 								}
@@ -1602,10 +1610,17 @@
 								}
 								f.append($('<span/>').text(fm.i18n(n) + ' : '));
 								if (o.type === 'boolean') {
-									if (o.default) {
+									if (o.default || (nozip = (n === 'allow_multiple_outputs' && !allowZip))) {
 										checked = ' checked';
+										if (nozip) {
+											disabled = ' disabled';
+										}
+										btn = this.children('button:first');
+										opts = btn.data('opts') || {};
+										opts[n] = true;
+										btn.data('opts', opts);
 									}
-									f.append($('<input type="checkbox" value="true"'+checked+'/>'));
+									f.append($('<input type="checkbox" value="true"'+checked+disabled+'/>'));
 								} else if (o.enum){
 									elm = $('<select/>').append($('<option value=""/>').text('Select...'));
 									$.each(o.enum, function(i, v) {
@@ -1618,16 +1633,17 @@
 								return f;
 							},
 							makeOption = function(o) {
-								var b = $('<span class="elfinder-button-icon elfinder-button-icon-preference"/>').on('click', function() {
+								var elm = this,
+									b = $('<span class="elfinder-button-icon elfinder-button-icon-preference"/>').on('click', function() {
 										f.toggle();
 									}),
 									f = $('<div class="elfinder-edit-onlinconvert-options"/>').hide();
 								if (o.options) {
 									$.each(o.options, function(k, v) {
-										k !== 'download_password' && f.append(oform(k, v));
+										k !== 'download_password' && f.append(oform.call(elm, k, v));
 									});
 								}
-								this.append(b, f);
+								elm.append(b, f);
 							},
 							setOptions = function(cat) {
 								var type, dfdInit, dfd;
@@ -1643,6 +1659,7 @@
 								} else {
 									dfdInit = $.Deferred().resolve({api: confObj.api});
 								}
+								cat = cat.toLowerCase();
 								dfdInit.done(function(data) {
 									confObj.api = data.api;
 									if (confObj.api) {
@@ -1672,22 +1689,49 @@
 								});
 							},
 							i = 0;
+						
+						if (!confObj.ext2mime) {
+							confObj.ext2mime = fm.arrayFlip(fm.mimeTypes);
+						}
 						$.each(conv, function(t, c) {
 							var cname = t.toLowerCase(),
 								id = 'elfinder-' + fm.namespace + '-edit-onlineconvert-' + cname,
-								type = $('<div id="' + id + '" class="onlineconvert-category onlineconvert-category-'+cname+'"/>').data('cname', cname);
-							$.each(c, function(i, n) {
-								var nl = n.toLowerCase();
-								type.append($('<div class="elfinder-edit-onlineconvert-button onlineconvert-'+nl+'"/>').on('makeoption', function(e, data) {
-									var elm = $(this);
-									if (!elm.children('.elfinder-button-icon-preference').length) {
-										makeOption.call(elm, data);
+								type = $('<div id="' + id + '" class="onlineconvert-category onlineconvert-category-'+cname+'"/>').data('cname', t),
+								cext;
+							if (catExts[t]) {
+								cext = catExts[t];
+							}
+							$.each(c, function(n, o) {
+								var nl = n.toLowerCase(),
+									ext;
+								if (cext) {
+									ext = cext;
+								} else if (o.ext) {
+									ext = o.ext;
+								} else {
+									ext = nl;
+								}
+								if (!confObj.ext2mime[ext]) {
+									if (cname === 'audio' || cname === 'image' || cname === 'video') {
+										confObj.ext2mime[ext] = cname + '/x-' + nl;
+									} else {
+										confObj.ext2mime[ext] = 'application/octet-stream';
 									}
-								}).append($('<button/>').text(n).data('conv', nl)));
+								}
+								if (fm.uploadMimeCheck(confObj.ext2mime[ext], file.phash)) {
+									type.append($('<div class="elfinder-edit-onlineconvert-button onlineconvert-'+nl+'"/>').on('makeoption', function(e, data) {
+										var elm = $(this);
+										if (!elm.children('.elfinder-button-icon-preference').length) {
+											makeOption.call(elm, data);
+										}
+									}).append($('<button/>').text(n).data('conv', n)));
+								}
 							});
-							ul.append($('<li/>').append($('<a/>').attr('href', '#' + id).text(t)));
-							btns.append(type);
-							idxs[cname] = i++;
+							if (type.children().length) {
+								ul.append($('<li/>').append($('<a/>').attr('href', '#' + id).text(t)));
+								btns.append(type);
+								idxs[cname] = i++;
+							}
 						});
 						btns.prepend(ul).tabs({
 							beforeActivate: function(e, ui) {
@@ -1737,8 +1781,8 @@
 									cmd: 'editor',
 									name: 'OnlineConvert',
 									method: 'api',
-									'args[category]': opts.category,
-									'args[convert]': opts.convert,
+									'args[category]': opts.category.toLowerCase(),
+									'args[convert]': opts.convert.toLowerCase(),
 									'args[options]': JSON.stringify(opts.options),
 									'args[source]' : fm.convAbsUrl(url)
 								},
@@ -1817,7 +1861,12 @@
 					open = function(cat, con) {
 						var link;
 						if (cat && con) {
-							link = converter.replace('%s', cat).replace('%s', cat === 'hash'? ('/' + con + '-generator') : ('/convert-to-' + con));
+							if (conv[cat] && conv[cat][con] && conv[cat][con].link) {
+								link = conv[cat][con].link.replace('%s', con);
+							} else {
+								link = cat === 'hash'? ('/' + con + '-generator') : ('/convert-to-' + con);
+							}
+							link = converter.replace('%s', cat).replace('%s', link);
 						} else {
 							link = converter.replace('%s', mode + '-conversion').replace('%s', '');
 						}

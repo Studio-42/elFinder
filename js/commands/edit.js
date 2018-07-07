@@ -59,11 +59,12 @@ elFinder.prototype.commands.edit = function() {
 				if (skip || file.mime === 'directory') {
 					return false;
 				}
-				res = (allowAll || fm.mimeIsText(file.mime) || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
+				res = file.read
+					&& (allowAll || fm.mimeIsText(file.mime) || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
 					&& (!self.onlyMimes.length || $.inArray(file.mime, self.onlyMimes) !== -1)
-					&& file.read && file.write
 					&& (cnt === 1 || (file.mime === mime && file.name.substr(ext.length * -1) === ext))
-					&& fm.uploadMimeCheck(file.mime, file.phash)? true : false;
+					&& fm.uploadMimeCheck(file.mime, file.phash)? true : false
+					&& (!file.write && setEditors(file, cnt) && Object.keys(editors).length);
 				if (!res) {
 					skip = true;
 				}
@@ -677,7 +678,8 @@ elFinder.prototype.commands.edit = function() {
 					}
 					return false;
 				},
-				optEditors = self.options.editors || [];
+				optEditors = self.options.editors || [],
+				cwdWrite = fm.cwd().write;
 			
 			stored = fm.storage('storedEditors') || {};
 			editors = {};
@@ -687,6 +689,7 @@ elFinder.prototype.commands.edit = function() {
 			$.each(optEditors, function(i, editor) {
 				var name;
 				if ((cnt === 1 || !editor.info || !editor.info.single)
+						&& (!editor.info || !editor.info.converter)? file.write : cwdWrite
 						&& mimeMatch(file.mime, editor.mimes || null)
 						&& extMatch(file.name, editor.exts || null)
 						&& typeof editor.load == 'function'
