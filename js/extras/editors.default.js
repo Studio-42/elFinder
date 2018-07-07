@@ -1552,6 +1552,7 @@
 						Hash: 'txt'
 					},
 					allowZip = fm.uploadMimeCheck('application/zip', file.phash),
+					useTabs = $.fn.tabs,
 					btns = (function() {
 						var btns = $('<div/>').on('click', 'button', function() {
 								var b = $(this),
@@ -1680,7 +1681,7 @@
 										dfd.done(function(d) {
 											confObj.conversions[cat] = d;
 											$.each(d, function(i, o) {
-												btns.children('.onlineconvert-category-'+o.category).children('.onlineconvert-'+o.target).trigger('makeoption', o);
+												btns[useTabs? 'children' : 'find']('.onlineconvert-category-' + o.category).children('.onlineconvert-' + o.target).trigger('makeoption', o);
 											});
 										});
 									}
@@ -1733,11 +1734,18 @@
 								idxs[cname] = i++;
 							}
 						});
-						btns.prepend(ul).tabs({
-							beforeActivate: function(e, ui) {
-								setOptions(ui.newPanel.data('cname'));
-							}
-						});
+						if (useTabs) {
+							btns.prepend(ul).tabs({
+								beforeActivate: function(e, ui) {
+									setOptions(ui.newPanel.data('cname'));
+								}
+							});
+						} else {
+							$.each(conv, function(t) {
+								btns.append($('<fieldset/>').append($('<legend/>').text(t)).append(btns.children('.onlineconvert-category-' + t.toLowerCase())));
+								setOptions(t);
+							});
+						}
 						return btns;
 					})(),
 					ifm = $(this).hide(),
@@ -1907,7 +1915,7 @@
 				if (m = file.mime.match(/^(audio|image|video)/)) {
 					mode = m[1];
 				}
-				if (idxs[mode]) {
+				if (useTabs && idxs[mode]) {
 					btns.tabs('option', 'active', idxs[mode]);
 				}
 			},
