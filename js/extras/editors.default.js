@@ -1516,6 +1516,25 @@
 			save : function(){}
 		},
 		{
+			// Simple Text (basic textarea editor)
+			info : {
+				id : 'textarea',
+				name : 'TextArea',
+				useTextAreaEvent : true
+			},
+			load : function(textarea) {
+				// trigger event 'editEditorPrepare'
+				this.trigger('Prepare', {
+					node: textarea,
+					editorObj: void(0),
+					instance: void(0),
+					opts: {}
+				});
+			},
+			save : function(){}
+		},
+		{
+			// File converter with online-convert.com
 			info : {
 				id : 'onlineconvert',
 				name : 'Online Convert',
@@ -1950,24 +1969,6 @@
 					dfrd.reject();
 				}
 			}
-		},
-		{
-			// Simple Text (basic textarea editor)
-			info : {
-				id : 'textarea',
-				name : 'TextArea',
-				useTextAreaEvent : true
-			},
-			load : function(textarea) {
-				// trigger event 'editEditorPrepare'
-				this.trigger('Prepare', {
-					node: textarea,
-					editorObj: void(0),
-					instance: void(0),
-					opts: {}
-				});
-			},
-			save : function(){}
 		}
 	];
 }, window.elFinder));
