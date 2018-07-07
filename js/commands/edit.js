@@ -689,7 +689,7 @@ elFinder.prototype.commands.edit = function() {
 			$.each(optEditors, function(i, editor) {
 				var name;
 				if ((cnt === 1 || !editor.info || !editor.info.single)
-						&& (!editor.info || !editor.info.converter)? file.write : cwdWrite
+						&& ((!editor.info || !editor.info.converter)? file.write : cwdWrite)
 						&& mimeMatch(file.mime, editor.mimes || null)
 						&& extMatch(file.name, editor.exts || null)
 						&& typeof editor.load == 'function'
