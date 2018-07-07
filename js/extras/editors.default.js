@@ -1893,7 +1893,8 @@
 									opts: opts
 								});
 
-								url = link + encodeURIComponent(fm.convAbsUrl(url).replace(/%20/g, '+'))/*.replace(/%2520/g, '%252520')*/;
+								// need `.replace(/%2520/g, '%252520')` for a bug of online-convert.com
+								url = link + encodeURIComponent(fm.convAbsUrl(url)).replace(/%2520/g, '%252520');
 								ifm.attr('src', url).show().css(opts.css);
 							} else {
 								data.error && fm.error(data.error);

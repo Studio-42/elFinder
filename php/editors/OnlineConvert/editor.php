@@ -11,6 +11,7 @@ class elFinderEditorOnlineConvert extends elFinderEditor
 
     public function api()
     {
+        // return array('apires' => array('message' => 'Currently disabled for developping...'));
         $endpoint = 'https://api2.online-convert.com/jobs';
         $category = $this->argValue('category');
         $convert = $this->argValue('convert');
