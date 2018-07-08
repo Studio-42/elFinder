@@ -397,6 +397,10 @@
     vertical-align: middle;
     cursor: pointer;
 }
+.elfinder-edit-bottom-btn {
+    text-align: center;
+    margin: 10px 0 0;
+}
 
 /********************** COMMAND "SORT" ****************************/
 /* for list table header sort triangle icon */
