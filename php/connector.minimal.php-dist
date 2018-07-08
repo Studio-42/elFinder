@@ -75,6 +75,11 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // define('ELFINDER_ZOHO_OFFICE_APIKEY', '');
 // ===============================================
 
+// // Online converter (online-convert.com) APIKey
+// // https://www.zoho.com/docs/help/office-apis.html
+// define('ELFINDER_ONLINE_CONVRT_APIKEY', '');
+// ===============================================
+
 // // Zip Archive editor
 // // Installation by composer
 // // `composer require nao-pon/elfinder-flysystem-ziparchive-netmount`
