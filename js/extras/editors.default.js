@@ -1570,6 +1570,7 @@
 					catExts = {
 						Hash: 'txt'
 					},
+					toastWidth = 280,
 					allowZip = fm.uploadMimeCheck('application/zip', file.phash),
 					useTabs = $.fn.tabs,
 					btns = (function() {
@@ -1845,9 +1846,23 @@
 							}
 						} else {
 							if (res.message) {
-								fm.error(res.message);
+								//fm.error(res.message);
+								fm.toast({
+									msg: fm.i18n(res.message),
+									mode: 'error',
+									timeOut: 5000,
+									width: toastWidth
+								});
 							}
-							open(cat, con);
+							fm.toast({
+								msg: fm.i18n('editorConvNoApi'),
+								mode: 'warning',
+								timeOut: 3000,
+								width: toastWidth,
+								onHidden: function() {
+									open(cat, con);
+								}
+							});
 						}
 					},
 					setStatus = function(status) {
@@ -1904,9 +1919,10 @@
 							var opts;
 							if (url) {
 								fm.toast({
-									msg: 'After conversion, you must be upload with the item URL or a downloaded file to save the converted file.',
+									msg: fm.i18n('editorConvNeedUpload'),
+									mode: 'info',
 									timeOut: 5000,
-									width: 280
+									width: toastWidth
 								});
 								opts = {
 									css: {
