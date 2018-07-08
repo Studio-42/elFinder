@@ -1772,7 +1772,7 @@
 					select = $('<div/>')
 						.append(
 							btns,
-							$('<div/>').append($('<button/>').html('Open online-convert.com').on('click', function() {
+							$('<div class="elfinder-edit-bottom-btn"/>').append($('<button/>').html('Open online-convert.com').on('click', function() {
 								open();
 							}))
 						)
