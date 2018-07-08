@@ -1834,6 +1834,7 @@
 									});
 								}
 								fm.error(err.length? err : status.info);
+								select.fadeIn();
 							} else if (status.code === 'completed') {
 								upload(res.output);
 							} else {
