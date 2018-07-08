@@ -48,4 +48,17 @@ class elFinderEditor
 
         return isset($checker[$name]);
     }
+
+    /**
+     * Return $this->args value of the key
+     *
+     * @param      string  $key    target key
+     * @param      string  $empty  empty value
+     *
+     * @return     mixed
+     */
+    public function argValue($key, $empty = '')
+    {
+        return isset($this->args[$key])? $this->args[$key] : $empty;
+    }
 }
