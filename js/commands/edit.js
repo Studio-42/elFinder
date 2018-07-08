@@ -690,6 +690,7 @@ elFinder.prototype.commands.edit = function() {
 				var name;
 				if ((cnt === 1 || !editor.info || !editor.info.single)
 						&& ((!editor.info || !editor.info.converter)? file.write : cwdWrite)
+						&& (!editor.info.converter || file.size > 0)
 						&& mimeMatch(file.mime, editor.mimes || null)
 						&& extMatch(file.name, editor.exts || null)
 						&& typeof editor.load == 'function'
