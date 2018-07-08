@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: 0de2ccb) (2018-07-08)
+ * Version 2.1.39 (2.1-src Nightly: 71ea6cc) (2018-07-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -406,6 +406,10 @@
     margin: 0 10px;
     vertical-align: middle;
     cursor: pointer;
+}
+.elfinder-edit-bottom-btn {
+    text-align: center;
+    margin: 10px 0 0;
 }
 
 /********************** COMMAND "SORT" ****************************/
