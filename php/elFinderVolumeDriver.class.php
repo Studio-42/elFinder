@@ -296,7 +296,17 @@ abstract class elFinderVolumeDriver {
 			'xls:application/vnd.ms-office'=> 'application/vnd.ms-excel',
 			'ppt:application/vnd.ms-office'=> 'application/vnd.ms-powerpoint',
 			'yml:text/plain'               => 'text/x-yaml',
-			'ai:application/pdf'           => 'application/postscript'
+			'ai:application/pdf'           => 'application/postscript',
+			'cgm:text/plain'               => 'image/cgm',
+			'dxf:text/plain'               => 'image/vnd.dxf',
+			'hpgl:text/plain'              => 'application/vnd.hp-hpgl',
+			'igs:text/plain'               => 'model/iges',
+			'iges:text/plain'              => 'model/iges',
+			'plt:application/octet-stream' => 'application/plt',
+			'plt:text/plain'               => 'application/plt',
+			'sat:text/plain'               => 'application/sat',
+			'step:text/plain'              => 'application/step',
+			'stp:text/plain'               => 'application/step'
 		),
 		// An option to add MimeMap to the `mimeMap` option
 		// Array '[ext]:[detected mime type]' => '[normalized mime]'

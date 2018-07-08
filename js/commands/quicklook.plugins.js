@@ -1249,6 +1249,84 @@ elFinder.prototype.commands.quicklook.plugins = [
 	},
 
 	/**
+	 * CAD-Files and 3D-Models online viewer on sharecad.org
+	 *
+	 * @param elFinder.commands.quicklook
+	 **/
+	function(ql) {
+		"use strict";
+		var fm      = ql.fm,
+			mimes   = fm.arrayFlip(ql.options.sharecadMimes || []),
+			preview = ql.preview,
+			win     = ql.window,
+			node;
+			
+		preview.on(ql.evUpdate, function(e) {
+			var file = e.file;
+			if (mimes[file.mime.toLowerCase()]) {
+				var win     = ql.window,
+					loading, url;
+				
+				if (file.url == '1') {
+					preview.hide();
+					$('<div class="elfinder-quicklook-info-data"><button class="elfinder-info-button">'+fm.i18n('getLink')+'</button></div>').appendTo(ql.info.find('.elfinder-quicklook-info'))
+					.on('click', function() {
+						var self = $(this);
+						self.html('<span class="elfinder-info-spinner">');
+						fm.request({
+							data : {cmd : 'url', target : file.hash},
+							preventDefault : true
+						})
+						.always(function() {
+							self.html('');
+						})
+						.done(function(data) {
+							var rfile = fm.file(file.hash);
+							file.url = rfile.url = data.url || '';
+							if (file.url) {
+								preview.trigger({
+									type: ql.evUpdate,
+									file: file,
+									forceUpdate: true
+								});
+							}
+						});
+					});
+				}
+				if (file.url !== '' && file.url != '1') {
+					e.stopImmediatePropagation();
+					preview.one('change', function() {
+						loading.remove();
+						node.off('load').remove();
+						node = null;
+					}).addClass('elfinder-overflow-auto');
+					
+					loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					
+					url = fm.convAbsUrl(fm.url(file.hash));
+					node = $('<iframe class="elfinder-quicklook-preview-iframe" scrolling="no"/>')
+						.css('background-color', 'transparent')
+						.appendTo(preview)
+						.on('load', function() {
+							ql.hideinfo();
+							loading.remove();
+							ql.preview.after(ql.info);
+							$(this).css('background-color', '#fff').show();
+						})
+						.on('error', function() {
+							loading.remove();
+							ql.preview.after(ql.info);
+						})
+						.attr('src', '//sharecad.org/cadframe/load?url=' + encodeURIComponent(url));
+					
+					ql.info.after(ql.preview);
+				}
+			}
+			
+		});
+	},
+
+	/**
 	 * Any supported files preview plugin using (Google docs | MS Office) online viewer
 	 *
 	 * @param elFinder.commands.quicklook
