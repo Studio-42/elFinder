@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: d3e9c77) (2018-07-08)
+ * Version 2.1.39 (2.1-src Nightly: 0de2ccb) (2018-07-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9527,7 +9527,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: d3e9c77)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 0de2ccb)';
 
 
 
@@ -12124,7 +12124,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-06-30
+ * @version 2018-07-08
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -12578,6 +12578,8 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'all'             : 'All', // from v2.1.38 added 4.4.2018
 			'iconSize'        : 'Icon Size (Icons view)', // from v2.1.39 added 7.5.2018
 			'editorMaximized' : 'Open the maximized editor window', // from v2.1.40 added 30.6.2018
+			'editorConvNoApi' : 'Because conversion by API is not currently available, please convert on the website.', //from v2.1.40 added 8.7.2018
+			'editorConvNeedUpload' : 'After conversion, you must be upload with the item URL or a downloaded file to save the converted file.', //from v2.1.40 added 8.7.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -22124,6 +22126,7 @@ elFinder.prototype.commands.edit = function() {
 		clsEditing = fm.res('class', 'editing'),
 		mimesSingle = [],
 		mimes = [],
+		allowAll = false,
 		rtrim = function(str){
 			return str.replace(/\s+$/, '');
 		},
@@ -22167,14 +22170,15 @@ elFinder.prototype.commands.edit = function() {
 			}
 			return $.grep(files, function(file) {
 				var res;
-				if (skip) {
+				if (skip || file.mime === 'directory') {
 					return false;
 				}
-				res = (fm.mimeIsText(file.mime) || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
+				res = file.read
+					&& (allowAll || fm.mimeIsText(file.mime) || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
 					&& (!self.onlyMimes.length || $.inArray(file.mime, self.onlyMimes) !== -1)
-					&& file.read && file.write
 					&& (cnt === 1 || (file.mime === mime && file.name.substr(ext.length * -1) === ext))
-					&& fm.uploadMimeCheck(file.mime, file.phash)? true : false;
+					&& fm.uploadMimeCheck(file.mime, file.phash)? true : false
+					&& (!file.write && setEditors(file, cnt) && Object.keys(editors).length);
 				if (!res) {
 					skip = true;
 				}
@@ -22761,7 +22765,7 @@ elFinder.prototype.commands.edit = function() {
 					if (!editorMimes) {
 						return fm.mimeIsText(fileMime);
 					} else {
-						if ($.inArray(fileMime, editorMimes) !== -1 ) {
+						if (editorMimes[0] === '*' || $.inArray(fileMime, editorMimes) !== -1) {
 							return true;
 						}
 						var i, l;
@@ -22788,7 +22792,8 @@ elFinder.prototype.commands.edit = function() {
 					}
 					return false;
 				},
-				optEditors = self.options.editors || [];
+				optEditors = self.options.editors || [],
+				cwdWrite = fm.cwd().write;
 			
 			stored = fm.storage('storedEditors') || {};
 			editors = {};
@@ -22798,6 +22803,8 @@ elFinder.prototype.commands.edit = function() {
 			$.each(optEditors, function(i, editor) {
 				var name;
 				if ((cnt === 1 || !editor.info || !editor.info.single)
+						&& ((!editor.info || !editor.info.converter)? file.write : cwdWrite)
+						&& (!editor.info.converter || file.size > 0)
 						&& mimeMatch(file.mime, editor.mimes || null)
 						&& extMatch(file.name, editor.exts || null)
 						&& typeof editor.load == 'function'
@@ -22923,6 +22930,9 @@ elFinder.prototype.commands.edit = function() {
 								if (!editor.info || !editor.info.single) {
 									mimes = mimes.concat(editor.mimes);
 								}
+							}
+							if (!allowAll && editor.mimes && editor.mimes[0] === '*') {
+								allowAll = true;
 							}
 						}
 					});
