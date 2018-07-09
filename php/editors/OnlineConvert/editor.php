@@ -22,6 +22,7 @@ class elFinderEditorOnlineConvert extends elFinderEditor
         $convert = $this->argValue('convert');
         $options = $this->argValue('options');
         $source = $this->argValue('source');
+        $filename = $this->argValue('filename');
         $jobid = $this->argValue('jobid');
         $string_method = '';
         $options = array();
@@ -41,6 +42,10 @@ class elFinderEditorOnlineConvert extends elFinderEditor
                     'target' => $convert
                 ))
             );
+
+            if ($filename !== '') {
+                $request['input'][0]['filename'] = $filename;
+            }
 
             if ($category) {
             	$request['conversion'][0]['category'] = $category;
