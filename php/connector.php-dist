@@ -86,8 +86,9 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // ===============================================
 
 // // Online converter (online-convert.com) APIKey
-// // https://www.zoho.com/docs/help/office-apis.html
+// // https://www.online-convert.com/signup/free
 // define('ELFINDER_ONLINE_CONVRT_APIKEY', '');
+// define('ELFINDER_DISABLE_ONLINE_CONVRT', false); // set `true` to disable Online converter
 // ===============================================
 
 // // Zip Archive editor
