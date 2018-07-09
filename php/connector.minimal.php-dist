@@ -76,7 +76,7 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // ===============================================
 
 // // Online converter (online-convert.com) APIKey
-// // https://www.online-convert.com/signup/free
+// // https://apiv2.online-convert.com/docs/getting_started/api_key.html
 // define('ELFINDER_ONLINE_CONVRT_APIKEY', '');
 // ===============================================
 
