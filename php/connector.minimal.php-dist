@@ -76,7 +76,7 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // ===============================================
 
 // // Online converter (online-convert.com) APIKey
-// // https://www.zoho.com/docs/help/office-apis.html
+// // https://www.online-convert.com/signup/free
 // define('ELFINDER_ONLINE_CONVRT_APIKEY', '');
 // ===============================================
 

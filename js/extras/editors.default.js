@@ -1539,6 +1539,7 @@
 				id : 'onlineconvert',
 				name : 'Online Convert',
 				iconImg : 'img/edit_onlineconvert.png',
+				cmdCheck : 'OnlineConvert',
 				preventGet: true,
 				hideButtons: true,
 				single: true,
@@ -1565,7 +1566,7 @@
 						EBook: {'AZW3':{ext:'azw'}, 'ePub':{}, 'FB2':{ext:'xml'}, 'LIT':{}, 'LRF':{}, 'MOBI':{}, 'PDB':{}, 'PDF':{},'PDF-eBook':{ext:'pdf'}, 'TCR':{}},
 						Hash: {'Adler32':{},  'Apache-htpasswd':{}, 'Blowfish':{}, 'CRC32':{}, 'CRC32B':{}, 'Gost':{}, 'Haval128':{},'MD4':{}, 'MD5':{}, 'RIPEMD128':{}, 'RIPEMD160':{}, 'SHA1':{}, 'SHA256':{}, 'SHA384':{}, 'SHA512':{}, 'Snefru':{}, 'Std-DES':{}, 'Tiger128':{}, 'Tiger128-calculator':{}, 'Tiger128-converter':{}, 'Tiger160':{}, 'Tiger192':{}, 'Whirlpool':{}},
 						Image: {'BMP':{}, 'EPS':{}, 'GIF':{}, 'EXR':{}, 'ICO':{}, 'JPG':{}, 'PNG':{}, 'SVG':{}, 'TGA':{}, 'TIFF':{ext:'tif'}, 'WBMP':{}, 'WebP':{}},
-						Video: {'3G2':{}, '3GP':{}, 'AVI':{}, 'FLV':{}, 'HLS':{}, 'MKV':{}, 'MOV':{}, 'MP4':{}, 'MPEG-1':{}, 'MPEG-2':{}, 'OGG':{}, 'OGV':{}, 'WebM':{}, 'WMV':{}, 'Android':{link:'/convert-video-for-%s'}, 'Blackberry':{}, 'DPG':{}, 'iPad':{}, 'iPhone':{}, 'iPod':{}, 'Nintendo-3DS':{}, 'Nintendo-DS':{}, 'PS3':{}, 'Wii':{}, 'Xbox':{}}
+						Video: {'3G2':{}, '3GP':{}, 'AVI':{}, 'FLV':{}, 'HLS':{}, 'MKV':{}, 'MOV':{}, 'MP4':{}, 'MPEG-1':{}, 'MPEG-2':{}, 'OGG':{}, 'OGV':{}, 'WebM':{}, 'WMV':{}, 'Android':{link:'/convert-video-for-%s'}, 'Blackberry':{link:'/convert-video-for-%s'}, 'DPG':{link:'/convert-video-for-%s'}, 'iPad':{link:'/convert-video-for-%s'}, 'iPhone':{link:'/convert-video-for-%s'}, 'iPod':{link:'/convert-video-for-%s'}, 'Nintendo-3DS':{link:'/convert-video-for-%s'}, 'Nintendo-DS':{link:'/convert-video-for-%s'}, 'PS3':{link:'/convert-video-for-%s'}, 'Wii':{link:'/convert-video-for-%s'}, 'Xbox':{link:'/convert-video-for-%s'}}
 					},
 					catExts = {
 						Hash: 'txt'

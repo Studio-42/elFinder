@@ -34,7 +34,7 @@ class elFinderEditorZohoOffice extends elFinderEditor
 
     public function enabled()
     {
-        return defined('ELFINDER_ZOHO_OFFICE_APIKEY') && function_exists('curl_init');
+        return defined('ELFINDER_ZOHO_OFFICE_APIKEY') && ELFINDER_ZOHO_OFFICE_APIKEY && function_exists('curl_init');
     }
 
     public function init()

@@ -4,9 +4,14 @@ class elFinderEditorOnlineConvert extends elFinderEditor
 {
     protected $allowed = array('init', 'api');
 
+    public function enabled()
+    {
+        return !defined('ELFINDER_DISABLE_ONLINE_CONVRT') || !ELFINDER_DISABLE_ONLINE_CONVRT;
+    }
+
     public function init()
     {
-        return array('api' => defined('ELFINDER_ONLINE_CONVRT_APIKEY') && function_exists('curl_init'));
+        return array('api' => defined('ELFINDER_ONLINE_CONVRT_APIKEY') && ELFINDER_ONLINE_CONVRT_APIKEY && function_exists('curl_init'));
     }
 
     public function api()
