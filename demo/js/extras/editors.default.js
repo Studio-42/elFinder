@@ -1547,6 +1547,26 @@
 			},
 			mimes : ['*'],
 			html : '<iframe style="width:100%;max-height:100%;border:none;"></iframe>',
+			// setup on elFinder bootup
+			setup : function(opts, fm) {
+				this.set = {
+					url : 'https://%s.online-convert.com%s?external_url=',
+					conv : {
+						Archive: {'7Z':{}, 'BZ2':{ext:'bz'}, 'GZ':{}, 'ZIP':{}},
+						Audio: {'MP3':{}, 'OGG':{}, 'WAV':{}, 'WMA':{}, 'AAC':{}, 'AIFF':{ext:'aif'}, 'FLAC':{}, 'M4A':{}, 'MMF':{}, 'OPUS':{ext:'ogg'}},
+						Document: {'DOC':{}, 'DOCX':{}, 'HTML':{}, 'ODT':{}, 'PDF':{}, 'PPT':{}, 'PPTX':{}, 'RTF':{}, 'SWF':{}, 'TXT':{}},
+						eBook: {'AZW3':{ext:'azw'}, 'ePub':{}, 'FB2':{ext:'xml'}, 'LIT':{}, 'LRF':{}, 'MOBI':{}, 'PDB':{}, 'PDF':{},'PDF-eBook':{ext:'pdf'}, 'TCR':{}},
+						Hash: {'Adler32':{},  'Apache-htpasswd':{}, 'Blowfish':{}, 'CRC32':{}, 'CRC32B':{}, 'Gost':{}, 'Haval128':{},'MD4':{}, 'MD5':{}, 'RIPEMD128':{}, 'RIPEMD160':{}, 'SHA1':{}, 'SHA256':{}, 'SHA384':{}, 'SHA512':{}, 'Snefru':{}, 'Std-DES':{}, 'Tiger128':{}, 'Tiger128-calculator':{}, 'Tiger128-converter':{}, 'Tiger160':{}, 'Tiger192':{}, 'Whirlpool':{}},
+						Image: {'BMP':{}, 'EPS':{}, 'GIF':{}, 'EXR':{}, 'ICO':{}, 'JPG':{}, 'PNG':{}, 'SVG':{}, 'TGA':{}, 'TIFF':{ext:'tif'}, 'WBMP':{}, 'WebP':{}},
+						Video: {'3G2':{}, '3GP':{}, 'AVI':{}, 'FLV':{}, 'HLS':{}, 'MKV':{}, 'MOV':{}, 'MP4':{}, 'MPEG-1':{}, 'MPEG-2':{}, 'OGG':{}, 'OGV':{}, 'WebM':{}, 'WMV':{}, 'Android':{link:'/convert-video-for-%s',ext:'mp4'}, 'Blackberry':{link:'/convert-video-for-%s',ext:'mp4'}, 'DPG':{link:'/convert-video-for-%s',ext:'avi'}, 'iPad':{link:'/convert-video-for-%s',ext:'mp4'}, 'iPhone':{link:'/convert-video-for-%s',ext:'mp4'}, 'iPod':{link:'/convert-video-for-%s',ext:'mp4'}, 'Nintendo-3DS':{link:'/convert-video-for-%s',ext:'avi'}, 'Nintendo-DS':{link:'/convert-video-for-%s',ext:'avi'}, 'PS3':{link:'/convert-video-for-%s',ext:'mp4'}, 'Wii':{link:'/convert-video-for-%s',ext:'avi'}, 'Xbox':{link:'/convert-video-for-%s',ext:'wmv'}}
+					},
+					catExts : {
+						Hash: 'txt'
+					},
+					toastWidth : 280,
+					useTabs : $.fn.tabs
+				};
+			},
 			// Prepare on before show dialog
 			prepare : function(base, dialogOpts, file) {
 				var elfNode = base.editor.fm.getUI();
@@ -1557,29 +1577,15 @@
 			init : function(id, file, dum, fm) {
 				var ta = this,
 					confObj = ta.editor.confObj,
+					set = confObj.set,
 					idxs = {},
-					converter = 'https://%s.online-convert.com%s?external_url=',
-					conv = {
-						Archive: {'7Z':{}, 'BZ2':{ext:'bz'}, 'GZ':{}, 'ZIP':{}},
-						Audio: {'MP3':{}, 'OGG':{}, 'WAV':{}, 'WMA':{}, 'AAC':{}, 'AIFF':{ext:'aif'}, 'FLAC':{}, 'M4A':{}, 'MMF':{}, 'OPUS':{ext:'ogg'}},
-						Document: {'DOC':{}, 'DOCX':{}, 'HTML':{}, 'ODT':{}, 'PDF':{}, 'PPT':{}, 'PPTX':{}, 'RTF':{}, 'SWF':{}, 'TXT':{}},
-						eBook: {'AZW3':{ext:'azw'}, 'ePub':{}, 'FB2':{ext:'xml'}, 'LIT':{}, 'LRF':{}, 'MOBI':{}, 'PDB':{}, 'PDF':{},'PDF-eBook':{ext:'pdf'}, 'TCR':{}},
-						Hash: {'Adler32':{},  'Apache-htpasswd':{}, 'Blowfish':{}, 'CRC32':{}, 'CRC32B':{}, 'Gost':{}, 'Haval128':{},'MD4':{}, 'MD5':{}, 'RIPEMD128':{}, 'RIPEMD160':{}, 'SHA1':{}, 'SHA256':{}, 'SHA384':{}, 'SHA512':{}, 'Snefru':{}, 'Std-DES':{}, 'Tiger128':{}, 'Tiger128-calculator':{}, 'Tiger128-converter':{}, 'Tiger160':{}, 'Tiger192':{}, 'Whirlpool':{}},
-						Image: {'BMP':{}, 'EPS':{}, 'GIF':{}, 'EXR':{}, 'ICO':{}, 'JPG':{}, 'PNG':{}, 'SVG':{}, 'TGA':{}, 'TIFF':{ext:'tif'}, 'WBMP':{}, 'WebP':{}},
-						Video: {'3G2':{}, '3GP':{}, 'AVI':{}, 'FLV':{}, 'HLS':{}, 'MKV':{}, 'MOV':{}, 'MP4':{}, 'MPEG-1':{}, 'MPEG-2':{}, 'OGG':{}, 'OGV':{}, 'WebM':{}, 'WMV':{}, 'Android':{link:'/convert-video-for-%s',ext:'mp4'}, 'Blackberry':{link:'/convert-video-for-%s',ext:'mp4'}, 'DPG':{link:'/convert-video-for-%s',ext:'avi'}, 'iPad':{link:'/convert-video-for-%s',ext:'mp4'}, 'iPhone':{link:'/convert-video-for-%s',ext:'mp4'}, 'iPod':{link:'/convert-video-for-%s',ext:'mp4'}, 'Nintendo-3DS':{link:'/convert-video-for-%s',ext:'avi'}, 'Nintendo-DS':{link:'/convert-video-for-%s',ext:'avi'}, 'PS3':{link:'/convert-video-for-%s',ext:'mp4'}, 'Wii':{link:'/convert-video-for-%s',ext:'avi'}, 'Xbox':{link:'/convert-video-for-%s',ext:'wmv'}}
-					},
-					catExts = {
-						Hash: 'txt'
-					},
-					toastWidth = 280,
 					allowZip = fm.uploadMimeCheck('application/zip', file.phash),
-					useTabs = $.fn.tabs,
 					getExt = function(cat, con) {
 						var c;
-						if (catExts[cat]) {
-							return catExts[cat];
+						if (set.catExts[cat]) {
+							return set.catExts[cat];
 						}
-						if (conv[cat] && (c = conv[cat][con])) {
+						if (set.conv[cat] && (c = set.conv[cat][con])) {
 							return (c.ext || con).toLowerCase();
 						}
 						return con.toLowerCase();
@@ -1712,20 +1718,21 @@
 										dfd.done(function(d) {
 											confObj.conversions[cat] = d;
 											$.each(d, function(i, o) {
-												btns[useTabs? 'children' : 'find']('.onlineconvert-category-' + o.category).children('.onlineconvert-' + o.target).trigger('makeoption', o);
+												btns[set.useTabs? 'children' : 'find']('.onlineconvert-category-' + o.category).children('.onlineconvert-' + o.target).trigger('makeoption', o);
 											});
 										});
 									}
 								});
 							},
+							ts = (+new Date()),
 							i = 0;
 						
 						if (!confObj.ext2mime) {
 							confObj.ext2mime = fm.arrayFlip(fm.mimeTypes);
 						}
-						$.each(conv, function(t, c) {
+						$.each(set.conv, function(t, c) {
 							var cname = t.toLowerCase(),
-								id = 'elfinder-' + fm.namespace + '-edit-onlineconvert-' + cname,
+								id = 'elfinder-edit-onlineconvert-' + cname + ts,
 								type = $('<div id="' + id + '" class="onlineconvert-category onlineconvert-category-'+cname+'"/>').data('cname', t),
 								cext;
 							$.each(c, function(n, o) {
@@ -1753,14 +1760,14 @@
 								idxs[cname] = i++;
 							}
 						});
-						if (useTabs) {
+						if (set.useTabs) {
 							btns.prepend(ul).tabs({
 								beforeActivate: function(e, ui) {
 									setOptions(ui.newPanel.data('cname'));
 								}
 							});
 						} else {
-							$.each(conv, function(t) {
+							$.each(set.conv, function(t) {
 								btns.append($('<fieldset/>').append($('<legend/>').text(t)).append(btns.children('.onlineconvert-category-' + t.toLowerCase())));
 								setOptions(t);
 							});
@@ -1787,17 +1794,24 @@
 						})
 						.html('<span class="elfinder-edit-loadingmsg">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
 						.appendTo(ifm.parent()),
+					_url = null,
 					url = function() {
-						spnr.show();
-						return fm.url(file.hash, {
-							async: true,
-							temporary: true
-						}).fail(function(error) {
-							error && fm.error(error);
-							ta.elfinderdialog('destroy');
-						}).always(function() {
-							spnr.hide();
-						});
+						if (_url) {
+							return $.Deferred().resolve(_url);
+						} else {
+							spnr.show();
+							return fm.url(file.hash, {
+								async: true,
+								temporary: true
+							}).done(function(url) {
+								_url = url;
+							}).fail(function(error) {
+								error && fm.error(error);
+								ta.elfinderdialog('destroy');
+							}).always(function() {
+								spnr.hide();
+							});
+						}
 					},
 					api = function(opts) {
 						$(ta).data('dfrd', url().done(function(url) {
@@ -1850,14 +1864,14 @@
 									msg: fm.i18n(res.message),
 									mode: 'error',
 									timeOut: 5000,
-									width: toastWidth
+									width: set.toastWidth
 								});
 							}
 							fm.toast({
 								msg: fm.i18n('editorConvNoApi'),
 								mode: 'warning',
 								timeOut: 3000,
-								width: toastWidth,
+								width: set.toastWidth,
 								onHidden: function() {
 									open(cat, con);
 								}
@@ -1903,15 +1917,16 @@
 					open = function(cat, con) {
 						var link;
 						if (cat && con) {
-							if (conv[cat] && conv[cat][con] && conv[cat][con].link) {
-								link = conv[cat][con].link.replace('%s', con);
+							if (set.conv[cat] && set.conv[cat][con] && set.conv[cat][con].link) {
+								link = set.conv[cat][con].link.replace('%s', con);
 							} else {
 								link = cat === 'hash'? ('/' + con + '-generator') : ('/convert-to-' + con);
 							}
-							link = converter.replace('%s', cat).replace('%s', link);
+							link = set.url.replace('%s', cat).replace('%s', link);
 						} else {
-							link = converter.replace('%s', mode + '-conversion').replace('%s', '');
+							link = set.url.replace('%s', mode + '-conversion').replace('%s', '');
 						}
+						spnr.hide();
 						select.hide();
 						ifm.parent().css({overflow: 'hidden'});
 						$(ta).data('dfrd', url().done(function(url) {
@@ -1921,7 +1936,7 @@
 									msg: fm.i18n('editorConvNeedUpload'),
 									mode: 'info',
 									timeOut: 5000,
-									width: toastWidth
+									width: set.toastWidth
 								});
 								opts = {
 									css: {
@@ -1950,7 +1965,7 @@
 				if (m = file.mime.match(/^(audio|image|video)/)) {
 					mode = m[1];
 				}
-				if (useTabs && idxs[mode]) {
+				if (set.useTabs && idxs[mode]) {
 					btns.tabs('option', 'active', idxs[mode]);
 				}
 			},
