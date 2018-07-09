@@ -23,6 +23,13 @@ class elFinderEditorOnlineConvert extends elFinderEditor
         $options = $this->argValue('options');
         $source = $this->argValue('source');
         $jobid = $this->argValue('jobid');
+        $string_method = '';
+        $options = array();
+        // Currently these converts are make error with API call. I don't know why.
+        $nonApi = array('android','blackberry','dpg','ipad','iphone','ipod','nintendo-3ds','nintendo-ds','ps3','psp','wii','xbox');
+        if (in_array($convert, $nonApi)) {
+            return array('apires' => array());
+        }
         $ch = null;
         if ($convert && $source) {
             $request = array(
@@ -34,10 +41,18 @@ class elFinderEditorOnlineConvert extends elFinderEditor
                     'target' => $convert
                 ))
             );
+
             if ($category) {
             	$request['conversion'][0]['category'] = $category;
             }
-            if ($options && $options !== 'null' && ($options = json_decode($options, true))) {
+
+            if ($options && $options !== 'null') {
+                $options = json_decode($options, true);
+            }
+            if (!is_array($options)) {
+                $options = array();
+            }
+            if ($options) {
             	$request['conversion'][0]['options'] = $options;
             }
 
@@ -74,7 +89,7 @@ class elFinderEditorOnlineConvert extends elFinderEditor
 
             return $res;
         } else {
-            return array('error', array('errCmdParams', 'editor.OnlineConvert.api'));
+            return array('error' => array('errCmdParams', 'editor.OnlineConvert.api'));
         }
     }
 }
