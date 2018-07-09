@@ -1574,6 +1574,16 @@
 					toastWidth = 280,
 					allowZip = fm.uploadMimeCheck('application/zip', file.phash),
 					useTabs = $.fn.tabs,
+					getExt = function(cat, con) {
+						var c;
+						if (catExts[cat]) {
+							return catExts[cat];
+						}
+						if (conv[cat] && (c = conv[cat][con])) {
+							return (c.ext || con).toLowerCase();
+						}
+						return con.toLowerCase();
+					},
 					btns = (function() {
 						var btns = $('<div/>').on('click', 'button', function() {
 								var b = $(this),
@@ -1706,8 +1716,6 @@
 											});
 										});
 									}
-								}).fail(function() {
-
 								});
 							},
 							i = 0;
@@ -1720,19 +1728,9 @@
 								id = 'elfinder-' + fm.namespace + '-edit-onlineconvert-' + cname,
 								type = $('<div id="' + id + '" class="onlineconvert-category onlineconvert-category-'+cname+'"/>').data('cname', t),
 								cext;
-							if (catExts[t]) {
-								cext = catExts[t];
-							}
 							$.each(c, function(n, o) {
 								var nl = n.toLowerCase(),
-									ext;
-								if (cext) {
-									ext = cext;
-								} else if (o.ext) {
-									ext = o.ext;
-								} else {
-									ext = nl;
-								}
+									ext = getExt(t, n);
 								if (!confObj.ext2mime[ext]) {
 									if (cname === 'audio' || cname === 'image' || cname === 'video') {
 										confObj.ext2mime[ext] = cname + '/x-' + nl;
@@ -1810,10 +1808,11 @@
 									cmd: 'editor',
 									name: 'OnlineConvert',
 									method: 'api',
-									'args[category]': opts.category.toLowerCase(),
-									'args[convert]': opts.convert.toLowerCase(),
-									'args[options]': JSON.stringify(opts.options),
-									'args[source]' : fm.convAbsUrl(url)
+									'args[category]' : opts.category.toLowerCase(),
+									'args[convert]'  : opts.convert.toLowerCase(),
+									'args[options]'  : JSON.stringify(opts.options),
+									'args[source]'   : fm.convAbsUrl(url),
+									'args[filename]' : fm.splitFileExtention(file.name)[0] + '.' + getExt(opts.category, opts.convert)
 								},
 								preventDefault : true
 							}).done(function(data) {
