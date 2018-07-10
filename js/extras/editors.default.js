@@ -1549,7 +1549,11 @@
 			html : '<iframe style="width:100%;max-height:100%;border:none;"></iframe>',
 			// setup on elFinder bootup
 			setup : function(opts, fm) {
-				this.set = {
+				var mOpts = opts.extraOptions.onlineConvert || {maxSize:100,showLink:true};
+				if (mOpts.maxSize) {
+					this.info.maxSize = mOpts.maxSize * 1048576;
+				}
+				this.set = Object.assign({
 					url : 'https://%s.online-convert.com%s?external_url=',
 					conv : {
 						Archive: {'7Z':{}, 'BZ2':{ext:'bz'}, 'GZ':{}, 'ZIP':{}},
@@ -1563,9 +1567,10 @@
 					catExts : {
 						Hash: 'txt'
 					},
+					link : '<div class="elfinder-edit-onlineconvert-link"><a href="https://www.online-convert.com" target="_blank"><span class="elfinder-button-icon"></span>ONLINE-CONVERT.COM</a></div>',
 					toastWidth : 280,
 					useTabs : $.fn.tabs
-				};
+				}, mOpts);
 			},
 			// Prepare on before show dialog
 			prepare : function(base, dialogOpts, file) {
@@ -1778,9 +1783,10 @@
 					select = $('<div/>')
 						.append(
 							btns,
-							$('<div class="elfinder-edit-bottom-btn"/>').append($('<button/>').html('Open online-convert.com').on('click', function() {
+							$('<div class="elfinder-edit-onlineconvert-bottom-btn"/>').append($('<button/>').html(fm.i18n('convertOn', 'Online-Convert.com')).on('click', function() {
 								open();
-							}))
+							})),
+							(set.showLink? $(set.link) : null)
 						)
 						.appendTo(ifm.parent().css({overflow: 'auto'})),
 					spnr = $('<div class="elfinder-edit-spiner elfinder-edit-online-convert"/>')
