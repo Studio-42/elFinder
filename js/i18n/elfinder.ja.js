@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-07-08
+ * @version 2018-07-10
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -464,7 +464,8 @@
 			'iconSize'        : 'アイコンサイズ (アイコンビュー)', // from v2.1.39 added 7.5.2018
 			'editorMaximized' : 'エディターウィンドウを最大化して開く', // from v2.1.40 added 30.6.2018
 			'editorConvNoApi' : '現在 API による変換は利用できないので、Web サイトで変換を行ってください。', //from v2.1.40 added 8.7.2018
-			'editorConvNeedUpload' : '変換後に変換されたファイルを保存するには、アイテムの URL またはダウンロードしたファイルをアップロードする必要があります。', //from v2.1.40 added 8.7.2018
+			'editorConvNeedUpload' : '変換後に変換されたファイルを保存するには、アイテムの URL またはダウンロードしたファイルをアップロードする必要があります。', // from v2.1.40 added 8.7.2018
+			'convertOn'       : '$1 のサイト上で変換する', // from v2.1.40 added 8.10.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',

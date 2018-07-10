@@ -389,7 +389,8 @@
     min-height: 30px;
     vertical-align: top;
 }
-.elfinder-edit-onlineconvert-button button {
+.elfinder-edit-onlineconvert-button button,
+.elfinder-edit-onlineconvert-bottom-btn button {
     cursor: pointer;
 }
 .elfinder-edit-onlineconvert-button .elfinder-button-icon {
@@ -397,9 +398,23 @@
     vertical-align: middle;
     cursor: pointer;
 }
-.elfinder-edit-bottom-btn {
+.elfinder-edit-onlineconvert-bottom-btn {
     text-align: center;
     margin: 10px 0 0;
+}
+
+.elfinder-edit-onlineconvert-link {
+    margin-top: 1em;
+    text-align: center;
+}
+.elfinder-edit-onlineconvert-link .elfinder-button-icon {
+    background-image: url("../img/edit_onlineconvert.png");
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin-bottom: -3px;
+}
+.elfinder-edit-onlineconvert-link a {
+    text-decoration: none;
 }
 
 /********************** COMMAND "SORT" ****************************/
