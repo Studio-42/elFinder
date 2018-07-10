@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: e7cd708) (2018-07-10)
+ * Version 2.1.39 (2.1-src Nightly: d558c86) (2018-07-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9527,7 +9527,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: e7cd708)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: d558c86)';
 
 
 
@@ -10381,6 +10381,7 @@ elFinder.prototype._options = {
 				ckeditor5Mode : 'balloon',
 				// Setting for Online-Convert.com
 				onlineConvert : {
+					'fix%20' : true,// fix '%20' bug of input URL of online-convert.com
 					maxSize  : 100, // (MB) Max 100MB on free account
 					showLink : true // It must be enabled with free account
 				}
