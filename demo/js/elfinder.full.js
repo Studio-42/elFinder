@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: 5cc2949) (2018-07-10)
+ * Version 2.1.39 (2.1-src Nightly: e7cd708) (2018-07-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9527,7 +9527,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 5cc2949)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: e7cd708)';
 
 
 
@@ -10378,7 +10378,12 @@ elFinder.prototype._options = {
 				//managerUrl : 'elfinder.html'
 				managerUrl : null,
 				// CKEditor5' builds mode - 'classic', 'inline' or 'balloon' 
-				ckeditor5Mode : 'balloon'
+				ckeditor5Mode : 'balloon',
+				// Setting for Online-Convert.com
+				onlineConvert : {
+					maxSize  : 100, // (MB) Max 100MB on free account
+					showLink : true // It must be enabled with free account
+				}
 			}
 		},
 		search : {
@@ -12124,7 +12129,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-07-08
+ * @version 2018-07-10
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -12580,6 +12585,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'editorMaximized' : 'Open the maximized editor window', // from v2.1.40 added 30.6.2018
 			'editorConvNoApi' : 'Because conversion by API is not currently available, please convert on the website.', //from v2.1.40 added 8.7.2018
 			'editorConvNeedUpload' : 'After conversion, you must be upload with the item URL or a downloaded file to save the converted file.', //from v2.1.40 added 8.7.2018
+			'convertOn'       : 'Convert on the site of $1', // from v2.1.40 added 8.10.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -22177,8 +22183,9 @@ elFinder.prototype.commands.edit = function() {
 					&& (allowAll || fm.mimeIsText(file.mime) || $.inArray(file.mime, cnt === 1? mimesSingle : mimes) !== -1) 
 					&& (!self.onlyMimes.length || $.inArray(file.mime, self.onlyMimes) !== -1)
 					&& (cnt === 1 || (file.mime === mime && file.name.substr(ext.length * -1) === ext))
-					&& fm.uploadMimeCheck(file.mime, file.phash)? true : false
-					&& (!file.write && setEditors(file, cnt) && Object.keys(editors).length);
+					&& (fm.uploadMimeCheck(file.mime, file.phash)? true : false)
+					&& setEditors(file, cnt)
+					&& Object.keys(editors).length;
 				if (!res) {
 					skip = true;
 				}
@@ -22805,6 +22812,7 @@ elFinder.prototype.commands.edit = function() {
 				if ((cnt === 1 || !editor.info || !editor.info.single)
 						&& ((!editor.info || !editor.info.converter)? file.write : cwdWrite)
 						&& (!editor.info.converter || file.size > 0)
+						&& (!editor.info.maxSize || file.size <= editor.info.maxSize)
 						&& mimeMatch(file.mime, editor.mimes || null)
 						&& extMatch(file.name, editor.exts || null)
 						&& typeof editor.load == 'function'
@@ -22817,6 +22825,7 @@ elFinder.prototype.commands.edit = function() {
 					editors[editor.id] = editor;
 				}
 			});
+			return Object.keys(editors).length? true : false;
 		},
 		store = function(mime, editor) {
 			if (mime && editor) {
@@ -22962,42 +22971,43 @@ elFinder.prototype.commands.edit = function() {
 			
 			if (e.data.type === 'files' && self.enabled()) {
 				file = fm.file(e.data.targets[0]);
-				setEditors(file, e.data.targets.length);
-				if (Object.keys(editors).length > 1) {
-					if (!useStoredEditor() || !(editor = getStoredEditor(file.mime))) {
-						delete self.extra;
-						self.variants = [];
-						$.each(editors, function(id, editor) {
-							self.variants.push([{ editor: editor }, editor.i18n, editor.info && editor.info.iconImg? fm.baseUrl + editor.info.iconImg : 'edit']);
-						});
+				if (setEditors(file, e.data.targets.length)) {
+					if (Object.keys(editors).length > 1) {
+						if (!useStoredEditor() || !(editor = getStoredEditor(file.mime))) {
+							delete self.extra;
+							self.variants = [];
+							$.each(editors, function(id, editor) {
+								self.variants.push([{ editor: editor }, editor.i18n, editor.info && editor.info.iconImg? fm.baseUrl + editor.info.iconImg : 'edit']);
+							});
+						} else {
+							single(editor);
+							self.extra = {
+								icon: 'menu',
+								node: $('<span/>')
+									.attr({title: fm.i18n('select')})
+									.on('click touchstart', function(e){
+										if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+											return;
+										}
+										var node = $(this);
+										e.stopPropagation();
+										e.preventDefault();
+										fm.trigger('contextmenu', {
+											raw: getSubMenuRaw(fm.selectedFiles(), function() {
+												var hashes = fm.selected();
+												fm.exec('edit', hashes, {editor: this});
+												fm.trigger('selectfiles', {files : hashes});
+											}),
+											x: node.offset().left,
+											y: node.offset().top
+										});
+									})
+							};
+						}
 					} else {
-						single(editor);
-						self.extra = {
-							icon: 'menu',
-							node: $('<span/>')
-								.attr({title: fm.i18n('select')})
-								.on('click touchstart', function(e){
-									if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
-										return;
-									}
-									var node = $(this);
-									e.stopPropagation();
-									e.preventDefault();
-									fm.trigger('contextmenu', {
-										raw: getSubMenuRaw(fm.selectedFiles(), function() {
-											var hashes = fm.selected();
-											fm.exec('edit', hashes, {editor: this});
-											fm.trigger('selectfiles', {files : hashes});
-										}),
-										x: node.offset().left,
-										y: node.offset().top
-									});
-								})
-						};
+						single(editors[Object.keys(editors)[0]]);
+						delete self.extra;
 					}
-				} else {
-					single(editors[Object.keys(editors)[0]]);
-					delete self.extra;
 				}
 			}
 		});
