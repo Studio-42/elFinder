@@ -93,6 +93,11 @@
 			html.push('</div>');
 			// end help
 		},
+		useInteg = false,
+		integrations = function() {
+			useInteg = true;
+			html.push('<div id="'+fm.namespace+'-help-integrations" class="ui-tabs-panel ui-widget-content ui-corner-bottom"/>');
+		},
 		useDebug = false,
 		debug = function() {
 			useDebug = true;
@@ -163,7 +168,7 @@
 			}
 		},
 		content = '',
-		opened, tabDebug, debugDIV, debugUL;
+		opened, tabInteg, integDIV, tabDebug, debugDIV, debugUL;
 	
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
@@ -175,7 +180,7 @@
 	}];
 	
 	fm.bind('load', function() {
-		var parts = self.options.view || ['about', 'shortcuts', 'help', 'debug'],
+		var parts = self.options.view || ['about', 'shortcuts', 'help', 'integrations', 'debug'],
 			i, helpSource, tabBase, tabNav, tabs, delta;
 		
 		// remove 'preference' tab, it moved to command 'preference'
@@ -202,6 +207,7 @@
 			helpSource = fm.baseUrl+'js/i18n/help/%s.html.js';
 			help();
 		}
+		$.inArray('integrations', parts) !== -1 && integrations();
 		$.inArray('debug', parts) !== -1 && debug();
 		
 		html.push('</div>');
@@ -226,6 +232,62 @@
 			})
 			.filter(':first').trigger('click');
 		
+		if (useInteg) {
+			tabInteg = content.find('.elfinder-help-tab-integrations').hide();
+			integDIV = content.find('#'+fm.namespace+'-help-integrations').hide().append($('<div class="elfinder-help-integrations-desc"/>').html(fm.i18n('integrationWith')));
+			fm.bind('helpIntegration', function(e) {
+				var ul = integDIV.children('ul:first'),
+					data, elm, cmdUL, cmdCls;
+				if (e.data) {
+					if ($.isPlainObject(e.data)) {
+						data = Object.assign({
+							link: '',
+							title: '',
+							banner: ''
+						}, e.data);
+						if (data.title || data.link) {
+							if (!data.title) {
+								data.title = data.link;
+							}
+							if (data.link) {
+								elm = $('<a/>').attr('href', data.link).attr('target', '_blank').text(data.title);
+							} else {
+								elm = $('<span/>').text(data.title);
+							}
+							if (data.banner) {
+								elm = $('<span/>').append($('<img/>').attr(data.banner), elm);
+							}
+						}
+					} else {
+						elm = $(e.data);
+						elm.filter('a').each(function() {
+							var tgt = $(this);
+							if (!tgt.attr('target')) {
+								tgt.attr('target', '_blank');;
+							}
+						});
+					}
+					if (elm) {
+						tabInteg.show();
+						if (!ul.length) {
+							ul = $('<ul class="elfinder-help-integrations"/>').appendTo(integDIV);
+						}
+						if (data && data.cmd) {
+							cmdCls = 'elfinder-help-integration-' + data.cmd;
+							cmdUL = ul.find('ul.' + cmdCls);
+							if (!cmdUL.length) {
+								cmdUL = $('<ul class="'+cmdCls+'"/>');
+								ul.append($('<li/>').append($('<span/>').html(fm.i18n('cmd'+data.cmd))).append(cmdUL));
+							}
+							elm = cmdUL.append($('<li/>').append(elm));
+						} else {
+							ul.append($('<li/>').append(elm));
+						}
+					}
+				}
+			});
+		}
+
 		// debug
 		if (useDebug) {
 			tabDebug = content.find('.elfinder-help-tab-debug').hide();
@@ -298,6 +360,8 @@
 		}
 		
 		self.state = 0;
+
+		fm.trigger('helpBuilded', self.dialog);
 	}).one('open', function() {
 		var debug = false;
 		fm.one('backenddebug', function() {

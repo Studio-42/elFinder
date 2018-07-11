@@ -550,7 +550,7 @@ elFinder.prototype._options = {
 		},
 		help : {
 			// Tabs to show
-			view : ['about', 'shortcuts', 'help', 'debug'],
+			view : ['about', 'shortcuts', 'help', 'integrations', 'debug'],
 			// HTML source URL of the heip tab
 			helpSource : ''
 		},

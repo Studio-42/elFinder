@@ -16,7 +16,18 @@ elFinder.prototype.commands.netmount = function() {
 	
 	this.handlers = {
 		load : function() {
-			this.drivers = this.fm.netDrivers;
+			var fm = self.fm;
+			self.drivers = fm.netDrivers;
+			if (self.drivers.length) {
+				requestAnimationFrame(function() {
+					$.each(self.drivers, function() {
+						var d = self.options[this];
+						if (d && d.integrateInfo) {
+							fm.trigger('helpIntegration', Object.assign({cmd: 'netmount'}, d.integrateInfo));
+						}
+					});
+				});
+			}
 		}
 	};
 

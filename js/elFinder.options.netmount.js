@@ -18,8 +18,31 @@ elFinder.prototype._options.commandsOptions.netmount = {
 			locale   : $('<input type="text" placeholder="Optional" class="elfinder-input-optional"/>')
 		}
 	},
-	dropbox2: elFinder.prototype.makeNetmountOptionOauth('dropbox2', 'Dropbox', 'Dropbox', {noOffline : true, root : '/', pathI18n : 'path'}),
-	googledrive: elFinder.prototype.makeNetmountOptionOauth('googledrive', 'Google Drive', 'Google'),
-	onedrive: elFinder.prototype.makeNetmountOptionOauth('onedrive', 'One Drive', 'OneDrive'),
-	box: elFinder.prototype.makeNetmountOptionOauth('box', 'Box', 'Box', {noOffline : true})
+	dropbox2: elFinder.prototype.makeNetmountOptionOauth('dropbox2', 'Dropbox', 'Dropbox', {noOffline : true,
+		root : '/',
+		pathI18n : 'path',
+		integrate : {
+			title: 'Dropbox.com',
+			link: 'https://www.dropbox.com'
+		}
+	}),
+	googledrive: elFinder.prototype.makeNetmountOptionOauth('googledrive', 'Google Drive', 'Google', {
+		integrate : {
+			title: 'Google Drive',
+			link: 'https://www.google.com/drive/'
+		}
+	}),
+	onedrive: elFinder.prototype.makeNetmountOptionOauth('onedrive', 'One Drive', 'OneDrive', {
+		integrate : {
+			title: 'Microsoft OneDrive',
+			link: 'https://onedrive.live.com'
+		}
+	}),
+	box: elFinder.prototype.makeNetmountOptionOauth('box', 'Box', 'Box', {
+		noOffline : true,
+		integrate : {
+			title: 'Box.com',
+			link: 'https://www.box.com'
+		}
+	})
 };

@@ -823,6 +823,9 @@ elFinder.prototype.commands.edit = function() {
 							if (!allowAll && editor.mimes && editor.mimes[0] === '*') {
 								allowAll = true;
 							}
+							if (editor.info && editor.info.integrate) {
+								fm.trigger('helpIntegration', Object.assign({cmd: 'edit'}, editor.info.integrate));
+							}
 						}
 					});
 					
