@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: d558c86) (2018-07-10)
+ * Version 2.1.39 (2.1-src Nightly: 3e4d155) (2018-07-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -582,6 +582,20 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
     position: absolute;
     left: 0;
     top: 45px;
+}
+
+ul.elfinder-help-integrations ul {
+    margin-bottom: 1em;
+    padding: 0;
+    margin: 0 1em 1em;
+}
+
+ul.elfinder-help-integrations a {
+    text-decoration: none;
+}
+
+ul.elfinder-help-integrations a:hover {
+    text-decoration: underline;
 }
 
 .elfinder-help-debug {

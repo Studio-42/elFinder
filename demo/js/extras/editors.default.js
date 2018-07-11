@@ -219,7 +219,11 @@
 				iconImg : 'img/edit_pixlreditor.png',
 				urlAsContent: true,
 				schemeContent: true,
-				single: true
+				single: true,
+				integrate: {
+					title: 'PIXLR EDITOR',
+					link: 'https://pixlr.com/editor/'
+				}
 			},
 			// MIME types to accept
 			mimes : ['image/jpeg', 'image/png'],
@@ -252,7 +256,11 @@
 				iconImg : 'img/edit_pixlrexpress.png',
 				urlAsContent: true,
 				schemeContent: true,
-				single: true
+				single: true,
+				integrate: {
+					title: 'PIXLR EXPRESS',
+					link: 'https://pixlr.com/express/'
+				}
 			},
 			// MIME types to accept
 			mimes : ['image/jpeg'],
@@ -284,7 +292,11 @@
 				name : 'Creative Cloud',
 				iconImg : 'img/edit_creativecloud.png',
 				schemeContent: true,
-				single: true
+				single: true,
+				integrate: {
+					title: 'Adobe Creative Cloud',
+					link: 'https://www.adobe.io/apis/creativecloud.html'
+				}
 			},
 			mimes : ['image/jpeg', 'image/png'],
 			// HTML of this editor
@@ -1342,7 +1354,11 @@
 				cmdCheck : 'ZohoOffice',
 				preventGet: true,
 				hideButtons: true,
-				syncInterval : 15000
+				syncInterval : 15000,
+				integrate: {
+					title: 'Zoho Office API',
+					link: 'https://www.zoho.com/officeapi/'
+				}
 			},
 			mimes : [
 				'application/msword',
@@ -1543,7 +1559,11 @@
 				preventGet: true,
 				hideButtons: true,
 				single: true,
-				converter: true
+				converter: true,
+				integrate: {
+					title: 'ONLINE-CONVERT.COM',
+					link: 'https://online-convert.com'
+				}
 			},
 			mimes : ['*'],
 			html : '<iframe style="width:100%;max-height:100%;border:none;"></iframe>',
