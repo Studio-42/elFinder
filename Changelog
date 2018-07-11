@@ -11,6 +11,15 @@
 		- [VD:abstract] Fixed #2549 freezes while creating and extracting a zip/7zip archive
 		- [ui:dialog] Fixed #2551 trigger `dialogopen` event before open the dialog
 		- [ui:dialog] Fixed #2558 autoopen after creation of dialog if it has open callback
+		- [cmd:upload] Fixed #2559 since 2.1.30, broken paste upload on iOS
+		- [ui:dialog] Fixed #2560 corection of restore dialog size on maximize/minimize
+		- [cmd:edit,preference] Fixed #2566 add preference 'Open the maximized editor window'
+		- [cmd:quicklook] Fixed #2567 support Microsoft Office Online viewer
+		- [VD:abstract] Fixed #2564 bugfix of MIME-Type detection
+		- [cmd:quicklook,VD:abstract] Fixed #2575 add CAD-Files and 3D-Models online viewer on sharecad.org
+		- [cmd:edit] Fixed #2570 add online-convert.com integration
+		- [cmd:edit] Fixed #2580 fix detectation of current enabled editors
+		- [cmd:help] Add a tab "Integrations" to listing external services
 		- And some minor bug fixes
 
 
