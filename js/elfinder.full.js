@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: d558c86) (2018-07-10)
+ * Version 2.1.39 (2.1-src Nightly: 3e4d155) (2018-07-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8691,7 +8691,8 @@ elFinder.prototype = {
 			fail: function(fm, err){
 				$(this.inputs.host[0]).removeData('inrequest');
 				this.protocol.trigger('change', 'reset');
-			}
+			},
+			integrateInfo: opts.integrate
 		};
 	},
 	
@@ -9527,7 +9528,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: d558c86)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 3e4d155)';
 
 
 
@@ -10494,7 +10495,7 @@ elFinder.prototype._options = {
 		},
 		help : {
 			// Tabs to show
-			view : ['about', 'shortcuts', 'help', 'debug'],
+			view : ['about', 'shortcuts', 'help', 'integrations', 'debug'],
 			// HTML source URL of the heip tab
 			helpSource : ''
 		},
@@ -11142,10 +11143,33 @@ elFinder.prototype._options.commandsOptions.netmount = {
 			locale   : $('<input type="text" placeholder="Optional" class="elfinder-input-optional"/>')
 		}
 	},
-	dropbox2: elFinder.prototype.makeNetmountOptionOauth('dropbox2', 'Dropbox', 'Dropbox', {noOffline : true, root : '/', pathI18n : 'path'}),
-	googledrive: elFinder.prototype.makeNetmountOptionOauth('googledrive', 'Google Drive', 'Google'),
-	onedrive: elFinder.prototype.makeNetmountOptionOauth('onedrive', 'One Drive', 'OneDrive'),
-	box: elFinder.prototype.makeNetmountOptionOauth('box', 'Box', 'Box', {noOffline : true})
+	dropbox2: elFinder.prototype.makeNetmountOptionOauth('dropbox2', 'Dropbox', 'Dropbox', {noOffline : true,
+		root : '/',
+		pathI18n : 'path',
+		integrate : {
+			title: 'Dropbox.com',
+			link: 'https://www.dropbox.com'
+		}
+	}),
+	googledrive: elFinder.prototype.makeNetmountOptionOauth('googledrive', 'Google Drive', 'Google', {
+		integrate : {
+			title: 'Google Drive',
+			link: 'https://www.google.com/drive/'
+		}
+	}),
+	onedrive: elFinder.prototype.makeNetmountOptionOauth('onedrive', 'One Drive', 'OneDrive', {
+		integrate : {
+			title: 'Microsoft OneDrive',
+			link: 'https://onedrive.live.com'
+		}
+	}),
+	box: elFinder.prototype.makeNetmountOptionOauth('box', 'Box', 'Box', {
+		noOffline : true,
+		integrate : {
+			title: 'Box.com',
+			link: 'https://www.box.com'
+		}
+	})
 };
 
 
@@ -12130,7 +12154,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-07-10
+ * @version 2018-07-11
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -12586,7 +12610,9 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'editorMaximized' : 'Open the maximized editor window', // from v2.1.40 added 30.6.2018
 			'editorConvNoApi' : 'Because conversion by API is not currently available, please convert on the website.', //from v2.1.40 added 8.7.2018
 			'editorConvNeedUpload' : 'After conversion, you must be upload with the item URL or a downloaded file to save the converted file.', //from v2.1.40 added 8.7.2018
-			'convertOn'       : 'Convert on the site of $1', // from v2.1.40 added 8.10.2018
+			'convertOn'       : 'Convert on the site of $1', // from v2.1.40 added 10.7.2018
+			'integrations'    : 'Integrations', // from v2.1.40 added 11.7.2018
+			'integrationWith' : 'This elFinder integrates the following external services. Please check the terms of use, privacy policy, etc. before using it.', // from v2.1.40 added 11.7.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -22944,6 +22970,9 @@ elFinder.prototype.commands.edit = function() {
 							if (!allowAll && editor.mimes && editor.mimes[0] === '*') {
 								allowAll = true;
 							}
+							if (editor.info && editor.info.integrate) {
+								fm.trigger('helpIntegration', Object.assign({cmd: 'edit'}, editor.info.integrate));
+							}
 						}
 					});
 					
@@ -23773,6 +23802,11 @@ elFinder.prototype.commands.fullscreen = function() {
 			html.push('</div>');
 			// end help
 		},
+		useInteg = false,
+		integrations = function() {
+			useInteg = true;
+			html.push('<div id="'+fm.namespace+'-help-integrations" class="ui-tabs-panel ui-widget-content ui-corner-bottom"/>');
+		},
 		useDebug = false,
 		debug = function() {
 			useDebug = true;
@@ -23843,7 +23877,7 @@ elFinder.prototype.commands.fullscreen = function() {
 			}
 		},
 		content = '',
-		opened, tabDebug, debugDIV, debugUL;
+		opened, tabInteg, integDIV, tabDebug, debugDIV, debugUL;
 	
 	this.alwaysEnabled  = true;
 	this.updateOnSelect = false;
@@ -23855,7 +23889,7 @@ elFinder.prototype.commands.fullscreen = function() {
 	}];
 	
 	fm.bind('load', function() {
-		var parts = self.options.view || ['about', 'shortcuts', 'help', 'debug'],
+		var parts = self.options.view || ['about', 'shortcuts', 'help', 'integrations', 'debug'],
 			i, helpSource, tabBase, tabNav, tabs, delta;
 		
 		// remove 'preference' tab, it moved to command 'preference'
@@ -23882,6 +23916,7 @@ elFinder.prototype.commands.fullscreen = function() {
 			helpSource = fm.baseUrl+'js/i18n/help/%s.html.js';
 			help();
 		}
+		$.inArray('integrations', parts) !== -1 && integrations();
 		$.inArray('debug', parts) !== -1 && debug();
 		
 		html.push('</div>');
@@ -23906,6 +23941,62 @@ elFinder.prototype.commands.fullscreen = function() {
 			})
 			.filter(':first').trigger('click');
 		
+		if (useInteg) {
+			tabInteg = content.find('.elfinder-help-tab-integrations').hide();
+			integDIV = content.find('#'+fm.namespace+'-help-integrations').hide().append($('<div class="elfinder-help-integrations-desc"/>').html(fm.i18n('integrationWith')));
+			fm.bind('helpIntegration', function(e) {
+				var ul = integDIV.children('ul:first'),
+					data, elm, cmdUL, cmdCls;
+				if (e.data) {
+					if ($.isPlainObject(e.data)) {
+						data = Object.assign({
+							link: '',
+							title: '',
+							banner: ''
+						}, e.data);
+						if (data.title || data.link) {
+							if (!data.title) {
+								data.title = data.link;
+							}
+							if (data.link) {
+								elm = $('<a/>').attr('href', data.link).attr('target', '_blank').text(data.title);
+							} else {
+								elm = $('<span/>').text(data.title);
+							}
+							if (data.banner) {
+								elm = $('<span/>').append($('<img/>').attr(data.banner), elm);
+							}
+						}
+					} else {
+						elm = $(e.data);
+						elm.filter('a').each(function() {
+							var tgt = $(this);
+							if (!tgt.attr('target')) {
+								tgt.attr('target', '_blank');;
+							}
+						});
+					}
+					if (elm) {
+						tabInteg.show();
+						if (!ul.length) {
+							ul = $('<ul class="elfinder-help-integrations"/>').appendTo(integDIV);
+						}
+						if (data && data.cmd) {
+							cmdCls = 'elfinder-help-integration-' + data.cmd;
+							cmdUL = ul.find('ul.' + cmdCls);
+							if (!cmdUL.length) {
+								cmdUL = $('<ul class="'+cmdCls+'"/>');
+								ul.append($('<li/>').append($('<span/>').html(fm.i18n('cmd'+data.cmd))).append(cmdUL));
+							}
+							elm = cmdUL.append($('<li/>').append(elm));
+						} else {
+							ul.append($('<li/>').append(elm));
+						}
+					}
+				}
+			});
+		}
+
 		// debug
 		if (useDebug) {
 			tabDebug = content.find('.elfinder-help-tab-debug').hide();
@@ -23978,6 +24069,8 @@ elFinder.prototype.commands.fullscreen = function() {
 		}
 		
 		self.state = 0;
+
+		fm.trigger('helpBuilded', self.dialog);
 	}).one('open', function() {
 		var debug = false;
 		fm.one('backenddebug', function() {
@@ -24539,7 +24632,18 @@ elFinder.prototype.commands.netmount = function() {
 	
 	this.handlers = {
 		load : function() {
-			this.drivers = this.fm.netDrivers;
+			var fm = self.fm;
+			self.drivers = fm.netDrivers;
+			if (self.drivers.length) {
+				requestAnimationFrame(function() {
+					$.each(self.drivers, function() {
+						var d = self.options[this];
+						if (d && d.integrateInfo) {
+							fm.trigger('helpIntegration', Object.assign({cmd: 'netmount'}, d.integrateInfo));
+						}
+					});
+				});
+			}
 		}
 	};
 
@@ -26722,6 +26826,17 @@ elFinder.prototype.commands.preference = function() {
 	};
 	
 	/**
+	 * Adds an integration into help dialog.
+	 *
+	 * @param Object opts  options
+	 */
+	this.addIntegration = function(opts) {
+		requestAnimationFrame(function() {
+			fm.trigger('helpIntegration', Object.assign({cmd: 'quicklook'}, opts));
+		});
+	};
+
+	/**
 	 * Init command.
 	 * Add default plugins and init other plugins
 	 *
@@ -28136,6 +28251,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 			win     = ql.window,
 			node;
 			
+		if (ql.options.sharecadMimes.length) {
+			ql.addIntegration({
+				title: 'sharecad.org CAD-Files and 3D-Models viewer',
+				link: 'https://sharecad.org/DWGOnlinePlugin'
+			});
+		}
+
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file;
 			if (mimes[file.mime.toLowerCase()]) {
@@ -28228,7 +28350,21 @@ elFinder.prototype.commands.quicklook.plugins = [
 				other: 10485760 // 10MB
 			},
 			node;
-			
+		
+		if (ql.options.googleDocsMimes.length) {
+			ql.addIntegration({
+				title: 'Google Docs Viewer',
+				link: 'https://docs.google.com/'
+			});
+		}
+		if (ql.options.officeOnlineMimes.length) {
+			ql.addIntegration({
+				title: 'MS Online Doc Viewer',
+				link: 'https://products.office.com/office-online/view-office-documents-online'
+			});
+		}
+
+
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file,
 				type;
