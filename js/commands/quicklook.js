@@ -706,6 +706,17 @@
 	};
 	
 	/**
+	 * Adds an integration into help dialog.
+	 *
+	 * @param Object opts  options
+	 */
+	this.addIntegration = function(opts) {
+		requestAnimationFrame(function() {
+			fm.trigger('helpIntegration', Object.assign({cmd: 'quicklook'}, opts));
+		});
+	};
+
+	/**
 	 * Init command.
 	 * Add default plugins and init other plugins
 	 *

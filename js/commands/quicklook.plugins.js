@@ -1261,6 +1261,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 			win     = ql.window,
 			node;
 			
+		if (ql.options.sharecadMimes.length) {
+			ql.addIntegration({
+				title: 'sharecad.org CAD-Files and 3D-Models viewer',
+				link: 'https://sharecad.org/DWGOnlinePlugin'
+			});
+		}
+
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file;
 			if (mimes[file.mime.toLowerCase()]) {
@@ -1354,7 +1361,21 @@ elFinder.prototype.commands.quicklook.plugins = [
 				other: 10485760 // 10MB
 			},
 			node;
-			
+		
+		if (ql.options.googleDocsMimes.length) {
+			ql.addIntegration({
+				title: 'Google Docs Viewer',
+				link: 'https://docs.google.com/'
+			});
+		}
+		if (ql.options.officeOnlineMimes.length) {
+			ql.addIntegration({
+				title: 'MS Online Doc Viewer',
+				link: 'https://products.office.com/office-online/view-office-documents-online'
+			});
+		}
+
+
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file,
 				type;

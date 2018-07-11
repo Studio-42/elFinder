@@ -8660,7 +8660,8 @@ elFinder.prototype = {
 			fail: function(fm, err){
 				$(this.inputs.host[0]).removeData('inrequest');
 				this.protocol.trigger('change', 'reset');
-			}
+			},
+			integrateInfo: opts.integrate
 		};
 	},
 	
