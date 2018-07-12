@@ -460,7 +460,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'editorConvNeedUpload' : 'After conversion, you must be upload with the item URL or a downloaded file to save the converted file.', //from v2.1.40 added 8.7.2018
 			'convertOn'       : 'Convert on the site of $1', // from v2.1.40 added 10.7.2018
 			'integrations'    : 'Integrations', // from v2.1.40 added 11.7.2018
-			'integrationWith' : 'This elFinder integrates the following external services. Please check the terms of use, privacy policy, etc. before using it.', // from v2.1.40 added 11.7.2018
+			'integrationWith' : 'This elFinder has the following external services integrated. Please check the terms of use, privacy policy, etc. before using it.', // from v2.1.40 added 11.7.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
