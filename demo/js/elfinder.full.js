@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: 3e4d155) (2018-07-12)
+ * Version 2.1.39 (2.1-src Nightly: 1dbff54) (2018-07-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9528,7 +9528,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 3e4d155)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 1dbff54)';
 
 
 
@@ -12612,7 +12612,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'editorConvNeedUpload' : 'After conversion, you must be upload with the item URL or a downloaded file to save the converted file.', //from v2.1.40 added 8.7.2018
 			'convertOn'       : 'Convert on the site of $1', // from v2.1.40 added 10.7.2018
 			'integrations'    : 'Integrations', // from v2.1.40 added 11.7.2018
-			'integrationWith' : 'This elFinder integrates the following external services. Please check the terms of use, privacy policy, etc. before using it.', // from v2.1.40 added 11.7.2018
+			'integrationWith' : 'This elFinder has the following external services integrated. Please check the terms of use, privacy policy, etc. before using it.', // from v2.1.40 added 11.7.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
