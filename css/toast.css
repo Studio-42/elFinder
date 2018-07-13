@@ -75,3 +75,13 @@
     background-color: #add6ad;
     color: #254b25;
 }
+
+.elfinder .elfinder-toast > .toast-info button.ui-button {
+    background-color: #046580;
+    color: #FFF;
+}
+
+.elfinder .elfinder-toast > .toast-info button.ui-button.ui-state-hover {
+    background-color: #7DC6DB;
+    color: #046580;
+}
