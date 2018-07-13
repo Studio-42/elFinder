@@ -1,4 +1,4 @@
-2018-0x-xx  Naoki Sawada  <hypweb+elfinder@gmail.com>
+2018-07-xx  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.40):
 		- [php:plugin] Fixed #2532 perform folder name filtering on folder upload
@@ -20,6 +20,7 @@
 		- [cmd:edit] Fixed #2570 add online-convert.com integration
 		- [cmd:edit] Fixed #2580 fix detectation of current enabled editors
 		- [cmd:help] Add a tab "Integrations" to listing external services
+		- [cmd:edit:images] Fixed #2568 open one format save to another
 		- And some minor bug fixes
 
 
