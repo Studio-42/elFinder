@@ -20,8 +20,31 @@
 			}
 			return hasFlash;
 		})(),
+		ext2mime = {
+			jpg: 'image/jpeg',
+			jpeg: 'image/jpeg',
+			png: 'image/png',
+			gif: 'image/gif',
+			bmp: 'image/x-ms-bmp',
+			svg: 'image/svg+xml',
+			pxd: 'image/x-pixlr-data'
+		},
+		getExt = function(file) {
+			var ext = fm.mimeTypes[file.mime];
+			if (ext === 'jpeg') {
+				ext = 'jpg';
+			}
+			return ext;
+		},
 		initImgTag = function(id, file, content, fm) {
-			var node = $(this).children('img:first'),
+			var getExt = function() {
+					var ext = fm.mimeTypes[file.mime];
+					if (ext === 'jpeg') {
+						ext = 'jpg';
+					}
+					return ext;
+				},
+				node = $(this).children('img:first').data('ext', getExt(file)),
 				spnr = $('<div/>')
 					.css({
 						position: 'absolute',
@@ -74,7 +97,7 @@
 			}
 			var pixlr = window.location.search.match(/[?&]pixlr=([^&]+)/),
 				image = window.location.search.match(/[?&]image=([^&]+)/),
-				p, ifm, url, node;
+				p, ifm, url, node, ext;
 			if (pixlr) {
 				// case of redirected from pixlr.com
 				p = window.parent;
@@ -82,6 +105,13 @@
 				node = p.$('#'+pixlr[1]).data('resizeoff')();
 				if (image[1].substr(0, 4) === 'http') {
 					url = image[1];
+					ext = url.replace(/.+\.([^.]+)$/, '$1');
+					if (node.data('ext') !== ext) {
+						node.closest('.ui-dialog').trigger('changeType', {
+							extention: ext,
+							mime : ext2mime[ext]
+						});
+					}
 					if (window.location.protocol === 'https:') {
 						url = url.replace(/^http:/, 'https:');
 					}
@@ -93,7 +123,7 @@
 				} else {
 					node.data('loading')(true);
 				}
-				ifm.remove();
+				ifm.trigger('destroy').remove();
 			}
 		},
 		pixlrSetup = function(opts, fm) {
@@ -119,23 +149,40 @@
 				elfNode = fm.getUI(),
 				container = $('<iframe class="ui-front" allowtransparency="true">'),
 				file = this.file,
+				timeout = 15,
 				error = function(error) {
-					container.remove();
-					node.data('loading')(true);
-					fm.error(error || 'Can not launch Pixlr.');
+					if (error) {
+						container.trigger('destroy').remove();
+						node.data('loading')(true);
+						fm.error(error);
+					} else {
+						fm.toast({
+							mode: 'info',
+							msg: 'Can not launch Pixlr yet. Waiting ' + timeout + ' seconds.',
+							extNode: $('<button class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"/>')
+								.append($('<span class="ui-button-text"/>').text(fm.i18n('Abort')))
+								.on('mouseenter mouseleave', function(e) { 
+									$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
+								})
+								.on('click', function() {
+									container.trigger('destroy').remove();
+									node.data('loading')(true);
+								})
+						});
+						errtm = setTimeout(error, timeout * 1000);
+					}
 				},
 				launch = function() {
 					var src = 'https://pixlr.com/'+mode+'/?s=c',
 						myurl = window.location.href.toString().replace(/#.*$/, ''),
 						opts = {};
 
-					errtm = setTimeout(error, 15000);
+					errtm = setTimeout(error, timeout * 1000);
 					myurl += (myurl.indexOf('?') === -1? '?' : '&') + 'pixlr='+node.attr('id');
 					src += '&referrer=elFinder&locktitle=true';
 					src += '&exit='+encodeURIComponent(myurl+'&image=0');
 					src += '&target='+encodeURIComponent(myurl);
 					src += '&title='+encodeURIComponent(file.name);
-					src += '&locktype='+encodeURIComponent(file.mime === 'image/png'? 'png' : 'jpg');
 					src += '&image='+encodeURIComponent(node.attr('src'));
 					
 					opts.src = src;
@@ -170,16 +217,17 @@
 								}
 							}, 1000);
 							dialog.addClass(clPreventBack);
+							fm.toggleMaximize(container, true);
 							fm.toFront(container);
+						})
+						.on('destroy', function() {
+							fm.toggleMaximize(container, false);
 						})
 						.on('error', error)
 						.appendTo(elfNode.hasClass('elfinder-fullscreen')? elfNode : 'body');
-					// fit to window size
-					$(window).on('resize.'+node.attr('id'), function() {
-						container.css('height', $(window).height());
-					});
 				},
 				errtm;
+			$(base).on('saveAsFail', launch);
 			launch();
 		};
 	
@@ -226,7 +274,7 @@
 				}
 			},
 			// MIME types to accept
-			mimes : ['image/jpeg', 'image/png'],
+			mimes : ['image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp', 'image/x-pixlr-data'],
 			// HTML of this editor
 			html : '<div style="width:100%;height:300px;max-height:100%;text-align:center;"><img/></div>',
 			// called on initialization of elFinder cmd edit (this: this editor's config object)
@@ -235,7 +283,6 @@
 			},
 			// Initialization of editing node (this: this editors HTML node)
 			init : function(id, file, url, fm) {
-				//initImgTag.call(this, id, file, fm.convAbsUrl(fm.openUrl(file.hash, true)), fm);
 				initImgTag.call(this, id, file, fm.convAbsUrl(url), fm);
 			},
 			// Get data uri scheme (this: this editors HTML node)
@@ -263,7 +310,7 @@
 				}
 			},
 			// MIME types to accept
-			mimes : ['image/jpeg'],
+			mimes : ['image/jpeg', 'image/png', 'image/gif'],
 			// HTML of this editor
 			html : '<div style="width:100%;height:300px;max-height:100%;text-align:center;"><img/></div>',
 			// called on initialization of elFinder cmd edit (this: this editor's config object)
@@ -298,7 +345,7 @@
 					link: 'https://www.adobe.io/apis/creativecloud.html'
 				}
 			},
-			mimes : ['image/jpeg', 'image/png'],
+			mimes : ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp'],
 			// HTML of this editor
 			html : '<div style="width:100%;height:300px;max-height:100%;text-align:center;"><img/></div>',
 			// called on initialization of elFinder cmd edit (this: this editor's config object)
@@ -344,10 +391,6 @@
 								height: $(window).height(),
 								overflow: 'auto'
 							}).hide().appendTo(elfNode.hasClass('elfinder-fullscreen')? elfNode : 'body');
-							// fit to window size
-							$(window).on('resize.'+fm.namespace, function() {
-								container.css('height', $(window).height());
-							});
 							// bind switch fullscreen event
 							elfNode.on('resize.'+fm.namespace, function(e, data) {
 								e.preventDefault();
@@ -365,7 +408,15 @@
 						opts = {
 							apiKey: self.confObj.apiKey,
 							onSave: function(imageID, newURL) {
+								var ext;
 								featherEditor.showWaitIndicator();
+								ext = newURL.replace(/.+\.([^.]+)$/, '$1');
+								if (node.data('ext') !== ext) {
+									node.closest('.ui-dialog').trigger('changeType', {
+										extention: ext,
+										mime : ext2mime[ext]
+									});
+								}
 								node.on('load error', function() {
 										node.data('loading')(true);
 									})
@@ -377,6 +428,7 @@
 							onLoad: onload || function(){},
 							onClose: function() { 
 								dialog.removeClass(fm.res('class', 'preventback'));
+								fm.toggleMaximize(container, false);
 								$(container).hide();
 							},
 							appendTo: container.get(0),
@@ -391,12 +443,14 @@
 							opts: opts
 						});
 						featherEditor = new Aviary.Feather(opts);
-						container.css('z-index', $(base).closest('.elfinder-dialog').css('z-index'));
 						// return editor instance
 						dfrd.resolve(featherEditor);
+						$(base).on('saveAsFail', launch);
 					},
 					launch = function() {
 						dialog.addClass(fm.res('class', 'preventback'));
+						fm.toggleMaximize(container, true);
+						fm.toFront(container);
 						$(container).show();
 						featherEditor.launch({
 							image: node.attr('id'),

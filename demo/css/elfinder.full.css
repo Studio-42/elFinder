@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: 1dbff54) (2018-07-12)
+ * Version 2.1.39 (2.1-src Nightly: 7573dae) (2018-07-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -4385,6 +4385,16 @@ embed.elfinder-quicklook-preview-audio {
 .elfinder .elfinder-toast > .toast-success button.ui-button.ui-state-hover {
     background-color: #add6ad;
     color: #254b25;
+}
+
+.elfinder .elfinder-toast > .toast-info button.ui-button {
+    background-color: #046580;
+    color: #FFF;
+}
+
+.elfinder .elfinder-toast > .toast-info button.ui-button.ui-state-hover {
+    background-color: #7DC6DB;
+    color: #046580;
 }
 
 /* File: /css/toolbar.css */
