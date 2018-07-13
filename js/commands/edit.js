@@ -502,9 +502,8 @@ elFinder.prototype.commands.edit = function() {
 				return dfrd.resolve();
 			}
 			
-			if (!file.read || !file.write) {
+			if (!file.read || (!file.write && (!editor.info || !editor.info.converter))) {
 				error = ['errOpen', file.name, 'errPerm'];
-				fm.error(error);
 				return dfrd.reject(error);
 			}
 			
