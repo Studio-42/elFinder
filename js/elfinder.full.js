@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.39 (2.1-src Nightly: 1dbff54) (2018-07-12)
+ * Version 2.1.39 (2.1-src Nightly: 7573dae) (2018-07-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9528,7 +9528,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 1dbff54)';
+elFinder.prototype.version = '2.1.39 (2.1-src Nightly: 7573dae)';
 
 
 
@@ -11921,7 +11921,16 @@ elFinder.prototype.resources = {
 										fm.unlockfiles({files : [id]});
 										inError = true;
 										input.show().prev().remove();
-										fm.error(error, {modal: true, close: function(){setTimeout(select, 120);}});
+										fm.error(error,　{
+											modal: true,
+											close: function() {
+												if (Array.isArray(error) && $.inArray('errUploadMime', error) !== -1) {
+													dfrd.notify('errUploadMime').reject();
+												} else {
+													setTimeout(select, 120);
+												}
+											}
+										});
 									})
 									.done(function(data) {
 										if (data && data.added && data.added[0]) {
@@ -22290,8 +22299,8 @@ elFinder.prototype.commands.edit = function() {
 							fm.disable();
 						},
 						make = function() {
-							self.mime = file.mime;
-							self.prefix = file.name.replace(/ \d+(\.[^.]+)?$/, '$1');
+							self.mime = saveAsFile.mime || file.mime;
+							self.prefix = (saveAsFile.name || file.name).replace(/ \d+(\.[^.]+)?$/, '$1');
 							self.requestCmd = 'mkfile';
 							self.nextAction = {};
 							self.data = {target : phash};
@@ -22306,6 +22315,11 @@ elFinder.prototype.commands.edit = function() {
 										fail();
 									}
 									dialogs.fadeIn();
+								})
+								.progress(function(err) {
+									if (err && err === 'errUploadMime') {
+										ta.trigger('saveAsFail');
+									}
 								})
 								.fail(fail)
 								.always(function() {
@@ -22351,33 +22365,40 @@ elFinder.prototype.commands.edit = function() {
 					closeOnEscape : false,
 					close   : function() {
 						var close = function() {
-							var conf;
-							dfrd.resolve();
-							if (ta.editor) {
-								ta.editor.close(ta[0], ta.editor.instance);
-								conf = ta.editor.confObj;
-								if (conf.info && conf.info.syncInterval) {
-									fileSync(file.hash);
+								var conf;
+								dfrd.resolve();
+								if (ta.editor) {
+									ta.editor.close(ta[0], ta.editor.instance);
+									conf = ta.editor.confObj;
+									if (conf.info && conf.info.syncInterval) {
+										fileSync(file.hash);
+									}
 								}
-							}
-							ta.elfinderdialog('destroy');
-						};
+								ta.elfinderdialog('destroy');
+							},
+							onlySaveAs = (typeof saveAsFile.name !== 'undefined'),
+							accept = onlySaveAs? {
+								label    : 'btnSaveAs',
+								callback : function() {
+									requestAnimationFrame(saveAs);
+								}
+							} : {
+								label    : 'btnSaveClose',
+								callback : function() {
+									save();
+									close();
+								}
+							};
 						if (changed()) {
 							fm.confirm({
 								title  : self.title,
 								text   : 'confirmNotSave',
-								accept : {
-									label    : 'btnSaveClose',
-									callback : function() {
-										save();
-										close();
-									}
-								},
+								accept : accept,
 								cancel : {
 									label    : 'btnClose',
 									callback : close
 								},
-								buttons : [{
+								buttons : onlySaveAs? null : [{
 									label    : 'btnSaveAs',
 									callback : function() {
 										requestAnimationFrame(saveAs);
@@ -22439,6 +22460,7 @@ elFinder.prototype.commands.edit = function() {
 						}, interval);
 					}
 				},
+				saveAsFile = {},
 				ta, old, dialogNode, selEncoding, extEditor, maxW, syncInterval;
 				
 			if (editor) {
@@ -22594,7 +22616,18 @@ elFinder.prototype.commands.edit = function() {
 				})
 				.css({ overflow: 'hidden', minHeight: '7em' })
 				.addClass('elfinder-edit-editor')
-				.closest('.ui-dialog');
+				.closest('.ui-dialog')
+				.on('changeType', function(e, data) {
+					if (data.extention && data.mime) {
+						var ext = data.extention,
+							mime = data.mime,
+							btnSet = $(this).children('.ui-dialog-buttonpane').children('.ui-dialog-buttonset');
+						btnSet.children('.elfinder-btncnt-0,.elfinder-btncnt-1').hide();
+						saveAsFile.name = fm.splitFileExtention(file.name)[0] + '.' + data.extention;
+						saveAsFile.mime = data.mime;
+						btnSet.children('.elfinder-btncnt-2').trigger('click');
+					}
+				});
 			
 			// care to viewport scale change with mobile devices
 			maxW = (fm.options.dialogContained? elfNode : $(window)).width();

@@ -282,6 +282,7 @@ abstract class elFinderVolumeDriver {
 			'rtf:text/rtf'                 => 'application/rtf',
 			'rtfd:text/rtfd'               => 'application/rtfd',
 			'ico:image/vnd.microsoft.icon' => 'image/x-icon',
+			'pxd:application/octet-stream' => 'image/x-pixlr-data',
 			'amr:application/octet-stream' => 'audio/amr',
 			'm4a:video/mp4'                => 'audio/mp4',
 			'oga:application/ogg'          => 'audio/ogg',
