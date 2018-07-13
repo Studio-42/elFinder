@@ -6,12 +6,12 @@ class elFinderEditorOnlineConvert extends elFinderEditor
 
     public function enabled()
     {
-        return !defined('ELFINDER_DISABLE_ONLINE_CONVRT') || !ELFINDER_DISABLE_ONLINE_CONVRT;
+        return !defined('ELFINDER_DISABLE_ONLINE_CONVERT') || !ELFINDER_DISABLE_ONLINE_CONVERT;
     }
 
     public function init()
     {
-        return array('api' => defined('ELFINDER_ONLINE_CONVRT_APIKEY') && ELFINDER_ONLINE_CONVRT_APIKEY && function_exists('curl_init'));
+        return array('api' => defined('ELFINDER_ONLINE_CONVERT_APIKEY') && ELFINDER_ONLINE_CONVERT_APIKEY && function_exists('curl_init'));
     }
 
     public function api()
@@ -66,7 +66,7 @@ class elFinderEditorOnlineConvert extends elFinderEditor
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
             curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'X-Oc-Api-Key: ' . ELFINDER_ONLINE_CONVRT_APIKEY,
+                'X-Oc-Api-Key: ' . ELFINDER_ONLINE_CONVERT_APIKEY,
                 'Content-Type: application/json',
                 'cache-control: no-cache'
             ));
@@ -75,7 +75,7 @@ class elFinderEditorOnlineConvert extends elFinderEditor
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
             curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                'X-Oc-Api-Key: ' . ELFINDER_ONLINE_CONVRT_APIKEY,
+                'X-Oc-Api-Key: ' . ELFINDER_ONLINE_CONVERT_APIKEY,
                 'cache-control: no-cache'
             ));
         }
