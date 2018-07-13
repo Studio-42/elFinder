@@ -569,6 +569,9 @@
 							editor.setOptions({
 								mode: 'ace/mode/' + mode
 							});
+							if (dfrd.state() === 'resolved') {
+								dialog.trigger('resize');
+							}
 						});
 						ace.config.loadModule('ace/ext/language_tools', function() {
 							ace.require('ace/ext/language_tools');
@@ -653,6 +656,7 @@
 							opts: {}
 						});
 						
+						dialog.trigger('resize');
 						dfrd.resolve(editor);
 					};
 
@@ -783,6 +787,8 @@
 							})
 						)
 						.prependTo(base.next());
+
+						base.parent().trigger('resize');
 					};
 				// load script then start
 				if (!self.confObj.loader) {
