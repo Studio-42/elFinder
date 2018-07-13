@@ -87,8 +87,8 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 
 // // Online converter (online-convert.com) APIKey
 // // https://apiv2.online-convert.com/docs/getting_started/api_key.html
-// define('ELFINDER_ONLINE_CONVRT_APIKEY', '');
-// define('ELFINDER_DISABLE_ONLINE_CONVRT', false); // set `true` to disable Online converter
+// define('ELFINDER_ONLINE_CONVERT_APIKEY', '');
+// define('ELFINDER_DISABLE_ONLINE_CONVERT', false); // set `true` to disable Online converter
 // ===============================================
 
 // // Zip Archive editor
