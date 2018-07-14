@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2018-07-14)
+ * Version 2.1.40 (2.1-src Nightly: d97c920) (2018-07-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9534,7 +9534,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.40';
+elFinder.prototype.version = '2.1.40 (2.1-src Nightly: d97c920)';
 
 
 
@@ -14343,7 +14343,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			oldSchool = function(p) {
-				var phash = fm.cwd().p,
+				var phash = fm.cwd().phash,
 					pdir  = fm.file(phash) || null,
 					set   = function(pdir) {
 						if (pdir) {
