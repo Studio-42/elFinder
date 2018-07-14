@@ -264,6 +264,9 @@ elFinder.prototype.commands.edit = function() {
 									ta.editor.instance = instance;
 									ta.editor.focus(ta[0], ta.editor.instance);
 									old = getContent();
+									requestAnimationFrame(function() {
+										dialogNode.trigger('resize');
+									});
 								}).fail(function(error) {
 									error && fm.error(error);
 									ta.elfinderdialog('destroy');
@@ -278,6 +281,9 @@ elFinder.prototype.commands.edit = function() {
 								ta.editor.instance = loadRes;
 								ta.editor.focus(ta[0], ta.editor.instance);
 								old = getContent();
+								requestAnimationFrame(function() {
+									dialogNode.trigger('resize');
+								});
 							}
 							conf = ta.editor.confObj;
 							if (conf.info && conf.info.syncInterval) {

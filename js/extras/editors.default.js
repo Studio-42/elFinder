@@ -656,7 +656,7 @@
 							opts: {}
 						});
 						
-						dialog.trigger('resize');
+						//dialog.trigger('resize');
 						dfrd.resolve(editor);
 					};
 
@@ -788,7 +788,7 @@
 						)
 						.prependTo(base.next());
 
-						base.parent().trigger('resize');
+						//base.parent().trigger('resize');
 					};
 				// load script then start
 				if (!self.confObj.loader) {
