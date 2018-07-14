@@ -787,7 +787,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			oldSchool = function(p) {
-				var phash = fm.cwd().p,
+				var phash = fm.cwd().phash,
 					pdir  = fm.file(phash) || null,
 					set   = function(pdir) {
 						if (pdir) {
