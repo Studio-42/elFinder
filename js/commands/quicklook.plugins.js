@@ -1263,7 +1263,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			
 		if (ql.options.sharecadMimes.length) {
 			ql.addIntegration({
-				title: 'sharecad.org CAD-Files and 3D-Models viewer',
+				title: 'ShareCAD.org CAD and 3D-Models viewer',
 				link: 'https://sharecad.org/DWGOnlinePlugin'
 			});
 		}

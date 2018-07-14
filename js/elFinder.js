@@ -4232,7 +4232,13 @@ var elFinder = function(elm, opts, bootCallback) {
 			if (e.target === this) {
 				tm && cancelAnimationFrame(tm);
 				tm = requestAnimationFrame(function() {
-					self.trigger('resize', {width : node.width(), height : node.height()});
+					var prv = node.data('resizeSize') || {w: 0, h: 0},
+						size = {w: Math.round(node.width()), h: Math.round(node.height())};
+					node.data('resizeSize', size);
+					if (size.w !== prv.w || size.h !== prv.h) {
+						node.trigger('resize');
+						self.trigger('resize', {width : size.w, height : size.h});
+					}
 				});
 			}
 		})
