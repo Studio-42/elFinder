@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: d97c920) (2018-07-14)
+ * Version 2.1.40 (2.1-src Nightly: 08ba3e3) (2018-07-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9534,7 +9534,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.40 (2.1-src Nightly: d97c920)';
+elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 08ba3e3)';
 
 
 
@@ -19030,7 +19030,7 @@ $.fn.elfinderstat = function(fm) {
  **/
 $.fn.elfindertoast = function(opts, fm) {
 		var defOpts = Object.assign({
-		mode: 'success',
+		mode: 'success', // or 'info', 'warning' and 'error'
 		msg: '',
 		showMethod: 'fadeIn', //fadeIn, slideDown, and show are built into jQuery
 		showDuration: 300,
@@ -19042,7 +19042,8 @@ $.fn.elfindertoast = function(opts, fm) {
 		onHidden: undefined,
 		timeOut: 3000,
 		extNode: undefined,
-		width: null
+		button: undefined,
+		width: undefined
 	}, $.isPlainObject(fm.options.uiOptions.toast.defaults)? fm.options.uiOptions.toast.defaults : {});
 	return this.each(function() {
 		opts = Object.assign({}, defOpts, opts || {});
@@ -19098,8 +19099,19 @@ $.fn.elfindertoast = function(opts, fm) {
 			self.append(opts.extNode);
 		}
 
+		if (opts.button) {
+			self.append(
+				$('<button class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"/>')
+				.append($('<span class="ui-button-text"/>').text(fm.i18n(opts.button.text)))
+				.on('mouseenter mouseleave', function(e) { 
+					$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
+				})
+				.on('click', opts.button.click || function(){})
+			);
+		}
+
 		if (opts.width) {
-			self.css('width', opts.width);
+			self.css('max-width', opts.width);
 		}
 		
 		show();
@@ -22426,6 +22438,9 @@ elFinder.prototype.commands.edit = function() {
 									ta.editor.instance = instance;
 									ta.editor.focus(ta[0], ta.editor.instance);
 									old = getContent();
+									requestAnimationFrame(function() {
+										dialogNode.trigger('resize');
+									});
 								}).fail(function(error) {
 									error && fm.error(error);
 									ta.elfinderdialog('destroy');
@@ -22440,6 +22455,9 @@ elFinder.prototype.commands.edit = function() {
 								ta.editor.instance = loadRes;
 								ta.editor.focus(ta[0], ta.editor.instance);
 								old = getContent();
+								requestAnimationFrame(function() {
+									dialogNode.trigger('resize');
+								});
 							}
 							conf = ta.editor.confObj;
 							if (conf.info && conf.info.syncInterval) {
