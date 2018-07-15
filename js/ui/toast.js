@@ -9,7 +9,7 @@
 $.fn.elfindertoast = function(opts, fm) {
 	"use strict";
 	var defOpts = Object.assign({
-		mode: 'success',
+		mode: 'success', // or 'info', 'warning' and 'error'
 		msg: '',
 		showMethod: 'fadeIn', //fadeIn, slideDown, and show are built into jQuery
 		showDuration: 300,
@@ -21,7 +21,8 @@ $.fn.elfindertoast = function(opts, fm) {
 		onHidden: undefined,
 		timeOut: 3000,
 		extNode: undefined,
-		width: null
+		button: undefined,
+		width: undefined
 	}, $.isPlainObject(fm.options.uiOptions.toast.defaults)? fm.options.uiOptions.toast.defaults : {});
 	return this.each(function() {
 		opts = Object.assign({}, defOpts, opts || {});
@@ -77,8 +78,19 @@ $.fn.elfindertoast = function(opts, fm) {
 			self.append(opts.extNode);
 		}
 
+		if (opts.button) {
+			self.append(
+				$('<button class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"/>')
+				.append($('<span class="ui-button-text"/>').text(fm.i18n(opts.button.text)))
+				.on('mouseenter mouseleave', function(e) { 
+					$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
+				})
+				.on('click', opts.button.click || function(){})
+			);
+		}
+
 		if (opts.width) {
-			self.css('width', opts.width);
+			self.css('max-width', opts.width);
 		}
 		
 		show();
