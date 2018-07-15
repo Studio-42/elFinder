@@ -147,6 +147,7 @@
 					}),
 				dialog = $(base).closest('.ui-dialog'),
 				elfNode = fm.getUI(),
+				uiToast = fm.getUI('toast'),
 				container = $('<iframe class="ui-front" allowtransparency="true">'),
 				file = this.file,
 				timeout = 15,
@@ -156,18 +157,20 @@
 						node.data('loading')(true);
 						fm.error(error);
 					} else {
+						uiToast.appendTo(dialog.closest('.ui-dialog'));
 						fm.toast({
 							mode: 'info',
 							msg: 'Can not launch Pixlr yet. Waiting ' + timeout + ' seconds.',
-							extNode: $('<button class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"/>')
-								.append($('<span class="ui-button-text"/>').text(fm.i18n('Abort')))
-								.on('mouseenter mouseleave', function(e) { 
-									$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
-								})
-								.on('click', function() {
+							button: {
+								text: 'Abort',
+								click: function() {
 									container.trigger('destroy').remove();
 									node.data('loading')(true);
-								})
+								}
+							},
+							onHidden: function() {
+								uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
+							}
 						});
 						errtm = setTimeout(error, timeout * 1000);
 					}
@@ -787,8 +790,6 @@
 							})
 						)
 						.prependTo(base.next());
-
-						//base.parent().trigger('resize');
 					};
 				// load script then start
 				if (!self.confObj.loader) {
@@ -1649,7 +1650,7 @@
 					},
 					link : '<div class="elfinder-edit-onlineconvert-link"><a href="https://www.online-convert.com" target="_blank"><span class="elfinder-button-icon"></span>ONLINE-CONVERT.COM</a></div>',
 					toastWidth : 280,
-					useTabs : $.fn.tabs
+					useTabs : ($.fn.tabs && !fm.UA.iOS)? true : false // Can't work on iOS, I don't know why.
 				}, mOpts);
 			},
 			// Prepare on before show dialog
@@ -1663,6 +1664,7 @@
 				var ta = this,
 					confObj = ta.editor.confObj,
 					set = confObj.set,
+					uiToast = fm.getUI('toast'),
 					idxs = {},
 					allowZip = fm.uploadMimeCheck('application/zip', file.phash),
 					getExt = function(cat, con) {
@@ -1674,6 +1676,48 @@
 							return (c.ext || con).toLowerCase();
 						}
 						return con.toLowerCase();
+					},
+					setOptions = function(cat, done) {
+						var type, dfdInit, dfd;
+						if (typeof confObj.api === 'undefined') {
+							dfdInit = fm.request({
+								data: {
+									cmd: 'editor',
+									name: 'OnlineConvert',
+									method: 'init'
+								},
+								preventDefault : true
+							});
+						} else {
+							dfdInit = $.Deferred().resolve({api: confObj.api});
+						}
+						cat = cat.toLowerCase();
+						dfdInit.done(function(data) {
+							confObj.api = data.api;
+							if (confObj.api) {
+								if (cat) {
+									type = '?category=' + cat;
+								} else {
+									type = '';
+									cat = 'all';
+								}
+								if (!confObj.conversions) {
+									confObj.conversions = {};
+								}
+								if (!confObj.conversions[cat]) {
+									dfd = $.getJSON('https://api2.online-convert.com/conversions' + type);
+								} else {
+									dfd = $.Deferred().resolve(confObj.conversions[cat]);
+								}
+								dfd.done(function(d) {
+									confObj.conversions[cat] = d;
+									$.each(d, function(i, o) {
+										btns[set.useTabs? 'children' : 'find']('.onlineconvert-category-' + o.category).children('.onlineconvert-' + o.target).trigger('makeoption', o);
+									});
+									done && done();
+								});
+							}
+						});
 					},
 					btns = (function() {
 						var btns = $('<div/>').on('click', 'button', function() {
@@ -1768,47 +1812,6 @@
 								}
 								elm.append(b, f);
 							},
-							setOptions = function(cat) {
-								var type, dfdInit, dfd;
-								if (typeof confObj.api === 'undefined') {
-									dfdInit = fm.request({
-										data: {
-											cmd: 'editor',
-											name: 'OnlineConvert',
-											method: 'init'
-										},
-										preventDefault : true
-									});
-								} else {
-									dfdInit = $.Deferred().resolve({api: confObj.api});
-								}
-								cat = cat.toLowerCase();
-								dfdInit.done(function(data) {
-									confObj.api = data.api;
-									if (confObj.api) {
-										if (cat) {
-											type = '?category=' + cat;
-										} else {
-											type = '';
-											cat = 'all';
-										}
-										if (!confObj.conversions) {
-											confObj.conversions = {};
-										}
-										if (!confObj.conversions[cat]) {
-											dfd = $.getJSON('https://api2.online-convert.com/conversions' + type);
-										} else {
-											dfd = $.Deferred().resolve(confObj.conversions[cat]);
-										}
-										dfd.done(function(d) {
-											confObj.conversions[cat] = d;
-											$.each(d, function(i, o) {
-												btns[set.useTabs? 'children' : 'find']('.onlineconvert-category-' + o.category).children('.onlineconvert-' + o.target).trigger('makeoption', o);
-											});
-										});
-									}
-								});
-							},
 							ts = (+new Date()),
 							i = 0;
 						
@@ -1853,8 +1856,8 @@
 							});
 						} else {
 							$.each(set.conv, function(t) {
-								btns.append($('<fieldset/>').append($('<legend/>').text(t)).append(btns.children('.onlineconvert-category-' + t.toLowerCase())));
-								setOptions(t);
+								var tl = t.toLowerCase();
+								btns.append($('<fieldset class="onlineconvert-fieldset-' + tl + '"/>').append($('<legend/>').text(t)).append(btns.children('.onlineconvert-category-' + tl)));
 							});
 						}
 						return btns;
@@ -1945,12 +1948,16 @@
 								}, 1000);
 							}
 						} else {
+							uiToast.appendTo(ta.closest('.ui-dialog'));
 							if (res.message) {
 								fm.toast({
 									msg: fm.i18n(res.message),
 									mode: 'error',
 									timeOut: 5000,
-									width: set.toastWidth
+									width: set.toastWidth,
+									onHidden: function() {
+										uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
+									}
 								});
 							}
 							fm.toast({
@@ -1959,6 +1966,7 @@
 								timeOut: 3000,
 								width: set.toastWidth,
 								onHidden: function() {
+									uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
 									open(cat, con);
 								}
 							});
@@ -2014,16 +2022,10 @@
 						}
 						spnr.hide();
 						select.hide();
-						ifm.parent().css({overflow: 'hidden'});
+						ifm.parent().css({overflow: fm.UA.iOS? 'auto' : 'hidden'});
 						$(ta).data('dfrd', url().done(function(url) {
 							var opts;
 							if (url) {
-								fm.toast({
-									msg: fm.i18n('editorConvNeedUpload'),
-									mode: 'info',
-									timeOut: 5000,
-									width: set.toastWidth
-								});
 								opts = {
 									css: {
 										height: '100%'
@@ -2043,7 +2045,22 @@
 									url = url.replace(/%2520/g, '%252520');
 								}
 								url = link + url;
-								ifm.attr('src', url).show().css(opts.css);
+								ifm.attr('src', url).show().css(opts.css)
+									.one('load', function() {
+										uiToast.appendTo(ta.closest('.ui-dialog'));
+										fm.toast({
+											msg: fm.i18n('editorConvNeedUpload'),
+											mode: 'info',
+											timeOut: 10000,
+											width: set.toastWidth,
+											onHidden: function() {
+												uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
+											},
+											button: {
+												text: 'btnYes'
+											}
+										});
+									});
 							} else {
 								data.error && fm.error(data.error);
 								ta.elfinderdialog('destroy');
@@ -2051,12 +2068,34 @@
 						}));
 					},
 					mode = 'document',
-					m;
+					cl, m;
+				ifm.parent().addClass('overflow-scrolling-touch');
 				if (m = file.mime.match(/^(audio|image|video)/)) {
 					mode = m[1];
 				}
-				if (set.useTabs && idxs[mode]) {
-					btns.tabs('option', 'active', idxs[mode]);
+				if (set.useTabs) {
+					if (idxs[mode]) {
+						btns.tabs('option', 'active', idxs[mode]);
+					}
+				} else {
+					cl = Object.keys(set.conv).length;
+					$.each(set.conv, function(t) {
+						if (t.toLowerCase() === mode) {
+							setOptions(t, function() {
+								$.each(set.conv, function(t0) {
+									t0.toLowerCase() !== mode && setOptions(t0);
+								});
+							});
+							return false;
+						}
+						cl--;
+					});
+					if (!cl) {
+						$.each(set.conv, function(t) {
+							setOptions(t);
+						});
+					}
+					ifm.parent().scrollTop(btns.children('.onlineconvert-fieldset-' + mode).offset().top);
 				}
 			},
 			load : function() {},
