@@ -1584,7 +1584,9 @@ var elFinder = function(elm, opts, bootCallback) {
 					return file.url;
 				}
 				
-				baseUrl = self.option('url', file.phash || file.hash);
+				if (typeof baseUrl === 'undefined') {
+					baseUrl = self.option('url', file.phash || file.hash);
+				}
 				
 				if (baseUrl) {
 					return baseUrl + $.map(self.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/');
@@ -1606,7 +1608,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			return async? dfrd.resolve('') : '';
 		}
 		
-		if (file.url == '1') {
+		if (file.url == '1' || (temp && !file.url && !(baseUrl = self.option('url', file.phash || file.hash)))) {
 			this.request({
 				data : { cmd : 'url', target : hash, options : { temporary: temp? 1 : 0 } },
 				preventDefault : true,

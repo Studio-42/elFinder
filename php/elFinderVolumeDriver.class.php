@@ -1320,7 +1320,7 @@ abstract class elFinderVolumeDriver {
 
 		$this->configure();
 		
-		// Normarize disabled (array_merge`for type array of JSON)
+		// Normalize disabled (array_merge`for type array of JSON)
 		$this->disabled = array_values(array_unique($this->disabled));
 		
 		// fix sync interval
@@ -4126,6 +4126,8 @@ abstract class elFinderVolumeDriver {
 		
 		if (empty($stat['mime'])) {
 			$stat['mime'] = $this->mimetype($stat['name'], true);
+		} else {
+			$stat['mime'] = $this->mimeTypeNormalize($stat['mime'], $stat['name']);
 		}
 		
 		// @todo move dateformat to client
@@ -4329,6 +4331,24 @@ abstract class elFinderVolumeDriver {
 		$type = trim($type[0]);
 		
 		// mime type normalization
+		$type = $this->mimeTypeNormalize($type, $name, $ext);
+		
+		return $type;
+	}
+	
+	/**
+	 * Normalize MIME-Type by options['mimeMap']
+	 *
+	 * @param      string  $type   MIME-Type
+	 * @param      string  $name   Filename
+	 * @param      string  $ext    File extention without first dot (optional)
+	 *
+	 * @return     string  Normalized MIME-Type
+	 */
+	protected function mimeTypeNormalize($type, $name, $ext = '') {
+		if ($ext === '') {
+			$ext = (false === $pos = strrpos($name, '.'))? '' : substr($name, $pos + 1);
+		}
 		$_checkKey = strtolower($ext.':'.$type);
 		if (isset($this->options['mimeMap'][$_checkKey])) {
 			$type = $this->options['mimeMap'][$_checkKey];
@@ -4343,10 +4363,9 @@ abstract class elFinderVolumeDriver {
 				}
 			}
 		}
-		
 		return $type;
 	}
-	
+
 	/**
 	 * Load file of mime.types
 	 *
