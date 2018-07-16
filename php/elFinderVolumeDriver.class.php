@@ -3011,11 +3011,11 @@ abstract class elFinderVolumeDriver {
 			$ret = false;
 			if  ($file['url'] && $file['url'] != 1) {
 				return $file['url'];
-			} else if (!empty($options['temporary']) && ($tempInfo = $this->getTempLinkInfo('temp_' . md5($hash)))) {
+			} else if (!empty($options['temporary']) && ($tempInfo = $this->getTempLinkInfo('temp_' . md5($hash.session_id())))) {
 				if ($source = $this->open($hash)) {
 					if ($dest = fopen($tempInfo['path'], 'wb')) {
 						if (stream_copy_to_stream($source, $dest)) {
-							$ret = $tempInfo['url'];
+							$ret = $tempInfo['url'] . '?' . rawurlencode($file['name']);
 						}
 						fclose($dest);
 					}
