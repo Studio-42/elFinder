@@ -3,7 +3,7 @@
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
  * @author Alex Yashkin <alex@yashkin.by>
- * @version 2018-05-27
+ * @version 2018-07-16
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -462,7 +462,13 @@
 			'workspace'       : 'Рабочая область', // from v2.1.38 added 4.4.2018
 			'dialog'          : 'Диалог', // from v2.1.38 added 4.4.2018
 			'all'             : 'Все', // from v2.1.38 added 4.4.2018
-			'iconSize'        : 'Размер иконок (В виде иконок)', // form v2.1.39 added 7.5.2018
+			'iconSize'        : 'Размер иконок (В виде иконок)', // from v2.1.39 added 7.5.2018
+			'editorMaximized' : 'Открывать редактор в развернутом виде', // from v2.1.40 added 30.6.2018
+			'editorConvNoApi' : 'Так как конвертация с помощью API недоступно, произведите конвертацию на веб-сайте.', //from v2.1.40 added 8.7.2018
+			'editorConvNeedUpload' : 'После конвертации вы должны загрузить скачанный файл, чтобы сохранить его.', //from v2.1.40 added 8.7.2018
+			'convertOn'       : 'Конвертировать на сайте $1', // from v2.1.40 added 10.7.2018
+			'integrations'    : 'Интеграции', // from v2.1.40 added 11.7.2018
+			'integrationWith' : 'Менеджер elFinder интегрирован со следующими внешними сервисами. Ознакомьтесь с правилами пользования, политиками безопасности и др. перед их использованием.', // from v2.1.40 added 11.7.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
