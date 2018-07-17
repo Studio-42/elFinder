@@ -29,22 +29,19 @@
 			svg: 'image/svg+xml',
 			pxd: 'image/x-pixlr-data'
 		},
-		getExt = function(file) {
-			var ext = fm.mimeTypes[file.mime];
+		mime2ext,
+		getExtention = function(file, fm) {
+			if (!mime2ext) {
+				mime2ext = fm.arrayFlip(ext2mime);
+			}
+			var ext = mime2ext[file.mime] || fm.mimeTypes[file.mime];
 			if (ext === 'jpeg') {
 				ext = 'jpg';
 			}
 			return ext;
 		},
 		initImgTag = function(id, file, content, fm) {
-			var getExt = function() {
-					var ext = fm.mimeTypes[file.mime];
-					if (ext === 'jpeg') {
-						ext = 'jpg';
-					}
-					return ext;
-				},
-				node = $(this).children('img:first').data('ext', getExt(file)),
+			var node = $(this).children('img:first').data('ext', getExtention(file, fm)),
 				spnr = $('<div/>')
 					.css({
 						position: 'absolute',
