@@ -3740,6 +3740,36 @@ abstract class elFinderVolumeDriver {
 		return $var;
 	}
 	
+	/**
+	 * Normalize MIME-Type by options['mimeMap']
+	 *
+	 * @param      string  $type   MIME-Type
+	 * @param      string  $name   Filename
+	 * @param      string  $ext    File extention without first dot (optional)
+	 *
+	 * @return     string  Normalized MIME-Type
+	 */
+	public function mimeTypeNormalize($type, $name, $ext = '') {
+		if ($ext === '') {
+			$ext = (false === $pos = strrpos($name, '.'))? '' : substr($name, $pos + 1);
+		}
+		$_checkKey = strtolower($ext.':'.$type);
+		if (isset($this->options['mimeMap'][$_checkKey])) {
+			$type = $this->options['mimeMap'][$_checkKey];
+		} else {
+			$_checkKey = strtolower($ext.':*');
+			if (isset($this->options['mimeMap'][$_checkKey])) {
+				$type = $this->options['mimeMap'][$_checkKey];
+			} else {
+				$_checkKey = strtolower('*:'.$type);
+				if (isset($this->options['mimeMap'][$_checkKey])) {
+					$type = $this->options['mimeMap'][$_checkKey];
+				}
+			}
+		}
+		return $type;
+	}
+
 	/*********************** util mainly for inheritance class *********************/
 	
 	/**
@@ -4336,36 +4366,6 @@ abstract class elFinderVolumeDriver {
 		return $type;
 	}
 	
-	/**
-	 * Normalize MIME-Type by options['mimeMap']
-	 *
-	 * @param      string  $type   MIME-Type
-	 * @param      string  $name   Filename
-	 * @param      string  $ext    File extention without first dot (optional)
-	 *
-	 * @return     string  Normalized MIME-Type
-	 */
-	protected function mimeTypeNormalize($type, $name, $ext = '') {
-		if ($ext === '') {
-			$ext = (false === $pos = strrpos($name, '.'))? '' : substr($name, $pos + 1);
-		}
-		$_checkKey = strtolower($ext.':'.$type);
-		if (isset($this->options['mimeMap'][$_checkKey])) {
-			$type = $this->options['mimeMap'][$_checkKey];
-		} else {
-			$_checkKey = strtolower($ext.':*');
-			if (isset($this->options['mimeMap'][$_checkKey])) {
-				$type = $this->options['mimeMap'][$_checkKey];
-			} else {
-				$_checkKey = strtolower('*:'.$type);
-				if (isset($this->options['mimeMap'][$_checkKey])) {
-					$type = $this->options['mimeMap'][$_checkKey];
-				}
-			}
-		}
-		return $type;
-	}
-
 	/**
 	 * Load file of mime.types
 	 *
