@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: 2eb8976) (2018-07-16)
+ * Version 2.1.40 (2.1-src Nightly: 09cd281) (2018-07-17)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -402,6 +402,16 @@
 .elfinder-edit-onlineconvert-button button,
 .elfinder-edit-onlineconvert-bottom-btn button {
     cursor: pointer;
+}
+.elfinder-edit-onlineconvert-bottom-btn button.elfinder-button-ios-multiline {
+    -webkit-appearance: none;
+    border-radius: 16px;
+    color: #000;
+    text-align: center;
+    padding: 8px;
+    background-color: #eee;
+    background-image: -webkit-linear-gradient(top, hsl(0,0%,98%) 0%,hsl(0,0%,77%) 100%);
+    background-image: linear-gradient(to bottom, hsl(0,0%,98%) 0%,hsl(0,0%,77%) 100%);
 }
 .elfinder-edit-onlineconvert-button .elfinder-button-icon {
     margin: 0 10px;
