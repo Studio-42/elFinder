@@ -1863,9 +1863,14 @@
 					select = $('<div/>')
 						.append(
 							btns,
-							$('<div class="elfinder-edit-onlineconvert-bottom-btn"/>').append($('<button/>').html(fm.i18n('convertOn', 'Online-Convert.com')).on('click', function() {
-								open();
-							})),
+							$('<div class="elfinder-edit-onlineconvert-bottom-btn"/>').append(
+								$('<button/>')
+									.addClass(fm.UA.iOS? 'elfinder-button-ios-multiline' : '')
+									.html(fm.i18n('convertOn', 'Online-Convert.com'))
+									.on('click', function() {
+										open();
+									})
+							),
 							(set.showLink? $(set.link) : null)
 						)
 						.appendTo(ifm.parent().css({overflow: 'auto'})),
