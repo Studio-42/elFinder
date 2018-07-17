@@ -2509,12 +2509,16 @@ class elFinder {
 	 * 
 	 * @param  object $volume elFinderVolumeDriver instance
 	 * @param  string $path Local path
+	 * @param  string $name Filename to save
 	 * @return string file type extension with dot
 	 * @author Naoki Sawada
 	 */
-	protected function detectFileExtension($volume, $path) {
+	protected function detectFileExtension($volume, $path, $name) {
 		$mime = $this->detectMimeType($path);
-		$ext = $mime !== 'unknown'? $volume->getExtentionByMime($mime) : '';
+		if ($mime === 'unknown') {
+			$mime = 'application/octet-stream';
+		}
+		$ext = $volume->getExtentionByMime($volume->mimeTypeNormalize($mime, $name));
 		return $ext? ('.' . $ext) : '';
 	}
 	
@@ -2861,7 +2865,7 @@ class elFinder {
 										rename($tmpfname, $tmpfname . $_ext);
 										$tmpfname = $tmpfname . $_ext;
 									}
-									$_b = $this->detectFileExtension($volume, $tmpfname);
+									$_b = $this->detectFileExtension($volume, $tmpfname, $_name);
 									$_name = $_a.$_b;
 								} else {
 									$_b = '.'.$_b;
@@ -3273,6 +3277,10 @@ class elFinder {
 				}
 				$fmeta = stream_get_meta_data($fp);
 				$mime = $this->detectMimeType($fmeta['uri']);
+				if ($mime === 'unknown') {
+					$mime = 'application/octet-stream';
+				}
+				$mime = $volume->mimeTypeNormalize($mime, $file['name']);
 				$args['content'] = 'data:'.$mime.';base64,'.base64_encode(file_get_contents($fmeta['uri']));
 			}
 			$encoding = '';
