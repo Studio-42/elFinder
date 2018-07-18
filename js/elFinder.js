@@ -1901,6 +1901,12 @@ var elFinder = function(elm, opts, bootCallback) {
 						self.trigger(cmd + 'done');
 					});
 				}).then(function() {
+					// make toast message
+					if (data.toasts && Array.isArray(data.toasts)) {
+						$.each(data.toasts, function() {
+							this.msg && self.toast(this);
+						});
+					}
 					// force update content
 					data.sync && self.sync();
 				});
@@ -5988,6 +5994,11 @@ elFinder.prototype = {
 							data.changed && data.changed.length && self.change(data);
 							self.trigger('upload', data, false);
 							self.trigger('uploaddone');
+							if (data.toasts && Array.isArray(data.toasts)) {
+								$.each(data.toasts, function() {
+									this.msg && self.toast(this);
+								});
+							}
 							data.sync && self.sync();
 							data.debug && fm.debug('backend-debug', data);
 						}
