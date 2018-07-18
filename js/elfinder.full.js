@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: e6a40b2) (2018-07-18)
+ * Version 2.1.40 (2.1-src Nightly: 662709c) (2018-07-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9547,7 +9547,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.40 (2.1-src Nightly: e6a40b2)';
+elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 662709c)';
 
 
 
@@ -14237,9 +14237,9 @@ $.fn.elfindercwd = function(fm, options) {
 					rec = (function() {
 						var wos = wrapper.offset(),
 							w = $(window),
-							x = firstNode.width() / 2,
+							x = (firstNode.width() / 2) * (!list && options.oldSchool? 3 : 1),
 							l = wos.left - w.scrollLeft() + (fm.direction === 'ltr'? x : wrapper.width() - x),
-							t = wos.top - w.scrollTop() + 10 + (list? bufferExt.itemH || (fm.UA.Touch? 36 : 24) : 0);
+							t = wos.top - w.scrollTop() + 10 + (list? (bufferExt.itemH * (options.oldSchool? 2 : 1)) || (fm.UA.Touch? 36 : 24) : 0);
 						return {left: Math.max(0, Math.round(l)), top: Math.max(0, Math.round(t))};
 					})(),
 					tgt = init? firstNode : $(document.elementFromPoint(rec.left , rec.top)),
