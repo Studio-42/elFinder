@@ -668,9 +668,9 @@ $.fn.elfindercwd = function(fm, options) {
 					rec = (function() {
 						var wos = wrapper.offset(),
 							w = $(window),
-							x = firstNode.width() / 2,
+							x = (firstNode.width() / 2) * (!list && options.oldSchool? 3 : 1),
 							l = wos.left - w.scrollLeft() + (fm.direction === 'ltr'? x : wrapper.width() - x),
-							t = wos.top - w.scrollTop() + 10 + (list? bufferExt.itemH || (fm.UA.Touch? 36 : 24) : 0);
+							t = wos.top - w.scrollTop() + 10 + (list? (bufferExt.itemH * (options.oldSchool? 2 : 1)) || (fm.UA.Touch? 36 : 24) : 0);
 						return {left: Math.max(0, Math.round(l)), top: Math.max(0, Math.round(t))};
 					})(),
 					tgt = init? firstNode : $(document.elementFromPoint(rec.left , rec.top)),
