@@ -652,7 +652,7 @@ class elFinder {
 					if (! is_array($handlers)) {
 						$handlers = array($handlers);
 					} else {
-						if (count($handlers) === 2 && is_object($handlers[0])) {
+						if (count($handlers) === 2 && is_callable($handlers)) {
 							$handlers = array($handlers);
 						}
 					}
@@ -2809,7 +2809,7 @@ class elFinder {
 						if ($url === 'chunkfail' && $args['mimes'] === 'chunkfail') {
 							$this->checkChunkedFile(null, $chunk, $cid, $tempDir);
 							if (preg_match('/^(.+)(\.\d+_(\d+))\.part$/s', $chunk, $m)) {
-								$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $m[1], self::ERROR_UPLOAD_TRANSFER);
+								$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $m[1], self::ERROR_UPLOAD_TEMP);
 							}
 							return $result;
 						} else {
@@ -2895,7 +2895,7 @@ class elFinder {
 		$addedDirs = array();
 		foreach ($files['name'] as $i => $name) {
 			if (($error = $files['error'][$i]) > 0) {
-				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, $error == UPLOAD_ERR_INI_SIZE || $error == UPLOAD_ERR_FORM_SIZE ? self::ERROR_UPLOAD_FILE_SIZE : self::ERROR_UPLOAD_TRANSFER);
+				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, $error == UPLOAD_ERR_INI_SIZE || $error == UPLOAD_ERR_FORM_SIZE ? self::ERROR_UPLOAD_FILE_SIZE : self::ERROR_UPLOAD_TRANSFER, $error);
 				$this->uploadDebug = 'Upload error code: '.$error;
 				break;
 			}
@@ -2920,7 +2920,7 @@ class elFinder {
 							}
 						}
 					} else {
-						$result['error'] = $this->error(self::ERROR_UPLOAD_FILE, $chunk, self::ERROR_UPLOAD_TRANSFER);
+						$result['error'] = $this->error(self::ERROR_UPLOAD_FILE, $chunk, self::ERROR_UPLOAD_TEMP);
 						$this->uploadDebug = 'Upload error: unable open tmp file';
 					}
 					return $result;
@@ -2948,13 +2948,14 @@ class elFinder {
 				}
 			}
 			
-			if ($mtime) {
+			clearstatcache();
+			if ($mtime && is_file($tmpname)) {
 				// for keep timestamp option in the LocalFileSystem volume
 				touch($tmpname, $mtime);
 			}
 			
-			if (($fp = fopen($tmpname, 'rb')) == false) {
-				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, self::ERROR_UPLOAD_TRANSFER);
+			if (!is_file($tmpname) || ($fp = fopen($tmpname, 'rb')) === false) {
+				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, self::ERROR_UPLOAD_TEMP);
 				$this->uploadDebug = 'Upload error: unable open tmp file';
 				if (! is_uploaded_file($tmpname)) {
 					if (unlink($tmpname)) unset($GLOBALS['elFinderTempFiles'][$tmpfname]);
