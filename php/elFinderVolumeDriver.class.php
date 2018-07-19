@@ -601,28 +601,6 @@ abstract class elFinderVolumeDriver {
 	);
 	
 	/**
-	 * MIME type list handled as a text file
-	 * 
-	 * @var array
-	 */
-	protected $textMimes = array(
-		'application/x-empty',
-		'application/javascript',
-		'application/json',
-		'application/xhtml+xml',
-		'audio/x-mp3-playlist',
-		'application/x-web-config',
-		'application/docbook+xml',
-		'application/x-php',
-		'application/x-perl',
-		'application/x-awk',
-		'application/x-config',
-		'application/x-csh',
-		'application/xml',
-		'application/sql'
-	);
-	
-	/**
 	 * Directory separator - required by client
 	 *
 	 * @var string
