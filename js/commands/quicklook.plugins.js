@@ -355,6 +355,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 			
 		if ((fm.UA.Safari && fm.OS === 'mac' && !fm.UA.iOS) || fm.UA.IE) {
 			active = true;
+		} else if (firefox = navigator.userAgent.match(/Firefox\/(\d+)/)) {
+			if (firefox && firefox[1] && firefox[1] >= 19) {
+				active = true;
+			}
 		} else {
 			$.each(navigator.plugins, function(i, plugins) {
 				$.each(plugins, function(i, plugin) {
