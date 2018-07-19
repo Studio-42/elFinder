@@ -1275,7 +1275,7 @@
 					fm   = this.fm,
 					dfrd = $.Deferred(),
 					init = function() {
-						var base = $(textarea).parent(),
+						var base = $(textarea).show().parent(),
 							dlg = base.closest('.elfinder-dialog'),
 							h = base.height(),
 							delta = base.outerHeight(true) - h,
@@ -1605,6 +1605,8 @@
 					instance: void(0),
 					opts: {}
 				});
+				textarea.setSelectionRange && textarea.setSelectionRange(0, 0);
+				$(textarea).trigger('focus').show();
 			},
 			save : function(){}
 		},

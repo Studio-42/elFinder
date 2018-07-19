@@ -393,7 +393,8 @@ elFinder.prototype.commands.edit = function() {
 
 					ta.initEditArea = function(id, file, content) {
 						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [];
-						ta.val(content);
+						// ta.hide() for performance tune. Need ta.show() in `load()` if use textarea node.
+						ta.hide().val(content);
 						if (content === '' || ! encoding || encoding !== 'UTF-8') {
 							heads.push({value: 'UTF-8'});
 						}
@@ -409,11 +410,6 @@ elFinder.prototype.commands.edit = function() {
 						}).on('mouseover', stateChange);
 						ta.parent().prev().find('.elfinder-titlebar-button:last')
 							.after($('<span class="elfinder-titlebar-button-right"/>').append(selEncoding));
-						
-						requestAnimationFrame(function() {
-							ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
-							ta.trigger('focus');
-						});
 					};
 				})();
 			}
@@ -671,6 +667,8 @@ elFinder.prototype.commands.edit = function() {
 					instance: void(0),
 					opts: {}
 				});
+				textarea.setSelectionRange && textarea.setSelectionRange(0, 0);
+				$(textarea).trigger('focus').show();
 			},
 			save : function(){}
 		},
