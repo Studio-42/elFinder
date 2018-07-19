@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: 499dc1b) (2018-07-19)
+ * Version 2.1.40 (2.1-src Nightly: 5f18af3) (2018-07-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9547,7 +9547,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 499dc1b)';
+elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 5f18af3)';
 
 
 
@@ -22590,7 +22590,8 @@ elFinder.prototype.commands.edit = function() {
 
 					ta.initEditArea = function(id, file, content) {
 						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [];
-						ta.val(content);
+						// ta.hide() for performance tune. Need ta.show() in `load()` if use textarea node.
+						ta.hide().val(content);
 						if (content === '' || ! encoding || encoding !== 'UTF-8') {
 							heads.push({value: 'UTF-8'});
 						}
@@ -22606,11 +22607,6 @@ elFinder.prototype.commands.edit = function() {
 						}).on('mouseover', stateChange);
 						ta.parent().prev().find('.elfinder-titlebar-button:last')
 							.after($('<span class="elfinder-titlebar-button-right"/>').append(selEncoding));
-						
-						requestAnimationFrame(function() {
-							ta[0].setSelectionRange && ta[0].setSelectionRange(0, 0);
-							ta.trigger('focus');
-						});
 					};
 				})();
 			}
@@ -22868,6 +22864,8 @@ elFinder.prototype.commands.edit = function() {
 					instance: void(0),
 					opts: {}
 				});
+				textarea.setSelectionRange && textarea.setSelectionRange(0, 0);
+				$(textarea).trigger('focus').show();
 			},
 			save : function(){}
 		},
