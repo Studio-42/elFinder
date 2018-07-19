@@ -338,6 +338,7 @@
 				id : 'creativecloud',
 				name : 'Creative Cloud',
 				iconImg : 'img/edit_creativecloud.png',
+				dataScheme: true,
 				schemeContent: true,
 				single: true,
 				integrate: {

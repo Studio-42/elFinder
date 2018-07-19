@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: 0e47b21) (2018-07-19)
+ * Version 2.1.40 (2.1-src Nightly: 499dc1b) (2018-07-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9547,7 +9547,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 0e47b21)';
+elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 499dc1b)';
 
 
 
@@ -22777,8 +22777,14 @@ elFinder.prototype.commands.edit = function() {
 					} else {
 						if ((!editor || !editor.info || !editor.info.preventGet) && fm.mimeIsText(file.mime)) {
 							reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i');
-							if (window.atob && (m = data.content.match(reg))) {
-								data.content = atob(data.content.substr(m[1].length));
+							if (!editor.info.dataScheme) {
+								if (window.atob && (m = data.content.match(reg))) {
+									data.content = atob(data.content.substr(m[1].length));
+								}
+							} else {
+								if (window.btoa && !data.content.match(reg)) {
+									data.content = 'data:'+file.mime+';base64,'+btoa(data.content);
+								}
 							}
 						}
 						dialog(id, file, data.content, data.encoding, editor)
