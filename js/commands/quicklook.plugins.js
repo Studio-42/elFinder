@@ -351,10 +351,15 @@ elFinder.prototype.commands.quicklook.plugins = [
 		var fm      = ql.fm,
 			mime    = 'application/pdf',
 			preview = ql.preview,
-			active  = false;
+			active  = false,
+			firefox;
 			
 		if ((fm.UA.Safari && fm.OS === 'mac' && !fm.UA.iOS) || fm.UA.IE) {
 			active = true;
+		} else if (fm.UA.Firefox && (firefox = navigator.userAgent.match(/Firefox\/(\d+)/))) {
+			if (firefox && firefox[1] && firefox[1] >= 19) {
+				active = true;
+			}
 		} else {
 			$.each(navigator.plugins, function(i, plugins) {
 				$.each(plugins, function(i, plugin) {
