@@ -106,20 +106,30 @@ class elFinder {
 	 * @var array
 	 */
 	public static $textMimes = array(
-		'application/x-empty',
+		'application/dash+xml',
+		'application/docbook+xml',
 		'application/javascript',
 		'application/json',
-		'application/xhtml+xml',
-		'audio/x-mp3-playlist',
-		'application/x-web-config',
-		'application/docbook+xml',
-		'application/x-php',
-		'application/x-perl',
+		'application/plt',
+		'application/sat',
+		'application/sql',
+		'application/step',
+		'application/vnd.hp-hpgl',
 		'application/x-awk',
 		'application/x-config',
 		'application/x-csh',
+		'application/x-empty',
+		'application/x-mpegurl',
+		'application/x-perl',
+		'application/x-php',
+		'application/x-web-config',
+		'application/xhtml+xml',
 		'application/xml',
-		'application/sql'
+		'audio/x-mp3-playlist',
+		'image/cgm',
+		'image/svg+xml',
+		'image/vnd.dxf',
+		'model/iges'
 	);
 	
 	/**
