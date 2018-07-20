@@ -354,12 +354,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 			active  = false,
 			firefox;
 			
-		if ((fm.UA.Safari && fm.OS === 'mac' && !fm.UA.iOS) || fm.UA.IE) {
+		if ((fm.UA.Safari && fm.OS === 'mac' && !fm.UA.iOS) || fm.UA.IE || fm.UA.Firefox) {
 			active = true;
-		} else if (fm.UA.Firefox && (firefox = navigator.userAgent.match(/Firefox\/(\d+)/))) {
-			if (firefox && firefox[1] && firefox[1] >= 19) {
-				active = true;
-			}
 		} else {
 			$.each(navigator.plugins, function(i, plugins) {
 				$.each(plugins, function(i, plugin) {
@@ -371,13 +367,18 @@ elFinder.prototype.commands.quicklook.plugins = [
 		}
 
 		active && preview.on(ql.evUpdate, function(e) {
-			var file = e.file, node;
+			var file = e.file;
 			
-			if (file.mime === mime && ql.dispInlineRegex.test(file.mime)) {
+			if (active && file.mime === mime && ql.dispInlineRegex.test(file.mime)) {
 				e.stopImmediatePropagation();
 				ql.hideinfo();
 				ql.cover.addClass('elfinder-quicklook-coverbg');
-				node = $('<object class="elfinder-quicklook-preview-pdf" data="'+fm.openUrl(file.hash)+'" type="application/pdf" />')
+				$('<object class="elfinder-quicklook-preview-pdf" data="'+fm.openUrl(file.hash)+'" type="application/pdf" />')
+					.on('error', function(e) {
+						active = false;
+						ql.update(void(0), fm.cwd());
+						ql.update(void(0), file);
+					})
 					.appendTo(preview);
 			}
 			
