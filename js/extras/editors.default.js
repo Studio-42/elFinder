@@ -1920,7 +1920,8 @@
 									'args[convert]'  : opts.convert.toLowerCase(),
 									'args[options]'  : JSON.stringify(opts.options),
 									'args[source]'   : fm.convAbsUrl(url),
-									'args[filename]' : fm.splitFileExtention(file.name)[0] + '.' + getExt(opts.category, opts.convert)
+									'args[filename]' : fm.splitFileExtention(file.name)[0] + '.' + getExt(opts.category, opts.convert),
+									'args[mime]'     : file.mime
 								},
 								preventDefault : true
 							}).done(function(data) {

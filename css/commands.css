@@ -716,6 +716,10 @@ ul.elfinder-help-integrations a:hover {
     margin: 0 10px;
 }
 
+.elfinder-preference button {
+    margin: 0 16px;
+}
+
 /********************** COMMAND "INFO" ****************************/
 .elfinder-rtl .elfinder-info-title .elfinder-cwd-icon:before {
     right: 33px;

@@ -157,6 +157,13 @@ var elFinder = function(elm, opts, bootCallback) {
 		files = {},
 		
 		/**
+		 * Hidden Files/dirs cache
+		 *
+		 * @type Object
+		 **/
+		hiddenFiles = {},
+
+		/**
 		 * Files/dirs hash cache of each dirs
 		 *
 		 * @type Object
@@ -340,6 +347,15 @@ var elFinder = function(elm, opts, bootCallback) {
 						gcJobRes = self.asyncJob(calc, hashes, {
 							interval : 20,
 							numPerOnce : 100
+						}).done(function() {
+							var hd = self.storage('hide') || {items: {}};
+							if (Object.keys(hiddenFiles).length) {
+								$.each(hiddenFiles, function(h) {
+									if (!hd.items[h]) {
+										delete hiddenFiles[h];
+									}
+								});
+							}
 						});
 					}
 				};
@@ -402,24 +418,29 @@ var elFinder = function(elm, opts, bootCallback) {
 				},
 				keeps = ['sizeInfo'],
 				changedParents = {},
-				f, i, keepProp, parents;
+				hideData = self.storage('hide') || {},
+				hides = hideData.items || {},
+				f, i, keepProp, parents, hidden;
 
 			for (i = 0; i < l; i++) {
 				f = Object.assign({}, data[i]);
+				hidden = (!hideData.show && hides[f.hash])? true : false;
 				if (f.name && f.hash && f.mime) {
-					if (sorterChk && f.phash === cwd) {
-						setSorter(f);
-						sorterChk = false;
-					}
-					
-					if (f.phash && (type === 'add' || type === 'change')) {
-						if (parents = self.parents(f.phash)) {
-							$.each(parents, function() {
-								changedParents[this] = true;
-							});
+					if (!hidden) {
+						if (sorterChk && f.phash === cwd) {
+							setSorter(f);
+							sorterChk = false;
+						}
+						
+						if (f.phash && (type === 'add' || type === 'change')) {
+							if (parents = self.parents(f.phash)) {
+								$.each(parents, function() {
+									changedParents[this] = true;
+								});
+							}
 						}
 					}
-					
+
 					if (files[f.hash]) {
 						$.each(keeps, function() {
 							if(files[f.hash][this] && ! f[this]) {
@@ -431,17 +452,25 @@ var elFinder = function(elm, opts, bootCallback) {
 						}
 						deleteCache(files[f.hash], true);
 					}
-					files[f.hash] = f;
-					if (f.mime === 'directory' && !ownFiles[f.hash]) {
-						ownFiles[f.hash] = {};
+					if (hides[f.hash]) {
+						hiddenFiles[f.hash] = f;
 					}
-					if (f.phash) {
-						if (!ownFiles[f.phash]) {
-							ownFiles[f.phash] = {};
+					if (hidden) {
+						l--;
+						data.splice(i--, 1);
+					} else {
+						files[f.hash] = f;
+						if (f.mime === 'directory' && !ownFiles[f.hash]) {
+							ownFiles[f.hash] = {};
 						}
-						ownFiles[f.phash][f.hash] = true;
+						if (f.phash) {
+							if (!ownFiles[f.phash]) {
+								ownFiles[f.phash] = {};
+							}
+							ownFiles[f.phash][f.hash] = true;
+						}
 					}
-				} 
+				}
 			}
 			// delete sizeInfo cache
 			$.each(Object.keys(changedParents), function() {
@@ -1431,8 +1460,8 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @param  String  file hash
 	 * @return Object
 	 */
-	this.file = function(hash) { 
-		return hash? files[hash] : void(0); 
+	this.file = function(hash, alsoHidden) { 
+		return hash? (files[hash] || (alsoHidden? hiddenFiles[hash] : void(0))) : void(0); 
 	};
 	
 	/**
@@ -2072,7 +2101,7 @@ var elFinder = function(elm, opts, bootCallback) {
 
 						if (!!data.init) {
 							self.uplMaxSize = self.returnBytes(response.uplMaxSize);
-							self.uplMaxFile = !!response.uplMaxFile? parseInt(response.uplMaxFile) : 20;
+							self.uplMaxFile = !!response.uplMaxFile? Math.max(parseInt(response.uplMaxFile), 50) : 20;
 						}
 					}
 
@@ -2805,7 +2834,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				pattern = patterns[i];
 				parts   = pattern.split('+');
 				code    = (code = parts.pop()).length == 1 
-					? code > 0 ? code : code.charCodeAt(0) 
+					? (code > 0 ? code : code.charCodeAt(0))
 					: (code > 0 ? code : $.ui.keyCode[code]);
 
 				if (code && !shortcuts[pattern]) {
@@ -3644,7 +3673,8 @@ var elFinder = function(elm, opts, bootCallback) {
 		'NUM7' : 103,
 		'NUM8' : 104,
 		'NUM9' : 105,
-		'CONTEXTMENU' : 93
+		'CONTEXTMENU' : 93,
+		'DOT'  : 190
 	});
 	
 	this.dragUpload = false;

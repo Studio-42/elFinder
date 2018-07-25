@@ -268,6 +268,12 @@
 }
 
 /* tooltip */
-.elfinder-ui-tooltip.ui-widget-shadow {
+.elfinder-ui-tooltip,
+.elfinder .elfinder-ui-tooltip {
+    background-color: #fff !important;
+}
+
+.elfinder-ui-tooltip.ui-widget-shadow,
+.elfinder .elfinder-ui-tooltip.ui-widget-shadow {
     box-shadow: 2px 6px 4px -4px #cecdcd;
 }

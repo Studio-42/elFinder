@@ -58,7 +58,7 @@
 			}
 			
 			html.push(sep);
-			html.push('<div class="'+lic+'">'+fm.i18n('icons')+': Pixelmixer, <a href="http://p.yusukekamiyamane.com" target="_blank">Fugue</a></div>');
+			html.push('<div class="'+lic+'">'+fm.i18n('icons')+': Pixelmixer, <a href="http://p.yusukekamiyamane.com" target="_blank">Fugue</a>, <a href="https://icons8.com" target="_blank">Icons8</a></div>');
 			
 			html.push(sep);
 			html.push('<div class="'+lic+'">Licence: 3-clauses BSD Licence</div>');

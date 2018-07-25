@@ -161,7 +161,12 @@ elFinder.prototype.command = function(fm) {
 		var self = this,
 			fm   = this.fm,
 			setCallback = function(s) {
-				var cb = s.callback || function(){ fm.exec(self.name, void(0), {_userAction: true}); };
+				var cb = s.callback || function(e) {
+							fm.exec(self.name, void(0), {
+							_userAction: true,
+							_currentType: 'shortcut'
+						});
+					};
 				s.callback = function(e) {
 					var enabled, checks = {};
 					if (self.enabled()) {
