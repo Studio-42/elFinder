@@ -222,7 +222,8 @@
 }
 
 /* tooltip */
-.elfinder-ui-tooltip {
-    font-size: 0.78em;
-    padding: 2px;
+.elfinder-ui-tooltip,
+.elfinder .elfinder-ui-tooltip {
+    font-size: 14px;
+    padding: 2px 4px;
 }

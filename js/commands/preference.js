@@ -22,13 +22,13 @@ elFinder.prototype.commands.preference = function() {
 			var cats = self.options.categories || {
 					'language' : ['language'],
 					'toolbar' : ['toolbarPref'],
-					'workspace' : ['iconSize','columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized'],
+					'workspace' : ['iconSize','columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized', 'showHidden'],
 					'dialog' : ['autoFocusDialog'],
 					'selectionInfo' : ['infoItems', 'hashChecker'],
 					'reset' : ['clearBrowserData'],
 					'all' : true
 				},
-				forms = self.options.prefs || ['language', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
+				forms = self.options.prefs || ['language', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized', 'showHidden', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
 			
 			forms = fm.arrayFlip(forms, true);
 			
@@ -191,6 +191,60 @@ elFinder.prototype.commands.preference = function() {
 			})()).on('change', function(e) {
 				fm.storage('editorMaximized', $(this).is(':checked')? 1 : -1);
 			}));
+
+			if (forms.showHidden) {
+				(function() {
+					var setTitle = function() {
+							var s = fm.storage('hide'),
+								t = [],
+								v;
+							if (s && s.items) {
+								$.each(s.items, function(h, n) {
+									t.push(fm.escape(n));
+								});
+							}
+							elms.prop('disabled', !t.length)[t.length? 'removeClass' : 'addClass']('ui-state-disabled');
+							v = t.length? t.join('\n') : '';
+							forms.showHidden.attr('title',v);
+							useTooltip && forms.showHidden.tooltip('option', 'content', v.replace(/\n/g, '<br>')).tooltip('close');
+						},
+						chk = $('<input type="checkbox"/>').prop('checked', (function() {
+							var s = fm.storage('hide');
+							return s && s.show;
+						})()).on('change', function(e) {
+							var o = {};
+							o[$(this).is(':checked')? 'show' : 'hide'] = true;
+							fm.exec('hide', void(0), o);
+						}),
+						btn = $('<button class="ui-button ui-corner-all ui-widget"/>').append(fm.i18n('reset')).on('click', function() {
+							fm.exec('hide', void(0), {reset: true});
+							$(this).parent().find('input:first').prop('checked', false);
+							setTitle();
+						}),
+						elms = $().add(chk).add(btn),
+						useTooltip;
+					
+					forms.showHidden = $('<div/>').append(chk, btn);
+					fm.bind('hide', function(e) {
+						var d = e.data;
+						if (!d.opts || (!d.opts.show && !d.opts.hide)) {
+							setTitle();
+						}
+					});
+					if (fm.UA.Mobile && $.fn.tooltip) {
+						useTooltip = true;
+						forms.showHidden.tooltip({
+							classes: {
+								'ui-tooltip': 'elfinder-ui-tooltip ui-widget-shadow'
+							},
+							tooltipClass: 'elfinder-ui-tooltip ui-widget-shadow',
+							track: true
+						}).css('user-select', 'none');
+						btn.css('user-select', 'none');
+					}
+					setTitle();
+				})();
+			}
 			
 			forms.infoItems && (forms.infoItems = (function() {
 				var items = fm.getCommand('info').items,
@@ -256,16 +310,20 @@ elFinder.prototype.commands.preference = function() {
 				} else if (prefs) {
 					dls = $();
 					$.each(prefs, function(i, n) {
-						var f, title, chks = '';
+						var f, title, chks = '', cbox;
 						if (f = forms[n]) {
 							found = 2;
 							title = fm.i18n(n);
-							if (f instanceof jQuery && f.length === 1 && f.is('input:checkbox')) {
-								if (!f.attr('id')) {
-									f.attr('id', 'elfinder-preference-'+n+'-checkbox');
+							cbox = $(f).filter('input[type="checkbox"]');
+							if (!cbox.length) {
+								cbox = $(f).find('input[type="checkbox"]');
+							}
+							if (cbox.length === 1) {
+								if (!cbox.attr('id')) {
+									cbox.attr('id', 'elfinder-preference-'+n+'-checkbox');
 								}
-								title = '<label for="'+f.attr('id')+'">'+title+'</label>';
-							} else if (f.find('input[type="checkbox"]').length > 1) {
+								title = '<label for="'+cbox.attr('id')+'">'+title+'</label>';
+							} else if (cbox.length > 1) {
 								chks = ' elfinder-preference-checkboxes';
 							}
 							dls = dls.add($('<dt class="elfinder-preference-'+n+chks+'">'+title+'</dt>')).add($('<dd class="elfinder-preference-'+n+chks+'"/>').append(f));
