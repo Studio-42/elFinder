@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: c3d8e0e) (2018-07-20)
+ * Version 2.1.40 (2.1-src Nightly: 8e623bd) (2018-07-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -188,6 +188,13 @@ var elFinder = function(elm, opts, bootCallback) {
 		files = {},
 		
 		/**
+		 * Hidden Files/dirs cache
+		 *
+		 * @type Object
+		 **/
+		hiddenFiles = {},
+
+		/**
 		 * Files/dirs hash cache of each dirs
 		 *
 		 * @type Object
@@ -371,6 +378,15 @@ var elFinder = function(elm, opts, bootCallback) {
 						gcJobRes = self.asyncJob(calc, hashes, {
 							interval : 20,
 							numPerOnce : 100
+						}).done(function() {
+							var hd = self.storage('hide') || {items: {}};
+							if (Object.keys(hiddenFiles).length) {
+								$.each(hiddenFiles, function(h) {
+									if (!hd.items[h]) {
+										delete hiddenFiles[h];
+									}
+								});
+							}
 						});
 					}
 				};
@@ -433,24 +449,29 @@ var elFinder = function(elm, opts, bootCallback) {
 				},
 				keeps = ['sizeInfo'],
 				changedParents = {},
-				f, i, keepProp, parents;
+				hideData = self.storage('hide') || {},
+				hides = hideData.items || {},
+				f, i, keepProp, parents, hidden;
 
 			for (i = 0; i < l; i++) {
 				f = Object.assign({}, data[i]);
+				hidden = (!hideData.show && hides[f.hash])? true : false;
 				if (f.name && f.hash && f.mime) {
-					if (sorterChk && f.phash === cwd) {
-						setSorter(f);
-						sorterChk = false;
-					}
-					
-					if (f.phash && (type === 'add' || type === 'change')) {
-						if (parents = self.parents(f.phash)) {
-							$.each(parents, function() {
-								changedParents[this] = true;
-							});
+					if (!hidden) {
+						if (sorterChk && f.phash === cwd) {
+							setSorter(f);
+							sorterChk = false;
+						}
+						
+						if (f.phash && (type === 'add' || type === 'change')) {
+							if (parents = self.parents(f.phash)) {
+								$.each(parents, function() {
+									changedParents[this] = true;
+								});
+							}
 						}
 					}
-					
+
 					if (files[f.hash]) {
 						$.each(keeps, function() {
 							if(files[f.hash][this] && ! f[this]) {
@@ -462,17 +483,25 @@ var elFinder = function(elm, opts, bootCallback) {
 						}
 						deleteCache(files[f.hash], true);
 					}
-					files[f.hash] = f;
-					if (f.mime === 'directory' && !ownFiles[f.hash]) {
-						ownFiles[f.hash] = {};
+					if (hides[f.hash]) {
+						hiddenFiles[f.hash] = f;
 					}
-					if (f.phash) {
-						if (!ownFiles[f.phash]) {
-							ownFiles[f.phash] = {};
+					if (hidden) {
+						l--;
+						data.splice(i--, 1);
+					} else {
+						files[f.hash] = f;
+						if (f.mime === 'directory' && !ownFiles[f.hash]) {
+							ownFiles[f.hash] = {};
 						}
-						ownFiles[f.phash][f.hash] = true;
+						if (f.phash) {
+							if (!ownFiles[f.phash]) {
+								ownFiles[f.phash] = {};
+							}
+							ownFiles[f.phash][f.hash] = true;
+						}
 					}
-				} 
+				}
 			}
 			// delete sizeInfo cache
 			$.each(Object.keys(changedParents), function() {
@@ -1462,8 +1491,8 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @param  String  file hash
 	 * @return Object
 	 */
-	this.file = function(hash) { 
-		return hash? files[hash] : void(0); 
+	this.file = function(hash, alsoHidden) { 
+		return hash? (files[hash] || (alsoHidden? hiddenFiles[hash] : void(0))) : void(0); 
 	};
 	
 	/**
@@ -2103,7 +2132,7 @@ var elFinder = function(elm, opts, bootCallback) {
 
 						if (!!data.init) {
 							self.uplMaxSize = self.returnBytes(response.uplMaxSize);
-							self.uplMaxFile = !!response.uplMaxFile? parseInt(response.uplMaxFile) : 20;
+							self.uplMaxFile = !!response.uplMaxFile? Math.max(parseInt(response.uplMaxFile), 50) : 20;
 						}
 					}
 
@@ -2836,7 +2865,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				pattern = patterns[i];
 				parts   = pattern.split('+');
 				code    = (code = parts.pop()).length == 1 
-					? code > 0 ? code : code.charCodeAt(0) 
+					? (code > 0 ? code : code.charCodeAt(0))
 					: (code > 0 ? code : $.ui.keyCode[code]);
 
 				if (code && !shortcuts[pattern]) {
@@ -3675,7 +3704,8 @@ var elFinder = function(elm, opts, bootCallback) {
 		'NUM7' : 103,
 		'NUM8' : 104,
 		'NUM9' : 105,
-		'CONTEXTMENU' : 93
+		'CONTEXTMENU' : 93,
+		'DOT'  : 190
 	});
 	
 	this.dragUpload = false;
@@ -9547,7 +9577,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.40 (2.1-src Nightly: c3d8e0e)';
+elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 8e623bd)';
 
 
 
@@ -10606,7 +10636,7 @@ elFinder.prototype._options = {
 			['mkdir', 'mkfile', 'upload'],
 			['open', 'download', 'getfile'],
 			['undo', 'redo'],
-			['copy', 'cut', 'paste', 'rm', 'empty'],
+			['copy', 'cut', 'paste', 'rm', 'empty', 'hide'],
 			['duplicate', 'rename', 'edit', 'resize', 'chmod'],
 			['selectall', 'selectnone', 'selectinvert'],
 			['quicklook', 'info'],
@@ -11081,11 +11111,11 @@ elFinder.prototype._options = {
 	 */
 	contextmenu : {
 		// navbarfolder menu
-		navbar : ['open', 'opennew', 'download', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', 'empty', '|', 'rename', '|', 'archive', '|', 'places', 'info', 'chmod', 'netunmount'],
+		navbar : ['open', 'opennew', 'download', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', 'empty', 'hide', '|', 'rename', '|', 'archive', '|', 'places', 'info', 'chmod', 'netunmount'],
 		// current directory menu
-		cwd    : ['undo', 'redo', '|', 'back', 'up', 'reload', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'empty', '|', 'view', 'sort', 'selectall', 'colwidth', '|', 'places', 'info', 'chmod', 'netunmount', '|', 'fullscreen', '|', 'preference'],
+		cwd    : ['undo', 'redo', '|', 'back', 'up', 'reload', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'empty', 'hide', '|', 'view', 'sort', 'selectall', 'colwidth', '|', 'places', 'info', 'chmod', 'netunmount', '|', 'fullscreen', '|', 'preference'],
 		// current directory file menu
-		files  : ['getfile', '|' ,'open', 'opennew', 'download', 'opendir', 'quicklook', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', 'empty', '|', 'rename', 'edit', 'resize', '|', 'archive', 'extract', '|', 'selectall', 'selectinvert', '|', 'places', 'info', 'chmod', 'netunmount']
+		files  : ['getfile', '|' ,'open', 'opennew', 'download', 'opendir', 'quicklook', '|', 'upload', 'mkdir', '|', 'copy', 'cut', 'paste', 'duplicate', '|', 'rm', 'empty', 'hide', '|', 'rename', 'edit', 'resize', '|', 'archive', 'extract', '|', 'selectall', 'selectinvert', '|', 'places', 'info', 'chmod', 'netunmount']
 	},
 
 	/**
@@ -11485,7 +11515,12 @@ elFinder.prototype.command = function(fm) {
 		var self = this,
 			fm   = this.fm,
 			setCallback = function(s) {
-				var cb = s.callback || function(){ fm.exec(self.name, void(0), {_userAction: true}); };
+				var cb = s.callback || function(e) {
+							fm.exec(self.name, void(0), {
+							_userAction: true,
+							_currentType: 'shortcut'
+						});
+					};
 				s.callback = function(e) {
 					var enabled, checks = {};
 					if (self.enabled()) {
@@ -12192,7 +12227,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-07-11
+ * @version 2018-07-24
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -12346,6 +12381,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'cmdselectnone': 'Select none', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': 'Invert selection', // from v2.1.28 added 15.08.2017
 			'cmdopennew'   : 'Open in new window', // from v2.1.38 added 3.4.2018
+			'cmdhide'      : 'Hide (personal)', // from v2.1.41 added 24.7.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
@@ -12651,6 +12687,9 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'convertOn'       : 'Convert on the site of $1', // from v2.1.40 added 10.7.2018
 			'integrations'    : 'Integrations', // from v2.1.40 added 11.7.2018
 			'integrationWith' : 'This elFinder has the following external services integrated. Please check the terms of use, privacy policy, etc. before using it.', // from v2.1.40 added 11.7.2018
+			'showHidden'      : 'Show hidden items', // from v2.1.41 added 24.7.2018
+			'hideHidden'      : 'Hide hidden items', // from v2.1.41 added 24.7.2018
+			'toggleHidden'    : 'Show/Hide hidden items', // from v2.1.41 added 24.7.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -23850,7 +23889,7 @@ elFinder.prototype.commands.fullscreen = function() {
 			}
 			
 			html.push(sep);
-			html.push('<div class="'+lic+'">'+fm.i18n('icons')+': Pixelmixer, <a href="http://p.yusukekamiyamane.com" target="_blank">Fugue</a></div>');
+			html.push('<div class="'+lic+'">'+fm.i18n('icons')+': Pixelmixer, <a href="http://p.yusukekamiyamane.com" target="_blank">Fugue</a>, <a href="https://icons8.com" target="_blank">Icons8</a></div>');
 			
 			html.push(sep);
 			html.push('<div class="'+lic+'">Licence: 3-clauses BSD Licence</div>');
@@ -24209,6 +24248,178 @@ elFinder.prototype.commands.hidden = function() {
 		return -1;
 	};
 };
+
+/*
+ * File: /js/commands/hide.js
+ */
+
+/**
+ * @class elFinder command "hide".
+ * folders/files to hide as personal setting.
+ *
+ * @type  elFinder.command
+ * @author  Naoki Sawada
+ */
+elFinder.prototype.commands.hide = function() {
+	
+	var self = this,
+		nameCache = {},
+		hideData, hideCnt, cMenuType, sOrigin;
+
+	this.syncTitleOnChange = true;
+
+	this.shortcuts = [{
+		pattern : 'ctrl+shift+dot',
+		description : this.fm.i18n('toggleHidden')
+	}];
+
+	this.init = function() {
+		var fm = this.fm;
+		
+		hideData = fm.storage('hide') || {items: {}};
+		hideCnt = Object.keys(hideData.items).length;
+
+		this.title = fm.i18n(hideData.show? 'hideHidden' : 'showHidden');
+		self.update(void(0), self.title);
+	};
+
+	this.fm.bind('select contextmenucreate closecontextmenu', function(e, fm) {
+		var sel = (e.data? (e.data.selected || e.data.targets) : null) || fm.selected();
+		if (e.type === 'select' && sel.length) {
+			sOrigin = e.data.origin;
+		} else if (e.type === 'contextmenucreate') {
+			cMenuType = e.data.type;
+		}
+		if (!sel.length || (((e.type !== 'contextmenucreate' && sOrigin !== 'navbar') || cMenuType === 'cwd') && sel[0] === fm.cwd().hash)) {
+			self.title = fm.i18n(hideData.show? 'hideHidden' : 'showHidden');
+		} else {
+			self.title = fm.i18n('cmdhide');
+		}
+		if (e.type !== 'closecontextmenu') {
+			self.update(cMenuType === 'cwd'? (hideCnt? 0 : -1) : void(0), self.title);
+		} else {
+			cMenuType = '';
+			requestAnimationFrame(function() {
+				self.update(void(0), self.title);
+			});
+		}
+	});
+
+	this.getstate = function(sel) {
+		return (cMenuType !== 'cwd' && (sel || this.fm.selected()).length) || hideCnt? 0 : -1;
+	};
+
+	this.exec = function(hashes, opts) {
+		var fm = this.fm,
+			dfrd = $.Deferred()
+				.done(function() {
+					fm.trigger('hide', {items: items, opts: opts});
+				})
+				.fail(function(error) {
+					fm.error(error);
+				}),
+			o = opts || {},
+			items = o.targets? o.targets : (hashes || fm.selected()),
+			added = [],
+			removed = [],
+			notifyto, files, res;
+
+		hideData = fm.storage('hide') || {};
+		if (!$.isPlainObject(hideData)) {
+			hideData = {};
+		}
+		if (!$.isPlainObject(hideData.items)) {
+			hideData.items = {};
+		}
+		if (opts._currentType === 'shortcut' || !items.length || (opts._currentType !== 'navbar' && items[0] === fm.cwd().hash)) {
+			if (hideData.show) {
+				o.hide = true;
+			} else if (Object.keys(hideData.items).length) {
+				o.show = true;
+			}
+		}
+		if (o.reset) {
+			o.show = true;
+			hideCnt = 0;
+		}
+		if (o.show || o.hide) {
+			if (o.show) {
+				hideData.show = true;
+			} else {
+				delete hideData.show;
+			}
+			if (o.show) {
+				fm.storage('hide', o.reset? null : hideData);
+				self.title = fm.i18n('hideHidden');
+				self.update(o.reset? -1 : void(0), self.title);
+				$.each(hideData.items, function(h) {
+					var f = fm.file(h, true);
+					if (f && (fm.searchStatus.state || fm.file(f.phash))) {
+						added.push(f);
+					}
+				});
+				if (added.length) {
+					fm.updateCache({added: added});
+					fm.add({added: added});
+				}
+				if (o.reset) {
+					hideData = {items: {}};
+				}
+				return dfrd.resolve();
+			}
+			items = Object.keys(hideData.items);
+		}
+
+		if (items.length) {
+			$.each(items, function(i, h) {
+				var f;
+				if (!hideData.items[h]) {
+					f = fm.file(h);
+					if (f) {
+						nameCache[h] = f.i18 || f.name;
+					}
+					hideData.items[h] = nameCache[h]? nameCache[h] : h;
+				}
+			});
+			hideCnt = Object.keys(hideData.items).length;
+			files = this.files(items);
+			fm.storage('hide', hideData);
+			fm.remove({removed: items});
+			if (hideData.show) {
+				this.exec(void(0), {hide: true});
+			}
+			if (!o.hide) {
+				res = {};
+				res.undo = {
+					cmd : 'hide',
+					callback : function() {
+						var nData = fm.storage('hide');
+						if (nData) {
+							$.each(items, function(i, h) {
+								delete nData.items[h];
+							});
+							hideCnt = Object.keys(nData.items).length;
+							fm.storage('hide', nData);
+							fm.trigger('hide', {items: items, opts: {}});
+							self.update(hideCnt? 0 : -1);
+						}
+						fm.updateCache({added: files});
+						fm.add({added: files});
+					}
+				};
+				res.redo = {
+					cmd : 'hide',
+					callback : function() {
+						return fm.exec('hide', void(0), {targets: items});
+					}
+				};
+			}
+		}
+
+		return dfrd.state() == 'rejected' ? dfrd : dfrd.resolve(res);
+	};
+};
+
 
 /*
  * File: /js/commands/home.js
@@ -25354,8 +25565,7 @@ elFinder.prototype.commands.opendir = function() {
  * @author Naoki Sawada
  **/  
 elFinder.prototype.commands.opennew = function() {
-	
-	var fm = this.fm;
+		var fm = this.fm;
 
 	this.shortcuts = [{
 		pattern  : (typeof(fm.options.getFileCallback) === 'function'? 'shift+' : '') + 'ctrl+enter'
@@ -25857,13 +26067,13 @@ elFinder.prototype.commands.preference = function() {
 			var cats = self.options.categories || {
 					'language' : ['language'],
 					'toolbar' : ['toolbarPref'],
-					'workspace' : ['iconSize','columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized'],
+					'workspace' : ['iconSize','columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized', 'showHidden'],
 					'dialog' : ['autoFocusDialog'],
 					'selectionInfo' : ['infoItems', 'hashChecker'],
 					'reset' : ['clearBrowserData'],
 					'all' : true
 				},
-				forms = self.options.prefs || ['language', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
+				forms = self.options.prefs || ['language', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized', 'showHidden', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
 			
 			forms = fm.arrayFlip(forms, true);
 			
@@ -26026,6 +26236,60 @@ elFinder.prototype.commands.preference = function() {
 			})()).on('change', function(e) {
 				fm.storage('editorMaximized', $(this).is(':checked')? 1 : -1);
 			}));
+
+			if (forms.showHidden) {
+				(function() {
+					var setTitle = function() {
+							var s = fm.storage('hide'),
+								t = [],
+								v;
+							if (s && s.items) {
+								$.each(s.items, function(h, n) {
+									t.push(fm.escape(n));
+								});
+							}
+							elms.prop('disabled', !t.length)[t.length? 'removeClass' : 'addClass']('ui-state-disabled');
+							v = t.length? t.join('\n') : '';
+							forms.showHidden.attr('title',v);
+							useTooltip && forms.showHidden.tooltip('option', 'content', v.replace(/\n/g, '<br>')).tooltip('close');
+						},
+						chk = $('<input type="checkbox"/>').prop('checked', (function() {
+							var s = fm.storage('hide');
+							return s && s.show;
+						})()).on('change', function(e) {
+							var o = {};
+							o[$(this).is(':checked')? 'show' : 'hide'] = true;
+							fm.exec('hide', void(0), o);
+						}),
+						btn = $('<button class="ui-button ui-corner-all ui-widget"/>').append(fm.i18n('reset')).on('click', function() {
+							fm.exec('hide', void(0), {reset: true});
+							$(this).parent().find('input:first').prop('checked', false);
+							setTitle();
+						}),
+						elms = $().add(chk).add(btn),
+						useTooltip;
+					
+					forms.showHidden = $('<div/>').append(chk, btn);
+					fm.bind('hide', function(e) {
+						var d = e.data;
+						if (!d.opts || (!d.opts.show && !d.opts.hide)) {
+							setTitle();
+						}
+					});
+					if (fm.UA.Mobile && $.fn.tooltip) {
+						useTooltip = true;
+						forms.showHidden.tooltip({
+							classes: {
+								'ui-tooltip': 'elfinder-ui-tooltip ui-widget-shadow'
+							},
+							tooltipClass: 'elfinder-ui-tooltip ui-widget-shadow',
+							track: true
+						}).css('user-select', 'none');
+						btn.css('user-select', 'none');
+					}
+					setTitle();
+				})();
+			}
 			
 			forms.infoItems && (forms.infoItems = (function() {
 				var items = fm.getCommand('info').items,
@@ -26091,16 +26355,20 @@ elFinder.prototype.commands.preference = function() {
 				} else if (prefs) {
 					dls = $();
 					$.each(prefs, function(i, n) {
-						var f, title, chks = '';
+						var f, title, chks = '', cbox;
 						if (f = forms[n]) {
 							found = 2;
 							title = fm.i18n(n);
-							if (f instanceof jQuery && f.length === 1 && f.is('input:checkbox')) {
-								if (!f.attr('id')) {
-									f.attr('id', 'elfinder-preference-'+n+'-checkbox');
+							cbox = $(f).filter('input[type="checkbox"]');
+							if (!cbox.length) {
+								cbox = $(f).find('input[type="checkbox"]');
+							}
+							if (cbox.length === 1) {
+								if (!cbox.attr('id')) {
+									cbox.attr('id', 'elfinder-preference-'+n+'-checkbox');
 								}
-								title = '<label for="'+f.attr('id')+'">'+title+'</label>';
-							} else if (f.find('input[type="checkbox"]').length > 1) {
+								title = '<label for="'+cbox.attr('id')+'">'+title+'</label>';
+							} else if (cbox.length > 1) {
 								chks = ' elfinder-preference-checkboxes';
 							}
 							dls = dls.add($('<dt class="elfinder-preference-'+n+chks+'">'+title+'</dt>')).add($('<dd class="elfinder-preference-'+n+chks+'"/>').append(f));
@@ -32054,7 +32322,6 @@ elFinder.prototype.commands.sort = function() {
  * File: /js/commands/undo.js
  */
 
-
 /**
  * @class  elFinder command "undo"
  * Undo previous commands
@@ -32085,7 +32352,7 @@ elFinder.prototype.commands.undo = function() {
 	this.syncTitleOnChange = true;
 	
 	this.getstate = function() {
-		return this.state;
+		return cmds.length? 0 : -1;
 	};
 	
 	this.setUndo = function(undo, redo) {
@@ -32192,7 +32459,7 @@ elFinder.prototype.commands.redo = function() {
 	this.syncTitleOnChange = true;
 	
 	this.getstate = function() {
-		return this.state;
+		return cmds.length? 0 : -1;
 	};
 	
 	this.setRedo = function(redo, undo) {

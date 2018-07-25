@@ -169,6 +169,7 @@
 			'cmdselectnone': 'Select none', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': 'Invert selection', // from v2.1.28 added 15.08.2017
 			'cmdopennew'   : 'Open in new window', // from v2.1.38 added 3.4.2018
+			'cmdhide'      : 'Hide (personal)', // from v2.1.41 added 24.7.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
@@ -474,6 +475,9 @@
 			'convertOn'       : 'Convert on the site of $1', // from v2.1.40 added 10.7.2018
 			'integrations'    : 'Integrations', // from v2.1.40 added 11.7.2018
 			'integrationWith' : 'This elFinder has the following external services integrated. Please check the terms of use, privacy policy, etc. before using it.', // from v2.1.40 added 11.7.2018
+			'showHidden'      : 'Show hidden items', // from v2.1.41 added 24.7.2018
+			'hideHidden'      : 'Hide hidden items', // from v2.1.41 added 24.7.2018
+			'toggleHidden'    : 'Show/Hide hidden items', // from v2.1.41 added 24.7.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',

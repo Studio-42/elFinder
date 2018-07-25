@@ -23,6 +23,7 @@ class elFinderEditorOnlineConvert extends elFinderEditor
         $options = $this->argValue('options');
         $source = $this->argValue('source');
         $filename = $this->argValue('filename');
+        $mime = $this->argValue('mime');
         $jobid = $this->argValue('jobid');
         $string_method = '';
         $options = array();
@@ -47,8 +48,12 @@ class elFinderEditorOnlineConvert extends elFinderEditor
                 $request['input'][0]['filename'] = $filename;
             }
 
+            if ($mime !== '') {
+                $request['input'][0]['content_type'] = $mime;
+            }
+
             if ($category) {
-            	$request['conversion'][0]['category'] = $category;
+                $request['conversion'][0]['category'] = $category;
             }
 
             if ($options && $options !== 'null') {
@@ -58,7 +63,7 @@ class elFinderEditorOnlineConvert extends elFinderEditor
                 $options = array();
             }
             if ($options) {
-            	$request['conversion'][0]['options'] = $options;
+                $request['conversion'][0]['options'] = $options;
             }
 
             $ch = curl_init($endpoint);
