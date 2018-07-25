@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-07-11
+ * @version 2018-07-24
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -163,6 +163,7 @@
 			'cmdselectnone': '選択解除', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': '選択を反転', // from v2.1.28 added 15.08.2017
 			'cmdopennew'   : '新しいウィンドウで開く', // from v2.1.38 added 3.4.2018
+			'cmdhide'      : '非表示(個人的)', // from v2.1.41 added 24.7.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : '閉じる',
@@ -468,6 +469,9 @@
 			'convertOn'       : '$1 のサイト上で変換する', // from v2.1.40 added 10.7.2018
 			'integrations'    : '統合', // from v2.1.40 added 11.7.2018
 			'integrationWith' : 'この elFinder は次の外部サービスが統合されています。それらの利用規約、プライバシーポリシーなどをご確認の上、ご利用ください。', // from v2.1.40 added 11.7.2018
+			'showHidden'      : '非表示アイテムを表示', // from v2.1.41 added 24.7.2018
+			'hideHidden'      : '非表示アイテムを隠す', // from v2.1.41 added 24.7.2018
+			'toggleHidden'    : '非表示アイテムの表示/非表示', // from v2.1.41 added 24.7.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
