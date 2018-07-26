@@ -100,7 +100,7 @@ elFinder.prototype.commands.hide = function() {
 				self.update(o.reset? -1 : void(0), self.title);
 				$.each(hideData.items, function(h) {
 					var f = fm.file(h, true);
-					if (f && (fm.searchStatus.state || fm.file(f.phash))) {
+					if (f && (fm.searchStatus.state || !f.phash || fm.file(f.phash))) {
 						added.push(f);
 					}
 				});
