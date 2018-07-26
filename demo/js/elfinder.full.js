@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: 8e623bd) (2018-07-26)
+ * Version 2.1.40 (2.1-src Nightly: 44ca907) (2018-07-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9577,7 +9577,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 8e623bd)';
+elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 44ca907)';
 
 
 
@@ -14162,7 +14162,10 @@ $.fn.elfindercwd = function(fm, options) {
 			 */
 			trigger = function() {
 				var selected = Object.keys(selectedFiles),
-					opts = { selected : selected };
+					opts = {
+						selected : selected,
+						origin : 'cwd'
+					};
 				
 				allSelected = selected.length && (selected.length === (incHashes || cwdHashes).length) && (!fm.maxTargets || selected.length <= fm.maxTargets);
 				if (selectCheckbox) {
@@ -24285,7 +24288,7 @@ elFinder.prototype.commands.hide = function() {
 
 	this.fm.bind('select contextmenucreate closecontextmenu', function(e, fm) {
 		var sel = (e.data? (e.data.selected || e.data.targets) : null) || fm.selected();
-		if (e.type === 'select' && sel.length) {
+		if (e.type === 'select' && e.data) {
 			sOrigin = e.data.origin;
 		} else if (e.type === 'contextmenucreate') {
 			cMenuType = e.data.type;
@@ -24331,7 +24334,7 @@ elFinder.prototype.commands.hide = function() {
 		if (!$.isPlainObject(hideData.items)) {
 			hideData.items = {};
 		}
-		if (opts._currentType === 'shortcut' || !items.length || (opts._currentType !== 'navbar' && items[0] === fm.cwd().hash)) {
+		if (opts._currentType === 'shortcut' || !items.length || (opts._currentType !== 'navbar' && sOrigin !=='navbar' && items[0] === fm.cwd().hash)) {
 			if (hideData.show) {
 				o.hide = true;
 			} else if (Object.keys(hideData.items).length) {
