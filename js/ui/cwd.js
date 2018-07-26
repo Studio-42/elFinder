@@ -544,7 +544,10 @@ $.fn.elfindercwd = function(fm, options) {
 			 */
 			trigger = function() {
 				var selected = Object.keys(selectedFiles),
-					opts = { selected : selected };
+					opts = {
+						selected : selected,
+						origin : 'cwd'
+					};
 				
 				allSelected = selected.length && (selected.length === (incHashes || cwdHashes).length) && (!fm.maxTargets || selected.length <= fm.maxTargets);
 				if (selectCheckbox) {

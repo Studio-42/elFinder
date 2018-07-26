@@ -31,7 +31,7 @@ elFinder.prototype.commands.hide = function() {
 
 	this.fm.bind('select contextmenucreate closecontextmenu', function(e, fm) {
 		var sel = (e.data? (e.data.selected || e.data.targets) : null) || fm.selected();
-		if (e.type === 'select' && sel.length) {
+		if (e.type === 'select' && e.data) {
 			sOrigin = e.data.origin;
 		} else if (e.type === 'contextmenucreate') {
 			cMenuType = e.data.type;
@@ -77,7 +77,7 @@ elFinder.prototype.commands.hide = function() {
 		if (!$.isPlainObject(hideData.items)) {
 			hideData.items = {};
 		}
-		if (opts._currentType === 'shortcut' || !items.length || (opts._currentType !== 'navbar' && items[0] === fm.cwd().hash)) {
+		if (opts._currentType === 'shortcut' || !items.length || (opts._currentType !== 'navbar' && sOrigin !=='navbar' && items[0] === fm.cwd().hash)) {
 			if (hideData.show) {
 				o.hide = true;
 			} else if (Object.keys(hideData.items).length) {
