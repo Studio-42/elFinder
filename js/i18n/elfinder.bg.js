@@ -429,7 +429,7 @@
 			'firstLetterSearch': 'Търсене по първа буква', // from v2.1.23 added 24.3.2017
 			'presets'         : 'Мостри', // from v2.1.25 added 26.5.2017
 			'tooManyToTrash'  : 'Прекалено много позиции, не може да премести в кошчето.', // from v2.1.25 added 9.6.2017
-			'TextArea'        : 'Ттекстово поле', // from v2.1.25 added 14.6.2017
+			'TextArea'        : 'Текстово поле', // from v2.1.25 added 14.6.2017
 			'folderToEmpty'   : 'Изпразнете папка "$1".', // from v2.1.25 added 22.6.2017
 			'filderIsEmpty'   : 'В папка "$1" няма позиции.', // from v2.1.25 added 22.6.2017
 			'preference'      : 'Настройки', // from v2.1.26 added 28.6.2017
