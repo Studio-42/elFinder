@@ -260,6 +260,194 @@
 	// return editors Array
 	return [
 		{
+			// tui.image-editor - https://github.com/nhnent/tui.image-editor
+			info : {
+				id: 'tuiimgedit',
+				name: 'TUI Image Editor',
+				iconImg: 'img/edit_tuiimgedit.png',
+				dataScheme: true,
+				schemeContent: true,
+				openMaximized: true
+			},
+			// MIME types to accept
+			mimes : ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp'],
+			// HTML of this editor
+			html : '<div class="elfinder-edit-imageeditor"><canvas></canvas></div>',
+			// called on initialization of elFinder cmd edit (this: this editor's config object)
+			setup : function(opts, fm) {
+				if (fm.UA.ltIE8 || fm.UA.Mobile) {
+					this.disabled = true;
+				} else {
+					this.opts = Object.assign({}, opts.extraOptions.tuiImgEditOpts || {}, {
+						iconsPath : fm.baseUrl + 'img/tui-',
+						theme : {}
+					});
+				}
+			},
+			// Initialization of editing node (this: this editors HTML node)
+			init : function(id, file, content, fm) {
+				this.data('url', content);
+			},
+			load : function(base) {
+				var self = this,
+					fm   = this.fm,
+					dfrd = $.Deferred(),
+					cdns = fm.options.cdns,
+					ver  = 'latest',
+					init = function(editor) {
+						var $base = $(base),
+							opts = self.confObj.opts,
+							iconsPath = opts.iconsPath,
+							iEditor = new editor(base, {
+								includeUI: {
+									loadImage: {
+										path: $base.data('url'),
+										name: self.file.name
+									},
+									theme: Object.assign({
+										// main icons
+										'menu.normalIcon.path': iconsPath + 'icon-b.svg',
+										'menu.normalIcon.name': 'icon-b',
+										'menu.activeIcon.path': iconsPath + 'icon-a.svg',
+										'menu.activeIcon.name': 'icon-a',
+										// submenu icons
+										'submenu.normalIcon.path': iconsPath + 'icon-a.svg',
+										'submenu.normalIcon.name': 'icon-a',
+										'submenu.activeIcon.path': iconsPath + 'icon-c.svg',
+										'submenu.activeIcon.name': 'icon-c',
+									}, opts.theme),
+									initMenu: 'filter',
+									menuBarPosition: 'bottom'
+								},
+								cssMaxWidth: 700,
+								cssMaxHeight: 500
+							}),
+							canvas = $base.find('canvas:first').get(0),
+							quty, qutyTm;
+
+						$base.removeData('url').data('canvas', canvas).data('mime', self.file.mime);
+
+						if (self.file.mime === 'image/jpeg') {
+							$base.data('quality', fm.storage('jpgQuality') || fm.option('jpgQuality'));
+							quty = $('<input type="number" class="ui-corner-all elfinder-resize-quality elfinder-tabstop"/>')
+								.attr('min', '1')
+								.attr('max', '100')
+								.attr('title', '1 - 100')
+								.on('change', function() {
+									var q = quty.val();
+									$base.data('quality', q);
+									qutyTm && cancelAnimationFrame(qutyTm);
+									qutyTm = requestAnimationFrame(function() {
+										canvas.toBlob(function(blob) {
+											blob && quty.next('span').text(' (' + fm.formatSize(blob.size) + ')');
+										}, 'image/jpeg', Math.max(Math.min(q, 100), 1) / 100);
+									});
+								})
+								.val($base.data('quality'))
+							$('<div class="ui-dialog-buttonset"/>')
+								.css('float', 'left')
+								.append(
+									$('<span>').html(fm.i18n('quality') + ' : '), quty, $('<span/>')
+								)
+								.prependTo($base.parent().next());
+						} else if (self.file.mime === 'image/svg+xml') {
+							$base.closest('.ui-dialog').trigger('changeType', {
+								extention: 'png',
+								mime : 'image/png',
+								keepEditor: true
+							});
+						}
+						// wait canvas ready
+						setTimeout(function() {
+							dfrd.resolve(iEditor);
+							if (quty) {
+								quty.trigger('change');
+								iEditor.on('redoStackChanged undoStackChanged', function() {
+									quty.trigger('change');
+								});
+							}
+						}, 100);
+					},
+					loader;
+
+				if (!self.confObj.editor) {
+					loader = $.Deferred();
+					fm.loadCss([
+						cdns.tui + '/tui-color-picker/latest/tui-color-picker.css',
+						cdns.tui + '/tui-image-editor/'+ver+'/tui-image-editor.css'
+					]);
+					if (fm.hasRequire) {
+						require.config({
+							paths : {
+								'fabric/dist/fabric.require' : cdns.fabric16 + '/fabric.require.min',
+								'tui-code-snippet' : cdns.tui + '/tui.code-snippet/latest/tui-code-snippet.min',
+								'tui-color-picker' : cdns.tui + '/tui.code-snippet/latest/tui-color-picker.min',
+								'tui-image-editor' : cdns.tui + '/tui-image-editor/'+ver+'/tui-image-editor.min'
+							}
+						});
+						require(['tui-image-editor'], function(ImageEditor) {
+							loader.resolve(ImageEditor);
+						});
+					} else {
+						fm.loadScript([
+							cdns.fabric16 + '/fabric.min.js',
+							cdns.tui + '/tui.code-snippet/latest/tui-code-snippet.min.js'
+						], function() {
+							fm.loadScript([
+								cdns.tui + '/tui-color-picker/latest/tui-color-picker.min.js'
+							], function() {
+								fm.loadScript([
+									cdns.tui + '/tui-image-editor/'+ver+'/tui-image-editor.js'
+								], function() {
+									loader.resolve(window.tui.ImageEditor);
+								}, {
+									loadType: 'tag'
+								});
+							}, {
+								loadType: 'tag'
+							});
+						}, {
+							loadType: 'tag'
+						});
+					}
+					loader.done(function(editor) {
+						self.confObj.editor = editor;
+						init(editor);
+					});
+				} else {
+					init(self.confObj.editor);
+				}
+				return dfrd;
+			},
+			getContent : function(base) {
+				var editor = this.editor,
+					fm = editor.fm,
+					$base = $(base),
+					quality = $base.data('quality');
+				if (editor.instance) {
+					if ($base.data('mime') === 'image/jpeg') {
+						quality = quality || fm.storage('jpgQuality') || fm.option('jpgQuality');
+						quality = Math.max(0.1, Math.min(1, quality / 100));
+					}
+					return $base.data('canvas').toDataURL($base.data('mime'), quality);
+				}
+			},
+			save : function(base) {
+				var $base = $(base),
+					quality = $base.data('quality'),
+					hash = $base.data('hash'),
+					file;
+				this.instance.deactivateAll();
+				if (typeof quality !== 'undefined') {
+					this.fm.storage('jpgQuality', quality);
+				}
+				if (hash) {
+					file = this.fm.file(hash);
+					$base.data('mime', file.mime);
+				}
+			}
+		},
+		{
 			// Pixlr Editor
 			info : {
 				id : 'pixlreditor',
@@ -276,7 +464,7 @@
 			// MIME types to accept
 			mimes : ['image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp', 'image/x-pixlr-data'],
 			// HTML of this editor
-			html : '<div style="width:100%;height:300px;max-height:100%;text-align:center;"><img/></div>',
+			html : '<div class="elfinder-edit-imageeditor"><img/></div>',
 			// called on initialization of elFinder cmd edit (this: this editor's config object)
 			setup : function(opts, fm) {
 				pixlrSetup.call(this, opts, fm);
@@ -312,7 +500,7 @@
 			// MIME types to accept
 			mimes : ['image/jpeg', 'image/png', 'image/gif'],
 			// HTML of this editor
-			html : '<div style="width:100%;height:300px;max-height:100%;text-align:center;"><img/></div>',
+			html : '<div class="elfinder-edit-imageeditor"><img/></div>',
 			// called on initialization of elFinder cmd edit (this: this editor's config object)
 			setup : function(opts, fm) {
 				pixlrSetup.call(this, opts, fm);
@@ -348,7 +536,7 @@
 			},
 			mimes : ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp'],
 			// HTML of this editor
-			html : '<div style="width:100%;height:300px;max-height:100%;text-align:center;"><img/></div>',
+			html : '<div class="elfinder-edit-imageeditor"><img/></div>',
 			// called on initialization of elFinder cmd edit (this: this editor's config object)
 			setup : function(opts, fm) {
 				if (fm.UA.ltIE8 || !opts.extraOptions || !opts.extraOptions.creativeCloudApiKey) {

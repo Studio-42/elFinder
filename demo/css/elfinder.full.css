@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: 580e973) (2018-07-26)
+ * Version 2.1.40 (2.1-src Nightly: b92d7bd) (2018-07-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -377,6 +377,28 @@
 /* edit area */
 .ui-dialog .ui-dialog-content.elfinder-edit-editor {
     background-color: #fff;
+}
+
+.ui-dialog .ui-dialog-content.elfinder-edit-editor .elfinder-edit-imageeditor {
+    width: 100%;
+    height: 300px;
+    max-height: 100%;
+    text-align: center;
+}
+
+.ui-dialog .ui-dialog-content.elfinder-edit-editor .elfinder-edit-imageeditor * {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+}
+
+.elfinder-edit-imageeditor .tui-image-editor-main-container .tui-image-editor-main {
+    top: 0;
+}
+
+.elfinder-edit-imageeditor .tui-image-editor-main-container .tui-image-editor-header {
+    display: none;
 }
 
 /* bottom margen for softkeyboard on fullscreen mode */
