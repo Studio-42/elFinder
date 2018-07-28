@@ -204,9 +204,10 @@ elFinder.prototype.commands.edit = function() {
 					maxHeight : 'window',
 					allowMinimize : true,
 					allowMaximize : true,
-					openMaximized : editorMaximized(),
+					openMaximized : editorMaximized() || (editor && editor.info && editor.info.openMaximized),
 					btnHoverFocus : false,
 					closeOnEscape : false,
+					propagationEvents : ['mousemove', 'mouseup', 'click'],
 					close   : function() {
 						var close = function() {
 								var conf;
@@ -256,7 +257,6 @@ elFinder.prototype.commands.edit = function() {
 					open    : function() {
 						var loadRes, conf, interval;
 						ta.initEditArea.call(ta, id, file, content, fm);
-						old = getContent();
 						if (ta.editor) {
 							loadRes = ta.editor.load(ta[0]) || null;
 							if (loadRes && loadRes.done) {
@@ -293,6 +293,8 @@ elFinder.prototype.commands.edit = function() {
 									}, interval);
 								}
 							}
+						} else {
+							old = getContent();
 						}
 					},
 					resize : function(e, data) {
@@ -471,7 +473,9 @@ elFinder.prototype.commands.edit = function() {
 						btnSet.children('.elfinder-btncnt-0,.elfinder-btncnt-1').hide();
 						saveAsFile.name = fm.splitFileExtention(file.name)[0] + '.' + data.extention;
 						saveAsFile.mime = data.mime;
-						btnSet.children('.elfinder-btncnt-2').trigger('click');
+						if (!data.keepEditor) {
+							btnSet.children('.elfinder-btncnt-2').trigger('click');
+						}
 					}
 				});
 			

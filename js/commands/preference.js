@@ -116,20 +116,24 @@ elFinder.prototype.commands.preference = function() {
 			
 			forms.iconSize && (forms.iconSize = (function() {
 				var max = fm.options.uiOptions.cwd.iconsView.sizeMax || 3,
-					size = fm.storage('iconsize') || 0;
-				return $('<div class="touch-punch"/>').slider({
-					classes: {
-						'ui-slider-handle': 'elfinder-tabstop',
-					},
-					value: size,
-					max: max,
-					slide: function(e, ui) {
-						fm.getUI('cwd').trigger('iconpref', {size: ui.value});
-					},
-					change: function(e, ui) {
-						fm.storage('iconsize', ui.value);
-					}
+					size = fm.storage('iconsize') || 0,
+					sld = $('<div class="touch-punch"/>').slider({
+						classes: {
+							'ui-slider-handle': 'elfinder-tabstop',
+						},
+						value: size,
+						max: max,
+						slide: function(e, ui) {
+							fm.getUI('cwd').trigger('iconpref', {size: ui.value});
+						},
+						change: function(e, ui) {
+							fm.storage('iconsize', ui.value);
+						}
+					});
+				fm.getUI('cwd').on('iconpref', function(e, data) {
+					sld.slider('option', 'value', data.size);
 				});
+				return sld;
 			})());
 
 			forms.columnPref && (forms.columnPref = (function() {
