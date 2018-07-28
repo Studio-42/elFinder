@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: 580e973) (2018-07-26)
+ * Version 2.1.40 (2.1-src Nightly: b92d7bd) (2018-07-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9577,7 +9577,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 580e973)';
+elFinder.prototype.version = '2.1.40 (2.1-src Nightly: b92d7bd)';
 
 
 
@@ -10012,6 +10012,8 @@ elFinder.prototype._options = {
 		ckeditor5  : '//cdn.ckeditor.com/ckeditor5/10.1.0',
 		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.8.0',
 		simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
+		fabric16   : '//cdnjs.cloudflare.com/ajax/libs/fabric.js/1.6.7',
+		tui        : '//uicdn.toast.com',
 		// for quicklook etc.
 		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.10.1/hls.min.js',
 		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.8.0/dash.all.min.js',
@@ -10420,6 +10422,14 @@ elFinder.prototype._options = {
 				'Windows-1250', 'Windows-1251', 'Windows-1252', 'Windows-1253', 'Windows-1254', 'Windows-1257'],
 			// options for extra editors
 			extraOptions : {
+				// TUI Image Editor's options
+				tuiImgEditOpts : {
+					// Path prefix of icon-a.svg, icon-b.svg, icon-c.svg and icon-d.svg in the Theme. 
+					// `iconsPath` MUST follow the same origin policy.
+					iconsPath : void(0), // default is "./img/tui-"
+					// Theme object
+					theme : {}
+				},
 				// Specify the Creative Cloud API key when using Creative SDK image editor of Creative Cloud.
 				// You can get the API key at https://console.adobe.io/.
 				creativeCloudApiKey : '',
@@ -22443,9 +22453,10 @@ elFinder.prototype.commands.edit = function() {
 					maxHeight : 'window',
 					allowMinimize : true,
 					allowMaximize : true,
-					openMaximized : editorMaximized(),
+					openMaximized : editorMaximized() || (editor && editor.info && editor.info.openMaximized),
 					btnHoverFocus : false,
 					closeOnEscape : false,
+					propagationEvents : ['mousemove', 'mouseup', 'click'],
 					close   : function() {
 						var close = function() {
 								var conf;
@@ -22495,7 +22506,6 @@ elFinder.prototype.commands.edit = function() {
 					open    : function() {
 						var loadRes, conf, interval;
 						ta.initEditArea.call(ta, id, file, content, fm);
-						old = getContent();
 						if (ta.editor) {
 							loadRes = ta.editor.load(ta[0]) || null;
 							if (loadRes && loadRes.done) {
@@ -22532,6 +22542,8 @@ elFinder.prototype.commands.edit = function() {
 									}, interval);
 								}
 							}
+						} else {
+							old = getContent();
 						}
 					},
 					resize : function(e, data) {
@@ -22710,7 +22722,9 @@ elFinder.prototype.commands.edit = function() {
 						btnSet.children('.elfinder-btncnt-0,.elfinder-btncnt-1').hide();
 						saveAsFile.name = fm.splitFileExtention(file.name)[0] + '.' + data.extention;
 						saveAsFile.mime = data.mime;
-						btnSet.children('.elfinder-btncnt-2').trigger('click');
+						if (!data.keepEditor) {
+							btnSet.children('.elfinder-btncnt-2').trigger('click');
+						}
 					}
 				});
 			
@@ -26164,20 +26178,24 @@ elFinder.prototype.commands.preference = function() {
 			
 			forms.iconSize && (forms.iconSize = (function() {
 				var max = fm.options.uiOptions.cwd.iconsView.sizeMax || 3,
-					size = fm.storage('iconsize') || 0;
-				return $('<div class="touch-punch"/>').slider({
-					classes: {
-						'ui-slider-handle': 'elfinder-tabstop',
-					},
-					value: size,
-					max: max,
-					slide: function(e, ui) {
-						fm.getUI('cwd').trigger('iconpref', {size: ui.value});
-					},
-					change: function(e, ui) {
-						fm.storage('iconsize', ui.value);
-					}
+					size = fm.storage('iconsize') || 0,
+					sld = $('<div class="touch-punch"/>').slider({
+						classes: {
+							'ui-slider-handle': 'elfinder-tabstop',
+						},
+						value: size,
+						max: max,
+						slide: function(e, ui) {
+							fm.getUI('cwd').trigger('iconpref', {size: ui.value});
+						},
+						change: function(e, ui) {
+							fm.storage('iconsize', ui.value);
+						}
+					});
+				fm.getUI('cwd').on('iconpref', function(e, data) {
+					sld.slider('option', 'value', data.size);
 				});
+				return sld;
 			})());
 
 			forms.columnPref && (forms.columnPref = (function() {
