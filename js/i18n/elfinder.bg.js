@@ -2,7 +2,7 @@
  * Bulgarian translation
  * @author Stamo Petkov <stamo.petkov@gmail.com>
  * @author Nikolay Petkov <office@cmstory.com>
- * @version 2018-02-18
+ * @version 2018-07-28
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,8 +17,8 @@
 		translator : 'Stamo Petkov &lt;stamo.petkov@gmail.com&gt;, Nikolay Petkov &lt;office@cmstory.com&gt;',
 		language   : 'Bulgarian',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i', // 01.03.2018 15:27
-		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25
+		dateFormat : 'd.m.Y H:i', // Mar 13, 2012 05:27 PM
+		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
 		nonameDateFormat : 'Ymd-His', // to apply if upload file is noname: 120513172700
 		messages   : {
 
@@ -162,6 +162,8 @@
 			'cmdselectall' : 'Избери всичко', // from v2.1.28 added 15.08.2017
 			'cmdselectnone': 'Избери нищо', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': 'Обърни селекцията', // from v2.1.28 added 15.08.2017
+			'cmdopennew'   : 'Отвори в нов прозорец', // from v2.1.38 added 3.4.2018
+			'cmdhide'      : 'Скрий (лично)', // from v2.1.41 added 24.7.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Затвори',
@@ -313,6 +315,10 @@
 			'selectlfile'     : 'Избери последният файл',
 			'viewlist'        : 'Изглед списък',
 			'viewicons'       : 'Изглед икони',
+			'viewSmall'       : 'Малки икони', // from v2.1.39 added 22.5.2018
+			'viewMedium'      : 'Средни икони', // from v2.1.39 added 22.5.2018
+			'viewLarge'       : 'Големи икони', // from v2.1.39 added 22.5.2018
+			'viewExtraLarge'  : 'Много големи икони', // from v2.1.39 added 22.5.2018
 			'places'          : 'Избрани',
 			'calc'            : 'Изчисли',
 			'path'            : 'Път',
@@ -330,7 +336,7 @@
 			'about'           : 'За',
 			'shortcuts'       : 'Бързи клавиши',
 			'help'            : 'Помощ',
-			'webfm'           : 'Файлов менаджер за Интернет',
+			'webfm'           : 'Файлов менажер за Интернет',
 			'ver'             : 'Версия',
 			'protocolver'     : 'версия на протокола',
 			'homepage'        : 'Начало',
@@ -445,6 +451,27 @@
 			'asSuffix'        : 'Добави суфикс', // from v2.1.31 added 8.12.2017
 			'changeExtention' : 'Промени разширение', // from v2.1.31 added 8.12.2017
 			'columnPref'      : 'Настройки за колони (Изглед в списък)', // from v2.1.32 added 6.2.2018
+			'reflectOnImmediate' : 'Всички промени ще се отразят незабавно в архива.', // from v2.1.33 added 2.3.2018
+			'reflectOnUnmount'   : 'Промените няма да се отразят, докато не размонтирате този диск.', // from v2.1.33 added 2.3.2018
+			'unmountChildren' : 'The following volume(s) mounted on this volume also unmounted. Are you sure to unmount it?', // from v2.1.33 added 5.3.2018
+			'selectionInfo'   : 'Информация за селекцията', // from v2.1.33 added 7.3.2018
+			'hashChecker'     : 'Алгоритми за показване на файловия хеш', // from v2.1.33 added 10.3.2018
+			'infoItems'       : 'Info Items (Selection Info Panel)', // from v2.1.38 added 28.3.2018
+			'pressAgainToExit': 'Натиснете отново, за да излезете.', // from v2.1.38 added 1.4.2018
+			'toolbar'         : 'Лента с инструменти', // from v2.1.38 added 4.4.2018
+			'workspace'       : 'Работно пространство', // from v2.1.38 added 4.4.2018
+			'dialog'          : 'Диалог', // from v2.1.38 added 4.4.2018
+			'all'             : 'Всички', // from v2.1.38 added 4.4.2018
+			'iconSize'        : 'Размер на иконите (изглед с икони)', // from v2.1.39 added 7.5.2018
+			'editorMaximized' : 'Отваря максимизиран прозорец на редактора', // from v2.1.40 added 30.6.2018
+			'editorConvNoApi' : 'Тъй като в момента не е налична API за конверсията, моля, конвертирайте в уебсайта.', //from v2.1.40 added 8.7.2018
+			'editorConvNeedUpload' : 'След конверсията трябва да го качите с URL адреса или изтегления файл, за да запазите конвертирания файл.', //from v2.1.40 added 8.7.2018
+			'convertOn'       : 'Конвертиране на сайта от $1', // from v2.1.40 added 10.7.2018
+			'integrations'    : 'Интеграции', // from v2.1.40 added 11.7.2018
+			'integrationWith' : 'Този elFinder има следните интегрирани външни услуги. Моля, проверете условията за ползване, декларацията за поверителност и т.н., преди да ги използвате.', // from v2.1.40 added 11.7.2018
+			'showHidden'      : 'Покажи скритите елементи', // from v2.1.41 added 24.7.2018
+			'hideHidden'      : 'Скрий скритите елементи', // from v2.1.41 added 24.7.2018
+			'toggleHidden'    : 'Покажи/скрий скритите елементи', // from v2.1.41 added 24.7.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Непознат',
