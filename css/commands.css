@@ -405,6 +405,19 @@
     font-size: 12px;
 }
 
+.ui-dialog-buttonpane .ui-dialog-buttonset.elfinder-edit-extras {
+    margin: 0 1em 0 .2em;
+    float: left;
+}
+
+.ui-dialog-buttonpane .ui-dialog-buttonset.elfinder-edit-extras-quality {
+    padding-top: 6px;
+}
+
+.ui-dialog-buttonpane .ui-icon {
+    cursor: pointer;
+}
+ 
 .elfinder-edit-onlineconvert-button {
     display: inline-block;
     width: 180px;
