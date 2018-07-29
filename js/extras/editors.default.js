@@ -282,6 +282,10 @@
 						iconsPath : fm.baseUrl + 'img/tui-',
 						theme : {}
 					});
+					if (!fm.isSameOrigin(this.opts.iconsPath)) {
+						this.disabled = true;
+						fm.debug('warning', 'Setting `commandOptions.edit.extraOptions.tuiImgEditOpts.iconsPath` MUST follow the same origin policy.');
+					}
 				}
 			},
 			// Initialization of editing node (this: this editors HTML node)
@@ -304,7 +308,7 @@
 										path: $base.data('url'),
 										name: self.file.name
 									},
-									theme: Object.assign({
+									theme: Object.assign(opts.theme, {
 										// main icons
 										'menu.normalIcon.path': iconsPath + 'icon-b.svg',
 										'menu.normalIcon.name': 'icon-b',
@@ -315,7 +319,7 @@
 										'submenu.normalIcon.name': 'icon-a',
 										'submenu.activeIcon.path': iconsPath + 'icon-c.svg',
 										'submenu.activeIcon.name': 'icon-c',
-									}, opts.theme),
+									}),
 									initMenu: 'filter',
 									menuBarPosition: 'bottom'
 								},
@@ -323,10 +327,50 @@
 								cssMaxHeight: 500
 							}),
 							canvas = $base.find('canvas:first').get(0),
-							quty, qutyTm;
+							zoom = function(v) {
+								var c = $(canvas),
+									w = parseInt(c.attr('width')),
+									h = parseInt(c.attr('height')),
+									a = w / h,
+									mw, mh, css;
+								if (v === 0) {
+									mw = w;
+									mh = h;
+								} else {
+									mw = parseInt(c.css('max-width')) + Number(v);
+									mh = mw / a;
+								}
+								css = {
+									maxWidth: mw,
+									maxHeight: mh
+								};
+								per.text(Math.round(mw / w * 100) + '%');
+								if (typeof v !== 'undefined') {
+									// set editor config directly for change scale
+									iEditor._graphics.cssMaxWidth = mw;
+									iEditor._graphics.cssMaxHeight = mh;
+									// change scale
+									c.css(css).next().css(css);
+									c.parents('.tui-image-editor-canvas-container,tui-image-editor-canvas').css(css);
+									c.closest('.tui-image-editor').css({
+										width: mw,
+										height: mh
+									});
+									// continually change more
+									if (zoomMore) {
+										setTimeout(function() {
+											zoomMore && zoom(v);
+										}, 50);
+									}
+								}
+							},
+							zup = $('<span class="ui-icon ui-icon-plusthick"/>').data('val', 10),
+							zdown = $('<span class="ui-icon ui-icon-minusthick"/>').data('val', -10),
+							per = $('<button/>').css('width', '4em').text('%').attr('title', '100%').data('val', 0),
+							quty, qutyTm, zoomTm, zoomMore;
 
 						$base.removeData('url').data('canvas', canvas).data('mime', self.file.mime);
-
+						// jpeg quality controls
 						if (self.file.mime === 'image/jpeg') {
 							$base.data('quality', fm.storage('jpgQuality') || fm.option('jpgQuality'));
 							quty = $('<input type="number" class="ui-corner-all elfinder-resize-quality elfinder-tabstop"/>')
@@ -343,9 +387,8 @@
 										}, 'image/jpeg', Math.max(Math.min(q, 100), 1) / 100);
 									});
 								})
-								.val($base.data('quality'))
-							$('<div class="ui-dialog-buttonset"/>')
-								.css('float', 'left')
+								.val($base.data('quality'));
+							$('<div class="ui-dialog-buttonset elfinder-edit-extras elfinder-edit-extras-quality"/>')
 								.append(
 									$('<span>').html(fm.i18n('quality') + ' : '), quty, $('<span/>')
 								)
@@ -357,6 +400,27 @@
 								keepEditor: true
 							});
 						}
+						// zoom scale controls
+						$('<div class="ui-dialog-buttonset elfinder-edit-extras"/>')
+							.append(
+								zdown, per, zup
+							)
+							.attr('title', fm.i18n('scale'))
+							.on('click', 'span,button', function() {
+								zoom($(this).data('val'));
+							})
+							.on('mousedown mouseup mouseleave', 'span', function(e) {
+								zoomMore = false;
+								zoomTm && clearTimeout(zoomTm);
+								if (e.type === 'mousedown') {
+									zoomTm = setTimeout(function() {
+										zoomMore = true;
+										zoom($(e.target).data('val'));
+									}, 500);
+								}
+							})
+							.prependTo($base.parent().next());
+
 						// wait canvas ready
 						setTimeout(function() {
 							dfrd.resolve(iEditor);
@@ -366,6 +430,8 @@
 									quty.trigger('change');
 								});
 							}
+							// show initial scale
+							zoom(null);
 						}, 100);
 					},
 					loader;
@@ -429,6 +495,7 @@
 						quality = quality || fm.storage('jpgQuality') || fm.option('jpgQuality');
 						quality = Math.max(0.1, Math.min(1, quality / 100));
 					}
+					// editor.instance.toDataURL() does not support second arg
 					return $base.data('canvas').toDataURL($base.data('mime'), quality);
 				}
 			},
