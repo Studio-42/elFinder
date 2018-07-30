@@ -352,7 +352,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 			mime    = 'application/pdf',
 			preview = ql.preview,
 			active  = false,
-			firefox;
+			urlhash = '',
+			firefox, toolbar;
 			
 		if ((fm.UA.Safari && fm.OS === 'mac' && !fm.UA.iOS) || fm.UA.IE || fm.UA.Firefox) {
 			active = true;
@@ -366,25 +367,28 @@ elFinder.prototype.commands.quicklook.plugins = [
 			});
 		}
 
-		active && preview.on(ql.evUpdate, function(e) {
-			var file = e.file;
-			
-			if (active && file.mime === mime && ql.dispInlineRegex.test(file.mime)) {
-				e.stopImmediatePropagation();
-				ql.hideinfo();
-				ql.cover.addClass('elfinder-quicklook-coverbg');
-				$('<object class="elfinder-quicklook-preview-pdf" data="'+fm.openUrl(file.hash)+'" type="application/pdf" />')
-					.on('error', function(e) {
-						active = false;
-						ql.update(void(0), fm.cwd());
-						ql.update(void(0), file);
-					})
-					.appendTo(preview);
+		if (active) {
+			if (typeof ql.options.pdfToolbar !== 'undefined' && !ql.options.pdfToolbar) {
+				urlhash = '#toolbar=0';
 			}
-			
-		});
-		
-			
+			preview.on(ql.evUpdate, function(e) {
+				var file = e.file;
+				
+				if (active && file.mime === mime && ql.dispInlineRegex.test(file.mime)) {
+					e.stopImmediatePropagation();
+					ql.hideinfo();
+					ql.cover.addClass('elfinder-quicklook-coverbg');
+					$('<object class="elfinder-quicklook-preview-pdf" data="'+fm.openUrl(file.hash)+urlhash+'" type="application/pdf" />')
+						.on('error', function(e) {
+							active = false;
+							ql.update(void(0), fm.cwd());
+							ql.update(void(0), file);
+						})
+						.appendTo(preview);
+				}
+				
+			});
+		}
 	},
 	
 	/**
@@ -451,11 +455,12 @@ elFinder.prototype.commands.quicklook.plugins = [
 			win  = ql.window,
 			navi = ql.navbar,
 			AMR, autoplay,
+			controlsList = typeof ql.options.mediaControlsList === 'string' && ql.options.mediaControlsList? ' controlsList="' + fm.escape(ql.options.mediaControlsList) + '"' : '',
 			setNavi = function() {
 				navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
 			},
 			getNode = function(src, hash) {
-				return $('<audio class="elfinder-quicklook-preview-audio ui-front" controls preload="auto" autobuffer><source src="'+src+'" /></audio>')
+				return $('<audio class="elfinder-quicklook-preview-audio ui-front" controls' + controlsList + ' preload="auto" autobuffer><source src="'+src+'" /></audio>')
 					.on('change', function(e) {
 						// Firefox fire change event on seek or volume change
 						e.stopPropagation();
@@ -614,6 +619,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			win  = ql.window,
 			navi = ql.navbar,
 			cHls, cDash, pDash, cFlv, autoplay, tm,
+			controlsList = typeof ql.options.mediaControlsList === 'string' && ql.options.mediaControlsList? ' controlsList="' + fm.escape(ql.options.mediaControlsList) + '"' : '',
 			setNavi = function() {
 				if (fm.UA.iOS) {
 					if (win.hasClass('elfinder-quicklook-fullscreen')) {
@@ -641,7 +647,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				pDash = null;
 				opts = opts || {};
 				ql.hideinfo();
-				node = $('<video class="elfinder-quicklook-preview-video" controls preload="auto" autobuffer playsinline>'
+				node = $('<video class="elfinder-quicklook-preview-video" controls' + controlsList + ' preload="auto" autobuffer playsinline>'
 						+'</video>')
 					.on('change', function(e) {
 						// Firefox fire change event on seek or volume change
