@@ -1,5 +1,6 @@
 /**
  * Persian-Farsi Translation
+ * @author Keyhan Mohammadpour <keyhan_universityworks@yahoo.com>
  * @author Farhad Zare <farhad@persianoc.com>
  * @version 2018-07-29
  */
@@ -13,7 +14,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.fa = {
-		translator : 'Farhad Zare &lt;farhad@persianoc.com&gt;',
+		translator : 'Keyhan Mohammadpour &lt;keyhan_universityworks@yahoo.com&gt;, Farhad Zare &lt;farhad@persianoc.com&gt;',
 		language   : 'فارسی',
 		direction  : 'rtl',
 		dateFormat : 'd.m.Y H:i',
