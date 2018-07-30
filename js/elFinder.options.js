@@ -296,6 +296,11 @@ elFinder.prototype._options = {
 			autoplay : true,
 			width    : 450,
 			height   : 300,
+			// ControlsList of HTML5 audio/video preview
+			// see https://googlechrome.github.io/samples/media/controlslist.html
+			mediaControlsList : '', // e.g. 'nodownload nofullscreen noremoteplayback'
+			// Show toolbar of PDF preview (with <embed> tag)
+			pdfToolbar : true,
 			// Maximum characters length to preview
 			textMaxlen : 2000,
 			// quicklook window must be contained in elFinder node on window open (true|false)
