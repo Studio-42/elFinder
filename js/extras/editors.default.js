@@ -267,7 +267,11 @@
 				iconImg: 'img/edit_tuiimgedit.png',
 				dataScheme: true,
 				schemeContent: true,
-				openMaximized: true
+				openMaximized: true,
+				integrate: {
+					title: 'TOAST UI Image Editor',
+					link: 'http://ui.toast.com/tui-image-editor/'
+				}
 			},
 			// MIME types to accept
 			mimes : ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp'],
