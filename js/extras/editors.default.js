@@ -463,7 +463,7 @@
 								cdns.tui + '/tui-color-picker/latest/tui-color-picker.min.js'
 							], function() {
 								fm.loadScript([
-									cdns.tui + '/tui-image-editor/'+ver+'/tui-image-editor.js'
+									cdns.tui + '/tui-image-editor/'+ver+'/tui-image-editor.min.js'
 								], function() {
 									loader.resolve(window.tui.ImageEditor);
 								}, {
