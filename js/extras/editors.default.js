@@ -30,18 +30,18 @@
 			pxd: 'image/x-pixlr-data'
 		},
 		mime2ext,
-		getExtention = function(file, fm) {
+		getExtention = function(mime, fm) {
 			if (!mime2ext) {
 				mime2ext = fm.arrayFlip(ext2mime);
 			}
-			var ext = mime2ext[file.mime] || fm.mimeTypes[file.mime];
+			var ext = mime2ext[mime] || fm.mimeTypes[mime];
 			if (ext === 'jpeg') {
 				ext = 'jpg';
 			}
 			return ext;
 		},
 		initImgTag = function(id, file, content, fm) {
-			var node = $(this).children('img:first').data('ext', getExtention(file, fm)),
+			var node = $(this).children('img:first').data('ext', getExtention(file.mime, fm)),
 				spnr = $('<div/>')
 					.css({
 						position: 'absolute',
@@ -373,7 +373,7 @@
 							per = $('<button/>').css('width', '4em').text('%').attr('title', '100%').data('val', 0),
 							quty, qutyTm, zoomTm, zoomMore;
 
-						$base.removeData('url').data('canvas', canvas).data('mime', self.file.mime);
+						$base.removeData('url').data('mime', self.file.mime);
 						// jpeg quality controls
 						if (self.file.mime === 'image/jpeg') {
 							$base.data('quality', fm.storage('jpgQuality') || fm.option('jpgQuality'));
@@ -499,8 +499,10 @@
 						quality = quality || fm.storage('jpgQuality') || fm.option('jpgQuality');
 						quality = Math.max(0.1, Math.min(1, quality / 100));
 					}
-					// editor.instance.toDataURL() does not support second arg
-					return $base.data('canvas').toDataURL($base.data('mime'), quality);
+					return editor.instance.toDataURL({
+						format: getExtention($base.data('mime'), fm),
+						quality: quality
+					});
 				}
 			},
 			save : function(base) {
