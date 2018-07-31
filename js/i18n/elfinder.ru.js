@@ -3,7 +3,7 @@
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
  * @author Alex Yashkin <alex@yashkin.by>
- * @version 2018-07-16
+ * @version 2018-07-30
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -164,6 +164,7 @@
 			'cmdselectnone': 'Отменить выбор', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': 'Инвертировать выбор', // from v2.1.28 added 15.08.2017
 			'cmdopennew'   : 'Открыть в новом окне', // from v2.1.38 added 3.4.2018
+			'cmdhide'      : 'Скрыть (персонально)', // from v2.1.41 added 24.7.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Закрыть',
@@ -469,6 +470,9 @@
 			'convertOn'       : 'Конвертировать на сайте $1', // from v2.1.40 added 10.7.2018
 			'integrations'    : 'Интеграции', // from v2.1.40 added 11.7.2018
 			'integrationWith' : 'Менеджер elFinder интегрирован со следующими внешними сервисами. Ознакомьтесь с правилами пользования, политиками безопасности и др. перед их использованием.', // from v2.1.40 added 11.7.2018
+			'showHidden'      : 'Показать скрытые элементы', // from v2.1.41 added 24.7.2018
+			'hideHidden'      : 'Скрыть скрытые элементы', // from v2.1.41 added 24.7.2018
+			'toggleHidden'    : 'Показать/скрыть скрытые элементы', // from v2.1.41 added 24.7.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
