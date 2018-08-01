@@ -595,21 +595,21 @@ class elFinder {
 		$this->uploadTempPath = (isset($opts['uploadTempPath']) ? $opts['uploadTempPath'] : '');
 		$this->callbackWindowURL = (isset($opts['callbackWindowURL']) ? $opts['callbackWindowURL'] : '');
 		$this->maxTargets = (isset($opts['maxTargets']) ? intval($opts['maxTargets']) : $this->maxTargets);
-		elFinder::$commonTempPath = (isset($opts['commonTempPath']) ? $opts['commonTempPath'] : './.tmp');
+		elFinder::$commonTempPath = realpath((isset($opts['commonTempPath']) ? $opts['commonTempPath'] : './.tmp'));
 		if (!is_writable(elFinder::$commonTempPath)) {
 			elFinder::$commonTempPath = sys_get_temp_dir();
 			if (!is_writable(elFinder::$commonTempPath)) {
 				elFinder::$commonTempPath = '';
 			}
 		}
-		if (isset($opts['connectionFlagsPath']) && is_writable($opts['connectionFlagsPath'])) {
+		if (isset($opts['connectionFlagsPath']) && is_writable($opts['connectionFlagsPath'] = realpath($opts['connectionFlagsPath']))) {
 			elFinder::$connectionFlagsPath = $opts['connectionFlagsPath'];
 		} else {
 			elFinder::$connectionFlagsPath = elFinder::$commonTempPath;
 		}
 		
 		if (! empty($opts['tmpLinkPath'])) {
-			elFinder::$tmpLinkPath = $opts['tmpLinkPath'];
+			elFinder::$tmpLinkPath = realpath($opts['tmpLinkPath']);
 		}
 		if (! empty($opts['tmpLinkUrl'])) {
 			elFinder::$tmpLinkUrl = $opts['tmpLinkUrl'];
