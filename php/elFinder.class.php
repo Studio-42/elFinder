@@ -595,7 +595,7 @@ class elFinder {
 		$this->uploadTempPath = (isset($opts['uploadTempPath']) ? $opts['uploadTempPath'] : '');
 		$this->callbackWindowURL = (isset($opts['callbackWindowURL']) ? $opts['callbackWindowURL'] : '');
 		$this->maxTargets = (isset($opts['maxTargets']) ? intval($opts['maxTargets']) : $this->maxTargets);
-		elFinder::$commonTempPath = realpath((isset($opts['commonTempPath']) ? $opts['commonTempPath'] : './.tmp'));
+		elFinder::$commonTempPath = (isset($opts['commonTempPath']) ? realpath($opts['commonTempPath']) : dirname(__FILE__) . '/.tmp');
 		if (!is_writable(elFinder::$commonTempPath)) {
 			elFinder::$commonTempPath = sys_get_temp_dir();
 			if (!is_writable(elFinder::$commonTempPath)) {
