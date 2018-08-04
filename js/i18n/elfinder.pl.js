@@ -1,9 +1,8 @@
 /**
  * Polski translation
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
- * @author Wojciech Jabłoński <www.jablonski@gmail.com>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2018-06-10
+ * @version 2018-08-04
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -15,7 +14,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.pl = {
-		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Wojciech Jabłoński &lt;www.jablonski@gmail.com&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;',
+		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;',
 		language   : 'Polski',
 		direction  : 'ltr',
 		dateFormat : 'd.m.Y H:i', // Mar 13, 2012 05:27 PM
@@ -164,6 +163,7 @@
 			'cmdselectnone': 'Odznacz wszystko', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': 'Odwróć wybór', // from v2.1.28 added 15.08.2017
 			'cmdopennew'   : 'Otwórz w nowym oknie', // from v2.1.38 added 3.4.2018
+			'cmdhide'      : 'Ukryj (osobiste)', // from v2.1.41 added 24.7.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Zamknij',
@@ -462,7 +462,16 @@
 			'workspace'       : 'Obszar Pracy', // from v2.1.38 added 4.4.2018
 			'dialog'          : 'Dialog', // from v2.1.38 added 4.4.2018
 			'all'             : 'Wszystko', // from v2.1.38 added 4.4.2018
-			'iconSize'        : 'Rozmiar Ikony (Podgląd ikon)', // form v2.1.39 added 7.5.2018
+			'iconSize'        : 'Rozmiar Ikony (Podgląd ikon)', // from v2.1.39 added 7.5.2018
+			'editorMaximized' : 'Otwórz zmaksymalizowane okno edytora', // from v2.1.40 added 30.6.2018
+			'editorConvNoApi' : 'Ponieważ konwersja przez API nie jest obecnie dostępna, należy dokonać konwersji w witrynie.', //from v2.1.40 added 8.7.2018
+			'editorConvNeedUpload' : 'Po konwersji musisz przesłać z adresem URL pozycji lub pobranym plikiem, aby zapisać przekonwertowany plik.', //from v2.1.40 added 8.7.2018
+			'convertOn'       : 'Konwertuj na stronie $1', // from v2.1.40 added 10.7.2018
+			'integrations'    : 'Integracje', // from v2.1.40 added 11.7.2018
+			'integrationWith' : 'Ten elFinder ma zintegrowane następujące usługi zewnętrzne. Przed użyciem ich sprawdź warunki użytkowania, politykę prywatności itp.', // from v2.1.40 added 11.7.2018
+			'showHidden'      : 'Pokaż ukryte pozycje', // from v2.1.41 added 24.7.2018
+			'hideHidden'      : 'Ukryj ukryte pozycje', // from v2.1.41 added 24.7.2018
+			'toggleHidden'    : 'Pokaż/Ukryj ukryte pozycje', // from v2.1.41 added 24.7.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',
