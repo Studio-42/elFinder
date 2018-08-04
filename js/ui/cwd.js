@@ -867,7 +867,7 @@ $.fn.elfindercwd = function(fm, options) {
 								if (f.mime == 'directory') {
 									dirs = true;
 								}
-								if (f.tmb || (stmb && f.mime.indexOf('image/') === 0)) {
+								if ((f.tmb && (f.tmb != 1 || f.size > 0)) || (stmb && f.mime.indexOf('image/') === 0)) {
 									atmb[f.hash] = f.tmb || 'self';
 								}
 								clipCuts[f.hash] && locks.push(f.hash);
@@ -1353,7 +1353,7 @@ $.fn.elfindercwd = function(fm, options) {
 					// see Studio-42/elFinder#1544 @ github
 					docFlag = $.htmlPrefilter? true : false,
 					tempDom = docFlag? $(document.createDocumentFragment()) : $('<div/>'),
-					file, hash, node, nodes, ndx;
+					file, hash, node, nodes, ndx, stmb;
 
 				if (l > showFiles) {
 					// re-render for performance tune
@@ -1363,6 +1363,9 @@ $.fn.elfindercwd = function(fm, options) {
 				} else {
 					// add the item immediately
 					l && wz.removeClass('elfinder-cwd-wrapper-empty');
+					
+					// Self thumbnail
+					stmb = (fm.option('tmbUrl') === 'self');
 					
 					while (l--) {
 						file = files[l];
@@ -1389,8 +1392,8 @@ $.fn.elfindercwd = function(fm, options) {
 						}
 						
 						if ($('#'+fm.cwdHash2Id(hash)).length) {
-							if (file.tmb) {
-								atmb[hash] = file.tmb;
+							if ((file.tmb && (file.tmb != 1 || file.size > 0)) || (stmb && file.mime.indexOf('image/') === 0)) {
+								atmb[hash] = file.tmb || 'self';
 							}
 						}
 					}
