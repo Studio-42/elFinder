@@ -21,13 +21,19 @@
 			return hasFlash;
 		})(),
 		ext2mime = {
-			jpg: 'image/jpeg',
-			jpeg: 'image/jpeg',
-			png: 'image/png',
-			gif: 'image/gif',
 			bmp: 'image/x-ms-bmp',
+			gif: 'image/gif',
+			jpeg: 'image/jpeg',
+			jpg: 'image/jpeg',
+			pdf: 'application/pdf',
+			png: 'image/png',
+			ppm: 'image/x-portable-pixmap',
+			psd: 'image/vnd.adobe.photoshop',
+			pxd: 'image/x-pixlr-data',
 			svg: 'image/svg+xml',
-			pxd: 'image/x-pixlr-data'
+			tiff: 'image/tiff',
+			webp: 'image/webp',
+			xcf: 'image/x-xcf'
 		},
 		mime2ext,
 		getExtention = function(mime, fm) {
@@ -591,6 +597,189 @@
 			},
 			save : function(base) {},
 			close : function(base) {}
+		},
+		{
+			// Photopea advanced image editor
+			info : {
+				id : 'photopea',
+				name : 'Photopea',
+				iconImg : 'img/edit_photopea.png',
+				single: true,
+				urlAsContent: true,
+				arrayBufferContent: true,
+				openMaximized: true,
+				integrate: {
+					title: 'Photopea',
+					link: 'https://www.photopea.com/learn/'
+				}
+			},
+			mimes : ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp', 'image/tiff', 'image/webp', 'image/x-xcf', 'image/vnd.adobe.photoshop', 'application/pdf', 'image/x-portable-pixmap'],
+			html : '<iframe style="width:100%;height:100%;border:none;"></iframe>',
+			// setup on elFinder bootup
+			setup : function(opts, fm) {
+				if (fm.UA.IE || fm.UA.Mobile) {
+					this.disabled = true;
+				}
+			},
+			// Initialization of editing node (this: this editors HTML node)
+			init : function(id, file, dum, fm) {
+				var orig = 'https://www.photopea.com',
+					ifm = $(this).hide()
+						//.css('box-sizing', 'border-box')
+						.on('load', function() {
+							//spnr.remove();
+							ifm.show();
+						})
+						.on('error', function() {
+							spnr.remove();
+							ifm.show();
+						}),
+					confObj = this.editor.confObj,
+					spnr = $('<div/>')
+						.css({
+							position: 'absolute',
+							top: '50%',
+							textAlign: 'center',
+							width: '100%',
+							fontSize: '16pt'
+						})
+						.html(fm.i18n('nowLoading') + '<span class="elfinder-spinner"/>')
+						.appendTo(ifm.parent()),
+					getType = function(mime) {
+						var ext = getExtention(mime, fm),
+							mime = ext2mime[ext];
+
+						if (!confObj.mimesFlip[mime]) {
+							ext = '';
+						} else if (ext === 'jpeg') {
+							ext = 'jpg';
+						}
+						if (!ext || ext === 'xcf') {
+							ext = 'psd';
+							mime = ext2mime[ext];
+							ifm.closest('.ui-dialog').trigger('changeType', {
+								extention: ext,
+								mime : mime,
+								keepEditor: true
+							});
+						}
+						return ext;
+					},
+					mime = file.mime,
+					liveMsg, type;
+				
+				if (!confObj.mimesFlip) {
+					confObj.mimesFlip = fm.arrayFlip(confObj.mimes, true);
+				}
+				if (!confObj.liveMsg) {
+					confObj.liveMsg = function(ifm, spnr, file) {
+						var url = fm.openUrl(file.hash);
+							if (!fm.isSameOrigin(url)) {
+								url = fm.openUrl(file.hash, true);
+							}
+						var wnd = ifm.get(0).contentWindow,
+							phase = 0,
+							data = null,
+							dfdIni = $.Deferred().done(function() {
+								spnr.remove();
+								phase = 1;
+								wnd.postMessage(data, '*');
+							}),
+							dfdGet;
+
+						this.load = function() {
+							return fm.request({
+								data    : {cmd : 'get'},
+								options : {
+									url: url,
+									type: 'get',
+									cache : true,
+									dataType : 'binary',
+									responseType :'arraybuffer',
+									processData: false
+								}
+							})
+							.fail(function(error) {
+								error && fm.error(error);
+							})
+							.done(function(d) {
+								data = d;
+							});
+						};
+
+						this.receive = function(e) {
+							var ev = e.originalEvent;
+							if (ev.origin === orig && ev.source === wnd) {
+								if (ev.data === 'done') {
+									if (phase === 0) {
+										dfdIni.resolve();
+									} else if (phase === 1) {
+										phase = 2;
+										ifm.trigger('contentsloaded');
+									}
+								} else {
+									if (dfdGet && dfdGet.state() === 'pending' && typeof ev.data === 'object') {
+										dfdGet.resolve('data:' + mime + ';base64,' + fm.arrayBufferToBase64(ev.data));
+									}
+								}
+							}
+						};
+
+						this.getContent = function() {
+							var type;
+							dfdGet && dfdGet.state() === 'pending' && dfdGet.reject();
+							dfdGet = null;
+							if (ifm.data('mime')) {
+								type = getType(ifm.data('mime'));
+							}
+							dfdGet = $.Deferred();
+							wnd.postMessage('app.activeDocument.saveToOE("' + type + '")', orig);
+							return dfdGet;
+						};
+					};
+				}
+
+				ifm.parent().css('padding', 0);
+				type = getType(file.mime);
+				liveMsg = this.editor.liveMsg = new confObj.liveMsg(ifm, spnr, file);
+				$(window).on('message.' + fm.namespace, liveMsg.receive);
+				liveMsg.load().done(function() {
+					ifm.attr('src', orig + '/');
+				});
+			},
+			load : function(base) {
+				var dfd = $.Deferred(),
+					self = this,
+					fm = this.fm,
+					$base = $(base);
+				$base.on('contentsloaded', function() {
+					dfd.resolve(self.liveMsg);
+				});
+				return dfd;
+			},
+			getContent : function() {
+				return this.editor.liveMsg? this.editor.liveMsg.getContent() : void(0);
+			},
+			save : function(base, liveMsg) {
+				var $base = $(base),
+					quality = $base.data('quality'),
+					hash = $base.data('hash'),
+					file;
+				if (typeof quality !== 'undefined') {
+					this.fm.storage('jpgQuality', quality);
+				}
+				if (hash) {
+					file = this.fm.file(hash);
+					$base.data('mime', file.mime);
+				} else {
+					$base.removeData('mime');
+				}
+			},
+			// On dialog closed
+			close : function(base, liveMsg) {
+				$(base).attr('src', '');
+				liveMsg && $(window).off('message.' + this.fm.namespace, liveMsg.receive);
+			}
 		},
 		{
 			// Adobe Creative SDK Creative Tools Image Editor UI

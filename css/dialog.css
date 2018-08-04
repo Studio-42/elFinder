@@ -357,7 +357,8 @@
     background-position: 0 -295px;
 }
 
-.elfinder-dialog-icon-rename {
+.elfinder-dialog-icon-rename,
+.elfinder-dialog-icon-chkcontent {
     background-position: 0 -330px;
 }
 
