@@ -270,7 +270,7 @@
 			info : {
 				id: 'tuiimgedit',
 				name: 'TUI Image Editor',
-				iconImg: 'img/edit_tuiimgedit.png',
+				iconImg: 'img/editor-icons.png 0 -48',
 				dataScheme: true,
 				schemeContent: true,
 				openMaximized: true,
@@ -531,7 +531,7 @@
 			info : {
 				id : 'pixlreditor',
 				name : 'Pixlr Editor',
-				iconImg : 'img/edit_pixlreditor.png',
+				iconImg : 'img/editor-icons.png 0 -128',
 				urlAsContent: true,
 				schemeContent: true,
 				single: true,
@@ -567,7 +567,7 @@
 			info : {
 				id: 'pixlrexpress',
 				name : 'Pixlr Express',
-				iconImg : 'img/edit_pixlrexpress.png',
+				iconImg : 'img/editor-icons.png 0 -112',
 				urlAsContent: true,
 				schemeContent: true,
 				single: true,
@@ -603,7 +603,7 @@
 			info : {
 				id : 'photopea',
 				name : 'Photopea',
-				iconImg : 'img/edit_photopea.png',
+				iconImg : 'img/editor-icons.png 0 -160',
 				single: true,
 				urlAsContent: true,
 				arrayBufferContent: true,
@@ -787,7 +787,7 @@
 			info : {
 				id : 'creativecloud',
 				name : 'Creative Cloud',
-				iconImg : 'img/edit_creativecloud.png',
+				iconImg : 'img/editor-icons.png 0 -192',
 				dataScheme: true,
 				schemeContent: true,
 				single: true,
@@ -942,7 +942,7 @@
 			info : {
 				id : 'aceeditor',
 				name : 'ACE Editor',
-				iconImg : 'img/edit_aceeditor.png'
+				iconImg : 'img/editor-icons.png 0 -96'
 			},
 			load : function(textarea) {
 				var self = this,
@@ -1147,7 +1147,7 @@
 			info : {
 				id : 'codemirror',
 				name : 'CodeMirror',
-				iconImg : 'img/edit_codemirror.png'
+				iconImg : 'img/editor-icons.png 0 -176'
 			},
 			load : function(textarea) {
 				var fm = this.fm,
@@ -1303,7 +1303,7 @@
 			info : {
 				id : 'simplemde',
 				name : 'SimpleMDE',
-				iconImg : 'img/edit_simplemde.png'
+				iconImg : 'img/editor-icons.png 0 -80'
 			},
 			exts  : ['md'],
 			load : function(textarea) {
@@ -1399,7 +1399,7 @@
 			info : {
 				id : 'ckeditor',
 				name : 'CKEditor',
-				iconImg : 'img/edit_ckeditor.png'
+				iconImg : 'img/editor-icons.png 0 0'
 			},
 			exts  : ['htm', 'html', 'xhtml'],
 			setup : function(opts, fm) {
@@ -1515,7 +1515,7 @@
 			info : {
 				id : 'ckeditor5',
 				name : 'CKEditor5',
-				iconImg : 'img/edit_ckeditor5.png'
+				iconImg : 'img/editor-icons.png 0 -16'
 			},
 			exts : ['htm', 'html', 'xhtml'],
 			html : '<div class="edit-editor-ckeditor5"></div>',
@@ -1708,7 +1708,7 @@
 			info : {
 				id : 'tinymce',
 				name : 'TinyMCE',
-				iconImg : 'img/edit_tinymce.png'
+				iconImg : 'img/editor-icons.png 0 -64'
 			},
 			exts  : ['htm', 'html', 'xhtml'],
 			setup : function(opts, fm) {
@@ -1859,7 +1859,7 @@
 			info : {
 				id : 'zohoeditor',
 				name : 'Zoho Editor',
-				iconImg : 'img/edit_zohooffice.png',
+				iconImg : 'img/editor-icons.png 0 -32',
 				cmdCheck : 'ZohoOffice',
 				preventGet: true,
 				hideButtons: true,
@@ -2065,7 +2065,7 @@
 			info : {
 				id : 'onlineconvert',
 				name : 'Online Convert',
-				iconImg : 'img/edit_onlineconvert.png',
+				iconImg : 'img/editor-icons.png 0 -144',
 				cmdCheck : 'OnlineConvert',
 				preventGet: true,
 				hideButtons: true,
