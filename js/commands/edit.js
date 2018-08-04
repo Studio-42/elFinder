@@ -104,37 +104,60 @@ elFinder.prototype.commands.edit = function() {
 		dialog = function(id, file, content, encoding, editor) {
 
 			var dfrd = $.Deferred(),
+				_loaded = false,
+				loaded = function() {
+					if (!_loaded) {
+						fm.toast({
+							mode: 'warning',
+							msg: fm.i18n('nowLoading')
+						});
+						return false;
+					}
+					return true;
+				},
 				save = function() {
 					var encord = selEncoding? selEncoding.val():void(0),
-						conf;
-					ta.one('_savefail', function() {
-						ta.off('_savedone');
-						dialogNode.show().find('button.elfinder-btncnt-0,button.elfinder-btncnt-1').hide();
-					}).one('_savedone', function() {
-						ta.off('_savefail');
-					});
+						saveDfd = $.Deferred().fail(function() {
+							dialogNode.show().find('button.elfinder-btncnt-0,button.elfinder-btncnt-1').hide();
+						}),
+						conf, res;
+					if (!loaded()) {
+						return saveDfd.resolve();
+					}
 					if (ta.editor) {
 						ta.editor.save(ta[0], ta.editor.instance);
 						conf = ta.editor.confObj;
-						if (conf.info && conf.info.schemeContent) {
+						if (conf.info && (conf.info.schemeContent || conf.info.arrayBufferContent)) {
 							encord = 'scheme';
 						}
 					}
-					old = getContent();
-					dfrd.notifyWith(ta, [encord, ta.data('hash')]);
+					res = getContent();
+					setOld(res);
+					if (res.promise) {
+						res.done(function(data) {
+							dfrd.notifyWith(ta, [encord, ta.data('hash'), old, saveDfd]);
+						});
+					} else {
+						dfrd.notifyWith(ta, [encord, ta.data('hash'), old, saveDfd]);
+					}
+					return saveDfd;
 				},
 				cancel = function() {
 					ta.elfinderdialog('close');
 				},
 				savecl = function() {
-					ta.one('_savedone', function() {
+					if (!loaded()) { return; }
+					save().done(function() {
+						_loaded = false;
 						dialogNode.show();
 						cancel();
+					}).fail(function() {
+						dialogNode.show();
 					});
-					save();
 					dialogNode.hide();
 				},
 				saveAs = function() {
+					if (!loaded()) { return; }
 					var prevOld = old,
 						phash = fm.file(file.phash)? file.phash : fm.cwd().hash,
 						fail = function() {
@@ -152,13 +175,15 @@ elFinder.prototype.commands.edit = function() {
 								.done(function(data) {
 									if (data.added && data.added.length) {
 										ta.data('hash', data.added[0].hash);
-										save();
-										dialogNode.show();
-										cancel();
+										save().done(function() {
+											_loaded = false;
+											dialogNode.show();
+											cancel();
+											dialogs.fadeIn();
+										}).fail(fail);
 									} else {
 										fail();
 									}
-									dialogs.fadeIn();
 								})
 								.progress(function(err) {
 									if (err && err === 'errUploadMime') {
@@ -192,8 +217,30 @@ elFinder.prototype.commands.edit = function() {
 					}).fail(fail);
 				},
 				changed = function() {
+					var dfd = $.Deferred(),
+						res, tm;
+					if (!_loaded) {
+						return dfd.resolve(false);
+					}
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
-					return  (old !== getContent());
+					var res = getContent();
+					if (res && res.promise) {
+						tm = setTimeout(function() {
+							fm.notify({
+								type : 'chkcontent',
+								cnt : 1,
+								hideCnt: true
+							});
+						}, 100);
+						res.done(function(d) {
+							tm && clearTimeout(tm);
+							fm.notify({ type : 'chkcontent', cnt: -1 });
+							dfd.resolve(old !== d);
+						});
+					} else {
+						dfd.resolve(old !== res);
+					}
+					return dfd;
 				},
 				opts = {
 					title   : fm.escape(file.name),
@@ -230,29 +277,32 @@ elFinder.prototype.commands.edit = function() {
 							} : {
 								label    : 'btnSaveClose',
 								callback : function() {
-									save();
-									close();
+									save().done(function() {
+										close();
+									});
 								}
 							};
-						if (changed()) {
-							fm.confirm({
-								title  : self.title,
-								text   : 'confirmNotSave',
-								accept : accept,
-								cancel : {
-									label    : 'btnClose',
-									callback : close
-								},
-								buttons : onlySaveAs? null : [{
-									label    : 'btnSaveAs',
-									callback : function() {
-										requestAnimationFrame(saveAs);
-									}
-								}]
-							});
-						} else {
-							close();
-						}
+						changed().done(function(change) {
+							if (change) {
+								fm.confirm({
+									title  : self.title,
+									text   : 'confirmNotSave',
+									accept : accept,
+									cancel : {
+										label    : 'btnClose',
+										callback : close
+									},
+									buttons : onlySaveAs? null : [{
+										label    : 'btnSaveAs',
+										callback : function() {
+											requestAnimationFrame(saveAs);
+										}
+									}]
+								});
+							} else {
+								close();
+							}
+						});
 					},
 					open    : function() {
 						var loadRes, conf, interval;
@@ -260,10 +310,12 @@ elFinder.prototype.commands.edit = function() {
 						if (ta.editor) {
 							loadRes = ta.editor.load(ta[0]) || null;
 							if (loadRes && loadRes.done) {
-								loadRes.done(function(instance) {
+								loadRes.always(function() {
+									_loaded = true;
+								}).done(function(instance) {
 									ta.editor.instance = instance;
 									ta.editor.focus(ta[0], ta.editor.instance);
-									old = getContent();
+									setOld(getContent());
 									requestAnimationFrame(function() {
 										dialogNode.trigger('resize');
 									});
@@ -273,6 +325,7 @@ elFinder.prototype.commands.edit = function() {
 									return;
 								});
 							} else {
+								_loaded = true;
 								if (loadRes && (typeof loadRes === 'string' || Array.isArray(loadRes))) {
 									fm.error(loadRes);
 									ta.elfinderdialog('destroy');
@@ -280,7 +333,7 @@ elFinder.prototype.commands.edit = function() {
 								}
 								ta.editor.instance = loadRes;
 								ta.editor.focus(ta[0], ta.editor.instance);
-								old = getContent();
+								setOld(getContent());
 								requestAnimationFrame(function() {
 									dialogNode.trigger('resize');
 								});
@@ -294,7 +347,8 @@ elFinder.prototype.commands.edit = function() {
 								}
 							}
 						} else {
-							old = getContent();
+							_loaded = true;
+							setOld(getContent());
 						}
 					},
 					resize : function(e, data) {
@@ -303,6 +357,15 @@ elFinder.prototype.commands.edit = function() {
 				},
 				getContent = function() {
 					return ta.getContent.call(ta, ta[0]);
+				},
+				setOld = function(res) {
+					if (res && res.promise) {
+						res.done(function(d) {
+							old = d;
+						});
+					} else {
+						old = res;
+					}
 				},
 				autoSync = function(interval) {
 					if (dialogNode.is(':visible')) {
@@ -348,11 +411,13 @@ elFinder.prototype.commands.edit = function() {
 				(function() {
 					var stateChange = function() {
 							if (selEncoding) {
-								if (changed()) {
-									selEncoding.attr('title', fm.i18n('saveAsEncoding')).addClass('elfinder-edit-changed');
-								} else {
-									selEncoding.attr('title', fm.i18n('openAsEncoding')).removeClass('elfinder-edit-changed');
-								}
+								changed().done(function(change) {
+									if (change) {
+										selEncoding.attr('title', fm.i18n('saveAsEncoding')).addClass('elfinder-edit-changed');
+									} else {
+										selEncoding.attr('title', fm.i18n('openAsEncoding')).removeClass('elfinder-edit-changed');
+									}
+								});
 							}
 						};
 						
@@ -405,10 +470,12 @@ elFinder.prototype.commands.edit = function() {
 							e.stopPropagation();
 						}).on('change', function() {
 							// reload to change encoding if not edited
-							if (! changed() && getContent() !== '') {
-								cancel();
-								edit(file, $(this).val(), editor).fail(function(err) { err && fm.error(err); });
-							}
+							changed().done(function(change) {
+								if (! change && getContent() !== '') {
+									cancel();
+									edit(file, $(this).val(), editor).fail(function(err) { err && fm.error(err); });
+								}
+							});
 						}).on('mouseover', stateChange);
 						ta.parent().prev().find('.elfinder-titlebar-button:last')
 							.after($('<span class="elfinder-titlebar-button-right"/>').append(selEncoding));
@@ -594,7 +661,7 @@ elFinder.prototype.commands.edit = function() {
 							.done(function(data) {
 								dfrd.resolve(data);
 							})
-							.progress(function(encoding, newHash) {
+							.progress(function(encoding, newHash, data, saveDfd) {
 								var ta = this;
 								if (newHash) {
 									hash = newHash;
@@ -605,7 +672,7 @@ elFinder.prototype.commands.edit = function() {
 										cmd     : 'put',
 										target  : hash,
 										encoding : encoding || data.encoding,
-										content : ta.getContent.call(ta, ta[0])
+										content : data
 									},
 									notify : {type : 'save', cnt : 1},
 									syncOnFail : true,
@@ -619,14 +686,14 @@ elFinder.prototype.commands.edit = function() {
 								})
 								.fail(function(error) {
 									dfrd.reject(error);
-									ta.trigger('_savefail');
+									saveDfd.reject();
 								})
 								.done(function(data) {
 									requestAnimationFrame(function(){
 										ta.trigger('focus');
 										ta.editor && ta.editor.focus(ta[0], ta.editor.instance);
 									});
-									ta.trigger('_savedone');
+									saveDfd.resolve();
 								});
 							})
 							.fail(function(error) {

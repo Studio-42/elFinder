@@ -242,12 +242,9 @@ $.fn.elfinderdialog = function(opts, fm) {
 					
 				},
 				minimize: function() {
-					var mnode, doffset;
+					var btn, mnode, doffset;
 					if (opts.allowMinimize) {
-						titlebar.on('dblclick', function(e) {
-								$(this).children('.elfinder-titlebar-minimize').trigger('mousedown');
-							})
-							.prepend($('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-minimize"><span class="ui-icon ui-icon-minusthick"/></span>')
+						btn = $('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-minimize"><span class="ui-icon ui-icon-minusthick"/></span>')
 							.on('mousedown', function(e) {
 								var $this = $(this),
 									tray = fm.getUI('bottomtray'),
@@ -297,8 +294,13 @@ $.fn.elfinderdialog = function(opts, fm) {
 										dialog.trigger('resize', {init: true});
 									});
 								}
-							})
-						);
+							});
+						titlebar.on('dblclick', function(e) {
+							$(this).children('.elfinder-titlebar-minimize').trigger('mousedown');
+						}).prepend(btn);
+						dialog.on('togleminimize', function() {
+							btn.trigger('mousedown');
+						});
 					}
 				}
 			},

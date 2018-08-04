@@ -9358,6 +9358,18 @@ elFinder.prototype = {
 		return segments;
 	},
 
+	arrayBufferToBase64 : function(ab) {
+		if (!window.btoa) {
+			return '';
+		}
+		var dView = new Uint8Array(ab), // Get a byte view
+			arr = Array.prototype.slice.call(dView), // Create a normal array
+			arr1 = arr.map(function(item) {
+				return String.fromCharCode(item); // Convert
+			});
+	    return window.btoa(arr1.join('')); // Form a string
+	},
+
 	log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
 	
 	debug : function(type, m) {

@@ -2,7 +2,7 @@
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-07-24
+ * @version 2018-08-03
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -218,6 +218,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'ntfchkdir'   : 'Checking destination folder', // from v2.1.24 added 3.5.2017
 			'ntfundo'     : 'Undoing previous operation', // from v2.1.27 added 31.07.2017
 			'ntfredo'     : 'Redoing previous undone', // from v2.1.27 added 31.07.2017
+			'ntfchkcontent' : 'Checking contents', // from v2.1.41 added 3.8.2018
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : 'Trash', //from v2.1.24 added 29.4.2017
