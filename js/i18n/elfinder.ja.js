@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-07-24
+ * @version 2018-08-03
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -225,6 +225,7 @@
 			'ntfchkdir'   : '宛先フォルダを確認しています', // from v2.1.24 added 3.5.2017
 			'ntfundo'     : '前の操作を取り消して元に戻しています', // from v2.1.27 added 31.07.2017
 			'ntfredo'     : '元に戻した操作をやり直しています', // from v2.1.27 added 31.07.2017
+			'ntfchkcontent' : 'コンテンツをチェックしています', // from v2.1.41 added 3.8.2018
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : 'ごみ箱', //from v2.1.24 added 29.4.2017
