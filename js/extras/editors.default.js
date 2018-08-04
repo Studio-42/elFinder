@@ -22,6 +22,7 @@
 		})(),
 		ext2mime = {
 			bmp: 'image/x-ms-bmp',
+			dng: 'image/x-adobe-dng',
 			gif: 'image/gif',
 			jpeg: 'image/jpeg',
 			jpg: 'image/jpeg',
@@ -613,7 +614,7 @@
 					link: 'https://www.photopea.com/learn/'
 				}
 			},
-			mimes : ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp', 'image/tiff', 'image/webp', 'image/x-xcf', 'image/vnd.adobe.photoshop', 'application/pdf', 'image/x-portable-pixmap'],
+			mimes : ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp', 'image/tiff', 'image/x-adobe-dng', 'image/webp', 'image/x-xcf', 'image/vnd.adobe.photoshop', 'application/pdf', 'image/x-portable-pixmap'],
 			html : '<iframe style="width:100%;height:100%;border:none;"></iframe>',
 			// setup on elFinder bootup
 			setup : function(opts, fm) {
@@ -654,7 +655,7 @@
 						} else if (ext === 'jpeg') {
 							ext = 'jpg';
 						}
-						if (!ext || ext === 'xcf') {
+						if (!ext || ext === 'xcf' || ext === 'dng') {
 							ext = 'psd';
 							mime = ext2mime[ext];
 							ifm.closest('.ui-dialog').trigger('changeType', {
