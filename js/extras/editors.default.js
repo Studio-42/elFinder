@@ -34,7 +34,8 @@
 			svg: 'image/svg+xml',
 			tiff: 'image/tiff',
 			webp: 'image/webp',
-			xcf: 'image/x-xcf'
+			xcf: 'image/x-xcf',
+			sketch: 'application/x-sketch'
 		},
 		mime2ext,
 		getExtention = function(mime, fm) {
@@ -614,7 +615,7 @@
 					link: 'https://www.photopea.com/learn/'
 				}
 			},
-			mimes : ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp', 'image/tiff', 'image/x-adobe-dng', 'image/webp', 'image/x-xcf', 'image/vnd.adobe.photoshop', 'application/pdf', 'image/x-portable-pixmap'],
+			mimes : ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp', 'image/tiff', 'image/x-adobe-dng', 'image/webp', 'image/x-xcf', 'image/vnd.adobe.photoshop', 'application/pdf', 'image/x-portable-pixmap', 'image/x-sketch'],
 			html : '<iframe style="width:100%;height:100%;border:none;"></iframe>',
 			// setup on elFinder bootup
 			setup : function(opts, fm) {
@@ -635,7 +636,8 @@
 							spnr.remove();
 							ifm.show();
 						}),
-					confObj = this.editor.confObj,
+					editor = this.editor,
+					confObj = editor.confObj,
 					spnr = $('<div/>')
 						.css({
 							position: 'absolute',
@@ -655,7 +657,7 @@
 						} else if (ext === 'jpeg') {
 							ext = 'jpg';
 						}
-						if (!ext || ext === 'xcf' || ext === 'dng') {
+						if (!ext || ext === 'xcf' || ext === 'dng' || ext === 'sketch') {
 							ext = 'psd';
 							mime = ext2mime[ext];
 							ifm.closest('.ui-dialog').trigger('changeType', {
@@ -700,19 +702,15 @@
 									processData: false
 								}
 							})
-							.fail(function(error) {
-								error && fm.error(error);
-							})
 							.done(function(d) {
 								data = d;
 							});
 						};
 
 						this.receive = function(e) {
-							var ev = e.originalEvent;
+							var ev = e.originalEvent,
+								state;
 							if (ev.origin === orig && ev.source === wnd) {
-								fm.log(phase);
-								fm.log(ev);
 								if (ev.data === 'done') {
 									if (phase === 0) {
 										dfdIni.resolve();
@@ -738,21 +736,29 @@
 
 						this.getContent = function() {
 							var type;
-							dfdGet && dfdGet.state() === 'pending' && dfdGet.reject();
-							dfdGet = null;
-							if (ifm.data('mime')) {
-								type = getType(ifm.data('mime'));
+							if (phase > 1) {
+								dfdGet && dfdGet.state() === 'pending' && dfdGet.reject();
+								dfdGet = null;
+								dfdGet = $.Deferred();
+								if (phase === 2) {
+									phase = 3;
+									dfdGet.resolve('data:' + mime + ';base64,' + fm.arrayBufferToBase64(data));
+									data = null;
+									return dfdGet;
+								}
+								if (ifm.data('mime')) {
+									type = getType(ifm.data('mime'));
+								}
+								wnd.postMessage('app.activeDocument.saveToOE("' + type + '")', orig);
+								return dfdGet;
 							}
-							dfdGet = $.Deferred();
-							wnd.postMessage('app.activeDocument.saveToOE("' + type + '")', orig);
-							return dfdGet;
 						};
 					};
 				}
 
 				ifm.parent().css('padding', 0);
 				type = getType(file.mime);
-				liveMsg = this.editor.liveMsg = new confObj.liveMsg(ifm, spnr, file);
+				liveMsg = editor.liveMsg = new confObj.liveMsg(ifm, spnr, file);
 				$(window).on('message.' + fm.namespace, liveMsg.receive);
 				liveMsg.load().done(function() {
 					var d = JSON.stringify({
@@ -762,6 +768,9 @@
 						}
 					});
 					ifm.attr('src', orig + '/#' + encodeURI(d));
+				}).fail(function(err) {
+					err && fm.error(err);
+					editor.initFail = true;
 				});
 			},
 			load : function(base) {
@@ -769,9 +778,13 @@
 					self = this,
 					fm = this.fm,
 					$base = $(base);
-				$base.on('contentsloaded', function() {
-					dfd.resolve(self.liveMsg);
-				});
+				if (self.initFail) {
+					dfd.reject();
+				} else {
+					$base.on('contentsloaded', function() {
+						dfd.resolve(self.liveMsg);
+					});
+				}
 				return dfd;
 			},
 			getContent : function() {
