@@ -2029,6 +2029,7 @@
 			info : {
 				id : 'ziparchive',
 				name : 'btnMount',
+				iconImg : 'img/toolbar.png 0 -416',
 				cmdCheck : 'ZipArchive',
 				edit : function(file, editor) {
 					var fm = this,
