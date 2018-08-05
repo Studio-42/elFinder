@@ -650,19 +650,19 @@
 						.appendTo(ifm.parent()),
 					getType = function(mime) {
 						var ext = getExtention(mime, fm),
-							mime = ext2mime[ext];
+							extmime = ext2mime[ext];
 
-						if (!confObj.mimesFlip[mime]) {
+						if (!confObj.mimesFlip[extmime]) {
 							ext = '';
 						} else if (ext === 'jpeg') {
 							ext = 'jpg';
 						}
 						if (!ext || ext === 'xcf' || ext === 'dng' || ext === 'sketch') {
 							ext = 'psd';
-							mime = ext2mime[ext];
+							extmime = ext2mime[ext];
 							ifm.closest('.ui-dialog').trigger('changeType', {
 								extention: ext,
-								mime : mime,
+								mime : extmime,
 								keepEditor: true
 							});
 						}
@@ -747,7 +747,8 @@
 									return dfdGet;
 								}
 								if (ifm.data('mime')) {
-									type = getType(ifm.data('mime'));
+									mime = ifm.data('mime');
+									type = getType(mime);
 								}
 								wnd.postMessage('app.activeDocument.saveToOE("' + type + '")', orig);
 								return dfdGet;
