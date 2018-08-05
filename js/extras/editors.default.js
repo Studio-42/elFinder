@@ -711,16 +711,26 @@
 						this.receive = function(e) {
 							var ev = e.originalEvent;
 							if (ev.origin === orig && ev.source === wnd) {
+								fm.log(phase);
+								fm.log(ev);
 								if (ev.data === 'done') {
 									if (phase === 0) {
 										dfdIni.resolve();
 									} else if (phase === 1) {
 										phase = 2;
 										ifm.trigger('contentsloaded');
+									} else {
+										if (dfdGet && dfdGet.state() === 'pending') {
+											dfdGet.reject('errDataEmpty');
+										}
 									}
 								} else {
-									if (dfdGet && dfdGet.state() === 'pending' && typeof ev.data === 'object') {
-										dfdGet.resolve('data:' + mime + ';base64,' + fm.arrayBufferToBase64(ev.data));
+									if (dfdGet && dfdGet.state() === 'pending') {
+										if (typeof ev.data === 'object') {
+											dfdGet.resolve('data:' + mime + ';base64,' + fm.arrayBufferToBase64(ev.data));
+										} else {
+											dfdGet.reject('errDataEmpty');
+										}
 									}
 								}
 							}
@@ -745,7 +755,13 @@
 				liveMsg = this.editor.liveMsg = new confObj.liveMsg(ifm, spnr, file);
 				$(window).on('message.' + fm.namespace, liveMsg.receive);
 				liveMsg.load().done(function() {
-					ifm.attr('src', orig + '/');
+					var d = JSON.stringify({
+						files : [],
+						environment : {
+							lang: fm.lang.replace(/_/g, '-')
+						}
+					});
+					ifm.attr('src', orig + '/#' + encodeURI(d));
 				});
 			},
 			load : function(base) {
