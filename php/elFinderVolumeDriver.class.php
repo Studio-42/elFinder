@@ -285,6 +285,8 @@ abstract class elFinderVolumeDriver {
 			'svg:text/plain'               => 'image/svg+xml',
 			'pxd:application/octet-stream' => 'image/x-pixlr-data',
 			'dng:image/tiff'               => 'image/x-adobe-dng',
+			'sketch:application/zip'       => 'image/x-sketch',
+			'sketch:application/octet-stream' => 'image/x-sketch',
 			'amr:application/octet-stream' => 'audio/amr',
 			'm4a:video/mp4'                => 'audio/mp4',
 			'oga:application/ogg'          => 'audio/ogg',
