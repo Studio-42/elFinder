@@ -287,6 +287,7 @@ abstract class elFinderVolumeDriver {
 			'dng:image/tiff'               => 'image/x-adobe-dng',
 			'sketch:application/zip'       => 'image/x-sketch',
 			'sketch:application/octet-stream' => 'image/x-sketch',
+			'xcf:application/octet-stream' => 'image/x-xcf',
 			'amr:application/octet-stream' => 'audio/amr',
 			'm4a:video/mp4'                => 'audio/mp4',
 			'oga:application/ogg'          => 'audio/ogg',
