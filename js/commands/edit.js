@@ -811,17 +811,17 @@ elFinder.prototype.commands.edit = function() {
 			}
 			$.each(optEditors, function(i, editor) {
 				var name;
-				if ((cnt === 1 || !editor.info || !editor.info.single)
+				if ((cnt === 1 || !editor.info.single)
 						&& ((!editor.info || !editor.info.converter)? file.write : cwdWrite)
-						&& (!editor.info.converter || file.size > 0)
+						&& (file.size > 0 || (!editor.info.converter && (editor.info.canMakeEmpty || fm.mimeIsText(file.mime))))
 						&& (!editor.info.maxSize || file.size <= editor.info.maxSize)
 						&& mimeMatch(file.mime, editor.mimes || null)
 						&& extMatch(file.name, editor.exts || null)
 						&& typeof editor.load == 'function'
 						&& typeof editor.save == 'function') {
 					
-					name = editor.info && editor.info.name? editor.info.name : ('Editor ' + i);
-					editor.id = editor.info && editor.info.id? editor.info.id : ('editor' + i),
+					name = editor.info.name? editor.info.name : ('Editor ' + i);
+					editor.id = editor.info.id? editor.info.id : ('editor' + i),
 					editor.name = name;
 					editor.i18n = fm.i18n(name);
 					editors[editor.id] = editor;
@@ -894,6 +894,7 @@ elFinder.prototype.commands.edit = function() {
 		fm.one('open', function() {
 			// editors setup
 			if (opts.editors && Array.isArray(opts.editors)) {
+				fm.trigger('canMakeEmptyFile', {mimes: Object.keys(fm.storage('mkfileTextMimes') || {}).concat(opts.makeTextMimes || ['text/plain'])});
 				$.each(opts.editors, function(i, editor) {
 					if (editor.info && editor.info.cmdCheck) {
 						cmdChecks.push(editor.info.cmdCheck);
@@ -945,8 +946,14 @@ elFinder.prototype.commands.edit = function() {
 							if (!allowAll && editor.mimes && editor.mimes[0] === '*') {
 								allowAll = true;
 							}
-							if (editor.info && editor.info.integrate) {
+							if (!editor.info) {
+								editor.info = {};
+							}
+							if (editor.info.integrate) {
 								fm.trigger('helpIntegration', Object.assign({cmd: 'edit'}, editor.info.integrate));
+							}
+							if (editor.info.canMakeEmpty) {
+								fm.trigger('canMakeEmptyFile', {mimes: editor.mimes});
 							}
 						}
 					});

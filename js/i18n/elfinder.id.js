@@ -130,7 +130,7 @@
 			'cmdinfo'      : 'Dapatkan info',
 			'cmdmkdir'     : 'Buat folder',
 			'cmdmkdirin'   : 'Masuk ke folder baru', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'Buat berkas teks',
+			'cmdmkfile'    : 'Buat fail',
 			'cmdopen'      : 'Buka',
 			'cmdpaste'     : 'Tempel',
 			'cmdquicklook' : 'Pratinjau',

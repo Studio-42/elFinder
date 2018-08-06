@@ -22,13 +22,13 @@ elFinder.prototype.commands.preference = function() {
 			var cats = self.options.categories || {
 					'language' : ['language'],
 					'toolbar' : ['toolbarPref'],
-					'workspace' : ['iconSize','columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized', 'showHidden'],
+					'workspace' : ['iconSize','columnPref', 'selectAction', 'makefileTypes', 'useStoredEditor', 'editorMaximized', 'showHidden'],
 					'dialog' : ['autoFocusDialog'],
 					'selectionInfo' : ['infoItems', 'hashChecker'],
 					'reset' : ['clearBrowserData'],
 					'all' : true
 				},
-				forms = self.options.prefs || ['language', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized', 'showHidden', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
+				forms = self.options.prefs || ['language', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'makefileTypes', 'useStoredEditor', 'editorMaximized', 'showHidden', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
 			
 			forms = fm.arrayFlip(forms, true);
 			
@@ -53,10 +53,10 @@ elFinder.prototype.commands.preference = function() {
 						el: 'Ελληνικά',
 						en: 'English',
 						es: 'Español',
-						fa: 'فارسی‌‎, پارسی‌',
+						fa: 'فارسی',
 						fo: 'Føroyskt',
 						fr: 'Français',
-						he: 'עברית‎',
+						he: 'עברית',
 						hr: 'Hrvatski',
 						hu: 'Magyar',
 						id: 'Bahasa Indonesia',
@@ -182,6 +182,84 @@ elFinder.prototype.commands.preference = function() {
 				return actSel.append(optTags.join('')).val(fm.storage('selectAction') || 'open');
 			})());
 			
+			forms.makefileTypes && (forms.makefileTypes = (function() {
+				var hides = fm.storage('mkfileHides') || {},
+					getTag = function() {
+						var tags = [];
+						$.each(fm.mimesCanMakeEmpty, function(mime, type) {
+							var name = fm.getCommand('mkfile').getTypeName(mime, type);
+							tags.push('<span class="elfinder-preference-column-item" title="'+fm.escape(name)+'"><label><input type="checkbox" value="'+mime+'" '+(hides[mime]? '' : 'checked')+'/>'+type+'</label></span>');
+						});
+						return tags.join(' ');
+					},
+					elm = $('<div/>').on('change', 'input', function() {
+						var v = $(this).val(),
+							o = $(this).is(':checked');
+						if (!o && !hides[v]) {
+							hides[v] = true;
+						} else if (o && hides[v]) {
+							delete hides[v];
+						}
+						fm.storage('mkfileHides', hides);
+						fm.trigger('canMakeEmptyFile');
+					}).append(getTag()),
+					add = $('<div/>').append(
+						$('<input type="text" placeholder="'+fm.i18n('typeOfTextfile')+'"/>').on('keydown', function(e) {
+							(e.keyCode === $.ui.keyCode.ENTER) && $(this).next().trigger('click');
+						}),
+						$('<button class="ui-button"/>').html(fm.i18n('add')).on('click', function() {
+							var input = $(this).prev(),
+								val = input.val(),
+								uiToast = fm.getUI('toast'),
+								err = function() {
+									uiToast.appendTo(input.closest('.ui-dialog'));
+									fm.toast({
+										msg:　fm.i18n('errUsupportType'),
+										mode: 'warning',
+										onHidden: function() {
+											uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
+										}
+									});
+									input.trigger('focus');
+									return false;
+								},
+								tmpMimes;
+							if (!val.match(/\//)) {
+								val = fm.arrayFlip(fm.mimeTypes)[val];
+								if (!val) {
+									return err();
+								}
+								input.val(val);
+							}
+							if (!fm.mimeIsText(val) || !fm.mimeTypes[val]) {
+								return err();
+							}
+							fm.trigger('canMakeEmptyFile', {mimes: [val], unshift: true});
+							tmpMimes = {};
+							tmpMimes[val] = fm.mimeTypes[val];
+							fm.storage('mkfileTextMimes', Object.assign(tmpMimes, fm.storage('mkfileTextMimes') || {}));
+							input.val('');
+							uiToast.appendTo(input.closest('.ui-dialog'));
+							fm.toast({
+								msg: fm.i18n(['complete', val + ' (' + tmpMimes[val] + ')']),
+								onHidden: function() {
+									uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
+								}
+							});
+						})
+					),
+					tm;
+				fm.bind('canMakeEmptyFile', function(e) {
+					if (e.data && e.data.mimes && e.data.mimes.length) {
+						tm && clearTimeout(tm);
+						tm = setTimeout(function() {
+							elm.empty().append(getTag());
+						}, 100);
+					}
+				});
+				return $('<div/>').append(elm, add);
+			})());
+
 			forms.useStoredEditor && (forms.useStoredEditor = $('<input type="checkbox"/>').prop('checked', (function() {
 				var s = fm.storage('useStoredEditor');
 				return s? (s > 0) : fm.options.commandsOptions.edit.useStoredEditor;

@@ -123,7 +123,7 @@
 			'cmdinfo'      : 'Tulajdonságok',
 			'cmdmkdir'     : 'Új mappa',
 			'cmdmkdirin'   : 'Into new folder', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'Új szöveges dokumentum',
+			'cmdmkfile'    : 'Új fájl',
 			'cmdopen'      : 'Megnyitás',
 			'cmdpaste'     : 'Beillesztés',
 			'cmdquicklook' : 'Előnézet',

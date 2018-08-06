@@ -131,7 +131,7 @@
 			'cmdinfo'      : 'තොරතුරු ලබාගන්න',
 			'cmdmkdir'     : 'අළුත් ෆෝල්ඩරයක්',
 			'cmdmkdirin'   : 'අළුත් ෆෝල්ඩරයක් තුළට', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'අළුත් ලිඛිත(text) ගොනුවක්',
+			'cmdmkfile'    : 'නව ගොනුවක්',
 			'cmdopen'      : 'විවෘත කරන්න',
 			'cmdpaste'     : 'දමන්න(Paste)',
 			'cmdquicklook' : 'පූර්ව දර්ශනයක්(Preview)',
