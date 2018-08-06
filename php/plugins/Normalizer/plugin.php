@@ -138,6 +138,8 @@ class elFinderPluginNormalizer extends elFinderPlugin
 				foreach($result['hashes'] as $name => $hash) {
 					if ($keys = array_keys($this->replaced['mkdir'], $name)) {
 						$result['hashes'][$keys[0]] = $hash;
+					} elseif ($keys = array_keys($this->replaced['mkdir'], ltrim($name, '/'))) {
+						$result['hashes']['/' . $keys[0]] = $hash;
 					}
 				}
 			}
