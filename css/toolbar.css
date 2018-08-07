@@ -364,6 +364,7 @@
     position: absolute;
     margin-top: 24px;
     padding: 3px 0;
+    overflow-y: auto;
 }
 
 .elfinder-touch .elfinder-button-menu {

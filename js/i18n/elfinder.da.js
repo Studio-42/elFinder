@@ -115,7 +115,7 @@
 			'cmdhome'      : 'Hjem',
 			'cmdinfo'      : 'Information',
 			'cmdmkdir'     : 'Ny mappe',
-			'cmdmkfile'    : 'Ny tekst fil',
+			'cmdmkfile'    : 'Ny fil',
 			'cmdopen'      : 'Åben',
 			'cmdpaste'     : 'Indsæt',
 			'cmdquicklook' : 'Vis',

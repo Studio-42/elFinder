@@ -409,6 +409,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							
 							submenu = $('<div class="ui-front ui-corner-all elfinder-contextmenu-sub"/>')
 								.hide()
+								.css('max-height', fm.getUI().height() - 30)
 								.appendTo(node.append('<span class="elfinder-contextmenu-arrow"/>'));
 							
 							hover = function(show){
@@ -464,7 +465,8 @@ $.fn.elfindercontextmenu = function(fm) {
 									submenu.css({
 										top : y,
 										left : cltr? x : 'auto',
-										right: cltr? 'auto' : x
+										right: cltr? 'auto' : x,
+										overflowY: 'auto'
 									}).show();
 									base.attr('style', bstyle);
 								}
