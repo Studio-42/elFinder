@@ -94,6 +94,8 @@ class elFinderPluginNormalizer extends elFinderPlugin
 				if (is_array($args[$key])) {
 					foreach($args[$key] as $i => $name) {
 						if ($cmd === 'mkdir' && $key === 'dirs') {
+							// $name need '/' as prefix see #2607
+							$name = '/' . ltrim($name, '/');
 							$_names = explode('/', $name);
 							$_res = array();
 							foreach($_names as $_name) {
@@ -104,7 +106,7 @@ class elFinderPluginNormalizer extends elFinderPlugin
 							$this->replaced[$cmd][$name] = $args[$key][$i] = $this->normalize($name, $opts);
 						}
 					}
-				} else {
+				} else if ($args[$key] !== '') {
 					$name = $args[$key];
 					$this->replaced[$cmd][$name] = $args[$key] = $this->normalize($name, $opts);
 				}
@@ -138,8 +140,6 @@ class elFinderPluginNormalizer extends elFinderPlugin
 				foreach($result['hashes'] as $name => $hash) {
 					if ($keys = array_keys($this->replaced['mkdir'], $name)) {
 						$result['hashes'][$keys[0]] = $hash;
-					} elseif ($keys = array_keys($this->replaced['mkdir'], ltrim($name, '/'))) {
-						$result['hashes']['/' . $keys[0]] = $hash;
 					}
 				}
 			}
