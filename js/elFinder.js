@@ -6669,12 +6669,13 @@ elFinder.prototype = {
 								file._remove = true;
 								relPath = void(0);
 							} else {
-								relPath = relPath.replace(/\/[^\/]*$/, '');
+								// add '/' as prefix to make same to folder uploading with DnD, see #2607
+								relPath = '/' + relPath.replace(/\/[^\/]*$/, '').replace(/^\//, '');
 								if (relPath && $.inArray(relPath, mkdirs) === -1) {
 									mkdirs.push(relPath);
 									// checking the root directory to supports <input type="file" webkitdirectory> see #2378
-									idx = relPath.indexOf('/');
-									if (idx !== -1 && (rootDir = relPath.substr(0, idx)) && $.inArray(rootDir, mkdirs) === -1) {
+									idx = relPath.substr(1).indexOf('/');
+									if (idx !== -1 && (rootDir = relPath.substr(0, idx + 1)) && $.inArray(rootDir, mkdirs) === -1) {
 										mkdirs.unshift(rootDir);
 									}
 								}
@@ -6685,7 +6686,7 @@ elFinder.prototype = {
 						hashes = {};
 						if (mkdirs.length) {
 							(function() {
-								var checkDirs = $.map(mkdirs, function(name) { return name.indexOf('/') === -1 ? {name: name} : null;}),
+								var checkDirs = $.map(mkdirs, function(name) { return name.substr(1).indexOf('/') === -1 ? {name: name.substr(1)} : null;}),
 									cancelDirs = [];
 								fm.uploads.checkExists(checkDirs, target, fm, true).done(
 									function(res, res2) {
@@ -6698,7 +6699,7 @@ elFinder.prototype = {
 											$.each(paths.concat(), function(i, path) {
 												if ($.inArray(path, cancelDirs) === 0) {
 													files[i]._remove = true;
-													delete paths[i];
+													paths[i] = void(0);
 												}
 											});
 										}
@@ -6757,10 +6758,10 @@ elFinder.prototype = {
 												.done(function(data) {
 													if (data.hashes) {
 														paths = $.map(paths.concat(), function(p) {
-															if (p === '') {
+															if (p === '/') {
 																return target;
 															} else {
-																return data.hashes['/' + p];
+																return data.hashes[p];
 															}
 														});
 													}
