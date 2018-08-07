@@ -289,6 +289,8 @@
 			'untitled file.txt' : '新規ファイル.txt', // added 10.11.2015
 			'untitled folder'   : '新規フォルダ',   // added 10.11.2015
 			'Archive'           : '新規アーカイブ',  // from v2.1 added 10.11.2015
+			'untitled file'     : '新規ファイル.$1', // from v2.1.41 added 6.8.2018
+			'extentionfile'     : '$1 ファイル',     // from v2.1.41 added 6.8.2018
 
 			/********************************** messages **********************************/
 			'confirmReq'      : '処理を実行しますか？',
