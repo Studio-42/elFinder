@@ -120,7 +120,7 @@
 			'cmdhome'      : 'Home',
 			'cmdinfo'      : 'Bekijk info',
 			'cmdmkdir'     : 'Nieuwe map',
-			'cmdmkfile'    : 'Nieuw tekstbestand',
+			'cmdmkfile'    : 'Nieuw bestand',
 			'cmdopen'      : 'Open',
 			'cmdpaste'     : 'Plak',
 			'cmdquicklook' : 'Voorbeeld',

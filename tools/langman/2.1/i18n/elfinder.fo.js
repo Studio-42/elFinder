@@ -120,7 +120,7 @@
 			'cmdhome'      : 'Heim',
 			'cmdinfo'      : 'Fá upplýsingar',
 			'cmdmkdir'     : 'Nýggja mappu',
-			'cmdmkfile'    : 'Nýggja tekst fílu',
+			'cmdmkfile'    : 'Nýggja fílu',
 			'cmdopen'      : 'Opna',
 			'cmdpaste'     : 'Set inn',
 			'cmdquicklook' : 'Forsýning',

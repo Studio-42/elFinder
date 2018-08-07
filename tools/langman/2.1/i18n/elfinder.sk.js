@@ -132,7 +132,7 @@
 			'cmdinfo'      : 'Info',
 			'cmdmkdir'     : 'Nový priečinok',
 			'cmdmkdirin'   : 'Do novej zložky', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'Nový textový súbor',
+			'cmdmkfile'    : 'Nový súbor',
 			'cmdopen'      : 'Otvoriť',
 			'cmdpaste'     : 'Vložiť',
 			'cmdquicklook' : 'Náhľad',
