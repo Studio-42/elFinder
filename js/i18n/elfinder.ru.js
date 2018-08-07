@@ -133,7 +133,7 @@
 			'cmdinfo'      : 'Свойства',
 			'cmdmkdir'     : 'Новая папка',
 			'cmdmkdirin'   : 'В новую папку', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'Новый текстовый файл',
+			'cmdmkfile'    : 'Новый файл',
 			'cmdopen'      : 'Открыть',
 			'cmdpaste'     : 'Вставить',
 			'cmdquicklook' : 'Быстрый просмотр',

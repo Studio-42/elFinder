@@ -133,7 +133,7 @@
 			'cmdinfo'      : '파일정보',
 			'cmdmkdir'     : '새 폴더',
 			'cmdmkdirin'   : '새 폴더로', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : '새 텍스트파일',
+			'cmdmkfile'    : '새 파일',
 			'cmdopen'      : '열기',
 			'cmdpaste'     : '붙여넣기',
 			'cmdquicklook' : '미리보기',

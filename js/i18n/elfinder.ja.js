@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-08-03
+ * @version 2018-08-07
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -132,7 +132,7 @@
 			'cmdinfo'      : '情報',
 			'cmdmkdir'     : '新規フォルダ',
 			'cmdmkdirin'   : '新規フォルダへ', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : '新規テキストファイル',
+			'cmdmkfile'    : '新規ファイル',
 			'cmdopen'      : '開く',
 			'cmdpaste'     : 'ペースト',
 			'cmdquicklook' : 'プレビュー',
@@ -473,6 +473,9 @@
 			'showHidden'      : '非表示アイテムを表示', // from v2.1.41 added 24.7.2018
 			'hideHidden'      : '非表示アイテムを隠す', // from v2.1.41 added 24.7.2018
 			'toggleHidden'    : '非表示アイテムの表示/非表示', // from v2.1.41 added 24.7.2018
+			'makefileTypes'   : '「新しいファイル」で有効にするファイルタイプ', // from v2.1.41 added 7.8.2018
+			'typeOfTextfile'  : 'テキストファイルのタイプ', // from v2.1.41 added 7.8.2018
+			'add'             : '追加', // from v2.1.41 added 7.8.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',

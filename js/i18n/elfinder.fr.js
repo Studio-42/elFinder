@@ -133,7 +133,7 @@
 			'cmdinfo'      : 'Informations',
 			'cmdmkdir'     : 'Nouveau dossier',
 			'cmdmkdirin'   : 'Dans un nouveau dossier', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'Nouveau fichier texte',
+			'cmdmkfile'    : 'Nouveau fichier',
 			'cmdopen'      : 'Ouvrir',
 			'cmdpaste'     : 'Coller',
 			'cmdquicklook' : 'Prévisualiser',

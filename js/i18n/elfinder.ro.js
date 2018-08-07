@@ -120,7 +120,7 @@
 			'cmdhome'      : 'Acasă',
 			'cmdinfo'      : 'Informații',
 			'cmdmkdir'     : 'Dosar nou',
-			'cmdmkfile'    : 'Fișier text nou',
+			'cmdmkfile'    : 'Fișier nou',
 			'cmdopen'      : 'Deschide',
 			'cmdpaste'     : 'Lipește',
 			'cmdquicklook' : 'Previzualizează',

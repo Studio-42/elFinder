@@ -115,7 +115,7 @@
 			'cmdhome'      : 'Početna',
 			'cmdinfo'      : 'Proveri informacije',
 			'cmdmkdir'     : 'Novi folder',
-			'cmdmkfile'    : 'Nova tekstualna datoteka',
+			'cmdmkfile'    : 'Nova datoteka',
 			'cmdopen'      : 'Otvori',
 			'cmdpaste'     : 'Zalepi',
 			'cmdquicklook' : 'Pregledaj',

@@ -132,7 +132,7 @@
 			'cmdinfo'      : 'مشاهده مشخصات',
 			'cmdmkdir'     : 'پوشه جدید',
 			'cmdmkdirin'   : 'انتقال به پوشه جدید',
-			'cmdmkfile'    : 'فایل متنی جدید',
+			'cmdmkfile'    : 'فایل جدید',
 			'cmdopen'      : 'باز کردن',
 			'cmdpaste'     : 'چسباندن',
 			'cmdquicklook' : 'پیش نمایش',

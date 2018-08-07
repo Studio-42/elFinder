@@ -132,7 +132,7 @@
 			'cmdinfo'      : 'معلومات ',
 			'cmdmkdir'     : 'مجلد جديد',
 			'cmdmkdirin'   : 'داخل ملف جديد', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'ملف نصي جديد',
+			'cmdmkfile'    : 'ملف جديد',
 			'cmdopen'      : 'فتح',
 			'cmdpaste'     : 'لصق',
 			'cmdquicklook' : 'معاينة',
