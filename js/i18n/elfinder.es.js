@@ -134,7 +134,7 @@
 			'cmdinfo'      : 'Obtener información',
 			'cmdmkdir'     : 'Nueva carpeta',
 			'cmdmkdirin'   : 'En una nueva carpeta', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'Nuevo archivo de texto',
+			'cmdmkfile'    : 'Nueva archivo',
 			'cmdopen'      : 'Abrir',
 			'cmdpaste'     : 'Pegar',
 			'cmdquicklook' : 'Previsualizar',

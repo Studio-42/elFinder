@@ -790,6 +790,9 @@ var elFinder = function(elm, opts, bootCallback) {
 	 */
 	this.cssloaded = false;
 	
+	
+	this.mimesCanMakeEmpty = {};
+
 	/**
 	 * Callback function at boot up that option specified at elFinder starting
 	 * 
@@ -4067,7 +4070,23 @@ var elFinder = function(elm, opts, bootCallback) {
 			self.searchStatus.ininc = false;
 			self.searchStatus.mixed = false;
 		})
-
+		.bind('canMakeEmptyFile', function(e) {
+			var data = e.data,
+				obj = {};
+			if (data && Array.isArray(data.mimes)) {
+				if (!data.unshift) {
+					obj = self.mimesCanMakeEmpty;
+				}
+				$.each(data.mimes, function() {
+					if (!obj[this]) {
+						obj[this] = self.mimeTypes[this];
+					}
+				});
+				if (data.unshift) {
+					self.mimesCanMakeEmpty = Object.assign(obj, self.mimesCanMakeEmpty);
+				}
+			}
+		})
 		;
 
 	// We listen and emit a sound on delete according to option

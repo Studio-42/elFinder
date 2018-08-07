@@ -136,7 +136,7 @@
 			'cmdinfo'      : 'Informationen',
 			'cmdmkdir'     : 'Neuer Ordner',
 			'cmdmkdirin'   : 'In neuen Ordner', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'Neue Textdatei',
+			'cmdmkfile'    : 'Neuer Datei',
 			'cmdopen'      : 'Öffnen',
 			'cmdpaste'     : 'Einfügen',
 			'cmdquicklook' : 'Vorschau',

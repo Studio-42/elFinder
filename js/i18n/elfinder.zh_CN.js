@@ -135,7 +135,7 @@
 			'cmdinfo'      : '查看详情',
 			'cmdmkdir'     : '新建文件夹',
 			'cmdmkdirin'   : '至新文件夹', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : '新建文本文件',
+			'cmdmkfile'    : '新建文件',
 			'cmdopen'      : '打开',
 			'cmdpaste'     : '粘贴',
 			'cmdquicklook' : '预览',

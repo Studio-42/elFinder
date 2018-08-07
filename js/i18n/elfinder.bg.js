@@ -132,7 +132,7 @@
 			'cmdinfo'      : 'Информация',
 			'cmdmkdir'     : 'Нова папка',
 			'cmdmkdirin'   : 'В нова папка', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'Нов текстови файл',
+			'cmdmkfile'    : 'Нов файл',
 			'cmdopen'      : 'Отвори',
 			'cmdpaste'     : 'Вмъкни',
 			'cmdquicklook' : 'Преглед',

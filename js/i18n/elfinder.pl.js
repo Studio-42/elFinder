@@ -132,7 +132,7 @@
 			'cmdinfo'      : 'Właściwości',
 			'cmdmkdir'     : 'Nowy katalog',
 			'cmdmkdirin'   : 'Do nowego katalogu', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'Nowy plik tekstowy',
+			'cmdmkfile'    : 'Nowy plik',
 			'cmdopen'      : 'Otwórz',
 			'cmdpaste'     : 'Wklej',
 			'cmdquicklook' : 'Podgląd',

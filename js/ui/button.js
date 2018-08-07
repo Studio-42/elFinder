@@ -44,11 +44,13 @@ $.fn.elfinderbutton = function(cmd) {
 				fm.toHide(menu);
 			},
 			getMenuOffset = function() {
-				var baseOffset = fm.getUI().offset(),
-					buttonOffset = button.offset();
+				var fmNode = fm.getUI(),
+					baseOffset = fm.getUI().offset(),
+					buttonOffset = fmNode.offset();
 				return {
 					top : buttonOffset.top - baseOffset.top,
-					left : buttonOffset.left - baseOffset.left
+					left : buttonOffset.left - baseOffset.left,
+					maxHeight : fmNode.height() - 40
 				};
 			},
 			getSelected = function() {

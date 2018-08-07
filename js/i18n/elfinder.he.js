@@ -115,7 +115,7 @@
 			'cmdhome'      : 'בית',
 			'cmdinfo'      : 'קבלת מידע',
 			'cmdmkdir'     : 'תיקייה חדשה',
-			'cmdmkfile'    : 'קובץ טקסט חדש',
+			'cmdmkfile'    : 'קובץ חדש',
 			'cmdopen'      : 'פתיחה',
 			'cmdpaste'     : 'הדבקה',
 			'cmdquicklook' : 'תצוגה מקדימה',

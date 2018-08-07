@@ -122,7 +122,7 @@
 			'cmdinfo'      : 'Info',
 			'cmdmkdir'     : 'Nova mapa',
 			'cmdmkdirin'   : 'U novu mapu', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'Novi tekst dokument',
+			'cmdmkfile'    : 'Nova файл',
 			'cmdopen'      : 'Otvori',
 			'cmdpaste'     : 'Zalijepi',
 			'cmdquicklook' : 'Pregled',
