@@ -276,6 +276,7 @@
 				dataScheme: true,
 				schemeContent: true,
 				openMaximized: true,
+				canMakeEmpty: false,
 				integrate: {
 					title: 'TOAST UI Image Editor',
 					link: 'http://ui.toast.com/tui-image-editor/'
@@ -574,6 +575,7 @@
 				urlAsContent: true,
 				schemeContent: true,
 				single: true,
+				canMakeEmpty: false,
 				integrate: {
 					title: 'PIXLR EXPRESS',
 					link: 'https://pixlr.com/express/'
@@ -824,6 +826,7 @@
 				dataScheme: true,
 				schemeContent: true,
 				single: true,
+				canMakeEmpty: false,
 				integrate: {
 					title: 'Adobe Creative Cloud',
 					link: 'https://www.adobe.io/apis/creativecloud.html'
@@ -2106,6 +2109,7 @@
 				hideButtons: true,
 				single: true,
 				converter: true,
+				canMakeEmpty: false,
 				integrate: {
 					title: 'ONLINE-CONVERT.COM',
 					link: 'https://online-convert.com'
