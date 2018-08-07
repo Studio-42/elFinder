@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: 5d3a439) (2018-08-07)
+ * Version 2.1.40 (2.1-src Nightly: 4b90005) (2018-08-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -821,6 +821,9 @@ var elFinder = function(elm, opts, bootCallback) {
 	 */
 	this.cssloaded = false;
 	
+	
+	this.mimesCanMakeEmpty = {};
+
 	/**
 	 * Callback function at boot up that option specified at elFinder starting
 	 * 
@@ -4098,7 +4101,23 @@ var elFinder = function(elm, opts, bootCallback) {
 			self.searchStatus.ininc = false;
 			self.searchStatus.mixed = false;
 		})
-
+		.bind('canMakeEmptyFile', function(e) {
+			var data = e.data,
+				obj = {};
+			if (data && Array.isArray(data.mimes)) {
+				if (!data.unshift) {
+					obj = self.mimesCanMakeEmpty;
+				}
+				$.each(data.mimes, function() {
+					if (!obj[this]) {
+						obj[this] = self.mimeTypes[this];
+					}
+				});
+				if (data.unshift) {
+					self.mimesCanMakeEmpty = Object.assign(obj, self.mimesCanMakeEmpty);
+				}
+			}
+		})
 		;
 
 	// We listen and emit a sound on delete according to option
@@ -9590,7 +9609,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 5d3a439)';
+elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 4b90005)';
 
 
 
@@ -10340,6 +10359,8 @@ elFinder.prototype._options = {
 			// list of allowed mimetypes to edit of text files
 			// if empty - any text files can be edited
 			mimes : [],
+			// MIME-types of text file to make as empty files
+			makeTextMimes : ['text/plain', 'text/css', 'text/html'],
 			// Use the editor stored in the browser
 			// This value allowd overwrite with user preferences
 			useStoredEditor : false,
@@ -12033,14 +12054,21 @@ elFinder.prototype.resources = {
 													'directory' : { cmd: 'open', msg: 'cmdopendir' },
 													'text'      : { cmd: 'edit', msg: 'cmdedit' },
 													'default'   : { cmd: 'open', msg: 'cmdopen' }
-												};
+												},
+												tmpMimes;
 											if (sel && move) {
 												fm.one(req+'done', function() {
 													fm.exec('paste', dirhash);
 												});
 											}
 											if (!move) {
-												Object.assign(nextAct, nextAction || acts[item.mime] || acts[item.mime.split('/')[0]] || acts[$.inArray(item.mime, fm.resources.mimes.text) !== -1 ? 'text' : 'none'] || acts['default']);
+												if (fm.mimeIsText(item.mime) && !fm.mimesCanMakeEmpty[item.mime] && fm.mimeTypes[item.mime]) {
+													fm.trigger('canMakeEmptyFile', {mimes: [item.mime], unshift: true});
+													tmpMimes = {};
+													tmpMimes[item.mime] = fm.mimeTypes[item.mime];
+													fm.storage('mkfileTextMimes', Object.assign(tmpMimes, fm.storage('mkfileTextMimes') || {}));
+												}
+												Object.assign(nextAct, nextAction || acts[item.mime] || acts[item.mime.split('/')[0]] || acts[(fm.mimesCanMakeEmpty[item.mime] || $.inArray(item.mime, fm.resources.mimes.text) !== -1) ? 'text' : 'none'] || acts['default']);
 												Object.assign(toast, nextAct.cmd ? {
 													incwd    : {msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), action: nextAct},
 													inbuffer : {msg: fm.i18n(['complete', fm.i18n('cmd'+cmd)]), action: nextAct}
@@ -12255,7 +12283,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-08-03
+ * @version 2018-08-07
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -12378,7 +12406,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'cmdinfo'      : 'Get info',
 			'cmdmkdir'     : 'New folder',
 			'cmdmkdirin'   : 'Into New Folder', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'New text file',
+			'cmdmkfile'    : 'New file',
 			'cmdopen'      : 'Open',
 			'cmdpaste'     : 'Paste',
 			'cmdquicklook' : 'Preview',
@@ -12535,6 +12563,8 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'untitled file.txt' : 'NewFile.txt', // added 10.11.2015
 			'untitled folder'   : 'NewFolder',   // added 10.11.2015
 			'Archive'           : 'NewArchive',  // from v2.1 added 10.11.2015
+			'untitled file'     : 'NewFile.$1',  // from v2.1.41 added 6.8.2018
+			'extentionfile'     : '$1 File',     // from v2.1.41 added 6.8.2018
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation required',
@@ -12719,6 +12749,9 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'showHidden'      : 'Show hidden items', // from v2.1.41 added 24.7.2018
 			'hideHidden'      : 'Hide hidden items', // from v2.1.41 added 24.7.2018
 			'toggleHidden'    : 'Show/Hide hidden items', // from v2.1.41 added 24.7.2018
+			'makefileTypes'   : 'File types to enable with "New file"', // from v2.1.41 added 7.8.2018
+			'typeOfTextfile'  : 'Type of the Text file', // from v2.1.41 added 7.8.2018
+			'add'             : 'Add', // from v2.1.41 added 7.8.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -12856,11 +12889,13 @@ $.fn.elfinderbutton = function(cmd) {
 				fm.toHide(menu);
 			},
 			getMenuOffset = function() {
-				var baseOffset = fm.getUI().offset(),
-					buttonOffset = button.offset();
+				var fmNode = fm.getUI(),
+					baseOffset = fm.getUI().offset(),
+					buttonOffset = fmNode.offset();
 				return {
 					top : buttonOffset.top - baseOffset.top,
-					left : buttonOffset.left - baseOffset.left
+					left : buttonOffset.left - baseOffset.left,
+					maxHeight : fmNode.height() - 40
 				};
 			},
 			getSelected = function() {
@@ -13356,6 +13391,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							
 							submenu = $('<div class="ui-front ui-corner-all elfinder-contextmenu-sub"/>')
 								.hide()
+								.css('max-height', fm.getUI().height() - 30)
 								.appendTo(node.append('<span class="elfinder-contextmenu-arrow"/>'));
 							
 							hover = function(show){
@@ -13411,7 +13447,8 @@ $.fn.elfindercontextmenu = function(fm) {
 									submenu.css({
 										top : y,
 										left : cltr? x : 'auto',
-										right: cltr? 'auto' : x
+										right: cltr? 'auto' : x,
+										overflowY: 'auto'
 									}).show();
 									base.attr('style', bstyle);
 								}
@@ -23090,17 +23127,17 @@ elFinder.prototype.commands.edit = function() {
 			}
 			$.each(optEditors, function(i, editor) {
 				var name;
-				if ((cnt === 1 || !editor.info || !editor.info.single)
+				if ((cnt === 1 || !editor.info.single)
 						&& ((!editor.info || !editor.info.converter)? file.write : cwdWrite)
-						&& (!editor.info.converter || file.size > 0)
+						&& (file.size > 0 || (!editor.info.converter && (editor.info.canMakeEmpty || fm.mimeIsText(file.mime))))
 						&& (!editor.info.maxSize || file.size <= editor.info.maxSize)
 						&& mimeMatch(file.mime, editor.mimes || null)
 						&& extMatch(file.name, editor.exts || null)
 						&& typeof editor.load == 'function'
 						&& typeof editor.save == 'function') {
 					
-					name = editor.info && editor.info.name? editor.info.name : ('Editor ' + i);
-					editor.id = editor.info && editor.info.id? editor.info.id : ('editor' + i),
+					name = editor.info.name? editor.info.name : ('Editor ' + i);
+					editor.id = editor.info.id? editor.info.id : ('editor' + i),
 					editor.name = name;
 					editor.i18n = fm.i18n(name);
 					editors[editor.id] = editor;
@@ -23173,6 +23210,7 @@ elFinder.prototype.commands.edit = function() {
 		fm.one('open', function() {
 			// editors setup
 			if (opts.editors && Array.isArray(opts.editors)) {
+				fm.trigger('canMakeEmptyFile', {mimes: Object.keys(fm.storage('mkfileTextMimes') || {}).concat(opts.makeTextMimes || ['text/plain'])});
 				$.each(opts.editors, function(i, editor) {
 					if (editor.info && editor.info.cmdCheck) {
 						cmdChecks.push(editor.info.cmdCheck);
@@ -23224,8 +23262,14 @@ elFinder.prototype.commands.edit = function() {
 							if (!allowAll && editor.mimes && editor.mimes[0] === '*') {
 								allowAll = true;
 							}
-							if (editor.info && editor.info.integrate) {
+							if (!editor.info) {
+								editor.info = {};
+							}
+							if (editor.info.integrate) {
 								fm.trigger('helpIntegration', Object.assign({cmd: 'edit'}, editor.info.integrate));
+							}
+							if (editor.info.canMakeEmpty) {
+								fm.trigger('canMakeEmptyFile', {mimes: editor.mimes});
 							}
 						}
 					});
@@ -25025,14 +25069,53 @@ elFinder.prototype.commands.mkdir = function() {
  * @author Dmitry (dio) Levashov
  **/
 elFinder.prototype.commands.mkfile = function() {
-		this.disableOnSearch = true;
+		var self = this;
+
+	this.disableOnSearch = true;
 	this.updateOnSelect  = false;
 	this.mime            = 'text/plain';
 	this.prefix          = 'untitled file.txt';
-	this.exec            = $.proxy(this.fm.res('mixin', 'make'), this);
-	
+	this.variants        = [];
+
+	this.getTypeName = function(mime, type) {
+		var fm = self.fm,
+			name;
+		if (name = fm.messages['kind' + fm.kinds[mime]]) {
+			name = type.toUpperCase() + ' ' + name;
+		} else {
+			name = fm.i18n(['extentionfile', type.toUpperCase()]);
+		}
+		return name;
+	};
+
+	this.fm.bind('open reload canMakeEmptyFile', function() {
+		var fm = self.fm,
+			hides = fm.storage('mkfileHides') || {};
+		self.variants = [];
+		if (fm.mimesCanMakeEmpty) {
+			$.each(fm.mimesCanMakeEmpty, function(mime, type) {
+				type && !hides[mime] && fm.uploadMimeCheck(mime) && self.variants.push([mime, self.getTypeName(mime, type)]);
+			});
+		}
+		self.change();
+	});
+
 	this.getstate = function() {
 		return this.fm.cwd().write ? 0 : -1;
+	};
+
+	this.exec = function(_dum, mime) {
+		var fm = self.fm,
+			type, err;
+		if (type = fm.mimesCanMakeEmpty[mime]) {
+			if (fm.uploadMimeCheck(mime)) {
+				this.mime = mime;
+				this.prefix = fm.i18n(['untitled file', type]);
+				return $.proxy(fm.res('mixin', 'make'), self)();
+			}
+			err = ['errMkfile', self.getTypeName(mime, type)];
+		}
+		return $.Deferred().reject(err);
 	};
 };
 
@@ -26199,13 +26282,13 @@ elFinder.prototype.commands.preference = function() {
 			var cats = self.options.categories || {
 					'language' : ['language'],
 					'toolbar' : ['toolbarPref'],
-					'workspace' : ['iconSize','columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized', 'showHidden'],
+					'workspace' : ['iconSize','columnPref', 'selectAction', 'makefileTypes', 'useStoredEditor', 'editorMaximized', 'showHidden'],
 					'dialog' : ['autoFocusDialog'],
 					'selectionInfo' : ['infoItems', 'hashChecker'],
 					'reset' : ['clearBrowserData'],
 					'all' : true
 				},
-				forms = self.options.prefs || ['language', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'useStoredEditor', 'editorMaximized', 'showHidden', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
+				forms = self.options.prefs || ['language', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'makefileTypes', 'useStoredEditor', 'editorMaximized', 'showHidden', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
 			
 			forms = fm.arrayFlip(forms, true);
 			
@@ -26230,10 +26313,10 @@ elFinder.prototype.commands.preference = function() {
 						el: 'Ελληνικά',
 						en: 'English',
 						es: 'Español',
-						fa: 'فارسی‌‎, پارسی‌',
+						fa: 'فارسی',
 						fo: 'Føroyskt',
 						fr: 'Français',
-						he: 'עברית‎',
+						he: 'עברית',
 						hr: 'Hrvatski',
 						hu: 'Magyar',
 						id: 'Bahasa Indonesia',
@@ -26359,6 +26442,84 @@ elFinder.prototype.commands.preference = function() {
 				return actSel.append(optTags.join('')).val(fm.storage('selectAction') || 'open');
 			})());
 			
+			forms.makefileTypes && (forms.makefileTypes = (function() {
+				var hides = fm.storage('mkfileHides') || {},
+					getTag = function() {
+						var tags = [];
+						$.each(fm.mimesCanMakeEmpty, function(mime, type) {
+							var name = fm.getCommand('mkfile').getTypeName(mime, type);
+							tags.push('<span class="elfinder-preference-column-item" title="'+fm.escape(name)+'"><label><input type="checkbox" value="'+mime+'" '+(hides[mime]? '' : 'checked')+'/>'+type+'</label></span>');
+						});
+						return tags.join(' ');
+					},
+					elm = $('<div/>').on('change', 'input', function() {
+						var v = $(this).val(),
+							o = $(this).is(':checked');
+						if (!o && !hides[v]) {
+							hides[v] = true;
+						} else if (o && hides[v]) {
+							delete hides[v];
+						}
+						fm.storage('mkfileHides', hides);
+						fm.trigger('canMakeEmptyFile');
+					}).append(getTag()),
+					add = $('<div/>').append(
+						$('<input type="text" placeholder="'+fm.i18n('typeOfTextfile')+'"/>').on('keydown', function(e) {
+							(e.keyCode === $.ui.keyCode.ENTER) && $(this).next().trigger('click');
+						}),
+						$('<button class="ui-button"/>').html(fm.i18n('add')).on('click', function() {
+							var input = $(this).prev(),
+								val = input.val(),
+								uiToast = fm.getUI('toast'),
+								err = function() {
+									uiToast.appendTo(input.closest('.ui-dialog'));
+									fm.toast({
+										msg:　fm.i18n('errUsupportType'),
+										mode: 'warning',
+										onHidden: function() {
+											uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
+										}
+									});
+									input.trigger('focus');
+									return false;
+								},
+								tmpMimes;
+							if (!val.match(/\//)) {
+								val = fm.arrayFlip(fm.mimeTypes)[val];
+								if (!val) {
+									return err();
+								}
+								input.val(val);
+							}
+							if (!fm.mimeIsText(val) || !fm.mimeTypes[val]) {
+								return err();
+							}
+							fm.trigger('canMakeEmptyFile', {mimes: [val], unshift: true});
+							tmpMimes = {};
+							tmpMimes[val] = fm.mimeTypes[val];
+							fm.storage('mkfileTextMimes', Object.assign(tmpMimes, fm.storage('mkfileTextMimes') || {}));
+							input.val('');
+							uiToast.appendTo(input.closest('.ui-dialog'));
+							fm.toast({
+								msg: fm.i18n(['complete', val + ' (' + tmpMimes[val] + ')']),
+								onHidden: function() {
+									uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
+								}
+							});
+						})
+					),
+					tm;
+				fm.bind('canMakeEmptyFile', function(e) {
+					if (e.data && e.data.mimes && e.data.mimes.length) {
+						tm && clearTimeout(tm);
+						tm = setTimeout(function() {
+							elm.empty().append(getTag());
+						}, 100);
+					}
+				});
+				return $('<div/>').append(elm, add);
+			})());
+
 			forms.useStoredEditor && (forms.useStoredEditor = $('<input type="checkbox"/>').prop('checked', (function() {
 				var s = fm.storage('useStoredEditor');
 				return s? (s > 0) : fm.options.commandsOptions.edit.useStoredEditor;

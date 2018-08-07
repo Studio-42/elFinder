@@ -133,7 +133,7 @@
 			'cmdinfo'      : '查看關於',
 			'cmdmkdir'     : '建立資料夾',
 			'cmdmkdirin'   : '移入新資料夾', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : '建立文字檔',
+			'cmdmkfile'    : '建立文檔',
 			'cmdopen'      : '開啟',
 			'cmdpaste'     : '貼上',
 			'cmdquicklook' : '預覽',

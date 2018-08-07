@@ -537,6 +537,7 @@
 				urlAsContent: true,
 				schemeContent: true,
 				single: true,
+				canMakeEmpty: true,
 				integrate: {
 					title: 'PIXLR EDITOR',
 					link: 'https://pixlr.com/editor/'
@@ -610,6 +611,7 @@
 				urlAsContent: true,
 				arrayBufferContent: true,
 				openMaximized: true,
+				canMakeEmpty: true,
 				integrate: {
 					title: 'Photopea',
 					link: 'https://www.photopea.com/learn/'
@@ -1895,6 +1897,7 @@
 				preventGet: true,
 				hideButtons: true,
 				syncInterval : 15000,
+				canMakeEmpty: true,
 				integrate: {
 					title: 'Zoho Office API',
 					link: 'https://www.zoho.com/officeapi/'

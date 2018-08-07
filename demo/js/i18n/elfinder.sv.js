@@ -115,7 +115,7 @@
 			'cmdhome'      : 'Hem',
 			'cmdinfo'      : 'Visa info',
 			'cmdmkdir'     : 'Ny mapp',
-			'cmdmkfile'    : 'Ny textfil',
+			'cmdmkfile'    : 'Ny fil',
 			'cmdopen'      : 'Öppna',
 			'cmdpaste'     : 'Klistra in',
 			'cmdquicklook' : 'Förhandsgranska',

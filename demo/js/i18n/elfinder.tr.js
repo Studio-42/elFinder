@@ -133,7 +133,7 @@
 			'cmdinfo'      : 'Bilgi göster',
 			'cmdmkdir'     : 'Yeni klasör',
 			'cmdmkdirin'   : 'Yeni Klasör / aç', // from v2.1.7 added 19.2.2016
-			'cmdmkfile'    : 'Yeni metin dosyası',
+			'cmdmkfile'    : 'Yeni dosya',
 			'cmdopen'      : 'Aç',
 			'cmdpaste'     : 'Yapıştır',
 			'cmdquicklook' : 'Ön izleme',
