@@ -980,7 +980,7 @@ elFinder.prototype.commands.edit = function() {
 					self.title = fm.escape(editor.i18n);
 					if (editor.info && editor.info.iconImg) {
 						self.contextmenuOpts = {
-							iconImg: editor.info.iconImg
+							iconImg: fm.baseUrl + editor.info.iconImg
 						};
 					}
 					delete self.variants;
