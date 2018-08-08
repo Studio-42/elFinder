@@ -274,6 +274,12 @@ var elFinder = function(elm, opts, bootCallback) {
 		 */
 		prevSorterStr = '',
 
+		/**
+		 * Map table of file extention to MIME-Type
+		 * @type Object
+		 */
+		extToMimeTable,
+
 		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
 		syncInterval,
@@ -3798,6 +3804,21 @@ var elFinder = function(elm, opts, bootCallback) {
 		});
 
 		return dfd;
+	};
+
+	this.getMimetype = function(name, orgMime) {
+		var mime = orgMime,
+			ext, m;
+		m = (name + '').match(/\.([^.]+)$/);
+		if (m && (ext = m[1])) {
+			if (!extToMimeTable) {
+				extToMimeTable = self.arrayFlip(self.mimeTypes);
+			}
+			if (!(mime = extToMimeTable[ext.toLowerCase()])) {
+				mime = orgMime;
+			}
+		}
+		return mime;
 	};
 
 	/**
@@ -7406,13 +7427,18 @@ elFinder.prototype = {
 						if (self.trashes[file.hash]) {
 							file.locked = true;
 						}
-					} else if (fileFilter) {
-						try {
-							if (! fileFilter(file)) {
-								return ign;
+					} else {
+						if (fileFilter) {
+							try {
+								if (! fileFilter(file)) {
+									return ign;
+								}
+							} catch(e) {
+								self.debug(e);
 							}
-						} catch(e) {
-							self.debug(e);
+						}
+						if (file.size == 0) {
+							file.mime = self.getMimetype(file.name, file.mime);
 						}
 					}
 					
