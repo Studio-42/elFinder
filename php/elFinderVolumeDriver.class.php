@@ -3736,8 +3736,16 @@ abstract class elFinderVolumeDriver {
 		if ($ext === '') {
 			$ext = (false === $pos = strrpos($name, '.'))? '' : substr($name, $pos + 1);
 		}
-		$_checkKey = strtolower($ext.':'.$type);
-		if (isset($this->options['mimeMap'][$_checkKey])) {
+		$_checkKey = strtolower($ext . ':' . $type);
+		if ($type === '') {
+			$_keylen = strlen($_checkKey);
+			foreach($this->options['mimeMap'] as $_key => $_type) {
+				if (substr($_key, 0, $_keylen) === $_checkKey) {
+					$type = $_type;
+					break;
+				}
+			}
+		} else if (isset($this->options['mimeMap'][$_checkKey])) {
 			$type = $this->options['mimeMap'][$_checkKey];
 		} else {
 			$_checkKey = strtolower($ext.':*');
@@ -4136,24 +4144,18 @@ abstract class elFinderVolumeDriver {
 			$stat['name'] = json_decode(str_replace($this->options['utf8patterns'], $this->options['utf8replace'], $jeName));
 		}
 		
-		
-		if (empty($stat['mime'])) {
-			$stat['mime'] = $this->mimetype($stat['name'], true);
-		} else {
-			$stat['mime'] = $this->mimeTypeNormalize($stat['mime'], $stat['name']);
-		}
-		
-		// @todo move dateformat to client
-		// $stat['date'] = isset($stat['ts'])
-		// 	? $this->formatDate($stat['ts'])
-		// 	: 'unknown';
-			
 		if (!isset($stat['size'])) {
 			$stat['size'] = 'unknown';
 		}	
-
-		if ($isDir = ($stat['mime'] === 'directory')) {
+		
+		if ($isDir = (isset($stat['mime']) && $stat['mime'] === 'directory')) {
 			$stat['volumeid'] = $this->id;
+		} else {		
+			if (empty($stat['mime']) || (!$isDir && $stat['size'] == 0)) {
+				$stat['mime'] = $this->mimetype($stat['name'], true, $stat['size']);
+			} else {
+				$stat['mime'] = $this->mimeTypeNormalize($stat['mime'], $stat['name']);
+			}
 		}
 		
 		$stat['read']  = intval($this->attr($path, 'read', isset($stat['read']) ? !!$stat['read'] : null, $isDir));
@@ -4296,10 +4298,11 @@ abstract class elFinderVolumeDriver {
 	 *
 	 * @param  string      $path file path
 	 * @param  string|bool $name
+	 * @param  integer     $size
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 */
-	protected function mimetype($path, $name = '') {
+	protected function mimetype($path, $name = '', $size = null) {
 		$type = '';
 		$nameCheck = false;
 		
@@ -4310,7 +4313,9 @@ abstract class elFinderVolumeDriver {
 			$nameCheck = true;
 		}
 		$ext = (false === $pos = strrpos($name, '.')) ? '' : substr($name, $pos + 1);
-		$size = file_exists($path)? filesize($path) : -1;
+		if ($size === null) {
+			$size = file_exists($path)? filesize($path) : -1;
+		}
 		if (! $nameCheck && is_readable($path) && $size > 0) {
 			// detecting by contents
 			if ($this->mimeDetect === 'finfo') {
@@ -4319,6 +4324,8 @@ abstract class elFinderVolumeDriver {
 				$type = mime_content_type($path);
 			}
 			if ($type) {
+				$type = explode(';', $type);
+				$type = trim($type[0]);
 				if ($ext && preg_match('~^application/(?:octet-stream|(?:x-)?zip)~', $type)) {
 					// load default MIME table file "mime.types"
 					if (!elFinderVolumeDriver::$mimetypesLoaded) {
@@ -4335,13 +4342,10 @@ abstract class elFinderVolumeDriver {
 		if (! $type) {
 			// detecting by filename
 			$type = elFinderVolumeDriver::mimetypeInternalDetect($name);
-			if ($type === 'unknown' && $size === 0) {
-				$type = 'text/plain';
+			if ($type === 'unknown') {
+				$type = ($size == 0)? '' : 'text/plain';
 			}
 		}
-		
-		$type = explode(';', $type);
-		$type = trim($type[0]);
 		
 		// mime type normalization
 		$type = $this->mimeTypeNormalize($type, $name, $ext);
