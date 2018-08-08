@@ -3,7 +3,7 @@
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
  * @author Alex Yashkin <alex@yashkin.by>
- * @version 2018-07-30
+ * @version 2018-08-08
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -226,6 +226,7 @@
 			'ntfchkdir'   : 'Проверка папки назначения', // from v2.1.24 added 3.5.2017
 			'ntfundo'     : 'Отмена предыдущей операции', // from v2.1.27 added 31.07.2017
 			'ntfredo'     : 'Восстановление предыдущей операции', // from v2.1.27 added 31.07.2017
+			'ntfchkcontent' : 'Проверка содержимого', // from v2.1.41 added 3.8.2018
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : 'Корзина', //from v2.1.24 added 29.4.2017
@@ -289,6 +290,8 @@
 			'untitled file.txt' : 'НовыйФайл.txt', // added 10.11.2015
 			'untitled folder'   : 'НоваяПапка',   // added 10.11.2015
 			'Archive'           : 'НовыйАрхив',  // from v2.1 added 10.11.2015
+			'untitled file'     : 'НовыйФайл.$1',  // from v2.1.41 added 6.8.2018
+			'extentionfile'     : '$1 Файл',     // from v2.1.41 added 6.8.2018
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Необходимо подтверждение',
@@ -473,6 +476,9 @@
 			'showHidden'      : 'Показать скрытые элементы', // from v2.1.41 added 24.7.2018
 			'hideHidden'      : 'Скрыть скрытые элементы', // from v2.1.41 added 24.7.2018
 			'toggleHidden'    : 'Показать/скрыть скрытые элементы', // from v2.1.41 added 24.7.2018
+			'makefileTypes'   : 'Типы файлов в меню "Новый файл"', // from v2.1.41 added 7.8.2018
+			'typeOfTextfile'  : 'Тип текстового файла', // from v2.1.41 added 7.8.2018
+			'add'             : 'Добавить', // from v2.1.41 added 7.8.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
