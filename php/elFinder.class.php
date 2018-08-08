@@ -983,7 +983,7 @@ class elFinder {
 				if (is_array($_res)) {
 					if (! empty($_res['preventexec'])) {
 						$result = array('error' => true);
-						if ($cmd === 'upload' & ! empty($args['node'])) {
+						if ($cmd === 'upload' && ! empty($args['node'])) {
 							$result['callback'] = array(
 								'node' => $args['node'],
 								'bind' => $cmd
