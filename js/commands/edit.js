@@ -978,9 +978,15 @@ elFinder.prototype.commands.edit = function() {
 						self.title = title;
 					});
 					self.title = fm.escape(editor.i18n);
+					if (editor.info && editor.info.iconImg) {
+						self.contextmenuOpts = {
+							iconImg: editor.info.iconImg
+						};
+					}
 					delete self.variants;
 				};
 			
+			self.contextmenuOpts = void(0);
 			if (e.data.type === 'files' && self.enabled()) {
 				file = fm.file(e.data.targets[0]);
 				if (setEditors(file, e.data.targets.length)) {
