@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: 378cabd) (2018-08-08)
+ * Version 2.1.40 (2.1-src Nightly: 2925b93) (2018-08-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -304,6 +304,12 @@ var elFinder = function(elm, opts, bootCallback) {
 		 * @type String
 		 */
 		prevSorterStr = '',
+
+		/**
+		 * Map table of file extention to MIME-Type
+		 * @type Object
+		 */
+		extToMimeTable,
 
 		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
@@ -3829,6 +3835,21 @@ var elFinder = function(elm, opts, bootCallback) {
 		});
 
 		return dfd;
+	};
+
+	this.getMimetype = function(name, orgMime) {
+		var mime = orgMime,
+			ext, m;
+		m = (name + '').match(/\.([^.]+)$/);
+		if (m && (ext = m[1])) {
+			if (!extToMimeTable) {
+				extToMimeTable = self.arrayFlip(self.mimeTypes);
+			}
+			if (!(mime = extToMimeTable[ext.toLowerCase()])) {
+				mime = orgMime;
+			}
+		}
+		return mime;
 	};
 
 	/**
@@ -7437,13 +7458,18 @@ elFinder.prototype = {
 						if (self.trashes[file.hash]) {
 							file.locked = true;
 						}
-					} else if (fileFilter) {
-						try {
-							if (! fileFilter(file)) {
-								return ign;
+					} else {
+						if (fileFilter) {
+							try {
+								if (! fileFilter(file)) {
+									return ign;
+								}
+							} catch(e) {
+								self.debug(e);
 							}
-						} catch(e) {
-							self.debug(e);
+						}
+						if (file.size == 0) {
+							file.mime = self.getMimetype(file.name, file.mime);
 						}
 					}
 					
@@ -9609,7 +9635,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 378cabd)';
+elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 2925b93)';
 
 
 
@@ -10480,7 +10506,6 @@ elFinder.prototype._options = {
 				ckeditor5Mode : 'balloon',
 				// Setting for Online-Convert.com
 				onlineConvert : {
-					'fix%20' : true,// fix '%20' bug of input URL of online-convert.com
 					maxSize  : 100, // (MB) Max 100MB on free account
 					showLink : true // It must be enabled with free account
 				}
@@ -13387,7 +13412,7 @@ $.fn.elfindercontextmenu = function(fm) {
 							if (!cmd.variants.length) {
 								return;
 							}
-							node = item(cmd.title, cmd.className? cmd.className : cmd.name, function(){});
+							node = item(cmd.title, cmd.className? cmd.className : cmd.name, function(){}, cmd.contextmenuOpts);
 							
 							submenu = $('<div class="ui-front ui-corner-all elfinder-contextmenu-sub"/>')
 								.hide()
@@ -13539,7 +13564,7 @@ $.fn.elfindercontextmenu = function(fm) {
 									!cmd.keepContextmenu && close();
 									fm.exec(cmd.name, targets, {_userAction: true, _currentType: type, _currentNode: node});
 								}
-							});
+							}, cmd.contextmenuOpts);
 							if (cmd.extra && cmd.extra.node) {
 								$('<span class="elfinder-button-icon elfinder-button-icon-'+(cmd.extra.icon || '')+' '+exIcon+'"/>')
 									.append(cmd.extra.node).appendTo(node);
@@ -23294,9 +23319,15 @@ elFinder.prototype.commands.edit = function() {
 						self.title = title;
 					});
 					self.title = fm.escape(editor.i18n);
+					if (editor.info && editor.info.iconImg) {
+						self.contextmenuOpts = {
+							iconImg: editor.info.iconImg
+						};
+					}
 					delete self.variants;
 				};
 			
+			self.contextmenuOpts = void(0);
 			if (e.data.type === 'files' && self.enabled()) {
 				file = fm.file(e.data.targets[0]);
 				if (setEditors(file, e.data.targets.length)) {
