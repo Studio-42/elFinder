@@ -453,9 +453,9 @@
     text-align: center;
 }
 .elfinder-edit-onlineconvert-link .elfinder-button-icon {
-    background-image: url("../img/edit_onlineconvert.png");
+    background-image: url("../img/editor-icons.png");
     background-repeat: no-repeat;
-    background-size: contain;
+    background-position: 0 -144px:;
     margin-bottom: -3px;
 }
 .elfinder-edit-onlineconvert-link a {
