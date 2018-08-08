@@ -454,7 +454,6 @@ elFinder.prototype._options = {
 				ckeditor5Mode : 'balloon',
 				// Setting for Online-Convert.com
 				onlineConvert : {
-					'fix%20' : true,// fix '%20' bug of input URL of online-convert.com
 					maxSize  : 100, // (MB) Max 100MB on free account
 					showLink : true // It must be enabled with free account
 				}

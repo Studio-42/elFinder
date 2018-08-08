@@ -2549,13 +2549,7 @@
 									instance: ifm,
 									opts: opts
 								});
-
-								url = encodeURIComponent(fm.convAbsUrl(url));
-								// need `.replace(/%2520/g, '%252520')` for a bug of online-convert.com
-								if (set['fix%20']) {
-									url = url.replace(/%2520/g, '%252520');
-								}
-								url = link + url;
+								url = link + encodeURIComponent(fm.convAbsUrl(url));
 								ifm.attr('src', url).show().css(opts.css)
 									.one('load', function() {
 										uiToast.appendTo(ta.closest('.ui-dialog'));
