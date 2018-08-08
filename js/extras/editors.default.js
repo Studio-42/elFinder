@@ -237,6 +237,40 @@
 				errtm;
 			$(base).on('saveAsFail', launch);
 			launch();
+		},
+		iframeClose = function(ifm) {
+			var $ifm = $(ifm),
+				dfd = $.Deferred().always(function() {
+					$ifm.off('load', load);
+				}),
+				ab = 'about:blank',
+				chk = function() {
+					tm = setTimeout(function() {
+						var src;
+						try {
+							src = base.contentWindow.location.href;
+						} catch(e) {
+							src = null;
+						}
+						if (src === ab) {
+							dfd.resolve();
+						} else if (--cnt > 0){
+							chk();
+						} else {
+							dfd.reject();
+						}
+					}, 500);
+				},
+				load = function() {
+					tm && clearTimeout(tm);
+					dfd.resolve();
+				},
+				cnt = 20, // 500ms * 20 = 10sec wait
+				tm;
+			$ifm.one('load', load);
+			ifm.src = ab;
+			chk();
+			return dfd;
 		};
 	
 	// check callback from pixlr
@@ -2002,25 +2036,7 @@
 			getContent : function() {},
 			save : function() {},
 			// Before dialog close
-			beforeclose : function(base) {
-				var dfd = $.Deferred(),
-					ab = 'about:blank';
-				base.src = ab;
-				setTimeout(function() {
-					var src;
-					try {
-						src = base.contentWindow.location.href;
-					} catch(e) {
-						src = null;
-					}
-					if (src === ab) {
-						dfd.resolve();
-					} else {
-						dfd.reject();
-					}
-				}, 10);
-				return dfd;
-			},
+			beforeclose : iframeClose,
 			// On dialog closed
 			close : function(ta) {
 				var fm = this.fm,
@@ -2597,25 +2613,7 @@
 			getContent : function() {},
 			save : function() {},
 			// Before dialog close
-			beforeclose : function(base) {
-				var dfd = $.Deferred(),
-					ab = 'about:blank';
-				base.src = ab;
-				setTimeout(function() {
-					var src;
-					try {
-						src = base.contentWindow.location.href;
-					} catch(e) {
-						src = null;
-					}
-					if (src === ab) {
-						dfd.resolve();
-					} else {
-						dfd.reject();
-					}
-				}, 100);
-				return dfd;
-			},
+			beforeclose : iframeClose,
 			// On dialog closed
 			close : function(ta) {
 				var fm = this.fm,
