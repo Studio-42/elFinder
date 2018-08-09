@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: b3ae9ce) (2018-08-09)
+ * Version 2.1.40 (2.1-src Nightly: 2f7b2b0) (2018-08-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9635,7 +9635,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.40 (2.1-src Nightly: b3ae9ce)';
+elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 2f7b2b0)';
 
 
 
@@ -28195,8 +28195,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 				var hash = node.data('hash'),
 					playPromise;
 				autoplay && (playPromise = player.play());
-				if (playPromise && playPromise.catch) {
-					playPromise.catch(function(e) {
+				// uses "playPromise['catch']" instead "playPromise.catch" to support Old IE
+				if (playPromise && playPromise['catch']) {
+					playPromise['catch'](function(e) {
 						if (!player.paused) {
 							node && node.data('hash') === hash && reset();
 						}
@@ -28392,8 +28393,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 				var hash = node.data('hash'),
 					playPromise;
 				autoplay && (playPromise = player.play());
-				if (playPromise && playPromise.catch) {
-					playPromise.catch(function(e) {
+				// uses "playPromise['catch']" instead "playPromise.catch" to support Old IE
+				if (playPromise && playPromise['catch']) {
+					playPromise['catch'](function(e) {
 						if (!player.paused) {
 							node && node.data('hash') === hash && reset(true);
 						}
