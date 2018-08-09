@@ -644,20 +644,6 @@
     content: none;
 }
 
-/* thumbnail image video overlay */
-.elfinder-cwd-icon-video:after {
-    top: 32px;
-    left: -26px;
-    height: 25px;
-    width: 22px;
-    background-position: 0px -373px;
-    -webkit-transform: scale(1);
-    -moz-transform: scale(1);
-    -ms-transform: scale(1);
-    -o-transform: scale(1);
-    transform: scale(1);
-}
-
 /* "opened folder" icon on dragover */
 .elfinder-cwd .elfinder-droppable-active .elfinder-cwd-icon {
     background-position: 0 -100px;
@@ -704,6 +690,7 @@
     background-position: 0 -300px;
 }
 
+.elfinder-cwd-icon-video:after,
 .elfinder-cwd-icon-video,
 .elfinder-cwd-icon-flash-video,
 .elfinder-cwd-icon-dash-xml,
