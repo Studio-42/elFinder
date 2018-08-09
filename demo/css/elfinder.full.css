@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: 39f9301) (2018-08-09)
+ * Version 2.1.40 (2.1-src Nightly: 082d47c) (2018-08-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -2009,7 +2009,7 @@ ul.elfinder-help-integrations a:hover {
 .elfinder-cwd-icon-rtfd:after,
 .elfinder-cwd-icon-rtf,
 .elfinder-cwd-icon-rtfd {
-    background-position: 0 -401px;
+    background-position: 0 -400px;
 }
 
 .elfinder-cwd-icon-pdf:after,
