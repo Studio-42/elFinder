@@ -2282,7 +2282,7 @@
 								}
 								f.append($('<span/>').text(fm.i18n(n) + ' : '));
 								if (o.type === 'boolean') {
-									if (o.default || (nozip = (n === 'allow_multiple_outputs' && !allowZip))) {
+									if (o['default'] || (nozip = (n === 'allow_multiple_outputs' && !allowZip))) {
 										checked = ' checked';
 										if (nozip) {
 											disabled = ' disabled';
@@ -2293,9 +2293,9 @@
 										btn.data('opts', opts);
 									}
 									f.append($('<input type="checkbox" value="true"'+checked+disabled+'/>'));
-								} else if (o.enum){
+								} else if (o['enum']){
 									elm = $('<select/>').append($('<option value=""/>').text('Select...'));
-									$.each(o.enum, function(i, v) {
+									$.each(o['enum'], function(i, v) {
 										elm.append($('<option value="'+v+'"/>').text(v));
 									});
 									f.append(elm);
