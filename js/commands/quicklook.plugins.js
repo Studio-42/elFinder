@@ -520,8 +520,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 				var hash = node.data('hash'),
 					playPromise;
 				autoplay && (playPromise = player.play());
-				if (playPromise && playPromise.catch) {
-					playPromise.catch(function(e) {
+				// uses "playPromise['catch']" instead "playPromise.catch" to support Old IE
+				if (playPromise && playPromise['catch']) {
+					playPromise['catch'](function(e) {
 						if (!player.paused) {
 							node && node.data('hash') === hash && reset();
 						}
@@ -718,8 +719,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 				var hash = node.data('hash'),
 					playPromise;
 				autoplay && (playPromise = player.play());
-				if (playPromise && playPromise.catch) {
-					playPromise.catch(function(e) {
+				// uses "playPromise['catch']" instead "playPromise.catch" to support Old IE
+				if (playPromise && playPromise['catch']) {
+					playPromise['catch'](function(e) {
 						if (!player.paused) {
 							node && node.data('hash') === hash && reset(true);
 						}
