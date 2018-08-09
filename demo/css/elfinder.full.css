@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: b3ae9ce) (2018-08-09)
+ * Version 2.1.40 (2.1-src Nightly: 2f7b2b0) (2018-08-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -1722,7 +1722,10 @@ ul.elfinder-help-integrations a:hover {
     width: 48px;
     height: 48px;
     margin: 0 auto;
-    background: url('../img/icons-big.png') 0 0 no-repeat;
+    background-image: url('../img/icons-big.svg');
+    background-image: url('../img/icons-big.png') \9;
+    background-position: 0 0;
+    background-repeat: no-repeat;
     -moz-background-clip: padding;
     -webkit-background-clip: padding-box;
     background-clip: padding-box;
@@ -1873,45 +1876,6 @@ ul.elfinder-help-integrations a:hover {
     left: -10px;
 }
 
-/* icon image has type */
-.elfinder-cwd-icon-x-empty:before,
-.elfinder-cwd-icon-plain:before,
-.elfinder-cwd-icon-rtf:before,
-.elfinder-cwd-icon-rtfd:before,
-.elfinder-cwd-icon-pdf:before,
-.elfinder-cwd-icon-html:before,
-.elfinder-cwd-icon-css:before,
-.elfinder-cwd-icon-javascript:before,
-.elfinder-cwd-icon-x-javascript:before,
-.elfinder-cwd-icon-x-perl:before,
-.elfinder-cwd-icon-x-python:before,
-.elfinder-cwd-icon-x-ruby:before,
-.elfinder-cwd-icon-x-sh:before,
-.elfinder-cwd-icon-x-shellscript:before,
-.elfinder-cwd-icon-x-c:before,
-.elfinder-cwd-icon-x-csrc:before,
-.elfinder-cwd-icon-x-chdr:before,
-.elfinder-cwd-icon-x-c--:before,
-.elfinder-cwd-icon-x-c--src:before,
-.elfinder-cwd-icon-x-c--hdr:before,
-.elfinder-cwd-icon-x-java:before,
-.elfinder-cwd-icon-x-java-source:before,
-.elfinder-cwd-icon-x-php:before,
-.elfinder-cwd-icon-xml:before,
-.elfinder-cwd-icon-zip:before,
-.elfinder-cwd-icon-x-zip:before,
-.elfinder-cwd-icon-x-xz:before,
-.elfinder-cwd-icon-x-7z-compressed:before,
-.elfinder-cwd-icon-x-gzip:before,
-.elfinder-cwd-icon-x-tar:before,
-.elfinder-cwd-icon-x-bzip:before,
-.elfinder-cwd-icon-x-bzip2:before,
-.elfinder-cwd-icon-x-rar:before,
-.elfinder-cwd-icon-x-rar-compressed:before,
-.elfinder-cwd-icon-x-shockwave-flash:before {
-    display: none
-}
-
 /* addtional type badge name */
 .elfinder-cwd-icon.elfinder-cwd-icon-mp2t:before {
     content: 'ts'
@@ -1960,7 +1924,9 @@ ul.elfinder-help-integrations a:hover {
     left: -38px;
     width: 48px;
     height: 48px;
-    background: url('../img/icons-big.png') 0 0 no-repeat;
+    background-image: url('../img/icons-big.svg');
+    background-image: url('../img/icons-big.png') \9;
+    background-repeat: no-repeat;
     background-size: auto !important;
     opacity: .8;
     filter: Alpha(Opacity=60);
