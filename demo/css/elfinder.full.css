@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: 082d47c) (2018-08-10)
+ * Version 2.1.40 (2.1-src Nightly: 8aa8f5b) (2018-08-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -1539,15 +1539,6 @@ ul.elfinder-help-integrations a:hover {
     transform: scale(1) translate(10px, -5px);
 }
 
-.elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-icon-video:after {
-    -ms-transform-origin: top left;
-    -ms-transform: scale(1.35) translate(-10px, 9px);
-    -webkit-transform-origin: top left;
-    -webkit-transform: scale(1.35) translate(-10px, 9px);
-    transform-origin: top left;
-    transform: scale(1.35) translate(-10px, 9px);
-}
-
 .elfinder-cwd-size1 .elfinder-cwd-icon.elfinder-cwd-bgurl {
     -ms-transform-origin: center center;
     -ms-transform: scale(1);
@@ -1597,15 +1588,6 @@ ul.elfinder-help-integrations a:hover {
     transform: scale(1.1) translate(0px, 10px);
 }
 
-.elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-icon-video:after {
-    -ms-transform-origin: top left;
-    -ms-transform: scale(1.8) translate(-16px, 14px);
-    -webkit-transform-origin: top left;
-    -webkit-transform: scale(1.8) translate(-16px, 14px);
-    transform-origin: top left;
-    transform: scale(1.8) translate(-16px, 14px);
-}
-
 .elfinder-cwd-size2 .elfinder-cwd-icon.elfinder-cwd-bgurl {
     -ms-transform-origin: center center;
     -ms-transform: scale(1);
@@ -1653,15 +1635,6 @@ ul.elfinder-help-integrations a:hover {
     -ms-transform: scale(1.2) translate(-9px, 22px);
     -webkit-transform: scale(1.2) translate(-9px, 22px);
     transform: scale(1.2) translate(-9px, 22px);
-}
-
-.elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-icon-video:after {
-    -ms-transform-origin: top left;
-    -ms-transform: scale(2.25) translate(-20px, 16px);
-    -webkit-transform-origin: top left;
-    -webkit-transform: scale(2.25) translate(-20px, 16px);
-    transform-origin: top left;
-    transform: scale(2.25) translate(-20px, 16px);
 }
 
 .elfinder-cwd-size3 .elfinder-cwd-icon.elfinder-cwd-bgurl {
