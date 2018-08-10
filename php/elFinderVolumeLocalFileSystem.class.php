@@ -488,6 +488,17 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if ($readable) {
 			$size = sprintf('%u', filesize($path));
 			$stat['ts'] = filemtime($path);
+			if($size == '0'){
+				// filesize problem for file larger than 4GB ( testing in PHP Version 5.4.16)
+				// https://stackoverflow.com/questions/6482211/php-filesize-over-4gb
+				$size = trim(shell_exec('stat -c %s '.escapeshellarg($path)));
+			}
+            
+			if($stat['ts'] === false){
+				// sometime filemtime will failed to return false
+				$stat['ts'] = (int)trim(shell_exec('stat -c %Y '.escapeshellarg($path)));
+			}
+			
 			if ($this->statOwner) {
 				$fstat = stat($path);
 				$uid = $fstat['uid'];
