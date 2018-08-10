@@ -15,7 +15,7 @@
    viewBox="0 0 12.69984 370.412"
    version="1.1"
    id="svg3971"
-   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   inkscape:version="0.92.1 r15371"
    sodipodi:docname="icons-big.svg"
    inkscape:export-filename="V:\osc\elFinder\img\icons-big.png"
    inkscape:export-xdpi="95.794289"
@@ -27,18 +27,18 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.979899"
-     inkscape:cx="-94.861864"
-     inkscape:cy="1130.5376"
+     inkscape:zoom="7.919596"
+     inkscape:cx="40.283762"
+     inkscape:cy="1080.1419"
      inkscape:document-units="px"
-     inkscape:current-layer="g4210"
+     inkscape:current-layer="g1127"
      showgrid="true"
      units="px"
      showguides="true"
      inkscape:guide-bbox="true"
-     inkscape:window-width="1303"
+     inkscape:window-width="1304"
      inkscape:window-height="745"
-     inkscape:window-x="55"
+     inkscape:window-x="54"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
      objecttolerance="1"
@@ -122,7 +122,7 @@
            id="g3979">
           <polygon
              id="polygon3973"
-             points="6.5,37.5 6.5,2.5 24.793,2.5 33.5,11.207 33.5,37.5 "
+             points="6.5,2.5 24.793,2.5 33.5,11.207 33.5,37.5 6.5,37.5 "
              style="fill:#ffffff" />
           <g
              id="g3977">
@@ -137,7 +137,7 @@
            id="g3987">
           <polygon
              id="polygon3981"
-             points="24.5,11.5 24.5,2.5 24.793,2.5 33.5,11.207 33.5,11.5 "
+             points="24.5,2.5 24.793,2.5 33.5,11.207 33.5,11.5 24.5,11.5 "
              style="fill:#ffffff" />
           <g
              id="g3985">
@@ -149,18 +149,17 @@
           </g>
         </g>
       </g>
-      <text
-         xml:space="preserve"
+      <g
+         aria-label="?"
+         transform="scale(1.1030678,0.90656258)"
          style="font-style:normal;font-weight:normal;font-size:8.4992733px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000080;fill-opacity:1;stroke:none;stroke-width:0.21248183"
-         x="3.4328628"
-         y="-69.288605"
-         id="text4008"
-         transform="scale(1.1030678,0.90656258)"><tspan
-           sodipodi:role="line"
-           x="3.4328628"
-           y="-69.288605"
+         id="text4008">
+        <path
+           d="M 5.0555268,-70.342714 H 5.897984 v 1.054109 H 5.0555268 Z m 0.817557,-0.610055 H 5.080427 v -0.639106 q 0,-0.419153 0.116201,-0.688906 0.116201,-0.269752 0.4897042,-0.626655 l 0.3735032,-0.369353 q 0.2365521,-0.219952 0.3403029,-0.415004 0.107901,-0.195051 0.107901,-0.398403 0,-0.369353 -0.2739024,-0.597605 -0.2697523,-0.228252 -0.7179562,-0.228252 -0.3278528,0 -0.701356,0.145251 -0.3693532,0.145251 -0.7719067,0.423304 v -0.780207 q 0.3901034,-0.236552 0.7885068,-0.352753 0.4025535,-0.116201 0.8300072,-0.116201 0.7636066,0 1.2242605,0.402553 0.464804,0.402554 0.464804,1.062409 0,0.315403 -0.1494012,0.601756 -0.1494013,0.282202 -0.5229046,0.639105 l -0.3652031,0.356903 q -0.1950517,0.195052 -0.2780524,0.307103 -0.078851,0.107901 -0.112051,0.211652 -0.0249,0.08715 -0.03735,0.211652 -0.01245,0.124501 -0.01245,0.340303 z"
            style="fill:#000080;stroke-width:0.21248183"
-           id="tspan4010">?</tspan></text>
+           id="path4781"
+           inkscape:connector-curvature="0" />
+      </g>
     </g>
     <g
        transform="matrix(0.31750001,0,0,0.31750001,0.02274683,-59.7069)"
@@ -341,7 +340,7 @@
          id="g4168">
         <polygon
            style="fill:#ffffff"
-           points="33.5,11.207 33.5,37.5 6.5,37.5 6.5,2.5 24.793,2.5 "
+           points="33.5,37.5 6.5,37.5 6.5,2.5 24.793,2.5 33.5,11.207 "
            id="polygon4162" />
         <g
            id="g4166">
@@ -356,7 +355,7 @@
          id="g4176">
         <polygon
            style="fill:#ffffff"
-           points="33.5,11.207 33.5,11.5 24.5,11.5 24.5,2.5 24.793,2.5 "
+           points="33.5,11.5 24.5,11.5 24.5,2.5 24.793,2.5 33.5,11.207 "
            id="polygon4170" />
         <g
            id="g4174">
@@ -372,7 +371,7 @@
          transform="translate(0,2.0247706)">
         <polygon
            id="polygon4178"
-           points="23,21.169 20,24 24.554,29 28,29 28,26 "
+           points="20,24 24.554,29 28,29 28,26 23,21.169 "
            style="opacity:1;fill:#79efa8" />
         <circle
            id="circle4180"
@@ -382,7 +381,7 @@
            style="opacity:1;fill:#b5ffc9" />
         <polygon
            id="polygon4182"
-           points="26,29 12,29 12,25 17,20 "
+           points="12,29 12,25 17,20 26,29 "
            style="opacity:1;fill:#b5ffc9" />
       </g>
     </g>
@@ -396,14 +395,14 @@
            id="g4210">
           <polygon
              id="polygon4204"
-             points="24.8,2.5 33.5,11.2 33.5,37.5 6.5,37.5 6.5,2.5 "
-             style="opacity:1;fill:#edffeb;fill-opacity:1" />
+             points="6.5,2.5 24.8,2.5 33.5,11.2 33.5,37.5 6.5,37.5 "
+             style="opacity:1;fill:#eaf3d9;fill-opacity:1" />
           <g
              id="g4208">
             <path
                id="path4206"
                d="M 24.6,3 33,11.4 V 37 H 7 V 3 H 24.6 M 25,2 H 6 V 38 H 34 V 11 Z"
-               style="opacity:1;fill:#74c378"
+               style="opacity:1;fill:#7bad2a;fill-opacity:1"
                inkscape:connector-curvature="0" />
           </g>
         </g>
@@ -411,14 +410,14 @@
            id="g4218">
           <polygon
              id="polygon4212"
-             points="24.5,2.5 24.8,2.5 33.5,11.2 33.5,11.5 24.5,11.5 "
+             points="24.5,11.5 24.5,2.5 24.8,2.5 33.5,11.2 33.5,11.5 "
              style="opacity:1;fill:#ffffff" />
           <g
              id="g4216">
             <path
                id="path4214"
                d="M 25,3.4 32.6,11 H 25 V 3.4 M 25,2 h -1 v 10 h 10 v -1 z"
-               style="opacity:1;fill:#74c378"
+               style="opacity:1;fill:#7bad2a;fill-opacity:1"
                inkscape:connector-curvature="0" />
           </g>
         </g>
@@ -429,26 +428,26 @@
              id="g4224">
             <path
                inkscape:connector-curvature="0"
-               style="opacity:1;fill:#8bef8f"
+               style="opacity:1;fill:#c9e69a;fill-opacity:1"
                d="m 20.5,26 v -9.5 c 2.6,0 4,1 4,1 v 2 c 0,0 -1.8,-1 -3.5,-1"
                id="path4220" />
             <path
                inkscape:connector-curvature="0"
-               style="opacity:1;fill:#4db553"
+               style="opacity:1;fill:#7bad2a;fill-opacity:1"
                d="M 21,26 H 20 V 16 h 0.5 c 2.8,0 4.2,1.1 4.3,1.1 l 0.2,0.1 v 3.1 l -0.7,-0.4 c 0,0 -1.8,-0.9 -3.3,-0.9 z m 0,-8 c 1.1,0 2.3,0.4 3,0.7 V 17.8 C 23.6,17.6 22.6,17.1 21,17 Z"
                id="path4222" />
           </g>
           <g
              id="g4230">
             <circle
-               style="opacity:1;fill:#8bef8f"
+               style="opacity:1;fill:#c4e490;fill-opacity:1"
                cx="18"
                cy="26"
                r="2.5"
                id="circle4226" />
             <path
                inkscape:connector-curvature="0"
-               style="opacity:1;fill:#4db553"
+               style="opacity:1;fill:#7bad2a;fill-opacity:1"
                d="m 18,24 c 1.1,0 2,0.9 2,2 0,1.1 -0.9,2 -2,2 -1.1,0 -2,-0.9 -2,-2 0,-1.1 0.9,-2 2,-2 m 0,-1 c -1.7,0 -3,1.3 -3,3 0,1.7 1.3,3 3,3 1.7,0 3,-1.3 3,-3 0,-1.7 -1.3,-3 -3,-3 z"
                id="path4228" />
           </g>
@@ -463,7 +462,7 @@
          id="g4261">
         <polygon
            style="fill:#ffffff"
-           points="33.5,37.5 6.5,37.5 6.5,2.5 24.793,2.5 33.5,11.207 "
+           points="6.5,37.5 6.5,2.5 24.793,2.5 33.5,11.207 33.5,37.5 "
            id="polygon4255" />
         <g
            id="g4259">
@@ -478,7 +477,7 @@
          id="g4269">
         <polygon
            style="fill:#ffffff"
-           points="33.5,11.5 24.5,11.5 24.5,2.5 24.793,2.5 33.5,11.207 "
+           points="24.5,11.5 24.5,2.5 24.793,2.5 33.5,11.207 33.5,11.5 "
            id="polygon4263" />
         <g
            id="g4267">
@@ -494,7 +493,7 @@
          transform="translate(0,1.7252276)">
         <polygon
            style="fill:#8bb7f0"
-           points="27.077,22 16,15.769 16,28.231 "
+           points="16,15.769 16,28.231 27.077,22 "
            id="polygon4271" />
       </g>
     </g>
@@ -678,7 +677,7 @@
            id="g4472">
           <polygon
              id="polygon4466"
-             points="6.5,37.5 6.5,2.5 24.8,2.5 33.5,11.2 33.5,37.5 "
+             points="6.5,2.5 24.8,2.5 33.5,11.2 33.5,37.5 6.5,37.5 "
              style="fill:#ffffff" />
           <g
              id="g4470">
@@ -693,7 +692,7 @@
            id="g4480">
           <polygon
              id="polygon4474"
-             points="24.5,11.5 24.5,2.5 24.8,2.5 33.5,11.2 33.5,11.5 "
+             points="24.5,2.5 24.8,2.5 33.5,11.2 33.5,11.5 24.5,11.5 "
              style="fill:#ffd9d9" />
           <g
              id="g4478">
@@ -861,7 +860,7 @@
          id="g6145">
         <polygon
            style="fill:#ba9b48"
-           points="22.5,19 20,19 19,18 22.5,18 "
+           points="20,19 19,18 22.5,18 22.5,19 "
            id="polygon6143" />
       </g>
       <g
@@ -877,7 +876,7 @@
          id="g6153">
         <polygon
            style="fill:#ba9b48"
-           points="17.5,20 20,20 21,19 17.5,19 "
+           points="20,20 21,19 17.5,19 17.5,20 "
            id="polygon6151" />
       </g>
       <g
@@ -893,7 +892,7 @@
          id="g6161">
         <polygon
            style="fill:#ba9b48"
-           points="22.5,17 20,17 19,16 22.5,16 "
+           points="20,17 19,16 22.5,16 22.5,17 "
            id="polygon6159" />
       </g>
       <g
@@ -909,7 +908,7 @@
          id="g6169">
         <polygon
            style="fill:#ba9b48"
-           points="17.5,18 20,18 21,17 17.5,17 "
+           points="20,18 21,17 17.5,17 17.5,18 "
            id="polygon6167" />
       </g>
       <g
@@ -925,7 +924,7 @@
          id="g6177">
         <polygon
            style="fill:#ba9b48"
-           points="22.5,15 20,15 19,14 22.5,14 "
+           points="20,15 19,14 22.5,14 22.5,15 "
            id="polygon6175" />
       </g>
       <g
@@ -941,7 +940,7 @@
          id="g6185">
         <polygon
            style="fill:#ba9b48"
-           points="17.5,16 20,16 21,15 17.5,15 "
+           points="20,16 21,15 17.5,15 17.5,16 "
            id="polygon6183" />
       </g>
       <g
@@ -957,7 +956,7 @@
          id="g6193">
         <polygon
            style="fill:#ba9b48"
-           points="22.5,13 20,13 19,12 22.5,12 "
+           points="20,13 19,12 22.5,12 22.5,13 "
            id="polygon6191" />
       </g>
       <g
@@ -973,7 +972,7 @@
          id="g6201">
         <polygon
            style="fill:#ba9b48"
-           points="17.5,14 20,14 21,13 17.5,13 "
+           points="20,14 21,13 17.5,13 17.5,14 "
            id="polygon6199" />
       </g>
       <g
@@ -989,7 +988,7 @@
          id="g6209">
         <polygon
            style="fill:#ba9b48"
-           points="22.5,11 20,11 19,10 22.5,10 "
+           points="20,11 19,10 22.5,10 22.5,11 "
            id="polygon6207" />
       </g>
       <g
@@ -1005,7 +1004,7 @@
          id="g6217">
         <polygon
            style="fill:#ba9b48"
-           points="17.5,12 20,12 21,11 17.5,11 "
+           points="20,12 21,11 17.5,11 17.5,12 "
            id="polygon6215" />
       </g>
       <g
@@ -1021,7 +1020,7 @@
          id="g6225">
         <polygon
            style="fill:#ba9b48"
-           points="22.5,9 20,9 19,8 22.5,8 "
+           points="20,9 19,8 22.5,8 22.5,9 "
            id="polygon6223" />
       </g>
       <g
@@ -1037,7 +1036,7 @@
          id="g6233">
         <polygon
            style="fill:#ba9b48"
-           points="17.5,10 20,10 21,9 17.5,9 "
+           points="20,10 21,9 17.5,9 17.5,10 "
            id="polygon6231" />
       </g>
       <g
@@ -1053,7 +1052,7 @@
          id="g6241">
         <polygon
            style="fill:#ba9b48"
-           points="22.5,7 20,7 19,6 22.5,6 "
+           points="20,7 19,6 22.5,6 22.5,7 "
            id="polygon6239" />
       </g>
       <g
@@ -1069,7 +1068,7 @@
          id="g6249">
         <polygon
            style="fill:#ba9b48"
-           points="17.5,8 20,8 21,7 17.5,7 "
+           points="20,8 21,7 17.5,7 17.5,8 "
            id="polygon6247" />
       </g>
       <g
@@ -1085,7 +1084,7 @@
          id="g6257">
         <polygon
            style="fill:#ba9b48"
-           points="22.5,5 20,5 19,4 22.5,4 "
+           points="20,5 19,4 22.5,4 22.5,5 "
            id="polygon6255" />
       </g>
       <g
@@ -1101,7 +1100,7 @@
          id="g6265">
         <polygon
            style="fill:#ba9b48"
-           points="17.5,6 20,6 21,5 17.5,5 "
+           points="20,6 21,5 17.5,5 17.5,6 "
            id="polygon6263" />
       </g>
       <g
@@ -1117,7 +1116,7 @@
          id="g6273">
         <polygon
            style="fill:#ba9b48"
-           points="17.5,4 20,4 21,3 17.5,3 "
+           points="20,4 21,3 17.5,3 17.5,4 "
            id="polygon6271" />
       </g>
       <g
@@ -1144,7 +1143,7 @@
              id="g4472-4">
             <polygon
                style="fill:#ffffff"
-               points="24.8,2.5 33.5,11.2 33.5,37.5 6.5,37.5 6.5,2.5 "
+               points="33.5,11.2 33.5,37.5 6.5,37.5 6.5,2.5 24.8,2.5 "
                id="polygon4466-8" />
             <g
                id="g4470-5">
@@ -1159,7 +1158,7 @@
              id="g4480-1">
             <polygon
                style="fill:#ffd9d9"
-               points="24.8,2.5 33.5,11.2 33.5,11.5 24.5,11.5 24.5,2.5 "
+               points="33.5,11.2 33.5,11.5 24.5,11.5 24.5,2.5 24.8,2.5 "
                id="polygon4474-9" />
             <g
                id="g4478-3">

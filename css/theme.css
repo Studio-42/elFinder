@@ -195,7 +195,6 @@
     background-color: #7c607c
 }
 
-/* Word */
 .elfinder-cwd-icon-msword:before,
 .elfinder-cwd-icon-vnd-ms-office:before,
 .elfinder-cwd-icon-vnd-ms-word:before,
@@ -206,7 +205,6 @@
     background-color: #2b569a
 }
 
-/* Excel */
 .elfinder-cwd-icon-ms-excel:before,
 .elfinder-cwd-icon-vnd-ms-excel:before,
 .elfinder-cwd-icon-vnd-ms-excel-addin-macroEnabled-12:before,
@@ -218,7 +216,6 @@
     background-color: #107b10
 }
 
-/* Power point */
 .elfinder-cwd-icon-vnd-ms-powerpoint:before,
 .elfinder-cwd-icon-vnd-ms-powerpoint-addin-macroEnabled-12:before,
 .elfinder-cwd-icon-vnd-ms-powerpoint-presentation-macroEnabled-12:before,
@@ -232,7 +229,6 @@
     background-color: #d24625
 }
 
-/* open office (Libreoffice) */
 .elfinder-cwd-icon-vnd-oasis-opendocument-chart:before,
 .elfinder-cwd-icon-vnd-oasis-opendocument-database:before,
 .elfinder-cwd-icon-vnd-oasis-opendocument-formula:before,
