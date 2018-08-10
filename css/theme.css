@@ -195,6 +195,62 @@
     background-color: #7c607c
 }
 
+/* Word */
+.elfinder-cwd-icon-msword:before,
+.elfinder-cwd-icon-vnd-ms-office:before,
+.elfinder-cwd-icon-vnd-ms-word:before,
+.elfinder-cwd-icon-vnd-ms-word-document-macroEnabled-12:before,
+.elfinder-cwd-icon-vnd-ms-word-template-macroEnabled-12:before,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-wordprocessingml-document:before,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-wordprocessingml-template:before {
+    background-color: #2b569a
+}
+
+/* Excel */
+.elfinder-cwd-icon-ms-excel:before,
+.elfinder-cwd-icon-vnd-ms-excel:before,
+.elfinder-cwd-icon-vnd-ms-excel-addin-macroEnabled-12:before,
+.elfinder-cwd-icon-vnd-ms-excel-sheet-binary-macroEnabled-12:before,
+.elfinder-cwd-icon-vnd-ms-excel-sheet-macroEnabled-12:before,
+.elfinder-cwd-icon-vnd-ms-excel-template-macroEnabled-12:before,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-spreadsheetml-sheet:before,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-spreadsheetml-template:before {
+    background-color: #107b10
+}
+
+/* Power point */
+.elfinder-cwd-icon-vnd-ms-powerpoint:before,
+.elfinder-cwd-icon-vnd-ms-powerpoint-addin-macroEnabled-12:before,
+.elfinder-cwd-icon-vnd-ms-powerpoint-presentation-macroEnabled-12:before,
+.elfinder-cwd-icon-vnd-ms-powerpoint-slide-macroEnabled-12:before,
+.elfinder-cwd-icon-vnd-ms-powerpoint-slideshow-macroEnabled-12:before,
+.elfinder-cwd-icon-vnd-ms-powerpoint-template-macroEnabled-12:before,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-presentationml-presentation:before,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-presentationml-slide:before,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-presentationml-slideshow:before,
+.elfinder-cwd-icon-vnd-openxmlformats-officedocument-presentationml-template:before {
+    background-color: #d24625
+}
+
+/* open office (Libreoffice) */
+.elfinder-cwd-icon-vnd-oasis-opendocument-chart:before,
+.elfinder-cwd-icon-vnd-oasis-opendocument-database:before,
+.elfinder-cwd-icon-vnd-oasis-opendocument-formula:before,
+.elfinder-cwd-icon-vnd-oasis-opendocument-graphics:before,
+.elfinder-cwd-icon-vnd-oasis-opendocument-graphics-template:before,
+.elfinder-cwd-icon-vnd-oasis-opendocument-image:before,
+.elfinder-cwd-icon-vnd-oasis-opendocument-presentation:before,
+.elfinder-cwd-icon-vnd-oasis-opendocument-presentation-template:before,
+.elfinder-cwd-icon-vnd-oasis-opendocument-spreadsheet:before,
+.elfinder-cwd-icon-vnd-oasis-opendocument-spreadsheet-template:before,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text:before,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text-master:before,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text-template:before,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text-web:before,
+.elfinder-cwd-icon-vnd-openofficeorg-extension:before {
+    background-color: #00a500
+}
+
 /* list view*/
 .elfinder-cwd table thead td.ui-state-hover {
     background: #ddd;
