@@ -2063,7 +2063,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					setTextMimes = function() {
 						self.textMimes = {};
 						$.each(self.res('mimes', 'text'), function() {
-							self.textMimes[this] = true;
+							self.textMimes[this.toLowerCase()] = true;
 						});
 					},
 					actionTarget;
@@ -8206,7 +8206,7 @@ elFinder.prototype = {
 	 * @return Boolean
 	 */
 	mimeIsText : function(mime) {
-		return (this.textMimes[mime] || (mime.indexOf('text/') === 0 && mime.substr(5, 3) !== 'rtf'))? true : false;
+		return (this.textMimes[mime.toLowerCase()] || (mime.indexOf('text/') === 0 && mime.substr(5, 3) !== 'rtf'))? true : false;
 	},
 	
 	/**
