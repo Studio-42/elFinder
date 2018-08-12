@@ -4981,8 +4981,11 @@ abstract class elFinderVolumeDriver {
 				}
 			}
 			return $this->imgLib
-				&& ($type === 'image')
-				&& ($this->imgLib == 'gd' ? in_array($stat['mime'], array('image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp')) : true);
+				&& (
+					($type === 'image' && ($this->imgLib === 'gd' ? in_array($stat['mime'], array('image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp')) : true))
+					 ||
+					($this->imgLib !== 'gd' && in_array($stat['mime'], array('application/postscript', 'application/pdf')))
+				);
 		}
 		return false;
 	}
@@ -5067,7 +5070,7 @@ abstract class elFinderVolumeDriver {
 		
 		if ($this->imgLib === 'imagick') {
 			try {
-				$imagickTest = new imagick($tmb);
+				$imagickTest = new imagick($tmb.'[0]');
 				$imagickTest->clear();
 				$imagickTest = true;
 			} catch (Exception $e) {
@@ -5084,7 +5087,10 @@ abstract class elFinderVolumeDriver {
 				try {
 					$imagick = new imagick();
 					$imagick->setBackgroundColor(new ImagickPixel($bgcolor));
-					$imagick->readImage($this->getExtentionByMime($stat['mime'], ':') . $tmb);
+					$imagick->readImage($this->getExtentionByMime($stat['mime'], ':') . $tmb . '[0]');
+					try {
+						$imagick->trimImage(0);
+					} catch (Exception $e) {}
 					$imagick->setImageFormat('png');
 					$imagick->writeImage($tmb);
 					$imagick->clear();
@@ -5092,6 +5098,15 @@ abstract class elFinderVolumeDriver {
 						$result = true;
 					}
 				} catch (Exception $e) {}
+			} else if ($this->imgLib === 'convert') {
+				$convParams = $this->imageMagickConvertPrepare($tmb, 'png', 100, array(), $stat['mime']);
+				$cmd = sprintf('%s -colorspace sRGB -trim %s %s', ELFINDER_CONVERT_PATH, $convParams['quotedPath'], $convParams['quotedDstPath']);
+				$result = false;
+				if ($this->procExec($cmd) === 0) {
+					if (($s = getimagesize($tmb)) !== false) {
+						$result = true;
+					}
+				}
 			}
 			if (! $result) {
 				// fallback imgLib to GD
@@ -5965,32 +5980,35 @@ abstract class elFinderVolumeDriver {
 	 * @param  string  $destformat
 	 * @param  int     $jpgQuality
 	 * @param  array   $imageSize
+	 * @param  string  $fileExt
 	 * @return array
 	 */
-	protected function imageMagickConvertPrepare($path, $destformat, $jpgQuality, $imageSize = null) {
+	protected function imageMagickConvertPrepare($path, $destformat, $jpgQuality, $imageSize = null, $mime = null) {
 		if (is_null($imageSize)) {
 			$imageSize = getimagesize($path);
 		}
-		if (!$imageSize) {
-			return array();
+		if (is_null($mime)) {
+			$mime = $this->mimetype($path);
 		}
-		$srcType = $this->getExtentionByMime($imageSize['mime'], ':');
+		$srcType = $this->getExtentionByMime($mime, ':');
 		$ani = false;
-		$cmd = 'identify ' . escapeshellarg($srcType . $path);
-		if ($this->procExec($cmd, $o) === 0) {
-			$ani = preg_split('/(?:\r\n|\n|\r)/', trim($o));
-			if (count($ani) < 2) {
-				$ani = false;
+		if (preg_match('/^(?:gif|png|ico)/', $srcType)) {
+			$cmd = 'identify ' . escapeshellarg($srcType . $path);
+			if ($this->procExec($cmd, $o) === 0) {
+				$ani = preg_split('/(?:\r\n|\n|\r)/', trim($o));
+				if (count($ani) < 2) {
+					$ani = false;
+				}
 			}
 		}
 		$coalesce = $index = $interlace = '';
 		$deconstruct = ' +repage';
+		$index = '[0]';
 		if ($ani) {
 			if (is_null($destformat)) {
 				$coalesce = ' -coalesce -repage 0x0';
 				$deconstruct = ' +repage -deconstruct -layers optimize';
-			} else {
-				$index = '[0]';
+			} else if ($imageSize) {
 				if ($srcType === 'ico:') {
 					foreach($ani as $_i => $_info) {
 						if (preg_match('/ (\d+)x(\d+) /', $_info, $m)) {
@@ -6003,7 +6021,7 @@ abstract class elFinderVolumeDriver {
 				}
 			}
 		}
-		if ($imageSize[2] === IMAGETYPE_JPEG || $imageSize[2] === IMAGETYPE_JPEG2000) {
+		if ($imageSize && ($imageSize[2] === IMAGETYPE_JPEG || $imageSize[2] === IMAGETYPE_JPEG2000)) {
 			$jpgQuality = ' -quality ' . $jpgQuality;
 			if ($this->options['jpgProgressive']) {
 				$interlace = ' -interlace Plane';

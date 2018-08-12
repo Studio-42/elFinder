@@ -651,11 +651,14 @@
 
 .elfinder-cwd-icon-image:after,
 .elfinder-cwd-icon-vnd-adobe-photoshop:after,
-.elfinder-cwd-icon-postscript:after,
 .elfinder-cwd-icon-image,
-.elfinder-cwd-icon-vnd-adobe-photoshop,
-.elfinder-cwd-icon-postscript {
+.elfinder-cwd-icon-vnd-adobe-photoshop {
     background-position: 0 -250px;
+}
+
+.elfinder-cwd-icon-postscript:after,
+.elfinder-cwd-icon-postscript {
+    background-position: 0 -1550px;
 }
 
 .elfinder-cwd-icon-audio:after,
