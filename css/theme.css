@@ -160,7 +160,7 @@
 }
 
 .elfinder-cwd-icon-x-shockwave-flash:before {
-    background-color: #D76C1B
+    background-color: #f43a36
 }
 
 .elfinder-cwd-icon-zip:before,
@@ -245,6 +245,10 @@
 .elfinder-cwd-icon-vnd-oasis-opendocument-text-web:before,
 .elfinder-cwd-icon-vnd-openofficeorg-extension:before {
     background-color: #00a500
+}
+
+.elfinder-cwd-icon-postscript:before {
+    background-color: #ff5722
 }
 
 /* list view*/
