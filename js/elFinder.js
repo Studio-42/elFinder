@@ -2695,14 +2695,14 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * To bind to multiply events at once, separate events names by space
 	 * 
 	 * @param  String  event(s) name(s)
-	 * @param  Object  event handler
+	 * @param  Object  event handler or {done: handler}
 	 * @param  Boolean priority first
 	 * @return elFinder
 	 */
 	this.bind = function(event, callback, priorityFirst) {
 		var i, len;
 		
-		if (typeof(callback) == 'function') {
+		if (callback && (typeof callback === 'function' || typeof callback.done === 'function')) {
 			event = ('' + event).toLowerCase().replace(/^\s+|\s+$/g, '').split(/\s+/);
 			
 			len = event.length;
@@ -2754,7 +2754,9 @@ var elFinder = function(elm, opts, bootCallback) {
 		var type      = evType.toLowerCase(),
 			isopen    = (type === 'open'),
 			dataIsObj = (typeof data === 'object'),
-			handlers  = listeners[type] || [], i, l, jst, event;
+			handlers  = listeners[type] || [],
+			dones     = [],
+			i, l, jst, event;
 		
 		this.debug('event-'+type, data);
 		
@@ -2772,6 +2774,13 @@ var elFinder = function(elm, opts, bootCallback) {
 					// probably un-binded this handler
 					continue;
 				}
+
+				// handler is $.Deferred(), call all functions upon completion
+				if (handlers[i].done) {
+					dones.push(handlers[i].done);
+					continue;
+				}
+				
 				// set `event.data` only callback has argument
 				if (handlers[i].length) {
 					if (!allowModify) {
@@ -2788,8 +2797,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 
 				try {
-					if (handlers[i].call(event, event, this) === false 
-					|| event.isDefaultPrevented()) {
+					if (handlers[i].call(event, event, this) === false || event.isDefaultPrevented()) {
 						this.debug('event-stoped', event.type);
 						break;
 					}
@@ -2799,6 +2807,20 @@ var elFinder = function(elm, opts, bootCallback) {
 				
 			}
 			
+			// call done functions
+			if (l = dones.length) {
+				for (i = 0; i < l; i++) {
+					try {
+						if (dones[i].call(event, event, this) === false || event.isDefaultPrevented()) {
+							this.debug('event-stoped', event.type + '(done)');
+							break;
+						}
+					} catch (ex) {
+						window.console && window.console.log && window.console.log(ex);
+					}
+				}
+			}
+
 			if (this.toUnbindEvents[type] && this.toUnbindEvents[type].length) {
 				$.each(this.toUnbindEvents[type], function(i, v) {
 					self.unbind(v.type, v.callback);
@@ -7043,8 +7065,11 @@ elFinder.prototype = {
 					type: event,
 					callback: h
 				});
-				return callback.apply(this, arguments);
+				return (callback.done? callback.done : callback).apply(this, arguments);
 			};
+		if (callback.done) {
+			h = {done: h};
+		}
 		return this.bind(event, h, priorityFirst);
 	},
 	

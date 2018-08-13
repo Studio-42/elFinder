@@ -1028,6 +1028,25 @@ elFinder.prototype.commands.edit = function() {
 					}
 				}
 			}
+		})
+		.bind('canMakeEmptyFile', function(e) {
+			if (e.data && e.data.resetTexts) {
+				var defs = fm.arrayFlip(self.options.makeTextMimes || ['text/plain']),
+					hides = fm.storage('mkfileHides') || {};
+
+				$.each((fm.storage('mkfileTextMimes') || {}), function(mime, type) {
+					if (!defs[mime]) {
+						delete fm.mimesCanMakeEmpty[mime];
+						delete hides[mime];
+					}
+				});
+				fm.storage('mkfileTextMimes', null);
+				if (Object.keys(hides).length) {
+					fm.storage('mkfileHides', hides);
+				} else {
+					fm.storage('mkfileHides', null);
+				}
+			}
 		});
 	};
 	

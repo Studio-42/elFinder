@@ -186,6 +186,8 @@ elFinder.prototype.commands.preference = function() {
 				var hides = fm.storage('mkfileHides') || {},
 					getTag = function() {
 						var tags = [];
+						// re-assign hides
+						hides = fm.storage('mkfileHides') || {};
 						$.each(fm.mimesCanMakeEmpty, function(mime, type) {
 							var name = fm.getCommand('mkfile').getTypeName(mime, type);
 							tags.push('<span class="elfinder-preference-column-item" title="'+fm.escape(name)+'"><label><input type="checkbox" value="'+mime+'" '+(hides[mime]? '' : 'checked')+'/>'+type+'</label></span>');
@@ -246,17 +248,20 @@ elFinder.prototype.commands.preference = function() {
 									uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
 								}
 							});
+						}),
+						$('<button class="ui-button"/>').html(fm.i18n('reset')).on('click', function() {
+							fm.one('canMakeEmptyFile', {done: function() {
+								elm.empty().append(getTag());
+							}});
+							fm.trigger('canMakeEmptyFile', {resetTexts: true});
 						})
 					),
 					tm;
-				fm.bind('canMakeEmptyFile', function(e) {
+				fm.bind('canMakeEmptyFile', {done: function(e) {
 					if (e.data && e.data.mimes && e.data.mimes.length) {
-						tm && clearTimeout(tm);
-						tm = setTimeout(function() {
-							elm.empty().append(getTag());
-						}, 100);
+						elm.empty().append(getTag());
 					}
-				});
+				}});
 				return $('<div/>').append(elm, add);
 			})());
 
