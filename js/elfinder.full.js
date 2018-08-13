@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: a2a1089) (2018-08-12)
+ * Version 2.1.40 (2.1-src Nightly: afe815e) (2018-08-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -2726,14 +2726,14 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * To bind to multiply events at once, separate events names by space
 	 * 
 	 * @param  String  event(s) name(s)
-	 * @param  Object  event handler
+	 * @param  Object  event handler or {done: handler}
 	 * @param  Boolean priority first
 	 * @return elFinder
 	 */
 	this.bind = function(event, callback, priorityFirst) {
 		var i, len;
 		
-		if (typeof(callback) == 'function') {
+		if (callback && (typeof callback === 'function' || typeof callback.done === 'function')) {
 			event = ('' + event).toLowerCase().replace(/^\s+|\s+$/g, '').split(/\s+/);
 			
 			len = event.length;
@@ -2785,7 +2785,9 @@ var elFinder = function(elm, opts, bootCallback) {
 		var type      = evType.toLowerCase(),
 			isopen    = (type === 'open'),
 			dataIsObj = (typeof data === 'object'),
-			handlers  = listeners[type] || [], i, l, jst, event;
+			handlers  = listeners[type] || [],
+			dones     = [],
+			i, l, jst, event;
 		
 		this.debug('event-'+type, data);
 		
@@ -2803,6 +2805,13 @@ var elFinder = function(elm, opts, bootCallback) {
 					// probably un-binded this handler
 					continue;
 				}
+
+				// handler is $.Deferred(), call all functions upon completion
+				if (handlers[i].done) {
+					dones.push(handlers[i].done);
+					continue;
+				}
+				
 				// set `event.data` only callback has argument
 				if (handlers[i].length) {
 					if (!allowModify) {
@@ -2819,8 +2828,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 
 				try {
-					if (handlers[i].call(event, event, this) === false 
-					|| event.isDefaultPrevented()) {
+					if (handlers[i].call(event, event, this) === false || event.isDefaultPrevented()) {
 						this.debug('event-stoped', event.type);
 						break;
 					}
@@ -2830,6 +2838,20 @@ var elFinder = function(elm, opts, bootCallback) {
 				
 			}
 			
+			// call done functions
+			if (l = dones.length) {
+				for (i = 0; i < l; i++) {
+					try {
+						if (dones[i].call(event, event, this) === false || event.isDefaultPrevented()) {
+							this.debug('event-stoped', event.type + '(done)');
+							break;
+						}
+					} catch (ex) {
+						window.console && window.console.log && window.console.log(ex);
+					}
+				}
+			}
+
 			if (this.toUnbindEvents[type] && this.toUnbindEvents[type].length) {
 				$.each(this.toUnbindEvents[type], function(i, v) {
 					self.unbind(v.type, v.callback);
@@ -7074,8 +7096,11 @@ elFinder.prototype = {
 					type: event,
 					callback: h
 				});
-				return callback.apply(this, arguments);
+				return (callback.done? callback.done : callback).apply(this, arguments);
 			};
+		if (callback.done) {
+			h = {done: h};
+		}
 		return this.bind(event, h, priorityFirst);
 	},
 	
@@ -9635,7 +9660,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.40 (2.1-src Nightly: a2a1089)';
+elFinder.prototype.version = '2.1.40 (2.1-src Nightly: afe815e)';
 
 
 
@@ -23369,6 +23394,25 @@ elFinder.prototype.commands.edit = function() {
 					}
 				}
 			}
+		})
+		.bind('canMakeEmptyFile', function(e) {
+			if (e.data && e.data.resetTexts) {
+				var defs = fm.arrayFlip(self.options.makeTextMimes || ['text/plain']),
+					hides = fm.storage('mkfileHides') || {};
+
+				$.each((fm.storage('mkfileTextMimes') || {}), function(mime, type) {
+					if (!defs[mime]) {
+						delete fm.mimesCanMakeEmpty[mime];
+						delete hides[mime];
+					}
+				});
+				fm.storage('mkfileTextMimes', null);
+				if (Object.keys(hides).length) {
+					fm.storage('mkfileHides', hides);
+				} else {
+					fm.storage('mkfileHides', null);
+				}
+			}
 		});
 	};
 	
@@ -26477,6 +26521,8 @@ elFinder.prototype.commands.preference = function() {
 				var hides = fm.storage('mkfileHides') || {},
 					getTag = function() {
 						var tags = [];
+						// re-assign hides
+						hides = fm.storage('mkfileHides') || {};
 						$.each(fm.mimesCanMakeEmpty, function(mime, type) {
 							var name = fm.getCommand('mkfile').getTypeName(mime, type);
 							tags.push('<span class="elfinder-preference-column-item" title="'+fm.escape(name)+'"><label><input type="checkbox" value="'+mime+'" '+(hides[mime]? '' : 'checked')+'/>'+type+'</label></span>');
@@ -26537,17 +26583,20 @@ elFinder.prototype.commands.preference = function() {
 									uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
 								}
 							});
+						}),
+						$('<button class="ui-button"/>').html(fm.i18n('reset')).on('click', function() {
+							fm.one('canMakeEmptyFile', {done: function() {
+								elm.empty().append(getTag());
+							}});
+							fm.trigger('canMakeEmptyFile', {resetTexts: true});
 						})
 					),
 					tm;
-				fm.bind('canMakeEmptyFile', function(e) {
+				fm.bind('canMakeEmptyFile', {done: function(e) {
 					if (e.data && e.data.mimes && e.data.mimes.length) {
-						tm && clearTimeout(tm);
-						tm = setTimeout(function() {
-							elm.empty().append(getTag());
-						}, 100);
+						elm.empty().append(getTag());
 					}
-				});
+				}});
 				return $('<div/>').append(elm, add);
 			})());
 
