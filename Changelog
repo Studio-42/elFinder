@@ -1,3 +1,23 @@
+2018-08-xx  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.41):
+		- [ui:cwd] Fixed #2583 `uiOptions.cwd.oldSchool` is no longer working
+		- [VD:abstract] change type from `protected` to `public` of `mimeTypeNormalize()`
+		- [js:core] Fixed #2591 show the toast message according with the response of connector
+		- [cmd:edit] Fixed #2592 to make ediable as text that the media file composed of text
+		- [cmd:undo/redo] Fixed #2596 bug of not updating status when elFinder into enable
+		- [cmd:hide] Fixed #2595 make to be able to hide selected items as personal setting
+		- [cmd:edit] Fixed #2565 Integrate the TUI Image Editor
+		- [cmd:quicklook] Fixed #2599 add controls option of HTML5 media , PDF preview
+		- [cmd:edit] set integrate of the "TUI Image Editor"
+		- [php:core] Fixed #2603 options path settings convert to absolute path
+		- [cmd:edit] Fixed #2569 add the photopea.com editor integration
+		- [cmd:upload] Fixed #2607 hash@undefined on select folder upload
+		- [cmd:mkfile] Fixed #2609 allow creation of various file types
+		- [img] Fixed #2503 make icons-big.svg and use it
+		- And some minor bug fixes
+
+
 2018-07-14  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.40):

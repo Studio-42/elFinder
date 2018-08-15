@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: 4e2b0ec) (2018-08-13)
+ * Version 2.1.40 (2.1-src Nightly: e929d13) (2018-08-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9660,7 +9660,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 4e2b0ec)';
+elFinder.prototype.version = '2.1.40 (2.1-src Nightly: e929d13)';
 
 
 
@@ -10089,17 +10089,17 @@ elFinder.prototype._options = {
 	 */
 	cdns : {
 		// for editor etc.
-		ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.3.3',
-		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.39.0',
+		ace        : '//cdnjs.cloudflare.com/ajax/libs/ace/1.4.1',
+		codemirror : '//cdnjs.cloudflare.com/ajax/libs/codemirror/5.39.2',
 		ckeditor   : '//cdnjs.cloudflare.com/ajax/libs/ckeditor/4.10.0',
-		ckeditor5  : '//cdn.ckeditor.com/ckeditor5/10.1.0',
-		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.8.0',
+		ckeditor5  : '//cdn.ckeditor.com/ckeditor5/11.0.1',
+		tinymce    : '//cdnjs.cloudflare.com/ajax/libs/tinymce/4.8.2',
 		simplemde  : '//cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		fabric16   : '//cdnjs.cloudflare.com/ajax/libs/fabric.js/1.6.7',
 		tui        : '//uicdn.toast.com',
 		// for quicklook etc.
 		hls        : '//cdnjs.cloudflare.com/ajax/libs/hls.js/0.10.1/hls.min.js',
-		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.8.0/dash.all.min.js',
+		dash       : '//cdnjs.cloudflare.com/ajax/libs/dashjs/2.9.0/dash.all.min.js',
 		flv        : '//cdnjs.cloudflare.com/ajax/libs/flv.js/1.4.2/flv.min.js',
 		prettify   : '//cdn.rawgit.com/google/code-prettify/453bd5f51e61245339b738b1bbdd42d7848722ba/loader/run_prettify.js',
 		psd        : '//cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js',
