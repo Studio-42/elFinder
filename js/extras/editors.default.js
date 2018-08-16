@@ -217,7 +217,7 @@
 						.attr('id', node.attr('id')+'iframe')
 						.attr('src', opts.src)
 						.css(opts.css)
-						.on('load', function() {
+						.one('load', function() {
 							errtm && clearTimeout(errtm);
 							setTimeout(function() {
 								if (container.is(':hidden')) {
