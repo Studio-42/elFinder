@@ -217,7 +217,7 @@
 						.attr('id', node.attr('id')+'iframe')
 						.attr('src', opts.src)
 						.css(opts.css)
-						.on('load', function() {
+						.one('load', function() {
 							errtm && clearTimeout(errtm);
 							setTimeout(function() {
 								if (container.is(':hidden')) {
@@ -588,7 +588,7 @@
 			},
 			// Initialization of editing node (this: this editors HTML node)
 			init : function(id, file, url, fm) {
-				initImgTag.call(this, id, file, fm.convAbsUrl(url), fm);
+				initImgTag.call(this, id, file, file.size > 0? fm.convAbsUrl(url) : '', fm);
 			},
 			// Get data uri scheme (this: this editors HTML node)
 			getContent : function() {
@@ -625,7 +625,7 @@
 			},
 			// Initialization of editing node (this: this editors HTML node)
 			init : function(id, file, url, fm) {
-				initImgTag.call(this, id, file, fm.convAbsUrl(url), fm);
+				initImgTag.call(this, id, file, file.size > 0? fm.convAbsUrl(url) : '', fm);
 			},
 			// Get data uri scheme (this: this editors HTML node)
 			getContent : function() {
