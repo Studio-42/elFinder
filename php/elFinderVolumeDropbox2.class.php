@@ -473,14 +473,14 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
      **/
     protected function init()
     {
-        if (empty($options['app_key'])) {
+        if (empty($this->options['app_key'])) {
             if (defined('ELFINDER_DROPBOX_APPKEY') && ELFINDER_DROPBOX_APPKEY) {
                 $this->options['app_key'] = ELFINDER_DROPBOX_APPKEY;
             } else {
                 return $this->setError('Required option "app_key" is undefined.');
             }
         }
-        if (empty($options['app_secret'])) {
+        if (empty($this->options['app_secret'])) {
             if (defined('ELFINDER_DROPBOX_APPSECRET') && ELFINDER_DROPBOX_APPSECRET) {
                 $this->options['app_secret'] = ELFINDER_DROPBOX_APPSECRET;
             } else {
