@@ -464,8 +464,8 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
     /*********************************************************************/
 
     /**
-     * Prepare FTP connection
-     * Connect to remote server and check if credentials are correct, if so, store the connection id in $ftp_conn.
+     * Prepare Dropbox connection
+     * Connect to remote server and check if credentials are correct, if so, store the connection id in $this->service.
      *
      * @return bool
      *
