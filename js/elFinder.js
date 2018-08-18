@@ -3161,7 +3161,8 @@ var elFinder = function(elm, opts, bootCallback) {
 			prevEnabled = enabled;
 			enabled = false;
 		}
-		this.disable().trigger('hide');
+		this.disable();
+		this.trigger('hide');
 		node.hide();
 	};
 	
