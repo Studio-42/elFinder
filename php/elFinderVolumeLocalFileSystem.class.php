@@ -67,6 +67,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		$this->options['detectDirIcon'] = '';         // file name that is detected as a folder icon e.g. '.diricon.png'
 		$this->options['keepTimestamp'] = array('copy', 'move'); // keep timestamp at inner filesystem allowed 'copy', 'move' and 'upload'
 		$this->options['substituteImg'] = true;       // support substitute image with dim command
+		$this->options['statCorrector'] = null;       // callable to correct stat data `function(&$stat, $path, $statOwner, $volumeDriveInstance){}`
 	}
 	
 	/*********************************************************************/
@@ -117,7 +118,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		if (is_null($this->options['syncCheckFunc'])) {
 			$this->options['syncCheckFunc'] = array($this, 'localFileSystemInotify');
 		}
-		
+		// check 'statCorrector'
+		if (empty($this->options['statCorrector']) || !is_callable($this->options['statCorrector'])) {
+			$this->options['statCorrector'] = null;
+		}
+
 		return true;
 	}
 	
@@ -519,6 +524,10 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			}
 		}
 		
+		if ($this->options['statCorrector']) {
+			call_user_func_array($this->options['statCorrector'], array(&$stat, $path, $this->statOwner, $this));
+		}
+
 		return $stat;
 	}
 	
@@ -738,6 +747,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 						$stat['size'] = $dir ? 0 : $size;
 					}
 					
+					if ($this->options['statCorrector']) {
+						call_user_func_array($this->options['statCorrector'], array(&$stat, $fpath, $this->statOwner, $this));
+					}
 				}
 				
 				$cache[] = array($fpath, $stat);

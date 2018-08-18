@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.40 (2.1-src Nightly: bf28df4) (2018-08-16)
+ * Version 2.1.40 (2.1-src Nightly: 749f746) (2018-08-18)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -3192,7 +3192,8 @@ var elFinder = function(elm, opts, bootCallback) {
 			prevEnabled = enabled;
 			enabled = false;
 		}
-		this.disable().trigger('hide');
+		this.disable();
+		this.trigger('hide');
 		node.hide();
 	};
 	
@@ -9660,7 +9661,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.40 (2.1-src Nightly: bf28df4)';
+elFinder.prototype.version = '2.1.40 (2.1-src Nightly: 749f746)';
 
 
 
@@ -10334,6 +10335,8 @@ elFinder.prototype._options = {
 			folders  : false,
 			// action after callback (""/"close"/"destroy")
 			oncomplete : '',
+			// action when callback is fail (""/"close"/"destroy")
+			onerror : '',
 			// get path before callback call
 			getPath    : true, 
 			// get image sizes before callback call
@@ -12295,7 +12298,7 @@ $.fn.dialogelfinder = function(opts) {
 	});
 	
 	if (opts == 'open') {
-		node = $(this),
+		var node = $(this),
 			pos  = node.data(position) || {
 				top  : parseInt($(document).scrollTop() + ($(window).height() < node.height() ? 2 : ($(window).height() - node.height())/2)),
 				left : parseInt($(document).scrollLeft() + ($(window).width() < node.width()  ? 2 : ($(window).width()  - node.width())/2))
@@ -23967,6 +23970,15 @@ elFinder.prototype.commands.fullscreen = function() {
 							} else if (opts.oncomplete == 'destroy') {
 								fm.destroy();
 							}
+						},
+						fail = function(error) {
+							if (opts.onerror == 'close') {
+								fm.hide();
+							} else if (opts.onerror == 'destroy') {
+								fm.destroy();
+							} else {
+								error && fm.error(error);
+							}
 						};
 					
 					fm.trigger('getfile', {files : data});
@@ -23974,15 +23986,12 @@ elFinder.prototype.commands.fullscreen = function() {
 					try {
 						res = self.callback(data, fm);
 					} catch(e) {
-						fm.error(['Error in `getFileCallback`.', e.message]);
+						fail(['Error in `getFileCallback`.', e.message]);
 						return;
 					}
 					
 					if (typeof res === 'object' && typeof res.done === 'function') {
-						res.done(done)
-						.fail(function(error) {
-							error && fm.error(error);
-						});
+						res.done(done).fail(fail);
 					} else {
 						done();
 					}
