@@ -46,6 +46,15 @@
 							} else if (opts.oncomplete == 'destroy') {
 								fm.destroy();
 							}
+						},
+						fail = function(error) {
+							if (opts.onerror == 'close') {
+								fm.hide();
+							} else if (opts.onerror == 'destroy') {
+								fm.destroy();
+							} else {
+								error && fm.error(error);
+							}
 						};
 					
 					fm.trigger('getfile', {files : data});
@@ -53,15 +62,12 @@
 					try {
 						res = self.callback(data, fm);
 					} catch(e) {
-						fm.error(['Error in `getFileCallback`.', e.message]);
+						fail(['Error in `getFileCallback`.', e.message]);
 						return;
 					}
 					
 					if (typeof res === 'object' && typeof res.done === 'function') {
-						res.done(done)
-						.fail(function(error) {
-							error && fm.error(error);
-						});
+						res.done(done).fail(fail);
 					} else {
 						done();
 					}

@@ -257,6 +257,8 @@ elFinder.prototype._options = {
 			folders  : false,
 			// action after callback (""/"close"/"destroy")
 			oncomplete : '',
+			// action when callback is fail (""/"close"/"destroy")
+			onerror : '',
 			// get path before callback call
 			getPath    : true, 
 			// get image sizes before callback call
