@@ -1,4 +1,4 @@
-2018-08-xx  Naoki Sawada  <hypweb+elfinder@gmail.com>
+2018-08-19  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.41):
 		- [ui:cwd] Fixed #2583 `uiOptions.cwd.oldSchool` is no longer working
@@ -15,6 +15,9 @@
 		- [cmd:upload] Fixed #2607 hash@undefined on select folder upload
 		- [cmd:mkfile] Fixed #2609 allow creation of various file types
 		- [img] Fixed #2503 make icons-big.svg and use it
+		- [VD:Dropbox2] Fixed options definition test (PR #2619)
+		- [js:core] Fixed #2616 can't close dialogelfinder if can't connect to the connector
+		- [php:plugin:Watermark] Fixed #2621 add option `ratio`, `position`, `marginX` and `marginY`
 		- And some minor bug fixes
 
 
