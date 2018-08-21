@@ -8180,6 +8180,8 @@ elFinder.prototype = {
 		mime = mime.split('/');
 		if (isText) {
 			mime[0] += ' ' + prefix + 'text';
+		} else if (mime[1] && mime[1].match(/\+xml$/)) {
+			mime[0] += ' ' + prefix + 'xml';
 		}
 		
 		return prefix + mime[0] + (mime[1] ? ' ' + prefix + mime[1].replace(/(\.|\+)/g, '-') : '');
@@ -8232,7 +8234,7 @@ elFinder.prototype = {
 	 * @return Boolean
 	 */
 	mimeIsText : function(mime) {
-		return (this.textMimes[mime.toLowerCase()] || (mime.indexOf('text/') === 0 && mime.substr(5, 3) !== 'rtf'))? true : false;
+		return (this.textMimes[mime.toLowerCase()] || (mime.indexOf('text/') === 0 && mime.substr(5, 3) !== 'rtf') || mime.match(/^application\/.+\+xml$/))? true : false;
 	},
 	
 	/**
