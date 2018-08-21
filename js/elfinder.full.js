@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.41 (2018-08-19)
+ * Version 2.1.41 (2.1-src Nightly: 6eac5a7) (2018-08-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8211,6 +8211,8 @@ elFinder.prototype = {
 		mime = mime.split('/');
 		if (isText) {
 			mime[0] += ' ' + prefix + 'text';
+		} else if (mime[1] && mime[1].match(/\+xml$/)) {
+			mime[0] += ' ' + prefix + 'xml';
 		}
 		
 		return prefix + mime[0] + (mime[1] ? ' ' + prefix + mime[1].replace(/(\.|\+)/g, '-') : '');
@@ -8263,7 +8265,7 @@ elFinder.prototype = {
 	 * @return Boolean
 	 */
 	mimeIsText : function(mime) {
-		return (this.textMimes[mime.toLowerCase()] || (mime.indexOf('text/') === 0 && mime.substr(5, 3) !== 'rtf'))? true : false;
+		return (this.textMimes[mime.toLowerCase()] || (mime.indexOf('text/') === 0 && mime.substr(5, 3) !== 'rtf') || mime.match(/^application\/.+\+xml$/))? true : false;
 	},
 	
 	/**
@@ -9661,7 +9663,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.41';
+elFinder.prototype.version = '2.1.41 (2.1-src Nightly: 6eac5a7)';
 
 
 
@@ -18756,10 +18758,9 @@ $.fn.elfindersearchbutton = function(cmd) {
 				})
 				.on('keydown', function(e) {
 					e.stopPropagation();
-					
-					e.keyCode == $.ui.keyCode.ENTER && search();
-					
-					if (e.keyCode == $.ui.keyCode.ESCAPE) {
+					if (e.keyCode === $.ui.keyCode.ENTER) {
+						search();
+					} else if (e.keyCode === $.ui.keyCode.ESCAPE) {
 						e.preventDefault();
 						abort();
 					}

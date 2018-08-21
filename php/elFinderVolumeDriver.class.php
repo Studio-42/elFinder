@@ -297,7 +297,6 @@ abstract class elFinderVolumeDriver {
 			'm3u8:text/plain'              => 'application/x-mpegURL',
 			'mpd:text/plain'               => 'application/dash+xml',
 			'mpd:application/xml'          => 'application/dash+xml',
-			'xml:application/xml'          => 'text/xml',
 			'*:application/x-dosexec'      => 'application/x-executable',
 			'doc:application/vnd.ms-office'=> 'application/msword',
 			'xls:application/vnd.ms-office'=> 'application/vnd.ms-excel',
@@ -4327,7 +4326,7 @@ abstract class elFinderVolumeDriver {
 			if ($type) {
 				$type = explode(';', $type);
 				$type = trim($type[0]);
-				if ($ext && preg_match('~^application/(?:octet-stream|(?:x-)?zip)~', $type)) {
+				if ($ext && preg_match('~^application/(?:octet-stream|(?:x-)?zip|xml)$~', $type)) {
 					// load default MIME table file "mime.types"
 					if (!elFinderVolumeDriver::$mimetypesLoaded) {
 						elFinderVolumeDriver::loadMimeTypes();
