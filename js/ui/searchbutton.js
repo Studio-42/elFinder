@@ -98,10 +98,9 @@ $.fn.elfindersearchbutton = function(cmd) {
 				})
 				.on('keydown', function(e) {
 					e.stopPropagation();
-					
-					e.keyCode == $.ui.keyCode.ENTER && search();
-					
-					if (e.keyCode == $.ui.keyCode.ESCAPE) {
+					if (e.keyCode === $.ui.keyCode.ENTER) {
+						search();
+					} else if (e.keyCode === $.ui.keyCode.ESCAPE) {
 						e.preventDefault();
 						abort();
 					}
