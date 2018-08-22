@@ -1267,14 +1267,12 @@ elFinder.prototype.commands.quicklook.plugins = [
 			gMaps = (window.google && google.maps);
 			// start load maps
 			loadMap = function(file, node) {
-				var opts = {};
+				var mapsOpts = ql.options.googleMapsOpts.maps;
 				ql.hideinfo();
 				try {
-					new gMaps.KmlLayer(fm.convAbsUrl(fm.url(file.hash)), {
-							suppressInfoWindows: true,
-							preserveViewport: false,
-							map: new gMaps.Map(node.get(0), opts)
-				 		});
+					new gMaps.KmlLayer(fm.convAbsUrl(fm.url(file.hash)), Object.assign({
+						map: new gMaps.Map(node.get(0), mapsOpts)
+					}, ql.options.googleMapsOpts.kml));
 				} catch(e) {
 					fail();
 				}
