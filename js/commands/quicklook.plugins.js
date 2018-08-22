@@ -1257,26 +1257,45 @@ elFinder.prototype.commands.quicklook.plugins = [
 				'application/vnd.google-earth.kmz' : true
 			},
 			preview = ql.preview,
-			gMaps   = (window.google && google.maps),
-			loadMap = function(file, node) {
-				var opts = {};
-				ql.hideinfo();
-				new gMaps.KmlLayer(fm.convAbsUrl(fm.url(file.hash)), {
-						suppressInfoWindows: true,
-						preserveViewport: false,
-						map: new gMaps.Map(node.get(0), opts)
-			 		});
-			}, mapScr;
+			gMaps, loadMap, wGmfail, fail, mapScr;
 
 		if (ql.options.googleMapsApiKey) {
 			ql.addIntegration({
 				title: 'Google Maps',
 				link: 'https://www.google.com/intl/' + fm.lang.replace('_', '-') + '/help/terms_maps.html'
 			});
-			mapScr = 'https://maps.googleapis.com/maps/api/js?key=' + ql.options.googleMapApiKey;
+			gMaps = (window.google && google.maps);
+			// start load maps
+			loadMap = function(file, node) {
+				var opts = {};
+				ql.hideinfo();
+				try {
+					new gMaps.KmlLayer(fm.convAbsUrl(fm.url(file.hash)), {
+							suppressInfoWindows: true,
+							preserveViewport: false,
+							map: new gMaps.Map(node.get(0), opts)
+				 		});
+				} catch(e) {
+					fail();
+				}
+			};
+			// keep stored error handler if exists
+			wGmfail = window.gm_authFailure;
+			// on error function
+			fail = function() {
+				mapScr = null;
+			};
+			// API script url
+			mapScr = 'https://maps.googleapis.com/maps/api/js?key=' + ql.options.googleMapsApiKey;
+			// error handler
+			window.gm_authFailure = function() {
+				fail();
+				wGmfail && wGmfail();
+			};
+
 			preview.on(ql.evUpdate, function(e) {
 				var file = e.file;
-				if (mimes[file.mime.toLowerCase()]) {
+				if (mapScr && mimes[file.mime.toLowerCase()]) {
 					var win     = ql.window,
 						loading, url, node;
 				
