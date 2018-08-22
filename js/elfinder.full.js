@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.41 (2.1-src Nightly: d1b78e6) (2018-08-22)
+ * Version 2.1.41 (2.1-src Nightly: c9b15a7) (2018-08-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9663,7 +9663,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.41 (2.1-src Nightly: d1b78e6)';
+elFinder.prototype.version = '2.1.41 (2.1-src Nightly: c9b15a7)';
 
 
 
@@ -28987,26 +28987,45 @@ elFinder.prototype.commands.quicklook.plugins = [
 				'application/vnd.google-earth.kmz' : true
 			},
 			preview = ql.preview,
-			gMaps   = (window.google && google.maps),
-			loadMap = function(file, node) {
-				var opts = {};
-				ql.hideinfo();
-				new gMaps.KmlLayer(fm.convAbsUrl(fm.url(file.hash)), {
-						suppressInfoWindows: true,
-						preserveViewport: false,
-						map: new gMaps.Map(node.get(0), opts)
-			 		});
-			}, mapScr;
+			gMaps, loadMap, wGmfail, fail, mapScr;
 
 		if (ql.options.googleMapsApiKey) {
 			ql.addIntegration({
 				title: 'Google Maps',
 				link: 'https://www.google.com/intl/' + fm.lang.replace('_', '-') + '/help/terms_maps.html'
 			});
-			mapScr = 'https://maps.googleapis.com/maps/api/js?key=' + ql.options.googleMapApiKey;
+			gMaps = (window.google && google.maps);
+			// start load maps
+			loadMap = function(file, node) {
+				var opts = {};
+				ql.hideinfo();
+				try {
+					new gMaps.KmlLayer(fm.convAbsUrl(fm.url(file.hash)), {
+							suppressInfoWindows: true,
+							preserveViewport: false,
+							map: new gMaps.Map(node.get(0), opts)
+				 		});
+				} catch(e) {
+					fail();
+				}
+			};
+			// keep stored error handler if exists
+			wGmfail = window.gm_authFailure;
+			// on error function
+			fail = function() {
+				mapScr = null;
+			};
+			// API script url
+			mapScr = 'https://maps.googleapis.com/maps/api/js?key=' + ql.options.googleMapsApiKey;
+			// error handler
+			window.gm_authFailure = function() {
+				fail();
+				wGmfail && wGmfail();
+			};
+
 			preview.on(ql.evUpdate, function(e) {
 				var file = e.file;
-				if (mimes[file.mime.toLowerCase()]) {
+				if (mapScr && mimes[file.mime.toLowerCase()]) {
 					var win     = ql.window,
 						loading, url, node;
 				
