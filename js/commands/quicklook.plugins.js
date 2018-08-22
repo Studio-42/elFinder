@@ -1273,7 +1273,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				title: 'Google Maps',
 				link: 'https://www.google.com/intl/' + fm.lang.replace('_', '-') + '/help/terms_maps.html'
 			});
-			mapScr = 'https://maps.googleapis.com/maps/api/js?key=' + ql.options.googleMapApiKey;
+			mapScr = 'https://maps.googleapis.com/maps/api/js?key=' + ql.options.googleMapsApiKey;
 			preview.on(ql.evUpdate, function(e) {
 				var file = e.file;
 				if (mimes[file.mime.toLowerCase()]) {
