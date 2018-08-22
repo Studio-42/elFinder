@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.41 (2.1-src Nightly: c9b15a7) (2018-08-22)
+ * Version 2.1.41 (2.1-src Nightly: 77008fc) (2018-08-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9663,7 +9663,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.41 (2.1-src Nightly: c9b15a7)';
+elFinder.prototype.version = '2.1.41 (2.1-src Nightly: 77008fc)';
 
 
 
@@ -10395,6 +10395,14 @@ elFinder.prototype._options = {
 			dockAutoplay : false,
 			// Google Maps API key (Require Maps JavaScript API)
 			googleMapsApiKey : '',
+			// Google Maps API Options
+			googleMapsOpts : {
+				maps : {},
+				kml : {
+					suppressInfoWindows : false,
+					preserveViewport : false
+				}
+			},
 			// MIME types to CAD-Files and 3D-Models online viewer on sharecad.org
 			// Example ['image/vnd.dwg', 'image/vnd.dxf', 'model/vnd.dwf', 'application/vnd.hp-hpgl', 'application/plt', 'application/step', 'model/iges', 'application/vnd.ms-pki.stl', 'application/sat', 'image/cgm', 'application/x-msmetafile']
 			sharecadMimes : [],
@@ -28997,14 +29005,12 @@ elFinder.prototype.commands.quicklook.plugins = [
 			gMaps = (window.google && google.maps);
 			// start load maps
 			loadMap = function(file, node) {
-				var opts = {};
+				var mapsOpts = ql.options.googleMapsOpts.maps;
 				ql.hideinfo();
 				try {
-					new gMaps.KmlLayer(fm.convAbsUrl(fm.url(file.hash)), {
-							suppressInfoWindows: true,
-							preserveViewport: false,
-							map: new gMaps.Map(node.get(0), opts)
-				 		});
+					new gMaps.KmlLayer(fm.convAbsUrl(fm.url(file.hash)), Object.assign({
+						map: new gMaps.Map(node.get(0), mapsOpts)
+					}, ql.options.googleMapsOpts.kml));
 				} catch(e) {
 					fail();
 				}
