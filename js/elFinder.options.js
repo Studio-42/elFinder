@@ -315,6 +315,14 @@ elFinder.prototype._options = {
 			dockAutoplay : false,
 			// Google Maps API key (Require Maps JavaScript API)
 			googleMapsApiKey : '',
+			// Google Maps API Options
+			googleMapsOpts : {
+				maps : {},
+				kml : {
+					suppressInfoWindows : false,
+					preserveViewport : false
+				}
+			},
 			// MIME types to CAD-Files and 3D-Models online viewer on sharecad.org
 			// Example ['image/vnd.dwg', 'image/vnd.dxf', 'model/vnd.dwf', 'application/vnd.hp-hpgl', 'application/plt', 'application/step', 'model/iges', 'application/vnd.ms-pki.stl', 'application/sat', 'image/cgm', 'application/x-msmetafile']
 			sharecadMimes : [],
