@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-08-07
+ * @version 2018-08-24
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'Tomoaki Yoshida &lt;info@yoshida-studio.jp&gt;, Naoki Sawada &lt;hypweb+elfinder@gmail.com&gt;',
 		language   : 'Japanese',
 		direction  : 'ltr',
-		dateFormat : 'Y/m/d h:i A', // Mar 13, 2012 05:27 PM
-		fancyDateFormat : '$1 h:i A', // will produce smth like: Today 12:25 PM
-		nonameDateFormat : 'ymd-His', // to apply if upload file is noname: 120513172700
+		dateFormat : 'Y/m/d h:i A', // will show like: 2018/08/24 04:37 PM
+		fancyDateFormat : '$1 h:i A', // will show like: 今日 04:37 PM
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 180824-163717
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -115,7 +115,7 @@
 			'errEditorNotFound'    : 'このファイルタイプのエディターがありません。', // from v2.1.25 added 23.5.2017
 			'errServerError'       : 'サーバー側でエラーが発生しました。', // from v2.1.25 added 16.6.2017
 			'errEmpty'             : 'フォルダ"$1"を空にすることができません。', // from v2.1.25 added 22.6.2017
-			
+
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'アーカイブ作成',
 			'cmdback'      : '戻る',
@@ -221,7 +221,7 @@
 			'ntfparents'  : 'パス情報を取得しています', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'アップロード済みファイルを処理中', // from v2.1.17 added 2.11.2016
 			'ntftrash'    : 'ごみ箱に入れています', // from v2.1.24 added 2.5.2017
-			'ntfrestore'  : 'ごみ箱から元に戻しています', // from v2.1.24 added 2.5.2017
+			'ntfrestore'  : 'ごみ箱から元に戻しています', // from v2.1.24 added 3.5.2017
 			'ntfchkdir'   : '宛先フォルダを確認しています', // from v2.1.24 added 3.5.2017
 			'ntfundo'     : '前の操作を取り消して元に戻しています', // from v2.1.27 added 31.07.2017
 			'ntfredo'     : '元に戻した操作をやり直しています', // from v2.1.27 added 31.07.2017
@@ -289,7 +289,7 @@
 			'untitled file.txt' : '新規ファイル.txt', // added 10.11.2015
 			'untitled folder'   : '新規フォルダ',   // added 10.11.2015
 			'Archive'           : '新規アーカイブ',  // from v2.1 added 10.11.2015
-			'untitled file'     : '新規ファイル.$1', // from v2.1.41 added 6.8.2018
+			'untitled file'     : '新規ファイル.$1',  // from v2.1.41 added 6.8.2018
 			'extentionfile'     : '$1 ファイル',     // from v2.1.41 added 6.8.2018
 
 			/********************************** messages **********************************/
@@ -468,7 +468,7 @@
 			'iconSize'        : 'アイコンサイズ (アイコンビュー)', // from v2.1.39 added 7.5.2018
 			'editorMaximized' : 'エディターウィンドウを最大化して開く', // from v2.1.40 added 30.6.2018
 			'editorConvNoApi' : '現在 API による変換は利用できないので、Web サイトで変換を行ってください。', //from v2.1.40 added 8.7.2018
-			'editorConvNeedUpload' : '変換後に変換されたファイルを保存するには、アイテムの URL またはダウンロードしたファイルをアップロードする必要があります。', // from v2.1.40 added 8.7.2018
+			'editorConvNeedUpload' : '変換後に変換されたファイルを保存するには、アイテムの URL またはダウンロードしたファイルをアップロードする必要があります。', //from v2.1.40 added 8.7.2018
 			'convertOn'       : '$1 のサイト上で変換する', // from v2.1.40 added 10.7.2018
 			'integrations'    : '統合', // from v2.1.40 added 11.7.2018
 			'integrationWith' : 'この elFinder は次の外部サービスが統合されています。それらの利用規約、プライバシーポリシーなどをご確認の上、ご利用ください。', // from v2.1.40 added 11.7.2018

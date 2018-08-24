@@ -23,9 +23,9 @@
 		translator : 'Translator name &lt;translator@email.tld&gt;',
 		language   : 'Language of translation in your language',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i', // Mar 13, 2012 05:27 PM
-		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
-		nonameDateFormat : 'ymd-His', // to apply if upload file is noname: 120513172700
+		dateFormat : 'M d, Y h:i A', // will show like: Mar 13, 2012 05:27 PM
+		fancyDateFormat : '$1 h:i A', // will show like: Today 12:25 PM
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 120513-172700
 		messages   : {
 
 			/********************************** errors **********************************/
