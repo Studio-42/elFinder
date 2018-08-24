@@ -25,6 +25,19 @@ elFinder.prototype.i18 = {};
 			$('#glbs').empty();
 			$('#content').empty();
 			$('#step').hide();
+			$('#glbs').on('change', '.direction', function() {
+				$this = $(this);
+				if ($this.val().trim() === 'rtl') {
+					$this.val('rtl');
+				} else {
+					$this.val('ltr');
+				}
+				$('body').css('direction', $this.val());
+			}).on('change keyup', '.dateFormat,.fancyDateFormat,.nonameDateFormat', function(e) {
+				var d = dateFormat($(this).val());
+				$(this).nextAll('.preview').text(d);
+			});
+
 			src = {};
 			keys = {};
 			$.getScript('./'+branch+'/i18n/elfinder.LANG.js', function() {
@@ -64,6 +77,9 @@ elFinder.prototype.i18 = {};
 					.always(function(){
 						$('span.langname').text(lang);
 						$('span.targetb').text(tgt);
+						$.each(src, function(k, v){
+							$('#inp-'+k).val(make.messages[keys[k]])[(make.messages[keys[k]] == src[k])?'addClass':'removeClass']('same');
+						});
 						$.each(glbs, function(k, v){
 							var t = $('#glbs-txt-' + k);
 							var val = make[k].replace(/&lt;/g, '<').replace(/&gt;/g, '>');
@@ -86,9 +102,7 @@ elFinder.prototype.i18 = {};
 							if (k === 'translator') {
 								$('#glbs-' + k).val('').attr('placeholder', slng[k].replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
 							}
-						});
-						$.each(src, function(k, v){
-							$('#inp-'+k).val(make.messages[keys[k]])[(make.messages[keys[k]] == src[k])?'addClass':'removeClass']('same');
+							$('#glbs-' + k).trigger('change');
 						});
 					});
 				});
@@ -134,6 +148,9 @@ elFinder.prototype.i18 = {};
 						}
 						made = made.replace(reg, function(str, p1, p2){return p1+val.replace(/\\(?=')/, '').replace('\\', '\\\\').replace(/'/g, "\\'").replace(/</g, '&lt;').replace(/>/g, '&gt;')+p2;});
 					});
+					made = made.replace(/^(.+ : '(.+)',.+ will show like:).*$/mg, function(str, p1, p2) {
+						return p1 + ' ' + dateFormat(p2);
+					});
 					$.each(src, function(k, v){
 						var reg = new RegExp('(\''+keys[k]+'\'\\s*:\\s*\').+(\')');
 						made = made.replace(reg, function(str, p1, p2){return p1+$('#inp-'+k).val().replace(/\\(?=')/, '').replace('\\', '\\\\').replace(/'/g, "\\'")+p2;});
@@ -152,12 +169,12 @@ elFinder.prototype.i18 = {};
 					if (k === 'translator') {
 						inp = '<span id="glbs-txt-'+k+'"></span>';
 					}
-					inp += '<input id="glbs-'+k+'" class="'+k+'" type="text"><span class="note">'+v+'</span>';
+					inp += '<input id="glbs-'+k+'" class="'+k+'" type="text"><span class="preview"></span><span class="note">'+v+'</span>';
 					$('<tr/>').append('<td class="caption">'+k+'</td><td class="input">'+inp+'</td>').appendTo(hTable);
 				});
 				$.each(src, function(k, v){
 					cl = (cl == 'even')? 'odd' : 'even';
-					tbl.append($('<tr class="'+cl+'"><td id="en-'+k+'" title="'+keys[k]+'">'+v+'</td><td id="lng-'+k+'"><input id="inp-'+k+'" class="mesinp" type="text" title="'+keys[k]+'"></input></td></tr>'));
+					tbl.append($('<tr class="'+cl+'"><td class="caption" id="en-'+k+'" title="'+keys[k]+'">'+v+'</td><td id="lng-'+k+'"><input id="inp-'+k+'" class="mesinp" type="text" title="'+keys[k]+'"></input></td></tr>'));
 				});
 				$('span.branch').text(branch);
 				
@@ -168,6 +185,58 @@ elFinder.prototype.i18 = {};
 				$('#made').val('Please click a button [Make it!] .');
 				
 			});
+		};
+		var i18n = function(key) {
+			return $('#inp-' + key).val();
+		};
+		var dateFormat = function(format) {
+			var date = new Date(),
+				output, d, dw, m, y, h, g, i, s, i18;
+			
+			h  = date.getHours();
+			g  = h > 12 ? h - 12 : h;
+			i  = date.getMinutes();
+			s  = date.getSeconds();
+			d  = date.getDate();
+			dw = date.getDay();
+			m  = date.getMonth() + 1;
+			y  = date.getFullYear();
+
+			i18 = {
+				months : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+				monthsShort : ['msJan', 'msFeb', 'msMar', 'msApr', 'msMay', 'msJun', 'msJul', 'msAug', 'msSep', 'msOct', 'msNov', 'msDec'],
+
+				days : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+				daysShort : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+			};
+			
+			output = format.replace(/[a-z]/gi, function(val) {
+				switch (val) {
+					case 'd': return d > 9 ? d : '0'+d;
+					case 'j': return d;
+					case 'D': return i18n(i18.daysShort[dw]);
+					case 'l': return i18n(i18.days[dw]);
+					case 'm': return m > 9 ? m : '0'+m;
+					case 'n': return m;
+					case 'M': return i18n(i18.monthsShort[m-1]);
+					case 'F': return i18n(i18.months[m-1]);
+					case 'Y': return y;
+					case 'y': return (''+y).substr(2);
+					case 'H': return h > 9 ? h : '0'+h;
+					case 'G': return h;
+					case 'g': return g;
+					case 'h': return g > 9 ? g : '0'+g;
+					case 'a': return h >= 12 ? 'pm' : 'am';
+					case 'A': return h >= 12 ? 'PM' : 'AM';
+					case 'i': return i > 9 ? i : '0'+i;
+					case 's': return s > 9 ? s : '0'+s;
+				}
+				return val;
+			});
+			
+			output = output.replace('$1', i18n('Today'));
+
+			return output;
 		};
 
 		hash = location.hash.replace(/^#/, '').match(/(2\.[01])(?::([a-zA-Z0-9-]{2,5}))/);

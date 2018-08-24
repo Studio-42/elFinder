@@ -3,14 +3,25 @@ table {
 }
 table.header td.input {
 	width: 100%;
+	direction: auto;
 }
 table.header td.caption {
 	white-space: nowrap;
 }
+td.caption {
+	direction: ltr;
+} 
 span.note {
 	color: gray;
 	font-size: 70%;
+	display: inline-block;
+}
+span.preview {
+	color: green;
+	font-size: 95%;
 	padding-left: 0.5em;
+	padding-right: 0.5em;
+	display: inline-block;
 }
 input.translator {
 	width: 20em;
@@ -39,4 +50,7 @@ div.checkbtn select {
 }
 div.makebtn button {
 	font-size: 110%;
+}
+textarea#made {
+	direction: ltr;
 }
