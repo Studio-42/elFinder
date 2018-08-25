@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.41 (2.1-src Nightly: 3297754) (2018-08-25)
+ * Version 2.1.41 (2.1-src Nightly: 3611fde) (2018-08-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9670,7 +9670,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.41 (2.1-src Nightly: 3297754)';
+elFinder.prototype.version = '2.1.41 (2.1-src Nightly: 3611fde)';
 
 
 
@@ -17972,10 +17972,11 @@ $.fn.elfinderpath = function(fm, options) {
 					dirs.attr('style', '');
 				}
 			},
-			hasUiTree;
+			hasUiTree, hasUiStat;
 
 		fm.one('init', function() {
 			hasUiTree = fm.getUI('tree').length;
+			hasUiStat = fm.getUI('stat').length;
 			if (! hasUiTree && options.toWorkzoneWithoutNavbar) {
 				wzbase.append(path).insertBefore(fm.getUI('workzone'));
 				place = 'workzone';
@@ -18000,7 +18001,7 @@ $.fn.elfinderpath = function(fm, options) {
 				path.css('margin', 0);
 				roots.hide();
 			}
-			fit();
+			!hasUiStat && fit();
 		})
 		.bind('searchstart', function(e) {
 			if (e.data) {
@@ -18036,7 +18037,7 @@ $.fn.elfinderpath = function(fm, options) {
 			}
 			fm.trigger('uiresize');
 		})
-		.bind('resize', fit);
+		.bind('resize uistatchange', fit);
 	});
 };
 
@@ -19216,7 +19217,8 @@ $.fn.elfinderstat = function(fm) {
 			} else {
 				sel.html('');
 			}
-			sel.attr('title', sel.text()); 
+			sel.attr('title', sel.text());
+			fm.trigger('uistatchange');
 		})
 		.bind('incsearch', function(e) {
 			setIncsearchStat(e.data);
