@@ -111,10 +111,11 @@ $.fn.elfinderpath = function(fm, options) {
 					dirs.attr('style', '');
 				}
 			},
-			hasUiTree;
+			hasUiTree, hasUiStat;
 
 		fm.one('init', function() {
 			hasUiTree = fm.getUI('tree').length;
+			hasUiStat = fm.getUI('stat').length;
 			if (! hasUiTree && options.toWorkzoneWithoutNavbar) {
 				wzbase.append(path).insertBefore(fm.getUI('workzone'));
 				place = 'workzone';
@@ -139,7 +140,7 @@ $.fn.elfinderpath = function(fm, options) {
 				path.css('margin', 0);
 				roots.hide();
 			}
-			fit();
+			!hasUiStat && fit();
 		})
 		.bind('searchstart', function(e) {
 			if (e.data) {
@@ -175,6 +176,6 @@ $.fn.elfinderpath = function(fm, options) {
 			}
 			fm.trigger('uiresize');
 		})
-		.bind('resize', fit);
+		.bind('resize uistatchange', fit);
 	});
 };
