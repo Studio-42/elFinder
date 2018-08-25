@@ -98,7 +98,8 @@ $.fn.elfinderstat = function(fm) {
 			} else {
 				sel.html('');
 			}
-			sel.attr('title', sel.text()); 
+			sel.attr('title', sel.text());
+			fm.trigger('uistatchange');
 		})
 		.bind('incsearch', function(e) {
 			setIncsearchStat(e.data);
