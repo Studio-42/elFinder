@@ -854,8 +854,15 @@ var elFinder = function(elm, opts, bootCallback) {
 			return self.options.baseUrl;
 		} else {
 			baseUrl = '';
-			myTag = $('head > script[src$="js/elfinder.min.js"],script[src$="js/elfinder.full.js"]:first');
-			if (myTag.length) {
+			//myTag = $('head > script[src$="js/elfinder.min.js"],script[src$="js/elfinder.full.js"]:first');
+			myTag = null;
+			$('head > script').each(function() {
+				if (this.src && this.src.match(/js\/elfinder(?:-.+)?(?:\.min)?\.js$/)) {
+					myTag = $(this);
+					return false;
+				}
+			});
+			if (myTag) {
 				myCss = $('head > link[href$="css/elfinder.min.css"],link[href$="css/elfinder.full.css"]:first').length;
 				if (! myCss) {
 					// to request CSS auto loading
