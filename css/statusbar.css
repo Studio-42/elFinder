@@ -27,6 +27,12 @@
     -o-text-overflow: ellipsis;
 }
 
+.elfinder-statusbar span.elfinder-path-other {
+    flex-shrink: 0;
+    text-overflow: clip;
+    -o-text-overflow: clip;
+}
+
 .elfinder-statusbar span.ui-state-hover,
 .elfinder-statusbar span.ui-state-active {
     border: none;
@@ -38,6 +44,7 @@
 
 /* path in statusbar */
 .elfinder-path {
+    display: flex;
     order: 1;
     flex-grow: 1;
     cursor: pointer;

@@ -74,6 +74,9 @@ $.fn.elfinderpath = function(fm, options) {
 				path.scrollLeft(prev.length? prev.position().left : 0);
 			},
 			fit = function() {
+				if (fm.UA.CSS.flex) {
+					return;
+				}
 				var dirs = path.children('span.elfinder-path-dir'),
 					cnt  = dirs.length,
 					m, bg = 0, ids;
