@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.41 (2.1-src Nightly: 7fec487) (2018-08-25)
+ * Version 2.1.41 (2.1-src Nightly: 104986f) (2018-08-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -5382,13 +5382,16 @@ elFinder.prototype = {
 				Angle   : 0,
 				Rotated : false,
 				CSS : (function() {
-					var mStyle = document.createElement('a').style, css;
+					var aStyle = document.createElement('a').style,
+						pStyle = document.createElement('p').style,
+						css;
 					css = 'position:sticky;position:-webkit-sticky;';
 					css += 'width:-webkit-max-content;width:-moz-max-content;width:-ms-max-content;width:max-content;';
-					mStyle.cssText = css;
+					aStyle.cssText = css;
 					return {
-						positionSticky : mStyle.position.indexOf('sticky')!==-1,
-						widthMaxContent : mStyle.width.indexOf('max-content')!==-1
+						positionSticky : aStyle.position.indexOf('sticky')!==-1,
+						widthMaxContent : aStyle.width.indexOf('max-content')!==-1,
+						flex : typeof pStyle.flex !== 'undefined'
 					};
 				})()
 			};
@@ -9670,7 +9673,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.41 (2.1-src Nightly: 7fec487)';
+elFinder.prototype.version = '2.1.41 (2.1-src Nightly: 104986f)';
 
 
 
@@ -17935,6 +17938,9 @@ $.fn.elfinderpath = function(fm, options) {
 				path.scrollLeft(prev.length? prev.position().left : 0);
 			},
 			fit = function() {
+				if (fm.UA.CSS.flex) {
+					return;
+				}
 				var dirs = path.children('span.elfinder-path-dir'),
 					cnt  = dirs.length,
 					m, bg = 0, ids;
