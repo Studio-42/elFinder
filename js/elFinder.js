@@ -857,7 +857,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			//myTag = $('head > script[src$="js/elfinder.min.js"],script[src$="js/elfinder.full.js"]:first');
 			myTag = null;
 			$('head > script').each(function() {
-				if (this.src && this.src.match(/js\/elfinder(?:-.+)?(?:\.min)?\.js$/)) {
+				if (this.src && this.src.match(/js\/elfinder(?:-[a-z0-9_-]+)?\.(?:min|full)\.js$/i)) {
 					myTag = $(this);
 					return false;
 				}
