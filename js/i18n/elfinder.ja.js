@@ -435,7 +435,7 @@
 			'TextArea'        : 'テキストエリア', // from v2.1.25 added 14.6.2017
 			'folderToEmpty'   : 'フォルダ"$1"を空にします。', // from v2.1.25 added 22.6.2017
 			'filderIsEmpty'   : 'フォルダ"$1"にアイテムはありません。', // from v2.1.25 added 22.6.2017
-			'preference'      : '環境設定', // from v2.1.26 added 28.6.2017
+			'preference'      : '個人設定', // from v2.1.26 added 28.6.2017
 			'language'        : '言語', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': 'ブラウザに保存された設定を初期化する', // from v2.1.26 added 28.6.2017
 			'toolbarPref'     : 'ツールバー設定', // from v2.1.27 added 2.8.2017
