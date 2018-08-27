@@ -5156,8 +5156,10 @@ var elFinder = function(elm, opts, bootCallback) {
 			// check css loaded and remove hide
 			(function() {
 				var loaded = function() {
-						node.data('cssautoloadHide').remove();
-						node.removeData('cssautoloadHide');
+						if (node.data('cssautoloadHide')) {
+							node.data('cssautoloadHide').remove();
+							node.removeData('cssautoloadHide');
+						}
 						self.cssloaded = true;
 						requestAnimationFrame(function() {
 							self.trigger('cssloaded');
