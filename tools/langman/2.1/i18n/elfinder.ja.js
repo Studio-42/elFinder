@@ -158,12 +158,12 @@
 			'cmdempty'     : 'フォルダを空に', // from v2.1.25 added 22.06.2017
 			'cmdundo'      : '元に戻す', // from v2.1.27 added 31.07.2017
 			'cmdredo'      : 'やり直し', // from v2.1.27 added 31.07.2017
-			'cmdpreference': '環境設定', // from v2.1.27 added 03.08.2017
+			'cmdpreference': '個人設定', // from v2.1.27 added 03.08.2017
 			'cmdselectall' : 'すべて選択', // from v2.1.28 added 15.08.2017
 			'cmdselectnone': '選択解除', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': '選択を反転', // from v2.1.28 added 15.08.2017
 			'cmdopennew'   : '新しいウィンドウで開く', // from v2.1.38 added 3.4.2018
-			'cmdhide'      : '非表示(個人的)', // from v2.1.41 added 24.7.2018
+			'cmdhide'      : '非表示 (個人設定)', // from v2.1.41 added 24.7.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : '閉じる',
