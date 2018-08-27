@@ -39,10 +39,39 @@ $.fn.elfinderstat = function(fm) {
 				});
 				size.html(titleitems+': <span class="elfinder-stat-incsearch"></span>'+c+',&nbsp;<span class="elfinder-stat-size'+(hasSize? ' elfinder-stat-size-recursive' : '')+'">'+fm.i18n(hasSize? 'sum' : 'size')+': '+fm.formatSize(s)+'</span>')
 					.attr('title', size.text());
+				fm.trigger('uistatchange');
 			},
 			setIncsearchStat = function(data) {
 				size.find('span.elfinder-stat-incsearch').html(data? data.hashes.length + ' / ' : '');
 				size.attr('title', size.text());
+				fm.trigger('uistatchange');
+			},
+			setSelect = function(files) {
+				var s = 0,
+					c = 0,
+					dirs = [],
+					path, file;
+
+				if (files.length === 1) {
+					file = files[0];
+					s = file.size;
+					if (fm.searchStatus.state === 2) {
+						path = fm.escape(file.path? file.path.replace(/\/[^\/]*$/, '') : '..');
+						dirs.push('<a href="#elf_'+file.phash+'" data-hash="'+file.hash+'" title="'+path+'">'+path+'</a>');
+					}
+					dirs.push(fm.escape(file.i18 || file.name));
+					sel.html(dirs.join('/') + (s > 0 ? ', '+fm.formatSize(s) : ''));
+				} else if (files.length) {
+					$.each(files, function(i, file) {
+						c++;
+						s += parseInt(file.size)||0;
+					});
+					sel.html(c ? titlesel+': '+c+', '+titlesize+': '+fm.formatSize(s) : '&nbsp;');
+				} else {
+					sel.html('');
+				}
+				sel.attr('title', sel.text());
+				fm.trigger('uistatchange');
 			};
 
 		fm.getUI('statusbar').prepend(size).append(sel).show();
@@ -74,32 +103,10 @@ $.fn.elfinderstat = function(fm) {
 			});
 		})
 		.select(function() {
-			var s = 0,
-				c = 0,
-				files = fm.selectedFiles(),
-				dirs = [],
-				path, file;
-
-			if (files.length === 1) {
-				file = files[0];
-				s = file.size;
-				if (fm.searchStatus.state === 2) {
-					path = fm.escape(file.path? file.path.replace(/\/[^\/]*$/, '') : '..');
-					dirs.push('<a href="#elf_'+file.phash+'" data-hash="'+file.hash+'" title="'+path+'">'+path+'</a>');
-				}
-				dirs.push(fm.escape(file.i18 || file.name));
-				sel.html(dirs.join('/') + (s > 0 ? ', '+fm.formatSize(s) : ''));
-			} else if (files.length) {
-				$.each(files, function(i, file) {
-					c++;
-					s += parseInt(file.size)||0;
-				});
-				sel.html(c ? titlesel+': '+c+', '+titlesize+': '+fm.formatSize(s) : '&nbsp;');
-			} else {
-				sel.html('');
-			}
-			sel.attr('title', sel.text());
-			fm.trigger('uistatchange');
+			setSelect(fm.selectedFiles());
+		})
+		.bind('open', function() {
+			setSelect([]);
 		})
 		.bind('incsearch', function(e) {
 			setIncsearchStat(e.data);
