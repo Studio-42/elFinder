@@ -11,6 +11,8 @@ elFinder.prototype.commands.rename = function() {
 	// set alwaysEnabled to allow root rename on client size
 	this.alwaysEnabled = true;
 
+	this.syncTitleOnChange = true;
+
 	var self = this,
 		fm = self.fm,
 		request = function(dfrd, targtes, file, name) {
@@ -551,7 +553,22 @@ elFinder.prototype.commands.rename = function() {
 		return dfrd;
 	};
 
-	fm.remove(function(e) {
+	fm.bind('select contextmenucreate closecontextmenu', function(e) {
+		var sel = (e.data? (e.data.selected || e.data.targets) : null) || fm.selected(),
+			file;
+		if (sel && sel.length === 1 && fm.isRoot(fm.file(sel[0]))) {
+			self.title = fm.i18n('kindAlias') + ' (' + fm.i18n('preference') + ')';
+		} else {
+			self.title = fm.i18n('cmdrename');
+		}
+		if (e.type !== 'closecontextmenu') {
+			self.update(void(0), self.title);
+		} else {
+			requestAnimationFrame(function() {
+				self.update(void(0), self.title);
+			});
+		}
+	}).remove(function(e) {
 		var rootNames;
 		if (e.data && e.data.removed && (rootNames = fm.storage('rootNames'))) {
 			$.each(e.data.removed, function(i, h) {
