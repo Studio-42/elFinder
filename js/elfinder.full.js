@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.41 (2.1-src Nightly: 0b5f671) (2018-08-26)
+ * Version 2.1.41 (2.1-src Nightly: 50d51f8) (2018-08-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -5187,8 +5187,10 @@ var elFinder = function(elm, opts, bootCallback) {
 			// check css loaded and remove hide
 			(function() {
 				var loaded = function() {
-						node.data('cssautoloadHide').remove();
-						node.removeData('cssautoloadHide');
+						if (node.data('cssautoloadHide')) {
+							node.data('cssautoloadHide').remove();
+							node.removeData('cssautoloadHide');
+						}
 						self.cssloaded = true;
 						requestAnimationFrame(function() {
 							self.trigger('cssloaded');
@@ -9673,7 +9675,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.41 (2.1-src Nightly: 0b5f671)';
+elFinder.prototype.version = '2.1.41 (2.1-src Nightly: 50d51f8)';
 
 
 
@@ -12512,7 +12514,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'cmdselectnone': 'Select none', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': 'Invert selection', // from v2.1.28 added 15.08.2017
 			'cmdopennew'   : 'Open in new window', // from v2.1.38 added 3.4.2018
-			'cmdhide'      : 'Hide (personal)', // from v2.1.41 added 24.7.2018
+			'cmdhide'      : 'Hide (Preference)', // from v2.1.41 added 24.7.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : 'Close',
@@ -19164,10 +19166,39 @@ $.fn.elfinderstat = function(fm) {
 				});
 				size.html(titleitems+': <span class="elfinder-stat-incsearch"></span>'+c+',&nbsp;<span class="elfinder-stat-size'+(hasSize? ' elfinder-stat-size-recursive' : '')+'">'+fm.i18n(hasSize? 'sum' : 'size')+': '+fm.formatSize(s)+'</span>')
 					.attr('title', size.text());
+				fm.trigger('uistatchange');
 			},
 			setIncsearchStat = function(data) {
 				size.find('span.elfinder-stat-incsearch').html(data? data.hashes.length + ' / ' : '');
 				size.attr('title', size.text());
+				fm.trigger('uistatchange');
+			},
+			setSelect = function(files) {
+				var s = 0,
+					c = 0,
+					dirs = [],
+					path, file;
+
+				if (files.length === 1) {
+					file = files[0];
+					s = file.size;
+					if (fm.searchStatus.state === 2) {
+						path = fm.escape(file.path? file.path.replace(/\/[^\/]*$/, '') : '..');
+						dirs.push('<a href="#elf_'+file.phash+'" data-hash="'+file.hash+'" title="'+path+'">'+path+'</a>');
+					}
+					dirs.push(fm.escape(file.i18 || file.name));
+					sel.html(dirs.join('/') + (s > 0 ? ', '+fm.formatSize(s) : ''));
+				} else if (files.length) {
+					$.each(files, function(i, file) {
+						c++;
+						s += parseInt(file.size)||0;
+					});
+					sel.html(c ? titlesel+': '+c+', '+titlesize+': '+fm.formatSize(s) : '&nbsp;');
+				} else {
+					sel.html('');
+				}
+				sel.attr('title', sel.text());
+				fm.trigger('uistatchange');
 			};
 
 		fm.getUI('statusbar').prepend(size).append(sel).show();
@@ -19199,32 +19230,10 @@ $.fn.elfinderstat = function(fm) {
 			});
 		})
 		.select(function() {
-			var s = 0,
-				c = 0,
-				files = fm.selectedFiles(),
-				dirs = [],
-				path, file;
-
-			if (files.length === 1) {
-				file = files[0];
-				s = file.size;
-				if (fm.searchStatus.state === 2) {
-					path = fm.escape(file.path? file.path.replace(/\/[^\/]*$/, '') : '..');
-					dirs.push('<a href="#elf_'+file.phash+'" data-hash="'+file.hash+'" title="'+path+'">'+path+'</a>');
-				}
-				dirs.push(fm.escape(file.i18 || file.name));
-				sel.html(dirs.join('/') + (s > 0 ? ', '+fm.formatSize(s) : ''));
-			} else if (files.length) {
-				$.each(files, function(i, file) {
-					c++;
-					s += parseInt(file.size)||0;
-				});
-				sel.html(c ? titlesel+': '+c+', '+titlesize+': '+fm.formatSize(s) : '&nbsp;');
-			} else {
-				sel.html('');
-			}
-			sel.attr('title', sel.text());
-			fm.trigger('uistatchange');
+			setSelect(fm.selectedFiles());
+		})
+		.bind('open', function() {
+			setSelect([]);
 		})
 		.bind('incsearch', function(e) {
 			setIncsearchStat(e.data);
@@ -29423,6 +29432,8 @@ elFinder.prototype.commands.rename = function() {
 	// set alwaysEnabled to allow root rename on client size
 	this.alwaysEnabled = true;
 
+	this.syncTitleOnChange = true;
+
 	var self = this,
 		fm = self.fm,
 		request = function(dfrd, targtes, file, name) {
@@ -29963,7 +29974,22 @@ elFinder.prototype.commands.rename = function() {
 		return dfrd;
 	};
 
-	fm.remove(function(e) {
+	fm.bind('select contextmenucreate closecontextmenu', function(e) {
+		var sel = (e.data? (e.data.selected || e.data.targets) : null) || fm.selected(),
+			file;
+		if (sel && sel.length === 1 && fm.isRoot(fm.file(sel[0]))) {
+			self.title = fm.i18n('kindAlias') + ' (' + fm.i18n('preference') + ')';
+		} else {
+			self.title = fm.i18n('cmdrename');
+		}
+		if (e.type !== 'closecontextmenu') {
+			self.update(void(0), self.title);
+		} else {
+			requestAnimationFrame(function() {
+				self.update(void(0), self.title);
+			});
+		}
+	}).remove(function(e) {
 		var rootNames;
 		if (e.data && e.data.removed && (rootNames = fm.storage('rootNames'))) {
 			$.each(e.data.removed, function(i, h) {
