@@ -1723,6 +1723,7 @@ abstract class elFinderVolumeDriver {
 					}
 				}
 			}
+			$this->removed = array_values($this->removed);
 		}
 		return $this->removed;
 	}
