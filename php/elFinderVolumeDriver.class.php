@@ -4984,7 +4984,7 @@ abstract class elFinderVolumeDriver {
 				&& (
 					($type === 'image' && ($this->imgLib === 'gd' ? in_array($stat['mime'], array('image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp')) : true))
 					 ||
-					($this->imgLib !== 'gd' && in_array($stat['mime'], array('application/postscript', 'application/pdf')))
+					(ELFINDER_IMAGEMAGICK_PS && $this->imgLib !== 'gd' && in_array($stat['mime'], array('application/postscript', 'application/pdf')))
 				);
 		}
 		return false;
@@ -5993,7 +5993,7 @@ abstract class elFinderVolumeDriver {
 		$srcType = $this->getExtentionByMime($mime, ':');
 		$ani = false;
 		if (preg_match('/^(?:gif|png|ico)/', $srcType)) {
-			$cmd = 'identify ' . escapeshellarg($srcType . $path);
+			$cmd = ELFINDER_IDENTIFY_PATH . ' ' . escapeshellarg($srcType . $path);
 			if ($this->procExec($cmd, $o) === 0) {
 				$ani = preg_split('/(?:\r\n|\n|\r)/', trim($o));
 				if (count($ani) < 2) {
