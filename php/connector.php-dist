@@ -13,6 +13,13 @@ if (function_exists('date_default_timezone_set')) {
 	date_default_timezone_set('Europe/Moscow');
 }
 
+// // To Enable(true) handling of PostScript files by ImageMagick
+// // It is disabled by default as a countermeasure 
+// // of Ghostscript multiple -dSAFER sandbox bypass vulnerabilities
+// // see https://www.kb.cert.org/vuls/id/332928
+// define('ELFINDER_IMAGEMAGICK_PS', true);
+// ===============================================
+
 // load composer autoload before load elFinder autoload If you need composer
 //require './vendor/autoload.php';
 
