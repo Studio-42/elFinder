@@ -1,3 +1,15 @@
+2018-08-29  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.42):
+		- [VD:abstract] Fixed #2624 "application/xml" determines the MIME-Type with the file extension
+		- [cmd:quicklook] Fixed #2627 kml, kmz preview with GoogleMaps API
+		- [ui:statusbar] Fixed #2635 positioning design with CSS flexible box
+		- [cmd:rename] Fixed #2639 change cmd title to "Alias (Preference)" of the volume root
+		- [php:core] Fixed #2641 problem of overwrite upload of folder uploading
+		- [php] Fixed #2642 Measures of Ghostscript security vulnerabilities
+		- And some minor bug fixes
+
+
 2018-08-19  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.41):
