@@ -39,11 +39,23 @@ class elFinderPlugin {
 	 * @param array $opts
 	 * @return boolean
 	 */
-	protected function iaEnabled($opts) {
+	protected function iaEnabled($opts, $elfinder = null) {
 		if (! $opts['enable']) {
 			return false;
 		}
 		
+		// check post var 'contentSaveId' to disable this plugin
+		if ($elfinder && !empty($opts['disableWithContentSaveId'])) {
+			$session = $elfinder->getSession();
+			$urlContentSaveIds = $session->get('urlContentSaveIds', array());
+			if (!empty(elFinder::$currentArgs['contentSaveId']) && ($contentSaveId = elFinder::$currentArgs['contentSaveId'])) {
+				if (!empty($urlContentSaveIds[$contentSaveId])) {
+					$elfinder->removeUrlContentSaveId($contentSaveId);
+					return false;
+				}
+			}
+		}
+
 		if (isset($opts['onDropWith']) && !is_null($opts['onDropWith'])) {
 			// plugin disabled by default, enabled only if given key is pressed
 			if (isset($_REQUEST['dropWith']) && $_REQUEST['dropWith']) {

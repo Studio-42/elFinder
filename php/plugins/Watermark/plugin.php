@@ -89,7 +89,8 @@ class elFinderPluginWatermark extends elFinderPlugin {
 			                                // Alt: 8, Ctrl: 4, Meta: 2, Shift: 1 - sum of each value
 			                                // In case of using any key, specify it as an array
 			'marginRight'    => 0,          // Deprecated - marginX should be used
-			'marginBottom'   => 0           // Deprecated - marginY should be used
+			'marginBottom'   => 0,          // Deprecated - marginY should be used
+			'disableWithContentSaveId' => true // Disable on URL upload with post data "contentSaveId"
 		);
 
 		$this->opts = array_merge($defaults, $opts);
@@ -99,7 +100,7 @@ class elFinderPluginWatermark extends elFinderPlugin {
 	public function onUpLoadPreSave(&$thash, &$name, $src, $elfinder, $volume) {
 		$opts = $this->getCurrentOpts($volume);
 		
-		if (! $this->iaEnabled($opts)) {
+		if (! $this->iaEnabled($opts, $elfinder)) {
 			return false;
 		}
 		
