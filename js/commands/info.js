@@ -160,13 +160,19 @@
 				if (file.url == '1') {
 					content.push(row.replace(l, msg.link).replace(v, '<button class="'+btnclass+' '+spclass+'-url">'+msg.getlink+'</button>'));
 				} else {
-					if (o.nullUrlDirLinkSelf && file.mime == 'directory' && file.url === null) {
-						var loc = window.location;
-						href = loc.pathname + loc.search + '#elf_' + file.hash;
+					if (file.url) {
+						href = file.url;
+					} else if (file.mime === 'directory') {
+						if (o.nullUrlDirLinkSelf && file.url === null) {
+							var loc = window.location;
+							href = loc.pathname + loc.search + '#elf_' + file.hash;
+						} else if (file.url !== '' && fm.option('url', (!fm.isRoot(file) && file.phash) || file.hash)) {
+							href = fm.url(file.hash);
+						}
 					} else {
 						href = fm.url(file.hash);
 					}
-					content.push(row.replace(l, msg.link).replace(v,  '<a href="'+href+'" target="_blank">'+name_esc+'</a>'));
+					href && content.push(row.replace(l, msg.link).replace(v,  '<a href="'+href+'" target="_blank">'+name_esc+'</a>'));
 				}
 			}
 			
