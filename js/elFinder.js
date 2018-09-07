@@ -1630,7 +1630,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 				
 				if (typeof baseUrl === 'undefined') {
-					baseUrl = self.option('url', file.phash || file.hash);
+					baseUrl = self.option('url', (!self.isRoot(file) && file.phash) || file.hash);
 				}
 				
 				if (baseUrl) {
@@ -1653,7 +1653,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			return async? dfrd.resolve('') : '';
 		}
 		
-		if (file.url == '1' || (temp && !file.url && !(baseUrl = self.option('url', file.phash || file.hash)))) {
+		if (file.url == '1' || (temp && !file.url && !(baseUrl = self.option('url', (!self.isRoot(file) && file.phash) || file.hash)))) {
 			this.request({
 				data : { cmd : 'url', target : hash, options : { temporary: temp? 1 : 0 } },
 				preventDefault : true,

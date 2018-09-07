@@ -489,6 +489,8 @@ elFinder.prototype._options = {
 		},
 		// "info" command options.
 		info : {
+			// If the URL of the Directory is null,
+			// it is assumed that the link destination is a URL to open the folder in elFinder
 			nullUrlDirLinkSelf : true,
 			// Information items to be hidden by default
 			// These name are 'size', 'aliasfor', 'path', 'link', 'dim', 'modify', 'perms', 'locked', 'owner', 'group', 'perm' and your custom info items label
