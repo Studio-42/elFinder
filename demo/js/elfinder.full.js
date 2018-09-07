@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 1a0ae12) (2018-08-29)
+ * Version 2.1.42 (2.1-src Nightly: 3d56c5a) (2018-09-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -1661,7 +1661,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 				
 				if (typeof baseUrl === 'undefined') {
-					baseUrl = self.option('url', file.phash || file.hash);
+					baseUrl = self.option('url', (!self.isRoot(file) && file.phash) || file.hash);
 				}
 				
 				if (baseUrl) {
@@ -1684,7 +1684,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			return async? dfrd.resolve('') : '';
 		}
 		
-		if (file.url == '1' || (temp && !file.url && !(baseUrl = self.option('url', file.phash || file.hash)))) {
+		if (file.url == '1' || (temp && !file.url && !(baseUrl = self.option('url', (!self.isRoot(file) && file.phash) || file.hash)))) {
 			this.request({
 				data : { cmd : 'url', target : hash, options : { temporary: temp? 1 : 0 } },
 				preventDefault : true,
@@ -9675,7 +9675,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 1a0ae12)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 3d56c5a)';
 
 
 
@@ -10581,6 +10581,8 @@ elFinder.prototype._options = {
 		},
 		// "info" command options.
 		info : {
+			// If the URL of the Directory is null,
+			// it is assumed that the link destination is a URL to open the folder in elFinder
 			nullUrlDirLinkSelf : true,
 			// Information items to be hidden by default
 			// These name are 'size', 'aliasfor', 'path', 'link', 'dim', 'modify', 'perms', 'locked', 'owner', 'group', 'perm' and your custom info items label
@@ -24909,13 +24911,19 @@ elFinder.prototype.commands.hide = function() {
 				if (file.url == '1') {
 					content.push(row.replace(l, msg.link).replace(v, '<button class="'+btnclass+' '+spclass+'-url">'+msg.getlink+'</button>'));
 				} else {
-					if (o.nullUrlDirLinkSelf && file.mime == 'directory' && file.url === null) {
-						var loc = window.location;
-						href = loc.pathname + loc.search + '#elf_' + file.hash;
+					if (file.url) {
+						href = file.url;
+					} else if (file.mime === 'directory') {
+						if (o.nullUrlDirLinkSelf && file.url === null) {
+							var loc = window.location;
+							href = loc.pathname + loc.search + '#elf_' + file.hash;
+						} else if (file.url !== '' && fm.option('url', (!fm.isRoot(file) && file.phash) || file.hash)) {
+							href = fm.url(file.hash);
+						}
 					} else {
 						href = fm.url(file.hash);
 					}
-					content.push(row.replace(l, msg.link).replace(v,  '<a href="'+href+'" target="_blank">'+name_esc+'</a>'));
+					href && content.push(row.replace(l, msg.link).replace(v,  '<a href="'+href+'" target="_blank">'+name_esc+'</a>'));
 				}
 			}
 			
