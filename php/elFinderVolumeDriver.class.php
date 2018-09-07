@@ -225,7 +225,7 @@ abstract class elFinderVolumeDriver {
 		'treeDeep'        => 1,
 		// root url, not set to disable sending URL to client (replacement for old "fileURL" option)
 		'URL'             => '',
-		// directory link url to own manager url with folder hash (`true`, `false` or default `'auto'`: URL is empty then `true` else `false`)
+		// directory link url to own manager url with folder hash (`true`, `false`, `'hide'`(No show) or default `'auto'`: URL is empty then `true` else `false`)
 		'dirUrlOwn'       => 'auto',
 		// directory separator. required by client to show paths correctly
 		'separator'       => DIRECTORY_SEPARATOR,
@@ -1227,8 +1227,12 @@ abstract class elFinderVolumeDriver {
 		if ($this->URL && preg_match("|[^/?&=]$|", $this->URL)) {
 			$this->URL .= '/';
 		}
-		if (strtolower($this->options['dirUrlOwn']) === 'auto') {
+
+		$dirUrlOwn = strtolower($this->options['dirUrlOwn']);
+		if ($dirUrlOwn === 'auto') {
 			$this->options['dirUrlOwn'] = $this->URL? false : true;
+		} else if ($dirUrlOwn === 'hide') {
+			$this->options['dirUrlOwn'] = 'hide';
 		} else {
 			$this->options['dirUrlOwn'] = (bool)$this->options['dirUrlOwn'];
 		}
@@ -4224,7 +4228,11 @@ abstract class elFinderVolumeDriver {
 					$stat['dirs'] = 1;
 				}
 				if ($this->options['dirUrlOwn'] === true) {
-					$stat['url'] = '#elf_' . $stat['hash'];
+					// Set `null` to use the client option `commandsOptions.info.nullUrlDirLinkSelf = true`
+					$stat['url'] = null;
+				} else if ($this->options['dirUrlOwn'] === 'hide') {
+					// to hide link in info dialog of the elFinder client
+					$stat['url'] = '';
 				}
 			} else {
 				// for files - check for thumbnails
