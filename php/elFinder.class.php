@@ -250,7 +250,7 @@ class elFinder {
 		'rename'    => array('target' => true, 'name' => true, 'mimes' => false, 'targets' => false, 'q' => false),
 		'duplicate' => array('targets' => true, 'suffix' => false),
 		'paste'     => array('dst' => true, 'targets' => true, 'cut' => false, 'mimes' => false, 'renames' => false, 'hashes' => false, 'suffix' => false),
-		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'hashes' => false, 'suffix' => false, 'mtime' => false, 'overwrite' => false),
+		'upload'    => array('target' => true, 'FILES' => true, 'mimes' => false, 'html' => false, 'upload' => false, 'name' => false, 'upload_path' => false, 'chunk' => false, 'cid' => false, 'node' => false, 'renames' => false, 'hashes' => false, 'suffix' => false, 'mtime' => false, 'overwrite' => false, 'contentSaveId' => false),
 		'get'       => array('target' => true, 'conv' => false),
 		'put'       => array('target' => true, 'content' => '', 'mimes' => false, 'encoding' => false),
 		'archive'   => array('targets' => true, 'type' => true, 'mimes' => false, 'name' => false),
@@ -393,6 +393,13 @@ class elFinder {
 	 * @var array|null
 	 */
 	protected $customData = null;
+
+	/**
+	 * Ids to remove of session var "urlContentSaveIds" for contents uploading by URL
+	 *
+	 * @var array
+	 */
+	protected $removeContentSaveIds = array();
 
 	// Errors messages
 	const ERROR_UNKNOWN           = 'errUnknown';
@@ -1114,6 +1121,21 @@ class elFinder {
 			}
 		}
 		
+		// remove sesstion var 'urlContentSaveIds'
+		if ($this->removeContentSaveIds) {
+			$urlContentSaveIds = $this->session->get('urlContentSaveIds', array());
+			foreach(array_keys($this->removeContentSaveIds) as $contentSaveId) {
+				if (isset($urlContentSaveIds[$contentSaveId])) {
+					unset($urlContentSaveIds[$contentSaveId]);
+				}
+			}
+			if ($urlContentSaveIds) {
+				$this->session->set('urlContentSaveIds', $urlContentSaveIds);
+			} else {
+				$this->session->remove('urlContentSaveIds');
+			}
+		}
+
 		foreach ($this->volumes as $volume) {
 			$volume->saveSessionCache();
 			$volume->umount();
@@ -1193,7 +1215,16 @@ class elFinder {
 			$netVolumes[$netKey][$optionKey] = $val;
 		}
 	}
-	
+
+	/**
+	 * remove of session var "urlContentSaveIds"
+	 *
+	 * @param string $id
+	 */
+	public function removeUrlContentSaveId($id) {
+		$this->removeContentSaveIds[$id] = true;
+	}
+
 	/**
 	 * Return network volumes config.
 	 *
