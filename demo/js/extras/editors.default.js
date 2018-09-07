@@ -2451,7 +2451,7 @@
 								fm.error(err.length? err : status.info);
 								select.fadeIn();
 							} else if (status.code === 'completed') {
-								upload(res.output);
+								upload(res);
 							} else {
 								setStatus(status);
 								setTimeout(function() {
@@ -2502,8 +2502,10 @@
 							ta.elfinderdialog('destroy');
 						});
 					},
-					upload = function(output) {
-						var url = '';
+					upload = function(res) {
+						var output = res.output,
+							id = res.id,
+							url = '';
 						spnr.hide();
 						if (output && output.length) {
 							ta.elfinderdialog('destroy');
@@ -2515,7 +2517,10 @@
 							fm.upload({
 								target: file.phash,
 								files: [url],
-								type: 'text'
+								type: 'text',
+								extraData: {
+									contentSaveId: 'OnlineConvert-' + res.id
+								}
 							});
 						}
 					},
