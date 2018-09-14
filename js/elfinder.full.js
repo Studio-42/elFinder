@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 573b7bd) (2018-09-09)
+ * Version 2.1.42 (2.1-src Nightly: 90f0a42) (2018-09-14)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9683,7 +9683,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 573b7bd)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 90f0a42)';
 
 
 
@@ -10372,7 +10372,10 @@ elFinder.prototype._options = {
 			method : 'post',
 			// Where to open into : 'window'(default), 'tab' or 'tabs'
 			// 'tabs' opens in each tabs
-			into   : 'window'
+			into   : 'window',
+			// Default command list of action when select file
+			// Array value are 'Command Name' or 'Command Name1/CommandName2...'
+			selectAction : 'open'
 		},
 		opennew : {
 			// URL of to open elFinder manager
@@ -25833,7 +25836,7 @@ elFinder.prototype.commands.netunmount = function() {
 				] : []
 			});
 		} else {
-			selAct = fm.storage('selectAction');
+			selAct = fm.storage('selectAction') || opts.selectAction;
 			if (selAct) {
 				$.each(selAct.split('/'), function() {
 					var cmdName = this.valueOf();
@@ -26559,10 +26562,11 @@ elFinder.prototype.commands.preference = function() {
 						fm.storage('selectAction', act === 'default'? null : act);
 					}),
 					optTags = [],
-					acts = self.options.selectActions;
+					acts = self.options.selectActions,
+					defAct = fm.getCommand('open').options.selectAction || 'open';
 				
-				if ($.inArray('open', acts) === -1) {
-					acts.unshift('open');
+				if ($.inArray(defAct, acts) === -1) {
+					acts.unshift(defAct);
 				}
 				$.each(acts, function(i, act) {
 					var names = $.map(act.split('/'), function(cmd) {
@@ -26574,7 +26578,7 @@ elFinder.prototype.commands.preference = function() {
 					});
 					optTags.push('<option value="'+act+'">'+names.join('/')+'</option>');
 				});
-				return actSel.append(optTags.join('')).val(fm.storage('selectAction') || 'open');
+				return actSel.append(optTags.join('')).val(fm.storage('selectAction') || defAct);
 			})());
 			
 			forms.makefileTypes && (forms.makefileTypes = (function() {

@@ -401,6 +401,13 @@ class elFinder {
 	 */
 	protected $removeContentSaveIds = array();
 
+	/**
+	 * Flag of throw Error on exec()
+	 *
+	 * @var boolean
+	 */
+	protected $throwErrorOnExec = false;
+
 	// Errors messages
 	const ERROR_UNKNOWN           = 'errUnknown';
 	const ERROR_UNKNOWN_CMD       = 'errUnknownCmd';
@@ -660,6 +667,10 @@ class elFinder {
 
 		// set memoryLimitGD
 		elFinder::$memoryLimitGD = isset($opts['memoryLimitGD'])? $opts['memoryLimitGD'] : 0;
+
+		// set flag of throwErrorOnExec
+		// `true` need `try{}` block for `$connector->run();`
+		$this->throwErrorOnExec = !empty($opts['throwErrorOnExec']);
 
 		// bind events listeners
 		if (!empty($opts['bind']) && is_array($opts['bind'])) {
@@ -1033,6 +1044,9 @@ class elFinder {
 					'error' => htmlspecialchars($e->getMessage()),
 					'sync' => true
 				);
+				if ($this->throwErrorOnExec) {
+					throw $e;
+				}
 			}
 		}
 		
