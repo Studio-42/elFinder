@@ -164,10 +164,11 @@ elFinder.prototype.commands.preference = function() {
 						fm.storage('selectAction', act === 'default'? null : act);
 					}),
 					optTags = [],
-					acts = self.options.selectActions;
+					acts = self.options.selectActions,
+					defAct = fm.getCommand('open').options.selectAction || 'open';
 				
-				if ($.inArray('open', acts) === -1) {
-					acts.unshift('open');
+				if ($.inArray(defAct, acts) === -1) {
+					acts.unshift(defAct);
 				}
 				$.each(acts, function(i, act) {
 					var names = $.map(act.split('/'), function(cmd) {
@@ -179,7 +180,7 @@ elFinder.prototype.commands.preference = function() {
 					});
 					optTags.push('<option value="'+act+'">'+names.join('/')+'</option>');
 				});
-				return actSel.append(optTags.join('')).val(fm.storage('selectAction') || 'open');
+				return actSel.append(optTags.join('')).val(fm.storage('selectAction') || defAct);
 			})());
 			
 			forms.makefileTypes && (forms.makefileTypes = (function() {
