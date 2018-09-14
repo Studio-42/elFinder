@@ -272,7 +272,10 @@ elFinder.prototype._options = {
 			method : 'post',
 			// Where to open into : 'window'(default), 'tab' or 'tabs'
 			// 'tabs' opens in each tabs
-			into   : 'window'
+			into   : 'window',
+			// Default command list of action when select file
+			// Array value are 'Command Name' or 'Command Name1/CommandName2...'
+			selectAction : 'open'
 		},
 		opennew : {
 			// URL of to open elFinder manager

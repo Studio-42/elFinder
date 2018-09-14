@@ -211,7 +211,7 @@
 				] : []
 			});
 		} else {
-			selAct = fm.storage('selectAction');
+			selAct = fm.storage('selectAction') || opts.selectAction;
 			if (selAct) {
 				$.each(selAct.split('/'), function() {
 					var cmdName = this.valueOf();
