@@ -78,7 +78,7 @@ class elFinderEditorZohoOffice extends elFinderEditor
                     'apikey' => ELFINDER_ZOHO_OFFICE_APIKEY,
                     'output' => 'url',
                     'mode' => 'normaledit',
-                    'filename' => rawurlencode($file['name']),
+                    'filename' => $file['name'],
                     'id' => $hash,
                     'format' => $format,
                     'lang' => $lang,
