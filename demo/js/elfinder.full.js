@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 5995f9b) (2018-09-15)
+ * Version 2.1.42 (2.1-src Nightly: 2514897) (2018-09-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9683,7 +9683,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 5995f9b)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 2514897)';
 
 
 
@@ -16924,6 +16924,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 									elm.data('style', self.attr('style') || '');
 								}
 								fm.toggleMaximize(dialog);
+								typeof(opts.maximize) === 'function' && opts.maximize.call(self[0]);
 							})
 						);
 					}
@@ -16968,6 +16969,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 										.addClass('elfinder-dialog-minimized')
 										.appendTo(tray);
 										checkEditing();
+										typeof(opts.minimize) === 'function' && opts.minimize.call(self[0]);
 									});
 								} else {
 									//restore
@@ -16980,6 +16982,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 										posCheck();
 										checkEditing();
 										dialog.trigger('resize', {init: true});
+										typeof(opts.minimize) === 'function' && opts.minimize.call(self[0]);
 									});
 								}
 							});
@@ -22693,6 +22696,15 @@ elFinder.prototype.commands.edit = function() {
 					btnHoverFocus : false,
 					closeOnEscape : false,
 					propagationEvents : ['mousemove', 'mouseup', 'click'],
+					minimize : function() {
+						var conf;
+						if (ta.editor && dialogNode.closest('.ui-dialog').is(':hidden')) {
+							conf = ta.editor.confObj;
+							if (conf.info && conf.info.syncInterval) {
+								fileSync(file.hash);
+							}
+						}
+					},
 					close   : function() {
 						var close = function() {
 								var conf;
