@@ -14,7 +14,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.sk = {
-		translator : 'RobiNN &lt;kelcakrobo@gmail.com&gt;, Jakub Ďuraš &lt;jkblmr@gmail.com&gt;'
+		translator : 'RobiNN &lt;kelcakrobo@gmail.com&gt;, Jakub Ďuraš &lt;jkblmr@gmail.com&gt;',
 		language   : 'Slovenčina',
 		direction  : 'ltr',
 		dateFormat : 'd.m.Y H:i', // will show like: 18.09.2018 20:06
@@ -286,7 +286,7 @@
 			'sortAlsoTreeview'  : 'Tiež stromové zobrazenie',  // from v2.1.15 added 01.08.2016
 
 			/********************************** new items **********************************/
-			'untitled file.txt' : 'Nový textový dokument.txt', // added 10.11.2015
+			'untitled file.txt' : 'Nový súbor.txt', // added 10.11.2015
 			'untitled folder'   : 'Nový priečinok',   // added 10.11.2015
 			'Archive'           : 'Nový archív',  // from v2.1 added 10.11.2015
 			'untitled file'     : 'Nový súbor.$1',  // from v2.1.41 added 6.8.2018
