@@ -1703,7 +1703,8 @@
 											reject(fm.i18n(data.error? data.error : 'errUpload'));
 										}
 									})
-									.fail(function(error) {
+									.fail(function(err) {
+										var error = fm.parseError(err);
 										reject(fm.i18n(error? (error === 'userabort'? 'errAbort' : error) : 'errUploadNoFiles'));
 									})
 									.progress(function(data) {
