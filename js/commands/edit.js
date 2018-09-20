@@ -729,7 +729,8 @@ elFinder.prototype.commands.edit = function() {
 					}
 				})
 				.fail(function(error) {
-					var err = Array.isArray(error)? error[0] : error;
+					var err = fm.parseError(error);
+					err = Array.isArray(err)? err[0] : err;
 					(err !== 'errConvUTF8') && fm.sync();
 					dfrd.reject(error);
 				});

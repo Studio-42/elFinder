@@ -2013,7 +2013,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 				
 				self.trigger(cmd + 'done');
-				dfrd.reject(error, xhr, status);
+				dfrd.reject({error: error}, xhr, status);
 			},
 			/**
 			 * Request success handler. Valid response data and reject/resolve dfrd.
@@ -2043,9 +2043,9 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 				
 				if (!response) {
-					return dfrd.reject(['errResponse', 'errDataEmpty'], xhr, response);
+					return dfrd.reject({error :['errResponse', 'errDataEmpty']}, xhr, response);
 				} else if (!$.isPlainObject(response)) {
-					return dfrd.reject(['errResponse', 'errDataNotJSON'], xhr, response);
+					return dfrd.reject({error :['errResponse', 'errDataNotJSON']}, xhr, response);
 				} else if (response.error) {
 					if (isOpen) {
 						// check leafRoots
@@ -2053,7 +2053,7 @@ var elFinder = function(elm, opts, bootCallback) {
 							self.leafRoots[phash] = $.grep(roots, function(h) { return h !== data.target; });
 						});
 					}
-					return dfrd.reject(response.error, xhr, response);
+					return dfrd.reject({error :response.error}, xhr, response);
 				}
 				
 				var resolve = function() {
@@ -2084,7 +2084,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					response = self.normalize(response);
 					
 					if (!self.validResponse(cmd, response)) {
-						return dfrd.reject((response.norError || 'errResponse'), xhr, response);
+						return dfrd.reject({error :(response.norError || 'errResponse')}, xhr, response);
 					}
 					
 					if (isOpen) {
@@ -2244,7 +2244,15 @@ var elFinder = function(elm, opts, bootCallback) {
 				dfrd.always(function() {
 					delete options.headers['X-elFinderReqid'];
 				}).fail(function(error, xhr, response) {
+					var errData = {
+						cmd: cmd,
+						err: error,
+						xhr: xhr,
+						rc: response
+					};
+
 					// unset this cmd queue when user canceling
+					// see notify : function - `cancel.reject(0);`
 					if (error === 0) {
 						if (requestQueue.length) {
 							requestQueue = $.grep(requestQueue, function(req) {
@@ -2252,6 +2260,16 @@ var elFinder = function(elm, opts, bootCallback) {
 							});
 						}
 					}
+					// trigger "requestError" event
+					self.trigger('requestError', errData);
+					if (errData._event && errData._event.isDefaultPrevented()) {
+						deffail = false;
+						syncOnFail = false;
+						if (error) {
+							error.error = '';
+						}
+					}
+					// abort xhr
 					xhrAbort();
 					if (isOpen) {
 						openDir = self.file(data.target);
@@ -2266,12 +2284,12 @@ var elFinder = function(elm, opts, bootCallback) {
 
 				if (!cmd) {
 					syncOnFail = false;
-					return dfrd.reject('errCmdReq');
+					return dfrd.reject({error :'errCmdReq'});
 				}
 				
 				if (self.maxTargets && data.targets && data.targets.length > self.maxTargets) {
 					syncOnFail = false;
-					return dfrd.reject(['errMaxTargets', self.maxTargets]);
+					return dfrd.reject({error :['errMaxTargets', self.maxTargets]});
 				}
 
 				defdone && dfrd.done(done);
@@ -2315,6 +2333,10 @@ var elFinder = function(elm, opts, bootCallback) {
 				};
 				
 				dfrd.xhr = xhr = self.transport.send(options).always(function() {
+					// set responseURL from native xhr object
+					if (options._xhr && typeof options._xhr.responseURL !== 'undefined') {
+						xhr.responseURL = options._xhr.responseURL || '';
+					}
 					--requestCnt;
 					if (requestQueue.length) {
 						requestQueue.shift()();
@@ -2620,7 +2642,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		.fail(function(error, xhr) {
 			if (! polling || $.inArray('errOpen', error) !== -1) {
 				dfrd.reject(error);
-				error && self.request({
+				self.parseError(error) && self.request({
 					data   : {cmd : 'open', target : (self.lastDir('') || self.root()), tree : 1, init : 1},
 					notify : {type : 'open', cnt : 1, hideCnt : true}
 				});
@@ -2772,6 +2794,9 @@ var elFinder = function(elm, opts, bootCallback) {
 		}
 		if (l = handlers.length) {
 			event = $.Event(type);
+			if (data) {
+				data._event = event;
+			}
 			if (allowModify) {
 				event.data = data;
 			}
@@ -3300,7 +3325,7 @@ var elFinder = function(elm, opts, bootCallback) {
 						var dosync = true, hash = cwd, cts;
 						if (cwdOptions.syncChkAsTs && files[hash] && (cts = files[hash].ts)) {
 							self.request({
-								data           : {cmd : 'info', targets : [hash], compare : cts, reload : 1},
+								data : {cmd : 'info', targets : [hash], compare : cts, reload : 1},
 								preventDefault : true
 							})
 							.done(function(data){
@@ -3325,9 +3350,10 @@ var elFinder = function(elm, opts, bootCallback) {
 								}
 							})
 							.fail(function(error, xhr){
-								if (error && xhr.status != 0) {
-									self.error(error);
-									if ($.inArray('errOpen', error) !== -1) {
+								var err = self.parseError(error);
+								if (err && xhr.status != 0) {
+									self.error(err);
+									if (Array.isArray(err) && $.inArray('errOpen', err) !== -1) {
 										self.request({
 											data   : {cmd : 'open', target : (self.lastDir('') || self.root()), tree : 1, init : 1},
 											notify : {type : 'open', cnt : 1, hideCnt : true}
@@ -3730,7 +3756,14 @@ var elFinder = function(elm, opts, bootCallback) {
 	}
 	
 	if (typeof(this.transport.send) != 'function') {
-		this.transport.send = function(opts) { return $.ajax(opts); };
+		this.transport.send = function(opts) {
+			if (!self.UA.IE) {
+				// keep native xhr object for handling property responseURL
+				opts._xhr = new XMLHttpRequest();
+				opts.xhr = function() { return opts._xhr; };
+			}
+			return $.ajax(opts);
+		};
 	}
 	
 	if (this.transport.upload == 'iframe') {
@@ -4029,6 +4062,20 @@ var elFinder = function(elm, opts, bootCallback) {
 	})(this);
 
 	/**
+	 * Parse error value to display
+	 *
+	 * @param  Mixed  error
+	 * @return Mixed  parsed error
+	 */
+	this.parseError = function(error) {
+		var arg = error;
+		if ($.isPlainObject(arg)) {
+			arg = arg.error;
+		}
+		return arg;
+	};
+
+	/**
 	 * Alias for this.trigger('error', {error : 'message'})
 	 *
 	 * @param  String  error message
@@ -4036,10 +4083,14 @@ var elFinder = function(elm, opts, bootCallback) {
 	 **/
 	this.error = function() {
 		var arg = arguments[0],
-			opts = arguments[1] || null;
-		return arguments.length == 1 && typeof(arg) == 'function'
-			? self.bind('error', arg)
-			: (arg === true? this : self.trigger('error', {error : arg, opts : opts}));
+			opts = arguments[1] || null,
+			err;
+		if (arguments.length == 1 && typeof(arg) === 'function') {
+			return self.bind('error', arg);
+		} else {
+			err = this.parseError(arg);
+			return (err === true || !err)? this : self.trigger('error', {error: err, opts : opts});
+		}
 	};
 	
 	// create bind/trigger aliases for build-in events
@@ -5905,7 +5956,7 @@ elFinder.prototype = {
 											data   : {cmd : 'rename', target : hash, name : bak},
 											notify : {type : 'rename', cnt : 1}
 										})
-										.fail(function(error) {
+										.fail(function() {
 											item._remove = true;
 											fm.sync();
 										})
@@ -6043,8 +6094,9 @@ elFinder.prototype = {
 					return dfd;
 				},
 				dfrd   = $.Deferred()
-					.fail(function(error) {
-						var userAbort;
+					.fail(function(err) {
+						var error = self.parseError(err),
+							userAbort;
 						if (error === 'userabort') {
 							userAbort = true;
 							error = void 0;
@@ -6235,7 +6287,7 @@ elFinder.prototype = {
 			}, false);
 			
 			xhr.addEventListener('load', function(e) {
-				var status = xhr.status, res, curr = 0, error = '';
+				var status = xhr.status, res, curr = 0, error = '', errData, errObj;
 				
 				if (status >= 400) {
 					if (status > 500) {
@@ -6280,20 +6332,31 @@ elFinder.prototype = {
 				
 				res._multiupload = data.multiupload? true : false;
 				if (res.error) {
+					errData = {
+						cmd: 'upload',
+						err: res,
+						xhr: xhr,
+						rc: xhr.status
+					};
 					self.trigger('uploadfail', res);
+					// trigger "requestError" event
+					self.trigger('requestError', errData);
+					if (errData._event && errData._event.isDefaultPrevented()) {
+						res.error = '';
+					}
 					if (res._chunkfailure || res._multiupload) {
 						abort = true;
 						self.uploads.xhrUploading = false;
 						notifyto && clearTimeout(notifyto);
 						if (ntfUpload.length) {
 							self.notify({type : 'upload', cnt : -cnt, progress : 0, size : 0});
-							dfrd.reject(res.error);
+							dfrd.reject(res);
 						} else {
 							// for multi connection
 							dfrd.reject();
 						}
 					} else {
-						dfrd.reject(res.error);
+						dfrd.reject(res);
 					}
 				} else {
 					dfrd.resolve(res);
