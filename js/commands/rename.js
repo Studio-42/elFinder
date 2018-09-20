@@ -74,8 +74,9 @@ elFinder.prototype.commands.rename = function() {
 					navigate : {}
 				})
 				.fail(function(error) {
+					var err = fm.parseError(error);
 					dfrd && dfrd.reject();
-					if (! error || ! Array.isArray(error) || error[0] !== 'errRename') {
+					if (! err || ! Array.isArray(err) || err[0] !== 'errRename') {
 						fm.sync();
 					}
 				})

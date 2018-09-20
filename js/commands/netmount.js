@@ -117,7 +117,7 @@ elFinder.prototype.commands.netmount = function() {
 							})
 							.fail(function(error) {
 								if (cur.fail && typeof cur.fail == 'function') {
-									cur.fail(fm, error);
+									cur.fail(fm, fm.parseError(error));
 								}
 								dfrd.reject(error);
 							});

@@ -99,7 +99,7 @@ elFinder.prototype.commands.empty = function() {
 							fm.exec('rm', targets, { _userAction : true, addTexts : [ fm.i18n('folderToEmpty', dir.name) ] })
 							.fail(function(error) {
 								fm.trigger('unselectfiles', {files: fm.selected()});
-								done(error || '');
+								done(fm.parseError(error) || '');
 							})
 							.done(function() { done(i); });
 						}
@@ -109,7 +109,7 @@ elFinder.prototype.commands.empty = function() {
 					done('');
 				}
 			}).fail(function(error) {
-				done(error || '');
+				done(fm.parseError(error) || '');
 			});
 		});
 		

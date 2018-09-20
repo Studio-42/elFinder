@@ -252,6 +252,7 @@ $.fn.elfindertree = function(fm, opts) {
 			 */
 			execSubdirs = function() {
 				var cnt = opts.subdirsMaxConn - subdirsPending,
+					atOnce = fm.maxTargets? Math.min(fm.maxTargets, opts.subdirsAtOnce) : opts.subdirsAtOnce,
 					i, ids;
 				execSubdirsTm && cancelAnimationFrame(execSubdirsTm);
 				if (subdirsExecQue.length) {
@@ -259,7 +260,7 @@ $.fn.elfindertree = function(fm, opts) {
 						for (i = 0; i < cnt; i++) {
 							if (subdirsExecQue.length) {
 								subdirsPending++;
-								subdirs(subdirsExecQue.splice(0, opts.subdirsAtOnce)).always(function() {
+								subdirs(subdirsExecQue.splice(0, atOnce)).always(function() {
 									subdirsPending--;
 									execSubdirs();
 								});
