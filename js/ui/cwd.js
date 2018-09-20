@@ -470,16 +470,18 @@ $.fn.elfindercwd = function(fm, options) {
 				selectCheckbox && selectAllCheckbox.find('input').prop('checked', true);
 				fm.lazy(function() {
 					var files;
-					cwd.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').trigger(evtSelect);
 					if (fm.maxTargets && (incHashes || cwdHashes).length > fm.maxTargets) {
+						unselectAll({ notrigger: true });
 						files = $.map(incHashes || cwdHashes, function(hash) { return fm.file(hash) || null; });
 						files = files.slice(0, fm.maxTargets);
 						selectedFiles = {};
 						$.each(files, function(i, v) {
 							selectedFiles[v.hash] = true;
+							$('#'+fm.cwdHash2Id(v.hash)).trigger(evtSelect);
 						});
 						fm.toast({mode: 'warning', msg: fm.i18n(['errMaxTargets', fm.maxTargets])});
 					} else {
+						cwd.find('[id]:not(.'+clSelected+'):not(.elfinder-cwd-parent)').trigger(evtSelect);
 						selectedFiles = fm.arrayFlip(incHashes || cwdHashes, true);
 					}
 					trigger();
@@ -2469,6 +2471,11 @@ $.fn.elfindercwd = function(fm, options) {
 			})
 			.bind('request.open', function() {
 				bufferExt.getTmbs = [];
+			})
+			.one('open', function() {
+				if (fm.maxTargets) {
+					tmbNum = Math.min(fm.maxTargets, tmbNum);
+				}
 			})
 			.bind('open add remove searchend', function() {
 				var phash = fm.cwd().hash,

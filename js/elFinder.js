@@ -2239,8 +2239,6 @@ var elFinder = function(elm, opts, bootCallback) {
 					requestQueueSkipOpen = true;
 				}
 				
-				requestCnt++;
-				
 				dfrd.always(function() {
 					delete options.headers['X-elFinderReqid'];
 				}).fail(function(error, xhr, response) {
@@ -2331,7 +2329,9 @@ var elFinder = function(elm, opts, bootCallback) {
 				dfrd.syncOnFail = function(state) {
 					syncOnFail = !!state;
 				};
-				
+
+				requestCnt++;
+
 				dfrd.xhr = xhr = self.transport.send(options).always(function() {
 					// set responseURL from native xhr object
 					if (options._xhr && typeof options._xhr.responseURL !== 'undefined') {
