@@ -4,31 +4,31 @@ define('ELFINDER_PHP_ROOT_PATH', dirname(__FILE__));
 
 function elFinderAutoloader($name) {
 	$map = array(
-		'elFinder' => ELFINDER_PHP_ROOT_PATH . '/elFinder.class.php',
-		'elFinderConnector' => ELFINDER_PHP_ROOT_PATH . '/elFinderConnector.class.php',
-		'elFinderEditor' => ELFINDER_PHP_ROOT_PATH . '/editors/editor.php',
-		'elFinderLibGdBmp' => ELFINDER_PHP_ROOT_PATH . '/libs/GdBmp.php',
-		'elFinderPlugin' => ELFINDER_PHP_ROOT_PATH . '/elFinderPlugin.php',
-		'elFinderPluginAutoResize' => ELFINDER_PHP_ROOT_PATH . '/plugins/AutoResize/plugin.php',
-		'elFinderPluginAutoRotate' => ELFINDER_PHP_ROOT_PATH . '/plugins/AutoRotate/plugin.php',
-		'elFinderPluginNormalizer' => ELFINDER_PHP_ROOT_PATH . '/plugins/Normalizer/plugin.php',
-		'elFinderPluginSanitizer' => ELFINDER_PHP_ROOT_PATH . '/plugins/Sanitizer/plugin.php',
-		'elFinderPluginWatermark' => ELFINDER_PHP_ROOT_PATH . '/plugins/Watermark/plugin.php',
-		'elFinderSession' => ELFINDER_PHP_ROOT_PATH . '/elFinderSession.php',
-		'elFinderSessionInterface' => ELFINDER_PHP_ROOT_PATH . '/elFinderSessionInterface.php',
-		'elFinderVolumeDriver' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeDriver.class.php',
-		'elFinderVolumeDropbox2' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeDropbox2.class.php',
-		'elFinderVolumeFTP' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeFTP.class.php',
-		'elFinderVolumeFlysystemGoogleDriveCache' => ELFINDER_PHP_ROOT_PATH . '/elFinderFlysystemGoogleDriveNetmount.php',
-		'elFinderVolumeFlysystemGoogleDriveNetmount' => ELFINDER_PHP_ROOT_PATH . '/elFinderFlysystemGoogleDriveNetmount.php',
-		'elFinderVolumeGoogleDrive' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeGoogleDrive.class.php',
-		'elFinderVolumeGroup' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeGroup.class.php',
-		'elFinderVolumeLocalFileSystem' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeLocalFileSystem.class.php',
-		'elFinderVolumeMySQL' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeMySQL.class.php',
-		'elFinderVolumeTrash' => ELFINDER_PHP_ROOT_PATH . '/elFinderVolumeTrash.class.php',
+		'elFinder' => 'elFinder.class.php',
+		'elFinderConnector' => 'elFinderConnector.class.php',
+		'elFinderEditor' => 'editors/editor.php',
+		'elFinderLibGdBmp' => 'libs/GdBmp.php',
+		'elFinderPlugin' => 'elFinderPlugin.php',
+		'elFinderPluginAutoResize' => 'plugins/AutoResize/plugin.php',
+		'elFinderPluginAutoRotate' => 'plugins/AutoRotate/plugin.php',
+		'elFinderPluginNormalizer' => 'plugins/Normalizer/plugin.php',
+		'elFinderPluginSanitizer' => 'plugins/Sanitizer/plugin.php',
+		'elFinderPluginWatermark' => 'plugins/Watermark/plugin.php',
+		'elFinderSession' => 'elFinderSession.php',
+		'elFinderSessionInterface' => 'elFinderSessionInterface.php',
+		'elFinderVolumeDriver' => 'elFinderVolumeDriver.class.php',
+		'elFinderVolumeDropbox2' => 'elFinderVolumeDropbox2.class.php',
+		'elFinderVolumeFTP' => 'elFinderVolumeFTP.class.php',
+		'elFinderVolumeFlysystemGoogleDriveCache' => 'elFinderFlysystemGoogleDriveNetmount.php',
+		'elFinderVolumeFlysystemGoogleDriveNetmount' => 'elFinderFlysystemGoogleDriveNetmount.php',
+		'elFinderVolumeGoogleDrive' => 'elFinderVolumeGoogleDrive.class.php',
+		'elFinderVolumeGroup' => 'elFinderVolumeGroup.class.php',
+		'elFinderVolumeLocalFileSystem' => 'elFinderVolumeLocalFileSystem.class.php',
+		'elFinderVolumeMySQL' => 'elFinderVolumeMySQL.class.php',
+		'elFinderVolumeTrash' => 'elFinderVolumeTrash.class.php',
 	);
 	if (isset($map[$name])) {
-		return include_once($map[$name]);
+		return include_once(ELFINDER_PHP_ROOT_PATH . '/' . $map[$name]);
 	}
 	$prefix = substr($name, 0, 14);
 	if (substr($prefix, 0, 8) === 'elFinder') {
