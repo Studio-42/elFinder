@@ -20,7 +20,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		 *
 		 * @type Array
 		 **/
-		conflictChecks = ['button'],
+		conflictChecks = ['button', 'tooltip'],
 		
 		/**
 		 * Node on which elfinder creating
