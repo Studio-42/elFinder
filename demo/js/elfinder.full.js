@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: e12a7b2) (2018-09-22)
+ * Version 2.1.42 (2.1-src Nightly: 3799a89) (2018-09-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -51,7 +51,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		 *
 		 * @type Array
 		 **/
-		conflictChecks = ['button'],
+		conflictChecks = ['button', 'tooltip'],
 		
 		/**
 		 * Node on which elfinder creating
@@ -9746,7 +9746,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: e12a7b2)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 3799a89)';
 
 
 
