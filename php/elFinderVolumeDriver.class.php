@@ -901,6 +901,15 @@ abstract class elFinderVolumeDriver {
 	}
 	
 	/**
+	 * Get elFinder sesson wrapper object
+	 *
+	 * @return object  The session object
+	 */
+	public function getSession() {
+		return $this->session;
+	}
+
+	/**
 	 * Save session cache data
 	 * Calls this function before umount this volume on elFinder::exec()
 	 * 
