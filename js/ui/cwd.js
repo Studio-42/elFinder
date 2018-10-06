@@ -1845,7 +1845,7 @@ $.fn.elfindercwd = function(fm, options) {
 						nodeName = e.target.nodeName,
 						sel;
 					
-					if ((nodeName === 'INPUT' && e.target.type === 'text') || nodeName === 'TEXTAREA') {
+					if ((nodeName === 'INPUT' && e.target.type === 'text') || nodeName === 'TEXTAREA' || tgt.hasClass('elfinder-cwd-nonselect')) {
 						e.stopPropagation();
 						return;
 					}
