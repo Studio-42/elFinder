@@ -6110,10 +6110,13 @@ abstract class elFinderVolumeDriver {
 	 * @return array
 	 */
 	protected function getArchivers($use_cache = true) {
-		$cache = elFinder::$archivers;
-
 		$sessionKey = 'archivers';
 		if ($use_cache) {
+			if (isset($this->options['archivers']) && is_array($this->options['archivers']) && $this->options['archivers']) {
+				$cache = $this->options['archivers'];
+			} else {
+				$cache = elFinder::$archivers;
+			}
 			if ($cache) {
 				return $cache;
 			} else {
