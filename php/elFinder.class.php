@@ -364,6 +364,14 @@ class elFinder {
 	 **/
 	public $mountErrors = array();
 	
+
+	/**
+	 * Archivers cache
+	 *
+	 * @var array
+	 */
+	public static $archivers = array();
+
 	/**
 	 * URL for callback output window for CORS
 	 * redirect to this URL when callback output
@@ -671,6 +679,9 @@ class elFinder {
 		// set flag of throwErrorOnExec
 		// `true` need `try{}` block for `$connector->run();`
 		$this->throwErrorOnExec = !empty($opts['throwErrorOnExec']);
+
+		// set archivers
+		elFinder::$archivers = isset($opts['archivers']) && is_array($opts['archivers'])? $opts['archivers'] : array();
 
 		// bind events listeners
 		if (!empty($opts['bind']) && is_array($opts['bind'])) {
