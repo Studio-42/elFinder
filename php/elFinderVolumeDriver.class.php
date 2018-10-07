@@ -6110,10 +6110,17 @@ abstract class elFinderVolumeDriver {
 	 * @return array
 	 */
 	protected function getArchivers($use_cache = true) {
+		$cache = elFinder::$archivers;
 
-		$sessionKey = 'ARCHIVERS_CACHE';
-		if ($use_cache && isset($this->sessionCache[$sessionKey]) && is_array($this->sessionCache[$sessionKey])) {
-			return $this->sessionCache[$sessionKey];
+		$sessionKey = 'archivers';
+		if ($use_cache) {
+			if ($cache) {
+				return $cache;
+			} else {
+				if ($cache = $this->session->get($sessionKey, array())) {
+					return elFinder::$archivers = $cache;
+				}
+			}
 		}
 		
 		$arcs = array(
@@ -6202,8 +6209,8 @@ abstract class elFinderVolumeDriver {
 			}
 		}
 		
-		$this->sessionCache[$sessionKey] = $arcs;
-		return $arcs;
+		$this->session->set($sessionKey, $arcs);
+		return elFinder::$archivers = $arcs;
 	}
 
 	/**
