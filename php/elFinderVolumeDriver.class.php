@@ -5772,7 +5772,8 @@ abstract class elFinderVolumeDriver {
 			2 => array("pipe", "w")   // stderr
 		);
 
-		$process = proc_open($command, $descriptorspec, $pipes, null, null);
+		$cwd = getcwd();
+		$process = proc_open($command, $descriptorspec, $pipes, $cwd, null);
 
 		if (is_resource($process)) {
 			stream_set_blocking($pipes[1], 0);
