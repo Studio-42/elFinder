@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: b0b43a1) (2018-10-07)
+ * Version 2.1.42 (2.1-src Nightly: 9bef9a4) (2018-10-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9746,7 +9746,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: b0b43a1)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 9bef9a4)';
 
 
 
@@ -13896,7 +13896,7 @@ $.fn.elfindercwd = function(fm, options) {
 			 *
 			 * @type String
 			 **/
-			fileSelector = '.'+clFile + (options.oldSchool? ':not(.elfinder-cwd-parent)' : ''),
+			fileSelector = '.'+clFile,
 			
 			/**
 			 * Selected css class
@@ -14401,6 +14401,10 @@ $.fn.elfindercwd = function(fm, options) {
 						origin : 'cwd'
 					};
 				
+				if (oldSchoolItem && (selected.length > 1 || selected[0] !== fm.cwdId2Hash(
+					oldSchoolItem.attr('id'))) && oldSchoolItem.hasClass(clSelected)) {
+					oldSchoolItem.trigger(evtUnselect);
+				}
 				allSelected = selected.length && (selected.length === (incHashes || cwdHashes).length) && (!fm.maxTargets || selected.length <= fm.maxTargets);
 				if (selectCheckbox) {
 					selectAllCheckbox.find('input').prop('checked', allSelected);
@@ -14636,6 +14640,11 @@ $.fn.elfindercwd = function(fm, options) {
 			},
 			
 			/**
+			 * Item node of oldScholl ".."
+			 */
+			oldSchoolItem = null,
+
+			/**
 			 * display parent folder with ".." name
 			 * 
 			 * @param  String  phash
@@ -14646,15 +14655,14 @@ $.fn.elfindercwd = function(fm, options) {
 					pdir  = fm.file(phash) || null,
 					set   = function(pdir) {
 						if (pdir) {
-							parent = $(itemhtml($.extend(true, {}, pdir, {name : '..', i18 : '..', mime : 'directory'})))
+							oldSchoolItem = $(itemhtml($.extend(true, {}, pdir, {name : '..', i18 : '..', mime : 'directory'})))
 								.addClass('elfinder-cwd-parent')
 								.on('dblclick', function() {
 									var hash = fm.cwdId2Hash(this.id);
 									fm.trigger('select', {selected : [hash]}).exec('open', hash);
-								}
-							);
-							(list ? parent.children('td:first') : parent).children('.elfinder-cwd-select').remove();
-							(list ? cwd.find('tbody') : cwd).prepend(parent);
+								});
+							(list ? oldSchoolItem.children('td:first') : oldSchoolItem).children('.elfinder-cwd-select').remove();
+							(list ? cwd.find('tbody') : cwd).prepend(oldSchoolItem);
 						}
 					};
 				if (pdir) {
@@ -14783,8 +14791,12 @@ $.fn.elfindercwd = function(fm, options) {
 					wrapper.scrollTop(0);
 					phash = fm.cwd().phash;
 					go();
-					if (options.oldSchool && phash && !query) {
-						oldSchool(phash);
+					if (options.oldSchool) {
+						if (phash && !query) {
+							oldSchool(phash);
+						} else {
+							oldSchoolItem = $();
+						}
 					}
 					if (list) {
 						colWidth && setColwidth();
