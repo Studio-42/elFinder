@@ -317,6 +317,8 @@ abstract class elFinderVolumeDriver {
 		// An option to add MimeMap to the `mimeMap` option
 		// Array '[ext]:[detected mime type]' => '[normalized mime]'
 		'additionalMimeMap' => array(),
+		// MIME-Type of filetype detected as unknown
+		'mimeTypeUnknown' => 'application/octet-stream',
 		// MIME regex of send HTTP header "Content-Disposition: inline" or allow preview in quicklook
 		// '.' is allow inline of all of MIME types
 		// '$^' is not allow inline of all of MIME types
@@ -4361,7 +4363,7 @@ abstract class elFinderVolumeDriver {
 			// detecting by filename
 			$type = elFinderVolumeDriver::mimetypeInternalDetect($name);
 			if ($type === 'unknown') {
-				$type = ($size == 0)? '' : 'text/plain';
+				$type = ($size == 0)? 'text/plain' : $this->options['mimeTypeUnknown'];
 			}
 		}
 		
