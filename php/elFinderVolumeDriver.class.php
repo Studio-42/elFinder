@@ -4164,11 +4164,12 @@ abstract class elFinderVolumeDriver {
 			$stat['size'] = 'unknown';
 		}	
 		
-		if ($isDir = (isset($stat['mime']) && $stat['mime'] === 'directory')) {
+		$mime = isset($stat['mime'])? $stat['mime'] : '';
+		if ($isDir = ($mime === 'directory')) {
 			$stat['volumeid'] = $this->id;
 		} else {		
-			if (empty($stat['mime']) || (!$isDir && $stat['size'] == 0)) {
-				$stat['mime'] = $this->mimetype($stat['name'], true, $stat['size']);
+			if (empty($stat['mime']) || $stat['size'] == 0) {
+				$stat['mime'] = $this->mimetype($stat['name'], true, $stat['size'], $mime);
 			} else {
 				$stat['mime'] = $this->mimeTypeNormalize($stat['mime'], $stat['name']);
 			}
@@ -4319,10 +4320,11 @@ abstract class elFinderVolumeDriver {
 	 * @param  string      $path file path
 	 * @param  string|bool $name
 	 * @param  integer     $size
+	 * @param  string      $mime was notified from the volume driver
 	 * @return string
 	 * @author Dmitry (dio) Levashov
 	 */
-	protected function mimetype($path, $name = '', $size = null) {
+	protected function mimetype($path, $name = '', $size = null, $mime = null) {
 		$type = '';
 		$nameCheck = false;
 		
@@ -4363,7 +4365,11 @@ abstract class elFinderVolumeDriver {
 			// detecting by filename
 			$type = elFinderVolumeDriver::mimetypeInternalDetect($name);
 			if ($type === 'unknown') {
-				$type = ($size == 0)? 'text/plain' : $this->options['mimeTypeUnknown'];
+				if ($mime) {
+					$type = $mime;
+				} else {
+					$type = ($size == 0)? 'text/plain' : $this->options['mimeTypeUnknown'];
+				}
 			}
 		}
 		
