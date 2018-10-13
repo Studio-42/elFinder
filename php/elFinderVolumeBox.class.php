@@ -1,7 +1,5 @@
 <?php
 
-elFinder::$netDrivers['box'] = 'Box';
-
 /**
  * Simple elFinder driver for BoxDrive
  * Box.com API v2.0.

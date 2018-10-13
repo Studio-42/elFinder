@@ -1,7 +1,5 @@
 <?php
 
-elFinder::$netDrivers['ftp'] = 'FTP';
-
 /**
  * Simple elFinder driver for FTP
  *
