@@ -697,7 +697,7 @@ elFinder.prototype._options = {
 		// toolbar extra options
 		toolbarExtra : {
 			// also displays the text label on the button (true / false / 'none')
-			displayTextLabel: true,
+			displayTextLabel: false,
 			// Exclude `displayTextLabel` setting UA type
 			labelExcludeUA: ['Mobile'],
 			// auto hide on initial open
