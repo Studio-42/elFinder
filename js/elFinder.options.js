@@ -696,8 +696,8 @@ elFinder.prototype._options = {
 		],
 		// toolbar extra options
 		toolbarExtra : {
-			// also displays the text label on the button (true / false)
-			displayTextLabel: false,
+			// also displays the text label on the button (true / false / 'none')
+			displayTextLabel: true,
 			// Exclude `displayTextLabel` setting UA type
 			labelExcludeUA: ['Mobile'],
 			// auto hide on initial open
@@ -706,7 +706,9 @@ elFinder.prototype._options = {
 			defaultHides: ['home', 'reload'],
 			// show Preference button ('none', 'auto', 'always')
 			// If you do not include 'preference' in the context menu you should specify 'auto' or 'always'
-			showPreferenceButton: 'none'
+			showPreferenceButton: 'none',
+			// show Preference button into contextmenu of the toolbar (true / false)
+			preferenceInContextmenu: true
 		},
 		// directories tree options
 		tree : {
