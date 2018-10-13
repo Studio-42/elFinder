@@ -185,12 +185,21 @@ elFinder.prototype._options = {
 
 	/**
 	 * Base URL of elfFinder library starting from Manager HTML
-	 * Auto detect when empty value`
+	 * Auto detect when empty value
 	 * 
 	 * @type String
 	 * @default ""
 	 */
 	baseUrl : '',
+
+	/**
+	 * Base URL of i18n js files
+	 * baseUrl + "js/i18n/" when empty value
+	 * 
+	 * @type String
+	 * @default ""
+	 */
+	i18nBaseUrl : '',
 	
 	/**
 	 * Auto load required CSS
