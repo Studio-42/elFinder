@@ -7,8 +7,6 @@ use Kunnu\Dropbox\Models\FolderMetadata;
 use Kunnu\Dropbox\Models\FileMetadata;
 use Kunnu\Dropbox\Exceptions\DropboxClientException;
 
-elFinder::$netDrivers['dropbox2'] = 'Dropbox2';
-
 /**
  * Simple elFinder driver for Dropbox
  * kunalvarma05/dropbox-php-sdk:0.1.5 or above.

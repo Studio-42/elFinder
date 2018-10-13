@@ -1,7 +1,5 @@
 <?php
 
-elFinder::$netDrivers['googledrive'] = 'GoogleDrive';
-
 /**
  * Simple elFinder driver for GoogleDrive
  * google-api-php-client-2.x or above.
