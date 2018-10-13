@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 52b9d4d) (2018-10-13)
+ * Version 2.1.42 (2.1-src Nightly: bfb4e83) (2018-10-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9756,7 +9756,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 52b9d4d)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: bfb4e83)';
 
 
 
@@ -10870,7 +10870,7 @@ elFinder.prototype._options = {
 		// toolbar extra options
 		toolbarExtra : {
 			// also displays the text label on the button (true / false / 'none')
-			displayTextLabel: true,
+			displayTextLabel: false,
 			// Exclude `displayTextLabel` setting UA type
 			labelExcludeUA: ['Mobile'],
 			// auto hide on initial open
