@@ -495,7 +495,7 @@
 .elfinder-cwd .elfinder-navbar-root-zip.elfinder-droppable-active .elfinder-cwd-icon,
 .elfinder-cwd-view-list .elfinder-navbar-root-zip td .elfinder-cwd-icon {
     background-image: url("../img/volume_icon_zip.svg");
-    background-image: url("../img/volume_icon_zip.svg") \9;
+    background-image: url("../img/volume_icon_zip.png") \9;
     background-position: 0 0;
     background-size: contain;
 }

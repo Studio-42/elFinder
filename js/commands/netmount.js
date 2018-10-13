@@ -7,6 +7,7 @@
 elFinder.prototype.commands.netmount = function() {
 	"use strict";
 	var self = this,
+		hasMenus = false,
 		content;
 
 	this.alwaysEnabled  = true;
@@ -22,8 +23,11 @@ elFinder.prototype.commands.netmount = function() {
 				requestAnimationFrame(function() {
 					$.each(self.drivers, function() {
 						var d = self.options[this];
-						if (d && d.integrateInfo) {
-							fm.trigger('helpIntegration', Object.assign({cmd: 'netmount'}, d.integrateInfo));
+						if (d) {
+							hasMenus = true;
+							if (d.integrateInfo) {
+								fm.trigger('helpIntegration', Object.assign({cmd: 'netmount'}, d.integrateInfo));
+							}
 						}
 					});
 				});
@@ -32,7 +36,7 @@ elFinder.prototype.commands.netmount = function() {
 	};
 
 	this.getstate = function() {
-		return this.drivers.length ? 0 : -1;
+		return hasMenus ? 0 : -1;
 	};
 	
 	this.exec = function() {

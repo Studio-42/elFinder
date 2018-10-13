@@ -1,7 +1,5 @@
 <?php
 
-elFinder::$netDrivers['onedrive'] = 'OneDrive';
-
 /**
  * Simple elFinder driver for OneDrive
  * onedrive api v5.0.

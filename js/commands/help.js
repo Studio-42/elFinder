@@ -204,7 +204,7 @@
 		$.inArray('about', parts) !== -1 && about();
 		$.inArray('shortcuts', parts) !== -1 && shortcuts();
 		if ($.inArray('help', parts) !== -1) {
-			helpSource = fm.baseUrl+'js/i18n/help/%s.html.js';
+			helpSource = fm.i18nBaseUrl + 'help/%s.html.js';
 			help();
 		}
 		$.inArray('integrations', parts) !== -1 && integrations();

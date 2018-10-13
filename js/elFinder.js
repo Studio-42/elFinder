@@ -790,6 +790,14 @@ var elFinder = function(elm, opts, bootCallback) {
 	this.baseUrl = '';
 	
 	/**
+	 * Base URL of i18n js files
+	 * baseUrl + "js/i18n/" when empty value
+	 * 
+	 * @type String
+	 */
+	this.i18nBaseUrl = '';
+
+	/**
 	 * Is elFinder CSS loaded
 	 * 
 	 * @type Boolean
@@ -888,6 +896,8 @@ var elFinder = function(elm, opts, bootCallback) {
 		}
 	})();
 	
+	this.i18nBaseUrl = (this.options.i18nBaseUrl || this.baseUrl + 'js/i18n').replace(/\/$/, '') + '/';
+
 	// set dispInlineRegex
 	cwdOptionsDefault['dispInlineRegex'] = this.options.dispInlineRegex;
 	
@@ -4496,7 +4506,7 @@ var elFinder = function(elm, opts, bootCallback) {
 	// auto load language file
 	dfrdsBeforeBootup.push((function() {
 		var lang   = self.lang,
-			langJs = self.baseUrl + 'js/i18n/elfinder.' + lang + '.js',
+			langJs = self.i18nBaseUrl + 'elfinder.' + lang + '.js',
 			dfd    = $.Deferred().done(function() {
 				if (self.i18[lang]) {
 					self.lang = lang;
