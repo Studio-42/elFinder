@@ -289,6 +289,16 @@
 		dialog = fm.dialog(view, opts);
 		dialog.attr('id', id);
 
+		if (fm.UA.Mobile && $.fn.tooltip) {
+			dialog.children('.ui-dialog-content .elfinder-info-title').tooltip({
+				classes: {
+					'ui-tooltip': 'elfinder-ui-tooltip ui-widget-shadow'
+				},
+				tooltipClass: 'elfinder-ui-tooltip ui-widget-shadow',
+				track: true
+			});
+		}
+
 		if (file && file.url == '1') {
 			dialog.on('click', '.'+spclass+'-url', function(){
 				$(this).parent().html(tpl.spinner.replace('{text}', fm.i18n('ntfurl')).replace('{name}', 'url'));
