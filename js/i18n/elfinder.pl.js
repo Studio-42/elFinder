@@ -2,7 +2,7 @@
  * Polski translation
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2018-08-23
+ * @version 2018-10-13
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;',
 		language   : 'Polski',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i', // Mar 13, 2012 05:27 PM
-		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
-		nonameDateFormat : 'ymd-His', // to apply if upload file is noname: 120513172700
+		dateFormat : 'd.m.Y H:i', // will show like: 13.10.2018 18:48
+		fancyDateFormat : '$1 H:i', // will show like: Dzisiaj 18:48
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 181013-184832
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -225,7 +225,7 @@
 			'ntfchkdir'   : 'Sprawdzanie folderu docelowego', // from v2.1.24 added 3.5.2017
 			'ntfundo'     : 'Cofanie poprzedniej operacji', // from v2.1.27 added 31.07.2017
 			'ntfredo'     : 'Ponownie poprzednio cofnięte', // from v2.1.27 added 31.07.2017
-			'ntfchkcontent' : 'Checking contents', // from v2.1.41 added 3.8.2018
+			'ntfchkcontent' : 'Sprawdzanie zawartości', // from v2.1.41 added 3.8.2018
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : 'Śmieci', //from v2.1.24 added 29.4.2017
@@ -289,8 +289,8 @@
 			'untitled file.txt' : 'NowyPlik.txt', // added 10.11.2015
 			'untitled folder'   : 'NowyFolder',   // added 10.11.2015
 			'Archive'           : 'NoweArchiwum',  // from v2.1 added 10.11.2015
-			'untitled file'     : 'NewFile.$1',  // from v2.1.41 added 6.8.2018
-			'extentionfile'     : '$1 File',     // from v2.1.41 added 6.8.2018
+			'untitled file'     : 'NowyPlik.$1',  // from v2.1.41 added 6.8.2018
+			'extentionfile'     : '$1 Plik',     // from v2.1.41 added 6.8.2018
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Wymagane potwierdzenie',
@@ -432,7 +432,7 @@
 			'firstLetterSearch': 'Wyszukiwanie pierwszej litery', // from v2.1.23 added 24.3.2017
 			'presets'         : 'Wstępnie ustalone', // from v2.1.25 added 26.5.2017
 			'tooManyToTrash'  : 'To zbyt wiele rzeczy, więc nie mogą być w koszu.', // from v2.1.25 added 9.6.2017
-			'TextArea'        : 'TextArea', // from v2.1.25 added 14.6.2017
+			'TextArea'        : 'PoleTekstowe', // from v2.1.25 added 14.6.2017
 			'folderToEmpty'   : 'Opróżnij folder "$1".', // from v2.1.25 added 22.6.2017
 			'filderIsEmpty'   : 'Brak elementów w folderze "$1".', // from v2.1.25 added 22.6.2017
 			'preference'      : 'Preferencje', // from v2.1.26 added 28.6.2017
@@ -475,9 +475,9 @@
 			'showHidden'      : 'Pokaż ukryte pozycje', // from v2.1.41 added 24.7.2018
 			'hideHidden'      : 'Ukryj ukryte pozycje', // from v2.1.41 added 24.7.2018
 			'toggleHidden'    : 'Pokaż/Ukryj ukryte pozycje', // from v2.1.41 added 24.7.2018
-			'makefileTypes'   : 'File types to enable with "New file"', // from v2.1.41 added 7.8.2018
-			'typeOfTextfile'  : 'Type of the Text file', // from v2.1.41 added 7.8.2018
-			'add'             : 'Add', // from v2.1.41 added 7.8.2018
+			'makefileTypes'   : 'Typy plików, które można włączyć za pomocą "Nowy plik"', // from v2.1.41 added 7.8.2018
+			'typeOfTextfile'  : 'Typ pliku tekstowego', // from v2.1.41 added 7.8.2018
+			'add'             : 'Dodaj', // from v2.1.41 added 7.8.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',
