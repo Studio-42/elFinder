@@ -3,14 +3,7 @@ elFinder
 
 **WARNING: IF YOU HAVE OLDER (IN PARTICULAR 2.1.38 OR EARLIER) VERSIONS OF ELFINDER ON PUBLIC SERVERS, IT MAY CAUSE SERIOUS DAMAGE TO YOUR SERVER AND VISITED USER. YOU SHOULD UPDATE TO THE LATEST VERSION OR REMOVE IT FROM THE SERVER.**
 
-<pre>
-      _ ______ _           _           
-     | |  ____(_)         | |          
-  ___| | |__   _ _ __   __| | ___ _ __ 
- / _ \ |  __| | | '_ \ / _` |/ _ \ '__|
-|  __/ | |    | | | | | (_| |  __/ |   
- \___|_|_|    |_|_| |_|\__,_|\___|_|   
-</pre>
+![elFinder file manager for the Web](https://studio-42.github.io/elFinder/images/elFinderScr.png "elFinder file manager for the Web")
 
 elFinder is an open-source file manager for web, written in JavaScript using
 jQuery UI. Creation is inspired by simplicity and convenience of Finder program
