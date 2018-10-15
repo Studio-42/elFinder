@@ -55,6 +55,7 @@ Features
  * High performance server backend and light client UI
  * Multi-root support
  * Local file system, MySQL, FTP, Box, Dropbox, GoogleDrive and OneDrive volume storage drivers
+ * Support AWS S3, Azure, Digital Ocean Spaces and more with [League\Flysystem (PHP)](https://github.com/barryvdh/elfinder-flysystem-d river) Flysystem driver
  * Cloud storage (Box, Dropbox, GoogleDrive and OneDrive) drivers
  * Background file/folder upload with Drag & Drop HTML5 support
  * Chunked file upload for large file
