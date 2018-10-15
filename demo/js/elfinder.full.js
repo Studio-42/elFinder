@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: a6bc282) (2018-10-14)
+ * Version 2.1.42 (2.1-src Nightly: 43f8621) (2018-10-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9756,7 +9756,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: a6bc282)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 43f8621)';
 
 
 
@@ -24929,6 +24929,13 @@ elFinder.prototype.commands.hide = function() {
 			group    : fm.i18n('group'),
 			perm     : fm.i18n('perm'),
 			getlink  : fm.i18n('getLink')
+		},
+		applyZWSP = function(str, remove) {
+			if (remove) {
+				return str.replace(/\u200B/g, '');
+			} else {
+				return str.replace(/(\/|\\)/g, "$1\u200B");
+			}
 		};
 	
 	this.items = ['size', 'aliasfor', 'path', 'link', 'dim', 'modify', 'perms', 'locked', 'owner', 'group', 'perm'];
@@ -25039,7 +25046,7 @@ elFinder.prototype.commands.hide = function() {
 			!hideItems.aleasfor && file.alias && content.push(row.replace(l, msg.aliasfor).replace(v, file.alias));
 			if (!hideItems.path) {
 				if (path = fm.path(file.hash, true)) {
-					content.push(row.replace(l, msg.path).replace(v, fm.escape(path).replace(/(\/|\\)/g, "$1&#8203;")).replace('{class}', 'elfinder-info-path'));
+					content.push(row.replace(l, msg.path).replace(v, applyZWSP(fm.escape(path))).replace('{class}', 'elfinder-info-path'));
 				} else {
 					content.push(row.replace(l, msg.path).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', 'path')).replace('{class}', 'elfinder-info-path'));
 					reqs.push(fm.path(file.hash, true, {notify: null})
@@ -25047,7 +25054,7 @@ elFinder.prototype.commands.hide = function() {
 						replSpinner(msg.unknown, 'path');
 					})
 					.done(function(path) {
-						replSpinner(path.replace(/(\/|\\)/g, "$1&#8203;"), 'path');
+						replSpinner(applyZWSP(path), 'path');
 					}));
 				}
 			}
@@ -25184,7 +25191,9 @@ elFinder.prototype.commands.hide = function() {
 		view = view.replace('{title}', title).replace('{content}', content.join('').replace(/{class}/g, ''));
 		
 		dialog = fm.dialog(view, opts);
-		dialog.attr('id', id);
+		dialog.attr('id', id).one('mousedown', '.elfinder-info-path', function() {
+			$(this).html(applyZWSP($(this).html(), true));
+		});
 
 		if (fm.UA.Mobile && $.fn.tooltip) {
 			dialog.children('.ui-dialog-content .elfinder-info-title').tooltip({
