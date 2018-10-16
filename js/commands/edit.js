@@ -234,7 +234,7 @@ elFinder.prototype.commands.edit = function() {
 						return dfd.resolve(false);
 					}
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
-					var res = getContent();
+					res = getContent();
 					if (res && res.promise) {
 						tm = setTimeout(function() {
 							fm.notify({
@@ -486,7 +486,13 @@ elFinder.prototype.commands.edit = function() {
 					}
 
 					ta.initEditArea = function(id, file, content) {
-						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [];
+						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [],
+							wfake = $('<select/>').hide(),
+							setSelW = function(init) {
+								init && wfake.appendTo(selEncoding.parent());
+								wfake.empty().append($('<option/>').text(selEncoding.val()));
+								selEncoding.width(wfake.width());
+							};
 						// ta.hide() for performance tune. Need ta.show() in `load()` if use textarea node.
 						ta.hide().val(content);
 						if (content === '' || ! encoding || encoding !== 'UTF-8') {
@@ -500,12 +506,13 @@ elFinder.prototype.commands.edit = function() {
 							changed().done(function(change) {
 								if (! change && getContent() !== '') {
 									cancel();
-									edit(file, $(this).val(), editor).fail(function(err) { err && fm.error(err); });
+									edit(file, selEncoding.val(), editor).fail(function(err) { err && fm.error(err); });
 								}
 							});
+							setSelW();
 						}).on('mouseover', stateChange);
-						ta.parent().prev().find('.elfinder-titlebar-button:last')
-							.after($('<span class="elfinder-titlebar-button-right"/>').append(selEncoding));
+						ta.parent().next().prepend($('<div class="ui-dialog-buttonset elfinder-edit-extras"/>').append(selEncoding));
+						setSelW(true);
 					};
 				})();
 			}

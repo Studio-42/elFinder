@@ -397,10 +397,6 @@
     margin-bottom: -20em;
 }
 
-.std42-dialog .ui-dialog-titlebar select {
-    font-size: 12px;
-}
-
 .std42-dialog .ui-dialog-buttonpane .elfinder-dialog-confirm-encoding {
     font-size: 12px;
 }
@@ -412,6 +408,11 @@
 
 .ui-dialog-buttonpane .ui-dialog-buttonset.elfinder-edit-extras-quality {
     padding-top: 6px;
+}
+
+.ui-dialog-buttonpane .ui-dialog-buttonset.elfinder-edit-extras select {
+    font-size: 12px;
+    margin-top: 8px;
 }
 
 .ui-dialog-buttonpane .ui-icon {
