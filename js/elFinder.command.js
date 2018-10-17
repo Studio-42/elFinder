@@ -21,6 +21,13 @@ elFinder.prototype.command = function(fm) {
 	this.name = '';
 	
 	/**
+	 * Dialog class name
+	 *
+	 * @type  String
+	 */
+	this.dialogClass = '';
+
+	/**
 	 * Command icon class name with out 'elfinder-button-icon-'
 	 * Use this.name if it is empty
 	 *
@@ -207,6 +214,7 @@ elFinder.prototype.command = function(fm) {
 		               : ((this.extendsCmd && fm.messages['cmd'+this.extendsCmd]) ? fm.i18n('cmd'+this.extendsCmd) : name);
 		this.options   = Object.assign({}, this.options, opts);
 		this.listeners = [];
+		this.dialogClass = 'elfinder-dialog-' + name;
 
 		if (opts.shortcuts) {
 			if (typeof opts.shortcuts === 'function') {
@@ -376,5 +384,21 @@ elFinder.prototype.command = function(fm) {
 		return hashes
 			? $.map(Array.isArray(hashes) ? hashes : [hashes], function(hash) { return fm.file(hash) || null; })
 			: fm.selectedFiles();
+	};
+
+	/**
+	 * Wrapper to fm.dialog()
+	 *
+	 * @param  String|DOMElement  content
+	 * @param  Object             options
+	 * @return Object             jQuery element object
+	 */
+	this.fmDialog = function(content, options) {
+		if (options.cssClass) {
+			options.cssClass += ' ' + this.dialogClass;
+		} else {
+			options.cssClass = this.dialogClass;
+		}
+		return this.fm.dialog(content, options);
 	};
 };
