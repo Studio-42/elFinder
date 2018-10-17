@@ -2,7 +2,7 @@
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-08-24
+ * @version 2018-10-17
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -283,7 +283,8 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'untitled folder'   : 'NewFolder',   // added 10.11.2015
 			'Archive'           : 'NewArchive',  // from v2.1 added 10.11.2015
 			'untitled file'     : 'NewFile.$1',  // from v2.1.41 added 6.8.2018
-			'extentionfile'     : '$1 File',     // from v2.1.41 added 6.8.2018
+			'extentionfile'     : '$1: File',    // from v2.1.41 added 6.8.2018
+			'extentiontype'     : '$1: $2',      // from v2.1.43 added 17.10.2018
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation required',

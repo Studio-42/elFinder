@@ -18,7 +18,7 @@ elFinder.prototype.commands.mkfile = function() {
 		var fm = self.fm,
 			name;
 		if (name = fm.messages['kind' + fm.kinds[mime]]) {
-			name = type.toUpperCase() + ' ' + name;
+			name = fm.i18n(['extentiontype', type.toUpperCase(), name]);
 		} else {
 			name = fm.i18n(['extentionfile', type.toUpperCase()]);
 		}
