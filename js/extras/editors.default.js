@@ -377,7 +377,8 @@
 									menuBarPosition: 'bottom'
 								},
 								cssMaxWidth: Math.max(300, bParent.width()),
-								cssMaxHeight: Math.max(200, bParent.height() - (tmpDiv[0].height() + tmpDiv[1].height() + 3 /*margin*/))
+								cssMaxHeight: Math.max(200, bParent.height() - (tmpDiv[0].height() + tmpDiv[1].height() + 3 /*margin*/)),
+								usageStatistics: false
 							}),
 							canvas = $base.find('canvas:first').get(0),
 							zoom = function(v) {
