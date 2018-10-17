@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-08-24
+ * @version 2018-10-17
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -290,7 +290,8 @@
 			'untitled folder'   : '新規フォルダ',   // added 10.11.2015
 			'Archive'           : '新規アーカイブ',  // from v2.1 added 10.11.2015
 			'untitled file'     : '新規ファイル.$1',  // from v2.1.41 added 6.8.2018
-			'extentionfile'     : '$1 ファイル',     // from v2.1.41 added 6.8.2018
+			'extentionfile'     : '$1: ファイル',     // from v2.1.41 added 6.8.2018
+			'extentiontype'     : '$1: $2',      // from v2.1.43 added 17.10.2018
 
 			/********************************** messages **********************************/
 			'confirmReq'      : '処理を実行しますか？',
