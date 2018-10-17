@@ -323,6 +323,11 @@
     background-color: inherit;
 }
 
+/* edit dialog */
+.elfinder-dialog-edit select.elfinder-edit-changed {
+    border-bottom: 2px solid #13ae10;
+}
+
 /* tooltip */
 .elfinder-ui-tooltip,
 .elfinder .elfinder-ui-tooltip {

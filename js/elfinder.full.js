@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 43f8621) (2018-10-15)
+ * Version 2.1.42 (2.1-src Nightly: f58de14) (2018-10-17)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -3098,7 +3098,7 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @return jQuery
 	 */
 	this.dialog = function(content, options) {
-		var dialog = $('<div/>').append(content).appendTo(node).elfinderdialog(options, this),
+		var dialog = $('<div/>').append(content).appendTo(node).elfinderdialog(options, self),
 			dnode  = dialog.closest('.ui-dialog'),
 			resize = function(){
 				! dialog.data('draged') && dialog.is(':visible') && dialog.elfinderdialog('posInit');
@@ -9756,7 +9756,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 43f8621)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: f58de14)';
 
 
 
@@ -11598,6 +11598,13 @@ elFinder.prototype.command = function(fm) {
 	this.name = '';
 	
 	/**
+	 * Dialog class name
+	 *
+	 * @type  String
+	 */
+	this.dialogClass = '';
+
+	/**
 	 * Command icon class name with out 'elfinder-button-icon-'
 	 * Use this.name if it is empty
 	 *
@@ -11784,6 +11791,7 @@ elFinder.prototype.command = function(fm) {
 		               : ((this.extendsCmd && fm.messages['cmd'+this.extendsCmd]) ? fm.i18n('cmd'+this.extendsCmd) : name);
 		this.options   = Object.assign({}, this.options, opts);
 		this.listeners = [];
+		this.dialogClass = 'elfinder-dialog-' + name;
 
 		if (opts.shortcuts) {
 			if (typeof opts.shortcuts === 'function') {
@@ -11953,6 +11961,22 @@ elFinder.prototype.command = function(fm) {
 		return hashes
 			? $.map(Array.isArray(hashes) ? hashes : [hashes], function(hash) { return fm.file(hash) || null; })
 			: fm.selectedFiles();
+	};
+
+	/**
+	 * Wrapper to fm.dialog()
+	 *
+	 * @param  String|DOMElement  content
+	 * @param  Object             options
+	 * @return Object             jQuery element object
+	 */
+	this.fmDialog = function(content, options) {
+		if (options.cssClass) {
+			options.cssClass += ' ' + this.dialogClass;
+		} else {
+			options.cssClass = this.dialogClass;
+		}
+		return this.fm.dialog(content, options);
 	};
 };
 
@@ -21889,7 +21913,7 @@ elFinder.prototype.commands.chmod = function() {
 
 		view = view.replace('{title}', title).replace('{dataTable}', dataTable).replace(/{id}/g, id);
 
-		dialog = fm.dialog(view, opts);
+		dialog = this.fmDialog(view, opts);
 		dialog.attr('id', id);
 
 		// load thumbnail
@@ -22301,7 +22325,7 @@ elFinder.prototype.commands.download = function() {
 									btn[fm.i18n('btnCancel')] = function() {
 										dialog.elfinderdialog('destroy');
 									};
-									dialog = fm.dialog(dllink, {
+									dialog = self.fmDialog(dllink, {
 										title: fm.i18n('link'),
 										buttons: btn,
 										width: '200px',
@@ -22550,7 +22574,6 @@ elFinder.prototype.commands.duplicate = function() {
 elFinder.prototype.commands.edit = function() {
 		var self  = this,
 		fm    = this.fm,
-		dlcls = 'elfinder-dialog-edit',
 		clsEditing = fm.res('class', 'editing'),
 		mimesSingle = [],
 		mimes = [],
@@ -22753,7 +22776,7 @@ elFinder.prototype.commands.edit = function() {
 							fm.trigger('unselectfiles', { files: [ file.hash ] });
 						},
 						reqOpen = null,
-						dialogs = fm.getUI().children('.' + dlcls + ':visible');
+						dialogs = fm.getUI().children('.' + self.dialogClass + ':visible');
 						if (dialogNode.is(':hidden')) {
 							dialogs = dialogs.add(dialogNode);
 						}
@@ -22776,7 +22799,7 @@ elFinder.prototype.commands.edit = function() {
 						return dfd.resolve(false);
 					}
 					ta.editor && ta.editor.save(ta[0], ta.editor.instance);
-					var res = getContent();
+					res = getContent();
 					if (res && res.promise) {
 						tm = setTimeout(function() {
 							fm.notify({
@@ -22802,7 +22825,7 @@ elFinder.prototype.commands.edit = function() {
 					title   : fm.escape(file.name),
 					width   : getDlgWidth(),
 					buttons : {},
-					cssClass  : dlcls  + ' ' + clsEditing,
+					cssClass  : clsEditing,
 					maxWidth  : 'window',
 					maxHeight : 'window',
 					allowMinimize : true,
@@ -23028,7 +23051,13 @@ elFinder.prototype.commands.edit = function() {
 					}
 
 					ta.initEditArea = function(id, file, content) {
-						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [];
+						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [],
+							wfake = $('<select/>').hide(),
+							setSelW = function(init) {
+								init && wfake.appendTo(selEncoding.parent());
+								wfake.empty().append($('<option/>').text(selEncoding.val()));
+								selEncoding.width(wfake.width());
+							};
 						// ta.hide() for performance tune. Need ta.show() in `load()` if use textarea node.
 						ta.hide().val(content);
 						if (content === '' || ! encoding || encoding !== 'UTF-8') {
@@ -23042,12 +23071,13 @@ elFinder.prototype.commands.edit = function() {
 							changed().done(function(change) {
 								if (! change && getContent() !== '') {
 									cancel();
-									edit(file, $(this).val(), editor).fail(function(err) { err && fm.error(err); });
+									edit(file, selEncoding.val(), editor).fail(function(err) { err && fm.error(err); });
 								}
 							});
+							setSelW();
 						}).on('mouseover', stateChange);
-						ta.parent().prev().find('.elfinder-titlebar-button:last')
-							.after($('<span class="elfinder-titlebar-button-right"/>').append(selEncoding));
+						ta.parent().next().prepend($('<div class="ui-dialog-buttonset elfinder-edit-extras"/>').append(selEncoding));
+						setSelW(true);
 					};
 				})();
 			}
@@ -23093,7 +23123,7 @@ elFinder.prototype.commands.edit = function() {
 				editor.prepare(ta, opts, file);
 			}
 			
-			dialogNode = fm.dialog(ta, opts)
+			dialogNode = self.fmDialog(ta, opts)
 				.attr('id', id)
 				.on('keydown keyup keypress', function(e) {
 					e.stopPropagation();
@@ -24585,7 +24615,7 @@ elFinder.prototype.commands.fullscreen = function() {
 		}
 
 		content.find('#'+fm.namespace+'-help-about').find('.apiver').text(fm.api);
-		self.dialog = fm.dialog(content, {
+		self.dialog = self.fmDialog(content, {
 				title : self.title,
 				width : 530,
 				maxWidth: 'window',
@@ -25190,7 +25220,7 @@ elFinder.prototype.commands.hide = function() {
 		
 		view = view.replace('{title}', title).replace('{content}', content.join('').replace(/{class}/g, ''));
 		
-		dialog = fm.dialog(view, opts);
+		dialog = self.fmDialog(view, opts);
 		dialog.attr('id', id).one('mousedown', '.elfinder-info-path', function() {
 			$(this).html(applyZWSP($(this).html(), true));
 		});
@@ -25598,7 +25628,7 @@ elFinder.prototype.commands.netmount = function() {
 				
 				content.find('select,input').addClass('elfinder-tabstop');
 				
-				dialog = fm.dialog(form.append(content), opts);
+				dialog = self.fmDialog(form.append(content), opts);
 				dialogNode = dialog.closest('.ui-dialog');
 				dialog.ready(function(){
 					inputs.protocol.trigger('change');
@@ -27005,7 +27035,7 @@ elFinder.prototype.commands.preference = function() {
 
 			base.append(ul, tabs).find('a,input,select,button').addClass('elfinder-tabstop');
 
-			dialog = fm.dialog(base, {
+			dialog = self.fmDialog(base, {
 				title : self.title,
 				width : 600,
 				height: 400,
@@ -29834,7 +29864,7 @@ elFinder.prototype.commands.rename = function() {
 					}
 				});
 			}
-			dialog = fm.dialog(node, opts);
+			dialog = self.fmDialog(node, opts);
 		};
 	
 	this.noChangeDirOnRemovedCwd = true;
@@ -30290,7 +30320,6 @@ elFinder.prototype.commands.resize = function() {
 			ctrgrup = $().controlgroup? 'controlgroup' : 'buttonset',
 			grid8Def = typeof options.grid8px === 'undefined' || options.grid8px !== 'disable'? true : false,
 			presetSize = Array.isArray(options.presetSize)? options.presetSize : [],
-			dlcls = 'elfinder-dialog-resize',
 			clactive = 'elfinder-dialog-active',
 			clsediting = fm.res('class', 'editing'),
 			open = function(file, id) {
@@ -31381,7 +31410,7 @@ elFinder.prototype.commands.resize = function() {
 							dialogs;
 						
 						if (checkVals()) {
-							dialogs = fmnode.children('.' + dlcls + ':visible').removeClass(clsediting).fadeOut();
+							dialogs = fmnode.children('.' + self.dialogClass + ':visible').removeClass(clsediting).fadeOut();
 							base.removeClass(clactive);
 							fm.enable();
 							if (fm.searchStatus.state < 2 && file.phash !== fm.cwd().hash) {
@@ -31599,7 +31628,7 @@ elFinder.prototype.commands.resize = function() {
 				
 				dialog.find('input,button').addClass('elfinder-tabstop');
 				
-				base = fm.dialog(dialog, {
+				base = self.fmDialog(dialog, {
 					title          : fm.escape(file.name),
 					width          : dialogWidth,
 					resizable      : false,
@@ -31658,7 +31687,7 @@ elFinder.prototype.commands.resize = function() {
 							dinit();
 						}
 					}
-				}).attr('id', id).closest('.ui-dialog').addClass(dlcls + ' ' + clsediting);
+				}).attr('id', id).closest('.ui-dialog').addClass(clsediting);
 				
 				// for IE < 9 dialog mising at open second+ time.
 				if (fm.UA.ltIE8) {
@@ -33674,7 +33703,7 @@ elFinder.prototype.commands.upload = function() {
 			
 		}
 		
-		uidialog = fm.dialog(dialog, {
+		uidialog = this.fmDialog(dialog, {
 			title          : this.title + '<span class="elfinder-upload-target">' + (targetDir? ' - ' + fm.escape(targetDir.i18 || targetDir.name) : '') + '</span>',
 			modal          : true,
 			resizable      : false,

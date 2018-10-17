@@ -3,14 +3,7 @@ elFinder
 
 **WARNING: IF YOU HAVE OLDER (IN PARTICULAR 2.1.38 OR EARLIER) VERSIONS OF ELFINDER ON PUBLIC SERVERS, IT MAY CAUSE SERIOUS DAMAGE TO YOUR SERVER AND VISITED USER. YOU SHOULD UPDATE TO THE LATEST VERSION OR REMOVE IT FROM THE SERVER.**
 
-<pre>
-      _ ______ _           _           
-     | |  ____(_)         | |          
-  ___| | |__   _ _ __   __| | ___ _ __ 
- / _ \ |  __| | | '_ \ / _` |/ _ \ '__|
-|  __/ | |    | | | | | (_| |  __/ |   
- \___|_|_|    |_|_| |_|\__,_|\___|_|   
-</pre>
+[![elFinder file manager for the Web](https://studio-42.github.io/elFinder/images/elFinderScr.png "elFinder file manager for the Web")](https://studio-42.github.io/elFinder/)
 
 elFinder is an open-source file manager for web, written in JavaScript using
 jQuery UI. Creation is inspired by simplicity and convenience of Finder program
@@ -54,7 +47,8 @@ Features
    upload, create folder/file, rename, etc.)
  * High performance server backend and light client UI
  * Multi-root support
- * Local file system, MySQL, FTP volume storage drivers
+ * Local file system, MySQL, FTP, Box, Dropbox, GoogleDrive and OneDrive volume storage drivers
+ * Support AWS S3, Azure, Digital Ocean Spaces and more with [League\Flysystem](https://github.com/barryvdh/elfinder-flysystem-driver) Flysystem driver
  * Cloud storage (Box, Dropbox, GoogleDrive and OneDrive) drivers
  * Background file/folder upload with Drag & Drop HTML5 support
  * Chunked file upload for large file
@@ -168,7 +162,7 @@ You can create or modify the language file to use translation tool. Please refer
 
 3rd party Volume Drivers
 --------------------
- * [League\Flysystem (PHP)](https://github.com/barryvdh/elfinder-flysystem-driver) (for elFinder 2.1+)
+ * [League\Flysystem (PHP)](https://github.com/barryvdh/elfinder-flysystem-driver) (for elFinder 2.1+) driver for the [Flysystem](https://github.com/thephpleague/flysystem)
 
 3rd party Themes
 --------------------
