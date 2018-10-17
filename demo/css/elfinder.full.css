@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 43f8621) (2018-10-15)
+ * Version 2.1.42 (2.1-src Nightly: f58de14) (2018-10-17)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -407,10 +407,6 @@
     margin-bottom: -20em;
 }
 
-.std42-dialog .ui-dialog-titlebar select {
-    font-size: 12px;
-}
-
 .std42-dialog .ui-dialog-buttonpane .elfinder-dialog-confirm-encoding {
     font-size: 12px;
 }
@@ -422,6 +418,11 @@
 
 .ui-dialog-buttonpane .ui-dialog-buttonset.elfinder-edit-extras-quality {
     padding-top: 6px;
+}
+
+.ui-dialog-buttonpane .ui-dialog-buttonset.elfinder-edit-extras select {
+    font-size: 12px;
+    margin-top: 8px;
 }
 
 .ui-dialog-buttonpane .ui-icon {
@@ -3150,12 +3151,6 @@ button.elfinder-info-button {
     display: none;
 }
 
-/*********************** EDIT DIALOG **************************/
-
-.ui-dialog-titlebar select.elfinder-edit-changed {
-    border-bottom: 1px solid #13ae10;
-}
-
 /* File: /css/fonts.css */
 .elfinder-font-mono {
     font-family: "Ricty Diminished", "Myrica M", Consolas, "Courier New", Courier, Monaco, monospace;
@@ -4702,10 +4697,6 @@ embed.elfinder-quicklook-preview-audio {
 
 .elfinder-button-icon-accept {
     background-position: 0 -736px;
-}
-
-.elfinder-button-icon-opendir {
-    background-position: 0 -32px;
 }
 
 .elfinder-button-icon-menu {
