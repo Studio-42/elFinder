@@ -262,7 +262,7 @@ elFinder.prototype.commands.download = function() {
 									btn[fm.i18n('btnCancel')] = function() {
 										dialog.elfinderdialog('destroy');
 									};
-									dialog = fm.dialog(dllink, {
+									dialog = self.fmDialog(dllink, {
 										title: fm.i18n('link'),
 										buttons: btn,
 										width: '200px',

@@ -714,7 +714,7 @@
 						return ext;
 					},
 					mime = file.mime,
-					liveMsg, type;
+					liveMsg, type, quty;
 				
 				if (!confObj.mimesFlip) {
 					confObj.mimesFlip = fm.arrayFlip(confObj.mimes, true);
@@ -780,7 +780,7 @@
 						};
 
 						this.getContent = function() {
-							var type;
+							var type, q;
 							if (phase > 1) {
 								dfdGet && dfdGet.state() === 'pending' && dfdGet.reject();
 								dfdGet = null;
@@ -794,6 +794,9 @@
 								if (ifm.data('mime')) {
 									mime = ifm.data('mime');
 									type = getType(mime);
+								}
+								if (q = ifm.data('quality')) {
+									type += ':' + (q / 100);
 								}
 								wnd.postMessage('app.activeDocument.saveToOE("' + type + '")', orig);
 								return dfdGet;
@@ -818,6 +821,25 @@
 					err && fm.error(err);
 					editor.initFail = true;
 				});
+
+				// jpeg quality controls
+				if (file.mime === 'image/jpeg' || file.mime === 'image/webp') {
+					ifm.data('quality', fm.storage('jpgQuality') || fm.option('jpgQuality'));
+					quty = $('<input type="number" class="ui-corner-all elfinder-resize-quality elfinder-tabstop"/>')
+						.attr('min', '1')
+						.attr('max', '100')
+						.attr('title', '1 - 100')
+						.on('change', function() {
+							var q = quty.val();
+							ifm.data('quality', q);
+						})
+						.val(ifm.data('quality'));
+					$('<div class="ui-dialog-buttonset elfinder-edit-extras elfinder-edit-extras-quality"/>')
+						.append(
+							$('<span>').html(fm.i18n('quality') + ' : '), quty, $('<span/>')
+						)
+						.prependTo(ifm.parent().next());
+				}
 			},
 			load : function(base) {
 				var dfd = $.Deferred(),

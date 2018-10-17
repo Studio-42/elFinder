@@ -102,7 +102,6 @@ elFinder.prototype.commands.resize = function() {
 			ctrgrup = $().controlgroup? 'controlgroup' : 'buttonset',
 			grid8Def = typeof options.grid8px === 'undefined' || options.grid8px !== 'disable'? true : false,
 			presetSize = Array.isArray(options.presetSize)? options.presetSize : [],
-			dlcls = 'elfinder-dialog-resize',
 			clactive = 'elfinder-dialog-active',
 			clsediting = fm.res('class', 'editing'),
 			open = function(file, id) {
@@ -1193,7 +1192,7 @@ elFinder.prototype.commands.resize = function() {
 							dialogs;
 						
 						if (checkVals()) {
-							dialogs = fmnode.children('.' + dlcls + ':visible').removeClass(clsediting).fadeOut();
+							dialogs = fmnode.children('.' + self.dialogClass + ':visible').removeClass(clsediting).fadeOut();
 							base.removeClass(clactive);
 							fm.enable();
 							if (fm.searchStatus.state < 2 && file.phash !== fm.cwd().hash) {
@@ -1411,7 +1410,7 @@ elFinder.prototype.commands.resize = function() {
 				
 				dialog.find('input,button').addClass('elfinder-tabstop');
 				
-				base = fm.dialog(dialog, {
+				base = self.fmDialog(dialog, {
 					title          : fm.escape(file.name),
 					width          : dialogWidth,
 					resizable      : false,
@@ -1470,7 +1469,7 @@ elFinder.prototype.commands.resize = function() {
 							dinit();
 						}
 					}
-				}).attr('id', id).closest('.ui-dialog').addClass(dlcls + ' ' + clsediting);
+				}).attr('id', id).closest('.ui-dialog').addClass(clsediting);
 				
 				// for IE < 9 dialog mising at open second+ time.
 				if (fm.UA.ltIE8) {

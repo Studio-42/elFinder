@@ -288,7 +288,7 @@ elFinder.prototype.commands.chmod = function() {
 
 		view = view.replace('{title}', title).replace('{dataTable}', dataTable).replace(/{id}/g, id);
 
-		dialog = fm.dialog(view, opts);
+		dialog = this.fmDialog(view, opts);
 		dialog.attr('id', id);
 
 		// load thumbnail

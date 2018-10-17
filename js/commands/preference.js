@@ -449,7 +449,7 @@ elFinder.prototype.commands.preference = function() {
 
 			base.append(ul, tabs).find('a,input,select,button').addClass('elfinder-tabstop');
 
-			dialog = fm.dialog(base, {
+			dialog = self.fmDialog(base, {
 				title : self.title,
 				width : 600,
 				height: 400,
