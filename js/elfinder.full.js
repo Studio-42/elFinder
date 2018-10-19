@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 6e95a5e) (2018-10-19)
+ * Version 2.1.42 (2.1-src Nightly: 88362b6) (2018-10-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9908,7 +9908,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 6e95a5e)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 88362b6)';
 
 
 
@@ -23917,7 +23917,7 @@ elFinder.prototype.commands.empty = function() {
 			cnt;
 		
 		cnt = sel.length;
-		return $.grep(sel, function(f) { return f.write && f.mime === 'directory' ? true : false; }).length == cnt ? 0 : -1;
+		return $.grep(sel, function(f) { return f.read && f.write && f.mime === 'directory' ? true : false; }).length == cnt ? 0 : -1;
 	};
 	
 	this.exec = function(hashes) {
@@ -33956,6 +33956,7 @@ elFinder.prototype.commands.upload = function() {
 			modal          : true,
 			resizable      : false,
 			destroyOnClose : true,
+			propagationEvents : ['mousemove', 'mouseup', 'click'],
 			close          : function() {
 				var cm = fm.getUI('contextmenu');
 				if (cm.is(':visible')) {
