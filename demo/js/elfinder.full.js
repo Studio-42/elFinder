@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 8983ab6) (2018-10-20)
+ * Version 2.1.42 (2.1-src Nightly: a4e1141) (2018-10-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -4253,6 +4253,11 @@ var elFinder = function(elm, opts, bootCallback) {
 					self.mimesCanMakeEmpty = Object.assign(obj, self.mimesCanMakeEmpty);
 				}
 			}
+		})
+		.bind('themechange', function() {
+			requestAnimationFrame(function() {
+				self.trigger('uiresize');
+			});
 		})
 		;
 
@@ -9549,7 +9554,7 @@ elFinder.prototype = {
 	changeTheme : function(themeid) {
 		var self = this;
 		if (themeid) {
-			if (self.options.themes[themeid]) {
+			if (self.options.themes[themeid] && (!self.theme || self.theme.id !== themeid)) {
 				self.getTheme(themeid).done(function(themeObj) {
 					if (themeObj.cssurls) {
 						$('head>link.elfinder-theme-ext').remove();
@@ -9562,7 +9567,7 @@ elFinder.prototype = {
 						});
 					}
 				});
-			} else if (themeid === 'default') {
+			} else if (themeid === 'default' && self.theme) {
 				$('head>link.elfinder-theme-ext').remove();
 				self.theme = null;
 				self.trigger && self.trigger('themechange');
@@ -9908,7 +9913,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 8983ab6)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: a4e1141)';
 
 
 
