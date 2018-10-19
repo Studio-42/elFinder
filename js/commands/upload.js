@@ -396,6 +396,7 @@ elFinder.prototype.commands.upload = function() {
 			modal          : true,
 			resizable      : false,
 			destroyOnClose : true,
+			propagationEvents : ['mousemove', 'mouseup', 'click'],
 			close          : function() {
 				var cm = fm.getUI('contextmenu');
 				if (cm.is(':visible')) {
