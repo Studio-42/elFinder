@@ -29,6 +29,7 @@ class elFinderVolumeGroup extends elFinderVolumeDriver {
 		$this->options['tmbPath'] = '';
 		$this->options['disabled'] = array(
 			'archive',
+			'copy',
 			'cut',
 			'duplicate',
 			'edit',
