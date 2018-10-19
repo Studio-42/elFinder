@@ -741,6 +741,13 @@ $.fn.elfinderdialog = function(opts, fm) {
 			}
 		}
 
+		if (opts.resize) {
+			fm.bind('themechange', function() {
+				setTimeout(function() {
+					dialog.trigger('resize', {init: true});
+				}, 300);
+			});
+		}
 	});
 	
 	return this;

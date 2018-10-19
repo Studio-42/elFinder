@@ -760,6 +760,52 @@ ul.elfinder-help-integrations a:hover {
     margin: 0 -10px;
 }
 
+.elfinder-preference .elfinder-preference-taball .elfinder-reference-hide-taball {
+    display: none;
+}
+
+.elfinder-preference-theme fieldset {
+    margin-bottom: 10px;
+}
+
+.elfinder-preference-theme legend a {
+    font-size: 1.8em;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.elfinder-preference-theme dt {
+    width: 20%;
+    word-break: break-all;
+}
+
+.elfinder-preference-theme dt:after {
+    content: " :";
+}
+
+.elfinder-preference-theme dd {
+    margin-inline-start: 20%;
+}
+
+.elfinder-preference img.elfinder-preference-theme-image {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 90%;
+    max-height: 200px;
+    cursor: pointer;
+}
+
+.elfinder-preference-theme-btn {
+    text-align: center;
+}
+
+.elfinder-preference-theme button.elfinder-preference-theme-default {
+    display: inline;
+    margin: 0 10px;
+    font-size: 8pt;
+}
+
 /********************** COMMAND "INFO" ****************************/
 .elfinder-rtl .elfinder-info-title .elfinder-cwd-icon:before {
     right: 33px;
