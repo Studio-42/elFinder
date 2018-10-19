@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: a4e1141) (2018-10-20)
+ * Version 2.1.42 (2.1-src Nightly: 34a5b68) (2018-10-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9913,7 +9913,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: a4e1141)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 34a5b68)';
 
 
 
@@ -10540,6 +10540,35 @@ elFinder.prototype._options = {
 	 * @default true
 	 */
 	cssAutoLoad : true,
+
+	/**
+	 * Theme to load
+	 * {"themeid" : "Theme CSS URL"} or
+	 * {"themeid" : "Theme manifesto.json URL"} or
+	 * Theme manifesto.json Object
+	 * {
+	 *   "themeid" : {
+	 *     "name":"Theme Name",
+	 *     "cssurls":"Theme CSS URL",
+	 *     "author":"Author Name",
+	 *     "email":"Author Email",
+	 *     "license":"License",
+	 *     "link":"Web Site URL",
+	 *     "image":"Screen Shot URL",
+	 *     "description":"Description"
+	 *   }
+	 * }
+	 * 
+	 * @type Object
+	 */
+	themes : {},
+
+	/**
+	 * Theme id to initial theme
+	 * 
+	 * @type String|Null
+	 */
+	theme : null,
 	
 	/**
 	 * Additional css class for filemanager node.
