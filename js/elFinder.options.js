@@ -210,6 +210,35 @@ elFinder.prototype._options = {
 	 * @default true
 	 */
 	cssAutoLoad : true,
+
+	/**
+	 * Theme to load
+	 * {"themeid" : "Theme CSS URL"} or
+	 * {"themeid" : "Theme manifesto.json URL"} or
+	 * Theme manifesto.json Object
+	 * {
+	 *   "themeid" : {
+	 *     "name":"Theme Name",
+	 *     "cssurls":"Theme CSS URL",
+	 *     "author":"Author Name",
+	 *     "email":"Author Email",
+	 *     "license":"License",
+	 *     "link":"Web Site URL",
+	 *     "image":"Screen Shot URL",
+	 *     "description":"Description"
+	 *   }
+	 * }
+	 * 
+	 * @type Object
+	 */
+	themes : {},
+
+	/**
+	 * Theme id to initial theme
+	 * 
+	 * @type String|Null
+	 */
+	theme : null,
 	
 	/**
 	 * Additional css class for filemanager node.
