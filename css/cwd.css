@@ -532,6 +532,7 @@
     border-radius: 4px;
     font-family: Verdana;
     font-size: 10px;
+    line-height: 1.3em;
     -webkit-transform: scale(0.9);
     -moz-transform: scale(0.9);
     -ms-transform: scale(0.9);
