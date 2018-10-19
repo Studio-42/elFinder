@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: d4af1b1) (2018-10-17)
+ * Version 2.1.42 (2.1-src Nightly: 6e95a5e) (2018-10-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -768,6 +768,52 @@ ul.elfinder-help-integrations a:hover {
 
 .elfinder-preference button + button {
     margin: 0 -10px;
+}
+
+.elfinder-preference .elfinder-preference-taball .elfinder-reference-hide-taball {
+    display: none;
+}
+
+.elfinder-preference-theme fieldset {
+    margin-bottom: 10px;
+}
+
+.elfinder-preference-theme legend a {
+    font-size: 1.8em;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.elfinder-preference-theme dt {
+    width: 20%;
+    word-break: break-all;
+}
+
+.elfinder-preference-theme dt:after {
+    content: " :";
+}
+
+.elfinder-preference-theme dd {
+    margin-inline-start: 20%;
+}
+
+.elfinder-preference img.elfinder-preference-theme-image {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 90%;
+    max-height: 200px;
+    cursor: pointer;
+}
+
+.elfinder-preference-theme-btn {
+    text-align: center;
+}
+
+.elfinder-preference-theme button.elfinder-preference-theme-default {
+    display: inline;
+    margin: 0 10px;
+    font-size: 8pt;
 }
 
 /********************** COMMAND "INFO" ****************************/
@@ -1843,6 +1889,7 @@ ul.elfinder-help-integrations a:hover {
     border-radius: 4px;
     font-family: Verdana;
     font-size: 10px;
+    line-height: 1.3em;
     -webkit-transform: scale(0.9);
     -moz-transform: scale(0.9);
     -ms-transform: scale(0.9);

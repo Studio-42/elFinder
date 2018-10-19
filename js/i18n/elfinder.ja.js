@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-10-17
+ * @version 2018-10-19
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -479,6 +479,13 @@
 			'makefileTypes'   : '「新しいファイル」で有効にするファイルタイプ', // from v2.1.41 added 7.8.2018
 			'typeOfTextfile'  : 'テキストファイルのタイプ', // from v2.1.41 added 7.8.2018
 			'add'             : '追加', // from v2.1.41 added 7.8.2018
+			'theme'           : 'テーマ', // from v2.1.43 added 19.10.2018
+			'default'         : 'デフォルト', // from v2.1.43 added 19.10.2018
+			'description'     : '説明', // from v2.1.43 added 19.10.2018
+			'website'         : 'ウェブサイト', // from v2.1.43 added 19.10.2018
+			'author'          : '作者', // from v2.1.43 added 19.10.2018
+			'email'           : 'Email', // from v2.1.43 added 19.10.2018
+			'license'         : 'ライセンス', // from v2.1.43 added 19.10.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
