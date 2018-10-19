@@ -4223,6 +4223,11 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 			}
 		})
+		.bind('themechange', function() {
+			requestAnimationFrame(function() {
+				self.trigger('uiresize');
+			});
+		})
 		;
 
 	// We listen and emit a sound on delete according to option
@@ -9518,7 +9523,7 @@ elFinder.prototype = {
 	changeTheme : function(themeid) {
 		var self = this;
 		if (themeid) {
-			if (self.options.themes[themeid]) {
+			if (self.options.themes[themeid] && (!self.theme || self.theme.id !== themeid)) {
 				self.getTheme(themeid).done(function(themeObj) {
 					if (themeObj.cssurls) {
 						$('head>link.elfinder-theme-ext').remove();
@@ -9531,7 +9536,7 @@ elFinder.prototype = {
 						});
 					}
 				});
-			} else if (themeid === 'default') {
+			} else if (themeid === 'default' && self.theme) {
 				$('head>link.elfinder-theme-ext').remove();
 				self.theme = null;
 				self.trigger && self.trigger('themechange');
