@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: d4af1b1) (2018-10-17)
+ * Version 2.1.42 (2.1-src Nightly: 6e95a5e) (2018-10-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -835,7 +835,13 @@ var elFinder = function(elm, opts, bootCallback) {
 	 */
 	this.cssloaded = false;
 	
-	
+	/**
+	 * Current theme object
+	 * 
+	 * @type Object|Null
+	 */
+	this.theme = null;
+
 	this.mimesCanMakeEmpty = {};
 
 	/**
@@ -844,7 +850,36 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @type Function
 	 */
 	this.bootCallback;
-	
+
+	/**
+	 * ID. Required to create unique cookie name
+	 *
+	 * @type String
+	 **/
+	this.id = id;
+
+	/**
+	 * Method to store/fetch data
+	 *
+	 * @type Function
+	 **/
+	this.storage = (function() {
+		try {
+			if ('localStorage' in window && window['localStorage'] !== null) {
+				if (self.UA.Safari) {
+					// check for Mac/iOS safari private browsing mode
+					window.localStorage.setItem('elfstoragecheck', 1);
+					window.localStorage.removeItem('elfstoragecheck');
+				}
+				return self.localStorage;
+			} else {
+				return self.cookie;
+			}
+		} catch (e) {
+			return self.cookie;
+		}
+	})();
+
 	/**
 	 * Configuration options
 	 *
@@ -943,7 +978,22 @@ var elFinder = function(elm, opts, bootCallback) {
 				$('head').append(node.data('cssautoloadHide'));
 				
 				// load CSS
-				self.loadCss([baseUrl+'css/elfinder.min.css', baseUrl+'css/theme.css']);
+				self.loadCss([baseUrl+'css/elfinder.min.css', baseUrl+'css/theme.css'], {
+					dfd: $.Deferred().always(function() {
+						if (node.data('cssautoloadHide')) {
+							node.data('cssautoloadHide').remove();
+							node.removeData('cssautoloadHide');
+						}
+					}).done(function() {
+						if (!self.cssloaded) {
+							self.cssloaded = true;
+							self.trigger('cssloaded');
+						}
+					}).fail(function() {
+						self.cssloaded = false;
+						self.error(['errRead', 'CSS (elfinder or theme)']);
+					})
+				});
 				
 				// additional CSS files
 				if (Array.isArray(self.options.cssAutoLoad)) {
@@ -953,6 +1003,9 @@ var elFinder = function(elm, opts, bootCallback) {
 			self.options.cssAutoLoad = false;
 		})();
 	}
+
+	// load theme if exists
+	self.changeTheme(self.storage('theme') || self.options.theme);
 	
 	/**
 	 * Volume option to set the properties of the root Stat
@@ -1156,13 +1209,6 @@ var elFinder = function(elm, opts, bootCallback) {
 	this.abortCmdsOnOpen = this.options.abortCmdsOnOpen || ['tmb', 'parents'];
 
 	/**
-	 * ID. Required to create unique cookie name
-	 *
-	 * @type String
-	 **/
-	this.id = id;
-	
-	/**
 	 * ui.nav id prefix
 	 * 
 	 * @type String
@@ -1237,28 +1283,6 @@ var elFinder = function(elm, opts, bootCallback) {
 		mixed  : false, // in multi volumes search: false or Array that target volume ids
 		ininc  : false // in incremental search
 	};
-
-	/**
-	 * Method to store/fetch data
-	 *
-	 * @type Function
-	 **/
-	this.storage = (function() {
-		try {
-			if ('localStorage' in window && window['localStorage'] !== null) {
-				if (self.UA.Safari) {
-					// check for Mac/iOS safari private browsing mode
-					window.localStorage.setItem('elfstoragecheck', 1);
-					window.localStorage.removeItem('elfstoragecheck');
-				}
-				return self.localStorage;
-			} else {
-				return self.cookie;
-			}
-		} catch (e) {
-			return self.cookie;
-		}
-	})();
 
 	/**
 	 * Interface language
@@ -9146,19 +9170,57 @@ elFinder.prototype = {
 	 * Load CSS files
 	 * 
 	 * @param  Array    to load CSS file URLs
+	 * @param  Object   options
 	 * @return elFinder
 	 */
-	loadCss : function(urls) {
-		var self = this;
+	loadCss : function(urls, opts) {
+		var self = this,
+			clName, dfds;
 		if (typeof urls === 'string') {
 			urls = [ urls ];
 		}
+		if (opts) {
+			if (opts.className) {
+				clName = opts.className;
+			}
+			if (opts.dfd && opts.dfd.promise) {
+				dfds = [];
+			}
+		}
 		$.each(urls, function(i, url) {
+			var link, df;
 			url = self.convAbsUrl(url).replace(/^https?:/i, '');
+			if (dfds) {
+				dfds[i] = $.Deferred();
+			}
 			if (! $("head > link[href='+url+']").length) {
-				$('head').append('<link rel="stylesheet" type="text/css" href="' + url + '" />');
+				link = document.createElement('link');
+				link.type = 'text/css';
+				link.rel = 'stylesheet';
+				link.href = url;
+				if (clName) {
+					link.className = clName;
+				}
+				if (dfds) {
+					link.onload = function() {
+						dfds[i].resolve();
+					};
+					link.onerror = function() {
+						dfds[i].reject();
+					};
+				}
+				$('head').append(link);
+			} else {
+				dfds && dfds[i].resolve();
 			}
 		});
+		if (dfds) {
+			$.when.apply(null, dfds).done(function() {
+				opts.dfd.resolve();
+			}).fail(function() {
+				opts.dfd.reject();
+			});
+		}
 		return this;
 	},
 	
@@ -9419,6 +9481,96 @@ elFinder.prototype = {
 		return dfrd;
 	},
 	
+	/**
+	 * Gets the theme object by settings of options.themes
+	 *
+	 * @param  String  themeid  The themeid
+	 * @return Object  jQuery.Deferred
+	 */
+	getTheme : function(themeid) {
+		var self = this,
+			dfd = $.Deferred(),
+			absUrl = function(url, base) {
+				if (Array.isArray(url)) {
+					return $.map(url, function(v) {
+						return absUrl(v, base);
+					});
+				} else {
+					return url.match(/^(?:http|\/\/)/i)? url : (base || self.baseUrl) + url.replace(/^(?:\.\/|\/)/, '');
+				}
+			},
+			themeObj, m;
+		if (themeid && (themeObj = self.options.themes[themeid])) {
+			if (typeof themeObj === 'string') {
+				url = absUrl(themeObj);
+				if (m = url.match(/^(.+\/)[^/]+\.json$/i)) {
+					$.getJSON(url).done(function(data) {
+						themeObj = data;
+						themeObj.id = themeid;
+						if (themeObj.cssurls) {
+							themeObj.cssurls = absUrl(themeObj.cssurls, m[1]);
+						}
+						dfd.resolve(themeObj);
+					}).fail(function() {
+						dfd.reject();
+					});
+				} else {
+					dfd.resolve({
+						id: themeid,
+						name: themeid,
+						cssurls: [url]
+					});
+				}
+			} else if ($.isPlainObject(themeObj) && themeObj.cssurls) {
+				themeObj.id = themeid;
+				themeObj.cssurls = absUrl(themeObj.cssurls);
+				if (!Array.isArray(themeObj.cssurls)) {
+					themeObj.cssurls = [themeObj.cssurls];
+				}
+				if (!themeObj.name) {
+					themeObj.name = themeid;
+				}
+				dfd.resolve(themeObj);
+			} else {
+				dfd.reject();
+			}
+		} else {
+			dfd.reject();
+		}
+		return dfd;
+	},
+
+	/**
+	 * Change current theme
+	 *
+	 * @param  String  themeid  The themeid
+	 * @return Object  this elFinder instance
+	 */
+	changeTheme : function(themeid) {
+		var self = this;
+		if (themeid) {
+			if (self.options.themes[themeid]) {
+				self.getTheme(themeid).done(function(themeObj) {
+					if (themeObj.cssurls) {
+						$('head>link.elfinder-theme-ext').remove();
+						self.loadCss(themeObj.cssurls, {
+							className: 'elfinder-theme-ext',
+							dfd: $.Deferred().done(function() {
+								self.theme = themeObj;
+								self.trigger && self.trigger('themechange');
+							})
+						});
+					}
+				});
+			} else if (themeid === 'default') {
+				$('head>link.elfinder-theme-ext').remove();
+				self.theme = null;
+				self.trigger && self.trigger('themechange');
+			}
+		}
+		return this;
+	},
+
 	/**
 	 * Apply leaf root stats to target directory
 	 *
@@ -9756,7 +9908,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: d4af1b1)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 6e95a5e)';
 
 
 
@@ -12481,7 +12633,7 @@ $.fn.dialogelfinder = function(opts) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-10-17
+ * @version 2018-10-19
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -12951,6 +13103,13 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'makefileTypes'   : 'File types to enable with "New file"', // from v2.1.41 added 7.8.2018
 			'typeOfTextfile'  : 'Type of the Text file', // from v2.1.41 added 7.8.2018
 			'add'             : 'Add', // from v2.1.41 added 7.8.2018
+			'theme'           : 'Theme', // from v2.1.43 added 19.10.2018
+			'default'         : 'Default', // from v2.1.43 added 19.10.2018
+			'description'     : 'Description', // from v2.1.43 added 19.10.2018
+			'website'         : 'Website', // from v2.1.43 added 19.10.2018
+			'author'          : 'Author', // from v2.1.43 added 19.10.2018
+			'email'           : 'Email', // from v2.1.43 added 19.10.2018
+			'license'         : 'License', // from v2.1.43 added 19.10.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -17557,6 +17716,13 @@ $.fn.elfinderdialog = function(opts, fm) {
 			}
 		}
 
+		if (opts.resize) {
+			fm.bind('themechange', function() {
+				setTimeout(function() {
+					dialog.trigger('resize', {init: true});
+				}, 300);
+			});
+		}
 	});
 	
 	return this;
@@ -24331,7 +24497,16 @@ elFinder.prototype.commands.fullscreen = function() {
 		sep     = '<div class="elfinder-help-separator"/>',
 		selfUrl = $('base').length? document.location.href.replace(/#.*$/, '') : '',
 		
-		
+		getTheme = function() {
+			var src;
+			if (fm.theme && fm.theme.author) {
+				src = atpl[r]('elfinder-help-team', 'elfinder-help-team elfinder-help-term-theme')[r](author, fm.i18n(fm.theme.author) + (fm.theme.email? ' &lt;'+fm.theme.email+'&gt;' : ''))[r](work, fm.i18n('theme') + ' ('+fm.i18n(fm.theme.name)+')');
+			} else {
+				src = '<div class="elfinder-help-team elfinder-help-term-theme" style="display:none"></div>';
+			}
+			return src;
+		},
+
 		about = function() {
 			html.push('<div id="'+fm.namespace+'-help-about" class="ui-tabs-panel ui-widget-content ui-corner-bottom"><div class="elfinder-help-logo"/>');
 			html.push('<h3>elFinder</h3>');
@@ -24362,6 +24537,8 @@ elFinder.prototype.commands.fullscreen = function() {
 				});	
 			}
 			
+			html.push(getTheme());
+
 			html.push(sep);
 			html.push('<div class="'+lic+'">'+fm.i18n('icons')+': Pixelmixer, <a href="http://p.yusukekamiyamane.com" target="_blank">Fugue</a>, <a href="https://icons8.com" target="_blank">Icons8</a></div>');
 			
@@ -24590,6 +24767,8 @@ elFinder.prototype.commands.fullscreen = function() {
 						}
 					}
 				}
+			}).bind('themechange', function() {
+				content.find('div.elfinder-help-term-theme').replaceWith(getTheme());
 			});
 		}
 
@@ -26608,6 +26787,7 @@ elFinder.prototype.commands.preference = function() {
 		build   = function() {
 			var cats = self.options.categories || {
 					'language' : ['language'],
+					'theme' : ['theme'],
 					'toolbar' : ['toolbarPref'],
 					'workspace' : ['iconSize','columnPref', 'selectAction', 'makefileTypes', 'useStoredEditor', 'editorMaximized', 'showHidden'],
 					'dialog' : ['autoFocusDialog'],
@@ -26615,7 +26795,7 @@ elFinder.prototype.commands.preference = function() {
 					'reset' : ['clearBrowserData'],
 					'all' : true
 				},
-				forms = self.options.prefs || ['language', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'makefileTypes', 'useStoredEditor', 'editorMaximized', 'showHidden', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
+				forms = self.options.prefs || ['language', 'theme', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'makefileTypes', 'useStoredEditor', 'editorMaximized', 'showHidden', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
 			
 			forms = fm.arrayFlip(forms, true);
 			
@@ -26674,6 +26854,73 @@ elFinder.prototype.commands.preference = function() {
 				return langSel.append(optTags.join('')).val(fm.lang);
 			})());
 			
+			forms.theme && (forms.theme = (function() {
+				if (!fm.options.themes || !Object.keys(fm.options.themes).length) {
+					return null;
+				}
+				var themeSel = $('<select/>').on('change', function() {
+						var theme = $(this).val();
+						fm.changeTheme(theme).storage('theme', theme);
+					}),
+					optTags = [],
+					tpl = {
+						image: '<img class="elfinder-preference-theme elfinder-preference-theme-image" src="$2" />',
+						link: '<a href="$1" target="_blank" title="$3">$2</a>',
+						data: '<dt>$1</dt><dd><span class="elfinder-preference-theme elfinder-preference-theme-$0">$2</span></dd>'
+					},
+					items = ['image', 'description', 'author', 'email', 'license'],
+					render = function(key, data) {
+					},
+					defBtn = $('<button class="ui-button ui-corner-all ui-widget elfinder-preference-theme-default"/>').text(fm.i18n('default')).on('click', function(e) {
+						themeSel.val('default').trigger('change');
+					}),
+					list = $('<div class="elfinder-reference-hide-taball"/>').on('click', 'button', function() {
+							var val = $(this).data('themeid')
+							themeSel.val(val).trigger('change');
+					});
+
+				themeSel.append('<option value="default">'+fm.i18n('default')+'</option>');
+				$.each(fm.options.themes, function(id, val) {
+					var opt = $('<option class="elfinder-theme-option-'+id+'" value="'+id+'">'+fm.i18n(id)+'</option>'),
+						dsc = $('<fieldset class="ui-widget ui-widget-content ui-corner-all elfinder-theme-list-'+id+'"><legend>'+fm.i18n(id)+'</legend><div><span class="elfinder-spinner"/></div></fieldset>'),
+						tm;
+					themeSel.append(opt);
+					list.append(dsc);
+					tm = setTimeout(function() {
+						dsc.find('span.elfinder-spinner').replaceWith(fm.i18n(['errRead', id]));
+					}, 10000);
+					fm.getTheme(id).always(function() {
+						tm && clearTimeout(tm);
+					}).done(function(data) {
+						var link, val = $(), dl = $('<dl/>');
+						link = data.link? tpl.link.replace(/\$1/g, data.link).replace(/\$3/g, fm.i18n('website')) : '$2';
+						if (data.name) {
+							opt.html(fm.i18n(data.name));
+						}
+						dsc.children('legend').html(link.replace(/\$2/g, fm.i18n(data.name) || id));
+						$.each(items, function(i, key) {
+							var t = tpl[key] || tpl.data,
+								elm;
+							if (data[key]) {
+								elm = t.replace(/\$0/g, fm.escape(key)).replace(/\$1/g, fm.i18n(key)).replace(/\$2/g, fm.i18n(data[key]));
+								if (key === 'image' && data.link) {
+									elm = $(elm).on('click', function() {
+										themeSel.val(id).trigger('change');
+									}).attr('title', fm.i18n('select'));
+								}
+								dl.append(elm);
+							}
+						});
+						val = val.add(dl);
+						val = val.add($('<div class="elfinder-preference-theme-btn"/>').append($('<button class="ui-button ui-corner-all ui-widget"/>').data('themeid', id).html(fm.i18n('select'))));
+						dsc.find('span.elfinder-spinner').replaceWith(val);
+					}).fail(function() {
+						dsc.find('span.elfinder-spinner').replaceWith(fm.i18n(['errRead', id]));
+					});
+				});
+				return $('<div/>').append(themeSel.val(fm.theme && fm.theme.id? fm.theme.id : 'default'), defBtn, list);
+			})());
+
 			forms.toolbarPref && (forms.toolbarPref = (function() {
 				var pnls = $.map(fm.options.uiOptions.toolbar, function(v) {
 						return $.isArray(v)? v : null;
@@ -27027,9 +27274,9 @@ elFinder.prototype.commands.preference = function() {
 				t.removeClass('ui-state-hover').parent().addClass('ui-tabs-selected ui-state-active');
 
 				if (h.match(/all$/)) {
-					tabs.children().show();
+					tabs.addClass('elfinder-preference-taball').children().show();
 				} else {
-					tabs.children().hide();
+					tabs.removeClass('elfinder-preference-taball').children().hide();
 					$(h).show();
 				}
 			});
