@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 34a5b68) (2018-10-20)
+ * Version 2.1.42 (2.1-src Nightly: 7a006c5) (2018-10-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -4827,6 +4827,11 @@ var elFinder = function(elm, opts, bootCallback) {
 							i = '<div class="elfinder-cwd-icon elfinder-cwd-icon-drag '+self.mime2class(mime)+' ui-corner-all"/>';
 							if (tmb) {
 								i = $(i).addClass(tmb.className).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
+							} else if (f.icon) {
+								i = $(i).css(self.getIconStyle(f, true)).get(0).outerHTML;
+							}
+							if (f.csscls) {
+								i = '<div class="'+f.csscls+'">' + i + '</div>';
 							}
 							return i;
 						},
@@ -9913,7 +9918,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 34a5b68)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 7a006c5)';
 
 
 
@@ -10956,6 +10961,16 @@ elFinder.prototype._options = {
 			helpSource : ''
 		},
 		preference : {
+			// dialog width
+			width: 600,
+			// dialog height
+			height: 400,
+			// tabs setting see preference.js : build()
+			categories: null,
+			// preference setting see preference.js : build()
+			prefs: null,
+			// language setting  see preference.js : build()
+			langs: null,
 			// Command list of action when select file
 			// Array value are 'Command Name' or 'Command Name1/CommandName2...'
 			selectActions : ['open', 'edit/download', 'resize/edit/download', 'download', 'quicklook']
@@ -16014,7 +16029,7 @@ $.fn.elfindercwd = function(fm, options) {
 
 					if (!mobile && !$this.data('dragRegisted') && !$this.hasClass(clTmp) && !$this.hasClass(clDraggable) && !$this.hasClass(clDisabled)) {
 						$this.data('dragRegisted', true);
-						if (!fm.isCommandEnabled('copy', fm.searchStatus.state > 1? fm.cwdId2Hash($this.attr('id')) : void 0)) {
+						if (!fm.isCommandEnabled('copy', fm.searchStatus.state > 1 || $this.hasClass('isroot')? fm.cwdId2Hash($this.attr('id')) : void 0)) {
 							return;
 						}
 						$this.on('mousedown', function(e) {
@@ -27319,8 +27334,8 @@ elFinder.prototype.commands.preference = function() {
 
 			dialog = self.fmDialog(base, {
 				title : self.title,
-				width : 600,
-				height: 400,
+				width : self.options.width || 600,
+				height: self.options.height || 400,
 				maxWidth: 'window',
 				maxHeight: 'window',
 				autoOpen : false,
@@ -32487,7 +32502,7 @@ elFinder.prototype.commands.rm = function() {
 			var cnt = targets.length,
 				cwd = fm.cwd().hash,
 				descs = [],
-				spinner = '<span class="elfinder-info-spinner"/>' + fm.i18n('calc'),
+				spinner = fm.i18n('calc') + '<span class="elfinder-spinner"/>',
 				dialog, text, tmb, size, f, fname;
 			
 			if (cnt > 1) {
@@ -32557,9 +32572,9 @@ elFinder.prototype.commands.rm = function() {
 			
 			if (getSize) {
 				getSize = fm.getSize($.map(files, function(f) { return f.mime === 'directory'? f.hash : null; })).done(function(data) {
-					dialog.find('span.elfinder-info-spinner').parent().html(fm.i18n('size')+': '+data.formated);
+					dialog.find('span.elfinder-spinner').parent().html(fm.i18n('size')+': '+data.formated);
 				}).fail(function() {
-					dialog.find('span.elfinder-info-spinner').parent().html(fm.i18n('size')+': '+fm.i18n('unknown'));
+					dialog.find('span.elfinder-spinner').parent().html(fm.i18n('size')+': '+fm.i18n('unknown'));
 				}).always(function() {
 					getSize = false;
 				});
