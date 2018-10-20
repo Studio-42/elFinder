@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 34a5b68) (2018-10-20)
+ * Version 2.1.42 (2.1-src Nightly: 7a006c5) (2018-10-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -1965,6 +1965,12 @@ ul.elfinder-help-integrations a:hover {
     -o-transform: scale(.6);
     transform-origin: 54px -24px;
     transform: scale(.6);
+}
+
+/* thumbnail image and draging icon */
+.elfinder-cwd-icon.elfinder-cwd-icon-drag {
+    width: 48px;
+    height: 48px;
 }
 
 /* thumbnail image and draging icon overlay none */
