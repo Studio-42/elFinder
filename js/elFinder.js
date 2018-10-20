@@ -4796,6 +4796,11 @@ var elFinder = function(elm, opts, bootCallback) {
 							i = '<div class="elfinder-cwd-icon elfinder-cwd-icon-drag '+self.mime2class(mime)+' ui-corner-all"/>';
 							if (tmb) {
 								i = $(i).addClass(tmb.className).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
+							} else if (f.icon) {
+								i = $(i).css(self.getIconStyle(f, true)).get(0).outerHTML;
+							}
+							if (f.csscls) {
+								i = '<div class="'+f.csscls+'">' + i + '</div>';
 							}
 							return i;
 						},
