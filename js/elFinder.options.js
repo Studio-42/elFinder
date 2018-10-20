@@ -626,6 +626,16 @@ elFinder.prototype._options = {
 			helpSource : ''
 		},
 		preference : {
+			// dialog width
+			width: 600,
+			// dialog height
+			height: 400,
+			// tabs setting see preference.js : build()
+			categories: null,
+			// preference setting see preference.js : build()
+			prefs: null,
+			// language setting  see preference.js : build()
+			langs: null,
 			// Command list of action when select file
 			// Array value are 'Command Name' or 'Command Name1/CommandName2...'
 			selectActions : ['open', 'edit/download', 'resize/edit/download', 'download', 'quicklook']

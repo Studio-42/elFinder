@@ -14,7 +14,7 @@ elFinder.prototype.commands.rm = function() {
 			var cnt = targets.length,
 				cwd = fm.cwd().hash,
 				descs = [],
-				spinner = '<span class="elfinder-info-spinner"/>' + fm.i18n('calc'),
+				spinner = fm.i18n('calc') + '<span class="elfinder-spinner"/>',
 				dialog, text, tmb, size, f, fname;
 			
 			if (cnt > 1) {
@@ -84,9 +84,9 @@ elFinder.prototype.commands.rm = function() {
 			
 			if (getSize) {
 				getSize = fm.getSize($.map(files, function(f) { return f.mime === 'directory'? f.hash : null; })).done(function(data) {
-					dialog.find('span.elfinder-info-spinner').parent().html(fm.i18n('size')+': '+data.formated);
+					dialog.find('span.elfinder-spinner').parent().html(fm.i18n('size')+': '+data.formated);
 				}).fail(function() {
-					dialog.find('span.elfinder-info-spinner').parent().html(fm.i18n('size')+': '+fm.i18n('unknown'));
+					dialog.find('span.elfinder-spinner').parent().html(fm.i18n('size')+': '+fm.i18n('unknown'));
 				}).always(function() {
 					getSize = false;
 				});
