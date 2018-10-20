@@ -519,8 +519,8 @@ elFinder.prototype.commands.preference = function() {
 
 			dialog = self.fmDialog(base, {
 				title : self.title,
-				width : 600,
-				height: 400,
+				width : self.options.width || 600,
+				height: self.options.height || 400,
 				maxWidth: 'window',
 				maxHeight: 'window',
 				autoOpen : false,
