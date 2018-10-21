@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 0eea86c) (2018-10-21)
+ * Version 2.1.42 (2.1-src Nightly: ea1c40e) (2018-10-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9918,7 +9918,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 0eea86c)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: ea1c40e)';
 
 
 
@@ -10647,7 +10647,7 @@ elFinder.prototype._options = {
 			// 'tabs' opens in each tabs
 			into   : 'window',
 			// Default command list of action when select file
-			// Array value are 'Command Name' or 'Command Name1/CommandName2...'
+			// String value that is 'Command Name' or 'Command Name1/CommandName2...'
 			selectAction : 'open'
 		},
 		opennew : {
