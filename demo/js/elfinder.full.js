@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: cd7ecc6) (2018-10-21)
+ * Version 2.1.42 (2.1-src Nightly: 0eea86c) (2018-10-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9918,7 +9918,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: cd7ecc6)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 0eea86c)';
 
 
 
@@ -19812,7 +19812,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			}
 			contextRaw.push({
 				label    : fm.i18n('textLabel'),
-				icon     : 'accept',
+				icon     : 'text',
 				callback : function() {
 					textLabel = ! textLabel;
 					self.css('height', '').find('.elfinder-button-text')[textLabel? 'show':'hide']();
