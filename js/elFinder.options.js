@@ -312,7 +312,7 @@ elFinder.prototype._options = {
 			// 'tabs' opens in each tabs
 			into   : 'window',
 			// Default command list of action when select file
-			// Array value are 'Command Name' or 'Command Name1/CommandName2...'
+			// String value that is 'Command Name' or 'Command Name1/CommandName2...'
 			selectAction : 'open'
 		},
 		opennew : {
