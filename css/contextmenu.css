@@ -230,6 +230,6 @@
 }
 
 /* for CSS style priority to ui-state-disabled - "background-image: none" */
-.elfinder .elfinder-button-icon.ui-state-disabled {
-    background-image: url('../img/toolbar.png') !important;
+.elfinder .elfinder-contextmenu-item .elfinder-button-icon.ui-state-disabled {
+    background-image: url('../img/toolbar.png');
 }

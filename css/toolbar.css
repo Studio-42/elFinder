@@ -345,6 +345,10 @@
     background-position: 0 -992px;
 }
 
+.elfinder-button-icon-text {
+    background-position: 0 -1008px;
+}
+
 /* button with dropdown menu*/
 .elfinder .elfinder-menubutton {
     overflow: visible;

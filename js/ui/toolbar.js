@@ -93,7 +93,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			}
 			contextRaw.push({
 				label    : fm.i18n('textLabel'),
-				icon     : 'accept',
+				icon     : 'text',
 				callback : function() {
 					textLabel = ! textLabel;
 					self.css('height', '').find('.elfinder-button-text')[textLabel? 'show':'hide']();
