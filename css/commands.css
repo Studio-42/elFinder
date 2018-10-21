@@ -685,6 +685,10 @@ ul.elfinder-help-integrations a:hover {
 }
 
 /********************** COMMAND "PREFERENCE" ****************************/
+.elfinder-preference .ui-tabs-nav {
+    margin-bottom: 1px;
+}
+
 /* fix tabs */
 .elfinder-preference .ui-tabs-panel {
     padding: 10px 10px 0;
