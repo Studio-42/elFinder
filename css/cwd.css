@@ -75,10 +75,15 @@
 .elfinder-cwd-wrapper-empty .elfinder-cwd:after {
     display: block;
     position: absolute;
-    top: 40%;
-    left: 0;
-    right: 0;
-    margin-top: -2em;
+    height: auto;
+    width: 90%;
+    width: calc(100% - 20px);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translateY(-50%) translateX(-50%);
+    -webkit-transform: translateY(-50%) translateX(-50%);
+    transform: translateY(-50%) translateX(-50%);
     line-height: 1.5em;
     text-align: center;
     white-space: pre-wrap;
