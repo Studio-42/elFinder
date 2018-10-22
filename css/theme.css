@@ -83,8 +83,9 @@
     color: #fff;
 }
 
+.elfinder-navbar .ui-droppable-hover,
 .elfinder-navbar .elfinder-droppable-active {
-    background: #A7C6E5 !important;
+    background: #A7C6E5;
 }
 
 /* disabled elfinder */
@@ -266,7 +267,7 @@
 }
 
 .elfinder-cwd .elfinder-droppable-active td {
-    background: #A7C6E5 !important;
+    background: #A7C6E5;
 }
 
 .elfinder-cwd.elfinder-table-header-sticky table {
@@ -329,9 +330,8 @@
 }
 
 /* tooltip */
-.elfinder-ui-tooltip,
-.elfinder .elfinder-ui-tooltip {
-    background-color: #fff !important;
+.ui-widget-content.elfinder-ui-tooltip {
+    background-color: #fff;
 }
 
 .elfinder-ui-tooltip.ui-widget-shadow,
