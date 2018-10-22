@@ -344,7 +344,7 @@
 					fm   = this.fm,
 					dfrd = $.Deferred(),
 					cdns = fm.options.cdns,
-					ver  = 'latest',
+					ver  = 'v3.2.2',
 					init = function(editor) {
 						var $base = $(base),
 							bParent = $base.parent(),
@@ -362,16 +362,18 @@
 										name: self.file.name
 									},
 									theme: Object.assign(opts.theme, {
-										// main icons
-										'menu.normalIcon.path': iconsPath + 'icon-b.svg',
-										'menu.normalIcon.name': 'icon-b',
-										'menu.activeIcon.path': iconsPath + 'icon-a.svg',
-										'menu.activeIcon.name': 'icon-a',
-										// submenu icons
-										'submenu.normalIcon.path': iconsPath + 'icon-a.svg',
-										'submenu.normalIcon.name': 'icon-a',
+										'menu.normalIcon.path': iconsPath + 'icon-d.svg',
+										'menu.normalIcon.name': 'icon-d',
+										'menu.activeIcon.path': iconsPath + 'icon-b.svg',
+										'menu.activeIcon.name': 'icon-b',
+										'menu.disabledIcon.path': iconsPath + 'icon-a.svg',
+										'menu.disabledIcon.name': 'icon-a',
+										'menu.hoverIcon.path': iconsPath + 'icon-c.svg',
+										'menu.hoverIcon.name': 'icon-c',
+										'submenu.normalIcon.path': iconsPath + 'icon-d.svg',
+										'submenu.normalIcon.name': 'icon-d',
 										'submenu.activeIcon.path': iconsPath + 'icon-c.svg',
-										'submenu.activeIcon.name': 'icon-c',
+										'submenu.activeIcon.name': 'icon-c'
 									}),
 									initMenu: 'filter',
 									menuBarPosition: 'bottom'
