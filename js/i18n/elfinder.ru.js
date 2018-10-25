@@ -3,7 +3,7 @@
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
  * @author Alex Yashkin <alex@yashkin.by>
- * @version 2018-08-08
+ * @version 2018-10-25
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -18,9 +18,9 @@
 		translator : 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;, Andrew Berezovsky &lt;andrew.berezovsky@gmail.com&gt;, Alex Yashkin &lt;alex@yashkin.by&gt;',
 		language   : 'Русский язык',
 		direction  : 'ltr',
-		dateFormat : 'd M Y H:i', // Mar 13, 2012 05:27 PM
-		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
-		nonameDateFormat : 'ymd-His', // to apply if upload file is noname: 120513172700
+		dateFormat : 'd M Y H:i', // will show like: 25 Окт 2018 12:37
+		fancyDateFormat : '$1 H:i', // will show like: Сегодня 12:37
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 181025-123708
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -291,7 +291,8 @@
 			'untitled folder'   : 'НоваяПапка',   // added 10.11.2015
 			'Archive'           : 'НовыйАрхив',  // from v2.1 added 10.11.2015
 			'untitled file'     : 'НовыйФайл.$1',  // from v2.1.41 added 6.8.2018
-			'extentionfile'     : '$1 Файл',     // from v2.1.41 added 6.8.2018
+			'extentionfile'     : '$1 Файл',    // from v2.1.41 added 6.8.2018
+			'extentiontype'     : '$1: $2',      // from v2.1.43 added 17.10.2018
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Необходимо подтверждение',
@@ -479,6 +480,13 @@
 			'makefileTypes'   : 'Типы файлов в меню "Новый файл"', // from v2.1.41 added 7.8.2018
 			'typeOfTextfile'  : 'Тип текстового файла', // from v2.1.41 added 7.8.2018
 			'add'             : 'Добавить', // from v2.1.41 added 7.8.2018
+			'theme'           : 'Тема', // from v2.1.43 added 19.10.2018
+			'default'         : 'По умолчанию', // from v2.1.43 added 19.10.2018
+			'description'     : 'Описание', // from v2.1.43 added 19.10.2018
+			'website'         : 'Веб-сайт', // from v2.1.43 added 19.10.2018
+			'author'          : 'Автор', // from v2.1.43 added 19.10.2018
+			'email'           : 'Email', // from v2.1.43 added 19.10.2018
+			'license'         : 'Лицензия', // from v2.1.43 added 19.10.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Неизвестный',
