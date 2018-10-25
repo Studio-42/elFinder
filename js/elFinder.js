@@ -8207,7 +8207,7 @@ elFinder.prototype = {
 				}
 				return m;
 			},
-			i, j, m, escFunc, start = 0;
+			i, j, m, escFunc, start = 0, isErr;
 		
 		if (arguments.length && arguments[0] === false) {
 			escFunc = function(m){ return m; };
@@ -8240,15 +8240,21 @@ elFinder.prototype = {
 			}
 			m = input[i];
 			if (typeof m == 'string') {
+				isErr = !!(messages[m] && m.match(/^err/));
 				// translate message
 				m = messages[m] || (escFunc? escFunc(m) : self.escape(m));
 				// replace placeholders in message
 				m = m.replace(/\$(\d+)/g, function(match, placeholder) {
+					var res;
 					placeholder = i + parseInt(placeholder);
 					if (placeholder > 0 && input[placeholder]) {
 						ignore.push(placeholder);
 					}
-					return escFunc? escFunc(input[placeholder]) : self.escape(input[placeholder]);
+					res = escFunc? escFunc(input[placeholder]) : self.escape(input[placeholder]);
+					if (isErr) {
+						res = '<span class="elfinder-err-var elfinder-err-var' + placeholder + '">' + res + '</span>';
+					}
+					return res;
 				});
 			} else {
 				// get HTML from jQuery object
