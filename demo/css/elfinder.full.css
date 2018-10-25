@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 3ca0c18) (2018-10-23)
+ * Version 2.1.42 (2.1-src Nightly: b840c1c) (2018-10-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -2892,6 +2892,10 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 .elfinder-rtl .elfinder-dialog-confirm .ui-dialog-content {
     padding-left: 0;
     padding-right: 56px;
+}
+
+.elfinder-dialog-error .elfinder-err-var {
+    word-break: break-all;
 }
 
 /*********************** NOTIFY DIALOG **************************/
