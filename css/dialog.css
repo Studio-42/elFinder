@@ -258,6 +258,10 @@
     padding-right: 56px;
 }
 
+.elfinder-dialog-error .elfinder-err-var {
+    word-break: break-all;
+}
+
 /*********************** NOTIFY DIALOG **************************/
 
 .elfinder-dialog-notify .ui-dialog-titlebar-close {
