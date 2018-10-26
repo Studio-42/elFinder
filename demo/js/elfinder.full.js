@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 0ed7ff8) (2018-10-26)
+ * Version 2.1.42 (2.1-src Nightly: b203000) (2018-10-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -4964,6 +4964,8 @@ var elFinder = function(elm, opts, bootCallback) {
 			bottomtray : $('<div class="elfinder-bottomtray">').appendTo(node)
 		};
 
+		self.trigger('uiready');
+
 		// load required ui
 		$.each(self.options.ui || [], function(i, ui) {
 			var name = 'elfinder'+ui,
@@ -9924,7 +9926,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 0ed7ff8)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: b203000)';
 
 
 
@@ -17852,33 +17854,44 @@ $.fn.elfindernavbar = function(fm, opts) {
 		var nav    = $(this).hide().addClass('ui-state-default elfinder-navbar'),
 			parent = nav.css('overflow', 'hidden').parent(),
 			wz     = parent.children('.elfinder-workzone').append(nav),
-			delta  = nav.outerHeight() - nav.height(),
 			ltr    = fm.direction == 'ltr',
-			handle, swipeHandle, autoHide, setWidth, navdock,
+			delta, deltaW, handle, swipeHandle, autoHide, setWidth, navdock,
 			setWzRect = function() {
 				var cwd = fm.getUI('cwd'),
 					wz  = fm.getUI('workzone'),
 					wzRect = wz.data('rectangle'),
 					cwdOffset = cwd.offset();
 				wz.data('rectangle', Object.assign(wzRect, { cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width() }));
+			},
+			setDelta = function() {
+				delta  = nav.outerHeight() - nav.height();
+				deltaW = navdock.outerWidth() - navdock.innerWidth();
 			};
 
-			fm.one('cssloaded', function() {
-				delta = nav.outerHeight() - nav.height();
-			}).one('opendone',function() {
-				handle && handle.trigger('resize');
-				nav.css('overflow', 'auto');
-			}).bind('wzresize', function() {
+		fm.one('init', function() {
+			var set = function() {
+				navdock =fm.getUI('navdock');
+				setDelta();
+				fm.trigger('wzresize');
+			};
+			fm.bind('wzresize', function() {
 				var navdockH = 0;
-				if (! navdock) {
-					navdock =fm.getUI('navdock');
-				}
-				navdock.width(nav.get(0).offsetWidth - 2);
+				navdock.width(nav.outerWidth() - deltaW);
 				if (navdock.children().length > 1) {
 					navdockH = navdock.outerHeight(true);
 				}
 				nav.height(wz.height() - navdockH - delta);
 			});
+			if (fm.cssloaded) {
+				set();
+			} else {
+				fm.one('cssloaded', set);
+			}
+		})
+		.one('opendone',function() {
+			handle && handle.trigger('resize');
+			nav.css('overflow', 'auto');
+		}).bind('themechange', setDelta);
 		
 		if (fm.UA.Touch) {
 			autoHide = fm.storage('autoHide') || {};
@@ -18144,6 +18157,15 @@ $.fn.elfindernavdock = function(fm, opts) {
 							}
 							self.resizable('option', 'maxHeight', maxH);
 						}
+					}).bind('themechange', function() {
+						var oldH = self.height();
+						requestAnimationFrame(function() {
+							var curH = self.height(),
+								diff = oldH - curH;
+							if (diff !== 0) {
+								resize(self.height(),  curH - diff);
+							}
+						});
 					});
 				}
 				fm.bind('navbarshow navbarhide', function(e) {
