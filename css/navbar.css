@@ -4,6 +4,7 @@
 
 /* container */
 .elfinder .elfinder-navbar {
+    /*box-sizing: border-box;*/
     width: 230px;
     padding: 3px 5px;
     background-image: none;
