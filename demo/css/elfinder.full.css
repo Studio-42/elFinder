@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: b840c1c) (2018-10-26)
+ * Version 2.1.42 (2.1-src Nightly: 0ed7ff8) (2018-10-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -3086,8 +3086,9 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 }
 
 .elfinder-info-tb td.elfinder-info-hash {
-    word-break: break-word;
-    max-width: 32em;
+    display: inline-block;
+    word-break: break-all;
+    max-width: 16em;
 }
 
 .elfinder-info-tb tr td:first-child {
