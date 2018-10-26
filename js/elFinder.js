@@ -4933,6 +4933,8 @@ var elFinder = function(elm, opts, bootCallback) {
 			bottomtray : $('<div class="elfinder-bottomtray">').appendTo(node)
 		};
 
+		self.trigger('uiready');
+
 		// load required ui
 		$.each(self.options.ui || [], function(i, ui) {
 			var name = 'elfinder'+ui,

@@ -137,6 +137,15 @@ $.fn.elfindernavdock = function(fm, opts) {
 							}
 							self.resizable('option', 'maxHeight', maxH);
 						}
+					}).bind('themechange', function() {
+						var oldH = self.height();
+						requestAnimationFrame(function() {
+							var curH = self.height(),
+								diff = oldH - curH;
+							if (diff !== 0) {
+								resize(self.height(),  curH - diff);
+							}
+						});
 					});
 				}
 				fm.bind('navbarshow navbarhide', function(e) {
