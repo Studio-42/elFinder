@@ -255,6 +255,7 @@
 
 /* other data in info */
 .elfinder-quicklook-info-data {
+    clear: both;
     padding-bottom: .2em;
     color: #fff;
 }

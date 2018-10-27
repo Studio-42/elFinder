@@ -153,6 +153,18 @@
     vertical-align: middle;
 }
 
+.elfinder-ltr .elfinder-spinner,
+.elfinder-ltr .elfinder-spinner-text {
+    float: left;
+}
+
+.elfinder-rtl .elfinder-spinner,
+.elfinder-rtl .elfinder-spinner-text  {
+    float: right;
+}
+
+
+
 /* resize handle for touch devices */
 .elfinder-touch .std42-dialog.ui-dialog:not(ui-resizable-disabled) .ui-resizable-se {
     width: 12px;
@@ -455,12 +467,20 @@
     max-width: 16em;
 }
 
-.elfinder-info-tb tr td:first-child {
+.elfinder-ltr .elfinder-info-tb tr td:first-child {
     text-align: right;
 }
 
-.elfinder-info-tb span {
+.elfinder-ltr .elfinder-info-tb span {
     float: left;
+}
+
+.elfinder-rtl .elfinder-info-tb tr td:first-child {
+    text-align: left;
+}
+
+.elfinder-rtl .elfinder-info-tb span {
+    float: right;
 }
 
 .elfinder-info-tb a {
@@ -470,14 +490,6 @@
 
 .elfinder-info-tb a:hover {
     text-decoration: none;
-}
-
-.elfinder-info-spinner {
-    width: 14px;
-    height: 14px;
-    float: left;
-    background: url("../img/spinner-mini.gif") center center no-repeat;
-    margin: 0 5px;
 }
 
 .elfinder-netmount-tb {

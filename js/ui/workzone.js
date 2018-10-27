@@ -8,9 +8,11 @@ $.fn.elfinderworkzone = function(fm) {
 	
 	this.not('.'+cl).each(function() {
 		var wz     = $(this).addClass(cl),
-			wdelta = wz.outerHeight(true) - wz.height(),
 			prevH  = Math.round(wz.height()),
 			parent = wz.parent(),
+			setDelta = function() {
+				wdelta = wz.outerHeight(true) - wz.height();
+			},
 			fitsize = function(e) {
 				var height = parent.height() - wdelta,
 					style  = parent.attr('style'),
@@ -41,10 +43,14 @@ $.fn.elfinderworkzone = function(fm) {
 			cssloaded = function() {
 				wdelta = wz.outerHeight(true) - wz.height();
 				fitsize();
-			};
-			
+			},
+			wdelta;
+		
+		setDelta();
 		parent.on('resize.' + fm.namespace, fitsize);
-		fm.one('cssloaded', cssloaded).bind('uiresize', fitsize);
+		fm.one('cssloaded', cssloaded)
+		  .bind('uiresize', fitsize)
+		  .bind('themechange', setDelta);
 	});
 	return this;
 };
