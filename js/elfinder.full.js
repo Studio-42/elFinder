@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: b203000) (2018-10-26)
+ * Version 2.1.42 (2.1-src Nightly: 0dcaae3) (2018-10-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -8836,7 +8836,7 @@ elFinder.prototype = {
 				}
 			},
 			spinner = function() {
-				return $('<div class="elfinder-netmount-spinner"/>').append('<span class="elfinder-info-spinner"/>');
+				return $('<div class="elfinder-netmount-spinner"/>').append('<span class="elfinder-spinner"/>');
 			},
 			xhr;
 		return {
@@ -8846,7 +8846,7 @@ elFinder.prototype = {
 				offline  : $('<input type="checkbox"/>').on('change', function() {
 					$(this).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
 				}),
-				host     : $('<span><span class="elfinder-info-spinner"/></span><input type="hidden"/>'),
+				host     : $('<span><span class="elfinder-spinner"/></span><input type="hidden"/>'),
 				path     : $('<input type="text" value="'+opts.root+'"/>'),
 				user     : $('<input type="hidden"/>'),
 				pass     : $('<input type="hidden"/>')
@@ -8858,7 +8858,7 @@ elFinder.prototype = {
 					data = d || null;
 				this.vars.mbtn = f.host.closest('.ui-dialog').children('.ui-dialog-buttonpane:first').find('button.elfinder-btncnt-0');
 				if (! f0.data('inrequest')
-						&& (f0.find('span.elfinder-info-spinner').length
+						&& (f0.find('span.elfinder-spinner').length
 							|| data === 'reset'
 							|| (data === 'winfocus' && ! f0.siblings('span.elfinder-button-icon-reload').length))
 							)
@@ -8868,13 +8868,13 @@ elFinder.prototype = {
 						oline.attr('title', fm.i18n('offlineAccess'));
 						oline.uniqueId().after($('<label/>').attr('for', oline.attr('id')).html(' '+fm.i18n('offlineAccess')));
 					}
-					f0.data('inrequest', true).empty().addClass('elfinder-info-spinner')
+					f0.data('inrequest', true).empty().addClass('elfinder-spinner')
 						.parent().find('span.elfinder-button-icon').remove();
 					fm.request({
 						data : {cmd : 'netmount', protocol: protocol, host: host, user: 'init', options: {id: fm.id, offline: oline.prop('checked')? 1:0, pass: f.host[1].value}},
 						preventDefault : true
 					}).done(function(data){
-						f0.removeClass("elfinder-info-spinner").html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1, host);}));
+						f0.removeClass("elfinder-spinner").html(data.body.replace(/\{msg:([^}]+)\}/g, function(whole,s1){return fm.i18n(s1, host);}));
 					});
 					opts.noOffline && oline.closest('tr').hide();
 				} else {
@@ -8892,7 +8892,7 @@ elFinder.prototype = {
 				
 				opts.noOffline && f.offline.closest('tr').hide();
 				if (data.mode == 'makebtn') {
-					f0.removeClass('elfinder-info-spinner').removeData('expires').removeData('funcexpup');
+					f0.removeClass('elfinder-spinner').removeData('expires').removeData('funcexpup');
 					f.host.find('input').on('mouseenter mouseleave', function(){$(this).toggleClass('ui-state-hover');});
 					f1.val('');
 					f.path.val(opts.root).next().remove();
@@ -8909,7 +8909,7 @@ elFinder.prototype = {
 						expires = '()';
 						f0.data('expires', data.expires);
 					}
-					f0.html(host + expires).removeClass('elfinder-info-spinner');
+					f0.html(host + expires).removeClass('elfinder-spinner');
 					if (data.expires) {
 						f0.data('funcexpup', function() {
 							var rem = Math.floor((f0.data('expires') - (+new Date()) / 1000) / 60);
@@ -9926,7 +9926,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: b203000)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 0dcaae3)';
 
 
 
@@ -10903,7 +10903,7 @@ elFinder.prototype._options = {
 				// 	 * 
 				// 	 * @type String
 				// 	 */
-				// 	tpl : '<div class="elfinder-info-desc"><span class="elfinder-info-spinner"></span></div>',
+				// 	tpl : '<div class="elfinder-info-desc"><span class="elfinder-spinner"></span></div>',
 				// 	
 				// 	/**
 				// 	 * Restricts to mimetypes (optional)
@@ -17864,8 +17864,10 @@ $.fn.elfindernavbar = function(fm, opts) {
 				wz.data('rectangle', Object.assign(wzRect, { cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width() }));
 			},
 			setDelta = function() {
-				delta  = nav.outerHeight() - nav.height();
-				deltaW = navdock.outerWidth() - navdock.innerWidth();
+				nav.css('overflow', 'hidden');
+				delta  = Math.round(nav.outerHeight() - nav.height());
+				deltaW = Math.round(navdock.outerWidth() - navdock.innerWidth());
+				nav.css('overflow', 'auto');
 			};
 
 		fm.one('init', function() {
@@ -18158,9 +18160,9 @@ $.fn.elfindernavdock = function(fm, opts) {
 							self.resizable('option', 'maxHeight', maxH);
 						}
 					}).bind('themechange', function() {
-						var oldH = self.height();
+						var oldH = Math.round(self.height());
 						requestAnimationFrame(function() {
-							var curH = self.height(),
+							var curH = Math.round(self.height()),
 								diff = oldH - curH;
 							if (diff !== 0) {
 								resize(self.height(),  curH - diff);
@@ -21697,9 +21699,11 @@ $.fn.elfinderworkzone = function(fm) {
 	
 	this.not('.'+cl).each(function() {
 		var wz     = $(this).addClass(cl),
-			wdelta = wz.outerHeight(true) - wz.height(),
 			prevH  = Math.round(wz.height()),
 			parent = wz.parent(),
+			setDelta = function() {
+				wdelta = wz.outerHeight(true) - wz.height();
+			},
 			fitsize = function(e) {
 				var height = parent.height() - wdelta,
 					style  = parent.attr('style'),
@@ -21730,10 +21734,14 @@ $.fn.elfinderworkzone = function(fm) {
 			cssloaded = function() {
 				wdelta = wz.outerHeight(true) - wz.height();
 				fitsize();
-			};
-			
+			},
+			wdelta;
+		
+		setDelta();
 		parent.on('resize.' + fm.namespace, fitsize);
-		fm.one('cssloaded', cssloaded).bind('uiresize', fitsize);
+		fm.one('cssloaded', cssloaded)
+		  .bind('uiresize', fitsize)
+		  .bind('themechange', setDelta);
 	});
 	return this;
 };
@@ -25192,7 +25200,7 @@ elFinder.prototype.commands.hide = function() {
 (elFinder.prototype.commands.info = function() {
 		var m   = 'msg',
 		fm  = this.fm,
-		spclass = 'elfinder-info-spinner',
+		spclass = 'elfinder-spinner',
 		btnclass = 'elfinder-info-button',
 		msg = {
 			calc     : fm.i18n('calc'),
@@ -27781,7 +27789,7 @@ elFinder.prototype.commands.preference = function() {
 				self.window.trigger('navdockout');
 			}
 		}),
-		spinner = '<span class="elfinder-info-spinner"/>' + fm.i18n('calc'),
+		spinner = '<span class="elfinder-spinner-text">' + fm.i18n('calc') + '</span>' + '<span class="elfinder-spinner"/>',
 		navStyle = '',
 		init = true,
 		dockHeight,	getSize, tm4cwd, dockedNode, selectTm;
@@ -27848,9 +27856,9 @@ elFinder.prototype.commands.preference = function() {
 					
 					if (getSizeHashes.length) {
 						getSize = fm.getSize(getSizeHashes).done(function(data) {
-							info.find('span.elfinder-info-spinner').parent().html(data.formated);
+							info.find('span.elfinder-spinner').parent().html(data.formated);
 						}).fail(function() {
-							info.find('span.elfinder-info-spinner').parent().html(fm.i18n('unknown'));
+							info.find('span.elfinder-spinner').parent().html(fm.i18n('unknown'));
 						}).always(function() {
 							getSize = null;
 						});
@@ -28403,7 +28411,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				// this is our file - stop event propagation
 				e.stopImmediatePropagation();
 
-				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+				loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"></span></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 
 				url = fm.openUrl(file.hash);
 				
@@ -28501,7 +28509,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				// this is our file - stop event propagation
 				e.stopImmediatePropagation();
 
-				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+				loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"></span></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 				url = fm.openUrl(file.hash);
 				if (!fm.isSameOrigin(url)) {
 					url = fm.openUrl(file.hash, true);
@@ -28545,7 +28553,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			if (mimes[file.mime] && ql.dispInlineRegex.test(file.mime) && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax)) {
 				e.stopImmediatePropagation();
 
-				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+				loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"></span></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 
 				// stop loading on change file if not loaded yet
 				preview.one('change', function() {
@@ -28600,7 +28608,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			if (mimes[file.mime] && fm.options.cdns.marked && marked !== false && ql.dispInlineRegex.test(file.mime) && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax)) {
 				e.stopImmediatePropagation();
 
-				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+				loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"></span></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 
 				// stop loading on change file if not loaded yet
 				preview.one('change', function() {
@@ -29300,7 +29308,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					// this is our file - stop event propagation
 					e.stopImmediatePropagation();
 					
-					loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"></span></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 					
 					// stop loading on change file if not loaded yet
 					preview.one('change', function() {
@@ -29404,7 +29412,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					// this is our file - stop event propagation
 					e.stopImmediatePropagation();
 					
-					loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"></span></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 					
 					// stop loading on change file if not loaded yet
 					preview.one('change', function() {
@@ -29487,7 +29495,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					$('<div class="elfinder-quicklook-info-data"><button class="elfinder-info-button">'+fm.i18n('getLink')+'</button></div>').appendTo(ql.info.find('.elfinder-quicklook-info'))
 					.on('click', function() {
 						var self = $(this);
-						self.html('<span class="elfinder-info-spinner">');
+						self.html('<span class="elfinder-spinner">');
 						fm.request({
 							data : {cmd : 'url', target : file.hash},
 							preventDefault : true
@@ -29515,7 +29523,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						node = null;
 					}).addClass('elfinder-overflow-auto');
 					
-					loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"></span></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 					
 					url = fm.convAbsUrl(fm.url(file.hash));
 					node = $('<iframe class="elfinder-quicklook-preview-iframe" scrolling="no"/>')
@@ -29598,7 +29606,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						$('<div class="elfinder-quicklook-info-data"><button class="elfinder-info-button">'+fm.i18n('getLink')+'</button></div>').appendTo(ql.info.find('.elfinder-quicklook-info'))
 						.on('click', function() {
 							var self = $(this);
-							self.html('<span class="elfinder-info-spinner">');
+							self.html('<span class="elfinder-spinner">');
 							fm.request({
 								data : {cmd : 'url', target : file.hash},
 								preventDefault : true
@@ -29705,7 +29713,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						$('<div class="elfinder-quicklook-info-data"><button class="elfinder-info-button">'+fm.i18n('getLink')+'</button></div>').appendTo(ql.info.find('.elfinder-quicklook-info'))
 						.on('click', function() {
 							var self = $(this);
-							self.html('<span class="elfinder-info-spinner">');
+							self.html('<span class="elfinder-spinner">');
 							fm.request({
 								data : {cmd : 'url', target : file.hash},
 								preventDefault : true
@@ -29735,7 +29743,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							node = null;
 						}).addClass('elfinder-overflow-auto');
 						
-						loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+						loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"></span></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 						
 						url = fm.convAbsUrl(fm.url(file.hash));
 						if (file.ts) {
@@ -29811,7 +29819,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				
 				(typeof window.PR === 'undefined') && prettify();
 				
-				loading = $('<div class="elfinder-quicklook-info-data"> '+fm.i18n('nowLoading')+'<span class="elfinder-info-spinner"></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+				loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"></span></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 
 				// stop loading on change file if not loadin yet
 				preview.one('change', function() {
