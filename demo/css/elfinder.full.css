@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: b203000) (2018-10-26)
+ * Version 2.1.42 (2.1-src Nightly: 0dcaae3) (2018-10-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -428,7 +428,20 @@
 .ui-dialog-buttonpane .ui-icon {
     cursor: pointer;
 }
- 
+
+.elfinder-edit-spiner {
+    position: absolute;
+    top: 50%;
+    text-align: center;
+    width: 100%;
+    font-size: 16pt;
+}
+
+.elfinder-dialog .elfinder-edit-spiner .elfinder-spinner,
+.elfinder-dialog .elfinder-edit-spiner .elfinder-spinner-text {
+    float: none;
+}
+
 .elfinder-edit-onlineconvert-button {
     display: inline-block;
     width: 180px;
@@ -2789,6 +2802,18 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
     vertical-align: middle;
 }
 
+.elfinder-ltr .elfinder-spinner,
+.elfinder-ltr .elfinder-spinner-text {
+    float: left;
+}
+
+.elfinder-rtl .elfinder-spinner,
+.elfinder-rtl .elfinder-spinner-text  {
+    float: right;
+}
+
+
+
 /* resize handle for touch devices */
 .elfinder-touch .std42-dialog.ui-dialog:not(ui-resizable-disabled) .ui-resizable-se {
     width: 12px;
@@ -3091,12 +3116,20 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
     max-width: 16em;
 }
 
-.elfinder-info-tb tr td:first-child {
+.elfinder-ltr .elfinder-info-tb tr td:first-child {
     text-align: right;
 }
 
-.elfinder-info-tb span {
+.elfinder-ltr .elfinder-info-tb span {
     float: left;
+}
+
+.elfinder-rtl .elfinder-info-tb tr td:first-child {
+    text-align: left;
+}
+
+.elfinder-rtl .elfinder-info-tb span {
+    float: right;
 }
 
 .elfinder-info-tb a {
@@ -3106,14 +3139,6 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 
 .elfinder-info-tb a:hover {
     text-decoration: none;
-}
-
-.elfinder-info-spinner {
-    width: 14px;
-    height: 14px;
-    float: left;
-    background: url("../img/spinner-mini.gif") center center no-repeat;
-    margin: 0 5px;
 }
 
 .elfinder-netmount-tb {
@@ -4016,6 +4041,7 @@ button.elfinder-info-button {
 
 /* other data in info */
 .elfinder-quicklook-info-data {
+    clear: both;
     padding-bottom: .2em;
     color: #fff;
 }
