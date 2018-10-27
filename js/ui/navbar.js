@@ -19,8 +19,10 @@ $.fn.elfindernavbar = function(fm, opts) {
 				wz.data('rectangle', Object.assign(wzRect, { cwdEdge: (fm.direction === 'ltr')? cwdOffset.left : cwdOffset.left + cwd.width() }));
 			},
 			setDelta = function() {
-				delta  = nav.outerHeight() - nav.height();
-				deltaW = navdock.outerWidth() - navdock.innerWidth();
+				nav.css('overflow', 'hidden');
+				delta  = Math.round(nav.outerHeight() - nav.height());
+				deltaW = Math.round(navdock.outerWidth() - navdock.innerWidth());
+				nav.css('overflow', 'auto');
 			};
 
 		fm.one('init', function() {
