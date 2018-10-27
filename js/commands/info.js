@@ -8,7 +8,7 @@
 	"use strict";
 	var m   = 'msg',
 		fm  = this.fm,
-		spclass = 'elfinder-info-spinner',
+		spclass = 'elfinder-spinner',
 		btnclass = 'elfinder-info-button',
 		msg = {
 			calc     : fm.i18n('calc'),

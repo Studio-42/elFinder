@@ -418,7 +418,20 @@
 .ui-dialog-buttonpane .ui-icon {
     cursor: pointer;
 }
- 
+
+.elfinder-edit-spiner {
+    position: absolute;
+    top: 50%;
+    text-align: center;
+    width: 100%;
+    font-size: 16pt;
+}
+
+.elfinder-dialog .elfinder-edit-spiner .elfinder-spinner,
+.elfinder-dialog .elfinder-edit-spiner .elfinder-spinner-text {
+    float: none;
+}
+
 .elfinder-edit-onlineconvert-button {
     display: inline-block;
     width: 180px;

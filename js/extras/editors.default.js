@@ -50,15 +50,8 @@
 		},
 		initImgTag = function(id, file, content, fm) {
 			var node = $(this).children('img:first').data('ext', getExtention(file.mime, fm)),
-				spnr = $('<div/>')
-					.css({
-						position: 'absolute',
-						top: '50%',
-						textAlign: 'center',
-						width: '100%',
-						fontSize: '16pt'
-					})
-					.html(fm.i18n('ntfloadimg'))
+				spnr = $('<div class="elfinder-edit-spiner elfinder-edit-image"/>')
+					.html('<span class="elfinder-spinner-text">' + fm.i18n('ntfloadimg') + '</span><span class="elfinder-spinner"/>')
 					.hide()
 					.appendTo(this);
 			
@@ -686,15 +679,8 @@
 						}),
 					editor = this.editor,
 					confObj = editor.confObj,
-					spnr = $('<div/>')
-						.css({
-							position: 'absolute',
-							top: '50%',
-							textAlign: 'center',
-							width: '100%',
-							fontSize: '16pt'
-						})
-						.html(fm.i18n('nowLoading') + '<span class="elfinder-spinner"/>')
+					spnr = $('<div class="elfinder-edit-spiner elfinder-edit-photopea"/>')
+						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
 						.appendTo(ifm.parent()),
 					getType = function(mime) {
 						var ext = getExtention(mime, fm),
@@ -2009,15 +1995,8 @@
 			init : function(id, file, dum, fm) {
 				var ta = this,
 					ifm = $(this).hide(),
-					spnr = $('<div/>')
-						.css({
-							position: 'absolute',
-							top: '50%',
-							textAlign: 'center',
-							width: '100%',
-							fontSize: '16pt'
-						})
-						.html(fm.i18n('nowLoading') + '<span class="elfinder-spinner"/>')
+					spnr = $('<div class="elfinder-edit-spiner elfinder-edit-zohoeditor"/>')
+						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
 						.appendTo(ifm.parent()),
 					cdata = function() {
 						var data = '';
@@ -2415,16 +2394,9 @@
 							(set.showLink? $(set.link) : null)
 						)
 						.appendTo(ifm.parent().css({overflow: 'auto'})),
-					spnr = $('<div class="elfinder-edit-spiner elfinder-edit-online-convert"/>')
+					spnr = $('<div class="elfinder-edit-spiner elfinder-edit-onlineconvert"/>')
 						.hide()
-						.css({
-							position: 'absolute',
-							top: '50%',
-							textAlign: 'center',
-							width: '100%',
-							fontSize: '16pt'
-						})
-						.html('<span class="elfinder-edit-loadingmsg">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
+						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
 						.appendTo(ifm.parent()),
 					_url = null,
 					url = function() {
@@ -2517,7 +2489,7 @@
 						}
 					},
 					setStatus = function(status) {
-						spnr.show().children('.elfinder-edit-loadingmsg').text(status.info);
+						spnr.show().children('.elfinder-spinner-text').text(status.info);
 					},
 					polling = function(jobid) {
 						fm.request({
