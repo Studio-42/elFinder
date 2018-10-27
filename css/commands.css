@@ -419,7 +419,7 @@
     cursor: pointer;
 }
 
-.elfinder-edit-spiner {
+.elfinder-edit-spinner {
     position: absolute;
     top: 50%;
     text-align: center;
@@ -427,8 +427,8 @@
     font-size: 16pt;
 }
 
-.elfinder-dialog .elfinder-edit-spiner .elfinder-spinner,
-.elfinder-dialog .elfinder-edit-spiner .elfinder-spinner-text {
+.elfinder-dialog .elfinder-edit-spinner .elfinder-spinner,
+.elfinder-dialog .elfinder-edit-spinner .elfinder-spinner-text {
     float: none;
 }
 

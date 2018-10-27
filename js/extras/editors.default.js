@@ -50,7 +50,7 @@
 		},
 		initImgTag = function(id, file, content, fm) {
 			var node = $(this).children('img:first').data('ext', getExtention(file.mime, fm)),
-				spnr = $('<div class="elfinder-edit-spiner elfinder-edit-image"/>')
+				spnr = $('<div class="elfinder-edit-spinner elfinder-edit-image"/>')
 					.html('<span class="elfinder-spinner-text">' + fm.i18n('ntfloadimg') + '</span><span class="elfinder-spinner"/>')
 					.hide()
 					.appendTo(this);
@@ -679,7 +679,7 @@
 						}),
 					editor = this.editor,
 					confObj = editor.confObj,
-					spnr = $('<div class="elfinder-edit-spiner elfinder-edit-photopea"/>')
+					spnr = $('<div class="elfinder-edit-spinner elfinder-edit-photopea"/>')
 						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
 						.appendTo(ifm.parent()),
 					getType = function(mime) {
@@ -1995,7 +1995,7 @@
 			init : function(id, file, dum, fm) {
 				var ta = this,
 					ifm = $(this).hide(),
-					spnr = $('<div class="elfinder-edit-spiner elfinder-edit-zohoeditor"/>')
+					spnr = $('<div class="elfinder-edit-spinner elfinder-edit-zohoeditor"/>')
 						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
 						.appendTo(ifm.parent()),
 					cdata = function() {
@@ -2394,7 +2394,7 @@
 							(set.showLink? $(set.link) : null)
 						)
 						.appendTo(ifm.parent().css({overflow: 'auto'})),
-					spnr = $('<div class="elfinder-edit-spiner elfinder-edit-onlineconvert"/>')
+					spnr = $('<div class="elfinder-edit-spinner elfinder-edit-onlineconvert"/>')
 						.hide()
 						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
 						.appendTo(ifm.parent()),
