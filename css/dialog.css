@@ -464,7 +464,7 @@
 .elfinder-info-tb td.elfinder-info-hash {
     display: inline-block;
     word-break: break-all;
-    max-width: 16em;
+    max-width: 32ch;
 }
 
 .elfinder-ltr .elfinder-info-tb tr td:first-child {
