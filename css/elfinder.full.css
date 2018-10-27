@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 0dcaae3) (2018-10-27)
+ * Version 2.1.42 (2.1-src Nightly: 2e4f302) (2018-10-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -429,7 +429,7 @@
     cursor: pointer;
 }
 
-.elfinder-edit-spiner {
+.elfinder-edit-spinner {
     position: absolute;
     top: 50%;
     text-align: center;
@@ -437,8 +437,8 @@
     font-size: 16pt;
 }
 
-.elfinder-dialog .elfinder-edit-spiner .elfinder-spinner,
-.elfinder-dialog .elfinder-edit-spiner .elfinder-spinner-text {
+.elfinder-dialog .elfinder-edit-spinner .elfinder-spinner,
+.elfinder-dialog .elfinder-edit-spinner .elfinder-spinner-text {
     float: none;
 }
 
