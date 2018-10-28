@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 2f9d578) (2018-10-28)
+ * Version 2.1.42 (2.1-src Nightly: 7f6b4ab) (2018-10-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -4542,9 +4542,6 @@ embed.elfinder-quicklook-preview-audio {
     float: left;
     background: transparent;
     padding: 0;
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
-    border-radius: 4px;
     overflow: hidden;
 }
 
