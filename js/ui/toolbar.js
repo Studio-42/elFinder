@@ -7,7 +7,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 	"use strict";
 	this.not('.elfinder-toolbar').each(function() {
 		var commands = fm._commands,
-			self     = $(this).addClass('ui-helper-clearfix ui-widget-header ui-corner-top elfinder-toolbar'),
+			self     = $(this).addClass('ui-helper-clearfix ui-widget-header elfinder-toolbar'),
 			options  = {
 				// default options
 				displayTextLabel: false,
@@ -32,7 +32,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				l = panels.length;
 				while (l--) {
 					if (panels[l]) {
-						panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>');
+						panel = $('<div class="ui-widget-content elfinder-buttonset"/>');
 						i = panels[l].length;
 						while (i--) {
 							name = panels[l][i];
@@ -58,7 +58,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 					//cmdPref.state = !self.children().length? 0 : -1;
 					if (options.showPreferenceButton === 'always' || (!self.children().length && options.showPreferenceButton === 'auto')) {
 						//cmdPref.state = 0;
-						panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>');
+						panel = $('<div class="ui-widget-content elfinder-buttonset"/>');
 						name = 'preference';
 						button = 'elfinder'+cmd.options.ui;
 						buttons[name] = $('<div/>')[button](cmdPref);
