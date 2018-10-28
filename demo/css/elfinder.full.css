@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 82bbd58) (2018-10-28)
+ * Version 2.1.42 (2.1-src Nightly: 2f9d578) (2018-10-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -4863,6 +4863,22 @@ embed.elfinder-quicklook-preview-audio {
 
 .elfinder-button-icon-text {
     background-position: 0 -1008px;
+}
+
+/* button icon mirroring for rtl */
+.elfinder-rtl .elfinder-button-icon-back,
+.elfinder-rtl .elfinder-button-icon-forward,
+.elfinder-rtl .elfinder-button-icon-getfile,
+.elfinder-rtl .elfinder-button-icon-help,
+.elfinder-rtl .elfinder-button-icon-redo,
+.elfinder-rtl .elfinder-button-icon-rename,
+.elfinder-rtl .elfinder-button-icon-search,
+.elfinder-rtl .elfinder-button-icon-undo,
+.elfinder-rtl .elfinder-button-icon-view-list,
+.elfinder-rtl .ui-icon-search {
+    -ms-transform: scale(-1, 1);
+    -webkit-transform: scale(-1, 1);
+    transform: scale(-1, 1);
 }
 
 /* button with dropdown menu*/
