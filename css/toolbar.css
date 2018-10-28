@@ -17,9 +17,6 @@
     float: left;
     background: transparent;
     padding: 0;
-    -moz-border-radius: 4px;
-    -webkit-border-radius: 4px;
-    border-radius: 4px;
     overflow: hidden;
 }
 
