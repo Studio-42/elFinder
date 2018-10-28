@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 2dce5b6) (2018-10-27)
+ * Version 2.1.42 (2.1-src Nightly: 82bbd58) (2018-10-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9926,7 +9926,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 2dce5b6)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 82bbd58)';
 
 
 
@@ -19762,7 +19762,7 @@ $.fn.elfindertoast = function(opts, fm) {
 $.fn.elfindertoolbar = function(fm, opts) {
 		this.not('.elfinder-toolbar').each(function() {
 		var commands = fm._commands,
-			self     = $(this).addClass('ui-helper-clearfix ui-widget-header ui-corner-top elfinder-toolbar'),
+			self     = $(this).addClass('ui-helper-clearfix ui-widget-header elfinder-toolbar'),
 			options  = {
 				// default options
 				displayTextLabel: false,
@@ -19787,7 +19787,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				l = panels.length;
 				while (l--) {
 					if (panels[l]) {
-						panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>');
+						panel = $('<div class="ui-widget-content elfinder-buttonset"/>');
 						i = panels[l].length;
 						while (i--) {
 							name = panels[l][i];
@@ -19813,7 +19813,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 					//cmdPref.state = !self.children().length? 0 : -1;
 					if (options.showPreferenceButton === 'always' || (!self.children().length && options.showPreferenceButton === 'auto')) {
 						//cmdPref.state = 0;
-						panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>');
+						panel = $('<div class="ui-widget-content elfinder-buttonset"/>');
 						name = 'preference';
 						button = 'elfinder'+cmd.options.ui;
 						buttons[name] = $('<div/>')[button](cmdPref);
