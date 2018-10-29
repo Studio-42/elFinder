@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 7f6b4ab) (2018-10-28)
+ * Version 2.1.42 (2.1-src Nightly: 2c235b3) (2018-10-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -13,7 +13,7 @@
 /******************************************************************/
 
 /********************** COMMAND "RESIZE" ****************************/
-.elfinder-dialog-resize {
+.elfinder-resize-container {
     margin-top: .3em;
 }
 
@@ -206,55 +206,55 @@
     border: 1px solid transparent;
 }
 
-.elfinder-dialog .elfinder-dialog-resize .elfinder-resize-whctrls {
+.elfinder-dialog-resize .elfinder-resize-whctrls {
     margin: -20px 5px 0 5px;
 }
 
-.elfinder-ltr .elfinder-dialog .elfinder-dialog-resize .elfinder-resize-whctrls {
+.elfinder-ltr .elfinder-dialog-resize .elfinder-resize-whctrls {
     float: right;
 }
 
-.elfinder-rtl .elfinder-dialog .elfinder-dialog-resize .elfinder-resize-whctrls {
+.elfinder-rtl .elfinder-dialog-resize .elfinder-resize-whctrls {
     float: left;
 }
 
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-e,
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-w {
+.elfinder-dialog-resize .ui-resizable-e,
+.elfinder-dialog-resize .ui-resizable-w {
     height: 100%;
     width: 10px;
 }
 
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-s,
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-n {
+.elfinder-dialog-resize .ui-resizable-s,
+.elfinder-dialog-resize .ui-resizable-n {
     width: 100%;
     height: 10px;
 }
 
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-e {
+.elfinder-dialog-resize .ui-resizable-e {
     margin-right: -7px;
 }
 
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-w {
+.elfinder-dialog-resize .ui-resizable-w {
     margin-left: -7px;
 }
 
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-s {
+.elfinder-dialog-resize .ui-resizable-s {
     margin-bottom: -7px;
 }
 
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-n {
+.elfinder-dialog-resize .ui-resizable-n {
     margin-top: -7px;
 }
 
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-se,
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-sw,
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-ne,
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-nw {
+.elfinder-dialog-resize .ui-resizable-se,
+.elfinder-dialog-resize .ui-resizable-sw,
+.elfinder-dialog-resize .ui-resizable-ne,
+.elfinder-dialog-resize .ui-resizable-nw {
     width: 10px;
     height: 10px;
 }
 
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-se {
+.elfinder-dialog-resize .ui-resizable-se {
     background: transparent;
     bottom: 0;
     right: 0;
@@ -262,40 +262,40 @@
     margin-bottom: -7px;
 }
 
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-sw {
+.elfinder-dialog-resize .ui-resizable-sw {
     margin-left: -7px;
     margin-bottom: -7px;
 }
 
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-ne {
+.elfinder-dialog-resize .ui-resizable-ne {
     margin-right: -7px;
     margin-top: -7px;
 }
 
-.elfinder-dialog .elfinder-dialog-resize .ui-resizable-nw {
+.elfinder-dialog-resize .ui-resizable-nw {
     margin-left: -7px;
     margin-top: -7px;
 }
 
-.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-s,
-.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-n {
+.elfinder-touch .elfinder-dialog-resize .ui-resizable-s,
+.elfinder-touch .elfinder-dialog-resize .ui-resizable-n {
     height: 20px;
 }
 
-.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-e,
-.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-w {
+.elfinder-touch .elfinder-dialog-resize .ui-resizable-e,
+.elfinder-touch .elfinder-dialog-resize .ui-resizable-w {
     width: 20px;
 }
 
-.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-se,
-.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-sw,
-.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-ne,
-.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .ui-resizable-nw {
+.elfinder-touch .elfinder-dialog-resize .ui-resizable-se,
+.elfinder-touch .elfinder-dialog-resize .ui-resizable-sw,
+.elfinder-touch .elfinder-dialog-resize .ui-resizable-ne,
+.elfinder-touch .elfinder-dialog-resize .ui-resizable-nw {
     width: 30px;
     height: 30px;
 }
 
-.elfinder-touch .elfinder-dialog .elfinder-dialog-resize .elfinder-resize-preview .ui-resizable-se {
+.elfinder-touch .elfinder-dialog-resize .elfinder-resize-preview .ui-resizable-se {
     width: 30px;
     height: 30px;
     margin: 0;
@@ -343,7 +343,7 @@
     font-size: 90%;
 }
 
-.ui-widget-content .elfinder-dialog-resize .elfinder-resize-rotate-slider {
+.ui-widget-content .elfinder-resize-container .elfinder-resize-rotate-slider {
     width: 195px;
     margin: 10px 7px;
     background-color: #fafafa;
