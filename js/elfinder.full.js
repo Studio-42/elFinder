@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 2c235b3) (2018-10-29)
+ * Version 2.1.42 (2.1-src Nightly: 10398e0) (2018-10-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9926,7 +9926,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 2c235b3)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 10398e0)';
 
 
 
@@ -15664,7 +15664,7 @@ $.fn.elfindercwd = function(fm, options) {
 					if (e.originalEvent.touches.length > 1) {
 						return;
 					}
-					if (cwd.data('longtap') !== void(0)) {
+					if (cwd.data('longtap') !== false) {
 						wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 						cwd.data('tmlongtap', setTimeout(function(){
 							// long tap
@@ -15753,13 +15753,7 @@ $.fn.elfindercwd = function(fm, options) {
 					if (list) {
 						cwd.html('<table><thead/><tbody/></table>');
 						thtr = $('<tr class="ui-state-default"><td class="elfinder-cwd-view-th-name">'+fm.getColumnName('name')+'</td>'+customColsNameBuild()+'</tr>');
-						cwd.find('thead').hide().append(
-							thtr
-							.on('contextmenu.'+fm.namespace, wrapperContextMenu.contextmenu)
-							.on('touchstart.'+fm.namespace, 'td', wrapperContextMenu.touchstart)
-							.on('touchmove.'+fm.namespace+' touchend.'+fm.namespace+' mouseup.'+fm.namespace, 'td', wrapperContextMenu.touchend)
-							.on('click.'+fm.namespace,'td', wrapperContextMenu.click)
-						).find('td:first').append(selectAllCheckbox);
+						cwd.find('thead').hide().append(thtr).find('td:first').append(selectAllCheckbox);
 
 						if ($.fn.sortable) {
 							thtr.addClass('touch-punch touch-punch-keep-default')
