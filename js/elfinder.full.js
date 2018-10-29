@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 7f6b4ab) (2018-10-28)
+ * Version 2.1.42 (2.1-src Nightly: 2c235b3) (2018-10-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9926,7 +9926,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 7f6b4ab)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 2c235b3)';
 
 
 
@@ -15664,7 +15664,7 @@ $.fn.elfindercwd = function(fm, options) {
 					if (e.originalEvent.touches.length > 1) {
 						return;
 					}
-					if (cwd.data('longtap') !== false) {
+					if (cwd.data('longtap') !== void(0)) {
 						wrapper.data('touching', {x: e.originalEvent.touches[0].pageX, y: e.originalEvent.touches[0].pageY});
 						cwd.data('tmlongtap', setTimeout(function(){
 							// long tap
@@ -30712,7 +30712,7 @@ elFinder.prototype.commands.resize = function() {
 			clsediting = fm.res('class', 'editing'),
 			open = function(file, id) {
 				var isJpeg   = (file.mime === 'image/jpeg'),
-					dialog   = $('<div class="elfinder-dialog-resize"/>'),
+					dialog   = $('<div class="elfinder-resize-container"/>'),
 					input    = '<input type="number" class="ui-corner-all"/>',
 					row      = '<div class="elfinder-resize-row"/>',
 					label    = '<div class="elfinder-resize-label"/>',
