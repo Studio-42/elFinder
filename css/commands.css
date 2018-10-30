@@ -512,6 +512,10 @@ div.elfinder-cwd-wrapper-list tr.ui-state-default td span.ui-icon {
     padding: 10px;
 }
 
+.elfinder-dialog .ui-tabs .ui-tabs-nav li {
+    overflow: hidden;
+}
+
 .elfinder-dialog .ui-tabs .ui-tabs-nav li a {
     padding: .2em .8em;
     display: inline-block;
