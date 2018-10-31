@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 10398e0) (2018-10-29)
+ * Version 2.1.42 (2.1-src Nightly: 449ecff) (2018-10-31)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -6618,7 +6618,7 @@ elFinder.prototype = {
 						
 						// file size check
 						if ((maxFileSize && blobSize > maxFileSize) || (!blobSlice && fm.uplMaxSize && blobSize > fm.uplMaxSize)) {
-							self.error(self.i18n('errUploadFile', blob.name) + ' ' + self.i18n('errUploadFileSize'));
+							self.error(['errUploadFile', blob.name, 'errUploadFileSize']);
 							cnt--;
 							total--;
 							continue;
@@ -6626,7 +6626,7 @@ elFinder.prototype = {
 						
 						// file mime check
 						if (blob.type && ! self.uploadMimeCheck(blob.type, target)) {
-							self.error(self.i18n('errUploadFile', blob.name) + ' ' + self.i18n('errUploadMime') + ' (' + self.escape(blob.type) + ')');
+							self.error(['errUploadFile', blob.name, 'errUploadMime', '(' + blob.type + ')']);
 							cnt--;
 							total--;
 							continue;
@@ -6672,7 +6672,7 @@ elFinder.prototype = {
 								end = start + BYTES_PER_CHUNK;
 							}
 							if (chunk == null) {
-								self.error(self.i18n('errUploadFile', blob.name) + ' ' + self.i18n('errUploadFileSize'));
+								self.error(['errUploadFile', blob.name, 'errUploadFileSize']);
 								cnt--;
 								total--;
 							} else {
@@ -6960,14 +6960,25 @@ elFinder.prototype = {
 													}
 												})
 												.done(function(data) {
-													if (data.hashes) {
-														paths = $.map(paths.concat(), function(p) {
-															if (p === '/') {
-																return target;
-															} else {
+													var rm = false;
+													if (!data.hashes) {
+														data.hashes = {};
+													}
+													paths = $.map(paths.concat(), function(p, i) {
+														if (p === '/') {
+															return target;
+														} else {
+															if (data.hashes[p]) {
 																return data.hashes[p];
+															} else {
+																rm = true;
+																files[i]._remove = true;
+																return null;
 															}
-														});
+														}
+													});
+													if (rm) {
+														files = $.grep(files, function(file) { return file._remove? false : true; });
 													}
 												})
 												.always(function(data) {
@@ -7041,15 +7052,26 @@ elFinder.prototype = {
 									}
 								})
 								.done(function(data) {
-									if (data.hashes) {
-										result[1] = $.map(result[1], function(p) {
-											p = p.replace(/\/[^\/]*$/, '');
-											if (p === '') {
-												return target;
-											} else {
+									var rm = false;
+									if (!data.hashes) {
+										data.hashes = {};
+									}
+									result[1] = $.map(result[1], function(p, i) {
+										p = p.replace(/\/[^\/]*$/, '');
+										if (p === '') {
+											return target;
+										} else {
+											if (data.hashes[p]) {
 												return data.hashes[p];
+											} else {
+												rm = true;
+												result[0][i]._remove = true;
+												return null;
 											}
-										});
+										}
+									});
+									if (rm) {
+										result[0] = $.grep(result[0], function(file) { return file._remove? false : true; });
 									}
 								})
 								.always(function(data) {
@@ -9926,7 +9948,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 10398e0)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 449ecff)';
 
 
 
@@ -12236,7 +12258,7 @@ elFinder.prototype.resources = {
 		lock       : '<span class="elfinder-lock"/>',
 		symlink    : '<span class="elfinder-symlink"/>',
 		navicon    : '<span class="elfinder-nav-icon"/>',
-		navspinner : '<span class="elfinder-navbar-spinner"/>',
+		navspinner : '<span class="elfinder-spinner elfinder-navbar-spinner"/>',
 		navdir     : '<div class="elfinder-navbar-wrapper{root}"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon" {style}/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree" style="display:none"/></div>',
 		placedir   : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}" title="{title}"><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon" {style}/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree" style="display:none"/></div>'
 		
@@ -17157,7 +17179,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 			cl1stfocus = 'elfinder-focus',
 			clmodal    = 'elfinder-dialog-modal',
 			id         = parseInt(Math.random()*1000000),
-			titlebar   = $('<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix"><span class="elfinder-dialog-title">'+opts.title+'</span></div>'),
+			titlebar   = $('<div class="ui-dialog-titlebar ui-widget-header ui-corner-top ui-helper-clearfix"><span class="elfinder-dialog-title">'+opts.title+'</span></div>'),
 			buttonset  = $('<div class="ui-dialog-buttonset"/>'),
 			buttonpane = $('<div class=" ui-helper-clearfix ui-dialog-buttonpane ui-widget-content"/>')
 				.append(buttonset),
@@ -24577,7 +24599,7 @@ elFinder.prototype.commands.fullscreen = function() {
 		lic     = 'elfinder-help-license',
 		tab     = '<li class="ui-state-default ui-corner-top elfinder-help-tab-{id}"><a href="#'+fm.namespace+'-help-{id}">{title}</a></li>',
 		html    = ['<div class="ui-tabs ui-widget ui-widget-content ui-corner-all elfinder-help">', 
-				'<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">'],
+				'<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-top">'],
 		stpl    = '<div class="elfinder-help-shortcut"><div class="elfinder-help-shortcut-pattern">{pattern}</div> {descrip}</div>',
 		sep     = '<div class="elfinder-help-separator"/>',
 		selfUrl = $('base').length? document.location.href.replace(/#.*$/, '') : '',
@@ -24792,7 +24814,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				e.stopPropagation();
 				
 				if (!link.hasClass('ui-tabs-selected')) {
-					link.parent().addClass('ui-tabs-selected ui-state-active').siblings().removeClass('ui-tabs-selected').removeClass('ui-state-active');
+					link.parent().addClass('ui-tabs-selected ui-tabs-active ui-state-active').siblings().removeClass('ui-tabs-selected').removeClass('ui-state-active');
 					content.children('.ui-tabs-panel').hide().filter(link.attr('href')).show();
 				}
 				
@@ -30781,7 +30803,7 @@ elFinder.prototype.commands.resize = function() {
 								e.preventDefault();
 							}
 						}),
-					spinner  = $('<div class="elfinder-resize-spinner">'+fm.i18n('ntfloadimg')+'</div>'),
+					spinner  = $('<div class="elfinder-resize-loading">'+fm.i18n('ntfloadimg')+'</div>'),
 					rhandle  = $('<div class="elfinder-resize-handle touch-punch"/>'),
 					rhandlec = $('<div class="elfinder-resize-handle touch-punch"/>'),
 					uiresize = $('<div class="elfinder-resize-uiresize elfinder-resize-control-panel"/>'),
