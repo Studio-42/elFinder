@@ -6587,7 +6587,7 @@ elFinder.prototype = {
 						
 						// file size check
 						if ((maxFileSize && blobSize > maxFileSize) || (!blobSlice && fm.uplMaxSize && blobSize > fm.uplMaxSize)) {
-							self.error(self.i18n('errUploadFile', blob.name) + ' ' + self.i18n('errUploadFileSize'));
+							self.error(['errUploadFile', blob.name, 'errUploadFileSize']);
 							cnt--;
 							total--;
 							continue;
@@ -6595,7 +6595,7 @@ elFinder.prototype = {
 						
 						// file mime check
 						if (blob.type && ! self.uploadMimeCheck(blob.type, target)) {
-							self.error(self.i18n('errUploadFile', blob.name) + ' ' + self.i18n('errUploadMime') + ' (' + self.escape(blob.type) + ')');
+							self.error(['errUploadFile', blob.name, 'errUploadMime', '(' + blob.type + ')']);
 							cnt--;
 							total--;
 							continue;
@@ -6641,7 +6641,7 @@ elFinder.prototype = {
 								end = start + BYTES_PER_CHUNK;
 							}
 							if (chunk == null) {
-								self.error(self.i18n('errUploadFile', blob.name) + ' ' + self.i18n('errUploadFileSize'));
+								self.error(['errUploadFile', blob.name, 'errUploadFileSize']);
 								cnt--;
 								total--;
 							} else {
@@ -6929,14 +6929,25 @@ elFinder.prototype = {
 													}
 												})
 												.done(function(data) {
-													if (data.hashes) {
-														paths = $.map(paths.concat(), function(p) {
-															if (p === '/') {
-																return target;
-															} else {
+													var rm = false;
+													if (!data.hashes) {
+														data.hashes = {};
+													}
+													paths = $.map(paths.concat(), function(p, i) {
+														if (p === '/') {
+															return target;
+														} else {
+															if (data.hashes[p]) {
 																return data.hashes[p];
+															} else {
+																rm = true;
+																files[i]._remove = true;
+																return null;
 															}
-														});
+														}
+													});
+													if (rm) {
+														files = $.grep(files, function(file) { return file._remove? false : true; });
 													}
 												})
 												.always(function(data) {
@@ -7010,15 +7021,26 @@ elFinder.prototype = {
 									}
 								})
 								.done(function(data) {
-									if (data.hashes) {
-										result[1] = $.map(result[1], function(p) {
-											p = p.replace(/\/[^\/]*$/, '');
-											if (p === '') {
-												return target;
-											} else {
+									var rm = false;
+									if (!data.hashes) {
+										data.hashes = {};
+									}
+									result[1] = $.map(result[1], function(p, i) {
+										p = p.replace(/\/[^\/]*$/, '');
+										if (p === '') {
+											return target;
+										} else {
+											if (data.hashes[p]) {
 												return data.hashes[p];
+											} else {
+												rm = true;
+												result[0][i]._remove = true;
+												return null;
 											}
-										});
+										}
+									});
+									if (rm) {
+										result[0] = $.grep(result[0], function(file) { return file._remove? false : true; });
 									}
 								})
 								.always(function(data) {
