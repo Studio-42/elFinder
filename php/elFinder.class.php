@@ -1945,15 +1945,14 @@ class elFinder {
 				$tgt =& $reset;
 			}
 			$res = $this->ensureDirsRecursively($volume, $target, $mkdirs);
+			$ret = array(
+				'added' => $res['stats'],
+				'hashes' => $res['hashes']
+			);
 			if ($res['error']) {
-				$errors = $volume->error();
-				if ($res['makes']) {
-					$this->rm(array('targets' => $res['makes']));
-				}
-				return array('error' => $this->error(self::ERROR_MKDIR, $res['error'][0], $errors));
-			} else {
-				return array('added' => $res['stats'], 'hashes' => $res['hashes']);
+				$ret['warning'] = $this->error(self::ERROR_MKDIR, $res['error'][0], $volume->error());
 			}
+			return $ret;
 		} else {
 			return ($dir = $volume->mkdir($target, $name)) == false
 				? array('error' => $this->error(self::ERROR_MKDIR, $name, $volume->error()))
@@ -2965,6 +2964,7 @@ class elFinder {
 		}
 
 		$addedDirs = array();
+		$errors = array();
 		foreach ($files['name'] as $i => $name) {
 			if (($error = $files['error'][$i]) > 0) {
 				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, $error == UPLOAD_ERR_INI_SIZE || $error == UPLOAD_ERR_FORM_SIZE ? self::ERROR_UPLOAD_FILE_SIZE : self::ERROR_UPLOAD_TRANSFER, $error);
@@ -3071,18 +3071,22 @@ class elFinder {
 					$rnres = $this->rename(array('target' => $hash, 'name' => $volume->uniqueName($dir, $name, $suffix, true, 0)));
 					if (!empty($rnres['error'])) {
 						$result['warning'] = $rnres['error'];
-						break;
+						if (!is_array($rnres['error'])) {
+							$errors = array_push($errors, $rnres['error']);
+						} else {
+							$errors = array_merge($errors, $rnres['error']);
+						}
+						continue;
 					}
 				}
 			}
 			if (! $_target || ($file = $volume->upload($fp, $_target, $name, $tmpname, ($_target === $target)? $hashes : array())) === false) {
-				$result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, $volume->error());
+				$errors = array_merge($errors, $this->error(self::ERROR_UPLOAD_FILE, $name, $volume->error()));
 				fclose($fp);
-				if (! is_uploaded_file($tmpname)) {
-					if (unlink($tmpname)) unset($GLOBALS['elFinderTempFiles'][$tmpname]);
-					continue;
+				if (! is_uploaded_file($tmpname) && unlink($tmpname)) {
+					unset($GLOBALS['elFinderTempFiles'][$tmpname]);
 				}
-				break;
+				continue;
 			}
 			
 			is_resource($fp) && fclose($fp);
@@ -3097,6 +3101,11 @@ class elFinder {
 				$result = array_merge_recursive($result, $rnres);
 			}
 		}
+
+		if ($errors) {
+			$result['warning'] = $errors;
+		}
+
 		if ($GLOBALS['elFinderTempFiles']) {
 			foreach(array_keys($GLOBALS['elFinderTempFiles']) as $_temp) {
 				 is_file($_temp) && unlink($_temp);
@@ -3966,9 +3975,6 @@ class elFinder {
 				$res['hashes'][$_path] = $dir['hash'];
 				if (count($sub)) {
 					$res = array_merge_recursive($res, $this->ensureDirsRecursively($volume, $dir['hash'], $sub, $_path));
-					if ($res['error']) {
-						break;
-					}
 				}
 			} else {
 				$res['error'][] = $name;

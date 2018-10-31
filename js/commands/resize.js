@@ -181,7 +181,7 @@ elFinder.prototype.commands.resize = function() {
 								e.preventDefault();
 							}
 						}),
-					spinner  = $('<div class="elfinder-resize-spinner">'+fm.i18n('ntfloadimg')+'</div>'),
+					spinner  = $('<div class="elfinder-resize-loading">'+fm.i18n('ntfloadimg')+'</div>'),
 					rhandle  = $('<div class="elfinder-resize-handle touch-punch"/>'),
 					rhandlec = $('<div class="elfinder-resize-handle touch-punch"/>'),
 					uiresize = $('<div class="elfinder-resize-uiresize elfinder-resize-control-panel"/>'),

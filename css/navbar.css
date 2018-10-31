@@ -255,23 +255,19 @@
 }
 
 /* spinner */
-.elfinder-navbar-spinner {
-    width: 14px;
-    height: 14px;
+.elfinder-tree .elfinder-spinner {
     position: absolute;
-    display: block;
     top: 50%;
-    margin-top: -7px;
-    background: url("../img/spinner-mini.gif") center center no-repeat;
+    margin: -7px 0 0;
 }
 
 /* spinner ltr/rtl enviroment */
-.elfinder-ltr .elfinder-navbar-spinner {
+.elfinder-ltr .elfinder-tree .elfinder-spinner {
     left: 0;
     margin-left: -2px;
 }
 
-.elfinder-rtl .elfinder-navbar-spinner {
+.elfinder-rtl .elfinder-tree .elfinder-spinner {
     right: 0;
     margin-right: -2px;
 }

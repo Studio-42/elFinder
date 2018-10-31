@@ -32,12 +32,6 @@
     border-left: 0 solid transparent;
     border-top: 0 solid transparent;
     border-right: 0 solid transparent;
-    -moz-border-radius-bottomleft: 0;
-    -webkit-border-bottom-left-radius: 0;
-    border-bottom-left-radius: 0;
-    -moz-border-radius-bottomright: 0;
-    -webkit-border-bottom-right-radius: 0;
-    border-bottom-right-radius: 0;
     font-weight: normal;
     padding: .2em 1em;
 }
