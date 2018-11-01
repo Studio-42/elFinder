@@ -27,7 +27,9 @@ elFinder.prototype.resources = {
 		placedir    : 'elfinder-place-dir',
 		searchbtn   : 'elfinder-button-search',
 		editing     : 'elfinder-to-editing',
-		preventback : 'elfinder-prevent-back'
+		preventback : 'elfinder-prevent-back',
+		tabstab     : 'ui-state-default ui-tabs-tab ui-corner-top ui-tab',
+		tabsactive  : 'ui-tabs-active ui-state-active'
 	},
 	tpl : {
 		perms      : '<span class="elfinder-perms"/>',

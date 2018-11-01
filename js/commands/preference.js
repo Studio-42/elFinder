@@ -8,9 +8,9 @@ elFinder.prototype.commands.preference = function() {
 	var self    = this,
 		fm      = this.fm,
 		r       = 'replace',
-		tab     = '<li class="ui-state-default ui-corner-top elfinder-preference-tab-{id}"><a href="#'+fm.namespace+'-preference-{id}" id="'+fm.namespace+'-preference-tab-{id}" class="{class}">{title}</a></li>',
+		tab     = '<li class="' + fm.res('class', 'tabstab') + ' elfinder-preference-tab-{id}"><a href="#'+fm.namespace+'-preference-{id}" id="'+fm.namespace+'-preference-tab-{id}" class="ui-tabs-anchor {class}">{title}</a></li>',
 		base    = $('<div class="ui-tabs ui-widget ui-widget-content ui-corner-all elfinder-preference">'), 
-		ul      = $('<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">'),
+		ul      = $('<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-top">'),
 		tabs    = $('<div class="elfinder-preference-tabs ui-tabs-panel ui-widget-content ui-corner-bottom"/>'),
 		sep     = '<div class="elfinder-preference-separator"/>',
 		selfUrl = $('base').length? document.location.href.replace(/#.*$/, '') : '',
@@ -18,6 +18,7 @@ elFinder.prototype.commands.preference = function() {
 			$('#'+fm.namespace+'-preference-tab-'+tab).trigger('mouseover').trigger('click');
 			openTab = tab;
 		},
+		clTabActive = fm.res('class', 'tabsactive'),
 		build   = function() {
 			var cats = self.options.categories || {
 					'language' : ['language'],
@@ -504,8 +505,8 @@ elFinder.prototype.commands.preference = function() {
 				e.preventDefault();
 				e.stopPropagation();
 
-				ul.children().removeClass('ui-tabs-selected ui-state-active');
-				t.removeClass('ui-state-hover').parent().addClass('ui-tabs-selected ui-state-active');
+				ul.children().removeClass(clTabActive);
+				t.removeClass('ui-state-hover').parent().addClass(clTabActive);
 
 				if (h.match(/all$/)) {
 					tabs.addClass('elfinder-preference-taball').children().show();
@@ -513,9 +514,14 @@ elFinder.prototype.commands.preference = function() {
 					tabs.removeClass('elfinder-preference-taball').children().hide();
 					$(h).show();
 				}
+			}).on('focus blur', 'a', function(e) {
+				$(this).parent().toggleClass('ui-state-focus', e.type === 'focusin');
+			}).on('mouseenter mouseleave', 'li', function(e) {
+				$(this).toggleClass('ui-state-hover', e.type === 'mouseenter');
 			});
 
-			base.append(ul, tabs).find('a,input,select,button').addClass('elfinder-tabstop');
+			tabs.find('a,input,select,button').addClass('elfinder-tabstop');
+			base.append(ul, tabs);
 
 			dialog = self.fmDialog(base, {
 				title : self.title,
