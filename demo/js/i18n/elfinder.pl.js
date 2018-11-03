@@ -2,7 +2,7 @@
  * Polski translation
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2018-10-13
+ * @version 2018-11-03
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
