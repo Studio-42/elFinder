@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 1b29ee7) (2018-11-03)
+ * Version 2.1.42 (2.1-src Nightly: 7481cc7) (2018-11-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -6636,12 +6636,12 @@ elFinder.prototype = {
 							start = 0;
 							end = BYTES_PER_CHUNK;
 							chunks = -1;
-							total = Math.floor(blobSize / BYTES_PER_CHUNK);
+							total = Math.floor((blobSize - 1) / BYTES_PER_CHUNK);
 							blobMtime = blob.lastModified? Math.round(blob.lastModified/1000) : 0;
 
 							totalSize += blobSize;
 							chunked[chunkID] = 0;
-							while(start <= blobSize) {
+							while(start < blobSize) {
 								chunk = blob[blobSlice](start, end);
 								chunk._chunk = blob.name + '.' + (++chunks) + '_' + total + '.part';
 								chunk._cid   = chunkID;
@@ -9948,7 +9948,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 1b29ee7)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 7481cc7)';
 
 
 
