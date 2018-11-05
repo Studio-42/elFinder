@@ -270,6 +270,23 @@
 
 /*********************** NOTIFY DIALOG **************************/
 
+.elfinder-dialog-notify {
+    top : 36px;
+    width : 280px;
+}
+
+.elfinder-ltr .elfinder-dialog-notify {
+    right : 12px;
+}
+
+.elfinder-rtl .elfinder-dialog-notify {
+    left : 12px;
+}
+
+.elfinder-dialog-notify .ui-dialog-titlebar {
+    height: 5px;
+}
+
 .elfinder-dialog-notify .ui-dialog-titlebar-close {
     display: none;
 }

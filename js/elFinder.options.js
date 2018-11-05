@@ -1061,10 +1061,10 @@ elFinder.prototype._options = {
 	 * Position CSS, Width of notifications dialogs
 	 *
 	 * @type Object
-	 * @default {position: {top : '12px', right : '12px'}, width : 280}
+	 * @default {position: {}, width : null} - Apply CSS definition
 	 * position: CSS object | null (null: position center & middle)
 	 */
-	notifyDialog : {position: {top : '12px', right : '12px'}, width : 280},
+	notifyDialog : {position: {}, width : null},
 	
 	/**
 	 * Dialog contained in the elFinder node
