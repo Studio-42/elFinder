@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 7481cc7) (2018-11-04)
+ * Version 2.1.42 (2.1-src Nightly: 0d472f3) (2018-11-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -3318,6 +3318,7 @@ button.elfinder-info-button {
 
 .elfinder-quicklook-title {
     font-size: .7em;
+    font-weight: normal;
 }
 
 .elfinder-quicklook-info-data {
@@ -3881,7 +3882,8 @@ button.elfinder-info-button {
     -moz-border-radius-topright: 7px;
     -webkit-border-top-right-radius: 7px;
     border-top-right-radius: 7px;
-    cursor: move;
+    border: none;
+    line-height: 1.2;
 }
 
 .elfinder-navdock .elfinder-quicklook-titlebar {
@@ -3900,10 +3902,9 @@ button.elfinder-info-button {
 
 /* window title */
 .elfinder-quicklook-title {
-    color: #fff;
+    display: inline-block;
     white-space: nowrap;
     overflow: hidden;
-    padding: 2px 0;
 }
 
 .elfinder-touch .elfinder-quicklook-title {
@@ -3915,8 +3916,9 @@ button.elfinder-info-button {
     position: absolute;
     left: 4px;
     top: 50%;
-    margin-top: -9px;
+    margin-top: -8px;
     height: 16px;
+    border: none;
 }
 .elfinder-touch .elfinder-quicklook-titlebar-icon {
     height: 22px;
@@ -3945,13 +3947,13 @@ button.elfinder-info-button {
     margin-top: -5px;
 }
 
-.elfinder-quicklook-titlebar-icon.elfinder-platformWin {
+.elfinder-quicklook-titlebar-icon.elfinder-titlebar-button-right {
     left: auto;
     right: 4px;
     direction: rtl;
 }
 
-.elfinder-quicklook-titlebar-icon.elfinder-platformWin .ui-icon {
+.elfinder-quicklook-titlebar-icon.elfinder-titlebar-button-right .ui-icon {
     margin: -9px 0px 0px 3px;
 }
 
@@ -3965,7 +3967,7 @@ button.elfinder-info-button {
     margin-right: 10px;
 }
 
-.elfinder-touch .elfinder-quicklook-titlebar-icon.elfinder-platformWin .ui-icon {
+.elfinder-touch .elfinder-quicklook-titlebar-icon.elfinder-titlebar-button-right .ui-icon {
     margin-left: 10px;
 }
 

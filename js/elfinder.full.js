@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 7481cc7) (2018-11-04)
+ * Version 2.1.42 (2.1-src Nightly: 0d472f3) (2018-11-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9948,7 +9948,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 7481cc7)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 0d472f3)';
 
 
 
@@ -27642,7 +27642,7 @@ elFinder.prototype.commands.preference = function() {
 		leftKey = $.ui.keyCode.LEFT,
 		rightKey = $.ui.keyCode.RIGHT,
 		coverEv = 'mousemove touchstart ' + ('onwheel' in document? 'wheel' : 'onmousewheel' in document? 'mousewheel' : 'DOMMouseScroll'),
-		title   = $('<div class="elfinder-quicklook-title"/>'),
+		title   = $('<span class="elfinder-dialog-title elfinder-quicklook-title"/>'),
 		icon    = $('<div/>'),
 		info    = $('<div class="elfinder-quicklook-info"/>'),//.hide(),
 		cover   = $('<div class="ui-front elfinder-quicklook-cover"/>'),
@@ -27951,12 +27951,12 @@ elFinder.prototype.commands.preference = function() {
 			}
 		})
 		.append(
-			$('<div class="elfinder-quicklook-titlebar"/>')
+			$('<div class="ui-dialog-titlebar ui-widget-header ui-corner-top ui-helper-clearfix elfinder-quicklook-titlebar"/>')
 			.append(
-				title,
-				$('<span class="elfinder-quicklook-titlebar-icon'+(platformWin? ' elfinder-platformWin' : '')+'"/>').append(
+				$('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-button elfinder-quicklook-titlebar-icon'+(platformWin? ' elfinder-titlebar-button-right' : '')+'"/>').append(
 					titleClose, titleDock
-				)
+				),
+				title
 			),
 			this.preview,
 			self.info.hide(),
