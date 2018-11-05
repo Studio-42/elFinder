@@ -101,7 +101,8 @@
     -moz-border-radius-topright: 7px;
     -webkit-border-top-right-radius: 7px;
     border-top-right-radius: 7px;
-    cursor: move;
+    border: none;
+    line-height: 1.2;
 }
 
 .elfinder-navdock .elfinder-quicklook-titlebar {
@@ -120,10 +121,9 @@
 
 /* window title */
 .elfinder-quicklook-title {
-    color: #fff;
+    display: inline-block;
     white-space: nowrap;
     overflow: hidden;
-    padding: 2px 0;
 }
 
 .elfinder-touch .elfinder-quicklook-title {
@@ -135,8 +135,9 @@
     position: absolute;
     left: 4px;
     top: 50%;
-    margin-top: -9px;
+    margin-top: -8px;
     height: 16px;
+    border: none;
 }
 .elfinder-touch .elfinder-quicklook-titlebar-icon {
     height: 22px;
@@ -165,13 +166,13 @@
     margin-top: -5px;
 }
 
-.elfinder-quicklook-titlebar-icon.elfinder-platformWin {
+.elfinder-quicklook-titlebar-icon.elfinder-titlebar-button-right {
     left: auto;
     right: 4px;
     direction: rtl;
 }
 
-.elfinder-quicklook-titlebar-icon.elfinder-platformWin .ui-icon {
+.elfinder-quicklook-titlebar-icon.elfinder-titlebar-button-right .ui-icon {
     margin: -9px 0px 0px 3px;
 }
 
@@ -185,7 +186,7 @@
     margin-right: 10px;
 }
 
-.elfinder-touch .elfinder-quicklook-titlebar-icon.elfinder-platformWin .ui-icon {
+.elfinder-touch .elfinder-quicklook-titlebar-icon.elfinder-titlebar-button-right .ui-icon {
     margin-left: 10px;
 }
 

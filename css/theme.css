@@ -29,6 +29,15 @@
     background-color: transparent;
 }
 
+.elfinder-quicklook-title {
+    color: #fff;
+}
+
+.elfinder-quicklook-titlebar-icon {
+    background-color: transparent;
+    background-image: none;
+}
+
 .elfinder-quicklook-titlebar-icon .ui-icon {
     background-color: #d4d4d4;
     border-color: #8a8a8a;

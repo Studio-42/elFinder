@@ -178,7 +178,7 @@
 		leftKey = $.ui.keyCode.LEFT,
 		rightKey = $.ui.keyCode.RIGHT,
 		coverEv = 'mousemove touchstart ' + ('onwheel' in document? 'wheel' : 'onmousewheel' in document? 'mousewheel' : 'DOMMouseScroll'),
-		title   = $('<div class="elfinder-quicklook-title"/>'),
+		title   = $('<span class="elfinder-dialog-title elfinder-quicklook-title"/>'),
 		icon    = $('<div/>'),
 		info    = $('<div class="elfinder-quicklook-info"/>'),//.hide(),
 		cover   = $('<div class="ui-front elfinder-quicklook-cover"/>'),
@@ -487,12 +487,12 @@
 			}
 		})
 		.append(
-			$('<div class="elfinder-quicklook-titlebar"/>')
+			$('<div class="ui-dialog-titlebar ui-widget-header ui-corner-top ui-helper-clearfix elfinder-quicklook-titlebar"/>')
 			.append(
-				title,
-				$('<span class="elfinder-quicklook-titlebar-icon'+(platformWin? ' elfinder-platformWin' : '')+'"/>').append(
+				$('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-button elfinder-quicklook-titlebar-icon'+(platformWin? ' elfinder-titlebar-button-right' : '')+'"/>').append(
 					titleClose, titleDock
-				)
+				),
+				title
 			),
 			this.preview,
 			self.info.hide(),
