@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 0d472f3) (2018-11-05)
+ * Version 2.1.42 (2.1-src Nightly: 909b7e9) (2018-11-05)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -4957,7 +4957,8 @@ var elFinder = function(elm, opts, bootCallback) {
 				autoOpen      : false,
 				closeOnEscape : false,
 				title         : '&nbsp;',
-				width         : parseInt(self.options.notifyDialog.width)
+				width         : self.options.notifyDialog.width? parseInt(self.options.notifyDialog.width) : null,
+				minHeight     : null
 			}),
 			statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"/>').hide().appendTo(node),
 			toast : $('<div class="elfinder-toast"/>').appendTo(node),
@@ -9948,7 +9949,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 0d472f3)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 909b7e9)';
 
 
 
@@ -11426,10 +11427,10 @@ elFinder.prototype._options = {
 	 * Position CSS, Width of notifications dialogs
 	 *
 	 * @type Object
-	 * @default {position: {top : '12px', right : '12px'}, width : 280}
+	 * @default {position: {}, width : null} - Apply CSS definition
 	 * position: CSS object | null (null: position center & middle)
 	 */
-	notifyDialog : {position: {top : '12px', right : '12px'}, width : 280},
+	notifyDialog : {position: {}, width : null},
 	
 	/**
 	 * Dialog contained in the elFinder node
