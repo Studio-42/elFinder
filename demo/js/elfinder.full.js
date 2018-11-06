@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: dd205b7) (2018-11-06)
+ * Version 2.1.42 (2.1-src Nightly: 84ca1c3) (2018-11-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -9949,7 +9949,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: dd205b7)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 84ca1c3)';
 
 
 
@@ -15769,7 +15769,7 @@ $.fn.elfindercwd = function(fm, options) {
 						.css('height', 'auto');
 					bottomMarker.hide();
 
-					wrapper[list ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-list');
+					wrapper[list ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-list')._padding = parseInt(wrapper.css('padding-top')) + parseInt(wrapper.css('padding-bottom'));
 					if (fm.UA.iOS) {
 						wrapper.removeClass('overflow-scrolling-touch').addClass('overflow-scrolling-touch');
 					}
@@ -16427,12 +16427,12 @@ $.fn.elfindercwd = function(fm, options) {
 			restm = null,
 			resize = function(init) {
 				var initHeight = function() {
-					if (bufferExt.renderd) {
+					if (typeof bufferExt.renderd !== 'undefined') {
 						var h = 0;
 						wrapper.siblings('div.elfinder-panel:visible').each(function() {
 							h += $(this).outerHeight(true);
 						});
-						wrapper.height(wz.height() - h);
+						wrapper.height(wz.height() - h - wrapper._padding);
 					}
 				};
 				
@@ -16764,6 +16764,7 @@ $.fn.elfindercwd = function(fm, options) {
 						});
 					}
 					content();
+					resize();
 
 					if (allsel) {
 						cwd.addClass('elfinder-cwd-allselected');
