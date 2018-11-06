@@ -1633,8 +1633,7 @@ $.fn.elfindercwd = function(fm, options) {
 						.css('height', 'auto');
 					bottomMarker.hide();
 
-					wrapper[list ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-list')
-						._padding = parseInt(wrapper.css('padding-top')) + parseInt(wrapper.css('padding-bottom'));
+					wrapper[list ? 'addClass' : 'removeClass']('elfinder-cwd-wrapper-list');
 					if (fm.UA.iOS) {
 						wrapper.removeClass('overflow-scrolling-touch').addClass('overflow-scrolling-touch');
 					}
@@ -2292,11 +2291,13 @@ $.fn.elfindercwd = function(fm, options) {
 			restm = null,
 			resize = function(init) {
 				var initHeight = function() {
-					var h = 0;
-					wrapper.siblings('div.elfinder-panel:visible').each(function() {
-						h += $(this).outerHeight(true);
-					});
-					wrapper.height(wz.height() - h - wrapper._padding);
+					if (bufferExt.renderd) {
+						var h = 0;
+						wrapper.siblings('div.elfinder-panel:visible').each(function() {
+							h += $(this).outerHeight(true);
+						});
+						wrapper.height(wz.height() - h);
+					}
 				};
 				
 				init && initHeight();
