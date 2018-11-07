@@ -1825,7 +1825,7 @@
 						// fit height function
 						textarea._setHeight = function(height) {
 							var base = $(this).parent(),
-								h	= height || base.height(),
+								h	= height || base.innerHeight(),
 								ctrH = 0,
 								areaH;
 							base.find('.mce-container-body:first').children('.mce-top-part,.mce-statusbar').each(function() {
