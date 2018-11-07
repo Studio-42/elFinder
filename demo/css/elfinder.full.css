@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 8840c34) (2018-11-07)
+ * Version 2.1.42 (2.1-src Nightly: 33520f0) (2018-11-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -362,7 +362,7 @@
 /* edit text file textarea */
 .elfinder-file-edit {
     width: 100%;
-    height: 99%;
+    height: 100%;
     margin: 0;
     padding: 2px;
     border: 1px solid #ccc;
