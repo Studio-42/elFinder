@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.42 (2.1-src Nightly: 84ca1c3) (2018-11-06)
+ * Version 2.1.42 (2.1-src Nightly: 8840c34) (2018-11-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -3509,7 +3509,6 @@ var elFinder = function(elm, opts, bootCallback) {
 			width   : '100%',
 			height  : '100%',
 			margin  : 0,
-			padding : 0,
 			top     : 0,
 			left    : 0,
 			display : 'block',
@@ -9949,7 +9948,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 84ca1c3)';
+elFinder.prototype.version = '2.1.42 (2.1-src Nightly: 8840c34)';
 
 
 
@@ -17421,6 +17420,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					});
 				})
 				.on('open', function() {
+					dialog.data('margin-y', self.outerHeight(true) - self.height());
 					if (syncSize.enabled) {
 						if (opts.height && opts.height !== 'auto') {
 							dialog.trigger('resize', {init: true});
@@ -17757,8 +17757,6 @@ $.fn.elfinderdialog = function(opts, fm) {
 			overflow   : dialog.css('overflow')
 		};
 		
-		dialog.data('margin-y', self.outerHeight(true) - self.height());
-		
 		if (opts.resizable) {
 			dialog.resizable({
 				minWidth   : opts.minWidth,
@@ -17803,6 +17801,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 		if (opts.resize) {
 			fm.bind('themechange', function() {
 				setTimeout(function() {
+					dialog.data('margin-y', self.outerHeight(true) - self.height());
 					dialog.trigger('resize', {init: true});
 				}, 300);
 			});
