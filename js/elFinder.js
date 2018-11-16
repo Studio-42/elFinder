@@ -1400,11 +1400,11 @@ var elFinder = function(elm, opts, bootCallback) {
 	/**
 	 * Return file is root?
 	 * 
-	 * @param  Object  target file object
+	 * @param  Object|null  target file object
 	 * @return Boolean
 	 */
 	this.isRoot = function(file) {
-		return (file.isroot || ! file.phash)? true : false;
+		return file && (file.isroot || !file.phash);
 	};
 	
 	/**
