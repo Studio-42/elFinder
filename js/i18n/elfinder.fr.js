@@ -112,7 +112,7 @@
 			'errSearchTimeout'     : 'Délai d’attente dépassé pour la recherche "$1". Le résultat de la recherche est partiel.', // from v2.1 added 12.1.2016
 			'errReauthRequire'     : 'Réauthorisation requise.', // from v2.1.10 added 24.3.2016
 			'errMaxTargets'        : 'Le nombre maximal d\'éléments pouvant être sélectionnés est $1.', // from v2.1.17 added 17.10.2016
-			'errRestore'           : 'Impossible de restorer la corbeille. La destination de la restoration n\'a pu être identifiée.', // from v2.1.24 added 3.5.2017
+			'errRestore'           : 'Impossible de restaurer la corbeille. La destination de la restauration n\'a pu être identifiée.', // from v2.1.24 added 3.5.2017
 			'errEditorNotFound'    : 'Aucun éditeur n\'a été trouvé pour ce type de fichier.', // from v2.1.25 added 23.5.2017
 			'errServerError'       : 'Une erreur est survenue du côté serveur.', // from v2.1.25 added 16.6.2017
 			'errEmpty'             : 'Impossible de vider le dossier "$1".', // from v2.1.25 added 22.6.2017
@@ -141,7 +141,7 @@
 			'cmdrename'    : 'Renommer',
 			'cmdrm'        : 'Supprimer',
 			'cmdtrash'     : 'À la corbeille', //from v2.1.24 added 29.4.2017
-			'cmdrestore'   : 'Restorer', //from v2.1.24 added 3.5.2017
+			'cmdrestore'   : 'Restaurer', //from v2.1.24 added 3.5.2017
 			'cmdsearch'    : 'Trouver les fichiers',
 			'cmdup'        : 'Remonter au dossier parent',
 			'cmdupload'    : 'Envoyer les fichiers',
@@ -221,7 +221,7 @@
 			'ntfparents'  : 'Traitement de l\'information du chemin', // from v2.1.17 added 2.11.2016
 			'ntfchunkmerge': 'Traitement du fichier envoyé', // from v2.1.17 added 2.11.2016
 			'ntftrash'    : 'Mettre à la corbeille', // from v2.1.24 added 2.5.2017
-			'ntfrestore'  : 'Restorer depuis la corbeille', // from v2.1.24 added 3.5.2017
+			'ntfrestore'  : 'Restaurer depuis la corbeille', // from v2.1.24 added 3.5.2017
 			'ntfchkdir'   : 'Validation du dossier de destination', // from v2.1.24 added 3.5.2017
 			'ntfundo'     : 'Annuler l\'opération précédente', // from v2.1.27 added 31.07.2017
 			'ntfredo'     : 'Refaire l\'opération annulée', // from v2.1.27 added 31.07.2017
@@ -358,7 +358,7 @@
 			'selectForUpload' : 'Sélectionner les fichiers à envoyer',
 			'moveFiles'       : 'Déplacer les éléments',
 			'copyFiles'       : 'Copier les éléments',
-			'restoreFiles'    : 'Restorer les éléments', // from v2.1.24 added 5.5.2017
+			'restoreFiles'    : 'Restaurer les éléments', // from v2.1.24 added 5.5.2017
 			'rmFromPlaces'    : 'Retirer des places',
 			'aspectRatio'     : 'Ratio d’affichage',
 			'scale'           : 'Mise à l\'échelle',
