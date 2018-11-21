@@ -1193,17 +1193,20 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                     $raw['mimeType'] == self::DIRMIME ? $this->copy($src.'/'.$raw['id'], $path, $raw['name']) : $this->_copy($src.'/'.$raw['id'], $path, $raw['name']);
                 }
 
-                return $this->_joinPath($dst, $itemId);
+                $ret = $this->_joinPath($dst, $itemId);
+                $this->added[] = $this->stat($ret);
             } else {
-                $this->setError(elFinder::ERROR_COPY, $this->_path($src));
+                $ret = $this->setError(elFinder::ERROR_COPY, $this->_path($src));
             }
         } else {
-            $itemId = $this->_copy($src, $dst, $name);
-
-            return $itemId
-            ? $this->_joinPath($dst, $itemId)
-            : $this->setError(elFinder::ERROR_COPY, $this->_path($src));
+            if ($itemId = $this->_copy($src, $dst, $name)) {
+                $ret = $this->_joinPath($dst, $itemId);
+                $this->added[] = $this->stat($ret);
+            } else {
+                $ret = $this->setError(elFinder::ERROR_COPY, $this->_path($src));
+            }
         }
+        return $ret;
     }
 
     /**

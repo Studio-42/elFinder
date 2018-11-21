@@ -2130,7 +2130,7 @@ class elFinder {
 	 **/
 	protected function duplicate($args) {
 		$targets = is_array($args['targets']) ? $args['targets'] : array();
-		$result  = array('added' => array());
+		$result  = array();
 		$suffix  = empty($args['suffix']) ? 'copy' : $args['suffix'];
 		
 		$this->itemLock($targets);
@@ -2148,8 +2148,6 @@ class elFinder {
 				$result['warning'] = $this->error($volume->error());
 				break;
 			}
-			
-			$result['added'][] = $file;
 		}
 		
 		return $result;
