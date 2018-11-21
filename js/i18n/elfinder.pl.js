@@ -2,7 +2,7 @@
  * Polski translation
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2018-11-03
+ * @version 2018-11-16
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;',
 		language   : 'Polski',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i', // will show like: 13.10.2018 18:48
-		fancyDateFormat : '$1 H:i', // will show like: Dzisiaj 18:48
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 181013-184832
+		dateFormat : 'd.m.Y H:i', // will show like: 16.11.2018 11:13
+		fancyDateFormat : '$1 H:i', // will show like: Dzisiaj 11:13
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 181116-111302
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -290,7 +290,8 @@
 			'untitled folder'   : 'NowyFolder',   // added 10.11.2015
 			'Archive'           : 'NoweArchiwum',  // from v2.1 added 10.11.2015
 			'untitled file'     : 'NowyPlik.$1',  // from v2.1.41 added 6.8.2018
-			'extentionfile'     : '$1 Plik',     // from v2.1.41 added 6.8.2018
+			'extentionfile'     : '$1 Plik',    // from v2.1.41 added 6.8.2018
+			'extentiontype'     : '$1: $2',      // from v2.1.43 added 17.10.2018
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Wymagane potwierdzenie',
@@ -478,6 +479,13 @@
 			'makefileTypes'   : 'Typy plików, które można włączyć za pomocą "Nowy plik"', // from v2.1.41 added 7.8.2018
 			'typeOfTextfile'  : 'Typ pliku tekstowego', // from v2.1.41 added 7.8.2018
 			'add'             : 'Dodaj', // from v2.1.41 added 7.8.2018
+			'theme'           : 'Motyw', // from v2.1.43 added 19.10.2018
+			'default'         : 'Domyślnie', // from v2.1.43 added 19.10.2018
+			'description'     : 'Opis', // from v2.1.43 added 19.10.2018
+			'website'         : 'Witryna', // from v2.1.43 added 19.10.2018
+			'author'          : 'Autor', // from v2.1.43 added 19.10.2018
+			'email'           : 'E-mail', // from v2.1.43 added 19.10.2018
+			'license'         : 'Licencja', // from v2.1.43 added 19.10.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',
