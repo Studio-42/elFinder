@@ -1038,11 +1038,13 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             }
         }
 
-        $path = $this->_copy($src, $dst, $name);
+        if ($path = $this->_copy($src, $dst, $name)) {
+            $this->added[] = $this->stat($path);
+        } else {
+            $this->setError(elFinder::ERROR_COPY, $this->_path($src));
+        }
 
-        return $path
-            ? $path
-            : $this->setError(elFinder::ERROR_COPY, $this->_path($src));
+        return $path;
     }
 
     /**

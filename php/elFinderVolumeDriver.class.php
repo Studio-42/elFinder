@@ -4783,9 +4783,7 @@ abstract class elFinderVolumeDriver {
 		if ($res = $this->convEncOut($this->_copy($this->convEncIn($src), $this->convEncIn($dst), $this->convEncIn($name)))) {
 			$path = is_string($res)? $res : $this->joinPathCE($dst, $name);
 			$this->clearstatcache();
-			if ($this->ARGS['cmd'] !== 'duplicate') {
-				$this->added[] = $this->stat($path);
-			}
+			$this->added[] = $this->stat($path);
 			return $path;
 		}
 
