@@ -1,3 +1,60 @@
+2018-11-24  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.43):
+
+		- [VD:abstract,cmd:info] Fixed #2646 volume roots option `'dirUrlOwn'` accepts value `'hide'`
+		- [php:plugin] Fixed #2649 disable content editing plugin when saving data in OnlineConvert
+		- [cmd:open] Fixed #2651 add an option `selectAction`
+		- [php:core] Fixed #2657 add a connector main option `throwErrorOnExec`
+		- [ui:cwd] Fixed #2653 correction of event handling of `input:checkbox`
+		- [js:core] Fixed #2660 add `requestError` event and make error message controlable
+		- [js:core,ui:cwd,tree] Fixed #2664 problem of handling of connector option `maxTargets`
+		- [php:autoload] Fixed #2672 simplified class map
+		- [js:core] Fixed #2674 'tooltip' conflict with Bootstrap
+		- [VD:abstract] Fixed #2687 add public method `getSession()`
+		- [ui:cwd] Fixed #2687, #2694 prevent select action of the item with CSS class "elfinder-cwd-nonselect"
+		- [php:core,VD] Fixed #2695 improved redundant check of archivers
+		- [ui:cwd] Fixed #2701 correction of oldScholl function
+		- [VD:abstract] Fixed #2704 correction of `mimetype()` & add an option `mimeTypeUnknown`
+		- [VD:abstract] Fixed #2704 use MIME-Type notified by the volume driver if detected as unknown
+		- [css:cwd] Fixed #2707 typo
+		- [js:core] Fixed #2706 add an option `i18nBaseUrl`
+		- [ui:toolbar] Fixed #2710 add an option `uiOptions.toolbarExtra.preferenceInContextmenu`
+		- [cmd:netmount] Fixed #2714 disable command if there is no protocols
+		- [cmd:info] Fixed #2712 remove ZWSP of the Path value with mousedown event
+		- [cmd:edit] Fixed #2717 encoding select box move to footer
+		- [css:toolbar] Fixed #2721 duplicated class name
+		- [js:command] Fixed #2718 add a method `fmDialog()` to add cmd class name to dialog
+		- [js:core] Fixed #2720 implementation of theme changer
+		- [cmd:empty] Fixed #2729 add check that folder is readable in getstate()
+		- [cmd:upload] Fixed #2725 problem of contextmenu (target selector) handling
+		- [VD:Group] Fixed #2730 set `copy` to disabled command
+		- [js:core,ui:cwd] Fixed #2730 correction of dragging icon
+		- [cmd:preference] Fixed #2731 add options `width`, `height`
+		- [cmd:rm] Fixed #2733 correction of spinner position
+		- [css:cwd] Fixed #2724 problem of position of perm marker in rtl
+		- [js:core] Fixed #2744 add class name "elfinder-err-var" to replaced word of error message
+		- [css:dialog] rel #2724 correction style of `td.elfinder-info-hash`
+		- [ui:navdock] Fixed #2747 theme support of CSS fine tuning part
+		- [ui:navdock] rel #2747 correction of the ui size adjustment
+		- [css:commands] Fixed #2748 fix spinner position in rtl and unify `elfinder-info-spinner` to `elfinder-spinner`
+		- [css:command] rel #2748 typo fix of "spiner" to "spinner"
+		- [cmd:quicklook] Fixed #2742 ViewerJS integration for PDF,ODT,ODS,ODP
+		- [ui:toolbar] Fixed #2751 correction rtl-toolbar (float icons in group)
+		- [css:toolbar] rel #2751 mirroring some icons for rtl
+		- [ui:cwd] Fixed #2749 show an unnecessary context menu on touch to the list header
+		- [cmd:resize] Fixed #2718 duplicate CSS class name
+		- [ui:cwd] Fixed #2749 show an unnecessary context menu on touch to the list header
+		- [ui:dialog] rel #2739 use CSS class `ui-corner-top` instead `ui-corner-all`
+		- [css:navbar] rel #2748 integrate "elfinder-navbar-spinner" into "elfinder-spinner"
+		- [API:upload] Fixed #2753 uploading multiple items continues uploading except error items
+		- [js:core] Fixed #2762 prevent useless requests when chunks uploading
+		- [cmd:quickllok] Fixed #2752 title bar HTML structure as well as other dialogs
+		- [js:core] Fixed #2764 delete padding specification by inline to maximize element
+		- [js:core] Fixed #2766 correction upload file size judgment
+		- And some minor bug fixes
+
+
 2018-08-29  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.42):
