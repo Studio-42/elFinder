@@ -702,8 +702,9 @@ ul.elfinder-help-integrations a:hover {
 }
 
 /********************** COMMAND "PREFERENCE" ****************************/
-.elfinder-preference .ui-tabs-nav {
+.elfinder-dialog .elfinder-preference .ui-tabs-nav {
     margin-bottom: 1px;
+    height: auto;
 }
 
 /* fix tabs */
