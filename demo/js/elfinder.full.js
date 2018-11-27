@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.43 (2.1-src Nightly: 6436ce0) (2018-11-25)
+ * Version 2.1.43 (2.1-src Nightly: a6a4881) (2018-11-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -1309,7 +1309,7 @@ var elFinder = function(elm, opts, bootCallback) {
 	}
 
 	this.sortAlsoTreeview = this.storage('sortAlsoTreeview');
-	if (this.sortAlsoTreeview === null) {
+	if (this.sortAlsoTreeview === null || this.options.sortAlsoTreeview === null) {
 		this.sortAlsoTreeview = !!this.options.sortAlsoTreeview;
 	} else {
 		this.sortAlsoTreeview = !!this.sortAlsoTreeview;
@@ -9948,7 +9948,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.43 (2.1-src Nightly: 6436ce0)';
+elFinder.prototype.version = '2.1.43 (2.1-src Nightly: a6a4881)';
 
 
 
@@ -11326,9 +11326,9 @@ elFinder.prototype._options = {
 	sortStickFolders : true,
 	
 	/**
-	 * Sort also applies to the treeview
+	 * Sort also applies to the treeview (null: disable this feature)
 	 *
-	 * @type {Boolean}
+	 * @type Boolean|null
 	 * @default false
 	 */
 	sortAlsoTreeview : false,
@@ -19509,22 +19509,22 @@ $.fn.elfindersortbutton = function(cmd) {
 				cmd.exec([], 'stick');
 			});
 
-		if ($.fn.elfindertree && $.inArray('tree', fm.options.ui) !== -1) {
-			$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-tree"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortAlsoTreeview')+'</div>')
+		fm.one('init', function() {
+			if (fm.ui.tree && fm.options.sortAlsoTreeview !== null) {
+				$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-tree"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortAlsoTreeview')+'</div>')
 				.appendTo(menu)
 				.on('click', function() {
 					cmd.exec([], 'tree');
 				});
-		}
-		
-		fm.bind('disable select', hide).getUI().on('click', hide);
-			
-		fm.bind('open', function() {
+			}
+		})
+		.bind('disable select', hide)
+		.bind('open', function() {
 			menu.children('[rel]').each(function() {
 				var $this = $(this);
 				$this.toggle(fm.sorters[$this.attr('rel')]);
 			});
-		}).bind('sortchange', update);
+		}).bind('sortchange', update).getUI().on('click', hide);
 		
 		if (menu.children().length > 1) {
 			cmd.change(function() {
@@ -33364,7 +33364,7 @@ elFinder.prototype.commands.sort = function() {
 				'stick',
 				(fm.sortStickFolders? '<span class="ui-icon ui-icon-check"/>' : '') + '&nbsp;' + fm.i18n('sortFoldersFirst')
 			]);
-			if (fm.ui.tree) {
+			if (fm.ui.tree && fm.options.sortAlsoTreeview !== null) {
 				self.variants.push('|');
 				self.variants.push([
 					'tree',
