@@ -961,9 +961,9 @@ elFinder.prototype._options = {
 	sortStickFolders : true,
 	
 	/**
-	 * Sort also applies to the treeview
+	 * Sort also applies to the treeview (null: disable this feature)
 	 *
-	 * @type {Boolean}
+	 * @type Boolean|null
 	 * @default false
 	 */
 	sortAlsoTreeview : false,

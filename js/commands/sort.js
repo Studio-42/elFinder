@@ -21,7 +21,7 @@ elFinder.prototype.commands.sort = function() {
 				'stick',
 				(fm.sortStickFolders? '<span class="ui-icon ui-icon-check"/>' : '') + '&nbsp;' + fm.i18n('sortFoldersFirst')
 			]);
-			if (fm.ui.tree) {
+			if (fm.ui.tree && fm.options.sortAlsoTreeview !== null) {
 				self.variants.push('|');
 				self.variants.push([
 					'tree',

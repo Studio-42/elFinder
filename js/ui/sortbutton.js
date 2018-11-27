@@ -76,22 +76,22 @@ $.fn.elfindersortbutton = function(cmd) {
 				cmd.exec([], 'stick');
 			});
 
-		if ($.fn.elfindertree && $.inArray('tree', fm.options.ui) !== -1) {
-			$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-tree"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortAlsoTreeview')+'</div>')
+		fm.one('init', function() {
+			if (fm.ui.tree && fm.options.sortAlsoTreeview !== null) {
+				$('<div class="'+item+' '+item+'-separated elfinder-sort-ext elfinder-sort-tree"><span class="ui-icon ui-icon-check"/>'+fm.i18n('sortAlsoTreeview')+'</div>')
 				.appendTo(menu)
 				.on('click', function() {
 					cmd.exec([], 'tree');
 				});
-		}
-		
-		fm.bind('disable select', hide).getUI().on('click', hide);
-			
-		fm.bind('open', function() {
+			}
+		})
+		.bind('disable select', hide)
+		.bind('open', function() {
 			menu.children('[rel]').each(function() {
 				var $this = $(this);
 				$this.toggle(fm.sorters[$this.attr('rel')]);
 			});
-		}).bind('sortchange', update);
+		}).bind('sortchange', update).getUI().on('click', hide);
 		
 		if (menu.children().length > 1) {
 			cmd.change(function() {
