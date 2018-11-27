@@ -1278,7 +1278,7 @@ var elFinder = function(elm, opts, bootCallback) {
 	}
 
 	this.sortAlsoTreeview = this.storage('sortAlsoTreeview');
-	if (this.sortAlsoTreeview === null) {
+	if (this.sortAlsoTreeview === null || this.options.sortAlsoTreeview === null) {
 		this.sortAlsoTreeview = !!this.options.sortAlsoTreeview;
 	} else {
 		this.sortAlsoTreeview = !!this.sortAlsoTreeview;
