@@ -1995,6 +1995,7 @@
 			init : function(id, file, dum, fm) {
 				var ta = this,
 					ifm = $(this).hide(),
+					uiToast = fm.getUI('toast'),
 					spnr = $('<div class="elfinder-edit-spinner elfinder-edit-zohoeditor"/>')
 						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
 						.appendTo(ifm.parent()),
@@ -2033,6 +2034,20 @@
 						});
 
 						ifm.attr('src', data.zohourl).show().css(opts.css);
+						if (data.warning) {
+							uiToast.appendTo(ta.closest('.ui-dialog'));
+							fm.toast({
+								msg: fm.i18n(data.warning),
+								mode: 'warning',
+								timeOut: 0,
+								onHidden: function() {
+									uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
+								},
+								button: {
+									text: 'btnYes'
+								}
+							});
+						}
 					} else {
 						data.error && fm.error(data.error);
 						ta.elfinderdialog('destroy');
@@ -2166,7 +2181,6 @@
 						Hash: 'txt'
 					},
 					link : '<div class="elfinder-edit-onlineconvert-link"><a href="https://www.online-convert.com" target="_blank"><span class="elfinder-button-icon"></span>ONLINE-CONVERT.COM</a></div>',
-					toastWidth : 280,
 					useTabs : ($.fn.tabs && !fm.UA.iOS)? true : false // Can't work on iOS, I don't know why.
 				}, mOpts);
 			},
@@ -2470,7 +2484,6 @@
 									msg: fm.i18n(res.message),
 									mode: 'error',
 									timeOut: 5000,
-									width: set.toastWidth,
 									onHidden: function() {
 										uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
 									}
@@ -2480,7 +2493,6 @@
 								msg: fm.i18n('editorConvNoApi'),
 								mode: 'warning',
 								timeOut: 3000,
-								width: set.toastWidth,
 								onHidden: function() {
 									uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
 									open(cat, con);
@@ -2566,8 +2578,7 @@
 										fm.toast({
 											msg: fm.i18n('editorConvNeedUpload'),
 											mode: 'info',
-											timeOut: 10000,
-											width: set.toastWidth,
+											timeOut: 15000,
 											onHidden: function() {
 												uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
 											},
