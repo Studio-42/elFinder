@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-10-19
+ * @version 2018-12-01
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -486,6 +486,7 @@
 			'author'          : '作者', // from v2.1.43 added 19.10.2018
 			'email'           : 'Email', // from v2.1.43 added 19.10.2018
 			'license'         : 'ライセンス', // from v2.1.43 added 19.10.2018
+			'exportToSave'    : 'このアイテムは保存できません。 編集内容を失わないようにするには、PCにエクスポートする必要があります。', // from v2.1.44 added 1.12.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
