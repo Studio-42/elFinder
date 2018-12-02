@@ -2,7 +2,7 @@
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-10-19
+ * @version 2018-12-01
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -479,6 +479,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'author'          : 'Author', // from v2.1.43 added 19.10.2018
 			'email'           : 'Email', // from v2.1.43 added 19.10.2018
 			'license'         : 'License', // from v2.1.43 added 19.10.2018
+			'exportToSave'    : 'This item can\'t be saved. To avoid losing the edits you need to export to your PC.', // from v2.1.44 added 1.12.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',

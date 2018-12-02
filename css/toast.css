@@ -85,3 +85,13 @@
     background-color: #7DC6DB;
     color: #046580;
 }
+
+.elfinder .elfinder-toast > .toast-warning button.ui-button {
+    background-color: #dd8c1a;
+    color: #FFF;
+}
+
+.elfinder .elfinder-toast > .toast-warning button.ui-button.ui-state-hover {
+    background-color: #e7ae5e;
+    color: #422a07;
+}

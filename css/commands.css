@@ -365,18 +365,18 @@
 }
 
 /* edit area */
-.ui-dialog .ui-dialog-content.elfinder-edit-editor {
+.elfinder-dialog-edit .ui-dialog-content.elfinder-edit-editor {
     background-color: #fff;
 }
 
-.ui-dialog .ui-dialog-content.elfinder-edit-editor .elfinder-edit-imageeditor {
+.elfinder-dialog-edit .ui-dialog-content.elfinder-edit-editor .elfinder-edit-imageeditor {
     width: 100%;
     height: 300px;
     max-height: 100%;
     text-align: center;
 }
 
-.ui-dialog .ui-dialog-content.elfinder-edit-editor .elfinder-edit-imageeditor * {
+.elfinder-dialog-edit .ui-dialog-content.elfinder-edit-editor .elfinder-edit-imageeditor * {
     -webkit-user-select: none;
     -moz-user-select: none;
     -khtml-user-select: none;
@@ -397,7 +397,7 @@
     margin-bottom: -20em;
 }
 
-.std42-dialog .ui-dialog-buttonpane .elfinder-dialog-confirm-encoding {
+.elfinder-dialog-edit .ui-dialog-buttonpane .elfinder-dialog-confirm-encoding {
     font-size: 12px;
 }
 
@@ -415,7 +415,7 @@
     margin-top: 8px;
 }
 
-.ui-dialog-buttonpane .ui-icon {
+.elfinder-dialog-edit .ui-dialog-buttonpane .ui-icon {
     cursor: pointer;
 }
 
@@ -427,11 +427,15 @@
     font-size: 16pt;
 }
 
-.elfinder-dialog .elfinder-edit-spinner .elfinder-spinner,
-.elfinder-dialog .elfinder-edit-spinner .elfinder-spinner-text {
+.elfinder-dialog-edit .elfinder-edit-spinner .elfinder-spinner,
+.elfinder-dialog-edit .elfinder-edit-spinner .elfinder-spinner-text {
     float: none;
 }
 
+.elfinder-dialog-edit .elfinder-toast > div {
+    width: 280px;
+}
+ 
 .elfinder-edit-onlineconvert-button {
     display: inline-block;
     width: 180px;
