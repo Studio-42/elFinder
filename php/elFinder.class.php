@@ -4342,6 +4342,19 @@ class elFinder {
 	}
 	
 	/**
+	 * Gets the fetch cookie file for curl.
+	 *
+	 * @return string  The fetch cookie file.
+	 */
+	public function getFetchCookieFile() {
+		$file = '';
+		if ($tmpDir = $this->getTempDir()) {
+			$file = $tmpDir . '/.elFinderAnonymousCookie';
+		}
+		return $file;
+	}
+
+	/**
 	 * Call curl_exec() with supported redirect on `safe_mode` or `open_basedir`
 	 *
 	 * @param resource    $curl
