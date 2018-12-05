@@ -86,13 +86,16 @@
     border-color: #bdcbd8;
 }
 
+.elfinder-navbar .ui-droppable-hover {
+    background: transparent;
+}
+
 .elfinder-navbar .ui-state-active {
     background: #3875d7;
     border-color: #3875d7;
     color: #fff;
 }
 
-.elfinder-navbar .ui-droppable-hover,
 .elfinder-navbar .elfinder-droppable-active {
     background: #A7C6E5;
 }
