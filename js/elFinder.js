@@ -6150,6 +6150,9 @@ elFinder.prototype = {
 						if (files && (self.uploads.xhrUploading || userAbort)) {
 							// send request om fail
 							getFile(files).done(function(file) {
+								if (!userAbort) {
+									triggerError(error, file);
+								}
 								if (! file._cid) {
 									// send sync request
 									self.uploads.failSyncTm && clearTimeout(self.uploads.failSyncTm);
@@ -6180,18 +6183,19 @@ elFinder.prototype = {
 									}, 1000);
 								}
 							});
+						} else {
+							triggerError(error);
 						}
 						!userAbort && self.sync();
 						self.uploads.xhrUploading = false;
 						files = null;
-						error && self.error(error);
 					})
 					.done(function(data) {
 						self.uploads.xhrUploading = false;
 						files = null;
 						if (data) {
 							self.currentReqCmd = 'upload';
-							data.warning && self.error(data.warning);
+							data.warning && triggerError(data.warning);
 							self.updateCache(data);
 							data.removed && data.removed.length && self.remove(data);
 							data.added   && data.added.length   && self.add(data);
@@ -6295,6 +6299,10 @@ elFinder.prototype = {
 							total: ntfUpload.data('total')
 						}]);
 					}
+				},
+				triggerError = function(err, file) {
+					self.trigger('xhruploadfail', { error: err, file: file });
+					err && self.error(err);
 				},
 				renames = (data.renames || null),
 				hashes = (data.hashes || null),
@@ -6557,7 +6565,7 @@ elFinder.prototype = {
 						setTimeout(check, 100);
 					}
 				},
-				reqId;
+				reqId, err;
 
 				if (! dataChecked && (isDataType || data.type == 'files')) {
 					if (! (maxFileSize = fm.option('uploadMaxSize', target))) {
@@ -6587,7 +6595,7 @@ elFinder.prototype = {
 						
 						// file size check
 						if ((maxFileSize && blobSize > maxFileSize) || (!blobSlice && fm.uplMaxSize && blobSize > fm.uplMaxSize)) {
-							self.error(['errUploadFile', blob.name, 'errUploadFileSize']);
+							triggerError(['errUploadFile', blob.name, 'errUploadFileSize'], blob);
 							cnt--;
 							total--;
 							continue;
@@ -6595,7 +6603,7 @@ elFinder.prototype = {
 						
 						// file mime check
 						if (blob.type && ! self.uploadMimeCheck(blob.type, target)) {
-							self.error(['errUploadFile', blob.name, 'errUploadMime', '(' + blob.type + ')']);
+							triggerError(['errUploadFile', blob.name, 'errUploadMime', '(' + blob.type + ')'], blob);
 							cnt--;
 							total--;
 							continue;
@@ -6641,7 +6649,7 @@ elFinder.prototype = {
 								end = start + BYTES_PER_CHUNK;
 							}
 							if (chunk == null) {
-								self.error(['errUploadFile', blob.name, 'errUploadFileSize']);
+								triggerError(['errUploadFile', blob.name, 'errUploadFileSize'], blob);
 								cnt--;
 								total--;
 							} else {
