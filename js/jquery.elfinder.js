@@ -9,7 +9,7 @@ if ($.ui) {
 					return true;
 				}
 				var rect = elem[0].getBoundingClientRect();
-				return document.elementFromPoint(rect.left, rect.top)? false : true;
+				return document.elementFromPoint(rect.left, rect.top) || document.elementFromPoint(rect.left + rect.width, rect.top + rect.height)? false : true;
 			};
 			
 			if (event.type === 'mousedown' || t.options.elfRefresh) {

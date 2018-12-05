@@ -291,11 +291,16 @@ $.fn.elfindertree = function(fm, opts) {
 					e.stopPropagation();
 					helper.data('dropover', helper.data('dropover') + 1);
 					dst.data('dropover', true);
-					if (ui.helper.data('namespace') !== fm.namespace || ! insideNavbar(e.clientX) || ! fm.insideWorkzone(e.pageX, e.pageY)) {
+					if (ui.helper.data('namespace') !== fm.namespace || ! fm.insideWorkzone(e.pageX, e.pageY)) {
 						dst.removeClass(cl);
 						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
 						return;
 					}
+					if (! insideNavbar(e.clientX)) {
+						dst.removeClass(cl);
+						return;
+					}
+					helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
 					dst.addClass(hover);
 					if (dst.is('.'+collapsed+':not(.'+expanded+')')) {
 						dst.data('expandTimer', setTimeout(function() {
@@ -304,7 +309,7 @@ $.fn.elfindertree = function(fm, opts) {
 					}
 					if (dst.is('.elfinder-ro,.elfinder-na')) {
 						dst.removeClass(dropover);
-						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
+						//helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
 						return;
 					}
 					hash = fm.navId2Hash(dst.attr('id'));
@@ -330,7 +335,10 @@ $.fn.elfindertree = function(fm, opts) {
 					var dst    = $(this),
 						helper = ui.helper;
 					e.stopPropagation();
-					helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus').data('dropover', Math.max(helper.data('dropover') - 1, 0));
+					if (insideNavbar(e.clientX)) {
+						helper.removeClass('elfinder-drag-helper-move elfinder-drag-helper-plus');
+					}
+					helper.data('dropover', Math.max(helper.data('dropover') - 1, 0));
 					dst.data('expandTimer') && clearTimeout(dst.data('expandTimer'));
 					dst.removeData('dropover')
 					   .removeClass(hover+' '+dropover);
