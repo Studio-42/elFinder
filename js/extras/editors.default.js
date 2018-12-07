@@ -337,7 +337,7 @@
 					fm   = this.fm,
 					dfrd = $.Deferred(),
 					cdns = fm.options.cdns,
-					ver  = 'v3.2.2',
+					ver  = 'v3.3.0',
 					init = function(editor) {
 						var $base = $(base),
 							bParent = $base.parent(),
@@ -377,34 +377,25 @@
 							}),
 							canvas = $base.find('canvas:first').get(0),
 							zoom = function(v) {
-								var c = $(canvas),
-									w = parseInt(c.attr('width')),
-									h = parseInt(c.attr('height')),
-									a = w / h,
-									mw, mh, css;
-								if (v === 0) {
-									mw = w;
-									mh = h;
-								} else {
-									mw = parseInt(c.css('max-width')) + Number(v);
-									mh = mw / a;
-								}
-								css = {
-									maxWidth: mw,
-									maxHeight: mh
-								};
-								per.text(Math.round(mw / w * 100) + '%');
 								if (typeof v !== 'undefined') {
-									// set editor config directly for change scale
-									iEditor._graphics.cssMaxWidth = mw;
-									iEditor._graphics.cssMaxHeight = mh;
-									// change scale
-									c.css(css).next().css(css);
-									c.parents('.tui-image-editor-canvas-container,tui-image-editor-canvas').css(css);
-									c.closest('.tui-image-editor').css({
-										width: mw,
-										height: mh
-									});
+									var c = $(canvas),
+										w = parseInt(c.attr('width')),
+										h = parseInt(c.attr('height')),
+										a = w / h,
+										mw, mh;
+									if (v === 0) {
+										mw = w;
+										mh = h;
+									} else {
+										mw = parseInt(c.css('max-width')) + Number(v);
+										mh = mw / a;
+										if (mw > w && mh > h) {
+											mw = w;
+											mh = h;
+										}
+									}
+									per.text(Math.round(mw / w * 100) + '%');
+									iEditor.resizeCanvasDimension({width: mw, height: mh});
 									// continually change more
 									if (zoomMore) {
 										setTimeout(function() {
