@@ -2,7 +2,7 @@
  * Slovak translation
  * @author RobiNN <kelcakrobo@gmail.com>
  * @author Jakub Ďuraš <jkblmr@gmail.com>
- * @version 2018-09-18
+ * @version 2018-12-06
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'RobiNN &lt;kelcakrobo@gmail.com&gt;, Jakub Ďuraš &lt;jkblmr@gmail.com&gt;',
 		language   : 'Slovenčina',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i', // will show like: 18.09.2018 20:06
-		fancyDateFormat : '$1 H:i', // will show like: Dnes 20:06
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 180918-200635
+		dateFormat : 'd.m.Y H:i', // will show like: 06.12.2018 15:38
+		fancyDateFormat : '$1 H:i', // will show like: Dnes 15:38
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 181206-153836
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -290,7 +290,8 @@
 			'untitled folder'   : 'Nový priečinok',   // added 10.11.2015
 			'Archive'           : 'Nový archív',  // from v2.1 added 10.11.2015
 			'untitled file'     : 'Nový súbor.$1',  // from v2.1.41 added 6.8.2018
-			'extentionfile'     : '$1 súbor',     // from v2.1.41 added 6.8.2018
+			'extentionfile'     : '$1 súbor',    // from v2.1.41 added 6.8.2018
+			'extentiontype'     : '$1: $2',      // from v2.1.43 added 17.10.2018
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Potrebné potvrdenie',
@@ -348,11 +349,11 @@
 			'twitter'         : 'Nasleduj nás na Twitteri',
 			'facebook'        : 'Pripoj sa k nám na Facebooku',
 			'team'            : 'Tím',
-			'chiefdev'        : 'hlavný vývojár',
-			'developer'       : 'vývojár',
-			'contributor'     : 'prispievateľ',
-			'maintainer'      : 'správca',
-			'translator'      : 'prekladateľ',
+			'chiefdev'        : 'Hlavný vývojár',
+			'developer'       : 'Vývojár',
+			'contributor'     : 'Prispievateľ',
+			'maintainer'      : 'Správca',
+			'translator'      : 'Prekladateľ',
 			'icons'           : 'Ikony',
 			'dontforget'      : 'a nezabudnite si plavky',
 			'shortcutsof'     : 'Skratky nie sú povolené',
@@ -478,6 +479,14 @@
 			'makefileTypes'   : 'Typy súborov, ktoré sa majú povoliť pomocou "Nový súbor"', // from v2.1.41 added 7.8.2018
 			'typeOfTextfile'  : 'Typ textového súboru', // from v2.1.41 added 7.8.2018
 			'add'             : 'Pridať', // from v2.1.41 added 7.8.2018
+			'theme'           : 'Téma', // from v2.1.43 added 19.10.2018
+			'default'         : 'Predvolená', // from v2.1.43 added 19.10.2018
+			'description'     : 'Popis', // from v2.1.43 added 19.10.2018
+			'website'         : 'Stránka', // from v2.1.43 added 19.10.2018
+			'author'          : 'Autor', // from v2.1.43 added 19.10.2018
+			'email'           : 'E-mail', // from v2.1.43 added 19.10.2018
+			'license'         : 'Licencia', // from v2.1.43 added 19.10.2018
+			'exportToSave'    : 'Túto položku nemožno uložiť. Ak chcete zabrániť strate úprav, musíte ju exportovať do počítača.', // from v2.1.44 added 1.12.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
