@@ -711,15 +711,18 @@
 .elfinder-cwd-icon-vnd-ms-excel-template-macroEnabled-12,
 .elfinder-cwd-icon-vnd-ms-excel-template-macroEnabled-12:after,
 .elfinder-cwd-icon-vnd-ms-excel:after,
-.elfinder-cwd-icon-vnd-oasis-opendocument-spreadsheet,
-.elfinder-cwd-icon-vnd-oasis-opendocument-spreadsheet-template,
-.elfinder-cwd-icon-vnd-oasis-opendocument-spreadsheet-template:after,
-.elfinder-cwd-icon-vnd-oasis-opendocument-spreadsheet:after,
 .elfinder-cwd-icon-vnd-openxmlformats-officedocument-spreadsheetml-sheet,
 .elfinder-cwd-icon-vnd-openxmlformats-officedocument-spreadsheetml-sheet:after,
 .elfinder-cwd-icon-vnd-openxmlformats-officedocument-spreadsheetml-template,
 .elfinder-cwd-icon-vnd-openxmlformats-officedocument-spreadsheetml-template:after {
     background-position: 0 -1450px
+}
+
+.elfinder-cwd-icon-vnd-oasis-opendocument-spreadsheet,
+.elfinder-cwd-icon-vnd-oasis-opendocument-spreadsheet-template,
+.elfinder-cwd-icon-vnd-oasis-opendocument-spreadsheet-template:after,
+.elfinder-cwd-icon-vnd-oasis-opendocument-spreadsheet:after {
+    background-position: 0 -1700px
 }
 
 .elfinder-cwd-icon-vnd-ms-powerpoint,
@@ -734,10 +737,6 @@
 .elfinder-cwd-icon-vnd-ms-powerpoint-template-macroEnabled-12,
 .elfinder-cwd-icon-vnd-ms-powerpoint-template-macroEnabled-12:after,
 .elfinder-cwd-icon-vnd-ms-powerpoint:after,
-.elfinder-cwd-icon-vnd-oasis-opendocument-presentation,
-.elfinder-cwd-icon-vnd-oasis-opendocument-presentation-template,
-.elfinder-cwd-icon-vnd-oasis-opendocument-presentation-template:after,
-.elfinder-cwd-icon-vnd-oasis-opendocument-presentation:after,
 .elfinder-cwd-icon-vnd-openxmlformats-officedocument-presentationml-presentation,
 .elfinder-cwd-icon-vnd-openxmlformats-officedocument-presentationml-presentation:after,
 .elfinder-cwd-icon-vnd-openxmlformats-officedocument-presentationml-slide,
@@ -747,6 +746,13 @@
 .elfinder-cwd-icon-vnd-openxmlformats-officedocument-presentationml-template,
 .elfinder-cwd-icon-vnd-openxmlformats-officedocument-presentationml-template:after {
     background-position: 0 -1400px
+}
+
+.elfinder-cwd-icon-vnd-oasis-opendocument-presentation,
+.elfinder-cwd-icon-vnd-oasis-opendocument-presentation-template,
+.elfinder-cwd-icon-vnd-oasis-opendocument-presentation-template:after,
+.elfinder-cwd-icon-vnd-oasis-opendocument-presentation:after {
+    background-position: 0 -1650px
 }
 
 .elfinder-cwd-icon-msword,
@@ -764,8 +770,22 @@
     background-position: 0 -1500px
 }
 
+.elfinder-cwd-icon-vnd-oasis-opendocument-text,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text-master,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text-master:after,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text-template,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text-template:after,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text-web,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text-web:after,
+.elfinder-cwd-icon-vnd-oasis-opendocument-text:after {
+    background-position: 0 -1750px
+}
+
 .elfinder-cwd-icon-vnd-ms-office,
-.elfinder-cwd-icon-vnd-ms-office:after,
+.elfinder-cwd-icon-vnd-ms-office:after {
+    background-position: 0 -500px
+}
+
 .elfinder-cwd-icon-vnd-oasis-opendocument-chart,
 .elfinder-cwd-icon-vnd-oasis-opendocument-chart:after,
 .elfinder-cwd-icon-vnd-oasis-opendocument-database,
@@ -778,17 +798,9 @@
 .elfinder-cwd-icon-vnd-oasis-opendocument-graphics:after,
 .elfinder-cwd-icon-vnd-oasis-opendocument-image,
 .elfinder-cwd-icon-vnd-oasis-opendocument-image:after,
-.elfinder-cwd-icon-vnd-oasis-opendocument-text,
-.elfinder-cwd-icon-vnd-oasis-opendocument-text-master,
-.elfinder-cwd-icon-vnd-oasis-opendocument-text-master:after,
-.elfinder-cwd-icon-vnd-oasis-opendocument-text-template,
-.elfinder-cwd-icon-vnd-oasis-opendocument-text-template:after,
-.elfinder-cwd-icon-vnd-oasis-opendocument-text-web,
-.elfinder-cwd-icon-vnd-oasis-opendocument-text-web:after,
-.elfinder-cwd-icon-vnd-oasis-opendocument-text:after,
 .elfinder-cwd-icon-vnd-openofficeorg-extension,
 .elfinder-cwd-icon-vnd-openofficeorg-extension:after {
-    background-position: 0 -500px
+    background-position: 0 -1600px
 }
 
 .elfinder-cwd-icon-html:after,
