@@ -4172,19 +4172,33 @@ var elFinder = function(elm, opts, bootCallback) {
 		.error(function(e) { 
 			var opts  = {
 					cssClass  : 'elfinder-dialog-error',
-					title     : self.i18n(self.i18n('error')),
+					title     : self.i18n('error'),
 					resizable : false,
 					destroyOnClose : true,
 					buttons   : {}
-			};
+				},
+				node = self.getUI(),
+				cnt = node.children('.elfinder-dialog-error').length,
+				last, counter;
 			
-			opts.buttons[self.i18n(self.i18n('btnClose'))] = function() { $(this).elfinderdialog('close'); };
+			if (cnt < parseInt(self.options.maxErrorDialogs || 5)) {
+				opts.buttons[self.i18n(self.i18n('btnClose'))] = function() { $(this).elfinderdialog('close'); };
 
-			if (e.data.opts && $.isPlainObject(e.data.opts)) {
-				Object.assign(opts, e.data.opts);
+				if (e.data.opts && $.isPlainObject(e.data.opts)) {
+					Object.assign(opts, e.data.opts);
+				}
+
+				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
+			} else {
+				last = node.children('.elfinder-dialog-error:last').children('.ui-dialog-content:first');
+				counter = last.children('.elfinder-error-counter');
+				if (counter.length) {
+					counter.data('cnt', parseInt(counter.data('cnt')) + 1).html(self.i18n(['moreErrors', counter.data('cnt')]));
+				} else {
+					counter = $('<span class="elfinder-error-counter">'+ self.i18n(['moreErrors', 1]) +'</span>').data('cnt', 1);
+					last.append('<br/>', counter);
+				}
 			}
-
-			self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
 		})
 		.bind('tmb', function(e) {
 			$.each(e.data.images||[], function(hash, tmb) {

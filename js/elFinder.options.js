@@ -239,7 +239,14 @@ elFinder.prototype._options = {
 	 * @type String|Null
 	 */
 	theme : null,
-	
+
+	/**
+	 * Maximum value of error dialog open at the same time
+	 * 
+	 * @type Number
+	 */
+	maxErrorDialogs : 5,
+
 	/**
 	 * Additional css class for filemanager node.
 	 *
