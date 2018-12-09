@@ -933,9 +933,11 @@ var elFinder = function(elm, opts, bootCallback) {
 	
 	this.i18nBaseUrl = (this.options.i18nBaseUrl || this.baseUrl + 'js/i18n').replace(/\/$/, '') + '/';
 
+	self.options.maxErrorDialogs = Math.max(1, parseInt(self.options.maxErrorDialogs || 5));
+
 	// set dispInlineRegex
 	cwdOptionsDefault['dispInlineRegex'] = this.options.dispInlineRegex;
-	
+
 	// auto load required CSS
 	if (this.options.cssAutoLoad) {
 		(function() {
@@ -4172,19 +4174,33 @@ var elFinder = function(elm, opts, bootCallback) {
 		.error(function(e) { 
 			var opts  = {
 					cssClass  : 'elfinder-dialog-error',
-					title     : self.i18n(self.i18n('error')),
+					title     : self.i18n('error'),
 					resizable : false,
 					destroyOnClose : true,
 					buttons   : {}
-			};
+				},
+				node = self.getUI(),
+				cnt = node.children('.elfinder-dialog-error').length,
+				last, counter;
 			
-			opts.buttons[self.i18n(self.i18n('btnClose'))] = function() { $(this).elfinderdialog('close'); };
+			if (cnt < self.options.maxErrorDialogs) {
+				opts.buttons[self.i18n(self.i18n('btnClose'))] = function() { $(this).elfinderdialog('close'); };
 
-			if (e.data.opts && $.isPlainObject(e.data.opts)) {
-				Object.assign(opts, e.data.opts);
+				if (e.data.opts && $.isPlainObject(e.data.opts)) {
+					Object.assign(opts, e.data.opts);
+				}
+
+				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
+			} else {
+				last = node.children('.elfinder-dialog-error:last').children('.ui-dialog-content:first');
+				counter = last.children('.elfinder-error-counter');
+				if (counter.length) {
+					counter.data('cnt', parseInt(counter.data('cnt')) + 1).html(self.i18n(['moreErrors', counter.data('cnt')]));
+				} else {
+					counter = $('<span class="elfinder-error-counter">'+ self.i18n(['moreErrors', 1]) +'</span>').data('cnt', 1);
+					last.append('<br/>', counter);
+				}
 			}
-
-			self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
 		})
 		.bind('tmb', function(e) {
 			$.each(e.data.images||[], function(hash, tmb) {
@@ -6300,10 +6316,36 @@ elFinder.prototype = {
 						}]);
 					}
 				},
-				triggerError = function(err, file) {
-					self.trigger('xhruploadfail', { error: err, file: file });
-					err && self.error(err);
+				triggerError = function(err, file, unite) {
+					err && self.trigger('xhruploadfail', { error: err, file: file });
+					if (unite) {
+						if (err) {
+							if (errCnt < self.options.maxErrorDialogs) {
+								if (Array.isArray(err)) {
+									errors = errors.concat(err);
+								} else {
+									errors.push(err);
+								}
+							}
+							errCnt++;
+						}
+					} else {
+						if (err) {
+							self.error(err);
+						} else {
+							if (errors.length) {
+								if (errCnt >= self.options.maxErrorDialogs) {
+									errors = errors.concat('moreErrors', errCnt - self.options.maxErrorDialogs);
+								}
+								self.error(errors);
+							}
+							errors = [];
+							errCnt = 0;
+						}
+					}
 				},
+				errors = [],
+				errCnt = 0,
 				renames = (data.renames || null),
 				hashes = (data.hashes || null),
 				chunkMerge = false,
@@ -6327,7 +6369,6 @@ elFinder.prototype = {
 						// ff bug while send zero sized file
 						// for safari - send directory
 						if (!isDataType && data.files && $.grep(data.files, function(f){return ! f.type && f.size === (self.UA.Safari? 1802 : 0)? true : false;}).length) {
-							errors.push('errFolderUpload');
 							dfrd.reject(['errAbort', 'errFolderUpload']);
 						} else if (data.input && $.grep(data.input.files, function(f){return ! f.type && f.size === (self.UA.Safari? 1802 : 0)? true : false;}).length) {
 							dfrd.reject(['errUploadNoFiles']);
@@ -6595,7 +6636,7 @@ elFinder.prototype = {
 						
 						// file size check
 						if ((maxFileSize && blobSize > maxFileSize) || (!blobSlice && fm.uplMaxSize && blobSize > fm.uplMaxSize)) {
-							triggerError(['errUploadFile', blob.name, 'errUploadFileSize'], blob);
+							triggerError(['errUploadFile', blob.name, 'errUploadFileSize'], blob, true);
 							cnt--;
 							total--;
 							continue;
@@ -6603,7 +6644,7 @@ elFinder.prototype = {
 						
 						// file mime check
 						if (blob.type && ! self.uploadMimeCheck(blob.type, target)) {
-							triggerError(['errUploadFile', blob.name, 'errUploadMime', '(' + blob.type + ')'], blob);
+							triggerError(['errUploadFile', blob.name, 'errUploadMime', '(' + blob.type + ')'], blob, true);
 							cnt--;
 							total--;
 							continue;
@@ -6649,7 +6690,7 @@ elFinder.prototype = {
 								end = start + BYTES_PER_CHUNK;
 							}
 							if (chunk == null) {
-								triggerError(['errUploadFile', blob.name, 'errUploadFileSize'], blob);
+								triggerError(['errUploadFile', blob.name, 'errUploadFileSize'], blob, true);
 								cnt--;
 								total--;
 							} else {
@@ -6683,6 +6724,10 @@ elFinder.prototype = {
 						fcnt++;
 					}
 					
+					if (errors.length) {
+						triggerError();
+					}
+
 					if (sfiles.length == 0) {
 						// no data
 						data.checked = true;
@@ -7120,7 +7165,7 @@ elFinder.prototype = {
 							if (self.options.iframeTimeout > 0) {
 								abortto = setTimeout(function() {
 									onload();
-									dfrd.reject([errors.connect, errors.timeout]);
+									dfrd.reject(['errConnect', 'errTimeout']);
 								}, self.options.iframeTimeout);
 							}
 							
