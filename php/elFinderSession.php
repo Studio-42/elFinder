@@ -11,6 +11,8 @@
 class elFinderSession implements elFinderSessionInterface
 {
 	protected $started = false;
+
+	protected $cookiePay = false;
 	
 	protected $keys = array();
 	
@@ -58,6 +60,11 @@ class elFinderSession implements elFinderSessionInterface
 	public function close()
 	{
 		if ($this->started) {
+			if (!$this->cookiePay) {
+				ini_set('session.use_cookies', 0);
+				setcookie(session_name(), session_id(), 0, '/', '', (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off'), true);
+				$this->cookiePay = true;
+			}
 			session_write_close();
 		}
 		$this->started = false;
