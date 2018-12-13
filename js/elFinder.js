@@ -2153,7 +2153,7 @@ var elFinder = function(elm, opts, bootCallback) {
 
 						if (!!data.init) {
 							self.uplMaxSize = self.returnBytes(response.uplMaxSize);
-							self.uplMaxFile = !!response.uplMaxFile? Math.max(parseInt(response.uplMaxFile), 50) : 20;
+							self.uplMaxFile = !!response.uplMaxFile? Math.min(parseInt(response.uplMaxFile), 50) : 20;
 						}
 					}
 
