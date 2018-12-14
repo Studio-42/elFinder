@@ -61,8 +61,9 @@ class elFinderSession implements elFinderSessionInterface
 	{
 		if ($this->started) {
 			if (!$this->cookiePay) {
+				$cParm = session_get_cookie_params();
 				ini_set('session.use_cookies', 0);
-				setcookie(session_name(), session_id(), 0, '/', '', (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off'), true);
+				setcookie(session_name(), session_id(), 0, $cParm['path'], $cParm['domain'], $cParm['secure'], $cParm['httponly']);
 				$this->cookiePay = true;
 			}
 			session_write_close();
