@@ -169,6 +169,16 @@
     margin-left: -5px;
 }
 
+.elfinder-dialog.elfinder-dialog-resize .ui-resizable-e {
+    width: 10px;
+    height: 100%;
+}
+
+.elfinder-dialog.elfinder-dialog-resize .ui-resizable-s {
+    width: 100%;
+    height: 10px;
+}
+
 .elfinder-resize-loading {
     position: absolute;
     width: 200px;
