@@ -1,3 +1,16 @@
+2018-12-15  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.44):
+
+		- [cmd:sort] Fixed #2774 to make can disable "Also Treeview" sort option
+		- [cmd:edit:zoho] Fixed #2777 to show warning when editing items that can not be written anonymously
+		- [js:core] Fixed #2783i, #2784 make new event `xhruploadfail`
+		- [ui:tree,cwd] Fixed #2785 event handling of droppable element of tree of navbar
+		- [VD:abstract] Fixed #2791 correction of `localRmdirRecursive()` for Win server
+		- [js:core] Fixed #2799 some files are not saved when uploading multiple files
+		- And some minor bug fixes
+
+
 2018-11-24  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.43):
