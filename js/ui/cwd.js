@@ -459,7 +459,7 @@ $.fn.elfindercwd = function(fm, options) {
 			selectedFiles = {},
 			
 			selectFile = function(hash) {
-				$('#'+fm.cwdHash2Id(hash)).trigger(evtSelect);
+				$(document.getElementById(fm.cwdHash2Id(hash))).trigger(evtSelect);
 			},
 			
 			allSelected = false,
@@ -477,7 +477,7 @@ $.fn.elfindercwd = function(fm, options) {
 						selectedFiles = {};
 						$.each(files, function(i, v) {
 							selectedFiles[v.hash] = true;
-							$('#'+fm.cwdHash2Id(v.hash)).trigger(evtSelect);
+							$(document.getElementById(fm.cwdHash2Id(v.hash))).trigger(evtSelect);
 						});
 						fm.toast({mode: 'warning', msg: fm.i18n(['errMaxTargets', fm.maxTargets])});
 					} else {
@@ -517,7 +517,7 @@ $.fn.elfindercwd = function(fm, options) {
 					selectAll();
 				} else {
 					$.each((incHashes || cwdHashes), function(i, h) {
-						var itemNode = $('#'+fm.cwdHash2Id(h));
+						var itemNode = $(document.getElementById(fm.cwdHash2Id(h)));
 						if (! selectedFiles[h]) {
 							invHashes[h] = true;
 							itemNode.length && itemNode.trigger(evtSelect);
@@ -1226,7 +1226,7 @@ $.fn.elfindercwd = function(fm, options) {
 							.attr('src', tmb.url);
 					},
 					chk  = function(hash, tmb) {
-						var node = $('#'+fm.cwdHash2Id(hash)),
+						var node = $(document.getElementById(fm.cwdHash2Id(hash))),
 							file, tmbObj, reloads = [];
 	
 						if (node.length) {
@@ -1394,7 +1394,7 @@ $.fn.elfindercwd = function(fm, options) {
 						file = files[l];
 						hash = file.hash;
 						
-						if ($('#'+fm.cwdHash2Id(hash)).length) {
+						if ($(document.getElementById(fm.cwdHash2Id(hash))).length) {
 							continue;
 						}
 						
@@ -1414,7 +1414,7 @@ $.fn.elfindercwd = function(fm, options) {
 							}
 						}
 						
-						if ($('#'+fm.cwdHash2Id(hash)).length) {
+						if ($(document.getElementById(fm.cwdHash2Id(hash))).length) {
 							if ((file.tmb && (file.tmb != 1 || file.size > 0)) || (stmb && file.mime.indexOf('image/') === 0)) {
 								atmb[hash] = file.tmb || 'self';
 							}
@@ -1462,7 +1462,7 @@ $.fn.elfindercwd = function(fm, options) {
 				
 				while (l--) {
 					hash = files[l];
-					if ((n = $('#'+fm.cwdHash2Id(hash))).length) {
+					if ((n = $(document.getElementById(fm.cwdHash2Id(hash)))).length) {
 						try {
 							n.remove();
 							--bufferExt.renderd;
@@ -2177,7 +2177,7 @@ $.fn.elfindercwd = function(fm, options) {
 				// unselect all selected files
 				.on('unselectall', unselectAll)
 				.on('selectfile', function(e, id) {
-					$('#'+fm.cwdHash2Id(id)).trigger(evtSelect);
+					$(document.getElementById(fm.cwdHash2Id(id))).trigger(evtSelect);
 					trigger();
 				})
 				.on('colwidth', function() {
@@ -2730,7 +2730,7 @@ $.fn.elfindercwd = function(fm, options) {
 
 				if (query) {
 					$.each(e.data.changed || [], function(i, file) {
-						if ($('#'+fm.cwdHash2Id(file.hash)).length) {
+						if ($(document.getElementById(fm.cwdHash2Id(file.hash))).length) {
 							remove([file.hash]);
 							add([file], 'change');
 							$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
@@ -2739,7 +2739,7 @@ $.fn.elfindercwd = function(fm, options) {
 					});
 				} else {
 					$.each($.grep(e.data.changed || [], function(f) { return f.phash == phash ? true : false; }), function(i, file) {
-						if ($('#'+fm.cwdHash2Id(file.hash)).length) {
+						if ($(document.getElementById(fm.cwdHash2Id(file.hash))).length) {
 							remove([file.hash]);
 							add([file], 'change');
 							$.inArray(file.hash, sel) !== -1 && selectFile(file.hash);
@@ -2827,7 +2827,7 @@ $.fn.elfindercwd = function(fm, options) {
 				if (!helper.data('locked')) {
 					while (l--) {
 						try {
-							$('#'+fm.cwdHash2Id(files[l])).trigger(event);
+							$(document.getElementById(fm.cwdHash2Id(files[l]))).trigger(event);
 						} catch(e) {}
 					}
 					! e.data.inselect && trigger();

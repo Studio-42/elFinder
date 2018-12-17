@@ -324,13 +324,13 @@ var elFinder = function(elm, opts, bootCallback) {
 					var isDir = (files[i].mime === 'directory'),
 						phash = files[i].phash,
 						pnav;
-					
+						
 					if (
 						(!isDir
 							|| emptyDirs[phash]
 							|| (!stayDirs[phash]
-								&& $('#'+self.navHash2Id(files[i].hash)).is(':hidden')
-								&& $('#'+self.navHash2Id(phash)).next('.elfinder-navbar-subtree').children().length > 100
+								&& $(document.getElementById(self.navHash2Id(files[i].hash))).is(':hidden')
+								&& $(document.getElementById(self.navHash2Id(phash))).next('.elfinder-navbar-subtree').children().length > 100
 							)
 						)
 						&& (isDir || phash !== cwd)
@@ -338,7 +338,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					) {
 						if (isDir && !emptyDirs[phash]) {
 							emptyDirs[phash] = true;
-							$('#'+self.navHash2Id(phash))
+							$(document.getElementById(self.navHash2Id(phash)))
 							 .removeClass(rmClass)
 							 .next('.elfinder-navbar-subtree').empty();
 						}
@@ -9014,7 +9014,7 @@ elFinder.prototype = {
 		
 		$.each(files, function(i, f) {
 			if (f.phash === cwdHash || self.searchStatus.state > 1) {
-				newItem = newItem.add(cwd.find('#'+self.cwdHash2Id(f.hash)));
+				newItem = newItem.add(document.getElementById(self.cwdHash2Id(f.hash)));
 				if (opts.firstOnly) {
 					return false;
 				}
