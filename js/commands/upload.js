@@ -310,7 +310,7 @@ elFinder.prototype.commands.upload = function() {
 		
 		if (targetDir.dirs) {
 			
-			if (targetDir.hash === cwdHash || $(document.getElementById(fm.navHash2Id(targetDir.hash))).hasClass('elfinder-subtree-loaded')) {
+			if (targetDir.hash === cwdHash || fm.navHash2Elm(targetDir.hash).hasClass('elfinder-subtree-loaded')) {
 				getSelector().appendTo(dialog);
 			} else {
 				spinner = $('<div class="elfinder-upload-dirselect" title="' + fm.i18n('nowLoading') + '"/>')

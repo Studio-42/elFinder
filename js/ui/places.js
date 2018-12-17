@@ -29,12 +29,20 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 **/
 			id2hash   = function(id) { return id.substr(6);	},
 			/**
-			 * Convert places dir node into dir hash
+			 * Convert places dir hash into dir node id
 			 *
 			 * @param  String  directory id
 			 * @return String
 			 **/
 			hash2id   = function(hash) { return 'place-'+hash; },
+
+			/**
+			 * Convert places dir hash into dir node elment (jQuery object)
+			 *
+			 * @param  String  directory id
+			 * @return Object
+			 **/
+			hash2elm  = function(hash) { return $(document.getElementById(hash2id(hash))); },
 			
 			/**
 			 * Save current places state
@@ -172,7 +180,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 
 				if (dirs[hash]) {
 					delete dirs[hash];
-					tgt = $('#'+hash2id(hash));
+					tgt = hash2elm(hash);
 					if (tgt.length) {
 						name = tgt.text();
 						tgt.parent().remove();
@@ -195,7 +203,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 * @return void
 			 **/
 			moveup = function(hash) {
-				var self = $('#'+hash2id(hash)),
+				var self = hash2elm(hash),
 					tgt  = self.parent(),
 					prev = tgt.prev('div'),
 					cls  = 'ui-state-hover',
@@ -230,7 +238,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 			 **/
 			update = function(dir, preHash) {
 				var hash = dir.hash,
-					tgt  = $('#'+hash2id(preHash || hash)),
+					tgt  = hash2elm(preHash || hash),
 					node = create(dir, hash);
 
 				if (tgt.length > 0) {
@@ -277,7 +285,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 							return true;
 						}
 					}
-					!$('#'+hash2id(h)).length && subtree.append(node);
+					!hash2elm(h).length && subtree.append(node);
 				});
 				save();
 			},
