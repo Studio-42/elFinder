@@ -2,7 +2,7 @@
  * Czech translation
  * @author RobiNN <kelcakrobo@gmail.com>
  * @author Jay Gridley <gridley.jay@hotmail.com>
- * @version 2018-09-18
+ * @version 2018-12-06
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'RobiNN &lt;kelcakrobo@gmail.com&gt;, Jay Gridley &lt;gridley.jay@hotmail.com&gt;',
 		language   : 'Čeština',
 		direction  : 'ltr',
-		dateFormat : 'd. m. Y H:i', // will show like: 18. 09. 2018 20:24
-		fancyDateFormat : '$1 H:i', // will show like: Dnes 20:24
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 180918-202435
+		dateFormat : 'd. m. Y H:i', // will show like: 06. 12. 2018 15:43
+		fancyDateFormat : '$1 H:i', // will show like: Dnes 15:43
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 181206-154356
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -290,7 +290,8 @@
 			'untitled folder'   : 'Nová složka',   // added 10.11.2015
 			'Archive'           : 'Nový archiv',  // from v2.1 added 10.11.2015
 			'untitled file'     : 'Nový soubor.$1',  // from v2.1.41 added 6.8.2018
-			'extentionfile'     : '$1 soubor',     // from v2.1.41 added 6.8.2018
+			'extentionfile'     : '$1 soubor',    // from v2.1.41 added 6.8.2018
+			'extentiontype'     : '$1: $2',      // from v2.1.43 added 17.10.2018
 
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Požadováno potvrzení',
@@ -478,6 +479,14 @@
 			'makefileTypes'   : 'Typy souborů, jež mají být povoleny pomocí "Nový soubor"', // from v2.1.41 added 7.8.2018
 			'typeOfTextfile'  : 'Typ textového souboru', // from v2.1.41 added 7.8.2018
 			'add'             : 'Přidat', // from v2.1.41 added 7.8.2018
+			'theme'           : 'Téma', // from v2.1.43 added 19.10.2018
+			'default'         : 'Výchozí', // from v2.1.43 added 19.10.2018
+			'description'     : 'Popis', // from v2.1.43 added 19.10.2018
+			'website'         : 'Stránka', // from v2.1.43 added 19.10.2018
+			'author'          : 'Autor', // from v2.1.43 added 19.10.2018
+			'email'           : 'E-mail', // from v2.1.43 added 19.10.2018
+			'license'         : 'Licence', // from v2.1.43 added 19.10.2018
+			'exportToSave'    : 'Tuto položku nelze uložit. Abyste se vyhnuli ztrátě úprav, musíte je exportovat do počítače.', // from v2.1.44 added 1.12.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámý',
