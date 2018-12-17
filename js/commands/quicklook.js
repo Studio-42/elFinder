@@ -513,7 +513,7 @@
 
 			if (!init && state === closed) {
 				if (file && file.hash !== cwdHash) {
-					node = $('#'+fm.cwdHash2Id(file.hash.split('/', 2)[0]));
+					node = $(document.getElementById(fm.cwdHash2Id(file.hash.split('/', 2)[0])));
 				}
 				navStyle = '';
 				navbar.attr('style', '');

@@ -137,7 +137,7 @@ elFinder.prototype.resources = {
 					move  : move
 				},
 				data = this.data || {},
-				node = ui.trigger('create.'+fm.namespace, file).find('#'+fm[find](id)),
+				node = ui.trigger('create.'+fm.namespace, file).find(document.getElementById(fm[find](id))),
 				nnode, pnode,
 				overlay = fm.getUI('overlay'),
 				cleanup = function() {
@@ -263,7 +263,7 @@ elFinder.prototype.resources = {
 										if (data && data.added && data.added[0]) {
 											var item    = data.added[0],
 												dirhash = item.hash,
-												newItem = ui.find('#'+fm[find](dirhash)),
+												newItem = ui.find(document.getElementById(fm[find](dirhash))),
 												acts    = {
 													'directory' : { cmd: 'open', msg: 'cmdopendir' },
 													'text'      : { cmd: 'edit', msg: 'cmdedit' },
@@ -334,7 +334,7 @@ elFinder.prototype.resources = {
 			}
 			
 			if (tree) {
-				dst = $('#'+fm[find](phash));
+				dst = $(document.getElementById(fm[find](phash)));
 				collapsed = fm.res('class', 'navcollapse');
 				expanded  = fm.res('class', 'navexpand');
 				arrow = fm.res('class', 'navarrow');
