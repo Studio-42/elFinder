@@ -184,6 +184,7 @@ elFinder.prototype.resources = {
 						if (e.keyCode == $.ui.keyCode.ESCAPE) {
 							dfrd.reject();
 						} else if (e.keyCode == $.ui.keyCode.ENTER) {
+							e.preventDefault();
 							input.trigger('blur');
 						}
 					})
