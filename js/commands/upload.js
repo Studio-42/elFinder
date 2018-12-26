@@ -166,16 +166,16 @@ elFinder.prototype.commands.upload = function() {
 					.on('dragover', function(e) {
 						e.originalEvent.dataTransfer.dropEffect = 'copy';
 					}),
-					form = $('<form/>').append(input);
+					form = $('<form/>').append(input).on('click', function(e) {
+						e.stopPropagation();
+					});
 
 				return $('<div class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only elfinder-tabstop elfinder-focus"><span class="ui-button-text">'+fm.i18n(caption)+'</span></div>')
 					.append(form)
 					.on('click', function(e) {
-						if (e.target === this) {
-							e.stopPropagation();
-							e.preventDefault();
-							input.trigger('click');
-						}
+						e.stopPropagation();
+						e.preventDefault();
+						input.trigger('click');
 					})
 					.on('mouseenter mouseleave', function(e) {
 						$(this).toggleClass(hover, e.type === 'mouseenter');
