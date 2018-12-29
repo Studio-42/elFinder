@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.44 (2.1-src Nightly: 8cf052b) (2018-12-26)
+ * Version 2.1.44 (2.1-src Nightly: cd6ecd1) (2018-12-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2018, Studio 42
@@ -1680,20 +1680,28 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * 
 	 * @param  String  file hash
 	 * @param  Object  Options
-	 * @return String
+	 * @return String|Object of jQuery Deferred
 	 */
 	this.url = function(hash, o) {
 		var file   = files[hash],
 			opts   = o || {},
 			async  = opts.async || false,
 			temp   = opts.temporary || false,
-			dfrd   = async? $.Deferred() : null,
+			onetm  = (opts.onetime && self.option('onetimeUrl', hash)) || false,
+			absurl = opts.absurl || false,
+			dfrd   = (async || onetm)? $.Deferred() : null,
+			filter = function(url) {
+				if (url && absurl) {
+					url = self.convAbsUrl(url);
+				}
+				return url;
+			},
 			getUrl = function(url) {
 				if (url) {
-					return url;
+					return filter(url);
 				}
 				if (file.url) {
-					return file.url;
+					return filter(file.url);
 				}
 				
 				if (typeof baseUrl === 'undefined') {
@@ -1701,7 +1709,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 				
 				if (baseUrl) {
-					return baseUrl + $.map(self.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/');
+					return filter(baseUrl + $.map(self.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/'));
 				}
 
 				var params = Object.assign({}, self.customData, {
@@ -1712,7 +1720,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					params.cmd = 'open';
 					params.current = file.phash;
 				}
-				return self.options.url + (self.options.url.indexOf('?') === -1 ? '?' : '&') + $.param(params, true);
+				return filter(self.options.url + (self.options.url.indexOf('?') === -1 ? '?' : '&') + $.param(params, true));
 			}, 
 			baseUrl, res;
 		
@@ -1720,44 +1728,75 @@ var elFinder = function(elm, opts, bootCallback) {
 			return async? dfrd.resolve('') : '';
 		}
 		
-		if (file.url == '1' || (temp && !file.url && !(baseUrl = self.option('url', (!self.isRoot(file) && file.phash) || file.hash)))) {
+		if (onetm) {
+			async = true;
 			this.request({
-				data : { cmd : 'url', target : hash, options : { temporary: temp? 1 : 0 } },
+				data : { cmd : 'url', target : hash, options : { onetime: 1 } },
 				preventDefault : true,
 				options: {async: async},
-				notify: async? {type : temp? 'file' : 'url', cnt : 1, hideCnt : true} : {}
-			})
-			.done(function(data) {
-				file.url = data.url || '';
-			})
-			.fail(function() {
-				file.url = '';
-			})
-			.always(function() {
-				var url;
-				if (file.url && temp) {
-					url = file.url;
-					file.url = '1'; // restore
-				}
-				if (async) {
-					dfrd.resolve(getUrl(url));
-				} else {
-					return getUrl(url);
-				}
+				notify: {type : 'file', cnt : 1, hideCnt : true}
+			}).done(function(data) {
+				dfrd.resolve(filter(data.url || ''));
+			}).fail(function() {
+				dfrd.resolve('');
 			});
 		} else {
-			if (async) {
-				dfrd.resolve(getUrl());
+			if (file.url == '1' || (temp && !file.url && !(baseUrl = self.option('url', (!self.isRoot(file) && file.phash) || file.hash)))) {
+				this.request({
+					data : { cmd : 'url', target : hash, options : { temporary: temp? 1 : 0 } },
+					preventDefault : true,
+					options: {async: async},
+					notify: async? {type : temp? 'file' : 'url', cnt : 1, hideCnt : true} : {}
+				})
+				.done(function(data) {
+					file.url = data.url || '';
+				})
+				.fail(function() {
+					file.url = '';
+				})
+				.always(function() {
+					var url;
+					if (file.url && temp) {
+						url = file.url;
+						file.url = '1'; // restore
+					}
+					if (async) {
+						dfrd.resolve(getUrl(url));
+					} else {
+						return getUrl(url);
+					}
+				});
 			} else {
-				return getUrl();
+				if (async) {
+					dfrd.resolve(getUrl());
+				} else {
+					return getUrl();
+				}
 			}
 		}
-		
 		if (async) {
 			return dfrd;
 		}
 	};
 	
+	/**
+	 * Return file url for the extarnal service
+	 *
+	 * @param      String  hash     The hash
+	 * @param      Object  options  The options
+	 * @return     Object  jQuery Deferred
+	 */
+	this.forExternalUrl = function(hash, options) {
+		var onetime = self.option('onetimeUrl', hash),
+			opts = {
+				async: true,
+				absurl: true
+			};
+
+		opts[onetime? 'onetime' : 'temporary'] = true;
+		return self.url(hash, Object.assign({}, options, opts));
+	};
+
 	/**
 	 * Return file url for open in elFinder
 	 * 
@@ -10021,7 +10060,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.44 (2.1-src Nightly: 8cf052b)';
+elFinder.prototype.version = '2.1.44 (2.1-src Nightly: cd6ecd1)';
 
 
 
@@ -17982,19 +18021,18 @@ $.fn.elfindernavbar = function(fm, opts) {
 			};
 
 		fm.one('init', function() {
+			navdock = fm.getUI('navdock');
 			var set = function() {
-				navdock =fm.getUI('navdock');
-				setDelta();
-				fm.trigger('wzresize');
-			};
-			fm.bind('wzresize', function() {
-				var navdockH = 0;
-				navdock.width(nav.outerWidth() - deltaW);
-				if (navdock.children().length > 1) {
-					navdockH = navdock.outerHeight(true);
-				}
-				nav.height(wz.height() - navdockH - delta);
-			});
+					setDelta();
+					fm.bind('wzresize', function() {
+						var navdockH = 0;
+						navdock.width(nav.outerWidth() - deltaW);
+						if (navdock.children().length > 1) {
+							navdockH = navdock.outerHeight(true);
+						}
+						nav.height(wz.height() - navdockH - delta);
+					}).trigger('wzresize');
+				};
 			if (fm.cssloaded) {
 				set();
 			} else {
@@ -29668,7 +29706,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file;
-			if (mimes[file.mime.toLowerCase()]) {
+			if (mimes[file.mime.toLowerCase()] && !fm.option('onetimeUrl', file.hash)) {
 				var win     = ql.window,
 					loading, url;
 				
@@ -29754,14 +29792,20 @@ elFinder.prototype.commands.quicklook.plugins = [
 			// start load maps
 			loadMap = function(file, node) {
 				var mapsOpts = ql.options.googleMapsOpts.maps;
-				ql.hideinfo();
-				try {
-					new gMaps.KmlLayer(fm.convAbsUrl(fm.url(file.hash)), Object.assign({
-						map: new gMaps.Map(node.get(0), mapsOpts)
-					}, ql.options.googleMapsOpts.kml));
-				} catch(e) {
-					fail();
-				}
+				fm.forExternalUrl(file.hash).done(function(url) {
+					if (url) {
+						try {
+							new gMaps.KmlLayer(url, Object.assign({
+								map: new gMaps.Map(node.get(0), mapsOpts)
+							}, ql.options.googleMapsOpts.kml));
+							ql.hideinfo();
+						} catch(e) {
+							fail();
+						}
+					} else {
+						fail();
+					}
+				});
 			};
 			// keep stored error handler if exists
 			wGmfail = window.gm_authFailure;
@@ -29781,10 +29825,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 				var file = e.file;
 				if (mapScr && mimes[file.mime.toLowerCase()]) {
 					var win     = ql.window,
+						getLink = (file.url == '1' && !fm.option('onetimeUrl', file.hash)),
 						loading, url, node;
 				
 					e.stopImmediatePropagation();
-					if (file.url == '1') {
+					if (getLink) {
 						preview.hide();
 						$('<div class="elfinder-quicklook-info-data"><button class="elfinder-info-button">'+fm.i18n('getLink')+'</button></div>').appendTo(ql.info.find('.elfinder-quicklook-info'))
 						.on('click', function() {
@@ -29810,7 +29855,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							});
 						});
 					}
-					if (file.url !== '' && file.url != '1') {
+					if (file.url !== '' && !getLink) {
 						node = $('<div style="width:100%;height:100%;"/>').appendTo(preview);
 						preview.one('change', function() {
 							node.remove();
@@ -29884,6 +29929,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? navBottom[type] : '');
 						},
 						ext     = fm.mimeTypes[file.mime],
+						getLink = (file.url == '1' && !fm.option('onetimeUrl', file.hash)),
 						loading, url;
 					
 					if (type === 'm') {
@@ -29891,7 +29937,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							type = 'g';
 						}
 					}
-					if (file.url == '1') {
+					if (getLink) {
 						preview.hide();
 						$('<div class="elfinder-quicklook-info-data"><button class="elfinder-info-button">'+fm.i18n('getLink')+'</button></div>').appendTo(ql.info.find('.elfinder-quicklook-info'))
 						.on('click', function() {
@@ -29917,7 +29963,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							});
 						});
 					}
-					if (file.url !== '' && file.url != '1') {
+					if (file.url !== '' && !getLink) {
 						e.stopImmediatePropagation();
 						preview.one('change', function() {
 							win.off('viewchange.googledocs');
@@ -29928,25 +29974,31 @@ elFinder.prototype.commands.quicklook.plugins = [
 						
 						loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 						
-						url = fm.convAbsUrl(fm.url(file.hash));
-						if (file.ts) {
-							url += (url.match(/\?/)? '&' : '?') + '_t=' + file.ts;
-						}
 						node = $('<iframe class="elfinder-quicklook-preview-iframe"/>')
 							.css('background-color', 'transparent')
-							.appendTo(preview)
-							.on('load', function() {
-								ql.hideinfo();
+							.appendTo(preview);
+
+						fm.forExternalUrl(file.hash).done(function(url) {
+							if (url) {
+								if (file.ts) {
+									url += (url.match(/\?/)? '&' : '?') + '_t=' + file.ts;
+								}
+								node.on('load', function() {
+									ql.hideinfo();
+									loading.remove();
+									ql.preview.after(ql.info);
+									$(this).css('background-color', '#fff').show();
+								})
+								.on('error', function() {
+									loading.remove();
+									ql.preview.after(ql.info);
+								}).attr('src', 'https://' + urls[type] + encodeURIComponent(url));
+							} else {
 								loading.remove();
-								ql.preview.after(ql.info);
-								$(this).css('background-color', '#fff').show();
-							})
-							.on('error', function() {
-								loading.remove();
-								ql.preview.after(ql.info);
-							})
-							.attr('src', 'https://' + urls[type] + encodeURIComponent(url));
-						
+								node.remove();
+							}
+						});
+
 						win.on('viewchange.googledocs', setNavi);
 						setNavi();
 						ql.info.after(ql.preview);
