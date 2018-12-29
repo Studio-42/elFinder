@@ -26,19 +26,18 @@ $.fn.elfindernavbar = function(fm, opts) {
 			};
 
 		fm.one('init', function() {
+			navdock = fm.getUI('navdock');
 			var set = function() {
-				navdock =fm.getUI('navdock');
-				setDelta();
-				fm.trigger('wzresize');
-			};
-			fm.bind('wzresize', function() {
-				var navdockH = 0;
-				navdock.width(nav.outerWidth() - deltaW);
-				if (navdock.children().length > 1) {
-					navdockH = navdock.outerHeight(true);
-				}
-				nav.height(wz.height() - navdockH - delta);
-			});
+					setDelta();
+					fm.bind('wzresize', function() {
+						var navdockH = 0;
+						navdock.width(nav.outerWidth() - deltaW);
+						if (navdock.children().length > 1) {
+							navdockH = navdock.outerHeight(true);
+						}
+						nav.height(wz.height() - navdockH - delta);
+					}).trigger('wzresize');
+				};
 			if (fm.cssloaded) {
 				set();
 			} else {
