@@ -241,7 +241,7 @@ class elFinder {
 		'tree'      => array('target' => true),
 		'parents'   => array('target' => true, 'until' => false),
 		'tmb'       => array('targets' => true),
-		'file'      => array('target' => true, 'download' => false, 'cpath' => false),
+		'file'      => array('target' => true, 'download' => false, 'cpath' => false, 'onetime' => false),
 		'zipdl'     => array('targets' => true, 'download' => false),
 		'size'      => array('targets' => true),
 		'mkdir'     => array('target' => true, 'name' => false, 'dirs' => false),
@@ -1752,24 +1752,49 @@ class elFinder {
 	protected function file($args) {
 		$target   = $args['target'];
 		$download = !empty($args['download']);
+		$onetime  = !empty($args['onetime']);
 		$h403     = 'HTTP/1.0 403 Access Denied';
 		$h404     = 'HTTP/1.0 404 Not Found';
 		$h304     = 'HTTP/1.1 304 Not Modified';
+		$a404     = array('error' => 'File not found', 'header' => $h404, 'raw' => true);
 
-		if (($volume = $this->volume($target)) == false) { 
-			return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
-		}
-		
-		if (($file = $volume->file($target)) == false) {
-			return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
-		}
-		
-		if (!$file['read']) {
-			return array('error' => 'Access denied', 'header' => $h403, 'raw' => true);
-		}
-		
-		if (($fp = $volume->open($target)) == false) {
-			return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
+		if ($onetime) {
+			$volume = null;
+			$tmpdir = elFinder::$commonTempPath;
+			if (!$tmpdir || !is_file($tmpf = $tmpdir . DIRECTORY_SEPARATOR . 'ELF' . $target)) {
+				return $a404;
+			}
+			$GLOBALS['elFinderTempFiles'][$tmpf] = true;
+			if ($file = json_decode(file_get_contents($tmpf), true)) {
+				$src = base64_decode($file['file']);
+				if (!is_file($src) || !($fp = fopen($src, 'rb'))) {
+					return $a404;
+				}
+				if (strpos($src, $tmpdir) === 0) {
+					$GLOBALS['elFinderTempFiles'][$src] = true;
+				}
+				unset($file['file']);
+				$file['read'] = true;
+				$file['size'] = filesize($src);
+			} else {
+				return $a404;
+			}
+		} else {
+			if (($volume = $this->volume($target)) == false) { 
+				return $a404;
+			}
+
+			if (($file = $volume->file($target)) == false) {
+				return $a404;
+			}
+			
+			if (!$file['read']) {
+				return $a404;
+			}
+			
+			if (($fp = $volume->open($target)) == false) {
+				return $a404;
+			}
 		}
 
 		// check aborted by user
@@ -1777,7 +1802,7 @@ class elFinder {
 
 		// allow change MIME type by 'file.pre' callback functions
 		$mime = isset($args['mime'])? $args['mime'] : $file['mime'];
-		if ($download) {
+		if ($download || $onetime) {
 			$disp = 'attachment';
 		} else {
 			$dispInlineRegex = $volume->getOption('dispInlineRegex');
@@ -1828,33 +1853,35 @@ class elFinder {
 			)
 		);
 		
-		// add cache control headers
-		if ($cacheHeaders = $volume->getOption('cacheHeaders')) {
-			$result['header'] = array_merge($result['header'], $cacheHeaders);
-		}
-		
-		// check 'xsendfile'
-		$xsendfile = $volume->getOption('xsendfile');
-		$path = null;
-		if ($xsendfile) {
-			$info = stream_get_meta_data($fp);
-			if ($path = empty($info['uri'])? null : $info['uri']) {
-				$basePath = rtrim($volume->getOption('xsendfilePath'), DIRECTORY_SEPARATOR);
-				if ($basePath) {
-					$root = rtrim($volume->getRootPath(), DIRECTORY_SEPARATOR);
-					if (strpos($path, $root) === 0) {
-						$path = $basePath . substr($path, strlen($root));
-					} else {
-						$path = null;
+		if (!$onetime) {
+			// add cache control headers
+			if ($cacheHeaders = $volume->getOption('cacheHeaders')) {
+				$result['header'] = array_merge($result['header'], $cacheHeaders);
+			}
+			
+			// check 'xsendfile'
+			$xsendfile = $volume->getOption('xsendfile');
+			$path = null;
+			if ($xsendfile) {
+				$info = stream_get_meta_data($fp);
+				if ($path = empty($info['uri'])? null : $info['uri']) {
+					$basePath = rtrim($volume->getOption('xsendfilePath'), DIRECTORY_SEPARATOR);
+					if ($basePath) {
+						$root = rtrim($volume->getRootPath(), DIRECTORY_SEPARATOR);
+						if (strpos($path, $root) === 0) {
+							$path = $basePath . substr($path, strlen($root));
+						} else {
+							$path = null;
+						}
 					}
 				}
 			}
+			if ($path) {
+				$result['header'][] = $xsendfile . ': ' . $path;
+				$result['info']['xsendfile'] = $xsendfile;
+			}
 		}
-		if ($path) {
-			$result['header'][] = $xsendfile . ': ' . $path;
-			$result['info']['xsendfile'] = $xsendfile;
-		}
-		
+
 		// add "Content-Location" if file has url data
 		if (isset($file['url']) && $file['url'] && $file['url'] != 1) {
 			$result['header'][] = 'Content-Location: '.$file['url'];
@@ -2606,8 +2633,8 @@ class elFinder {
 		if ($volumeTempPath) {
 			$testDirs[] = rtrim(realpath($volumeTempPath), DIRECTORY_SEPARATOR);
 		}
-		if (function_exists('sys_get_temp_dir')) {
-			$testDirs[] = sys_get_temp_dir();
+		if (elFinder::$commonTempPath) {
+			$testDirs[] = elFinder::$commonTempPath;
 		}
 		$tempDir = '';
 		foreach($testDirs as $testDir) {

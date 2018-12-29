@@ -2005,7 +2005,7 @@
 						method: 'init',
 						'args[target]': file.hash,
 						'args[lang]' : fm.lang,
-						'args[cdata]' : cdata
+						'args[cdata]' : cdata()
 					},
 					preventDefault : true
 				}).done(function(data) {
@@ -2405,14 +2405,12 @@
 						.appendTo(ifm.parent()),
 					_url = null,
 					url = function() {
+						var onetime;
 						if (_url) {
 							return $.Deferred().resolve(_url);
 						} else {
 							spnr.show();
-							return fm.url(file.hash, {
-								async: true,
-								temporary: true
-							}).done(function(url) {
+							return fm.forExternalUrl(file.hash).done(function(url) {
 								_url = url;
 							}).fail(function(error) {
 								error && fm.error(error);

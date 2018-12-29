@@ -1139,6 +1139,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      **/
     public function getContentUrl($hash, $options = array())
     {
+        if (! empty($options['onetime']) && $this->options['onetimeUrl']) {
+            return parent::getContentUrl($hash, $options);
+        }
         if (!empty($options['temporary'])) {
             // try make temporary file
             $url = parent::getContentUrl($hash, $options);

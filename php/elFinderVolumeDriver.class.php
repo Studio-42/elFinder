@@ -225,6 +225,8 @@ abstract class elFinderVolumeDriver {
 		'treeDeep'        => 1,
 		// root url, not set to disable sending URL to client (replacement for old "fileURL" option)
 		'URL'             => '',
+		// enable onetime URL to a file - (true, false or callable (A function that return onetime URL))
+		'onetimeUrl'      => false,
 		// directory link url to own manager url with folder hash (`true`, `false`, `'hide'`(No show) or default `'auto'`: URL is empty then `true` else `false`)
 		'dirUrlOwn'       => 'auto',
 		// directory separator. required by client to show paths correctly
@@ -1588,7 +1590,8 @@ abstract class elFinderVolumeDriver {
 			'syncMinMs'       => intval($this->options['syncMinMs']),
 			'i18nFolderName'  => intval($this->options['i18nFolderName']),
 			'tmbCrop'         => intval($this->options['tmbCrop']),
-			'substituteImg'   => (bool)$this->options['substituteImg']
+			'substituteImg'   => (bool)$this->options['substituteImg'],
+			'onetimeUrl'      => (bool)$this->options['onetimeUrl'],
 		);
 		if (! empty($this->options['trashHash'])) {
 			$opts['trashHash'] = $this->options['trashHash'];
@@ -2998,6 +3001,54 @@ abstract class elFinderVolumeDriver {
 	public function getContentUrl($hash, $options = array()) {
 		if (($file = $this->file($hash)) === false) {
 			return false;
+		}
+		if (! empty($options['onetime']) && $this->options['onetimeUrl']) {
+			if (is_callable($this->options['onetimeUrl'])) {
+				return call_user_func_array($this->options['onetimeUrl'], array($file, $options, $this));
+			} else {
+				$ret = false;
+				if ($tmpdir = elFinder::getStaticVar('commonTempPath')) {
+					if ($source = $this->open($hash)) {
+						if ($_dat = tempnam($tmpdir, 'ELF')) {
+							$token = md5($_dat . session_id());
+							$dat = $tmpdir . DIRECTORY_SEPARATOR . 'ELF' . $token;
+							if (rename($_dat, $dat)) {
+								$info = stream_get_meta_data($source);
+								if (!empty($info['uri'])) {
+									$tmp = $info['uri'];
+								} else {
+									$tmp = tempnam($tmpdir, 'ELF');
+									if ($dest = fopen($tmp, 'wb')) {
+										if (!stream_copy_to_stream($source, $dest)) {
+											$tmp = false;
+										}
+										fclose($dest);
+									}
+								}
+								$this->close($source, $hash);
+								if ($tmp) {
+									$info = array(
+										'file' => base64_encode($tmp),
+										'name' => $file['name'],
+										'mime' => $file['mime'],
+										'ts'   => $file['ts']
+									);
+									if (file_put_contents($dat, json_encode($info))) {
+										$ret = elFinder::getConnectorUrl() . '?cmd=file&onetime=1&target=' . $token;
+
+									}
+								}
+								if (!$ret) {
+									unlink($dat);
+								}
+							} else {
+								unlink($_dat);
+							}
+						}
+				    }
+				}
+				return $ret;
+			}
 		}
 		if (empty($file['url']) && $this->URL) {
 			$path = str_replace($this->separator, '/', substr($this->decode($hash), strlen(rtrim($this->root, '/'.$this->separator)) + 1));
