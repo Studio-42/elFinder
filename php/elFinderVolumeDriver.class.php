@@ -2402,7 +2402,7 @@ abstract class elFinderVolumeDriver {
 			$source = $this->decode($src);
 			// do not copy into itself
 			if ($this->inpathCE($destination, $source)) {
-				return $this->setError(elFinder::ERROR_COPY_INTO_ITSELF, $errpath);
+				return $this->setError(elFinder::ERROR_COPY_ITSELF, $errpath);
 			}
 			$rmDir = false;
 			if ($rmSrc) {
