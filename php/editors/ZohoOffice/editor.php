@@ -50,7 +50,7 @@ class elFinderEditorZohoOffice extends elFinderEditor
                 $cookie = $this->elfinder->getFetchCookieFile();
                 $save = false;
                 $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, elFinder::getConnectorUrl().'?cmd=editor&name=ZohoOffice&method=chk&args[target]='.rawurlencode($hash).$cdata);
+                curl_setopt($ch, CURLOPT_URL, elFinder::getConnectorUrl() . '?cmd=editor&name=ZohoOffice&method=chk&args[target]=' . rawurlencode($hash) . $cdata);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                 if ($cookie) {
                     curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie);
@@ -77,7 +77,7 @@ class elFinderEditorZohoOffice extends elFinderEditor
                             $cfile->setPostFilename($file['name']);
                             $cfile->setMimeType($file['mime']);
                         } else {
-                            $cfile = '@'.$srcFile;
+                            $cfile = '@' . $srcFile;
                         }
                     }
                 }
@@ -101,7 +101,7 @@ class elFinderEditorZohoOffice extends elFinderEditor
                     'lang' => $lang
                 );
                 if ($save) {
-                    $data['saveurl'] = elFinder::getConnectorUrl().'?cmd=editor&name=ZohoOffice&method=save'.$cdata;
+                    $data['saveurl'] = elFinder::getConnectorUrl() . '?cmd=editor&name=ZohoOffice&method=save' . $cdata;
                 }
                 if ($cfile) {
                     $data['content'] = $cfile;
@@ -146,7 +146,7 @@ class elFinderEditorZohoOffice extends elFinderEditor
 
     public function save()
     {
-        if (isset($_POST) && ! empty($_POST['id'])) {
+        if (isset($_POST) && !empty($_POST['id'])) {
             $hash = $_POST['id'];
             if ($volume = $this->elfinder->getVolume($hash)) {
                 $content = file_get_contents($_FILES['content']['tmp_name']);

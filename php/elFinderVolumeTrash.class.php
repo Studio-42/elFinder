@@ -1,4 +1,5 @@
 <?php
+
 /**
  * elFinder driver for trash bin at local filesystem.
  *
