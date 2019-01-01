@@ -117,9 +117,9 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
      *
      * @param string $path
      *
-     * @return object Dropbox metadata
+     * @return boolean|object Dropbox metadata
      */
-    private function _db_getFile($path, $fields = '')
+    private function _db_getFile($path)
     {
         if ($path === '/') {
             return true;
@@ -141,7 +141,7 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
     /**
      * Parse line from Dropbox metadata output and return file stat (array).
      *
-     * @param string $raw line from ftp_rawlist() output
+     * @param object $raw line from ftp_rawlist() output
      *
      * @return array
      *
@@ -219,8 +219,8 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
     /**
      * Join dir name and file name(display name) and retur full path.
      *
-     * @param unknown $dir
-     * @param unknown $displayName
+     * @param string $dir
+     * @param string $displayName
      *
      * @return string
      */
@@ -312,7 +312,7 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
                 $aToken = [];
             }
 
-            $rootObj = $service = null;
+            $service = null;
             if ($aToken) {
                 try {
                     $dropbox->setAccessToken($aToken['access_token']);
@@ -553,7 +553,9 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
      * Configure after successfull mount.
      *
      * @author Naoki Sawada
-     **/
+     *
+     * @throws elFinderAbortException
+     */
     protected function configure()
     {
         parent::configure();
@@ -583,9 +585,11 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
      * Cache dir contents.
      *
      * @param string $path dir path
+     * @return
      *
      * @author Naoki Sawada
-     **/
+     *
+     */
     protected function cacheDir($path)
     {
         $this->dirsCache[$path] = [];
@@ -619,14 +623,15 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
     /**
      * Recursive files search.
      *
-     * @param string $path  dir path
-     * @param string $q     search string
-     * @param array  $mimes
+     * @param string $path dir path
+     * @param string $q search string
+     * @param array $mimes
      *
      * @return array
      *
+     * @throws elFinderAbortException
      * @author Naoki Sawada
-     **/
+     */
     protected function doSearch($path, $q, $mimes)
     {
         if (!empty($this->doSearchCurrentQuery['matchMethod']) || $mimes) {
@@ -666,14 +671,15 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
      * Copy file/recursive copy dir only in current volume.
      * Return new file path or false.
      *
-     * @param string $src  source path
-     * @param string $dst  destination dir path
+     * @param string $src source path
+     * @param string $dst destination dir path
      * @param string $name new file name (optionaly)
      *
      * @return string|false
      *
+     * @throws elFinderAbortException
      * @author Naoki Sawada
-     **/
+     */
     protected function copy($src, $dst, $name)
     {
         $srcStat = $this->stat($src);
@@ -698,13 +704,14 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
     /**
      * Remove file/ recursive remove dir.
      *
-     * @param string $path  file path
-     * @param bool   $force try to remove even if file locked
-     *
+     * @param string $path file path
+     * @param bool $force try to remove even if file locked
+     * @param bool $recursive
      * @return bool
      *
+     * @throws elFinderAbortException
      * @author Naoki Sawada
-     **/
+     */
     protected function remove($path, $force = false, $recursive = false)
     {
         $stat = $this->stat($path);
@@ -739,12 +746,13 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
      * Create thumnbnail and return it's URL on success.
      *
      * @param string $path file path
-     * @param string $mime file mime type
-     *
+     * @param $stat
      * @return string|false
+     * @throws ImagickException
+     * @throws elFinderAbortException
      *
      * @author Naoki Sawada
-     **/
+     */
     protected function createTmb($path, $stat)
     {
         if (!$stat || !$this->canCreateTmb($path, $stat)) {
@@ -762,13 +770,13 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
             return false;
         }
 
-        $result = false;
-
         $tmbSize = $this->tmbSize;
 
         if (($s = getimagesize($tmb)) == false) {
             return false;
         }
+
+        $result = true;
 
         /* If image smaller or equal thumbnail size - just fitting to thumbnail square */
         if ($s[0] <= $tmbSize && $s[1] <= $tmbSize) {
@@ -781,7 +789,7 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
                     $result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, false, 'png');
                 }
 
-                if (($s = getimagesize($tmb)) != false) {
+                if ($result && ($s = getimagesize($tmb)) != false) {
                     $x = $s[0] > $tmbSize ? intval(($s[0] - $tmbSize) / 2) : 0;
                     $y = $s[1] > $tmbSize ? intval(($s[1] - $tmbSize) / 2) : 0;
                     $result = $this->imgCrop($tmb, $tmbSize, $tmbSize, $x, $y, 'png');
@@ -790,7 +798,10 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
                 $result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, true, 'png');
             }
 
-            $result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png');
+            if ($result) {
+                $result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png');
+
+            }
         }
 
         if (!$result) {
@@ -1096,9 +1107,11 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
      * @param string $mime file mime type
      *
      * @return string
+     * @throws ImagickException
+     * @throws elFinderAbortException
      *
      * @author Naoki Sawada
-     **/
+     */
     protected function _dimensions($path, $mime)
     {
         if (strpos($mime, 'image') !== 0) {

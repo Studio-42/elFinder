@@ -14,6 +14,20 @@ class elFinderEditor
     protected $allowed = array();
 
     /**
+     * elFinder instance
+     *
+     * @var object elFinder instance
+     */
+    protected $elfinder;
+
+    /**
+     * Arguments
+     *
+     * @var array argValues
+     */
+    protected $args;
+
+    /**
      * Constructor.
      *
      * @param object $elfinder

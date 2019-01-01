@@ -144,11 +144,12 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      * Obtains a new access token from OAuth. This token is valid for one hour.
      *
      * @param string $clientSecret The Box client secret
-     * @param string $code         The code returned by Box after
+     * @param string $code The code returned by Box after
      *                             successful log in
-     * @param string $redirectUri  Must be the same as the redirect URI passed
+     * @param string $redirectUri Must be the same as the redirect URI passed
      *                             to LoginUrl
      *
+     * @return bool|object
      * @throws \Exception Thrown if this Client instance's clientId is not set
      * @throws \Exception Thrown if the redirect URI of this Client instance's
      *                    state is not set
@@ -200,6 +201,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      * Get token and auto refresh.
      *
      * @return true|string error message
+     * @throws Exception
      */
     protected function _bd_refreshToken()
     {
@@ -283,9 +285,10 @@ class elFinderVolumeBox extends elFinderVolumeDriver
     /**
      * Creates a base cURL object which is compatible with the Box.com API.
      *
-     * @param string $path The path of the API call (eg. /folders/0)
-     *
-     * @return resource A compatible cURL object
+     * @param $url
+     * @param bool $contents
+     * @return boolean|array
+     * @throws Exception
      */
     protected function _bd_fetch($url, $contents = false)
     {
@@ -363,7 +366,6 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         // make catch
         if ($decodeOrParent && $decodeOrParent !== true) {
             $raws = null;
-            list(, $parentId) = $this->_bd_splitPath($decodeOrParent);
             if (isset($decoded->entries)) {
                 $raws = $decoded->entries;
             } elseif (isset($decoded->id)) {
@@ -386,9 +388,11 @@ class elFinderVolumeBox extends elFinderVolumeDriver
     /**
      * Drive query and fetchAll.
      *
-     * @param string $sql
-     *
-     * @return bool|array
+     * @param $itemId
+     * @param bool $fetch_self
+     * @param bool $recursive
+     * @return bool|object
+     * @throws Exception
      */
     protected function _bd_query($itemId, $fetch_self = false, $recursive = false)
     {
@@ -432,7 +436,8 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      *
      * @param string $path
      *
-     * @return array box metadata
+     * @return object box metadata
+     * @throws Exception
      */
     protected function _bd_getRawItem($path)
     {
@@ -445,14 +450,15 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         try {
             return $this->_bd_query($itemId, $fetch_self = true);
         } catch (Exception $e) {
-            return array();
+            $empty = new stdClass;
+            return $empty;
         }
     }
 
     /**
      * Parse line from box metadata output and return file stat (array).
      *
-     * @param string $raw line from ftp_rawlist() output
+     * @param object $raw line from ftp_rawlist() output
      *
      * @return array
      *
@@ -716,8 +722,8 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      * process of on netunmount
      * Drop `box` & rm thumbs.
      *
-     * @param array $options
-     *
+     * @param $netVolumes
+     * @param $key
      * @return bool
      */
     public function netunmount($netVolumes, $key)
@@ -756,9 +762,10 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      *
      * @return bool
      *
+     * @throws Exception
      * @author Dmitry (dio) Levashov
      * @author Cem (DiscoFever)
-     **/
+     */
     protected function init()
     {
         if (!$this->options['accessToken']) {
@@ -828,7 +835,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      * Configure after successfull mount.
      *
      * @author Dmitry (dio) Levashov
-     **/
+     *
+     * @throws elFinderAbortException
+     */
     protected function configure()
     {
         parent::configure();
@@ -859,11 +868,12 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      *
      * @param string $path file cache
      *
-     * @return array
+     * @return array|boolean
+     * @throws elFinderAbortException
      */
     protected function isNameExists($path)
     {
-        list($pid, $name, $parent) = $this->_bd_splitPath($path);
+        list(, $name, $parent) = $this->_bd_splitPath($path);
 
         // We can not use it because the search of Box.com there is a time lag.
         // ref. https://docs.box.com/reference#searching-for-content
@@ -901,8 +911,10 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      *
      * @param string $path dir path
      *
+     * @return
+     * @throws Exception
      * @author Dmitry Levashov
-     **/
+     */
     protected function cacheDir($path)
     {
         $this->dirsCache[$path] = array();
@@ -965,14 +977,15 @@ class elFinderVolumeBox extends elFinderVolumeDriver
     /**
      * Remove file/ recursive remove dir.
      *
-     * @param string $path  file path
-     * @param bool   $force try to remove even if file locked
+     * @param string $path file path
+     * @param bool $force try to remove even if file locked
      *
      * @return bool
      *
+     * @throws elFinderAbortException
      * @author Dmitry (dio) Levashov
      * @author Naoki Sawada
-     **/
+     */
     protected function remove($path, $force = false)
     {
         $stat = $this->stat($path);
@@ -1007,13 +1020,14 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      * Create thumnbnail and return it's URL on success.
      *
      * @param string $path file path
-     * @param string $mime file mime type
-
+     * @param $stat
      * @return string|false
      *
+     * @throws ImagickException
+     * @throws elFinderAbortException
      * @author Dmitry (dio) Levashov
      * @author Naoki Sawada
-     **/
+     */
     protected function createTmb($path, $stat)
     {
         if (!$stat || !$this->canCreateTmb($path, $stat)) {
@@ -1034,14 +1048,13 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             return false;
         }
 
-        $result = false;
-
         $tmbSize = $this->tmbSize;
 
         if (($s = getimagesize($tmb)) == false) {
             return false;
         }
 
+        $result = true;
         /* If image smaller or equal thumbnail size - just fitting to thumbnail square */
         if ($s[0] <= $tmbSize && $s[1] <= $tmbSize) {
             $result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png');
@@ -1053,7 +1066,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                     $result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, false, 'png');
                 }
 
-                if (($s = getimagesize($tmb)) != false) {
+                if ($result && ($s = getimagesize($tmb)) != false) {
                     $x = $s[0] > $tmbSize ? intval(($s[0] - $tmbSize) / 2) : 0;
                     $y = $s[1] > $tmbSize ? intval(($s[1] - $tmbSize) / 2) : 0;
                     $result = $this->imgCrop($tmb, $tmbSize, $tmbSize, $x, $y, 'png');
@@ -1062,7 +1075,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 $result = $this->imgResize($tmb, $tmbSize, $tmbSize, true, true, 'png');
             }
 
-            $result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png');
+            if ($result) {
+                $result = $this->imgSquareFit($tmb, $tmbSize, $tmbSize, 'center', 'middle', $this->options['tmbBgColor'], 'png');
+            }
         }
 
         if (!$result) {
@@ -1091,9 +1106,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
     /**
      * Return content URL.
      *
-     * @param array $raw data
+     * @param object $raw data
      *
-     * @return array
+     * @return string
      *
      * @author Naoki Sawada
      **/
@@ -1130,13 +1145,14 @@ class elFinderVolumeBox extends elFinderVolumeDriver
     /**
      * Return content URL.
      *
-     * @param string $hash    file hash
-     * @param array  $options options
+     * @param string $hash file hash
+     * @param array $options options
      *
      * @return string
      *
+     * @throws Exception
      * @author Naoki Sawada
-     **/
+     */
     public function getContentUrl($hash, $options = array())
     {
         if (! empty($options['onetime']) && $this->options['onetimeUrl']) {
@@ -1324,8 +1340,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      *
      * @return array|false
      *
+     * @throws Exception
      * @author Dmitry (dio) Levashov
-     **/
+     */
     protected function _stat($path)
     {
         if ($raw = $this->_bd_getRawItem($path)) {
@@ -1342,8 +1359,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      *
      * @return bool
      *
+     * @throws Exception
      * @author Dmitry (dio) Levashov
-     **/
+     */
     protected function _subdirs($path)
     {
         list(, $itemId) = $this->_bd_splitPath($path);
@@ -1370,8 +1388,10 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      *
      * @return string
      *
+     * @throws ImagickException
+     * @throws elFinderAbortException
      * @author Dmitry (dio) Levashov
-     **/
+     */
     protected function _dimensions($path, $mime)
     {
         if (strpos($mime, 'image') !== 0) {
@@ -1404,9 +1424,10 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      *
      * @return array
      *
+     * @throws Exception
      * @author Dmitry (dio) Levashov
      * @author Cem (DiscoFever)
-     **/
+     */
     protected function _scandir($path)
     {
         return isset($this->dirsCache[$path])
@@ -1417,13 +1438,12 @@ class elFinderVolumeBox extends elFinderVolumeDriver
     /**
      * Open file and return file pointer.
      *
-     * @param string $path  file path
-     * @param bool   $write open file for writing
-     *
+     * @param string $path file path
+     * @param string $mode
      * @return resource|false
      *
      * @author Dmitry (dio) Levashov
-     **/
+     */
     protected function _fopen($path, $mode = 'rb')
     {
         if ($mode === 'rb' || $mode === 'r') {
@@ -1444,10 +1464,11 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      *
      * @param resource $fp file pointer
      *
-     * @return bool
+     * @param string $path
+     * @return void
      *
      * @author Dmitry (dio) Levashov
-     **/
+     */
     protected function _fclose($fp, $path = '')
     {
         fclose($fp);
@@ -1537,7 +1558,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         try {
             //Set the Parent id
             list(, $parentId) = $this->_bd_splitPath($targetDir);
-            list($srcPid, $srcId) = $this->_bd_splitPath($source);
+            list(, $srcId) = $this->_bd_splitPath($source);
 
             $srcItem = $this->_bd_getRawItem($source);
 
@@ -1732,8 +1753,6 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      **/
     protected function _getContents($path)
     {
-        $contents = '';
-
         try {
             list(, $itemId) = $this->_bd_splitPath($path);
             $url = self::API_URL.'/files/'.$itemId.'/content';
@@ -1790,37 +1809,6 @@ class elFinderVolumeBox extends elFinderVolumeDriver
     protected function _chmod($path, $mode)
     {
         return false;
-    }
-
-    /**
-     * Unpack archive.
-     *
-     * @param string $path archive path
-     * @param array  $arc  archiver command and arguments (same as in $this->archivers)
-     *
-     * @return true
-     *
-     * @author Dmitry (dio) Levashov
-     * @author Alexey Sukhotin
-     **/
-    protected function _unpack($path, $arc)
-    {
-        die('Not yet implemented. (_unpack)');
-        //return false;
-    }
-
-    /**
-     * Recursive symlinks search.
-     *
-     * @param string $path file/dir path
-     *
-     * @return bool
-     *
-     * @author Dmitry (dio) Levashov
-     **/
-    protected function _findSymlinks($path)
-    {
-        die('Not yet implemented. (_findSymlinks)');
     }
 
     /**
