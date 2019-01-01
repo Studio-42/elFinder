@@ -28,7 +28,7 @@ class elFinderEditorOnlineConvert extends elFinderEditor
         $string_method = '';
         $options = array();
         // Currently these converts are make error with API call. I don't know why.
-        $nonApi = array('android','blackberry','dpg','ipad','iphone','ipod','nintendo-3ds','nintendo-ds','ps3','psp','wii','xbox');
+        $nonApi = array('android', 'blackberry', 'dpg', 'ipad', 'iphone', 'ipod', 'nintendo-3ds', 'nintendo-ds', 'ps3', 'psp', 'wii', 'xbox');
         if (in_array($convert, $nonApi)) {
             return array('apires' => array());
         }
@@ -88,17 +88,17 @@ class elFinderEditorOnlineConvert extends elFinderEditor
         if ($ch) {
             $response = curl_exec($ch);
             $info = curl_getinfo($ch);
-            $error =  curl_error($ch);
+            $error = curl_error($ch);
             curl_close($ch);
 
-            if (! empty($error)) {
+            if (!empty($error)) {
                 $res = array('error' => $error);
             } else {
                 $data = json_decode($response, true);
                 if (isset($data['status']) && isset($data['status']['code']) && $data['status']['code'] === 'completed') {
                     $session = $this->elfinder->getSession();
                     $urlContentSaveIds = $session->get('urlContentSaveIds', array());
-                    $urlContentSaveIds['OnlineConvert-'.$data['id']] = true;
+                    $urlContentSaveIds['OnlineConvert-' . $data['id']] = true;
                     $session->set('urlContentSaveIds', $urlContentSaveIds);
                 }
                 $res = array('apires' => $data);
