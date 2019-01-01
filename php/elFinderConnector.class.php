@@ -16,7 +16,7 @@ class elFinderConnector {
 	/**
 	 * Options
 	 *
-	 * @var aray
+	 * @var array
 	 **/
 	protected $options = array();
 	
@@ -62,8 +62,9 @@ class elFinderConnector {
 	 * Execute elFinder command and output result
 	 *
 	 * @return void
+	 * @throws Exception
 	 * @author Dmitry (dio) Levashov
-	 **/
+	 */
 	public function run() {
 		$isPost = $this->reqMethod === 'POST';
 		$src    = $isPost ? array_merge($_GET, $_POST) : $_GET;
@@ -97,7 +98,6 @@ class elFinderConnector {
 		}
 		
 		if (isset($src['targets']) && $this->elFinder->maxTargets && count($src['targets']) > $this->elFinder->maxTargets) {
-			$error = $this->elFinder->error(elFinder::ERROR_MAX_TARGTES);
 			$this->output(array('error' => $this->elFinder->error(elFinder::ERROR_MAX_TARGTES)));
 		}
 		
@@ -171,8 +171,9 @@ class elFinderConnector {
 	 *
 	 * @param  array  data to output
 	 * @return void
+	 * @throws elFinderAbortException
 	 * @author Dmitry (dio) Levashov
-	 **/
+	 */
 	protected function output(array $data) {
 		// unlock session data for multiple access
 		$this->elFinder->getSession()->close();
@@ -198,14 +199,13 @@ class elFinderConnector {
 			$toEnd = true;
 			$fp = $data['pointer'];
 			$sendData = !($this->reqMethod === 'HEAD' || !empty($data['info']['xsendfile']));
+			$psize = null;
 			if (($this->reqMethod === 'GET' || !$sendData)
 					&& elFinder::isSeekableStream($fp)
 					&& (array_search('Accept-Ranges: none', headers_list()) === false)) {
 				header('Accept-Ranges: bytes');
-				$psize = null;
 				if (!empty($_SERVER['HTTP_RANGE'])) {
 					$size = $data['info']['size'];
-					$start = 0;
 					$end = $size - 1;
 					if (preg_match('/bytes=(\d*)-(\d*)(,?)/i', $_SERVER['HTTP_RANGE'], $matches)) {
 						if (empty($matches[3])) {

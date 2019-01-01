@@ -241,7 +241,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     /**
      * Parse line from googledrive metadata output and return file stat (array).
      *
-     * @param string $raw line from ftp_rawlist() output
+     * @param array $raw line from ftp_rawlist() output
      *
      * @return array
      *
@@ -312,7 +312,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     /**
      * Make cache of $parents, $names and $directories.
      *
-     * @param string $usecache
+     * @param bool $usecache
      */
     protected function _gd_getDirectoryData($usecache = true)
     {
@@ -393,7 +393,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     /**
      * Get ID based path from item ID.
      *
-     * @param string $path
+     * @param string $id
+     * @return array
      */
     protected function _gd_getMountPaths($id)
     {
@@ -499,8 +500,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      * Get thumbnail from GoogleDrive.com.
      *
      * @param string $path
-     * @param string $size
-     *
      * @return string | boolean
      */
     protected function _gd_getThumbnail($path)
@@ -798,8 +797,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      * process of on netunmount
      * Drop `googledrive` & rm thumbs.
      *
-     * @param array $options
-     *
+     * @param $netVolumes
+     * @param $key
      * @return bool
      */
     public function netunmount($netVolumes, $key)
@@ -1044,8 +1043,11 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      *
      * @param string $path dir path
      *
+     * @return array
+     *
      * @author Dmitry Levashov
-     **/
+     *
+     */
     protected function cacheDir($path)
     {
         $this->dirsCache[$path] = [];
@@ -1086,14 +1088,15 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     /**
      * Recursive files search.
      *
-     * @param string $path  dir path
-     * @param string $q     search string
-     * @param array  $mimes
+     * @param string $path dir path
+     * @param string $q search string
+     * @param array $mimes
      *
      * @return array
      *
+     * @throws elFinderAbortException
      * @author Naoki Sawada
-     **/
+     */
     protected function doSearch($path, $q, $mimes)
     {
         if (!empty($this->doSearchCurrentQuery['matchMethod'])) {
@@ -1212,14 +1215,16 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     /**
      * Remove file/ recursive remove dir.
      *
-     * @param string $path  file path
-     * @param bool   $force try to remove even if file locked
+     * @param string $path file path
+     * @param bool $force try to remove even if file locked
      *
+     * @param bool $recursive
      * @return bool
      *
+     * @throws elFinderAbortException
      * @author Dmitry (dio) Levashov
      * @author Naoki Sawada
-     **/
+     */
     protected function remove($path, $force = false, $recursive = false)
     {
         $stat = $this->stat($path);
@@ -1254,13 +1259,14 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      * Create thumnbnail and return it's URL on success.
      *
      * @param string $path file path
-     * @param string $mime file mime type
-     *
+     * @param $stat
      * @return string|false
      *
+     * @throws ImagickException
+     * @throws elFinderAbortException
      * @author Dmitry (dio) Levashov
      * @author Naoki Sawada
-     **/
+     */
     protected function createTmb($path, $stat)
     {
         if (!$stat || !$this->canCreateTmb($path, $stat)) {
@@ -1581,8 +1587,10 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      *
      * @return string
      *
+     * @throws ImagickException
+     * @throws elFinderAbortException
      * @author Dmitry (dio) Levashov
-     **/
+     */
     protected function _dimensions($path, $mime)
     {
         if (strpos($mime, 'image') !== 0) {
@@ -1886,15 +1894,15 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      * Create new file and write into it from file pointer.
      * Return new file path or false on error.
      *
-     * @param resource $fp   file pointer
-     * @param string   $dir  target dir path
-     * @param string   $name file name
-     * @param array    $stat file stat (required by some virtual fs)
+     * @param resource $fp file pointer
+     * @param $path
+     * @param string $name file name
+     * @param array $stat file stat (required by some virtual fs)
      *
      * @return bool|string
      *
      * @author Dmitry (dio) Levashov
-     **/
+     */
     protected function _save($fp, $path, $name, $stat)
     {
         if ($name !== '') {
@@ -2092,13 +2100,13 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      * Unpack archive.
      *
      * @param string $path archive path
-     * @param array  $arc  archiver command and arguments (same as in $this->archivers)
+     * @param array $arc archiver command and arguments (same as in $this->archivers)
      *
-     * @return true
+     * @return void
      *
      * @author Dmitry (dio) Levashov
      * @author Alexey Sukhotin
-     **/
+     */
     protected function _unpack($path, $arc)
     {
         die('Not yet implemented. (_unpack)');
@@ -2106,30 +2114,16 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     }
 
     /**
-     * Recursive symlinks search.
-     *
-     * @param string $path file/dir path
-     *
-     * @return bool
-     *
-     * @author Dmitry (dio) Levashov
-     **/
-    protected function _findSymlinks($path)
-    {
-        die('Not yet implemented. (_findSymlinks)');
-    }
-
-    /**
      * Extract files from archive.
      *
      * @param string $path archive path
-     * @param array  $arc  archiver command and arguments (same as in $this->archivers)
+     * @param array $arc archiver command and arguments (same as in $this->archivers)
      *
-     * @return true
+     * @return void
      *
      * @author Dmitry (dio) Levashov,
      * @author Alexey Sukhotin
-     **/
+     */
     protected function _extract($path, $arc)
     {
         die('Not yet implemented. (_extract)');

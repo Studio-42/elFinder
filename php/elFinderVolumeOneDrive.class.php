@@ -118,14 +118,12 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     /**
      * Obtains a new access token from OAuth. This token is valid for one hour.
      *
-     * @param string $clientSecret The OneDrive client secret
-     * @param string $code         The code returned by OneDrive after
+     * @param $client_id
+     * @param $client_secret
+     * @param string $code The code returned by OneDrive after
      *                             successful log in
-     * @param string $redirectUri  Must be the same as the redirect URI passed
-     *                             to LoginUrl
-     *
-     * @throws \Exception Thrown if this Client instance's clientId is not set
-     * @throws \Exception Thrown if the redirect URI of this Client instance's
+     * @return object|string
+     * @throws Exception Thrown if the redirect URI of this Client instance's
      *                    state is not set
      */
     protected function _od_obtainAccessToken($client_id, $client_secret, $code)
@@ -193,6 +191,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      * Get token and auto refresh.
      *
      * @return true|Exception
+     * @throws Exception
      */
     protected function _od_refreshToken()
     {
@@ -324,7 +323,9 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      *
      * @param string $path The path of the API call (eg. me/skydrive)
      *
+     * @param bool $contents
      * @return resource A compatible cURL object
+     * @throws elFinderAbortException
      */
     protected function _od_createCurl($path, $contents = false)
     {
@@ -357,9 +358,12 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     /**
      * Drive query and fetchAll.
      *
-     * @param string $sql
-     *
+     * @param $itemId
+     * @param bool $fetch_self
+     * @param bool $recursive
+     * @param array $options
      * @return object|array
+     * @throws elFinderAbortException
      */
     protected function _od_query($itemId, $fetch_self = false, $recursive = false, $options = array())
     {
@@ -399,7 +403,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     /**
      * Parse line from onedrive metadata output and return file stat (array).
      *
-     * @param string $raw line from ftp_rawlist() output
+     * @param object $raw line from ftp_rawlist() output
      *
      * @return array
      *
@@ -472,8 +476,6 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      * Get thumbnail from OneDrive.com.
      *
      * @param string $path
-     * @param string $size
-     *
      * @return string | boolean
      */
     protected function _od_getThumbnail($path)
@@ -860,9 +862,10 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      *
      * @return bool
      *
+     * @throws elFinderAbortException
      * @author Dmitry (dio) Levashov
      * @author Cem (DiscoFever)
-     **/
+     */
     protected function init()
     {
         if (!$this->options['accessToken']) {
@@ -982,8 +985,10 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      *
      * @param string $path dir path
      *
+     * @return array
+     * @throws elFinderAbortException
      * @author Dmitry Levashov
-     **/
+     */
     protected function cacheDir($path)
     {
         $this->dirsCache[$path] = array();
@@ -1019,15 +1024,16 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      * Copy file/recursive copy dir only in current volume.
      * Return new file path or false.
      *
-     * @param string $src  source path
-     * @param string $dst  destination dir path
+     * @param string $src source path
+     * @param string $dst destination dir path
      * @param string $name new file name (optionaly)
      *
      * @return string|false
      *
+     * @throws elFinderAbortException
      * @author Dmitry (dio) Levashov
      * @author Naoki Sawada
-     **/
+     */
     protected function copy($src, $dst, $name)
     {
         $itemId = '';
@@ -1050,14 +1056,15 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     /**
      * Remove file/ recursive remove dir.
      *
-     * @param string $path  file path
-     * @param bool   $force try to remove even if file locked
+     * @param string $path file path
+     * @param bool $force try to remove even if file locked
      *
      * @return bool
      *
+     * @throws elFinderAbortException
      * @author Dmitry (dio) Levashov
      * @author Naoki Sawada
-     **/
+     */
     protected function remove($path, $force = false)
     {
         $stat = $this->stat($path);
@@ -1092,13 +1099,14 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      * Create thumnbnail and return it's URL on success.
      *
      * @param string $path file path
-     * @param string $mime file mime type
-
+     * @param $stat
      * @return string|false
      *
+     * @throws ImagickException
+     * @throws elFinderAbortException
      * @author Dmitry (dio) Levashov
      * @author Naoki Sawada
-     **/
+     */
     protected function createTmb($path, $stat)
     {
         if ($this->options['useApiThumbnail']) {
@@ -1418,8 +1426,9 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      *
      * @return bool
      *
+     * @throws elFinderAbortException
      * @author Dmitry (dio) Levashov
-     **/
+     */
     protected function _subdirs($path)
     {
         list(, $itemId) = $this->_od_splitPath($path);
@@ -1442,8 +1451,9 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      *
      * @return string
      *
+     * @throws elFinderAbortException
      * @author Dmitry (dio) Levashov
-     **/
+     */
     protected function _dimensions($path, $mime)
     {
         if (strpos($mime, 'image') !== 0) {
@@ -1514,9 +1524,10 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      *
      * @return array
      *
+     * @throws elFinderAbortException
      * @author Dmitry (dio) Levashov
      * @author Cem (DiscoFever)
-     **/
+     */
     protected function _scandir($path)
     {
         return isset($this->dirsCache[$path])
@@ -1731,13 +1742,13 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      * Return new file path or false.
      *
      * @param string $source source file path
-     * @param string $target target dir path
-     * @param string $name   file name
+     * @param $targetDir
+     * @param string $name file name
      *
      * @return string|bool
      *
      * @author Dmitry (dio) Levashov
-     **/
+     */
     protected function _move($source, $targetDir, $name)
     {
         try {
@@ -1825,15 +1836,15 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      * Create new file and write into it from file pointer.
      * Return new file path or false on error.
      *
-     * @param resource $fp   file pointer
-     * @param string   $dir  target dir path
-     * @param string   $name file name
-     * @param array    $stat file stat (required by some virtual fs)
+     * @param resource $fp file pointer
+     * @param $path
+     * @param string $name file name
+     * @param array $stat file stat (required by some virtual fs)
      *
      * @return bool|string
      *
      * @author Dmitry (dio) Levashov
-     **/
+     */
     protected function _save($fp, $path, $name, $stat)
     {
         $itemId = '';
@@ -1971,13 +1982,13 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      * Unpack archive.
      *
      * @param string $path archive path
-     * @param array  $arc  archiver command and arguments (same as in $this->archivers)
+     * @param array $arc archiver command and arguments (same as in $this->archivers)
      *
-     * @return true
+     * @return void
      *
      * @author Dmitry (dio) Levashov
      * @author Alexey Sukhotin
-     **/
+     */
     protected function _unpack($path, $arc)
     {
         die('Not yet implemented. (_unpack)');
@@ -1985,30 +1996,16 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     }
 
     /**
-     * Recursive symlinks search.
-     *
-     * @param string $path file/dir path
-     *
-     * @return bool
-     *
-     * @author Dmitry (dio) Levashov
-     **/
-    protected function _findSymlinks($path)
-    {
-        die('Not yet implemented. (_findSymlinks)');
-    }
-
-    /**
      * Extract files from archive.
      *
      * @param string $path archive path
-     * @param array  $arc  archiver command and arguments (same as in $this->archivers)
+     * @param array $arc archiver command and arguments (same as in $this->archivers)
      *
-     * @return true
+     * @return void
      *
      * @author Dmitry (dio) Levashov,
      * @author Alexey Sukhotin
-     **/
+     */
     protected function _extract($path, $arc)
     {
         die('Not yet implemented. (_extract)');

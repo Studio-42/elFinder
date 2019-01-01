@@ -20,7 +20,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	/**
 	 * FTP Connection Instance
 	 *
-	 * @var ftp
+	 * @var resource a FTP stream
 	 **/
 	protected $connect = null;
 	
@@ -124,7 +124,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * Call from elFinder::netmout() before volume->mount()
 	 *
 	 * @param $options
-	 * @return Array
+	 * @return array volume root options
 	 * @author Naoki Sawada
 	 */
 	public function netmountPrepare($options) {
@@ -213,8 +213,9 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * Configure after successfull mount.
 	 *
 	 * @return void
+	 * @throws elFinderAbortException
 	 * @author Dmitry (dio) Levashov
-	 **/
+	 */
 	protected function configure() {
 		parent::configure();
 		
@@ -437,7 +438,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		}
 
 		$owner_computed  = isset($stat['isowner'])? $stat['isowner'] : $this->options['owner'] ;
- 		$perm = $this->parsePermissions($info[0], $owner_computed );
+		$perm = $this->parsePermissions($info[0], $owner_computed );
 		$stat['name']  = $name;
 		$stat['mime']  = substr(strtolower($info[0]), 0, 1) == 'd' ? 'directory' : $this->mimetype($stat['name'], true);
 		$stat['size']  = $stat['mime'] == 'directory' ? 0 : $info[4];
@@ -558,8 +559,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 				if (isset($tstat['ts']))      { $stat['ts']      = $tstat['ts']; }
 				if (isset($tstat['owner']))   { $stat['owner']   = $tstat['owner']; }
 				if (isset($tstat['group']))   { $stat['group']   = $tstat['group']; }
- 				if (isset($tstat['perm']))    { $stat['perm']    = $tstat['perm']; }
- 				if (isset($tstat['isowner'])) { $stat['isowner'] = $tstat['isowner']; }
+				if (isset($tstat['perm']))    { $stat['perm']    = $tstat['perm']; }
+				if (isset($tstat['isowner'])) { $stat['isowner'] = $tstat['isowner']; }
 			} else {
 				
 				$stat['mime']  = 'symlink-broken';
@@ -989,16 +990,18 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Return object width and height
 	 * Ususaly used for images, but can be realize for video etc...
 	 *
-	 * @param  string  $path  file path
-	 * @param  string  $mime  file mime type
+	 * @param  string $path file path
+	 * @param  string $mime file mime type
 	 * @return string|false
+	 * @throws ImagickException
+	 * @throws elFinderAbortException
 	 * @author Dmitry (dio) Levashov
-	 **/
+	 */
 	protected function _dimensions($path, $mime) {
 		$ret = false;
 		if ($imgsize = $this->getImageSize($path, $mime)) {
@@ -1023,13 +1026,13 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	protected function _scandir($path) {
 		$files = array();
 
- 		foreach ($this->ftpRawList($path) as $str) {
- 			if (($stat = $this->parseRaw($str, $path, true))) {
- 				$files[] = $this->_joinPath($path, $stat['name']);
- 			}
- 		}
+		foreach ($this->ftpRawList($path) as $str) {
+			if (($stat = $this->parseRaw($str, $path, true))) {
+				$files[] = $this->_joinPath($path, $stat['name']);
+			}
+		}
 
- 		return $files;
+		return $files;
 	}
 
 	/**
@@ -1038,6 +1041,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * @param  string $path file path
 	 * @param string $mode
 	 * @return false|resource
+	 * @throws elFinderAbortException
 	 * @internal param bool $write open file for writing
 	 * @author Dmitry (dio) Levashov
 	 */
@@ -1081,7 +1085,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 *
 	 * @param  resource $fp file pointer
 	 * @param string $path
-	 * @return bool
+	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function _fclose($fp, $path='') {
@@ -1224,14 +1228,15 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 			? $path
 			: false;
 	}
-	
+
 	/**
 	 * Get file contents
 	 *
-	 * @param  string  $path  file path
+	 * @param  string $path file path
 	 * @return string|false
+	 * @throws elFinderAbortException
 	 * @author Dmitry (dio) Levashov
-	 **/
+	 */
 	protected function _getContents($path) {
 		$contents = '';
 		if (($fp = $this->_fopen($path))) {
@@ -1278,7 +1283,8 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * Detect available archivers
 	 *
 	 * @return void
-	 **/
+	 * @throws elFinderAbortException
+	 */
 	protected function _checkArchivers() {
 		$this->archivers = $this->getArchivers();
 		return;
@@ -1297,25 +1303,15 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	}
 
 	/**
-	 * Recursive symlinks search
-	 *
-	 * @param  string  $path  file/dir path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _findSymlinks($path) {
-		die('Not yet implemented. (_findSymlinks)');
-	}
-
-	/**
 	 * Extract files from archive
 	 *
-	 * @param  string  $path  archive path
-	 * @param  array   $arc   archiver command and arguments (same as in $this->archivers)
+	 * @param  string $path archive path
+	 * @param  array $arc archiver command and arguments (same as in $this->archivers)
 	 * @return true
+	 * @throws elFinderAbortException
 	 * @author Dmitry (dio) Levashov,
 	 * @author Alexey Sukhotin
-	 **/
+	 */
 	protected function _extract($path, $arc)
 	{
 		$dir = $this->tempDir();
@@ -1462,14 +1458,15 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	/**
 	 * Create archive and return its path
 	 *
-	 * @param  string  $dir    target dir
-	 * @param  array   $files  files names list
-	 * @param  string  $name   archive name
-	 * @param  array   $arc    archiver options
+	 * @param  string $dir target dir
+	 * @param  array $files files names list
+	 * @param  string $name archive name
+	 * @param  array $arc archiver options
 	 * @return string|bool
+	 * @throws elFinderAbortException
 	 * @author Dmitry (dio) Levashov,
 	 * @author Alexey Sukhotin
-	 **/
+	 */
 	protected function _archive($dir, $files, $name, $arc)
 	{
 		// get current directory
@@ -1623,6 +1620,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver {
 	 * Delete local directory recursively.
 	 * @param $dirPath string to directory to be erased.
 	 * @return bool true on success and false on failure.
+	 * @throws Exception
 	 */
 	private function deleteDir($dirPath)
 	{

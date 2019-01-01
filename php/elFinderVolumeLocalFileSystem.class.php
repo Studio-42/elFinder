@@ -4,19 +4,20 @@
 // http://php.net/manual/class.recursivecallbackfilteriterator.php#110974
 if (! class_exists('RecursiveCallbackFilterIterator', false)) {
 	class RecursiveCallbackFilterIterator extends RecursiveFilterIterator {
+		private $callback;
+
+		public function __construct ( RecursiveIterator $iterator, $callback ) {
+			$this->callback = $callback;
+			parent::__construct($iterator);
+		}
 	   
-	    public function __construct ( RecursiveIterator $iterator, $callback ) {
-	        $this->callback = $callback;
-	        parent::__construct($iterator);
-	    }
+		public function accept () {
+			return call_user_func($this->callback, parent::current(), parent::key(), parent::getInnerIterator());
+		}
 	   
-	    public function accept () {
-	        return call_user_func($this->callback, parent::current(), parent::key(), parent::getInnerIterator());
-	    }
-	   
-	    public function getChildren () {
-	        return new self($this->getInnerIterator()->getChildren(), $this->callback);
-	    }
+		public function getChildren () {
+			return new self($this->getInnerIterator()->getChildren(), $this->callback);
+		}
 	}
 }
 
@@ -50,6 +51,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * @var        boolean
 	 */
 	protected $statOwner = false;
+
+	/**
+	 * Path to quarantine directory
+	 *
+	 * @var string
+	 */
+	private $quarantine;
 
 	/**
 	 * Constructor
@@ -125,13 +133,14 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 
 		return true;
 	}
-	
+
 	/**
 	 * Configure after successfull mount.
 	 *
 	 * @return void
+	 * @throws elFinderAbortException
 	 * @author Dmitry (dio) Levashov
-	 **/
+	 */
 	protected function configure() {
 		$root = $this->stat($this->root);
 		
@@ -208,16 +217,17 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 
 		$this->statOwner = (!empty($this->options['statOwner']));
 	}
-	
+
 	/**
 	 * Long pooling sync checker
 	 * This function require server command `inotifywait`
 	 * If `inotifywait` need full path, Please add `define('ELFINER_INOTIFYWAIT_PATH', '/PATH_TO/inotifywait');` into connector.php
-	 * 
-	 * @param string     $path
-	 * @param int        $standby
-	 * @param number     $compare
+	 *
+	 * @param string $path
+	 * @param int $standby
+	 * @param number $compare
 	 * @return number|bool
+	 * @throws elFinderAbortException
 	 */
 	public function localFileSystemInotify($path, $standby, $compare) {
 		if (isset($this->sessionCache['localFileSystemInotify_disable'])) {
@@ -252,7 +262,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		// error
 		// cache to $_SESSION
 		$this->sessionCache['localFileSystemInotify_disable'] = true;
-		$this->session->set($this->id, $this->sessionCache, true);
+		$this->session->set($this->id, $this->sessionCache);
 		return false;
 	}
 	
@@ -464,7 +474,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			return $stat;
 		}
 
-		$gid = $uid = 0;
 		$stat['isowner'] = false;
 		$linkreadable = false;
 		if ($path != $this->root && is_link($path)) {
@@ -663,14 +672,15 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 		
 		return $target;
 	}
-		
+
 	/**
 	 * Return files list in directory.
 	 *
-	 * @param  string  $path  dir path
+	 * @param  string $path dir path
 	 * @return array
+	 * @throws elFinderAbortException
 	 * @author Dmitry (dio) Levashov
-	 **/
+	 */
 	protected function _scandir($path) {
 		elFinder::checkAborted();
 		$files = array();
@@ -691,7 +701,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 				$br = false;
 				$stat = array();
 				
-				$gid = $uid = 0;
 				$stat['isowner'] = false;
 				$linkreadable = false;
 				if ($file->isLink()) {
@@ -971,7 +980,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * Detect available archivers
 	 *
 	 * @return void
-	 **/
+	 * @throws elFinderAbortException
+	 */
 	protected function _checkArchivers() {
 		$this->archivers = $this->getArchivers();
 		return;
@@ -992,10 +1002,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	/**
 	 * Recursive symlinks search
 	 *
-	 * @param  string  $path  file/dir path
+	 * @param  string $path file/dir path
 	 * @return bool
+	 * @throws Exception
 	 * @author Dmitry (dio) Levashov
-	 **/
+	 */
 	protected function _findSymlinks($path) {
 		return self::localFindSymlinks($path);
 	}
@@ -1003,12 +1014,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	/**
 	 * Extract files from archive
 	 *
-	 * @param  string  $path  archive path
-	 * @param  array   $arc   archiver command and arguments (same as in $this->archivers)
-	 * @return true
-	 * @author Dmitry (dio) Levashov, 
+	 * @param  string $path archive path
+	 * @param  array $arc archiver command and arguments (same as in $this->archivers)
+	 * @return array|string|boolean
+	 * @throws elFinderAbortException
+	 * @author Dmitry (dio) Levashov,
 	 * @author Alexey Sukhotin
-	 **/
+	 */
 	protected function _extract($path, $arc) {
 		
 		if ($this->quarantine) {
@@ -1034,8 +1046,12 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			$this->unpackArchive($path, $arc, $archive? true : $dir);
 			
 			// get files list
-			$ls = self::localScandir($dir);
-			
+			try {
+				$ls = self::localScandir($dir);
+			} catch (Exception $e) {
+				return false;
+			}
+
 			// no files - extract error ?
 			if (empty($ls)) {
 				return false;
@@ -1107,20 +1123,22 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 			
 			return (is_array($result) || file_exists($result)) ? $result : false;
 		}
-	    //TODO: Add return statement here
+		//TODO: Add return statement here
+		return false;
 	}
-	
+
 	/**
 	 * Create archive and return its path
 	 *
-	 * @param  string  $dir    target dir
-	 * @param  array   $files  files names list
-	 * @param  string  $name   archive name
-	 * @param  array   $arc    archiver options
+	 * @param  string $dir target dir
+	 * @param  array $files files names list
+	 * @param  string $name archive name
+	 * @param  array $arc archiver options
 	 * @return string|bool
-	 * @author Dmitry (dio) Levashov, 
+	 * @throws elFinderAbortException
+	 * @author Dmitry (dio) Levashov,
 	 * @author Alexey Sukhotin
-	 **/
+	 */
 	protected function _archive($dir, $files, $name, $arc) {
 		return $this->makeArchive($dir, $files, $name, $arc);
 	}
@@ -1143,6 +1161,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 *
 	 * @param string $localpath path need convert encoding to server encoding
 	 * @return boolean
+	 * @throws elFinderAbortException
 	 * @author Naoki Sawada
 	 */
 	protected function delTree($localpath) {
@@ -1155,7 +1174,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 * Please override if needed on each drivers
 	 *
 	 * @param  string  $path  file cache
-	 * @return array
+	 * @return array|boolean false
 	 */
 	protected function isNameExists($path) {
 		$exists = file_exists($this->convEncIn($path));
@@ -1169,13 +1188,14 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	/**
 	 * Recursive files search
 	 *
-	 * @param  string  $path   dir path
-	 * @param  string  $q      search string
-	 * @param  array   $mimes
+	 * @param  string $path dir path
+	 * @param  string $q search string
+	 * @param  array $mimes
 	 * @return array
+	 * @throws elFinderAbortException
 	 * @author Dmitry (dio) Levashov
 	 * @author Naoki Sawada
-	 **/
+	 */
 	protected function doSearch($path, $q, $mimes) {
 		if (!empty($this->doSearchCurrentQuery['matchMethod']) || $this->encoding || ! class_exists('FilesystemIterator', false)) {
 			// has custom match method or non UTF-8, use elFinderVolumeDriver::doSearch()
@@ -1238,8 +1258,6 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 					continue;
 				}
 					
-				$name = $stat['name'];
-		
 				if ((!$mimes || $stat['mime'] !== 'directory')) {
 					$stat['path'] = $this->path($stat['hash']);
 					if ($this->URL && !isset($stat['url'])) {
@@ -1263,6 +1281,8 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver {
 	 */
 
 	public function localFileSystemSearchIteratorFilter($file, $key, $iterator) {
+		/* @var FilesystemIterator $file */
+		/* @var RecursiveDirectoryIterator $iterator */
 		$name = $file->getFilename();
 		if ($this->doSearchCurrentQuery['excludes']) {
 			foreach($this->doSearchCurrentQuery['excludes'] as $exclude) {
