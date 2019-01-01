@@ -11,3 +11,4 @@ connector-svn.php
 node_modules
 connector.php
 .jshintrc
+.idea

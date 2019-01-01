@@ -135,13 +135,13 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	}
 
 
-
 	/**
 	 * Set tmp path
 	 *
 	 * @return void
+	 * @throws elFinderAbortException
 	 * @author Dmitry (dio) Levashov
-	 **/
+	 */
 	protected function configure() {
 		parent::configure();
 
@@ -195,10 +195,10 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 * Perform sql query and return result.
 	 * Increase sqlCnt and save error if occured
 	 *
-	 * @param  string  $sql  query
-	 * @return misc
+	 * @param  string $sql query
+	 * @return bool|mysqli_result
 	 * @author Dmitry (dio) Levashov
-	 **/
+	 */
 	protected function query($sql) {
 		$this->sqlCnt++;
 		$res = $this->db->query($sql);
@@ -315,12 +315,13 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	/**
 	 * Recursive files search
 	 *
-	 * @param  string  $path   dir path
-	 * @param  string  $q      search string
-	 * @param  array   $mimes
+	 * @param  string $path dir path
+	 * @param  string $q search string
+	 * @param  array $mimes
 	 * @return array
+	 * @throws elFinderAbortException
 	 * @author Dmitry (dio) Levashov
-	 **/
+	 */
 	protected function doSearch($path, $q, $mimes) {
 		if (!empty($this->doSearchCurrentQuery['matchMethod'])) {
 			// has custom match method use elFinderVolumeDriver::doSearch()
@@ -648,7 +649,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 *
 	 * @param  resource $fp file pointer
 	 * @param string $path
-	 * @return bool
+	 * @return void
 	 * @author Dmitry (dio) Levashov
 	 */
 	protected function _fclose($fp, $path='') {
@@ -894,17 +895,6 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver {
 	 **/
 	protected function _unpack($path, $arc) {
 		return;
-	}
-
-	/**
-	 * Recursive symlinks search
-	 *
-	 * @param  string  $path  file/dir path
-	 * @return bool
-	 * @author Dmitry (dio) Levashov
-	 **/
-	protected function _findSymlinks($path) {
-		return false;
 	}
 
 	/**

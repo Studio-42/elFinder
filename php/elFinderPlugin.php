@@ -35,8 +35,9 @@ class elFinderPlugin {
 	
 	/**
 	 * Is enabled with options
-	 * 
+	 *
 	 * @param array $opts
+	 * @param elFinder $elfinder
 	 * @return boolean
 	 */
 	protected function iaEnabled($opts, $elfinder = null) {
