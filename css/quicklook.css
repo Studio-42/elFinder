@@ -411,7 +411,7 @@
     height: 100%;
     background: #fff;
     color: #222;
-    font-size: 1.5ex;
+    font-size: 90%;
     overflow: auto;
     -webkit-overflow-scrolling: touch
 }
