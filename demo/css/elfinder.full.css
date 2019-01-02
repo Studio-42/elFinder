@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.44 (2.1-src Nightly: c6743de) (2019-01-01)
+ * Version 2.1.44 (2.1-src Nightly: ef90959) (2019-01-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -4248,7 +4248,7 @@ button.elfinder-info-button {
     height: 100%;
     background: #fff;
     color: #222;
-    font-size: 1.5ex;
+    font-size: 90%;
     overflow: auto;
     -webkit-overflow-scrolling: touch
 }
