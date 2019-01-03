@@ -501,7 +501,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver
      *                                             If the owner parameter is false to understand if the user is the file owner we compare the ftp user with the file owner id.
      * @param Boolean $isowner                     . Tell if the current user is the owner of the object.
      *
-     * @return string
+     * @return array
      * @author Dmitry (dio) Levashov
      * @author Ugo Vierucci
      */
