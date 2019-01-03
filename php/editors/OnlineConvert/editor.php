@@ -96,6 +96,7 @@ class elFinderEditorOnlineConvert extends elFinderEditor
             } else {
                 $data = json_decode($response, true);
                 if (isset($data['status']) && isset($data['status']['code']) && $data['status']['code'] === 'completed') {
+                    /** @var elFinderSession $session */
                     $session = $this->elfinder->getSession();
                     $urlContentSaveIds = $session->get('urlContentSaveIds', array());
                     $urlContentSaveIds['OnlineConvert-' . $data['id']] = true;
