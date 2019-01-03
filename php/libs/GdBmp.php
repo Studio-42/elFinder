@@ -198,6 +198,18 @@ class elFinderLibGdBmp
                 "Vclr_used/" .
                 "Vclr_important", $buf
             ));
+            /**
+             * @var integer $width
+             * @var integer $height
+             * @var integer $planes
+             * @var integer $bit_count
+             * @var integer $compression
+             * @var integer $size_image
+             * @var integer $x_pels_per_meter
+             * @var integer $y_pels_per_meter
+             * @var integer $clr_used
+             * @var integer $clr_important
+             */
             //負の整数を受け取る可能性があるものは自前で変換する
             if ($width & 0x80000000) {
                 $width = -(~$width & 0xffffffff) - 1;
@@ -317,6 +329,12 @@ class elFinderLibGdBmp
                     return false;
                 }
                 extract(unpack("Cb/Cg/Cr/Cx", $buf . "\x00"));
+                /**
+                 * @var integer $b
+                 * @var integer $g
+                 * @var integer $r
+                 * @var integer $x
+                 */
                 $palette[] = imagecolorallocate($img, $r, $g, $b);
             }
 

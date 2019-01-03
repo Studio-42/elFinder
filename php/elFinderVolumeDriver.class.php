@@ -5639,6 +5639,16 @@ abstract class elFinderVolumeDriver
 
             case 'convert':
                 extract($this->imageMagickConvertPrepare($path, $destformat, $jpgQuality, $s));
+                /**
+                 * @var string $ani
+                 * @var string $index
+                 * @var string $coalesce
+                 * @var string $deconstruct
+                 * @var string $jpgQuality
+                 * @var string $quotedPath
+                 * @var string $quotedDstPath
+                 * @var string $interlace
+                 */
                 $filter = ($destformat === 'png' /* createTmb */) ? '-filter Box' : '-filter Lanczos';
                 $strip = (isset($options['preserveExif']) && !$options['preserveExif']) ? ' -strip' : '';
                 $cmd = sprintf('%s %s%s%s%s%s %s -geometry %dx%d! %s %s', ELFINDER_CONVERT_PATH, $quotedPath, $coalesce, $jpgQuality, $strip, $interlace, $filter, $size_w, $size_h, $deconstruct, $quotedDstPath);
@@ -5753,6 +5763,16 @@ abstract class elFinderVolumeDriver
 
             case 'convert':
                 extract($this->imageMagickConvertPrepare($path, $destformat, $jpgQuality, $s));
+                /**
+                 * @var string $ani
+                 * @var string $index
+                 * @var string $coalesce
+                 * @var string $deconstruct
+                 * @var string $jpgQuality
+                 * @var string $quotedPath
+                 * @var string $quotedDstPath
+                 * @var string $interlace
+                 */
                 $cmd = sprintf('%s %s%s%s%s -crop %dx%d+%d+%d%s %s', ELFINDER_CONVERT_PATH, $quotedPath, $coalesce, $jpgQuality, $interlace, $width, $height, $x, $y, $deconstruct, $quotedDstPath);
 
                 $result = false;
@@ -5892,6 +5912,16 @@ abstract class elFinderVolumeDriver
 
             case 'convert':
                 extract($this->imageMagickConvertPrepare($path, $destformat, $jpgQuality, $s));
+                /**
+                 * @var string $ani
+                 * @var string $index
+                 * @var string $coalesce
+                 * @var string $deconstruct
+                 * @var string $jpgQuality
+                 * @var string $quotedPath
+                 * @var string $quotedDstPath
+                 * @var string $interlace
+                 */
                 if ($bgcolor === 'transparent') {
                     $bgcolor = 'rgba(255, 255, 255, 0.0)';
                 }
@@ -6022,6 +6052,16 @@ abstract class elFinderVolumeDriver
 
             case 'convert':
                 extract($this->imageMagickConvertPrepare($path, $destformat, $jpgQuality, $s));
+                /**
+                 * @var string $ani
+                 * @var string $index
+                 * @var string $coalesce
+                 * @var string $deconstruct
+                 * @var string $jpgQuality
+                 * @var string $quotedPath
+                 * @var string $quotedDstPath
+                 * @var string $interlace
+                 */
                 if ($s[2] === IMAGETYPE_GIF || $s[2] === IMAGETYPE_PNG) {
                     $bgcolor = 'rgba(255, 255, 255, 0.0)';
                 }
