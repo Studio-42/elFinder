@@ -509,6 +509,11 @@ elFinder.prototype._options = {
 					// Theme object
 					theme : {}
 				},
+				// Pixo image editor constructor options - https://pixoeditor.com/
+				// Require 'apikey' to enable it
+				pixo: {
+					apikey: ''
+				},
 				// Specify the Creative Cloud API key when using Creative SDK image editor of Creative Cloud.
 				// You can get the API key at https://console.adobe.io/.
 				creativeCloudApiKey : '',
