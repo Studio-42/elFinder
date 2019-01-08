@@ -92,10 +92,15 @@
 				spnr = $('<div class="elfinder-edit-spinner elfinder-edit-image"/>')
 					.html('<span class="elfinder-spinner-text">' + fm.i18n('ntfloadimg') + '</span><span class="elfinder-spinner"/>')
 					.hide()
-					.appendTo(this);
+					.appendTo(this),
+				url;
 			
+			if (!content.match(/^data:/)) {
+				url = fm.openUrl(file.hash);
+				node.attr('_src', content);
+			}
 			node.attr('id', id+'-img')
-				.attr('src', content)
+				.attr('src', url || content)
 				.css({'height':'', 'max-width':'100%', 'max-height':'100%', 'cursor':'pointer'})
 				.data('loading', function(done) {
 					var btns = node.closest('.elfinder-dialog').find('button,.elfinder-titlebar-button');
@@ -223,7 +228,7 @@
 					src += '&exit='+encodeURIComponent(myurl+'&image=0');
 					src += '&target='+encodeURIComponent(myurl);
 					src += '&title='+encodeURIComponent(file.name);
-					src += '&image='+encodeURIComponent(node.attr('src'));
+					src += '&image='+encodeURIComponent(node.attr('_src'));
 					
 					opts.src = src;
 					opts.css = {
@@ -677,7 +682,7 @@
 				name : 'Photopea',
 				iconImg : 'img/editor-icons.png 0 -160',
 				single: true,
-				urlAsContent: true,
+				noContent: true,
 				arrayBufferContent: true,
 				openMaximized: true,
 				canMakeEmpty: true,
