@@ -2,7 +2,7 @@
  * Polski translation
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2018-11-16
+ * @version 2018-12-29
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;',
 		language   : 'Polski',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i', // will show like: 16.11.2018 11:13
-		fancyDateFormat : '$1 H:i', // will show like: Dzisiaj 11:13
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 181116-111302
+		dateFormat : 'd.m.Y H:i', // will show like: 29.12.2018 19:25
+		fancyDateFormat : '$1 H:i', // will show like: Dzisiaj 19:25
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 181229-192530
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -115,6 +115,7 @@
 			'errEditorNotFound'    : 'Nie znaleziono edytora tego typu pliku.', // from v2.1.25 added 23.5.2017
 			'errServerError'       : 'Wystąpił błąd po stronie serwera .', // from v2.1.25 added 16.6.2017
 			'errEmpty'             : 'Nie można do pustego folderu "$1".', // from v2.1.25 added 22.6.2017
+			'moreErrors'           : 'Jest jeszcze $1 błąd/błędy.', // from v2.1.44 added 9.12.2018
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Utwórz archiwum',
@@ -486,6 +487,7 @@
 			'author'          : 'Autor', // from v2.1.43 added 19.10.2018
 			'email'           : 'E-mail', // from v2.1.43 added 19.10.2018
 			'license'         : 'Licencja', // from v2.1.43 added 19.10.2018
+			'exportToSave'    : 'Tego elementu nie można zapisać. Aby uniknąć utraty zmian, musisz wyeksportować go na swój komputer.', // from v2.1.44 added 1.12.2018
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',
@@ -571,4 +573,3 @@
 		}
 	};
 }));
-
