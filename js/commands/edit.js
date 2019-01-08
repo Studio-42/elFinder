@@ -628,10 +628,10 @@ elFinder.prototype.commands.edit = function() {
 					return dfrd;
 				}
 
-				if (editor.info.urlAsContent || editor.info.preventGet) {
+				if (editor.info.urlAsContent || editor.info.preventGet || editor.info.noContent) {
 					req = $.Deferred();
-					if (! editor.info.preventGet) {
-						fm.url(hash, { async: true, temporary: true }).done(function(url) {
+					if (editor.info.urlAsContent) {
+						fm.url(hash, { async: true, onetime: true, temporary: true }).done(function(url) {
 							req.resolve({content: url});
 						});
 					} else {
