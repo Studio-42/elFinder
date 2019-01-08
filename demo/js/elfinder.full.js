@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.44 (2.1-src Nightly: e85eb5b) (2019-01-03)
+ * Version 2.1.44 (2.1-src Nightly: 2edbb9b) (2019-01-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10060,7 +10060,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.44 (2.1-src Nightly: e85eb5b)';
+elFinder.prototype.version = '2.1.44 (2.1-src Nightly: 2edbb9b)';
 
 
 
@@ -10985,6 +10985,11 @@ elFinder.prototype._options = {
 					iconsPath : void(0), // default is "./img/tui-"
 					// Theme object
 					theme : {}
+				},
+				// Pixo image editor constructor options - https://pixoeditor.com/
+				// Require 'apikey' to enable it
+				pixo: {
+					apikey: ''
 				},
 				// Specify the Creative Cloud API key when using Creative SDK image editor of Creative Cloud.
 				// You can get the API key at https://console.adobe.io/.
@@ -14460,6 +14465,11 @@ $.fn.elfindercwd = function(fm, options) {
 			colWidth = null,
 
 			/**
+			 * Table header height
+			 */
+			thHeight,
+
+			/**
 			 * File templates
 			 *
 			 * @type Object
@@ -14933,17 +14943,21 @@ $.fn.elfindercwd = function(fm, options) {
 			 * @return void
 			 */
 			wrapperRepaint = function(init, recnt) {
-				var firstNode = (list? cwd.find('tbody:first') : cwd).children('[id]:first');
+				if (!bufferExt.renderd) {
+					return;
+				}
+				var firstNode = (list? cwd.find('tbody:first') : cwd).children('[id]'+(options.oldSchool? ':not(.elfinder-cwd-parent)' : '')+':first');
 				if (!firstNode.length) {
 					return;
 				}
 				var selectable = cwd.data('selectable'),
 					rec = (function() {
 						var wos = wrapper.offset(),
+							ww = wrapper.width(),
 							w = $(window),
-							x = (firstNode.width() / 2) * (!list && options.oldSchool? 3 : 1),
-							l = wos.left - w.scrollLeft() + (fm.direction === 'ltr'? x : wrapper.width() - x),
-							t = wos.top - w.scrollTop() + 10 + (list? (bufferExt.itemH * (options.oldSchool? 2 : 1)) || (fm.UA.Touch? 36 : 24) : 0);
+							x = firstNode.width() / 2,
+							l = Math.min(wos.left - w.scrollLeft() + (fm.direction === 'ltr'? x : ww - x), wos.left + ww - 10),
+							t = wos.top - w.scrollTop() + 10 + (list? thHeight : 0);
 						return {left: Math.max(0, Math.round(l)), top: Math.max(0, Math.round(t))};
 					})(),
 					tgt = init? firstNode : $(document.elementFromPoint(rec.left , rec.top)),
@@ -15193,7 +15207,6 @@ $.fn.elfindercwd = function(fm, options) {
 								// make files selectable
 								cwd.selectable(selectableOption).data('selectable', true);
 							}
-							wrapperRepaint(true);
 						}
 
 						! scrolling && wrapper.trigger(scrollEvent);
@@ -15220,6 +15233,7 @@ $.fn.elfindercwd = function(fm, options) {
 					bufferExt.itemH = (list? place.find('tr:first') : place.find('[id]:first')).outerHeight(true);
 					fm.trigger('cwdrender');
 					bufferExt.rendering = false;
+					wrapperRepaint(true);
 				}
 				if (! bufferExt.rendering && buffer.length) {
 					// next go()
@@ -15245,6 +15259,7 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			// To fixed table header colmun
 			fixTableHeader = function(optsArg) {
+				thHeight = 0;
 				if (! options.listView.fixedHeader) {
 					return;
 				}
@@ -15334,6 +15349,7 @@ $.fn.elfindercwd = function(fm, options) {
 							}
 						}));
 					}
+					thHeight = thead.height();
 				}
 			},
 			
@@ -15901,7 +15917,6 @@ $.fn.elfindercwd = function(fm, options) {
 						cwd.html('<table><thead/><tbody/></table>');
 						thtr = $('<tr class="ui-state-default"><td class="elfinder-cwd-view-th-name">'+fm.getColumnName('name')+'</td>'+customColsNameBuild()+'</tr>');
 						cwd.find('thead').hide().append(thtr).find('td:first').append(selectAllCheckbox);
-
 						if ($.fn.sortable) {
 							thtr.addClass('touch-punch touch-punch-keep-default')
 								.sortable({
