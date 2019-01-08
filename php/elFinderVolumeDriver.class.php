@@ -3199,7 +3199,7 @@ abstract class elFinderVolumeDriver
             return $this->URL . $path;
         } else {
             $ret = false;
-            if ($file['url'] && $file['url'] != 1) {
+            if (!empty($file['url']) && $file['url'] != 1) {
                 return $file['url'];
             } else if (!empty($options['temporary']) && ($tempInfo = $this->getTempLinkInfo('temp_' . md5($hash . session_id())))) {
                 if ($source = $this->open($hash)) {
