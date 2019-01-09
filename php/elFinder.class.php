@@ -2395,8 +2395,11 @@ class elFinder
      **/
     protected function get_remote_contents(&$url, $timeout = 30, $redirect_max = 5, $ua = 'Mozilla/5.0', $fp = null)
     {
-        $method = (function_exists('curl_exec') && !ini_get('safe_mode') && !ini_get('open_basedir')) ? 'curl_get_contents' : 'fsock_get_contents';
-        return $this->$method($url, $timeout, $redirect_max, $ua, $fp);
+        if (preg_match('~^(?:ht|f)tps?://[-_.!\~*\'()a-z0-9;/?:\@&=+\$,%#\*]+~i', $url)) {
+            $method = (function_exists('curl_exec') && !ini_get('safe_mode') && !ini_get('open_basedir')) ? 'curl_get_contents' : 'fsock_get_contents';
+            return $this->$method($url, $timeout, $redirect_max, $ua, $fp);
+        }
+        return false;
     }
 
     /**
@@ -3037,19 +3040,20 @@ class elFinder
                         list($data, $args['name'][$i]) = $this->parse_data_scheme($url, $extTable, $args);
                     } else {
                         $fp = fopen($tmpfname, 'wb');
-                        $data = $this->get_remote_contents($url, 30, 5, 'Mozilla/5.0', $fp);
-                        // to check connection is aborted
-                        elFinder::checkAborted();
-                        $_name = preg_replace('~^.*?([^/#?]+)(?:\?.*)?(?:#.*)?$~', '$1', rawurldecode($url));
-                        // Check `Content-Disposition` response header
-                        if ($data && ($headers = get_headers($url, true)) && !empty($headers['Content-Disposition'])) {
-                            if (preg_match('/filename\*=(?:([a-zA-Z0-9_-]+?)\'\')"?([a-z0-9_.~%-]+)"?/i', $headers['Content-Disposition'], $m)) {
-                                $_name = rawurldecode($m[2]);
-                                if ($m[1] && strtoupper($m[1]) !== 'UTF-8' && function_exists('mb_convert_encoding')) {
-                                    $_name = mb_convert_encoding($_name, 'UTF-8', $m[1]);
+                        if ($data = $this->get_remote_contents($url, 30, 5, 'Mozilla/5.0', $fp)) {
+                            // to check connection is aborted
+                            elFinder::checkAborted();
+                            $_name = preg_replace('~^.*?([^/#?]+)(?:\?.*)?(?:#.*)?$~', '$1', rawurldecode($url));
+                            // Check `Content-Disposition` response header
+                            if ($data && ($headers = get_headers($url, true)) && !empty($headers['Content-Disposition'])) {
+                                if (preg_match('/filename\*=(?:([a-zA-Z0-9_-]+?)\'\')"?([a-z0-9_.~%-]+)"?/i', $headers['Content-Disposition'], $m)) {
+                                    $_name = rawurldecode($m[2]);
+                                    if ($m[1] && strtoupper($m[1]) !== 'UTF-8' && function_exists('mb_convert_encoding')) {
+                                        $_name = mb_convert_encoding($_name, 'UTF-8', $m[1]);
+                                    }
+                                } else if (preg_match('/filename="?([ a-z0-9_.~%-]+)"?/i', $headers['Content-Disposition'], $m)) {
+                                    $_name = rawurldecode($m[1]);
                                 }
-                            } else if (preg_match('/filename="?([ a-z0-9_.~%-]+)"?/i', $headers['Content-Disposition'], $m)) {
-                                $_name = rawurldecode($m[1]);
                             }
                         }
                     }
