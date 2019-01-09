@@ -834,7 +834,7 @@ var elFinder = function(elm, opts, bootCallback) {
 	 **/
 	this.storage = (function() {
 		try {
-			if ('localStorage' in window && window['localStorage'] !== null) {
+			if ('localStorage' in window && window.localStorage !== null) {
 				if (self.UA.Safari) {
 					// check for Mac/iOS safari private browsing mode
 					window.localStorage.setItem('elfstoragecheck', 1);
@@ -888,7 +888,168 @@ var elFinder = function(elm, opts, bootCallback) {
 	// join toolbarExtra to toolbar
 	this.options.uiOptions.toolbar.push(this.options.uiOptions.toolbarExtra);
 	delete this.options.uiOptions.toolbarExtra;
+
+	/**
+	 * Arrays that has to unbind events
+	 * 
+	 * @type Object
+	 */
+	this.toUnbindEvents = {};
 	
+	/**
+	 * Attach listener to events
+	 * To bind to multiply events at once, separate events names by space
+	 * 
+	 * @param  String  event(s) name(s)
+	 * @param  Object  event handler or {done: handler}
+	 * @param  Boolean priority first
+	 * @return elFinder
+	 */
+	this.bind = function(event, callback, priorityFirst) {
+		var i, len;
+		
+		if (callback && (typeof callback === 'function' || typeof callback.done === 'function')) {
+			event = ('' + event).toLowerCase().replace(/^\s+|\s+$/g, '').split(/\s+/);
+			
+			len = event.length;
+			for (i = 0; i < len; i++) {
+				if (listeners[event[i]] === void(0)) {
+					listeners[event[i]] = [];
+				}
+				listeners[event[i]][priorityFirst? 'unshift' : 'push'](callback);
+			}
+		}
+		return this;
+	};
+	
+	/**
+	 * Remove event listener if exists
+	 * To un-bind to multiply events at once, separate events names by space
+	 *
+	 * @param  String    event(s) name(s)
+	 * @param  Function  callback
+	 * @return elFinder
+	 */
+	this.unbind = function(event, callback) {
+		var i, len, l, ci;
+		
+		event = ('' + event).toLowerCase().split(/\s+/);
+		
+		len = event.length;
+		for (i = 0; i < len; i++) {
+			if (l = listeners[event[i]]) {
+				ci = $.inArray(callback, l);
+				ci > -1 && l.splice(ci, 1);
+			}
+		}
+		
+		callback = null;
+		return this;
+	};
+	
+	/**
+	 * Fire event - send notification to all event listeners
+	 * In the callback `this` becames an event object
+	 *
+	 * @param  String   event type
+	 * @param  Object   data to send across event
+	 * @param  Boolean  allow modify data (call by reference of data) default: true
+	 * @return elFinder
+	 */
+	this.trigger = function(evType, data, allowModify) {
+		var type      = evType.toLowerCase(),
+			isopen    = (type === 'open'),
+			dataIsObj = (typeof data === 'object'),
+			handlers  = listeners[type] || [],
+			dones     = [],
+			i, l, jst, event;
+		
+		this.debug('event-'+type, data);
+		
+		if (! dataIsObj || typeof allowModify === 'undefined') {
+			allowModify = true;
+		}
+		if (l = handlers.length) {
+			event = $.Event(type);
+			if (data) {
+				data._event = event;
+			}
+			if (allowModify) {
+				event.data = data;
+			}
+
+			for (i = 0; i < l; i++) {
+				if (! handlers[i]) {
+					// probably un-binded this handler
+					continue;
+				}
+
+				// handler is $.Deferred(), call all functions upon completion
+				if (handlers[i].done) {
+					dones.push(handlers[i].done);
+					continue;
+				}
+				
+				// set `event.data` only callback has argument
+				if (handlers[i].length) {
+					if (!allowModify) {
+						// to avoid data modifications. remember about "sharing" passing arguments in js :) 
+						if (typeof jst === 'undefined') {
+							try {
+								jst = JSON.stringify(data);
+							} catch(e) {
+								jst = false;
+							}
+						}
+						event.data = jst? JSON.parse(jst) : data;
+					}
+				}
+
+				try {
+					if (handlers[i].call(event, event, this) === false || event.isDefaultPrevented()) {
+						this.debug('event-stoped', event.type);
+						break;
+					}
+				} catch (ex) {
+					window.console && window.console.log && window.console.log(ex);
+				}
+				
+			}
+			
+			// call done functions
+			if (l = dones.length) {
+				for (i = 0; i < l; i++) {
+					try {
+						if (dones[i].call(event, event, this) === false || event.isDefaultPrevented()) {
+							this.debug('event-stoped', event.type + '(done)');
+							break;
+						}
+					} catch (ex) {
+						window.console && window.console.log && window.console.log(ex);
+					}
+				}
+			}
+
+			if (this.toUnbindEvents[type] && this.toUnbindEvents[type].length) {
+				$.each(this.toUnbindEvents[type], function(i, v) {
+					self.unbind(v.type, v.callback);
+				});
+				delete this.toUnbindEvents[type];
+			}
+		}
+		return this;
+	};
+	
+	/**
+	 * Get event listeners
+	 *
+	 * @param  String   event type
+	 * @return Array    listed event functions
+	 */
+	this.getListeners = function(event) {
+		return event? listeners[event.toLowerCase()] : listeners;
+	};
+
 	// set fm.baseUrl
 	this.baseUrl = (function() {
 		var myTag, myCss, base, baseUrl;
@@ -933,23 +1094,50 @@ var elFinder = function(elm, opts, bootCallback) {
 	
 	this.i18nBaseUrl = (this.options.i18nBaseUrl || this.baseUrl + 'js/i18n').replace(/\/$/, '') + '/';
 
-	self.options.maxErrorDialogs = Math.max(1, parseInt(self.options.maxErrorDialogs || 5));
+	this.options.maxErrorDialogs = Math.max(1, parseInt(this.options.maxErrorDialogs || 5));
 
 	// set dispInlineRegex
-	cwdOptionsDefault['dispInlineRegex'] = this.options.dispInlineRegex;
+	cwdOptionsDefault.dispInlineRegex = this.options.dispInlineRegex;
 
 	// auto load required CSS
 	if (this.options.cssAutoLoad) {
 		(function() {
 			var baseUrl = self.baseUrl;
 			
+			// additional CSS files
+			if (Array.isArray(self.options.cssAutoLoad)) {
+				if (self.cssloaded === true) {
+					self.loadCss(self.options.cssAutoLoad);
+				} else {
+					self.bind('cssloaded', function() {
+						self.loadCss(self.options.cssAutoLoad);
+					});
+				}
+			}
+
+			// try to load main css
 			if (self.cssloaded === null) {
 				// hide elFinder node while css loading
 				node.data('cssautoloadHide', $('<style>.elfinder{visibility:hidden;overflow:hidden}</style>'));
 				$('head').append(node.data('cssautoloadHide'));
-				
+
+				// set default theme
+				if (!self.options.themes.default) {
+					self.options.themes = Object.assign({
+						'default' : {
+							'name': 'default',
+							'cssurls': 'css/theme.css',
+							'author': 'elFinder Project',
+							'license': '3-clauses BSD'
+						}
+					}, self.options.themes);
+					if (!self.options.theme) {
+						self.options.theme = 'default';
+					}
+				}
+
 				// load CSS
-				self.loadCss([baseUrl+'css/elfinder.min.css', baseUrl+'css/theme.css'], {
+				self.loadCss([baseUrl+'css/elfinder.min.css'], {
 					dfd: $.Deferred().always(function() {
 						if (node.data('cssautoloadHide')) {
 							node.data('cssautoloadHide').remove();
@@ -965,18 +1153,13 @@ var elFinder = function(elm, opts, bootCallback) {
 						self.error(['errRead', 'CSS (elfinder or theme)']);
 					})
 				});
-				
-				// additional CSS files
-				if (Array.isArray(self.options.cssAutoLoad)) {
-					self.loadCss(self.options.cssAutoLoad);
-				}
 			}
 			self.options.cssAutoLoad = false;
 		})();
 	}
 
 	// load theme if exists
-	self.changeTheme(self.storage('theme') || self.options.theme);
+	this.changeTheme(this.storage('theme') || this.options.theme);
 	
 	/**
 	 * Volume option to set the properties of the root Stat
@@ -2785,167 +2968,6 @@ var elFinder = function(elm, opts, bootCallback) {
 	
 	this.upload = function(files) {
 		return this.transport.upload(files, this);
-	};
-	
-	/**
-	 * Arrays that has to unbind events
-	 * 
-	 * @type Object
-	 */
-	this.toUnbindEvents = {};
-	
-	/**
-	 * Attach listener to events
-	 * To bind to multiply events at once, separate events names by space
-	 * 
-	 * @param  String  event(s) name(s)
-	 * @param  Object  event handler or {done: handler}
-	 * @param  Boolean priority first
-	 * @return elFinder
-	 */
-	this.bind = function(event, callback, priorityFirst) {
-		var i, len;
-		
-		if (callback && (typeof callback === 'function' || typeof callback.done === 'function')) {
-			event = ('' + event).toLowerCase().replace(/^\s+|\s+$/g, '').split(/\s+/);
-			
-			len = event.length;
-			for (i = 0; i < len; i++) {
-				if (listeners[event[i]] === void(0)) {
-					listeners[event[i]] = [];
-				}
-				listeners[event[i]][priorityFirst? 'unshift' : 'push'](callback);
-			}
-		}
-		return this;
-	};
-	
-	/**
-	 * Remove event listener if exists
-	 * To un-bind to multiply events at once, separate events names by space
-	 *
-	 * @param  String    event(s) name(s)
-	 * @param  Function  callback
-	 * @return elFinder
-	 */
-	this.unbind = function(event, callback) {
-		var i, len, l, ci;
-		
-		event = ('' + event).toLowerCase().split(/\s+/);
-		
-		len = event.length;
-		for (i = 0; i < len; i++) {
-			if (l = listeners[event[i]]) {
-				ci = $.inArray(callback, l);
-				ci > -1 && l.splice(ci, 1);
-			}
-		}
-		
-		callback = null;
-		return this;
-	};
-	
-	/**
-	 * Fire event - send notification to all event listeners
-	 * In the callback `this` becames an event object
-	 *
-	 * @param  String   event type
-	 * @param  Object   data to send across event
-	 * @param  Boolean  allow modify data (call by reference of data) default: true
-	 * @return elFinder
-	 */
-	this.trigger = function(evType, data, allowModify) {
-		var type      = evType.toLowerCase(),
-			isopen    = (type === 'open'),
-			dataIsObj = (typeof data === 'object'),
-			handlers  = listeners[type] || [],
-			dones     = [],
-			i, l, jst, event;
-		
-		this.debug('event-'+type, data);
-		
-		if (! dataIsObj || typeof allowModify === 'undefined') {
-			allowModify = true;
-		}
-		if (l = handlers.length) {
-			event = $.Event(type);
-			if (data) {
-				data._event = event;
-			}
-			if (allowModify) {
-				event.data = data;
-			}
-
-			for (i = 0; i < l; i++) {
-				if (! handlers[i]) {
-					// probably un-binded this handler
-					continue;
-				}
-
-				// handler is $.Deferred(), call all functions upon completion
-				if (handlers[i].done) {
-					dones.push(handlers[i].done);
-					continue;
-				}
-				
-				// set `event.data` only callback has argument
-				if (handlers[i].length) {
-					if (!allowModify) {
-						// to avoid data modifications. remember about "sharing" passing arguments in js :) 
-						if (typeof jst === 'undefined') {
-							try {
-								jst = JSON.stringify(data);
-							} catch(e) {
-								jst = false;
-							}
-						}
-						event.data = jst? JSON.parse(jst) : data;
-					}
-				}
-
-				try {
-					if (handlers[i].call(event, event, this) === false || event.isDefaultPrevented()) {
-						this.debug('event-stoped', event.type);
-						break;
-					}
-				} catch (ex) {
-					window.console && window.console.log && window.console.log(ex);
-				}
-				
-			}
-			
-			// call done functions
-			if (l = dones.length) {
-				for (i = 0; i < l; i++) {
-					try {
-						if (dones[i].call(event, event, this) === false || event.isDefaultPrevented()) {
-							this.debug('event-stoped', event.type + '(done)');
-							break;
-						}
-					} catch (ex) {
-						window.console && window.console.log && window.console.log(ex);
-					}
-				}
-			}
-
-			if (this.toUnbindEvents[type] && this.toUnbindEvents[type].length) {
-				$.each(this.toUnbindEvents[type], function(i, v) {
-					self.unbind(v.type, v.callback);
-				});
-				delete this.toUnbindEvents[type];
-			}
-		}
-		return this;
-	};
-	
-	/**
-	 * Get event listeners
-	 *
-	 * @param  String   event type
-	 * @return Array    listed event functions
-	 */
-	this.getListeners = function(event) {
-		return event? listeners[event.toLowerCase()] : listeners;
 	};
 	
 	/**
@@ -9612,12 +9634,15 @@ elFinder.prototype = {
 		var self = this,
 			dfd = $.Deferred(),
 			absUrl = function(url, base) {
+				if (!base) {
+					base = self.convAbsUrl(self.baseUrl);
+				}
 				if (Array.isArray(url)) {
 					return $.map(url, function(v) {
 						return absUrl(v, base);
 					});
 				} else {
-					return url.match(/^(?:http|\/\/)/i)? url : (base || self.baseUrl) + url.replace(/^(?:\.\/|\/)/, '');
+					return url.match(/^(?:http|\/\/)/i)? url : base + url.replace(/^(?:\.\/|\/)/, '');
 				}
 			},
 			themeObj, m;

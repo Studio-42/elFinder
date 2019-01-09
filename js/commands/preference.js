@@ -90,7 +90,8 @@ elFinder.prototype.commands.preference = function() {
 			})());
 			
 			forms.theme && (forms.theme = (function() {
-				if (!fm.options.themes || !Object.keys(fm.options.themes).length) {
+				var cnt = fm.options.themes? Object.keys(fm.options.themes).length : 0;
+				if (cnt === 0 || (cnt === 1 && fm.options.themes.default)) {
 					return null;
 				}
 				var themeSel = $('<select/>').on('change', function() {
@@ -110,11 +111,13 @@ elFinder.prototype.commands.preference = function() {
 						themeSel.val('default').trigger('change');
 					}),
 					list = $('<div class="elfinder-reference-hide-taball"/>').on('click', 'button', function() {
-							var val = $(this).data('themeid')
+							var val = $(this).data('themeid');
 							themeSel.val(val).trigger('change');
 					});
 
-				themeSel.append('<option value="default">'+fm.i18n('default')+'</option>');
+				if (!fm.options.themes.default) {
+					themeSel.append('<option value="default">'+fm.i18n('default')+'</option>');
+				}
 				$.each(fm.options.themes, function(id, val) {
 					var opt = $('<option class="elfinder-theme-option-'+id+'" value="'+id+'">'+fm.i18n(id)+'</option>'),
 						dsc = $('<fieldset class="ui-widget ui-widget-content ui-corner-all elfinder-theme-list-'+id+'"><legend>'+fm.i18n(id)+'</legend><div><span class="elfinder-spinner"/></div></fieldset>'),
