@@ -1,3 +1,17 @@
+2019-01-09  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.45):
+
+		- [js] Fixed #2802 broken handling of jQuery `#` selector
+		- [cmd:upload] Fixed #2807 correction of event handling of buttons
+		- [api:url] Fixed #2808 supports onetime url for the external service
+		- [VD:abstract] typo Fixed #2809 undefined ERROR_COPY_INTO_ITSELF
+		- [cwd] Fixed problem of thumbnail attaching on mobile devices
+		- [cmd:edit:editors.default] Fixed #2815 add Pixo editor integration
+		- [cmd:edit] To support onetime URL to get content URL
+		- [php:core:security] Fixed information leakage vulnerability
+
+
 2018-12-15  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.44):
