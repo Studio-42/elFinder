@@ -9,7 +9,7 @@
 		- [cwd] Fixed problem of thumbnail attaching on mobile devices
 		- [cmd:edit:editors.default] Fixed #2815 add Pixo editor integration
 		- [cmd:edit] To support onetime URL to get content URL
-		- [php:core:security] Fixed information leakage vulnerability
+		- [php:core:security] [CVE-2019-5884] Fixed information leakage vulnerability
 
 
 2018-12-15  Naoki Sawada  <hypweb+elfinder@gmail.com>
