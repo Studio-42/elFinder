@@ -6178,7 +6178,7 @@ elFinder.prototype = {
 					});
 				} else {
 					var regex, m, url;
-					regex = /(http[^<>"{}|\\^\[\]`\s]+)/ig;
+					regex = /((?:ht|f)tps?:\/\/[-_.!~*\'()a-z0-9;/?:\@&=+\$,%#\*\[\]]+)/ig;
 					while (m = regex.exec(str)) {
 						url = m[1].replace(/&amp;/g, '&');
 						if ($.inArray(url, ret) == -1) ret.push(url);
