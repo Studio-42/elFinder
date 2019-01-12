@@ -2411,22 +2411,21 @@ class elFinder
         if (preg_match('~^(?:ht|f)tps?://[-_.!\~*\'()a-z0-9;/?:\@&=+\$,%#\*\[\]]+~i', $url)) {
             $info = parse_url($url);
             $host = strtolower($info['host']);
-            // check URL is local loopback address
-            if ($host === 'localhost' || $host === '2130706433' || $host === '0x7f000001' || $host === '017700000001') {
+            // do not support IPv6 address
+            if (preg_match('/^\[.*\]$/', $host)) {
                 return false;
             }
+            // do not support non dot URL
+            if (strpos($host, '.') === false) {
+                return false;
+            }
+            // disallow including "localhost"
+            if (strpos($host, 'localhost') !== false) {
+                return false;
+            }
+            // check IPv4 local loopback
             if (preg_match('/^(?:127|0177|0x7f)\.[0-9a-fx.]+$/', $host)) {
-                // IPv4
                 return false;
-            }
-            if (preg_match('/^\[([0-9a-f:]+)\]$/', $host, $m)) {
-                // IPv6
-                $host = $m[1];
-                $host = preg_replace('/((?:^|\:))0+([1-9a-f])?/', '$1$2', $host);
-                $host = preg_replace('/\:\:\:+/', '::', $host);
-                if ($host === '::1') {
-                    return false;
-                }
             }
             // check by URL upload filter
             if ($this->urlUploadFilter && is_callable($this->urlUploadFilter)) {
