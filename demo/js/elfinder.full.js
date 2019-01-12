@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.45 (2019-01-09)
+ * Version 2.1.45 (2.1-src Nightly: 56d69f1) (2019-01-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -6209,7 +6209,7 @@ elFinder.prototype = {
 					});
 				} else {
 					var regex, m, url;
-					regex = /(http[^<>"{}|\\^\[\]`\s]+)/ig;
+					regex = /((?:ht|f)tps?:\/\/[-_.!~*\'()a-z0-9;/?:\@&=+\$,%#\*\[\]]+)/ig;
 					while (m = regex.exec(str)) {
 						url = m[1].replace(/&amp;/g, '&');
 						if ($.inArray(url, ret) == -1) ret.push(url);
@@ -10085,7 +10085,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.45';
+elFinder.prototype.version = '2.1.45 (2.1-src Nightly: 56d69f1)';
 
 
 
