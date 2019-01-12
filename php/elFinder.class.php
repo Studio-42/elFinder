@@ -193,6 +193,16 @@ class elFinder
     protected static $commonTempPath = '';
 
     /**
+     * Callable function for URL upload filter
+     * The first argument is a URL and the second argument is an instance of the elFinder class
+     * A filter should be return true (to allow) / false (to disallow)
+     *
+     * @var callable
+     * @default null
+     */
+    protected $urlUploadFilter = null;
+
+    /**
      * Connection flag files path that connection check of current request
      *
      * @var string
@@ -650,6 +660,9 @@ class elFinder
         }
         if (!empty($opts['textMimes']) && is_array($opts['textMimes'])) {
             elfinder::$textMimes = $opts['textMimes'];
+        }
+        if (!empty($opts['urlUploadFilter'])) {
+            $this->urlUploadFilter = $opts['urlUploadFilter'];
         }
         $this->maxArcFilesSize = isset($opts['maxArcFilesSize']) ? intval($opts['maxArcFilesSize']) : 0;
         $this->optionsNetVolumes = (isset($opts['optionsNetVolumes']) && is_array($opts['optionsNetVolumes'])) ? $opts['optionsNetVolumes'] : array();
@@ -2395,7 +2408,31 @@ class elFinder
      **/
     protected function get_remote_contents(&$url, $timeout = 30, $redirect_max = 5, $ua = 'Mozilla/5.0', $fp = null)
     {
-        if (preg_match('~^(?:ht|f)tps?://[-_.!\~*\'()a-z0-9;/?:\@&=+\$,%#\*]+~i', $url)) {
+        if (preg_match('~^(?:ht|f)tps?://[-_.!\~*\'()a-z0-9;/?:\@&=+\$,%#\*\[\]]+~i', $url)) {
+            $info = parse_url($url);
+            $host = strtolower($info['host']);
+            // do not support IPv6 address
+            if (preg_match('/^\[.*\]$/', $host)) {
+                return false;
+            }
+            // do not support non dot URL
+            if (strpos($host, '.') === false) {
+                return false;
+            }
+            // disallow including "localhost"
+            if (strpos($host, 'localhost') !== false) {
+                return false;
+            }
+            // check IPv4 local loopback
+            if (preg_match('/^(?:127|0177|0x7f)\.[0-9a-fx.]+$/', $host)) {
+                return false;
+            }
+            // check by URL upload filter
+            if ($this->urlUploadFilter && is_callable($this->urlUploadFilter)) {
+                if (!call_user_func_array($this->urlUploadFilter, array($url, $this))) {
+                    return false;
+                }
+            }
             $method = (function_exists('curl_exec') && !ini_get('safe_mode') && !ini_get('open_basedir')) ? 'curl_get_contents' : 'fsock_get_contents';
             return $this->$method($url, $timeout, $redirect_max, $ua, $fp);
         }
