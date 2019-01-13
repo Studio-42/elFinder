@@ -2,7 +2,7 @@
  * Czech translation
  * @author RobiNN <kelcakrobo@gmail.com>
  * @author Jay Gridley <gridley.jay@hotmail.com>
- * @version 2018-12-06
+ * @version 2019-01-12
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'RobiNN &lt;kelcakrobo@gmail.com&gt;, Jay Gridley &lt;gridley.jay@hotmail.com&gt;',
 		language   : 'Čeština',
 		direction  : 'ltr',
-		dateFormat : 'd. m. Y H:i', // will show like: 06. 12. 2018 15:43
-		fancyDateFormat : '$1 H:i', // will show like: Dnes 15:43
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 181206-154356
+		dateFormat : 'd. m. Y H:i', // will show like: 12. 01. 2019 18:21
+		fancyDateFormat : '$1 H:i', // will show like: Dnes 18:21
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 190112-182129
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -115,6 +115,7 @@
 			'errEditorNotFound'    : 'Editor tohoto typu souboru nebyl nalezen.', // from v2.1.25 added 23.5.2017
 			'errServerError'       : 'Došlo k chybě na straně serveru.', // from v2.1.25 added 16.6.2017
 			'errEmpty'             : 'Nelze vyprázdnit složku "$1".', // from v2.1.25 added 22.6.2017
+			'moreErrors'           : 'Existují ještě další $1 chyby.', // from v2.1.44 added 9.12.2018
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Vytvořit archív',
@@ -417,7 +418,7 @@
 			'contextmenu'     : 'Kontextové menu', // from v2.1.15 added 9.9.2016
 			'pageTurning'     : 'Otáčení stránky', // from v2.1.15 added 10.9.2016
 			'volumeRoots'     : 'Kořeny média', // from v2.1.16 added 16.9.2016
-			'reset'           : 'Reset', // from v2.1.16 added 1.10.2016
+			'reset'           : 'Obnovit', // from v2.1.16 added 1.10.2016
 			'bgcolor'         : 'Barva pozadí', // from v2.1.16 added 1.10.2016
 			'colorPicker'     : 'Výběr barvy', // from v2.1.16 added 1.10.2016
 			'8pxgrid'         : '8px mřížka', // from v2.1.16 added 4.10.2016

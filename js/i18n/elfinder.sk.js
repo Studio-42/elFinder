@@ -2,7 +2,7 @@
  * Slovak translation
  * @author RobiNN <kelcakrobo@gmail.com>
  * @author Jakub Ďuraš <jkblmr@gmail.com>
- * @version 2018-12-06
+ * @version 2019-01-12
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'RobiNN &lt;kelcakrobo@gmail.com&gt;, Jakub Ďuraš &lt;jkblmr@gmail.com&gt;',
 		language   : 'Slovenčina',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i', // will show like: 06.12.2018 15:38
-		fancyDateFormat : '$1 H:i', // will show like: Dnes 15:38
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 181206-153836
+		dateFormat : 'd.m.Y H:i', // will show like: 12.01.2019 18:18
+		fancyDateFormat : '$1 H:i', // will show like: Dnes 18:18
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 190112-181846
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -115,6 +115,7 @@
 			'errEditorNotFound'    : 'Editor tohto typu súboru nebol nájdený.', // from v2.1.25 added 23.5.2017
 			'errServerError'       : 'Vyskytla sa chyba na strane servera.', // from v2.1.25 added 16.6.2017
 			'errEmpty'             : 'Nepodarilo sa vyprázdniť priečinok "$1".', // from v2.1.25 added 22.6.2017
+			'moreErrors'           : 'Existujú ešte ďalšie $1 chyby.', // from v2.1.44 added 9.12.2018
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Vytvoriť archív',
