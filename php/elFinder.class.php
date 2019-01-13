@@ -2410,23 +2410,41 @@ class elFinder
     {
         if (preg_match('~^(?:ht|f)tps?://[-_.!\~*\'()a-z0-9;/?:\@&=+\$,%#\*\[\]]+~i', $url)) {
             $info = parse_url($url);
-            $host = strtolower($info['host']);
+            $host = trim(strtolower($info['host']), '.');
             // do not support IPv6 address
             if (preg_match('/^\[.*\]$/', $host)) {
                 return false;
             }
-            // do not support non dot URL
+            // do not support non dot host
             if (strpos($host, '.') === false) {
                 return false;
             }
-            // disallow including "localhost"
-            if (strpos($host, 'localhost') !== false) {
+            // do not support URL-encoded host
+            if (strpos($host, '%') !== false) {
                 return false;
             }
-            // check IPv4 local loopback
-            if (preg_match('/^(?:127|0177|0x7f)\.[0-9a-fx.]+$/', $host)) {
+            // disallow including "localhost" and "localdomain"
+            if (preg_match('/\b(?:localhost|localdomain)\b/', $host)) {
                 return false;
             }
+            // check IPv4 local loopback, private network and link local
+            if (preg_match('/^0x[0-9a-f]+|[0-9]+(?:\.(?:0x[0-9a-f]+|[0-9]+)){1,3}$/', $host, $m)) {
+                $long = (int)sprintf('%u', ip2long($host));
+                if (!$long) {
+                    return false;
+                }
+                $local = (int)sprintf('%u', ip2long('127.255.255.255')) >> 24;
+                $prv1 = (int)sprintf('%u', ip2long('10.255.255.255')) >> 24;
+                $prv2 = (int)sprintf('%u', ip2long('172.31.255.255')) >> 20;
+                $prv3 = (int)sprintf('%u', ip2long('192.168.255.255')) >> 16;
+                $link = (int)sprintf('%u', ip2long('169.254.255.255')) >> 16;
+
+                if ($long >> 24 === $local || $long >> 24 === $prv1 || $long >> 20 === $prv2 || $long >> 16 === $prv3 || $long >> 16 === $link) {
+                    return false;
+                }
+            }
+            // dose not support 'user' and 'pass' for security reasons
+            $url = $info['scheme'].'://'.$host.(!empty($info['port'])? (':'.$info['port']) : '').$info['path'].(!empty($info['query'])? ('?'.$info['query']) : '').(!empty($info['fragment'])? ('#'.$info['fragment']) : '');
             // check by URL upload filter
             if ($this->urlUploadFilter && is_callable($this->urlUploadFilter)) {
                 if (!call_user_func_array($this->urlUploadFilter, array($url, $this))) {
@@ -2549,6 +2567,10 @@ class elFinder
                 throw new elFinderAbortException();
             }
             sleep(1); // wait 1sec
+        }
+
+        if (!$fp) {
+            return false;
         }
 
         $fwrite = 0;

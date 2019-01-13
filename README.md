@@ -198,6 +198,7 @@ Support
 Authors
 -------
 
+ * Current main developer: Naoki Sawada <hypweb+elfinder@gmail.com>
  * Chief developer: Dmitry "dio" Levashov <dio@std42.ru>
  * Maintainer: Troex Nevelin <troex@fury.scancode.ru>
  * Developers: Alexey Sukhotin <strogg@yandex.ru>, Naoki Sawada <hypweb+elfinder@gmail.com>
