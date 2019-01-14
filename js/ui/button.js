@@ -45,8 +45,8 @@ $.fn.elfinderbutton = function(cmd) {
 			},
 			getMenuOffset = function() {
 				var fmNode = fm.getUI(),
-					baseOffset = fm.getUI().offset(),
-					buttonOffset = fmNode.offset();
+					baseOffset = fmNode.offset(),
+					buttonOffset = button.offset();
 				return {
 					top : buttonOffset.top - baseOffset.top,
 					left : buttonOffset.left - baseOffset.left,
