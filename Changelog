@@ -1,3 +1,13 @@
+2019-01-14  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.46):
+
+		- [php:core:security] Add an option `urlUploadFilter`(@type callable) to elFinder class constructor options
+		- [php:core:security] Fixed SSRF vulnerability of `elFinder::get_remote_contents()` [Reporter: Do Ha Anh of Viettel Cyber Security]
+		- [ui:button] Fixed #2818 correction of cmd menu position
+		- And some minor bug fixes
+
+
 2019-01-09  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.45):
@@ -9,7 +19,8 @@
 		- [cwd] Fixed problem of thumbnail attaching on mobile devices
 		- [cmd:edit:editors.default] Fixed #2815 add Pixo editor integration
 		- [cmd:edit] To support onetime URL to get content URL
-		- [php:core:security] [CVE-2019-5884] Fixed information leakage vulnerability
+		- [php:core:security] [CVE-2019-5884] Fixed information leakage vulnerability [Reporter: Ravindra Rajaram (ravindra.rajaram@broadcom.com) and Hamsalekha Madiraju (hamsalekha.madiraju@broadcom.com)]
+		- And some minor bug fixes
 
 
 2018-12-15  Naoki Sawada  <hypweb+elfinder@gmail.com>
