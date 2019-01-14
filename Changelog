@@ -3,7 +3,7 @@
 	* elFinder (2.1.46):
 
 		- [php:core:security] Add an option `urlUploadFilter`(@type callable) to elFinder class constructor options
-		- [php:core:security] Fixed SSRF vulnerability of `elFinder::get_remote_contents()` [Reporter: Do Ha Anh of Viettel Cyber Security]
+		- [php:core:security] [CVE-2019-6257] Fixed SSRF vulnerability of `elFinder::get_remote_contents()` [Reporter: Do Ha Anh of Viettel Cyber Security]
 		- [ui:button] Fixed #2818 correction of cmd menu position
 		- And some minor bug fixes
 
