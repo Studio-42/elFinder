@@ -1846,8 +1846,13 @@
 				if (!fm.options.cdns.ckeditor5 || typeof window.Symbol !== 'function' || typeof Symbol() !== 'symbol') {
 					this.disabled = true;
 				} else {
-					if (opts.extraOptions && opts.extraOptions.ckeditor5Mode) {
-						this.ckeditor5Mode = opts.extraOptions.ckeditor5Mode;
+					if (opts.extraOptions) {
+						if (opts.extraOptions.ckeditor5Mode) {
+							this.ckeditor5Mode = opts.extraOptions.ckeditor5Mode;
+						}
+						if (opts.extraOptions.managerUrl) {
+							this.managerUrl = opts.extraOptions.managerUrl;
+						}
 					}
 				}
 				fm.bind('destroy', function() {
@@ -1885,7 +1890,7 @@
 				var self = this,
 					fm   = this.fm,
 					dfrd = $.Deferred(),
-					mode = self.confObj.ckeditor5Mode || 'balloon',
+					mode = self.confObj.ckeditor5Mode || 'inline',
 					lang = (function() {
 						var l = fm.lang.toLowerCase().replace('_', '-');
 						if (l.substr(0, 2) === 'zh' && l !== 'zh-cn') {
@@ -1902,7 +1907,7 @@
 
 						// CKEditor5 configure options
 						opts = {
-							toolbar: ['heading', '|', 'bold', 'italic', 'link', 'imageUpload', 'bulletedList', 'numberedList', 'blockQuote', 'undo', 'redo' ],
+							toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'imageUpload', 'ckfinder', 'blockQuote', 'insertTable', 'mediaEmbed', 'undo', 'redo'],
 							language: lang
 						};
 
@@ -1917,7 +1922,78 @@
 						cEditor
 							.create(editnode, opts)
 							.then(function(editor) {
-								var fileRepo = editor.plugins.get('FileRepository');
+								var ckf = editor.commands.get('ckfinder'),
+									fileRepo = editor.plugins.get('FileRepository'),
+									prevVars = {}, isImage, insertImages;
+								// Set up this elFinder instead of CKFinder
+								if (ckf) {
+									isImage = function(f) {
+										return f && f.mime.match(/^image\//i);
+									};
+									insertImages = function(urls) {
+										var imgCmd = editor.commands.get('imageUpload');
+										if (!imgCmd.isEnabled) {
+											var ntf = editor.plugins.get('Notification'),
+												i18 = editor.locale.t;
+											ntf.showWarning(i18('Could not insert image at the current position.'), {
+												title: i18('Inserting image failed'),
+												namespace: 'ckfinder'
+											});
+											return;
+										}
+										editor.execute('imageInsert', { source: urls });
+									};
+									// Take over ckfinder execute()
+									ckf.execute = function() {
+										var dlg = base.closest('.elfinder-dialog'),
+											gf = fm.getCommand('getfile'),
+											rever = function() {
+												if (prevVars.hasVar) {
+													dlg.off('resize close', rever);
+													gf.callback = prevVars.callback;
+													gf.options.folders = prevVars.folders;
+													gf.options.multiple = prevVars.multi;
+													fm.commandMap.open = prevVars.open;
+													prevVars.hasVar = false;
+												}
+											};
+										dlg.trigger('togleminimize').one('resize close', rever);
+										prevVars.callback = gf.callback;
+										prevVars.folders = gf.options.folders;
+										prevVars.multi = gf.options.multiple;
+										prevVars.open = fm.commandMap.open;
+										prevVars.hasVar = true;
+										gf.callback = function(files) {
+											var imgs = [];
+											if (files.length === 1 && files[0].mime === 'directory') {
+												fm.one('open', function() {
+													fm.commandMap.open = 'getfile';
+												}).getCommand('open').exec(files[0].hash);
+												return;
+											}
+											fm.getUI('cwd').trigger('unselectall');
+											$.each(files, function(i, f) {
+												if (isImage(f)) {
+													imgs.push(fm.convAbsUrl(f.url));
+												} else {
+													editor.execute('link', fm.convAbsUrl(f.url));
+												}
+											});
+											if (imgs.length) {
+												insertImages(imgs);
+											}
+											dlg.trigger('togleminimize');
+										};
+										gf.options.folders = true;
+										gf.options.multiple = true;
+										fm.commandMap.open = 'getfile';
+										fm.toast({
+											mode: 'info',
+											msg: fm.i18n('Please choose any items.')
+										});
+									};
+								}
+								// Set up image uploader
 								fileRepo.createUploadAdapter = function(loader) {
 									return new uploder(loader);
 								};
@@ -1929,7 +2005,8 @@
 								});
 								dfrd.resolve(editor);
 								/*fm.log({
-									plugins: cEditor.build.plugins.map(function(p) { return p.pluginName; }),
+									defaultConfig: cEditor.defaultConfig,
+									plugins: cEditor.builtinPlugins.map(function(p) { return p.pluginName; }),
 									toolbars: Array.from(editor.ui.componentFactory.names())
 								});*/
 							})
