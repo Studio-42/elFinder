@@ -289,7 +289,7 @@ elFinder.prototype.commands.preference = function() {
 								err = function() {
 									uiToast.appendTo(input.closest('.ui-dialog'));
 									fm.toast({
-										msg:　fm.i18n('errUsupportType'),
+										msg: fm.i18n('errUsupportType'),
 										mode: 'warning',
 										onHidden: function() {
 											uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
