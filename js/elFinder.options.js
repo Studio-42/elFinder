@@ -522,7 +522,7 @@ elFinder.prototype._options = {
 				//managerUrl : 'elfinder.html'
 				managerUrl : null,
 				// CKEditor5' builds mode - 'classic', 'inline' or 'balloon' 
-				ckeditor5Mode : 'balloon',
+				ckeditor5Mode : 'inline',
 				// Setting for Online-Convert.com
 				onlineConvert : {
 					maxSize  : 100, // (MB) Max 100MB on free account
