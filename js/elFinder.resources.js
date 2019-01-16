@@ -249,7 +249,7 @@ elFinder.prototype.resources = {
 										fm.unlockfiles({files : [id]});
 										inError = true;
 										input.show().prev().remove();
-										fm.error(error,　{
+										fm.error(error, {
 											modal: true,
 											close: function() {
 												if (Array.isArray(error) && $.inArray('errUploadMime', error) !== -1) {
