@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.46 (2.1-src Nightly: 4621346) (2019-01-16)
+ * Version 2.1.46 (2.1-src Nightly: 8a44977) (2019-01-16)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -6229,7 +6229,7 @@ elFinder.prototype = {
 				isDataType  = (data.isDataType || data.type == 'data'),
 				target      = (data.target || self.cwd().hash),
 				dropEvt     = (data.dropEvt || null),
-				extraData　 = data.extraData || null,
+				extraData   = data.extraData || null,
 				chunkEnable = (self.option('uploadMaxConn', target) != -1),
 				multiMax    = Math.min(5, Math.max(1, self.option('uploadMaxConn', target))),
 				retryWait   = 10000, // 10 sec
@@ -10085,7 +10085,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.46 (2.1-src Nightly: 4621346)';
+elFinder.prototype.version = '2.1.46 (2.1-src Nightly: 8a44977)';
 
 
 
@@ -12621,7 +12621,7 @@ elFinder.prototype.resources = {
 										fm.unlockfiles({files : [id]});
 										inError = true;
 										input.show().prev().remove();
-										fm.error(error,　{
+										fm.error(error, {
 											modal: true,
 											close: function() {
 												if (Array.isArray(error) && $.inArray('errUploadMime', error) !== -1) {
@@ -27358,7 +27358,7 @@ elFinder.prototype.commands.preference = function() {
 								err = function() {
 									uiToast.appendTo(input.closest('.ui-dialog'));
 									fm.toast({
-										msg:　fm.i18n('errUsupportType'),
+										msg: fm.i18n('errUsupportType'),
 										mode: 'warning',
 										onHidden: function() {
 											uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
