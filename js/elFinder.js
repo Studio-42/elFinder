@@ -6874,6 +6874,7 @@ elFinder.prototype = {
 				});
 				
 				$.each(files, function(i, file) {
+					var name;
 					if (file._chunkmerged) {
 						formData.append('chunk', file._chunkmerged);
 						formData.append('upload[]', file._name);
@@ -6883,20 +6884,24 @@ elFinder.prototype = {
 							formData.append('upload[]', 'chunkfail');
 							formData.append('mimes', 'chunkfail');
 						} else {
-							formData.append('upload[]', file);
 							if (data.clipdata) {
 								data.overwrite = 0;
-								formData.append('name[]', fm.date(fm.nonameDateFormat) + '.png');
-							}
-							if (file.name && fm.UA.iOS) {
-								if (file.name.match(/^image\.jpe?g$/i)) {
-									data.overwrite = 0;
-									formData.append('name[]', fm.date(fm.nonameDateFormat) + '.jpg');
-								} else if (file.name.match(/^capturedvideo\.mov$/i)) {
-									data.overwrite = 0;
-									formData.append('name[]', fm.date(fm.nonameDateFormat) + '.mov');
+								name = fm.date(fm.nonameDateFormat) + '.png';
+							} else {
+								if (file.name) {
+									name = file.name;
+									if (fm.UA.iOS) {
+										if (name.match(/^image\.jpe?g$/i)) {
+											data.overwrite = 0;
+											name = fm.date(fm.nonameDateFormat) + '.jpg';
+										} else if (name.match(/^capturedvideo\.mov$/i)) {
+											data.overwrite = 0;
+											name = fm.date(fm.nonameDateFormat) + '.mov';
+										}
+									}
 								}
 							}
+							formData.append('upload[]', file, name);
 						}
 						if (file._chunk) {
 							formData.append('chunk', file._chunk);
