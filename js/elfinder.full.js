@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.46 (2.1-src Nightly: 8a44977) (2019-01-16)
+ * Version 2.1.46 (2.1-src Nightly: cad1ac5) (2019-01-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -6905,6 +6905,7 @@ elFinder.prototype = {
 				});
 				
 				$.each(files, function(i, file) {
+					var name;
 					if (file._chunkmerged) {
 						formData.append('chunk', file._chunkmerged);
 						formData.append('upload[]', file._name);
@@ -6914,20 +6915,24 @@ elFinder.prototype = {
 							formData.append('upload[]', 'chunkfail');
 							formData.append('mimes', 'chunkfail');
 						} else {
-							formData.append('upload[]', file);
 							if (data.clipdata) {
 								data.overwrite = 0;
-								formData.append('name[]', fm.date(fm.nonameDateFormat) + '.png');
-							}
-							if (file.name && fm.UA.iOS) {
-								if (file.name.match(/^image\.jpe?g$/i)) {
-									data.overwrite = 0;
-									formData.append('name[]', fm.date(fm.nonameDateFormat) + '.jpg');
-								} else if (file.name.match(/^capturedvideo\.mov$/i)) {
-									data.overwrite = 0;
-									formData.append('name[]', fm.date(fm.nonameDateFormat) + '.mov');
+								name = fm.date(fm.nonameDateFormat) + '.png';
+							} else {
+								if (file.name) {
+									name = file.name;
+									if (fm.UA.iOS) {
+										if (name.match(/^image\.jpe?g$/i)) {
+											data.overwrite = 0;
+											name = fm.date(fm.nonameDateFormat) + '.jpg';
+										} else if (name.match(/^capturedvideo\.mov$/i)) {
+											data.overwrite = 0;
+											name = fm.date(fm.nonameDateFormat) + '.mov';
+										}
+									}
 								}
 							}
+							formData.append('upload[]', file, name);
 						}
 						if (file._chunk) {
 							formData.append('chunk', file._chunk);
@@ -10085,7 +10090,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.46 (2.1-src Nightly: 8a44977)';
+elFinder.prototype.version = '2.1.46 (2.1-src Nightly: cad1ac5)';
 
 
 
@@ -12790,7 +12795,7 @@ elFinder.prototype.resources = {
 $.fn.dialogelfinder = function(opts) {
 		var position = 'elfinderPosition',
 		destroy  = 'elfinderDestroyOnClose',
-		node;
+		node, pos;
 	
 	this.not('.elfinder').each(function() {
 
@@ -12832,11 +12837,11 @@ $.fn.dialogelfinder = function(opts) {
 	});
 	
 	if (opts == 'open') {
-		var node = $(this),
-			pos  = node.data(position) || {
-				top  : parseInt($(document).scrollTop() + ($(window).height() < node.height() ? 2 : ($(window).height() - node.height())/2)),
-				left : parseInt($(document).scrollLeft() + ($(window).width() < node.width()  ? 2 : ($(window).width()  - node.width())/2))
-			};
+		node = $(this);
+		pos = node.data(position) || {
+			top  : parseInt($(document).scrollTop() + ($(window).height() < node.height() ? 2 : ($(window).height() - node.height())/2)),
+			left : parseInt($(document).scrollLeft() + ($(window).width() < node.width()  ? 2 : ($(window).width()  - node.width())/2))
+		};
 
 		if (node.is(':hidden')) {
 			node.addClass('ui-front').css(pos).show().trigger('resize');
