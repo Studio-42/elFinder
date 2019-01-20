@@ -300,15 +300,18 @@ $.fn.elfinder = function(o, o2) {
 	
 	if (o === 'instance') {
 		return this.getElFinder();
+	} else if (o === 'ondemand') {
+
 	}
 	
 	return this.each(function() {
 		
 		var cmd          = typeof o  === 'string'  ? o  : '',
 			bootCallback = typeof o2 === 'function'? o2 : void(0),
-			opts;
+			elfinder     = this.elfinder,
+			opts, reloadCallback;
 		
-		if (!this.elfinder) {
+		if (!elfinder) {
 			if ($.isPlainObject(o)) {
 				new elFinder(this, o, bootCallback);
 			}
@@ -316,25 +319,29 @@ $.fn.elfinder = function(o, o2) {
 			switch(cmd) {
 				case 'close':
 				case 'hide':
-					this.elfinder.hide();
+					elfinder.hide();
 					break;
 					
 				case 'open':
 				case 'show':
-					this.elfinder.show();
+					elfinder.show();
 					break;
 					
 				case 'destroy':
-					this.elfinder.destroy();
+					elfinder.destroy();
 					break;
 				
 				case 'reload':
 				case 'restart':
-					if (this.elfinder) {
-						opts = this.elfinder.options;
-						bootCallback = this.elfinder.bootCallback;
-						this.elfinder.destroy();
-						new elFinder(this, $.extend(true, opts, $.isPlainObject(o2)? o2 : {}), bootCallback);
+					if (elfinder) {
+						opts = $.extend(true, elfinder.options, $.isPlainObject(o2)? o2 : {});
+						bootCallback = elfinder.bootCallback;
+						if (elfinder.reloadCallback && $.isFunction(elfinder.reloadCallback)) {
+							elfinder.reloadCallback(opts, bootCallback);
+						} else {
+							elfinder.destroy();
+							new elFinder(this, opts, bootCallback);
+						}
 					}
 					break;
 			}
