@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.46 (2.1-src Nightly: cad1ac5) (2019-01-20)
+ * Version 2.1.46 (2.1-src Nightly: d6afc97) (2019-01-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -80,14 +80,14 @@ var elFinder = function(elm, opts, bootCallback) {
 		 *
 		 * @type String
 		 **/
-		id = node.attr('id') || '',
+		id = node.attr('id') || node.attr('id', 'elf' + Math.random().toString().substr(2, 7)).attr('id'),
 		
 		/**
 		 * Events namespace
 		 *
 		 * @type String
 		 **/
-		namespace = 'elfinder-' + (id ? id : Math.random().toString().substr(2, 7)),
+		namespace = 'elfinder-' + id,
 		
 		/**
 		 * Mousedown event
@@ -850,6 +850,13 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @type Function
 	 */
 	this.bootCallback;
+
+	/**
+	 * Callback function at reload(restart) elFinder 
+	 * 
+	 * @type Function
+	 */
+	this.reloadCallback;
 
 	/**
 	 * ID. Required to create unique cookie name
@@ -3216,7 +3223,7 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @return jQuery
 	 */
 	this.getUI = function(ui) {
-		return this.ui[ui] || (ui? $() : node);
+		return ui? (this.ui[ui] || $()) : node;
 	};
 	
 	/**
@@ -10090,7 +10097,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.46 (2.1-src Nightly: cad1ac5)';
+elFinder.prototype.version = '2.1.46 (2.1-src Nightly: d6afc97)';
 
 
 
@@ -10400,15 +10407,18 @@ $.fn.elfinder = function(o, o2) {
 	
 	if (o === 'instance') {
 		return this.getElFinder();
+	} else if (o === 'ondemand') {
+
 	}
 	
 	return this.each(function() {
 		
 		var cmd          = typeof o  === 'string'  ? o  : '',
 			bootCallback = typeof o2 === 'function'? o2 : void(0),
-			opts;
+			elfinder     = this.elfinder,
+			opts, reloadCallback;
 		
-		if (!this.elfinder) {
+		if (!elfinder) {
 			if ($.isPlainObject(o)) {
 				new elFinder(this, o, bootCallback);
 			}
@@ -10416,25 +10426,29 @@ $.fn.elfinder = function(o, o2) {
 			switch(cmd) {
 				case 'close':
 				case 'hide':
-					this.elfinder.hide();
+					elfinder.hide();
 					break;
 					
 				case 'open':
 				case 'show':
-					this.elfinder.show();
+					elfinder.show();
 					break;
 					
 				case 'destroy':
-					this.elfinder.destroy();
+					elfinder.destroy();
 					break;
 				
 				case 'reload':
 				case 'restart':
-					if (this.elfinder) {
-						opts = this.elfinder.options;
-						bootCallback = this.elfinder.bootCallback;
-						this.elfinder.destroy();
-						new elFinder(this, $.extend(true, opts, $.isPlainObject(o2)? o2 : {}), bootCallback);
+					if (elfinder) {
+						opts = $.extend(true, elfinder.options, $.isPlainObject(o2)? o2 : {});
+						bootCallback = elfinder.bootCallback;
+						if (elfinder.reloadCallback && $.isFunction(elfinder.reloadCallback)) {
+							elfinder.reloadCallback(opts, bootCallback);
+						} else {
+							elfinder.destroy();
+							new elFinder(this, opts, bootCallback);
+						}
 					}
 					break;
 			}
@@ -12792,24 +12806,34 @@ elFinder.prototype.resources = {
  * })
  * @author Dmitry (dio) Levashov
  **/
-$.fn.dialogelfinder = function(opts) {
+$.fn.dialogelfinder = function(opts, opts2) {
 		var position = 'elfinderPosition',
 		destroy  = 'elfinderDestroyOnClose',
 		node, pos;
-	
-	this.not('.elfinder').each(function() {
 
-		
-		var doc     = $(document),
-			toolbar = $('<div class="ui-widget-header dialogelfinder-drag ui-corner-top">'+(opts.title || 'Files')+'</div>'),
-			button  = $('<a href="#" class="dialogelfinder-drag-close ui-corner-all"><span class="ui-icon ui-icon-closethick"> </span></a>')
-				.appendTo(toolbar)
-				.on('click', function(e) {
-					e.preventDefault();
-					
-					node.dialogelfinder('close');
-				}),
-			node    = $(this).addClass('dialogelfinder')
+	if ($.isPlainObject(opts)) {
+		this.not('.elfinder').each(function() {
+
+			opts.handlers = opts.handlers || {};
+
+			var node    = $(this),
+				doc     = $(document),
+				toolbar = $('<div class="ui-widget-header dialogelfinder-drag ui-corner-top">'+(opts.title || 'Files')+'</div>'),
+				button  = $('<a href="#" class="dialogelfinder-drag-close ui-corner-all"><span class="ui-icon ui-icon-closethick"> </span></a>')
+					.appendTo(toolbar)
+					.on('click', function(e) {
+						e.preventDefault();
+						node.dialogelfinder('close');
+					}),
+				init    = opts.handlers.init,
+				elfinder;
+
+			opts.handlers.init = function(e, fm) {
+				node.prepend(toolbar);
+				init && init(e, fm);
+			};
+
+			elfinder = node.addClass('dialogelfinder')
 				.css('position', 'absolute')
 				.hide()
 				.appendTo('body')
@@ -12821,46 +12845,51 @@ $.fn.dialogelfinder = function(opts) {
 						elfinder.trigger('resize');
 					}
 				})
-				.elfinder(opts)
-				.prepend(toolbar),
-			elfinder = node.elfinder('instance');
-		
-		
-		node.width(parseInt(node.width()) || 840) // fix width if set to "auto"
-			.data(destroy, !!opts.destroyOnClose)
-			.find('.elfinder-toolbar').removeClass('ui-corner-top');
-		
-		opts.position && node.data(position, opts.position);
-		
-		opts.autoOpen !== false && $(this).dialogelfinder('open');
-
-	});
-	
-	if (opts == 'open') {
-		node = $(this);
-		pos = node.data(position) || {
-			top  : parseInt($(document).scrollTop() + ($(window).height() < node.height() ? 2 : ($(window).height() - node.height())/2)),
-			left : parseInt($(document).scrollLeft() + ($(window).width() < node.width()  ? 2 : ($(window).width()  - node.width())/2))
-		};
-
-		if (node.is(':hidden')) {
-			node.addClass('ui-front').css(pos).show().trigger('resize');
-
-			setTimeout(function() {
-				// fix resize icon position and make elfinder active
-				node.trigger('resize').trigger('mousedown');
-			}, 200);
-		}
-	} else if (opts == 'close') {
-		node = $(this).removeClass('ui-front');
+				.elfinder(opts, opts2)
+				.elfinder('instance');
 			
-		if (node.is(':visible')) {
-			!!node.data(destroy)
-				? node.elfinder('destroy').remove()
-				: node.elfinder('close');
+			elfinder.reloadCallback = function(o, o2) {
+				elfinder.destroy();
+				o.handlers.init = init;
+				node.dialogelfinder(o, o2).dialogelfinder('open');
+			};
+			
+			node.width(parseInt(node.width()) || 840) // fix width if set to "auto"
+				.data(destroy, !!opts.destroyOnClose)
+				.find('.elfinder-toolbar').removeClass('ui-corner-top');
+			
+			opts.position && node.data(position, opts.position);
+			
+			opts.autoOpen !== false && $(this).dialogelfinder('open');
+
+		});
+	} else {
+		if (opts === 'open') {
+			node = $(this);
+			pos = node.data(position) || {
+				top  : parseInt($(document).scrollTop() + ($(window).height() < node.height() ? 2 : ($(window).height() - node.height())/2)),
+				left : parseInt($(document).scrollLeft() + ($(window).width() < node.width()  ? 2 : ($(window).width()  - node.width())/2))
+			};
+
+			if (node.is(':hidden')) {
+				node.addClass('ui-front').css(pos).show().trigger('resize');
+
+				setTimeout(function() {
+					// fix resize icon position and make elfinder active
+					node.trigger('resize').trigger('mousedown');
+				}, 200);
+			}
+		} else if (opts === 'close') {
+			node = $(this).removeClass('ui-front');
+				
+			if (node.is(':visible')) {
+				!!node.data(destroy)
+					? node.elfinder('destroy').remove()
+					: node.elfinder('close');
+			}
+		} else if (opts === 'instance') {
+			return $(this).getElFinder();
 		}
-	} else if (opts == 'instance') {
-		return $(this).getElFinder();
 	}
 
 	return this;
