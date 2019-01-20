@@ -49,14 +49,14 @@ var elFinder = function(elm, opts, bootCallback) {
 		 *
 		 * @type String
 		 **/
-		id = node.attr('id') || '',
+		id = node.attr('id') || node.attr('id', 'elf' + Math.random().toString().substr(2, 7)).attr('id'),
 		
 		/**
 		 * Events namespace
 		 *
 		 * @type String
 		 **/
-		namespace = 'elfinder-' + (id ? id : Math.random().toString().substr(2, 7)),
+		namespace = 'elfinder-' + id,
 		
 		/**
 		 * Mousedown event
@@ -819,6 +819,13 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @type Function
 	 */
 	this.bootCallback;
+
+	/**
+	 * Callback function at reload(restart) elFinder 
+	 * 
+	 * @type Function
+	 */
+	this.reloadCallback;
 
 	/**
 	 * ID. Required to create unique cookie name
@@ -3185,7 +3192,7 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @return jQuery
 	 */
 	this.getUI = function(ui) {
-		return this.ui[ui] || (ui? $() : node);
+		return ui? (this.ui[ui] || $()) : node;
 	};
 	
 	/**
