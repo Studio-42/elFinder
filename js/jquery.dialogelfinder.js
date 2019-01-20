@@ -16,7 +16,7 @@ $.fn.dialogelfinder = function(opts) {
 	"use strict";
 	var position = 'elfinderPosition',
 		destroy  = 'elfinderDestroyOnClose',
-		node;
+		node, pos;
 	
 	this.not('.elfinder').each(function() {
 
@@ -58,11 +58,11 @@ $.fn.dialogelfinder = function(opts) {
 	});
 	
 	if (opts == 'open') {
-		var node = $(this),
-			pos  = node.data(position) || {
-				top  : parseInt($(document).scrollTop() + ($(window).height() < node.height() ? 2 : ($(window).height() - node.height())/2)),
-				left : parseInt($(document).scrollLeft() + ($(window).width() < node.width()  ? 2 : ($(window).width()  - node.width())/2))
-			};
+		node = $(this);
+		pos = node.data(position) || {
+			top  : parseInt($(document).scrollTop() + ($(window).height() < node.height() ? 2 : ($(window).height() - node.height())/2)),
+			left : parseInt($(document).scrollLeft() + ($(window).width() < node.width()  ? 2 : ($(window).width()  - node.width())/2))
+		};
 
 		if (node.is(':hidden')) {
 			node.addClass('ui-front').css(pos).show().trigger('resize');
