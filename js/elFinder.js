@@ -6908,7 +6908,7 @@ elFinder.prototype = {
 									}
 								}
 							}
-							formData.append('upload[]', file, name);
+							name? formData.append('upload[]', file, name) : formData.append('upload[]', file);
 						}
 						if (file._chunk) {
 							formData.append('chunk', file._chunk);
