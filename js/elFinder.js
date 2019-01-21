@@ -49,7 +49,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		 *
 		 * @type String
 		 **/
-		id = node.attr('id') || node.attr('id', 'elf' + Math.random().toString().substr(2, 7)).attr('id'),
+		id = node.attr('id') || node.attr('id', 'elfauto' + $('.elfinder').length).attr('id'),
 		
 		/**
 		 * Events namespace
