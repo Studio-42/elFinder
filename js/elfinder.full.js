@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.46 (2.1-src Nightly: 366ef7c) (2019-01-21)
+ * Version 2.1.46 (2.1-src Nightly: 64db6f3) (2019-01-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10097,7 +10097,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.46 (2.1-src Nightly: 366ef7c)';
+elFinder.prototype.version = '2.1.46 (2.1-src Nightly: 64db6f3)';
 
 
 
@@ -21426,16 +21426,24 @@ $.fn.elfindertree = function(fm, opts) {
 				.on('mouseenter mouseleave', selNavdir, function(e) {
 					var enter = (e.type === 'mouseenter');
 					if (enter && scrolling) { return; }
-					var link  = $(this); 
+					var link  = $(this),
+						hash, dir; 
 					
 					if (!link.hasClass(dropover+' '+disabled)) {
 						if (!mobile && enter && !link.data('dragRegisted') && !link.hasClass(root+' '+draggable+' elfinder-na elfinder-wo')) {
 							link.data('dragRegisted', true);
-							if (fm.isCommandEnabled('copy', fm.navId2Hash(link.attr('id')))) {
+							if (fm.isCommandEnabled('copy', (hash = fm.navId2Hash(link.attr('id'))))) {
 								link.draggable(fm.draggable);
 							}
 						}
 						link.toggleClass(hover, enter);
+					}
+					// update title attr if necessary
+					if (enter && opts.attrTitle) {
+						dir = fm.file(hash || fm.navId2Hash(link.attr('id')));
+						if (!dir.isroot && link.attr('title') === (dir.i18 || dir.name)) {
+							link.attr('title', fm.path(hash, true));
+						}
 					}
 				})
 				// native drag enter
