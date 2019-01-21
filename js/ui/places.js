@@ -138,7 +138,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 						.replace(/\{name\}/, fm.escape(dir? dir.i18 || dir.name : hash))
 						.replace(/\{cssclass\}/, dir? (fm.perms2class(dir) + (dir.notfound? ' elfinder-na' : '') + (dir.csscls? ' '+dir.csscls : '')) : '')
 						.replace(/\{permissions\}/, (dir && (!dir.read || !dir.write || dir.notfound))? ptpl : '')
-						.replace(/\{title\}/, (dir && dir.path)? fm.escape(dir.path) : '')
+						.replace(/\{title\}/, dir? (' title="' + fm.escape(fm.path(dir.hash, true) || dir.i18 || dir.name) + '"') : '')
 						.replace(/\{symlink\}/, '')
 						.replace(/\{style\}/, (dir && dir.icon)? fm.getIconStyle(dir) : ''));
 			},
