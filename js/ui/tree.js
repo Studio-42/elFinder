@@ -404,6 +404,7 @@ $.fn.elfindertree = function(fm, opts) {
 					dir.csscls && (cname += ' ' + fm.escape(dir.csscls));
 					return cname;
 				},
+				title       : function(dir) { return opts.attrTitle? (' title="' + fm.escape(fm.path(dir.hash, true) || dir.i18 || dir.name) + '"') : ''; },
 				root        : function(dir) {
 					var cls = '';
 					if (!dir.phash || dir.isroot) {

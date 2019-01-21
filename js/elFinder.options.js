@@ -769,6 +769,8 @@ elFinder.prototype._options = {
 		},
 		// directories tree options
 		tree : {
+			// set path info to attr title
+			attrTitle : true,
 			// expand current root on init
 			openRootOnLoad : true,
 			// expand current work directory on open
