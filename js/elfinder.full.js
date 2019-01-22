@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.46 (2.1-src Nightly: 2b57fb1) (2019-01-21)
+ * Version 2.1.46 (2.1-src Nightly: f93bdac) (2019-01-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -3172,7 +3172,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		}
 		dfrd = this._commands[cmd] && this.isCommandEnabled(cmd, dstHash) 
 			? this._commands[cmd].exec(files, opts) 
-			: $.Deferred().reject('No such command');
+			: $.Deferred().reject('errUnknownCmd');
 		
 		resType = typeof dfrd;
 		if (!(resType === 'object' && dfrd.promise)) {
@@ -6623,7 +6623,7 @@ elFinder.prototype = {
 				chunkID = new Date().getTime().toString().substr(-9), // for take care of the 32bit backend system
 				BYTES_PER_CHUNK = Math.min((fm.uplMaxSize? fm.uplMaxSize : 2097152) - 8190, fm.options.uploadMaxChunkSize), // uplMaxSize margin 8kb or options.uploadMaxChunkSize
 				blobSlice = chunkEnable? false : '',
-				blobSize, blobMtime, i, start, end, chunks, blob, chunk, added, done, last, failChunk,
+				blobSize, blobMtime, blobName, i, start, end, chunks, blob, chunk, added, done, last, failChunk,
 				multi = function(files, num){
 					var sfiles = [], cid, sfilesLen = 0, cancelChk;
 					if (!abort) {
@@ -6652,7 +6652,8 @@ elFinder.prototype = {
 									renames: renames,
 									hashes: hashes,
 									multiupload: true,
-									overwrite: data.overwrite === 0? 0 : void 0
+									overwrite: data.overwrite === 0? 0 : void 0,
+									clipdata: data.clipdata
 								}, void 0, target)
 								.fail(function(error) {
 									if (error && error === 'No such command') {
@@ -6755,12 +6756,13 @@ elFinder.prototype = {
 							chunks = -1;
 							total = Math.floor((blobSize - 1) / BYTES_PER_CHUNK);
 							blobMtime = blob.lastModified? Math.round(blob.lastModified/1000) : 0;
+							blobName = data.clipdata? fm.date(fm.nonameDateFormat) + '.png' : blob.name;
 
 							totalSize += blobSize;
 							chunked[chunkID] = 0;
 							while(start < blobSize) {
 								chunk = blob[blobSlice](start, end);
-								chunk._chunk = blob.name + '.' + (++chunks) + '_' + total + '.part';
+								chunk._chunk = blobName + '.' + (++chunks) + '_' + total + '.part';
 								chunk._cid   = chunkID;
 								chunk._range = start + ',' + chunk.size + ',' + blobSize;
 								chunk._mtime = blobMtime;
@@ -6917,14 +6919,17 @@ elFinder.prototype = {
 						formData.append('chunk', file._chunkmerged);
 						formData.append('upload[]', file._name);
 						formData.append('mtime[]', file._mtime);
+						data.clipdata && formData.append('overwrite', 0);
 					} else {
 						if (file._chunkfail) {
 							formData.append('upload[]', 'chunkfail');
 							formData.append('mimes', 'chunkfail');
 						} else {
 							if (data.clipdata) {
-								data.overwrite = 0;
-								name = fm.date(fm.nonameDateFormat) + '.png';
+								if (!file._chunk) {
+									data.overwrite = 0;
+									name = fm.date(fm.nonameDateFormat) + '.png';
+								}
 							} else {
 								if (file.name) {
 									name = file.name;
@@ -10097,7 +10102,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.46 (2.1-src Nightly: 2b57fb1)';
+elFinder.prototype.version = '2.1.46 (2.1-src Nightly: f93bdac)';
 
 
 
@@ -11022,6 +11027,8 @@ elFinder.prototype._options = {
 				'Windows-1250', 'Windows-1251', 'Windows-1252', 'Windows-1253', 'Windows-1254', 'Windows-1257'],
 			// options for extra editors
 			extraOptions : {
+				// upload command options
+				uploadOpts : {},
 				// TUI Image Editor's options
 				tuiImgEditOpts : {
 					// Path prefix of icon-a.svg, icon-b.svg, icon-c.svg and icon-d.svg in the Theme. 
@@ -11044,6 +11051,8 @@ elFinder.prototype._options = {
 				managerUrl : null,
 				// CKEditor5' builds mode - 'classic', 'inline' or 'balloon' 
 				ckeditor5Mode : 'inline',
+				// TinyMCE editor options
+				tinymce : {},
 				// Setting for Online-Convert.com
 				onlineConvert : {
 					maxSize  : 100, // (MB) Max 100MB on free account
@@ -12906,7 +12915,7 @@ $.fn.dialogelfinder = function(opts, opts2) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2018-12-09
+ * @version 2019-01-22
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -13385,6 +13394,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'email'           : 'Email', // from v2.1.43 added 19.10.2018
 			'license'         : 'License', // from v2.1.43 added 19.10.2018
 			'exportToSave'    : 'This item can\'t be saved. To avoid losing the edits you need to export to your PC.', // from v2.1.44 added 1.12.2018
+			'dblclickToSelect': 'Double click on the file to select it.', // from v2.1.47 added 22.1.2019
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
