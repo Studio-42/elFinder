@@ -51,7 +51,7 @@
 						},
 						creativeCloudApiKey : '6e62687b643a413cbb6aedf72ced95e3',
 						managerUrl : 'manager.html',
-						tinymce {
+						tinymce : {
 							imagetools_cors_hosts: ['hypweb.net']
 						}
 					}
