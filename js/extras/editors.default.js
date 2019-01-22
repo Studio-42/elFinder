@@ -2310,7 +2310,7 @@
 						});
 
 						// TinyMCE configure
-						tinymce.init(Object.assign(opts, self.confObj.tinymce));
+						tinymce.init(Object.assign(opts, self.confObj.mceOpts));
 					};
 				
 				if (!self.confObj.loader) {
