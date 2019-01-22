@@ -3141,7 +3141,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		}
 		dfrd = this._commands[cmd] && this.isCommandEnabled(cmd, dstHash) 
 			? this._commands[cmd].exec(files, opts) 
-			: $.Deferred().reject('No such command');
+			: $.Deferred().reject('errUnknownCmd');
 		
 		resType = typeof dfrd;
 		if (!(resType === 'object' && dfrd.promise)) {
@@ -6592,7 +6592,7 @@ elFinder.prototype = {
 				chunkID = new Date().getTime().toString().substr(-9), // for take care of the 32bit backend system
 				BYTES_PER_CHUNK = Math.min((fm.uplMaxSize? fm.uplMaxSize : 2097152) - 8190, fm.options.uploadMaxChunkSize), // uplMaxSize margin 8kb or options.uploadMaxChunkSize
 				blobSlice = chunkEnable? false : '',
-				blobSize, blobMtime, i, start, end, chunks, blob, chunk, added, done, last, failChunk,
+				blobSize, blobMtime, blobName, i, start, end, chunks, blob, chunk, added, done, last, failChunk,
 				multi = function(files, num){
 					var sfiles = [], cid, sfilesLen = 0, cancelChk;
 					if (!abort) {
@@ -6621,7 +6621,8 @@ elFinder.prototype = {
 									renames: renames,
 									hashes: hashes,
 									multiupload: true,
-									overwrite: data.overwrite === 0? 0 : void 0
+									overwrite: data.overwrite === 0? 0 : void 0,
+									clipdata: data.clipdata
 								}, void 0, target)
 								.fail(function(error) {
 									if (error && error === 'No such command') {
@@ -6724,12 +6725,13 @@ elFinder.prototype = {
 							chunks = -1;
 							total = Math.floor((blobSize - 1) / BYTES_PER_CHUNK);
 							blobMtime = blob.lastModified? Math.round(blob.lastModified/1000) : 0;
+							blobName = data.clipdata? fm.date(fm.nonameDateFormat) + '.png' : blob.name;
 
 							totalSize += blobSize;
 							chunked[chunkID] = 0;
 							while(start < blobSize) {
 								chunk = blob[blobSlice](start, end);
-								chunk._chunk = blob.name + '.' + (++chunks) + '_' + total + '.part';
+								chunk._chunk = blobName + '.' + (++chunks) + '_' + total + '.part';
 								chunk._cid   = chunkID;
 								chunk._range = start + ',' + chunk.size + ',' + blobSize;
 								chunk._mtime = blobMtime;
@@ -6886,14 +6888,17 @@ elFinder.prototype = {
 						formData.append('chunk', file._chunkmerged);
 						formData.append('upload[]', file._name);
 						formData.append('mtime[]', file._mtime);
+						data.clipdata && formData.append('overwrite', 0);
 					} else {
 						if (file._chunkfail) {
 							formData.append('upload[]', 'chunkfail');
 							formData.append('mimes', 'chunkfail');
 						} else {
 							if (data.clipdata) {
-								data.overwrite = 0;
-								name = fm.date(fm.nonameDateFormat) + '.png';
+								if (!file._chunk) {
+									data.overwrite = 0;
+									name = fm.date(fm.nonameDateFormat) + '.png';
+								}
 							} else {
 								if (file.name) {
 									name = file.name;

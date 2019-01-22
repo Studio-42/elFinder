@@ -501,6 +501,8 @@ elFinder.prototype._options = {
 				'Windows-1250', 'Windows-1251', 'Windows-1252', 'Windows-1253', 'Windows-1254', 'Windows-1257'],
 			// options for extra editors
 			extraOptions : {
+				// upload command options
+				uploadOpts : {},
 				// TUI Image Editor's options
 				tuiImgEditOpts : {
 					// Path prefix of icon-a.svg, icon-b.svg, icon-c.svg and icon-d.svg in the Theme. 
@@ -523,6 +525,8 @@ elFinder.prototype._options = {
 				managerUrl : null,
 				// CKEditor5' builds mode - 'classic', 'inline' or 'balloon' 
 				ckeditor5Mode : 'inline',
+				// TinyMCE editor options
+				tinymce : {},
 				// Setting for Online-Convert.com
 				onlineConvert : {
 					maxSize  : 100, // (MB) Max 100MB on free account

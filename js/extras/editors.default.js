@@ -1989,7 +1989,7 @@
 										fm.commandMap.open = 'getfile';
 										fm.toast({
 											mode: 'info',
-											msg: fm.i18n('Please choose any items.')
+											msg: fm.i18n('dblclickToSelect')
 										});
 									};
 								}
@@ -2114,8 +2114,11 @@
 				if (!fm.options.cdns.tinymce) {
 					this.disabled = true;
 				} else {
-					if (opts.extraOptions && opts.extraOptions.managerUrl) {
-						this.managerUrl = opts.extraOptions.managerUrl;
+					if (opts.extraOptions) {
+						this.uploadOpts = Object.assign({}, opts.extraOptions.uploadOpts || {});
+						this.mceOpts = Object.assign({}, opts.extraOptions.tinymce || {});
+					} else {
+						this.uploadOpts = {};
 					}
 				}
 			},
@@ -2128,7 +2131,23 @@
 							dlg = base.closest('.elfinder-dialog'),
 							h = base.height(),
 							delta = base.outerHeight(true) - h,
-							opts;
+							// hide MCE dialog and modal block
+							hideMceDlg = function() {
+								var mceW;
+								if (tinymce.activeEditor.windowManager.windows) {
+									mceW = tinymce.activeEditor.windowManager.windows[0];
+									mceDlg = $(mceW? mceW.getEl() : void(0)).hide();
+									mceCv = $('#mce-modal-block').hide();
+								} else {
+									mceDlg = $('.tox-dialog-wrap').hide();
+								}
+							},
+							// Show MCE dialog and modal block
+							showMceDlg = function() {
+								mceCv && mceCv.show();
+								mceDlg && mceDlg.show();
+							},
+							opts, mceDlg, mceCv;
 
 						// set base height
 						base.height(h);
@@ -2153,7 +2172,7 @@
 							plugins: [
 								'fullpage', // require for getting full HTML
 								'image', 'link', 'media',
-								'code', 'fullscreen'
+								'code', 'fullscreen', 'imagetools'
 							],
 							init_instance_callback : function(editor) {
 								// fit height on init
@@ -2170,50 +2189,115 @@
 								dfrd.resolve(editor);
 							},
 							file_picker_callback : function (callback, value, meta) {
-								var reg = /([&?]getfile=)[^&]+/,
-									loc = self.confObj.managerUrl || window.location.href.replace(/#.*$/, ''),
-									name = 'tinymce';
+								var gf = fm.getCommand('getfile'),
+									revar = function() {
+										if (prevVars.hasVar) {
+											gf.callback = prevVars.callback;
+											gf.options.folders = prevVars.folders;
+											gf.options.multiple = prevVars.multi;
+											fm.commandMap.open = prevVars.open;
+											prevVars.hasVar = false;
+										}
+										dlg.off('resize close', revar);
+										showMceDlg();
+									},
+									prevVars = {};
+								prevVars.callback = gf.callback;
+								prevVars.folders = gf.options.folders;
+								prevVars.multi = gf.options.multiple;
+								prevVars.open = fm.commandMap.open;
+								prevVars.hasVar = true;
+								gf.callback = function(file) {
+									var url, info;
+
+									if (file.mime === 'directory') {
+										fm.one('open', function() {
+											fm.commandMap.open = 'getfile';
+										}).getCommand('open').exec(file.hash);
+										return;
+									}
+
+									// URL normalization
+									url = fm.convAbsUrl(file.url);
+									
+									// Make file info
+									info = file.name + ' (' + fm.formatSize(file.size) + ')';
+
+									// Provide file and text for the link dialog
+									if (meta.filetype == 'file') {
+										callback(url, {text: info, title: info});
+									}
+
+									// Provide image and alt text for the image dialog
+									if (meta.filetype == 'image') {
+										callback(url, {alt: info});
+									}
+
+									// Provide alternative source and posted for the media dialog
+									if (meta.filetype == 'media') {
+										callback(url);
+									}
+									dlg.trigger('togleminimize');
+								};
+								gf.options.folders = true;
+								gf.options.multiple = false;
+								fm.commandMap.open = 'getfile';
 								
-								// make manager location
-								if (reg.test(loc)) {
-									loc = loc.replace(reg, '$1' + name);
-								} else {
-									loc += '?getfile=' + name;
+								hideMceDlg();
+								dlg.trigger('togleminimize').one('resize close', revar);
+								fm.toast({
+									mode: 'info',
+									msg: fm.i18n('dblclickToSelect')
+								});
+
+								return false;
+							},
+							images_upload_handler : function (blobInfo, success, failure) {
+								var file = blobInfo.blob(),
+									err = function(e) {
+										var dlg = e.data.dialog || {};
+		                                if (dlg.hasClass('elfinder-dialog-error') || dlg.hasClass('elfinder-confirm-upload')) {
+		                                    hideMceDlg();
+		                                    dlg.trigger('togleminimize').one('resize close', revert);
+		                                    fm.unbind('dialogopened', err);
+		                                }
+									},
+									revert = function() {
+										dlg.off('resize close', revert);
+										showMceDlg();
+									},
+									clipdata = true;
+
+								// check file object
+								if (file.name) {
+									// file blob of client side file object
+									clipdata = void(0);
 								}
-								// launch TinyMCE
-								tinymce.activeEditor.windowManager.open({
-									file: loc,
-									title: 'elFinder',
-									width: 900,	 
-									height: 450,
-									resizable: 'yes'
-								}, {
-									oninsert: function (file, elf) {
-										var url, reg, info;
-
-										// URL normalization
-										url = elf.convAbsUrl(file.url);
-										
-										// Make file info
-										info = file.name + ' (' + elf.formatSize(file.size) + ')';
-
-										// Provide file and text for the link dialog
-										if (meta.filetype == 'file') {
-											callback(url, {text: info, title: info});
-										}
-
-										// Provide image and alt text for the image dialog
-										if (meta.filetype == 'image') {
-											callback(url, {alt: info});
-										}
-
-										// Provide alternative source and posted for the media dialog
-										if (meta.filetype == 'media') {
-											callback(url);
+								fm.bind('dialogopened', err).exec('upload', Object.assign({
+									files: [file],
+									clipdata: clipdata // to get unique name on connector
+								}, self.confObj.uploadOpts), void(0), fm.cwd().hash).done(function(data) {
+									if (data.added && data.added.length) {
+										fm.url(data.added[0].hash, { async: true }).done(function(url) {
+											showMceDlg();
+											success(fm.convAbsUrl(url));
+										}).fail(function() {
+											failure(fm.i18n('errFileNotFound'));
+										});
+									} else {
+										failure(fm.i18n(data.error? data.error : 'errUpload'));
+									}
+								}).fail(function(err) {
+									var error = fm.parseError(err);
+									if (error) {
+										if (error === 'errUnknownCmd') {
+											error = 'errPerm';
+										} else if (error === 'userabort') {
+											error = 'errAbort';
 										}
 									}
+									failure(fm.i18n(error? error : 'errUploadNoFiles'));
 								});
-								return false;
 							}
 						};
 
@@ -2226,12 +2310,12 @@
 						});
 
 						// TinyMCE configure
-						tinymce.init(opts);
+						tinymce.init(Object.assign(opts, self.confObj.tinymce));
 					};
 				
 				if (!self.confObj.loader) {
 					self.confObj.loader = $.Deferred();
-					$.getScript(fm.options.cdns.tinymce + '/tinymce.min.js', function() {
+					$.getScript(fm.options.cdns.tinymce + (fm.options.cdns.tinymce.match(/\.js/)? '' : '/tinymce.min.js'), function() {
 						setTimeout(function() {
 							self.confObj.loader.resolve();
 						}, 0);
