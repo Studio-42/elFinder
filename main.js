@@ -50,7 +50,10 @@
 							apikey: '359qg6hf7t40'
 						},
 						creativeCloudApiKey : '6e62687b643a413cbb6aedf72ced95e3',
-						managerUrl : 'manager.html'
+						managerUrl : 'manager.html',
+						tinymce {
+							imagetools_cors_hosts: ['hypweb.net']
+						}
 					}
 				},
 				quicklook : {
