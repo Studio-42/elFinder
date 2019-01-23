@@ -39,7 +39,7 @@ $.fn.dialogelfinder = function(opts, opts2) {
 				init && init(e, fm);
 			};
 
-			elfinder = node.addClass('dialogelfinder touch-punch')
+			elfinder = node.addClass('elfinder dialogelfinder touch-punch')
 				.css('position', 'absolute')
 				.hide()
 				.appendTo('body')
