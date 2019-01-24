@@ -483,7 +483,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 						return;
 					}
 					if (! css && ! dialog.data('resizing')) {
-						nodeFull = elfNode.hasClass('elfinder-fullscreen');
+						nodeFull = elfNode.hasClass('elfinder-fullscreen') || fm.options.enableAlways;
 						dialog.css(nodeFull? {
 							maxWidth  : '100%',
 							maxHeight : '100%',
