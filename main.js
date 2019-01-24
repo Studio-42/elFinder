@@ -34,7 +34,7 @@
             sortOrder : 'desc',
             sortStickFolders : false,
             themes : {
-                'dark-slim'     : 'https://nao-pon.github.io/elfinder-theme-manifests/dark-slim.json',
+                'dark-slim'     : 'https://johnfort.github.io/elFinder.themes/dark-slim/manifest.json',
                 'material'      : 'https://nao-pon.github.io/elfinder-theme-manifests/material-default.json',
                 'material-gray' : 'https://nao-pon.github.io/elfinder-theme-manifests/material-gray.json',
                 'material-light': 'https://nao-pon.github.io/elfinder-theme-manifests/material-light.json',
