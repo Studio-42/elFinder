@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.46 (2.1-src Nightly: 75d140b) (2019-01-23)
+ * Version 2.1.46 (2.1-src Nightly: afb78ae) (2019-01-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10102,7 +10102,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.46 (2.1-src Nightly: 75d140b)';
+elFinder.prototype.version = '2.1.46 (2.1-src Nightly: afb78ae)';
 
 
 
@@ -11254,10 +11254,10 @@ elFinder.prototype._options = {
 	 * Here set not required plugins as folders tree/toolbar/statusbar etc.
 	 *
 	 * @type Array
-	 * @default ['toolbar', 'tree', 'path', 'stat']
+	 * @default ['toolbar', 'places', 'tree', 'path', 'stat']
 	 * @full ['toolbar', 'places', 'tree', 'path', 'stat']
 	 */
-	ui : ['toolbar', 'tree', 'path', 'stat'],
+	ui : ['toolbar', 'places', 'tree', 'path', 'stat'],
 	
 	/**
 	 * Some UI plugins options.
@@ -17751,7 +17751,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 						return;
 					}
 					if (! css && ! dialog.data('resizing')) {
-						nodeFull = elfNode.hasClass('elfinder-fullscreen');
+						nodeFull = elfNode.hasClass('elfinder-fullscreen') || fm.options.enableAlways;
 						dialog.css(nodeFull? {
 							maxWidth  : '100%',
 							maxHeight : '100%',
