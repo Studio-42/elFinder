@@ -33,7 +33,7 @@ $.fn.elfindersortbutton = function(cmd) {
 					}
 				}),
 			hide = function() { fm.toHide(menu); },
-			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
+			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu elfinder-button-sort-menu ui-corner-all"/>')
 				.hide()
 				.appendTo(fm.getUI())
 				.on('mouseenter mouseleave', '.'+item, function(e) { $(this).toggleClass(hover, e.type === 'mouseenter'); })
@@ -86,12 +86,7 @@ $.fn.elfindersortbutton = function(cmd) {
 			}
 		})
 		.bind('disable select', hide)
-		.bind('open', function() {
-			menu.children('[rel]').each(function() {
-				var $this = $(this);
-				$this.toggle(fm.sorters[$this.attr('rel')]);
-			});
-		}).bind('sortchange', update).getUI().on('click', hide);
+		.bind('sortchange', update).getUI().on('click', hide);
 		
 		if (menu.children().length > 1) {
 			cmd.change(function() {
