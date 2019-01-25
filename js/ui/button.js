@@ -17,10 +17,10 @@ $.fn.elfinderbutton = function(cmd) {
 			selected = 'elfinder-button-menu-item-selected',
 			menu,
 			text     = $('<span class="elfinder-button-text">'+cmd.title+'</span>'),
-			prvCname = 'elfinder-button-icon-' + (cmd.className? cmd.className : cmd.name),
+			prvCname = cmd.className? cmd.className : cmd.name,
 			button   = $(this).addClass('ui-state-default elfinder-button')
 				.attr('title', cmd.title)
-				.append('<span class="elfinder-button-icon ' + prvCname + '"/>', text)
+				.append('<span class="elfinder-button-icon elfinder-button-icon-' + prvCname + '"/>', text)
 				.on('mouseenter mouseleave', function(e) { !button.hasClass(disabled) && button[e.type == 'mouseleave' ? 'removeClass' : 'addClass'](hover);})
 				.on('click', function(e) { 
 					if (!button.hasClass(disabled)) {
@@ -76,7 +76,7 @@ $.fn.elfinderbutton = function(cmd) {
 		if (Array.isArray(cmd.variants)) {
 			button.addClass('elfinder-menubutton');
 			
-			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
+			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu elfinder-button-' + prvCname + '-menu ui-corner-all"/>')
 				.hide()
 				.appendTo(fm.getUI())
 				.on('mouseenter mouseleave', '.'+item, function() { $(this).toggleClass(hover); })
@@ -117,9 +117,12 @@ $.fn.elfinderbutton = function(cmd) {
 					button[cmd.active() ? 'addClass' : 'removeClass'](active);
 				}
 				if (cmd.syncTitleOnChange) {
-					cName = 'elfinder-button-icon-' + (cmd.className? cmd.className : cmd.name);
+					cName = cmd.className? cmd.className : cmd.name;
 					if (prvCname !== cName) {
-						button.children('.elfinder-button-icon').removeClass(prvCname).addClass(cName);
+						button.children('.elfinder-button-icon').removeClass('elfinder-button-icon-' + prvCname).addClass('elfinder-button-icon-' + cName);
+						if (menu) {
+							menu.removeClass('elfinder-button-' + prvCname + '-menu').addClass('elfinder-button-' + cName + '-menu');
+						}
 						prvCname = cName;
 					}
 					text.html(cmd.title);
