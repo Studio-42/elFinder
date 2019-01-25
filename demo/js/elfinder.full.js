@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.46 (2.1-src Nightly: afb78ae) (2019-01-24)
+ * Version 2.1.46 (2.1-src Nightly: 1cd934c) (2019-01-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10102,7 +10102,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.46 (2.1-src Nightly: afb78ae)';
+elFinder.prototype.version = '2.1.46 (2.1-src Nightly: 1cd934c)';
 
 
 
@@ -13505,10 +13505,10 @@ $.fn.elfinderbutton = function(cmd) {
 			selected = 'elfinder-button-menu-item-selected',
 			menu,
 			text     = $('<span class="elfinder-button-text">'+cmd.title+'</span>'),
-			prvCname = 'elfinder-button-icon-' + (cmd.className? cmd.className : cmd.name),
+			prvCname = cmd.className? cmd.className : cmd.name,
 			button   = $(this).addClass('ui-state-default elfinder-button')
 				.attr('title', cmd.title)
-				.append('<span class="elfinder-button-icon ' + prvCname + '"/>', text)
+				.append('<span class="elfinder-button-icon elfinder-button-icon-' + prvCname + '"/>', text)
 				.on('mouseenter mouseleave', function(e) { !button.hasClass(disabled) && button[e.type == 'mouseleave' ? 'removeClass' : 'addClass'](hover);})
 				.on('click', function(e) { 
 					if (!button.hasClass(disabled)) {
@@ -13564,7 +13564,7 @@ $.fn.elfinderbutton = function(cmd) {
 		if (Array.isArray(cmd.variants)) {
 			button.addClass('elfinder-menubutton');
 			
-			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
+			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu elfinder-button-' + prvCname + '-menu ui-corner-all"/>')
 				.hide()
 				.appendTo(fm.getUI())
 				.on('mouseenter mouseleave', '.'+item, function() { $(this).toggleClass(hover); })
@@ -13605,9 +13605,12 @@ $.fn.elfinderbutton = function(cmd) {
 					button[cmd.active() ? 'addClass' : 'removeClass'](active);
 				}
 				if (cmd.syncTitleOnChange) {
-					cName = 'elfinder-button-icon-' + (cmd.className? cmd.className : cmd.name);
+					cName = cmd.className? cmd.className : cmd.name;
 					if (prvCname !== cName) {
-						button.children('.elfinder-button-icon').removeClass(prvCname).addClass(cName);
+						button.children('.elfinder-button-icon').removeClass('elfinder-button-icon-' + prvCname).addClass('elfinder-button-icon-' + cName);
+						if (menu) {
+							menu.removeClass('elfinder-button-' + prvCname + '-menu').addClass('elfinder-button-' + cName + '-menu');
+						}
 						prvCname = cName;
 					}
 					text.html(cmd.title);
@@ -19695,7 +19698,7 @@ $.fn.elfindersortbutton = function(cmd) {
 					}
 				}),
 			hide = function() { fm.toHide(menu); },
-			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu ui-corner-all"/>')
+			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu elfinder-button-sort-menu ui-corner-all"/>')
 				.hide()
 				.appendTo(fm.getUI())
 				.on('mouseenter mouseleave', '.'+item, function(e) { $(this).toggleClass(hover, e.type === 'mouseenter'); })
@@ -19748,12 +19751,7 @@ $.fn.elfindersortbutton = function(cmd) {
 			}
 		})
 		.bind('disable select', hide)
-		.bind('open', function() {
-			menu.children('[rel]').each(function() {
-				var $this = $(this);
-				$this.toggle(fm.sorters[$this.attr('rel')]);
-			});
-		}).bind('sortchange', update).getUI().on('click', hide);
+		.bind('sortchange', update).getUI().on('click', hide);
 		
 		if (menu.children().length > 1) {
 			cmd.change(function() {
@@ -33676,10 +33674,10 @@ elFinder.prototype.commands.sort = function() {
 	fm.bind('sortchange', setVar)
 	.bind('sorterupdate', function() {
 		setVar();
-		fm.getUI('toolbar').find('.elfiner-button-sort .elfinder-button-menu .elfinder-button-menu-item').each(function() {
+		fm.getUI().children('.elfinder-button-sort-menu').children('.elfinder-button-menu-item').each(function() {
 			var tgt = $(this),
 				rel = tgt.attr('rel');
-			tgt.toggle(! rel || fm.sorters[rel]);
+			tgt.toggle(!!(! rel || fm.sorters[rel]));
 		});
 	})
 	.bind('cwdrender', function() {
