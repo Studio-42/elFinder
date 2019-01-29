@@ -600,6 +600,7 @@ elFinder.prototype.commands.edit = function() {
 				id     = 'edit-'+fm.namespace+'-'+file.hash,
 				d      = fm.getUI().find('#'+id),
 				conv   = !convert? 0 : convert,
+				noContent = false,
 				req, error, res;
 			
 			
@@ -628,7 +629,8 @@ elFinder.prototype.commands.edit = function() {
 					return dfrd;
 				}
 
-				if (editor.info.urlAsContent || editor.info.preventGet || editor.info.noContent) {
+				noContent = editor.info.preventGet || editor.info.noContent;
+				if (editor.info.urlAsContent || noContent) {
 					req = $.Deferred();
 					if (editor.info.urlAsContent) {
 						fm.url(hash, { async: true, onetime: true, temporary: true }).done(function(url) {
@@ -678,7 +680,7 @@ elFinder.prototype.commands.edit = function() {
 							}
 						});
 					} else {
-						if ((!editor || !editor.info || !editor.info.preventGet) && fm.mimeIsText(file.mime)) {
+						if (!noContent && fm.mimeIsText(file.mime)) {
 							reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i');
 							if (!editor.info.dataScheme) {
 								if (window.atob && (m = data.content.match(reg))) {
