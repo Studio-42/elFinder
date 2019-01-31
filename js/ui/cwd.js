@@ -2458,7 +2458,8 @@ $.fn.elfindercwd = function(fm, options) {
 					sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-incsearch-result .elfinder-cwd:not(.elfinder-table-header-sticky):after{ content:"'+fm.i18n('emptyIncSearch')+'" }', i++);
 					sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-letsearch-result .elfinder-cwd:not(.elfinder-table-header-sticky):after{ content:"'+fm.i18n('emptyLetSearch')+'" }', i++);
 				}
-				if (iconSize = fm.storage('iconsize') || 0) {
+				if (iconSize = (fm.storage('iconsize') || options.iconsView.size || 0)) {
+					iconSize = Math.min(iconSize, options.iconsView.sizeMax);
 					cwd.trigger('iconpref', {size: iconSize});
 				}
 				if (! mobile) {
