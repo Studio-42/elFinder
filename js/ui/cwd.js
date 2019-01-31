@@ -1423,6 +1423,7 @@ $.fn.elfindercwd = function(fm, options) {
 							} else {
 								place.append(nodes);
 							}
+							++bufferExt.renderd;
 						}
 						
 						if (fm.cwdHash2Elm(hash).length) {
