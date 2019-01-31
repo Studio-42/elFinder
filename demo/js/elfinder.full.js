@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.46 (2.1-src Nightly: 7d1cc18) (2019-01-31)
+ * Version 2.1.46 (2.1-src Nightly: 059d691) (2019-01-31)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10102,7 +10102,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.46 (2.1-src Nightly: 7d1cc18)';
+elFinder.prototype.version = '2.1.46 (2.1-src Nightly: 059d691)';
 
 
 
@@ -16794,7 +16794,8 @@ $.fn.elfindercwd = function(fm, options) {
 					sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-incsearch-result .elfinder-cwd:not(.elfinder-table-header-sticky):after{ content:"'+fm.i18n('emptyIncSearch')+'" }', i++);
 					sheet.insertRule('.elfinder-cwd-wrapper-empty.elfinder-search-result.elfinder-letsearch-result .elfinder-cwd:not(.elfinder-table-header-sticky):after{ content:"'+fm.i18n('emptyLetSearch')+'" }', i++);
 				}
-				if (iconSize = fm.storage('iconsize') || 0) {
+				if (iconSize = (fm.storage('iconsize') || options.iconsView.size || 0)) {
+					iconSize = Math.min(iconSize, options.iconsView.sizeMax);
 					cwd.trigger('iconpref', {size: iconSize});
 				}
 				if (! mobile) {
