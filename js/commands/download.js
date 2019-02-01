@@ -272,8 +272,11 @@ elFinder.prototype.commands.download = function() {
 										}
 									});
 								} else {
-									click(dllink.hide().appendTo('body').get(0));
-									dllink.remove();
+									// Delay timing to prevent warning dialog of leaving the page
+									requestAnimationFrame(function() {
+										click(dllink.hide().appendTo('body').get(0));
+										dllink.remove();
+									});
 								}
 							} else {
 								form = $('<form action="'+fm.options.url+'" method="post" target="'+uniq+'" style="display:none"/>')
