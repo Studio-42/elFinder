@@ -106,14 +106,26 @@
 }
 
 .elfinder-touch .elfinder-button-icon {
-    -moz-transform-origin: top left;
-    -moz-transform: scale(1.25);
-    zoom: 1.25;
+    transform: scale(1.25);
+    transform-origin: top left;
+}
+
+.elfinder-rtl.elfinder-touch .elfinder-button-icon {
+    transform-origin: top right;
 }
 
 .elfinder-touch .elfinder-button-text {
-    -moz-transform: translate(3px, 3px);
+    transform: translate(3px, 3px);
     top: -5px;
+}
+
+.elfinder-touch .elfinder-button-icon.elfinder-contextmenu-extra-icon {
+    transform: scale(2);
+    transform-origin: 12px 8px;
+}
+
+.elfinder-rtl.elfinder-touch .elfinder-button-icon.elfinder-contextmenu-extra-icon {
+    transform-origin: 4px 8px;
 }
 
 /* buttons icons */
@@ -351,6 +363,21 @@
     -ms-transform: scale(-1, 1);
     -webkit-transform: scale(-1, 1);
     transform: scale(-1, 1);
+}
+
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-back,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-forward,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-getfile,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-help,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-redo,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-rename,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-search,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-undo,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-view-list,
+.elfinder-rtl.elfinder-touch .ui-icon-search {
+    -ms-transform: scale(-1.25, 1.25) translateX(16px);
+    -webkit-transform: scale(-1.25, 1.25) translateX(16px);
+    transform: scale(-1.25, 1.25) translateX(16px);
 }
 
 /* button with dropdown menu*/

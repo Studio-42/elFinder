@@ -1208,6 +1208,7 @@ $.fn.elfindertree = function(fm, opts) {
 						return;
 					}
 					clearTimeout($(this).data('tmlongtap'));
+					$(this).removeData('tmlongtap');
 					if (e.type == 'touchmove') {
 						$(this).removeClass(hover);
 					}
@@ -1282,13 +1283,14 @@ $.fn.elfindertree = function(fm, opts) {
 					
 					e.preventDefault();
 
-					fm.trigger('contextmenu', {
-						'type'    : 'navbar',
-						'targets' : [fm.navId2Hash($(this).attr('id'))],
-						'x'       : e.pageX,
-						'y'       : e.pageY
-					});
-					
+					if (!self.data('tmlongtap')) {
+						fm.trigger('contextmenu', {
+							'type'    : 'navbar',
+							'targets' : [fm.navId2Hash($(this).attr('id'))],
+							'x'       : e.pageX,
+							'y'       : e.pageY
+						});
+					}
 					self.addClass('ui-state-hover');
 					
 					fm.getUI('contextmenu').children().on('mouseenter', function() {
