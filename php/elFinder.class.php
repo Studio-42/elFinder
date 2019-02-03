@@ -3214,7 +3214,23 @@ class elFinder
             // do hook function 'upload.presave'
             if (!empty($this->listeners['upload.presave'])) {
                 foreach ($this->listeners['upload.presave'] as $handler) {
-                    call_user_func_array($handler, array(&$thash, &$name, $tmpname, $this, $volume));
+                    $_res = call_user_func_array($handler, array(&$thash, &$name, $tmpname, $this, $volume));
+                    if ($_res && is_array($_res)) {
+                        $_err = !empty($_res['error'])? $_res['error'] : (!empty($_res['warning'])? $_res['warning'] : null);
+                        if ($_err) {
+                            if (is_array($_err)) {
+                                $errors = array_merge($errors, $_err);
+                            } else {
+                                $errors[] = (string)$_err;
+                            }
+                            if ($_res['error']) {
+                                if (!is_uploaded_file($tmpname)) {
+                                    if (unlink($tmpname) && $tmpfname) unset($GLOBALS['elFinderTempFiles'][$tmpfname]);
+                                }
+                                continue 2;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -3224,8 +3240,9 @@ class elFinder
                 touch($tmpname, $mtime);
             }
 
+            $fp = null;
             if (!is_file($tmpname) || ($fp = fopen($tmpname, 'rb')) === false) {
-                $result['warning'] = $this->error(self::ERROR_UPLOAD_FILE, $name, self::ERROR_UPLOAD_TEMP);
+                $errors = array_merge($errors, array(self::ERROR_UPLOAD_FILE, $name, ($fp === false? self::ERROR_UPLOAD_TEMP : self::ERROR_UPLOAD_TRANSFER)));
                 $this->uploadDebug = 'Upload error: unable open tmp file';
                 if (!is_uploaded_file($tmpname)) {
                     if (unlink($tmpname) && $tmpfname) unset($GLOBALS['elFinderTempFiles'][$tmpfname]);
