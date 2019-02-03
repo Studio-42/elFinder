@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.46 (2.1-src Nightly: 216d947) (2019-02-01)
+ * Version 2.1.46 (2.1-src Nightly: ec755f6) (2019-02-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -1337,6 +1337,10 @@ ul.elfinder-help-integrations a:hover {
     overflow: hidden;
 }
 
+.elfinder-touch .elfinder-button-icon.elfinder-contextmenu-icon {
+    transform-origin: center center;
+}
+
 /* command icon in rtl/ltr enviroment */
 .elfinder .elfinder-contextmenu-ltr .elfinder-contextmenu-icon {
     left: 8px;
@@ -1374,10 +1378,9 @@ ul.elfinder-help-integrations a:hover {
 /* command extra icon's <a>, <span> tag */
 .elfinder .elfinder-contextmenu-extra-icon a,
 .elfinder .elfinder-contextmenu-extra-icon span {
-    display: inline-block;
+    position: relative;
     width: 100%;
     height: 100%;
-    padding: 20px;
     margin: 0;
     color: transparent !important;
     text-decoration: none;
@@ -4693,14 +4696,26 @@ embed.elfinder-quicklook-preview-audio {
 }
 
 .elfinder-touch .elfinder-button-icon {
-    -moz-transform-origin: top left;
-    -moz-transform: scale(1.25);
-    zoom: 1.25;
+    transform: scale(1.25);
+    transform-origin: top left;
+}
+
+.elfinder-rtl.elfinder-touch .elfinder-button-icon {
+    transform-origin: top right;
 }
 
 .elfinder-touch .elfinder-button-text {
-    -moz-transform: translate(3px, 3px);
+    transform: translate(3px, 3px);
     top: -5px;
+}
+
+.elfinder-touch .elfinder-button-icon.elfinder-contextmenu-extra-icon {
+    transform: scale(2);
+    transform-origin: 12px 8px;
+}
+
+.elfinder-rtl.elfinder-touch .elfinder-button-icon.elfinder-contextmenu-extra-icon {
+    transform-origin: 4px 8px;
 }
 
 /* buttons icons */
@@ -4938,6 +4953,21 @@ embed.elfinder-quicklook-preview-audio {
     -ms-transform: scale(-1, 1);
     -webkit-transform: scale(-1, 1);
     transform: scale(-1, 1);
+}
+
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-back,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-forward,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-getfile,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-help,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-redo,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-rename,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-search,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-undo,
+.elfinder-rtl.elfinder-touch .elfinder-button-icon-view-list,
+.elfinder-rtl.elfinder-touch .ui-icon-search {
+    -ms-transform: scale(-1.25, 1.25) translateX(16px);
+    -webkit-transform: scale(-1.25, 1.25) translateX(16px);
+    transform: scale(-1.25, 1.25) translateX(16px);
 }
 
 /* button with dropdown menu*/
