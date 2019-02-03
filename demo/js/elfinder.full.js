@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.46 (2.1-src Nightly: 216d947) (2019-02-01)
+ * Version 2.1.46 (2.1-src Nightly: ec755f6) (2019-02-03)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10102,7 +10102,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.46 (2.1-src Nightly: 216d947)';
+elFinder.prototype.version = '2.1.46 (2.1-src Nightly: ec755f6)';
 
 
 
@@ -21537,6 +21537,7 @@ $.fn.elfindertree = function(fm, opts) {
 						return;
 					}
 					clearTimeout($(this).data('tmlongtap'));
+					$(this).removeData('tmlongtap');
 					if (e.type == 'touchmove') {
 						$(this).removeClass(hover);
 					}
@@ -21611,13 +21612,14 @@ $.fn.elfindertree = function(fm, opts) {
 					
 					e.preventDefault();
 
-					fm.trigger('contextmenu', {
-						'type'    : 'navbar',
-						'targets' : [fm.navId2Hash($(this).attr('id'))],
-						'x'       : e.pageX,
-						'y'       : e.pageY
-					});
-					
+					if (!self.data('tmlongtap')) {
+						fm.trigger('contextmenu', {
+							'type'    : 'navbar',
+							'targets' : [fm.navId2Hash($(this).attr('id'))],
+							'x'       : e.pageX,
+							'y'       : e.pageY
+						});
+					}
 					self.addClass('ui-state-hover');
 					
 					fm.getUI('contextmenu').children().on('mouseenter', function() {
@@ -29250,6 +29252,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				'video/mp4'       : 'mp4',
 				'video/x-m4v'     : 'mp4',
 				'video/quicktime' : 'mp4',
+				'video/mpeg'      : 'mpeg',
 				'video/ogg'       : 'ogg',
 				'application/ogg' : 'ogg',
 				'video/webm'      : 'webm',
@@ -29258,12 +29261,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 				'application/vnd.apple.mpegurl' : 'm3u8',
 				'application/x-mpegurl' : 'm3u8',
 				'application/dash+xml'  : 'mpd',
-				'video/x-flv'     : 'flv'
+				'video/x-flv'     : 'flv',
+				'video/x-msvideo' : 'avi'
 			},
 			node,
 			win  = ql.window,
 			navi = ql.navbar,
-			cHls, cDash, pDash, cFlv, autoplay, tm,
+			cHls, cDash, pDash, cFlv, cVideojs, autoplay, tm,
 			controlsList = typeof ql.options.mediaControlsList === 'string' && ql.options.mediaControlsList? ' controlsList="' + fm.escape(ql.options.mediaControlsList) + '"' : '',
 			setNavi = function() {
 				if (fm.UA.iOS) {
@@ -29359,6 +29363,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 				player.load();
 				play(player);
 			},
+			loadVideojs = function(file) {
+				render(file);
+				node[0].src = fm.openUrl(file.hash);
+				cVideojs(node[0], {
+					src: fm.openUrl(file.hash)
+				});
+			},
 			play = function(player) {
 				var hash = node.data('hash'),
 					playPromise;
@@ -29396,7 +29407,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				type = mimes[mime],
 				stock, playPromise;
 			
-			if (mimes[mime] && ql.dispInlineRegex.test(file.mime) && (((type === 'm3u8' || (type === 'mpd' && !fm.UA.iOS) || type === 'flv') && !fm.UA.ltIE10) || ql.support.video[type])) {
+			if (mimes[mime] && ql.dispInlineRegex.test(file.mime) /*&& (((type === 'm3u8' || (type === 'mpd' && !fm.UA.iOS) || type === 'flv') && !fm.UA.ltIE10) || ql.support.video[type])*/) {
 				autoplay = ql.autoPlay();
 				if (ql.support.video[type] && (type !== 'm3u8' || fm.UA.Safari)) {
 					e.stopImmediatePropagation();
@@ -29466,6 +29477,25 @@ elFinder.prototype.commands.quicklook.plugins = [
 									}
 								}
 							);
+						}
+					} else {
+						if (cVideojs) {
+							loadVideojs(file);
+						} else {
+							fm.loadScript(
+								[ 'https://cdnjs.cloudflare.com/ajax/libs/video.js/7.5.0/video.min.js' ],
+								function(res) { 
+									cVideojs = res || window.videojs || false;
+									//window.flvjs = stock;
+									cVideojs && loadVideojs(file);
+								},
+								{
+									tryRequire: true,
+									error : function() {
+										cVideojs = false;
+									}
+								}
+							).loadCss(['https://cdnjs.cloudflare.com/ajax/libs/video.js/7.5.0/video-js.min.css']);
 						}
 					}
 				}
