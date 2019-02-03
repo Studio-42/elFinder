@@ -100,6 +100,9 @@ class elFinderPluginAutoResize extends elFinderPlugin
         }
         if (extension_loaded('exif') && function_exists('exif_imagetype')) {
             $imageType = exif_imagetype($src);
+            if ($imageType === false) {
+                return false;
+            }
         } else {
             $srcImgInfo = getimagesize($src);
             if ($srcImgInfo === false) {
