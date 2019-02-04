@@ -272,11 +272,8 @@ elFinder.prototype.commands.download = function() {
 										}
 									});
 								} else {
-									// Delay timing to prevent warning dialog of leaving the page
-									requestAnimationFrame(function() {
-										click(dllink.hide().appendTo('body').get(0));
-										dllink.remove();
-									});
+									click(dllink.hide().appendTo('body').get(0));
+									dllink.remove();
 								}
 							} else {
 								form = $('<form action="'+fm.options.url+'" method="post" target="'+uniq+'" style="display:none"/>')
@@ -316,6 +313,7 @@ elFinder.prototype.commands.download = function() {
 					clickEv = document.createEvent('MouseEvents');
 					clickEv.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
 				}
+				fm.pauseUnloadCheck(true);
 				a.dispatchEvent(clickEv);
 			},
 			checkCookie = function(id) {
