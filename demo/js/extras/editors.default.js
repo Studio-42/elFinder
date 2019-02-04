@@ -326,13 +326,6 @@
 				fm.destroy();
 				window.close();
 			};
-		} else if (getfile === 'tinymce') {
-			elFinder.prototype._options.getFileCallback = function(file, fm) {
-				// pass selected file data to TinyMCE
-				parent.tinymce.activeEditor.windowManager.getParams().oninsert(file, fm);
-				// close popup window
-				parent.tinymce.activeEditor.windowManager.close();
-			};
 		}
 	}
 	
@@ -1724,11 +1717,16 @@
 			},
 			exts  : ['htm', 'html', 'xhtml'],
 			setup : function(opts, fm) {
+				var confObj = this;
 				if (!fm.options.cdns.ckeditor) {
-					this.disabled = true;
+					confObj.disabled = true;
 				} else {
-					if (opts.extraOptions && opts.extraOptions.managerUrl) {
-						this.managerUrl = opts.extraOptions.managerUrl;
+					confObj.ckeOpts = {};
+					if (opts.extraOptions) {
+						confObj.ckeOpts = Object.assign({}, opts.extraOptions.ckeditor || {});
+						if (opts.extraOptions.managerUrl) {
+							confObj.managerUrl = opts.extraOptions.managerUrl;
+						}
 					}
 				}
 			},
@@ -1791,7 +1789,7 @@
 						});
 
 						// CKEditor configure
-						CKEDITOR.replace(textarea.id, opts);
+						CKEDITOR.replace(textarea.id, Object.assign(opts, self.confObj.ckeOpts));
 						CKEDITOR.on('dialogDefinition', function(e) {
 							var dlg = e.data.definition.dialog;
 							dlg.on('show', function(e) {
@@ -1844,14 +1842,21 @@
 				var confObj = this;
 				// check cdn and ES6 support
 				if (!fm.options.cdns.ckeditor5 || typeof window.Symbol !== 'function' || typeof Symbol() !== 'symbol') {
-					this.disabled = true;
+					confObj.disabled = true;
 				} else {
+					confObj.ckeOpts = {};
 					if (opts.extraOptions) {
+						// @deprecated option extraOptions.ckeditor5Mode
 						if (opts.extraOptions.ckeditor5Mode) {
-							this.ckeditor5Mode = opts.extraOptions.ckeditor5Mode;
+							confObj.ckeditor5Mode = opts.extraOptions.ckeditor5Mode;
+						}
+						confObj.ckeOpts = Object.assign({}, opts.extraOptions.ckeditor5 || {});
+						if (confObj.ckeOpts.mode) {
+							confObj.ckeditor5Mode = confObj.ckeOpts.mode;
+							delete confObj.ckeOpts.mode;
 						}
 						if (opts.extraOptions.managerUrl) {
-							this.managerUrl = opts.extraOptions.managerUrl;
+							confObj.managerUrl = opts.extraOptions.managerUrl;
 						}
 					}
 				}
@@ -1920,7 +1925,7 @@
 						});
 
 						cEditor
-							.create(editnode, opts)
+							.create(editnode, Object.assign(opts, self.confObj.ckeOpts))
 							.then(function(editor) {
 								var ckf = editor.commands.get('ckfinder'),
 									fileRepo = editor.plugins.get('FileRepository'),
@@ -2111,14 +2116,16 @@
 			},
 			exts  : ['htm', 'html', 'xhtml'],
 			setup : function(opts, fm) {
+				var confObj = this;
 				if (!fm.options.cdns.tinymce) {
-					this.disabled = true;
+					confObj.disabled = true;
 				} else {
+					confObj.mceOpts = {};
 					if (opts.extraOptions) {
-						this.uploadOpts = Object.assign({}, opts.extraOptions.uploadOpts || {});
-						this.mceOpts = Object.assign({}, opts.extraOptions.tinymce || {});
+						confObj.uploadOpts = Object.assign({}, opts.extraOptions.uploadOpts || {});
+						confObj.mceOpts = Object.assign({}, opts.extraOptions.tinymce || {});
 					} else {
-						this.uploadOpts = {};
+						confObj.uploadOpts = {};
 					}
 				}
 			},
