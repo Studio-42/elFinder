@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.46 (2.1-src Nightly: 9747171) (2019-02-03)
+ * Version 2.1.46 (2.1-src Nightly: cf599ba) (2019-02-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -310,6 +310,12 @@ var elFinder = function(elm, opts, bootCallback) {
 		 * @type Object
 		 */
 		extToMimeTable,
+
+		/**
+		 * Disabled page unload function
+		 * @type Boolean
+		 */
+		diableUnloadCheck = false,
 
 		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
@@ -886,6 +892,26 @@ var elFinder = function(elm, opts, bootCallback) {
 			return self.cookie;
 		}
 	})();
+
+	/**
+	 * Set pause page unload check function or Get state
+	 *
+	 * @param      Boolean   state   To set state
+	 * @param      Boolean   keep    Keep disabled
+	 * @return     Boolean|void
+	 */
+	this.pauseUnloadCheck = function(state, keep) {
+		if (typeof state === 'undefined') {
+			return diableUnloadCheck;
+		} else {
+			diableUnloadCheck = !!state;
+			if (state && !keep) {
+				requestAnimationFrame(function() {
+					diableUnloadCheck = false;
+				});
+			}
+		}
+	};
 
 	/**
 	 * Configuration options
@@ -4556,22 +4582,24 @@ var elFinder = function(elm, opts, bootCallback) {
 		})
 		.on('beforeunload.' + namespace,function(e){
 			var msg, cnt;
-			if (node.is(':visible')) {
-				if (self.ui.notify.children().length && $.inArray('hasNotifyDialog', self.options.windowCloseConfirm) !== -1) {
-					msg = self.i18n('ntfsmth');
-				} else if (node.find('.'+self.res('class', 'editing')).length && $.inArray('editingFile', self.options.windowCloseConfirm) !== -1) {
-					msg = self.i18n('editingFile');
-				} else if ((cnt = Object.keys(self.selected()).length) && $.inArray('hasSelectedItem', self.options.windowCloseConfirm) !== -1) {
-					msg = self.i18n('hasSelected', ''+cnt);
-				} else if ((cnt = Object.keys(self.clipboard()).length) && $.inArray('hasClipboardData', self.options.windowCloseConfirm) !== -1) {
-					msg = self.i18n('hasClipboard', ''+cnt);
+			if (!self.pauseUnloadCheck()) {
+				if (node.is(':visible')) {
+					if (self.ui.notify.children().length && $.inArray('hasNotifyDialog', self.options.windowCloseConfirm) !== -1) {
+						msg = self.i18n('ntfsmth');
+					} else if (node.find('.'+self.res('class', 'editing')).length && $.inArray('editingFile', self.options.windowCloseConfirm) !== -1) {
+						msg = self.i18n('editingFile');
+					} else if ((cnt = Object.keys(self.selected()).length) && $.inArray('hasSelectedItem', self.options.windowCloseConfirm) !== -1) {
+						msg = self.i18n('hasSelected', ''+cnt);
+					} else if ((cnt = Object.keys(self.clipboard()).length) && $.inArray('hasClipboardData', self.options.windowCloseConfirm) !== -1) {
+						msg = self.i18n('hasClipboard', ''+cnt);
+					}
+					if (msg) {
+						e.returnValue = msg;
+						return msg;
+					}
 				}
-				if (msg) {
-					e.returnValue = msg;
-					return msg;
-				}
+				self.trigger('unload');
 			}
-			self.trigger('unload');
 		});
 
 		// bind window onmessage for CORS
@@ -10102,7 +10130,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.46 (2.1-src Nightly: 9747171)';
+elFinder.prototype.version = '2.1.46 (2.1-src Nightly: cf599ba)';
 
 
 
@@ -22861,11 +22889,8 @@ elFinder.prototype.commands.download = function() {
 										}
 									});
 								} else {
-									// Delay timing to prevent warning dialog of leaving the page
-									requestAnimationFrame(function() {
-										click(dllink.hide().appendTo('body').get(0));
-										dllink.remove();
-									});
+									click(dllink.hide().appendTo('body').get(0));
+									dllink.remove();
 								}
 							} else {
 								form = $('<form action="'+fm.options.url+'" method="post" target="'+uniq+'" style="display:none"/>')
@@ -22905,6 +22930,7 @@ elFinder.prototype.commands.download = function() {
 					clickEv = document.createEvent('MouseEvents');
 					clickEv.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
 				}
+				fm.pauseUnloadCheck(true);
 				a.dispatchEvent(clickEv);
 			},
 			checkCookie = function(id) {
