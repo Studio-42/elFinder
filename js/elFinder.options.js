@@ -523,8 +523,13 @@ elFinder.prototype._options = {
 				// Uses self location with the empty value or not defined.
 				//managerUrl : 'elfinder.html'
 				managerUrl : null,
-				// CKEditor5' builds mode - 'classic', 'inline' or 'balloon' 
-				ckeditor5Mode : 'inline',
+				// CKEditor editor options
+				ckeditor: {},
+				// CKEditor 5 editor options
+				ckeditor5: {
+					// builds mode - 'classic', 'inline' or 'balloon' 
+					mode: 'inline'
+				},
 				// TinyMCE editor options
 				tinymce : {},
 				// Setting for Online-Convert.com
