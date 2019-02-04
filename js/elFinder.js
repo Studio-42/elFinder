@@ -280,6 +280,12 @@ var elFinder = function(elm, opts, bootCallback) {
 		 */
 		extToMimeTable,
 
+		/**
+		 * Disabled page unload function
+		 * @type Boolean
+		 */
+		diableUnloadCheck = false,
+
 		beeper = $(document.createElement('audio')).hide().appendTo('body')[0],
 			
 		syncInterval,
@@ -855,6 +861,26 @@ var elFinder = function(elm, opts, bootCallback) {
 			return self.cookie;
 		}
 	})();
+
+	/**
+	 * Set pause page unload check function or Get state
+	 *
+	 * @param      Boolean   state   To set state
+	 * @param      Boolean   keep    Keep disabled
+	 * @return     Boolean|void
+	 */
+	this.pauseUnloadCheck = function(state, keep) {
+		if (typeof state === 'undefined') {
+			return diableUnloadCheck;
+		} else {
+			diableUnloadCheck = !!state;
+			if (state && !keep) {
+				requestAnimationFrame(function() {
+					diableUnloadCheck = false;
+				});
+			}
+		}
+	};
 
 	/**
 	 * Configuration options
@@ -4525,22 +4551,24 @@ var elFinder = function(elm, opts, bootCallback) {
 		})
 		.on('beforeunload.' + namespace,function(e){
 			var msg, cnt;
-			if (node.is(':visible')) {
-				if (self.ui.notify.children().length && $.inArray('hasNotifyDialog', self.options.windowCloseConfirm) !== -1) {
-					msg = self.i18n('ntfsmth');
-				} else if (node.find('.'+self.res('class', 'editing')).length && $.inArray('editingFile', self.options.windowCloseConfirm) !== -1) {
-					msg = self.i18n('editingFile');
-				} else if ((cnt = Object.keys(self.selected()).length) && $.inArray('hasSelectedItem', self.options.windowCloseConfirm) !== -1) {
-					msg = self.i18n('hasSelected', ''+cnt);
-				} else if ((cnt = Object.keys(self.clipboard()).length) && $.inArray('hasClipboardData', self.options.windowCloseConfirm) !== -1) {
-					msg = self.i18n('hasClipboard', ''+cnt);
+			if (!self.pauseUnloadCheck()) {
+				if (node.is(':visible')) {
+					if (self.ui.notify.children().length && $.inArray('hasNotifyDialog', self.options.windowCloseConfirm) !== -1) {
+						msg = self.i18n('ntfsmth');
+					} else if (node.find('.'+self.res('class', 'editing')).length && $.inArray('editingFile', self.options.windowCloseConfirm) !== -1) {
+						msg = self.i18n('editingFile');
+					} else if ((cnt = Object.keys(self.selected()).length) && $.inArray('hasSelectedItem', self.options.windowCloseConfirm) !== -1) {
+						msg = self.i18n('hasSelected', ''+cnt);
+					} else if ((cnt = Object.keys(self.clipboard()).length) && $.inArray('hasClipboardData', self.options.windowCloseConfirm) !== -1) {
+						msg = self.i18n('hasClipboard', ''+cnt);
+					}
+					if (msg) {
+						e.returnValue = msg;
+						return msg;
+					}
 				}
-				if (msg) {
-					e.returnValue = msg;
-					return msg;
-				}
+				self.trigger('unload');
 			}
-			self.trigger('unload');
 		});
 
 		// bind window onmessage for CORS
