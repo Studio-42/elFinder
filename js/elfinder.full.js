@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.46 (2.1-src Nightly: cf599ba) (2019-02-04)
+ * Version 2.1.46 (2.1-src Nightly: e6a959b) (2019-02-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10130,7 +10130,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.46 (2.1-src Nightly: cf599ba)';
+elFinder.prototype.version = '2.1.46 (2.1-src Nightly: e6a959b)';
 
 
 
@@ -11077,8 +11077,13 @@ elFinder.prototype._options = {
 				// Uses self location with the empty value or not defined.
 				//managerUrl : 'elfinder.html'
 				managerUrl : null,
-				// CKEditor5' builds mode - 'classic', 'inline' or 'balloon' 
-				ckeditor5Mode : 'inline',
+				// CKEditor editor options
+				ckeditor: {},
+				// CKEditor 5 editor options
+				ckeditor5: {
+					// builds mode - 'classic', 'inline' or 'balloon' 
+					mode: 'inline'
+				},
 				// TinyMCE editor options
 				tinymce : {},
 				// Setting for Online-Convert.com
