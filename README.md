@@ -86,7 +86,9 @@ Requirements
 ------------
 ### jQuery / jQuery UI
  * jQuery 1.8.0+
- * jQuery UI 1.9.0+ (require draggable, droppable, resizable, selectable and slider)
+ * jQuery UI 1.9.0+
+    * Required: draggable, droppable, resizable, selectable, button and slider
+    * Recommend: sorter (To make sortable the List column and the Places)
 
 **However, we recommend newest version.**
 
