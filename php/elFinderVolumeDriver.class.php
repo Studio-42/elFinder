@@ -5126,11 +5126,13 @@ abstract class elFinderVolumeDriver
 
         if ($res = $this->convEncOut($this->_move($this->convEncIn($src), $this->convEncIn($dst), $this->convEncIn($name)))) {
             $this->clearstatcache();
-            $this->removed[] = $stat;
             if ($stat['mime'] === 'directory') {
                 $this->updateSubdirsCache($dst, true);
             }
-            return is_string($res) ? $res : $this->joinPathCE($dst, $name);
+            $path = is_string($res) ? $res : $this->joinPathCE($dst, $name);
+            $this->added[] = $this->stat($path);
+            $this->removed[] = $stat;
+            return $path;
         }
 
         return $this->setError(elFinder::ERROR_MOVE, $this->path($stat['hash']));
