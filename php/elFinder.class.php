@@ -3415,8 +3415,6 @@ class elFinder
 
             if ($rnres) {
                 $result = array_merge_recursive($result, $rnres);
-            } else {
-                $result['added'][] = $file;
             }
         }
         if (count($result['warning']) < 1) {
