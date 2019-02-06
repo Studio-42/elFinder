@@ -3413,15 +3413,10 @@ class elFinder
                 $result['warning'] = array_merge($result['warning'], $this->error($error));
             }
 
-            $dirChange = !empty($file['dirChange']);
-            unset($file['dirChange']);
-            if ($dirChange) {
-                $result['changed'][] = $file;
-            } else {
-                $result['added'][] = $file;
-            }
             if ($rnres) {
                 $result = array_merge_recursive($result, $rnres);
+            } else {
+                $result['added'][] = $file;
             }
         }
         if (count($result['warning']) < 1) {
