@@ -2154,22 +2154,24 @@
 								mceCv && mceCv.show();
 								mceDlg && mceDlg.show();
 							},
+							tVer = tinymce.majorVersion,
 							opts, mceDlg, mceCv;
 
 						// set base height
 						base.height(h);
 						// fit height function
 						textarea._setHeight = function(height) {
-							var base = $(this).parent(),
-								h	= height || base.innerHeight(),
-								ctrH = 0,
-								areaH;
-							base.find('.mce-container-body:first').children('.mce-top-part,.mce-statusbar').each(function() {
-								ctrH += $(this).outerHeight(true);
-							});
-							areaH = h - ctrH - delta;
-							base.find('.mce-edit-area iframe:first').height(areaH);
-							return areaH;
+							if (tVer < 5) {
+								var base = $(this).parent(),
+									h = height || base.innerHeight(),
+									ctrH = 0,
+									areaH;
+								base.find('.mce-container-body:first').children('.mce-top-part,.mce-statusbar').each(function() {
+									ctrH += $(this).outerHeight(true);
+								});
+								areaH = h - ctrH - delta;
+								base.find('.mce-edit-area iframe:first').height(areaH);
+							}
 						};
 
 						// TinyMCE configure options
@@ -2306,6 +2308,11 @@
 							}
 						};
 
+						// TinyMCE 5 supports "height: 100%"
+						if (tVer >= 5) {
+							opts.height = '100%';
+						}
+
 						// trigger event 'editEditorPrepare'
 						self.trigger('Prepare', {
 							node: textarea,
@@ -2320,10 +2327,10 @@
 				
 				if (!self.confObj.loader) {
 					self.confObj.loader = $.Deferred();
-					$.getScript(fm.options.cdns.tinymce + (fm.options.cdns.tinymce.match(/\.js/)? '' : '/tinymce.min.js'), function() {
-						setTimeout(function() {
-							self.confObj.loader.resolve();
-						}, 0);
+					self.fm.loadScript([fm.options.cdns.tinymce + (fm.options.cdns.tinymce.match(/\.js/)? '' : '/tinymce.min.js')], function() {
+						self.confObj.loader.resolve();
+					}, {
+						loadType: 'tag'
 					});
 				}
 				self.confObj.loader.done(init);
