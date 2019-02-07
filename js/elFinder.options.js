@@ -13,10 +13,10 @@ elFinder.prototype._options = {
 	cdns : {
 		// for editor etc.
 		ace        : 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2',
-		codemirror : 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.42.2',
+		codemirror : 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.43.0',
 		ckeditor   : 'https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.11.2',
 		ckeditor5  : 'https://cdn.ckeditor.com/ckeditor5/11.2.0',
-		tinymce    : 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.9.2',
+		tinymce    : 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.0.0',
 		simplemde  : 'https://cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		fabric16   : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.6.7',
 		tui        : 'https://uicdn.toast.com',
