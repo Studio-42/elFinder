@@ -355,7 +355,9 @@
 				if (fm.UA.ltIE8 || fm.UA.Mobile) {
 					this.disabled = true;
 				} else {
-					this.opts = Object.assign({}, opts.extraOptions.tuiImgEditOpts || {}, {
+					this.opts = Object.assign({
+						version: 'v3.5.0'
+					}, opts.extraOptions.tuiImgEditOpts || {}, {
 						iconsPath : fm.baseUrl + 'img/tui-',
 						theme : {}
 					});
@@ -374,7 +376,7 @@
 					fm   = this.fm,
 					dfrd = $.Deferred(),
 					cdns = fm.options.cdns,
-					ver  = 'v3.4.0',
+					ver  = self.confObj.opts.version,
 					init = function(editor) {
 						var $base = $(base),
 							bParent = $base.parent(),
