@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.46 (2.1-src Nightly: a8e3957) (2019-02-18)
+ * Version 2.1.46 (2.1-src Nightly: 9a27dfc) (2019-02-19)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -3625,7 +3625,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			}
 		}
 
-		var orgStyle, bodyOvf, resizeTm, fullElm, exitFull, toFull,
+		var orgStyle, bodyOvf, resizeTm, fullElm, exitFull, toFull, funcObj,
 			cls = 'elfinder-fullscreen',
 			clsN = 'elfinder-fullscreen-native',
 			checkDialog = function() {
@@ -3645,85 +3645,88 @@ var elFinder = function(elm, opts, bootCallback) {
 					}
 				});
 			},
-			funcObj = self.UA.Fullscreen? {
-				// native full screen mode
-				
-				fullElm: function() {
-					return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || null;
-				},
-				
-				exitFull: function() {
-					if (document.exitFullscreen) {
-						return document.exitFullscreen();
-					} else if (document.webkitExitFullscreen) {
-						return document.webkitExitFullscreen();
-					} else if (document.mozCancelFullScreen) {
-						return document.mozCancelFullScreen();
-					} else if (document.msExitFullscreen) {
-						return document.msExitFullscreen();
-					}
-				},
-				
-				toFull: function(elem) {
-					if (elem.requestFullscreen) {
-						return elem.requestFullscreen();
-					} else if (elem.webkitRequestFullscreen) {
-						return elem.webkitRequestFullscreen();
-					} else if (elem.mozRequestFullScreen) {
-						return elem.mozRequestFullScreen();
-					} else if (elem.msRequestFullscreen) {
-						return elem.msRequestFullscreen();
-					}
-					return false;
-				}
-			} : {
-				// node element maximize mode
-				
-				fullElm: function() {
-					var full;
-					if (node.hasClass(cls)) {
-						return node.get(0);
-					} else {
-						full = node.find('.' + cls);
-						if (full.length) {
-							return full.get(0);
+			setFuncObj = function() {
+				var useFullscreen = self.storage('useFullscreen');
+				funcObj = self.UA.Fullscreen && (useFullscreen? useFullscreen > 0 : self.options.commandsOptions.fullscreen.mode === 'screen') ? {
+					// native full screen mode
+					
+					fullElm: function() {
+						return document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || null;
+					},
+					
+					exitFull: function() {
+						if (document.exitFullscreen) {
+							return document.exitFullscreen();
+						} else if (document.webkitExitFullscreen) {
+							return document.webkitExitFullscreen();
+						} else if (document.mozCancelFullScreen) {
+							return document.mozCancelFullScreen();
+						} else if (document.msExitFullscreen) {
+							return document.msExitFullscreen();
 						}
+					},
+					
+					toFull: function(elem) {
+						if (elem.requestFullscreen) {
+							return elem.requestFullscreen();
+						} else if (elem.webkitRequestFullscreen) {
+							return elem.webkitRequestFullscreen();
+						} else if (elem.mozRequestFullScreen) {
+							return elem.mozRequestFullScreen();
+						} else if (elem.msRequestFullscreen) {
+							return elem.msRequestFullscreen();
+						}
+						return false;
 					}
-					return null;
-				},
-				
-				exitFull: function() {
-					var elm;
+				} : {
+					// node element maximize mode
 					
-					$(window).off('resize.' + namespace, resize);
-					if (bodyOvf !== void(0)) {
-						$('body').css('overflow', bodyOvf);
+					fullElm: function() {
+						var full;
+						if (node.hasClass(cls)) {
+							return node.get(0);
+						} else {
+							full = node.find('.' + cls);
+							if (full.length) {
+								return full.get(0);
+							}
+						}
+						return null;
+					},
+					
+					exitFull: function() {
+						var elm;
+						
+						$(window).off('resize.' + namespace, resize);
+						if (bodyOvf !== void(0)) {
+							$('body').css('overflow', bodyOvf);
+						}
+						bodyOvf = void(0);
+						
+						if (orgStyle) {
+							elm = orgStyle.elm;
+							restoreStyle(elm);
+							$(elm).trigger('resize', {fullscreen: 'off'});
+						}
+						
+						$(window).trigger('resize');
+					},
+					
+					toFull: function(elem) {
+						bodyOvf = $('body').css('overflow') || '';
+						$('body').css('overflow', 'hidden');
+						
+						$(elem).css(self.getMaximizeCss())
+							.addClass(cls)
+							.trigger('resize', {fullscreen: 'on'});
+						
+						checkDialog();
+						
+						$(window).on('resize.' + namespace, resize).trigger('resize');
+						
+						return true;
 					}
-					bodyOvf = void(0);
-					
-					if (orgStyle) {
-						elm = orgStyle.elm;
-						restoreStyle(elm);
-						$(elm).trigger('resize', {fullscreen: 'off'});
-					}
-					
-					$(window).trigger('resize');
-				},
-				
-				toFull: function(elem) {
-					bodyOvf = $('body').css('overflow') || '';
-					$('body').css('overflow', 'hidden');
-					
-					$(elem).css(self.getMaximizeCss())
-						.addClass(cls)
-						.trigger('resize', {fullscreen: 'on'});
-					
-					checkDialog();
-					
-					$(window).on('resize.' + namespace, resize).trigger('resize');
-					
-					return true;
-				}
+				};
 			},
 			restoreStyle = function(elem) {
 				if (orgStyle && orgStyle.elm == elem) {
@@ -3743,6 +3746,8 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 			};
 		
+		setFuncObj();
+
 		$(document).on('fullscreenchange.' + namespace + ' webkitfullscreenchange.' + namespace + ' mozfullscreenchange.' + namespace + ' MSFullscreenChange.' + namespace, function(e){
 			if (self.UA.Fullscreen) {
 				var elm = funcObj.fullElm(),
@@ -3797,6 +3802,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 			}
 			
+			setFuncObj();
 			orgStyle = {elm: elm, style: $(elm).attr('style')};
 			if (funcObj.toFull(elm) !== false) {
 				return elm;
@@ -10130,7 +10136,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.46 (2.1-src Nightly: a8e3957)';
+elFinder.prototype.version = '2.1.46 (2.1-src Nightly: 9a27dfc)';
 
 
 
@@ -11092,6 +11098,10 @@ elFinder.prototype._options = {
 					showLink : true // It must be enabled with free account
 				}
 			}
+		},
+		fullscreen : {
+			// fullscreen mode 'screen'(When the browser supports it) or 'window'
+			mode: 'screen' // 'screen' or 'window'
 		},
 		search : {
 			// Incremental search from the current view
@@ -12948,7 +12958,7 @@ $.fn.dialogelfinder = function(opts, opts2) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2019-01-22
+ * @version 2019-02-18
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -13428,6 +13438,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'license'         : 'License', // from v2.1.43 added 19.10.2018
 			'exportToSave'    : 'This item can\'t be saved. To avoid losing the edits you need to export to your PC.', // from v2.1.44 added 1.12.2018
 			'dblclickToSelect': 'Double click on the file to select it.', // from v2.1.47 added 22.1.2019
+			'useFullscreen'   : 'Use fullscreen mode', // from v2.1.47 added 19.2.2019
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Unknown',
@@ -27186,13 +27197,13 @@ elFinder.prototype.commands.preference = function() {
 					'language' : ['language'],
 					'theme' : ['theme'],
 					'toolbar' : ['toolbarPref'],
-					'workspace' : ['iconSize','columnPref', 'selectAction', 'makefileTypes', 'useStoredEditor', 'editorMaximized', 'showHidden'],
+					'workspace' : ['iconSize','columnPref', 'selectAction', 'makefileTypes', 'useStoredEditor', 'editorMaximized', 'useFullscreen', 'showHidden'],
 					'dialog' : ['autoFocusDialog'],
 					'selectionInfo' : ['infoItems', 'hashChecker'],
 					'reset' : ['clearBrowserData'],
 					'all' : true
 				},
-				forms = self.options.prefs || ['language', 'theme', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'makefileTypes', 'useStoredEditor', 'editorMaximized', 'showHidden', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
+				forms = self.options.prefs || ['language', 'theme', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'makefileTypes', 'useStoredEditor', 'editorMaximized', 'useFullscreen', 'showHidden', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
 			
 			forms = fm.arrayFlip(forms, true);
 			
@@ -27512,6 +27523,13 @@ elFinder.prototype.commands.preference = function() {
 				return s? (s > 0) : fm.options.commandsOptions.edit.editorMaximized;
 			})()).on('change', function(e) {
 				fm.storage('editorMaximized', $(this).is(':checked')? 1 : -1);
+			}));
+
+			fm.UA.Fullscreen && forms.useFullscreen && (forms.useFullscreen = $('<input type="checkbox"/>').prop('checked', (function() {
+				var s = fm.storage('useFullscreen');
+				return s? (s > 0) : fm.options.commandsOptions.fullscreen.mode === 'screen';
+			})()).on('change', function(e) {
+				fm.storage('useFullscreen', $(this).is(':checked')? 1 : -1);
 			}));
 
 			if (forms.showHidden) {

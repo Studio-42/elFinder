@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2019-01-22
+ * @version 2019-02-18
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -489,6 +489,7 @@
 			'license'         : 'ライセンス', // from v2.1.43 added 19.10.2018
 			'exportToSave'    : 'このアイテムは保存できません。 編集内容を失わないようにするには、PCにエクスポートする必要があります。', // from v2.1.44 added 1.12.2018
 			'dblclickToSelect': 'ファイルをダブルクリックして選択します。', // from v2.1.47 added 22.1.2019
+			'useFullscreen'   : 'フルスクリーンモードの利用', // from v2.1.47 added 19.2.2019
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '不明',
