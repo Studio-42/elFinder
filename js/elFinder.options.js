@@ -539,6 +539,10 @@ elFinder.prototype._options = {
 				}
 			}
 		},
+		fullscreen : {
+			// fullscreen mode 'screen'(When the browser supports it) or 'window'
+			mode: 'screen' // 'screen' or 'window'
+		},
 		search : {
 			// Incremental search from the current view
 			incsearch : {
