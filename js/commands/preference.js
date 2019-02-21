@@ -37,7 +37,10 @@ elFinder.prototype.commands.preference = function() {
 			if (fm.options.getFileCallback) {
 				delete forms.selectAction;
 			}
-			
+			if (!fm.UA.Fullscreen) {
+				delete forms.useFullscreen;
+			}
+
 			forms.language && (forms.language = (function() {
 				var langSel = $('<select/>').on('change', function() {
 						var lang = $(this).val();
@@ -352,7 +355,7 @@ elFinder.prototype.commands.preference = function() {
 				fm.storage('editorMaximized', $(this).is(':checked')? 1 : -1);
 			}));
 
-			fm.UA.Fullscreen && forms.useFullscreen && (forms.useFullscreen = $('<input type="checkbox"/>').prop('checked', (function() {
+			forms.useFullscreen && (forms.useFullscreen = $('<input type="checkbox"/>').prop('checked', (function() {
 				var s = fm.storage('useFullscreen');
 				return s? (s > 0) : fm.options.commandsOptions.fullscreen.mode === 'screen';
 			})()).on('change', function(e) {
