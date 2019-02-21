@@ -49,7 +49,7 @@ elFinder.prototype.commands.preference = function() {
 					}),
 					optTags = [],
 					langs = self.options.langs || {
-						ar: 'اللغة العربية',
+						ar: 'العربية',
 						bg: 'Български',
 						ca: 'Català',
 						cs: 'Čeština',
