@@ -1,3 +1,23 @@
+2019-02-25  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.47):
+		- [js] Fixed #2820 remove Multi-byte space characters
+		- [js:jqueryelfinder] bugfix of elfinder reload(restart) on dialogelfinder
+		- [ui:places] Fixed #2822 set title attr correctly
+		- [ui:tree] add an option `uiOptions.tree.attrTitle` to enable set path info to title attr
+		- [js:editors.default] support tinyMCE 5 and integrate image uploader
+		- [js:dialogelfinder] Fixed #2824 freezes browser in uses dialogelfinder
+		- [ui:button] add CSS class `elfinder-button-{COMMAND NAME}-menu` to submenu
+		- [ui:sortbutton] Fixed #2829 sort menu is not synchronized with the data of cwd
+		- [ui:cwd] Fixed #2840 thumbnail is not created when adding an image to an empty folder
+		- [ui:cwd] Fixed #2836 setting CWD icons size not working
+		- [php:core] Fixed #2842 allow to cancel upload on upload.presave callback
+		- [js:core] Fixed #2845 `size` request with wrong params `targets`
+		- [php:session] Fixed #2857 consideration for environment other than "apache2 SAPI"
+		- [cmd:fullscreen] Fixed #2858 add an option of fullscreen mode screen/window
+		- And some minor bug fixes
+
+
 2019-01-14  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.46):
