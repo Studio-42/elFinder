@@ -3476,7 +3476,7 @@ abstract class elFinderVolumeDriver
                     $ss = $this->options['tmbVideoConvSec'];
                 }
             }
-            $cmd = sprintf(ELFINDER_FFMPEG_PATH . ' -i %s -ss 00:00:%.3f -vframes 1 -f image2 %s', escapeshellarg($tmp), $ss, escapeshellarg($file));
+            $cmd = sprintf(ELFINDER_FFMPEG_PATH . ' -i %s -ss 00:00:%.3f -vframes 1 -f image2 -- %s', escapeshellarg($tmp), $ss, escapeshellarg($file));
             $r = ($this->procExec($cmd) === 0);
             clearstatcache();
             if ($r && $ss > 0 && !file_exists($file)) {
@@ -5463,7 +5463,7 @@ abstract class elFinderVolumeDriver
                 }
             } else if ($this->imgLib === 'convert') {
                 $convParams = $this->imageMagickConvertPrepare($tmb, 'png', 100, array(), $stat['mime']);
-                $cmd = sprintf('%s -colorspace sRGB -trim %s %s', ELFINDER_CONVERT_PATH, $convParams['quotedPath'], $convParams['quotedDstPath']);
+                $cmd = sprintf('%s -colorspace sRGB -trim -- %s %s', ELFINDER_CONVERT_PATH, $convParams['quotedPath'], $convParams['quotedDstPath']);
                 $result = false;
                 if ($this->procExec($cmd) === 0) {
                     if (($s = getimagesize($tmb)) !== false) {
@@ -6004,10 +6004,10 @@ abstract class elFinderVolumeDriver
             $quotedPath = escapeshellarg($path);
             $cmds = array();
             if ($this->procExec(ELFINDER_EXIFTRAN_PATH . ' -h') === 0) {
-                $cmds[] = ELFINDER_EXIFTRAN_PATH . ' -i ' . $exiftran[$count] . ' ' . $path;
+                $cmds[] = ELFINDER_EXIFTRAN_PATH . ' -i ' . $exiftran[$count] . ' -- ' . $quotedPath;
             }
             if ($this->procExec(ELFINDER_JPEGTRAN_PATH . ' -version') === 0) {
-                $cmds[] = ELFINDER_JPEGTRAN_PATH . ' -rotate ' . $jpegtran[$count] . ' -copy all -outfile ' . $quotedPath . ' ' . $quotedPath;
+                $cmds[] = ELFINDER_JPEGTRAN_PATH . ' -rotate ' . $jpegtran[$count] . ' -copy all -outfile ' . $quotedPath . ' -- ' . $quotedPath;
             }
             foreach ($cmds as $cmd) {
                 if ($this->procExec($cmd) === 0) {
@@ -6067,7 +6067,7 @@ abstract class elFinderVolumeDriver
                 if ($s[2] === IMAGETYPE_GIF || $s[2] === IMAGETYPE_PNG) {
                     $bgcolor = 'rgba(255, 255, 255, 0.0)';
                 }
-                $cmd = sprintf('%s %s%s%s%s -background "%s" -rotate %d%s %s', ELFINDER_CONVERT_PATH, $quotedPath, $coalesce, $jpgQuality, $interlace, $bgcolor, $degree, $deconstruct, $quotedDstPath);
+                $cmd = sprintf('%s%s%s%s -background "%s" -rotate %d%s -- %s %s', ELFINDER_CONVERT_PATH, $coalesce, $jpgQuality, $interlace, $bgcolor, $degree, $deconstruct, $quotedPath, $quotedDstPath);
 
                 $result = false;
                 if ($this->procExec($cmd) === 0) {
@@ -6420,7 +6420,7 @@ abstract class elFinderVolumeDriver
         $srcType = $this->getExtentionByMime($mime, ':');
         $ani = false;
         if (preg_match('/^(?:gif|png|ico)/', $srcType)) {
-            $cmd = ELFINDER_IDENTIFY_PATH . ' ' . escapeshellarg($srcType . $path);
+            $cmd = ELFINDER_IDENTIFY_PATH . ' -- ' . escapeshellarg($srcType . $path);
             if ($this->procExec($cmd, $o) === 0) {
                 $ani = preg_split('/(?:\r\n|\n|\r)/', trim($o));
                 if (count($ani) < 2) {
