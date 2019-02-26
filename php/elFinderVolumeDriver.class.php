@@ -6205,8 +6205,8 @@ abstract class elFinderVolumeDriver
             fclose($pipes[1]);
             fclose($pipes[2]);
 
-            $error_output = $tmpout;
-            $output = $tmperr;
+            $output = $tmpout;
+            $error_output = $tmperr;
             $return_var = proc_close($process);
 
         } else {
@@ -6430,13 +6430,13 @@ abstract class elFinderVolumeDriver
         }
         $coalesce = $index = $interlace = '';
         $deconstruct = ' +repage';
-        $index = '[0]';
-        if ($ani) {
+        if ($ani && $destformat !== 'png'/* not createTmb */) {
             if (is_null($destformat)) {
                 $coalesce = ' -coalesce -repage 0x0';
                 $deconstruct = ' +repage -deconstruct -layers optimize';
             } else if ($imageSize) {
                 if ($srcType === 'ico:') {
+                    $index = '[0]';
                     foreach ($ani as $_i => $_info) {
                         if (preg_match('/ (\d+)x(\d+) /', $_info, $m)) {
                             if ($m[1] == $imageSize[0] && $m[2] == $imageSize[1]) {
@@ -6447,6 +6447,8 @@ abstract class elFinderVolumeDriver
                     }
                 }
             }
+        } else {
+            $index = '[0]';
         }
         if ($imageSize && ($imageSize[2] === IMAGETYPE_JPEG || $imageSize[2] === IMAGETYPE_JPEG2000)) {
             $jpgQuality = ' -quality ' . $jpgQuality;
