@@ -527,7 +527,7 @@
 							paths : {
 								'fabric/dist/fabric.require' : cdns.fabric16 + '/fabric.require.min',
 								'tui-code-snippet' : cdns.tui + '/tui.code-snippet/latest/tui-code-snippet.min',
-								'tui-color-picker' : cdns.tui + '/tui.code-snippet/latest/tui-color-picker.min',
+								'tui-color-picker' : cdns.tui + '/tui-color-picker/latest/tui-color-picker.min.js',
 								'tui-image-editor' : cdns.tui + '/tui-image-editor/'+ver+'/tui-image-editor.min'
 							}
 						});
