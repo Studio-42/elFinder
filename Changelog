@@ -2,7 +2,7 @@
 
 	* elFinder (2.1.48):
 		- [VD:abstract] fix animated image conversion on ImageMagick
-		- [Security,VD:abstract] fix command injection vulnerability of PHP connector
+		- [Security,VD:abstract] [CVE-2019-9194] fix command injection vulnerability of PHP connector
 			Special thanks to Thomas Chauchefoin (Synacktiv) for reporting this vulnerability.
 
 
