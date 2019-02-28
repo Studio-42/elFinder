@@ -1187,7 +1187,6 @@ var elFinder = function(elm, opts, bootCallback) {
 					})
 				});
 			}
-			self.options.cssAutoLoad = false;
 		})();
 	}
 
@@ -5393,7 +5392,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					loaded();
 				}
 			})();
-		} else {
+		} else if (self.cssloaded !== true) {
 			self.cssloaded = true;
 			self.trigger('cssloaded');
 		}
