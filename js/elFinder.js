@@ -4643,6 +4643,15 @@ var elFinder = function(elm, opts, bootCallback) {
 				! self.enabled() && self.enable();
 			});
 		}
+
+		// When the browser tab turn to foreground/background
+		$(window).on('visibilitychange.' + namespace, function(e) {
+			var background = document.hidden || document.webkitHidden || document.msHidden;
+			// AutoSync turn On/Off
+			if (self.options.syncStart) {
+				self.autoSync(background? 'stop' : void(0));
+			}
+		});
 	});
 
 	// store instance in node
