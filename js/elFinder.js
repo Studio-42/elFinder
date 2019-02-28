@@ -1085,13 +1085,12 @@ var elFinder = function(elm, opts, bootCallback) {
 
 	// set fm.baseUrl
 	this.baseUrl = (function() {
-		var myTag, myCss, base, baseUrl;
+		var myTag, base, baseUrl;
 		
 		if (self.options.baseUrl) {
 			return self.options.baseUrl;
 		} else {
 			baseUrl = '';
-			//myTag = $('head > script[src$="js/elfinder.min.js"],script[src$="js/elfinder.full.js"]:first');
 			myTag = null;
 			$('head > script').each(function() {
 				if (this.src && this.src.match(/js\/elfinder(?:-[a-z0-9_-]+)?\.(?:min|full)\.js$/i)) {
@@ -1100,11 +1099,6 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 			});
 			if (myTag) {
-				myCss = $('head > link[href$="css/elfinder.min.css"],link[href$="css/elfinder.full.css"]:first').length;
-				if (! myCss) {
-					// to request CSS auto loading
-					self.cssloaded = null;
-				}
 				baseUrl = myTag.attr('src').replace(/js\/[^\/]+$/, '');
 				if (! baseUrl.match(/^(https?\/\/|\/)/)) {
 					// check <base> tag
@@ -1135,8 +1129,14 @@ var elFinder = function(elm, opts, bootCallback) {
 	// auto load required CSS
 	if (this.options.cssAutoLoad) {
 		(function() {
-			var baseUrl = self.baseUrl;
+			var baseUrl = self.baseUrl,
+				myCss = $('head > link[href$="css/elfinder.min.css"],link[href$="css/elfinder.full.css"]:first').length;
 			
+			if (! myCss) {
+				// to request CSS auto loading
+				self.cssloaded = null;
+			}
+
 			// additional CSS files
 			if (Array.isArray(self.options.cssAutoLoad)) {
 				if (self.cssloaded === true) {
@@ -5374,7 +5374,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			})();
 		}
 
-		// trigger event cssloaded if cddAutoLoad disabled
+		// trigger event cssloaded if cssAutoLoad disabled
 		if (self.cssloaded === null) {
 			// check css loaded and remove hide
 			(function() {
