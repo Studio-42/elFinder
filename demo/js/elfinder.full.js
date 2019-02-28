@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.48 (2.1-src Nightly: da62dbf) (2019-02-28)
+ * Version 2.1.48 (2.1-src Nightly: e126690) (2019-02-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -1213,8 +1213,14 @@ var elFinder = function(elm, opts, bootCallback) {
 							self.trigger('cssloaded');
 						}
 					}).fail(function() {
-						self.cssloaded = false;
-						self.error(['errRead', 'CSS (elfinder or theme)']);
+						if (!self.cssloaded) {
+							self.cssloaded = false;
+							self.bind('init', function() {
+								if (!self.cssloaded) {
+									self.error(['errRead', 'CSS (elfinder or theme)']);
+								}
+							});
+						}
 					})
 				});
 			}
@@ -1222,7 +1228,18 @@ var elFinder = function(elm, opts, bootCallback) {
 	}
 
 	// load theme if exists
-	this.changeTheme(this.storage('theme') || this.options.theme);
+	(function() {
+		var theme,
+			themes = self.options.themes,
+			ids = Object.keys(themes || {});
+		if (ids.length) {
+			theme = self.storage('theme') || self.options.theme;
+			if (!themes[theme]) {
+				theme = ids[0];
+			}
+			self.changeTheme(theme);
+		}
+	})();
 	
 	/**
 	 * Volume option to set the properties of the root Stat
@@ -10144,7 +10161,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.48 (2.1-src Nightly: da62dbf)';
+elFinder.prototype.version = '2.1.48 (2.1-src Nightly: e126690)';
 
 
 
