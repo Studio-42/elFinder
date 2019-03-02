@@ -1130,7 +1130,20 @@ var elFinder = function(elm, opts, bootCallback) {
 	if (this.options.cssAutoLoad) {
 		(function() {
 			var baseUrl = self.baseUrl,
-				myCss = $('head > link[href$="css/elfinder.min.css"],link[href$="css/elfinder.full.css"]:first').length;
+				myCss = $('head > link[href$="css/elfinder.min.css"],link[href$="css/elfinder.full.css"]:first').length,
+				rmTag = function() {
+					if (node.data('cssautoloadHide')) {
+						node.data('cssautoloadHide').remove();
+						node.removeData('cssautoloadHide');
+					}
+				},
+				loaded = function() {
+					if (!self.cssloaded) {
+						rmTag();
+						self.cssloaded = true;
+						self.trigger('cssloaded');
+					}
+				};
 			
 			if (! myCss) {
 				// to request CSS auto loading
@@ -1151,7 +1164,8 @@ var elFinder = function(elm, opts, bootCallback) {
 			// try to load main css
 			if (self.cssloaded === null) {
 				// hide elFinder node while css loading
-				node.data('cssautoloadHide', $('<style>.elfinder{visibility:hidden;overflow:hidden}</style>'));
+				node.addClass('elfinder')
+					.data('cssautoloadHide', $('<style>.elfinder{visibility:hidden;overflow:hidden}</style>'));
 				$('head').append(node.data('cssautoloadHide'));
 
 				// set default theme
@@ -1169,28 +1183,28 @@ var elFinder = function(elm, opts, bootCallback) {
 					}
 				}
 
-				// load CSS
-				self.loadCss([baseUrl+'css/elfinder.min.css'], {
-					dfd: $.Deferred().always(function() {
-						if (node.data('cssautoloadHide')) {
-							node.data('cssautoloadHide').remove();
-							node.removeData('cssautoloadHide');
-						}
-					}).done(function() {
-						if (!self.cssloaded) {
-							self.cssloaded = true;
-							self.trigger('cssloaded');
-						}
-					}).fail(function() {
-						if (!self.cssloaded) {
-							self.cssloaded = false;
-							self.bind('init', function() {
+				// Delay 'visibility' check it required for browsers such as Safari
+				requestAnimationFrame(function() {
+					if (node.css('visibility') === 'hidden') {
+						// load CSS
+						self.loadCss([baseUrl+'css/elfinder.min.css'], {
+							dfd: $.Deferred().done(function() {
+								loaded();
+							}).fail(function() {
+								rmTag();
 								if (!self.cssloaded) {
-									self.error(['errRead', 'CSS (elfinder or theme)']);
+									self.cssloaded = false;
+									self.bind('init', function() {
+										if (!self.cssloaded) {
+											self.error(['errRead', 'CSS (elfinder.min)']);
+										}
+									});
 								}
-							});
-						}
-					})
+							})
+						});
+					} else {
+						loaded();
+					}
 				});
 			}
 		})();
@@ -5392,33 +5406,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		}
 
 		// trigger event cssloaded if cssAutoLoad disabled
-		if (self.cssloaded === null) {
-			// check css loaded and remove hide
-			(function() {
-				var loaded = function() {
-						if (node.data('cssautoloadHide')) {
-							node.data('cssautoloadHide').remove();
-							node.removeData('cssautoloadHide');
-						}
-						self.cssloaded = true;
-						requestAnimationFrame(function() {
-							self.trigger('cssloaded');
-						});
-					},
-					cnt, fi;
-				if (node.css('visibility') === 'hidden') {
-					cnt = 1000; // timeout 10 secs
-					fi  = setInterval(function() {
-						if (--cnt < 0 || node.css('visibility') !== 'hidden') {
-							clearInterval(fi);
-							loaded();
-						}
-					}, 10);
-				} else {
-					loaded();
-				}
-			})();
-		} else if (self.cssloaded !== true) {
+		if (self.cssloaded === false) {
 			self.cssloaded = true;
 			self.trigger('cssloaded');
 		}
