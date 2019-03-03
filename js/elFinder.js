@@ -1220,7 +1220,13 @@ var elFinder = function(elm, opts, bootCallback) {
 			if (!themes[theme]) {
 				theme = ids[0];
 			}
-			self.changeTheme(theme);
+			if (self.cssloaded) {
+				self.changeTheme(theme);
+			} else {
+				self.bind('cssloaded', function() {
+					self.changeTheme(theme);
+				});
+			}
 		}
 	})();
 	
@@ -9772,7 +9778,7 @@ elFinder.prototype = {
 						});
 					}
 				});
-			} else if (themeid === 'default' && self.theme) {
+			} else if (themeid === 'default' && self.theme && self.theme.id !== 'default') {
 				$('head>link.elfinder-theme-ext').remove();
 				self.theme = null;
 				self.trigger && self.trigger('themechange');
