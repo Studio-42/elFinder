@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.48 (2.1-src Nightly: deb1196) (2019-03-03)
+ * Version 2.1.48 (2.1-src Nightly: 802a690) (2019-03-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10155,7 +10155,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.48 (2.1-src Nightly: deb1196)';
+elFinder.prototype.version = '2.1.48 (2.1-src Nightly: 802a690)';
 
 
 
@@ -11134,7 +11134,20 @@ elFinder.prototype._options = {
 				// "SearchMime" is implemented in default
 				SearchMime : {           // The key is search type that send to the connector
 					name : 'btnMime',    // Button text to be processed in i18n()
-					title : 'searchMime' // Button title to be processed in i18n()
+					title : 'searchMime',// Button title to be processed in i18n()
+					incsearch : 'mime'   // Incremental search target filed name of the file object
+					// Or Callable function
+					/* incsearch function example
+					function(queryObject, cwdHashes, elFinderInstance) {
+						var q = queryObject.val;
+						var regex = queryObject.regex;
+						var matchedHashes = $.grep(cwdHashes, function(hash) {
+							var file = elFinderInstance.file(hash);
+							return (file && file.mime && file.mime.match(regex))? true : false;
+						});
+						return matchedHashes;
+					}
+					*/
 				}
 			}
 		},
@@ -16982,29 +16995,53 @@ $.fn.elfindercwd = function(fm, options) {
 				query = e.data.query;
 			})
 			.bind('incsearchstart', function(e) {
-				selectedFiles = {};
-				fm.lazy(function() {
-					// incremental search
-					var regex, q, fst = '';
-					q = query = e.data.query || '';
-					if (q) {
-						if (q.substr(0,1) === '/') {
-							q = q.substr(1);
-							fst = '^';
+				var q = e.data.query || '',
+					type =  e.data.type || 'SearchName',
+					searchTypes = fm.options.commandsOptions.search.searchTypes || {};
+
+				if ((searchTypes[type] && searchTypes[type].incsearch) || type === 'SearchName') {
+					selectedFiles = {};
+					fm.lazy(function() {
+						// incremental search
+						var regex, incSearch, fst = '';
+						query = q;
+						if (q) {
+							if (q.substr(0,1) === '/') {
+								q = q.substr(1);
+								fst = '^';
+							}
+							regex = new RegExp(fst + q.replace(/([\\*\;\.\?\[\]\{\}\(\)\^\$\-\|])/g, '\\$1'), 'i');
+							if (type === 'SearchName') {
+								incHashes = $.grep(cwdHashes, function(hash) {
+									var file = fm.file(hash);
+									return (file && (file.name.match(regex) || (file.i18 && file.i18.match(regex))))? true : false;
+								});
+							} else {
+								incSearch = searchTypes[type].incsearch;
+								if (typeof incSearch === 'string') {
+									incHashes = $.grep(cwdHashes, function(hash) {
+										var file = fm.file(hash);
+										return (file && file[incSearch] && (file[incSearch] + '').match(regex))? true : false;
+									});
+								} else if (typeof incSearch === 'function') {
+									try {
+										incHashes = $.grep(incSearch({val: q, regex: regex}, cwdHashes, fm), function(hash) {
+											return fm.file(hash)? true : false;
+										});
+									} catch(e) {
+										incHashes = [];
+									}
+								}
+							}
+							fm.trigger('incsearch', { hashes: incHashes, query: q })
+								.searchStatus.ininc = true;
+							content();
+							fm.autoSync('stop');
+						} else {
+							fm.trigger('incsearchend');
 						}
-						regex = new RegExp(fst + q.replace(/([\\*\;\.\?\[\]\{\}\(\)\^\$\-\|])/g, '\\$1'), 'i');
-						incHashes = $.grep(cwdHashes, function(hash) {
-							var file = fm.file(hash);
-							return (file && (file.name.match(regex) || (file.i18 && file.i18.match(regex))))? true : false;
-						});
-						fm.trigger('incsearch', { hashes: incHashes, query: q })
-							.searchStatus.ininc = true;
-						content();
-						fm.autoSync('stop');
-					} else {
-						fm.trigger('incsearchend');
-					}
-				});
+					});
+				}
 			})
 			.bind('incsearchend', function(e) {
 				query = '';
@@ -19530,7 +19567,10 @@ $.fn.elfindersearchbutton = function(cmd) {
 						input.data('inctm', setTimeout(function() {
 							var val = input.val();
 							if (val.length === 0 || val.length >= isopts.minlen) {
-								(incVal !== val) && fm.trigger('incsearchstart', { query: val });
+								(incVal !== val) && fm.trigger('incsearchstart', {
+									query: val,
+									type: typeSet? typeSet.children('input:checked').val() : 'searchName'
+								});
 								incVal = val;
 								if (val === '' && fm.searchStatus.state > 1 && fm.searchStatus.query) {
 									input.val(fm.searchStatus.query).trigger('select');
