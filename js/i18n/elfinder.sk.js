@@ -2,7 +2,7 @@
  * Slovak translation
  * @author RobiNN <kelcakrobo@gmail.com>
  * @author Jakub Ďuraš <jkblmr@gmail.com>
- * @version 2019-01-12
+ * @version 2019-03-14
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'RobiNN &lt;kelcakrobo@gmail.com&gt;, Jakub Ďuraš &lt;jkblmr@gmail.com&gt;',
 		language   : 'Slovenčina',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i', // will show like: 12.01.2019 18:18
-		fancyDateFormat : '$1 H:i', // will show like: Dnes 18:18
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 190112-181846
+		dateFormat : 'd.m.Y H:i', // will show like: 14.03.2019 11:05
+		fancyDateFormat : '$1 H:i', // will show like: Dnes 11:05
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 190314-110533
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -488,6 +488,8 @@
 			'email'           : 'E-mail', // from v2.1.43 added 19.10.2018
 			'license'         : 'Licencia', // from v2.1.43 added 19.10.2018
 			'exportToSave'    : 'Túto položku nemožno uložiť. Ak chcete zabrániť strate úprav, musíte ju exportovať do počítača.', // from v2.1.44 added 1.12.2018
+			'dblclickToSelect': 'Dvakrát kliknite na súbor a vyberte ho.', // from v2.1.47 added 22.1.2019
+			'useFullscreen'   : 'Použiť režim celej obrazovky', // from v2.1.47 added 19.2.2019
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámy',
