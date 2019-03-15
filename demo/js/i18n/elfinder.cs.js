@@ -2,7 +2,7 @@
  * Czech translation
  * @author RobiNN <kelcakrobo@gmail.com>
  * @author Jay Gridley <gridley.jay@hotmail.com>
- * @version 2019-01-12
+ * @version 2019-03-14
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'RobiNN &lt;kelcakrobo@gmail.com&gt;, Jay Gridley &lt;gridley.jay@hotmail.com&gt;',
 		language   : 'Čeština',
 		direction  : 'ltr',
-		dateFormat : 'd. m. Y H:i', // will show like: 12. 01. 2019 18:21
-		fancyDateFormat : '$1 H:i', // will show like: Dnes 18:21
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 190112-182129
+		dateFormat : 'd. m. Y H:i', // will show like: 14. 03. 2019 11:10
+		fancyDateFormat : '$1 H:i', // will show like: Dnes 11:10
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 190314-111058
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -488,6 +488,8 @@
 			'email'           : 'E-mail', // from v2.1.43 added 19.10.2018
 			'license'         : 'Licence', // from v2.1.43 added 19.10.2018
 			'exportToSave'    : 'Tuto položku nelze uložit. Abyste se vyhnuli ztrátě úprav, musíte je exportovat do počítače.', // from v2.1.44 added 1.12.2018
+			'dblclickToSelect': 'Poklepáním na soubor jej vyberte.', // from v2.1.47 added 22.1.2019
+			'useFullscreen'   : 'Použít režim celé obrazovky', // from v2.1.47 added 19.2.2019
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Neznámý',
