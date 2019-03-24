@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.48 (2.1-src Nightly: b5c88aa) (2019-03-15)
+ * Version 2.1.48 (2.1-src Nightly: b0f837e) (2019-03-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10155,7 +10155,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.48 (2.1-src Nightly: b5c88aa)';
+elFinder.prototype.version = '2.1.48 (2.1-src Nightly: b0f837e)';
 
 
 
