@@ -712,6 +712,7 @@
 					spnr = $('<div class="elfinder-edit-spinner elfinder-edit-photopea"/>')
 						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
 						.appendTo(ifm.parent()),
+					saveTypes = fm.arrayFlip(['jpg', 'png', 'gif', 'bmp', 'tiff', 'webp']),
 					getType = function(mime) {
 						var ext = getExtention(mime, fm),
 							extmime = ext2mime[ext];
@@ -721,7 +722,7 @@
 						} else if (ext === 'jpeg') {
 							ext = 'jpg';
 						}
-						if (!ext || ext === 'xcf' || ext === 'dng' || ext === 'sketch') {
+						if (!ext || !saveTypes[ext]) {
 							ext = 'psd';
 							extmime = ext2mime[ext];
 							ifm.closest('.ui-dialog').trigger('changeType', {
