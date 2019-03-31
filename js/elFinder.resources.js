@@ -96,14 +96,16 @@ elFinder.prototype.resources = {
 					if (!overlay.is(':hidden')) {
 						overlay.elfinderoverlay('hide').off('click close', cancel);
 					}
-					pnode.removeClass('ui-front')
-						.css('position', '')
-						.off('unselect.'+fm.namespace, unselect);
-					if (tarea) {
-						nnode && nnode.css('max-height', '');
-					} else if (!tree) {
-						pnode.css('width', '')
-							.parent('td').css('overflow', '');
+					if (nnode) {
+						pnode.removeClass('ui-front')
+							.css('position', '')
+							.off('unselect.'+fm.namespace, unselect);
+						if (tarea) {
+							nnode && nnode.css('max-height', '');
+						} else if (!tree) {
+							pnode.css('width', '')
+								.parent('td').css('overflow', '');
+						}
 					}
 				}, colwidth,
 				dfrd = $.Deferred()
