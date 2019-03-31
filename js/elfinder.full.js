@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.48 (2.1-src Nightly: de2fcad) (2019-03-26)
+ * Version 2.1.48 (2.1-src Nightly: 31f1bfa) (2019-03-31)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10155,7 +10155,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.48 (2.1-src Nightly: de2fcad)';
+elFinder.prototype.version = '2.1.48 (2.1-src Nightly: 31f1bfa)';
 
 
 
@@ -12573,14 +12573,16 @@ elFinder.prototype.resources = {
 					if (!overlay.is(':hidden')) {
 						overlay.elfinderoverlay('hide').off('click close', cancel);
 					}
-					pnode.removeClass('ui-front')
-						.css('position', '')
-						.off('unselect.'+fm.namespace, unselect);
-					if (tarea) {
-						nnode && nnode.css('max-height', '');
-					} else if (!tree) {
-						pnode.css('width', '')
-							.parent('td').css('overflow', '');
+					if (nnode) {
+						pnode.removeClass('ui-front')
+							.css('position', '')
+							.off('unselect.'+fm.namespace, unselect);
+						if (tarea) {
+							nnode && nnode.css('max-height', '');
+						} else if (!tree) {
+							pnode.css('width', '')
+								.parent('td').css('overflow', '');
+						}
 					}
 				}, colwidth,
 				dfrd = $.Deferred()
