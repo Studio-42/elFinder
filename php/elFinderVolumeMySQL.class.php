@@ -667,7 +667,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
      **/
     protected function _fopen($path, $mode = 'rb')
     {
-        $fp = $this->tmbPath
+        $fp = $this->tmpPath
             ? fopen($this->getTempFile($path), 'w+')
             : $this->tmpfile();
 
