@@ -2607,6 +2607,7 @@
 					uiToast = fm.getUI('toast'),
 					idxs = {},
 					allowZip = fm.uploadMimeCheck('application/zip', file.phash),
+					selfUrl = $('base').length? document.location.href.replace(/#.*$/, '') : '',
 					getExt = function(cat, con) {
 						var c;
 						if (set.catExts[cat]) {
@@ -2783,7 +2784,7 @@
 								}
 							});
 							if (type.children().length) {
-								ul.append($('<li/>').append($('<a/>').attr('href', '#' + id).text(t)));
+								ul.append($('<li/>').append($('<a/>').attr('href', selfUrl + '#' + id).text(t)));
 								btns.append(type);
 								idxs[cname] = i++;
 							}
