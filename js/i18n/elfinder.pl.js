@@ -2,7 +2,7 @@
  * Polski translation
  * @author Marcin Mikołajczyk <marcin@pjwstk.edu.pl>
  * @author Bogusław Zięba <bobi@poczta.fm>
- * @version 2019-01-31
+ * @version 2019-03-24
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'Marcin Mikołajczyk &lt;marcin@pjwstk.edu.pl&gt;, Bogusław Zięba &lt;bobi@poczta.fm&gt;',
 		language   : 'Polski',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i', // will show like: 31.01.2019 05:20
-		fancyDateFormat : '$1 H:i', // will show like: Dzisiaj 05:20
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 190131-052020
+		dateFormat : 'd.m.Y H:i', // will show like: 24.03.2019 08:58
+		fancyDateFormat : '$1 H:i', // will show like: Dzisiaj 08:58
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 190324-085845
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -489,6 +489,7 @@
 			'license'         : 'Licencja', // from v2.1.43 added 19.10.2018
 			'exportToSave'    : 'Tego elementu nie można zapisać. Aby uniknąć utraty zmian, musisz wyeksportować go na swój komputer.', // from v2.1.44 added 1.12.2018
 			'dblclickToSelect': 'Kliknij dwukrotnie plik, aby go wybrać.', // from v2.1.47 added 22.1.2019
+			'useFullscreen'   : 'Użyj trybu pełnoekranowego', // from v2.1.47 added 19.2.2019
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : 'Nieznany',
