@@ -2043,7 +2043,7 @@ abstract class elFinderVolumeDriver
     }
 
     /**
-     * Create thumbnail for required file and return its name of false on failed
+     * Create thumbnail for required file and return its name or false on failed
      *
      * @param $hash
      *
