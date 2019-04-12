@@ -1944,9 +1944,9 @@ $.fn.elfindercwd = function(fm, options) {
 						$this.on('mousedown', function(e) {
 							// shiftKey or altKey + drag start for HTML5 native drag function
 							// Note: can no use shiftKey with the Google Chrome 
-							var metaKey = e.shiftKey || e.altKey,
+							var metaKey = options.metakeyDragout && !fm.UA.IE && (e.shiftKey || e.altKey),
 								disable = false;
-							if (metaKey && !fm.UA.IE && cwd.data('selectable')) {
+							if (metaKey && cwd.data('selectable')) {
 								// destroy jQuery-ui selectable while trigger native drag
 								cwd.selectable('disable').selectable('destroy').removeData('selectable');
 								requestAnimationFrame(function(){

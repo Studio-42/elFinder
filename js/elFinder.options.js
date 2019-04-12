@@ -849,6 +849,9 @@ elFinder.prototype._options = {
 			
 			// fm.UA types array to show item select checkboxes e.g. ['All'] or ['Mobile'] etc. default: ['Touch']
 			showSelectCheckboxUA : ['Touch'],
+
+			// Enable dragout by dragstart with Alt key or Shift key
+			metakeyDragout : true,
 			
 			// file info columns displayed
 			listView : {
