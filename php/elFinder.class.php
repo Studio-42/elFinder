@@ -1901,7 +1901,7 @@ class elFinder
         if (strpos($filenameEncoded, '%') === false) { // ASCII only
             $filename = 'filename="' . $file['name'] . '"';
         } else {
-            $ua = $_SERVER['HTTP_USER_AGENT'];
+            $ua = isset($_SERVER['HTTP_USER_AGENT'])? $_SERVER['HTTP_USER_AGENT'] : '';
             if (preg_match('/MSIE [4-8]/', $ua)) { // IE < 9 do not support RFC 6266 (RFC 2231/RFC 5987)
                 $filename = 'filename="' . $filenameEncoded . '"';
             } elseif (strpos($ua, 'Chrome') === false && strpos($ua, 'Safari') !== false && preg_match('#Version/[3-5]#', $ua)) { // Safari < 6
