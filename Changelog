@@ -1,8 +1,25 @@
+2019-04-17  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.49):
+		- [js:core] Fixed #2863 cssAutoLoad Array option is not working
+		- [js:core] Fixed #2862 stop autoSync when browser tab turn to background
+		- [cmd:search] Fixed #2867 support incremental search other than filename
+		- [VD:abstract] Fixed #2873 correct MIME-Type detection of "*.java"
+		- [js:extras:editors] Fixed #2879 adjustment save type of Photopea
+		- [js:resources:mixin] Fixed #2880 error "Uncaught TypeError"
+		- [VD:MySQL] Fixed #2883 problem that not uses `tmpPath` on `_fopen()`
+		- [js:extras:editors] Fixed problem of Online Convert by `<base>` tag
+		- [ui:dialog] Fixed problem of dialog height by CSS percentage max-height
+		- [ui:cwd] Fixed #2865 add an option `uiOptions.cwd.matekeyDragout`
+		- [Security,php:core] Fixed being bypassable of CVE-2019-6257 SSRF
+		- And some minor bug fixes
+
+
 2019-02-26  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.48):
-		- [VD:abstract] fix animated image conversion on ImageMagick
-		- [Security,VD:abstract] [CVE-2019-9194] fix command injection vulnerability of PHP connector
+		- [VD:abstract] Fixed animated image conversion on ImageMagick
+		- [Security,VD:abstract] [CVE-2019-9194] Fixed command injection vulnerability of PHP connector
 			Special thanks to Thomas Chauchefoin (Synacktiv) for reporting this vulnerability.
 
 
@@ -244,7 +261,7 @@
 		- [php:plugin] add option onDropWith for plugin function iaEnabled (#2442)
 		- [cmd:paste] Fixed #2439 missing `src` param on API < 2.1
 		- [proxy:Ver1] correction of response data normalization on paste
-		- [php:security] fix directory traversal vulnerability
+		- [php:security] Fixed directory traversal vulnerability
 		- And some minor bug fixes
 
 
@@ -252,7 +269,7 @@
 
 	* elFinder (2.1.35):
 		- [cmd:upload] notify progress data to dfrd.progress in uploading
-		- [VD:LocalFileSystem,OneDrive] fix wrong result of isNameExists()
+		- [VD:LocalFileSystem,OneDrive] Fixed wrong result of isNameExists()
 		- [ui:dialog] Fixed #2431 form elements can not get focus with mouse down
 		- And some minor bug fixes
 
@@ -334,7 +351,7 @@
 		- [cmd:rename] Fixed #2308 rename multiple items at once 
 		- [cmd:rename] Fixed #2315 add batch rename function
 		- [js:core] Fixed #2320 problem that rename on upload don't work with FormData
-		- [cmd:rm] fix problem of contentmenu extra button "Remove" not work on tree
+		- [cmd:rm] Fixed problem of contentmenu extra button "Remove" not work on tree
 		- [cmd:quicklook] add "RAR Archive" preview
 		- [js:core] bugfix of registration `of fm.decodeRawString` by `fm.options.rawStringDecoder`
 		- [php:core] Fixed #2312 can't upload by "paste url or images" on IE
@@ -343,7 +360,7 @@
 		- [js:core] Fixed #2332 CORS detection gives false positive on IE11
 		- [ui:dialog] Fixed #2331 add CSS class name to dialog buttons
 		- [cmd:quicklook] show file size of the Archive preview
-		- [js:core] fix problem that options.drawString encoder does not effect
+		- [js:core] Fixed problem that options.drawString encoder does not effect
 		- Fixed #2336 'jp' isn't a Japanese in ISO-639 correctly it's a 'ja'
 		- [js:core] Fixed #2337 prevent request initial request is completed
 		- [js:options] allow empty value of cdns to disable it
@@ -691,7 +708,7 @@
 		- [js:command] inheritable elFinder.command object rel. #1545
 		- [VD:abstract] Fixed #1550 option `uiCmdMap` dose not work on 2.1.14
 		- [VD:abstract] Fixed #1553 root stat not refresh when do chmod of root
-		- [php:core] fix make netkey problem - support multiple array options
+		- [php:core] Fixed make netkey problem - support multiple array options
 		- [js:core] Fixed #1554 can not unmount netvolume when done auto sync
 		- [js:core] Fixed #1555 can not upload to unreadable folder
 		- [php:core] parent dir sets to changed when upload, paste, rm, mkfile, mkdir etc
