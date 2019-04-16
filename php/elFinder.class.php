@@ -2427,6 +2427,10 @@ class elFinder
             if (preg_match('/\b(?:localhost|localdomain)\b/', $host)) {
                 return false;
             }
+            // wildcard DNS (e.g xip.io)
+            if (preg_match('/0x[0-9a-f]+|[0-9]+(?:\.(?:0x[0-9a-f]+|[0-9]+)){1,3}/', $host)) {
+                $host = gethostbyname($host);
+            }
             // check IPv4 local loopback, private network and link local
             if (preg_match('/^0x[0-9a-f]+|[0-9]+(?:\.(?:0x[0-9a-f]+|[0-9]+)){1,3}$/', $host, $m)) {
                 $long = (int)sprintf('%u', ip2long($host));
