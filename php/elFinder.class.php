@@ -1901,7 +1901,7 @@ class elFinder
         if (strpos($filenameEncoded, '%') === false) { // ASCII only
             $filename = 'filename="' . $file['name'] . '"';
         } else {
-            $ua = $_SERVER['HTTP_USER_AGENT'];
+            $ua = isset($_SERVER['HTTP_USER_AGENT'])? $_SERVER['HTTP_USER_AGENT'] : '';
             if (preg_match('/MSIE [4-8]/', $ua)) { // IE < 9 do not support RFC 6266 (RFC 2231/RFC 5987)
                 $filename = 'filename="' . $filenameEncoded . '"';
             } elseif (strpos($ua, 'Chrome') === false && strpos($ua, 'Safari') !== false && preg_match('#Version/[3-5]#', $ua)) { // Safari < 6
@@ -2426,6 +2426,10 @@ class elFinder
             // disallow including "localhost" and "localdomain"
             if (preg_match('/\b(?:localhost|localdomain)\b/', $host)) {
                 return false;
+            }
+            // wildcard DNS (e.g xip.io)
+            if (preg_match('/0x[0-9a-f]+|[0-9]+(?:\.(?:0x[0-9a-f]+|[0-9]+)){1,3}/', $host)) {
+                $host = gethostbyname($host);
             }
             // check IPv4 local loopback, private network and link local
             if (preg_match('/^0x[0-9a-f]+|[0-9]+(?:\.(?:0x[0-9a-f]+|[0-9]+)){1,3}$/', $host, $m)) {
