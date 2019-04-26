@@ -680,7 +680,7 @@
 				noContent: true,
 				arrayBufferContent: true,
 				openMaximized: true,
-				canMakeEmpty: true,
+				canMakeEmpty: ['image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp', 'image/tiff', 'image/webp', 'image/vnd.adobe.photoshop', 'image/x-portable-pixmap', 'image/x-sketch'],
 				integrate: {
 					title: 'Photopea',
 					link: 'https://www.photopea.com/learn/'
@@ -712,7 +712,7 @@
 					spnr = $('<div class="elfinder-edit-spinner elfinder-edit-photopea"/>')
 						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
 						.appendTo(ifm.parent()),
-					saveTypes = fm.arrayFlip(['jpg', 'png', 'gif', 'bmp', 'tiff', 'webp']),
+					saveMimes = fm.arrayFlip(confObj.info.canMakeEmpty),
 					getType = function(mime) {
 						var ext = getExtention(mime, fm),
 							extmime = ext2mime[ext];
@@ -722,7 +722,7 @@
 						} else if (ext === 'jpeg') {
 							ext = 'jpg';
 						}
-						if (!ext || !saveTypes[ext]) {
+						if (!ext || !!saveMimes[ext]) {
 							ext = 'psd';
 							extmime = ext2mime[ext];
 							ifm.closest('.ui-dialog').trigger('changeType', {
