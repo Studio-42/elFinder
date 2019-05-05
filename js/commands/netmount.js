@@ -18,9 +18,9 @@ elFinder.prototype.commands.netmount = function() {
 	this.handlers = {
 		load : function() {
 			var fm = self.fm;
-			self.drivers = fm.netDrivers;
-			if (self.drivers.length) {
-				requestAnimationFrame(function() {
+			fm.one('open', function() {
+				self.drivers = fm.netDrivers;
+				if (self.drivers.length) {
 					$.each(self.drivers, function() {
 						var d = self.options[this];
 						if (d) {
@@ -30,8 +30,8 @@ elFinder.prototype.commands.netmount = function() {
 							}
 						}
 					});
-				});
-			}
+				}
+			});
 		}
 	};
 
