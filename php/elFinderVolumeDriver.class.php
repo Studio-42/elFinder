@@ -4628,7 +4628,7 @@ abstract class elFinderVolumeDriver
             $name = $path;
             $nameCheck = true;
         }
-        $ext = (false === $pos = strrpos($name, '.')) ? '' : substr($name, $pos + 1);
+        $ext = (false === $pos = strrpos($name, '.')) ? '' : strtolower(substr($name, $pos + 1));
         if ($size === null) {
             $size = file_exists($path) ? filesize($path) : -1;
         }
