@@ -356,7 +356,7 @@
 					this.disabled = true;
 				} else {
 					this.opts = Object.assign({
-						version: 'v3.5.1'
+						version: 'v3.5.2'
 					}, opts.extraOptions.tuiImgEditOpts || {}, {
 						iconsPath : fm.baseUrl + 'img/tui-',
 						theme : {}
