@@ -4881,7 +4881,7 @@ abstract class elFinderVolumeDriver
      * @param string $path
      * @param bool   $subdirs
      *
-     * @returnv void
+     * @return void
      */
     protected function updateSubdirsCache($path, $subdirs)
     {
