@@ -21,7 +21,7 @@
 				// detection by browser language
 				fullLang = (navigator.browserLanguage || navigator.language || navigator.userLanguage);
 			}
-			lang = fullLang.substr(0,2);
+			lang = (fullLang || 'en').substr(0,2);
 			if (lang === 'pt') lang = 'pt_BR';
 			else if (lang === 'ug') lang = 'ug_CN';
 			else if (lang === 'zh') lang = (fullLang.substr(0,5).toLowerCase() === 'zh-tw')? 'zh_TW' : 'zh_CN';
