@@ -1029,14 +1029,6 @@ class elFinder
         $dst = !empty($args['target']) ? $args['target'] : (!empty($args['dst']) ? $args['dst'] : '');
         if ($dst) {
             $dstVolume = $this->volume($dst);
-        } else if (isset($args['targets']) && is_array($args['targets']) && isset($args['targets'][0])) {
-            $dst = $args['targets'][0];
-            $dstVolume = $this->volume($dst);
-            if ($dstVolume && ($_stat = $dstVolume->file($dst)) && !empty($_stat['phash'])) {
-                $dst = $_stat['phash'];
-            } else {
-                $dst = '';
-            }
         } else if ($cmd === 'open') {
             // for initial open without args `target`
             $dstVolume = $this->default;
