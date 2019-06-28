@@ -5,7 +5,7 @@ Work in the server's shell. This bash script to install composer.phar and set up
 
 1. `mkdir elfinder`
 2. `cd elfinder`.
-3. `curl -sS http://studio-42.github.io/elFinder/tools/installer/setup_with_composer/setup_with_composer.sh | bash`
+3. `curl -sSL http://studio-42.github.io/elFinder/tools/installer/setup_with_composer/setup_with_composer.sh | bash`
 4. completion!
 
 ## Note
