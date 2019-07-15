@@ -206,6 +206,7 @@ elFinder.prototype.commands.paste = function() {
 						fm.request({
 								data   : reqData,
 								notify : {type : cmd, cnt : cnt},
+								cancel : true,
 								navigate : { 
 									toast  : opts.noToast? {} : {
 										inbuffer : {msg: fm.i18n(['complete', fm.i18n('cmd' + cmd)]), action: {
@@ -271,8 +272,12 @@ elFinder.prototype.commands.paste = function() {
 								}
 								dfrd.resolve(data);
 							})
-							.fail(function() {
+							.fail(function(flg) {
 								dfrd.reject();
+								if (flg === 0) {
+									// canceling
+									fm.sync();
+								}
 							})
 							.always(function() {
 								fm.unlockfiles({files : files});

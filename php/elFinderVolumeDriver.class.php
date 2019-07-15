@@ -5074,8 +5074,16 @@ abstract class elFinderVolumeDriver
 
             $dst = $this->decode($testStat['hash']);
 
+            // start time
+            $stime = microtime(true);
             foreach ($this->getScandir($src) as $stat) {
                 if (empty($stat['hidden'])) {
+                    // current time
+                    $ctime = microtime(true);
+                    if (($ctime - $stime) > 2) {
+                        $stime = $ctime;
+                        elFinder::checkAborted();
+                    }
                     $name = $stat['name'];
                     $_src = $this->decode($stat['hash']);
                     if (!$this->copy($_src, $dst, $name)) {
