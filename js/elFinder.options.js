@@ -12,24 +12,24 @@ elFinder.prototype._options = {
 	 */
 	cdns : {
 		// for editor etc.
-		ace        : 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2',
-		codemirror : 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.43.0',
-		ckeditor   : 'https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.11.2',
-		ckeditor5  : 'https://cdn.ckeditor.com/ckeditor5/11.2.0',
-		tinymce    : 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.0.0',
+		ace        : 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.5',
+		codemirror : 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.0',
+		ckeditor   : 'https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.12.1',
+		ckeditor5  : 'https://cdn.ckeditor.com/ckeditor5/12.3.0',
+		tinymce    : 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.0.11',
 		simplemde  : 'https://cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		fabric16   : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.6.7',
 		tui        : 'https://uicdn.toast.com',
 		// for quicklook etc.
-		hls        : 'https://cdnjs.cloudflare.com/ajax/libs/hls.js/0.10.1/hls.min.js',
-		dash       : 'https://cdnjs.cloudflare.com/ajax/libs/dashjs/2.9.3/dash.all.min.js',
+		hls        : 'https://cdnjs.cloudflare.com/ajax/libs/hls.js/0.12.4/hls.min.js',
+		dash       : 'https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.0.0/dash.all.min.js',
 		flv        : 'https://cdnjs.cloudflare.com/ajax/libs/flv.js/1.5.0/flv.min.js',
 		prettify   : 'https://cdn.jsdelivr.net/gh/google/code-prettify@453bd5f51e61245339b738b1bbdd42d7848722ba/loader/run_prettify.js',
 		psd        : 'https://cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js',
 		rar        : 'https://cdn.jsdelivr.net/gh/nao-pon/rar.js@6cef13ec66dd67992fc7f3ea22f132d770ebaf8b/rar.min.js',
 		zlibUnzip  : 'https://cdn.jsdelivr.net/gh/imaya/zlib.js@0.3.1/bin/unzip.min.js', // need check unzipFiles() in quicklook.plugins.js when update
 		zlibGunzip : 'https://cdn.jsdelivr.net/gh/imaya/zlib.js@0.3.1/bin/gunzip.min.js',
-		marked     : 'https://cdnjs.cloudflare.com/ajax/libs/marked/0.6.1:/marked.min.js',
+		marked     : 'https://cdnjs.cloudflare.com/ajax/libs/marked/0.7.0/marked.min.js',
 		sparkmd5   : 'https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.0/spark-md5.min.js',
 		jssha      : 'https://cdnjs.cloudflare.com/ajax/libs/jsSHA/2.3.1/sha.js',
 		amr        : 'https://cdn.jsdelivr.net/gh/yxl/opencore-amr-js@dcf3d2b5f384a1d9ded2a54e4c137a81747b222b/js/amrnb.js'
@@ -527,8 +527,8 @@ elFinder.prototype._options = {
 				ckeditor: {},
 				// CKEditor 5 editor options
 				ckeditor5: {
-					// builds mode - 'classic', 'inline' or 'balloon' 
-					mode: 'inline'
+					// builds mode - 'classic', 'inline', 'balloon', 'balloon-block' or 'decoupled-document'
+					mode: 'decoupled-document'
 				},
 				// TinyMCE editor options
 				tinymce : {},
