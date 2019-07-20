@@ -2577,6 +2577,7 @@ abstract class elFinderVolumeDriver
         if (!$archivers) {
             return false;
         }
+        $file = $mime = '';
         foreach (array('zip', 'tgz') as $ext) {
             $mime = $this->mimetype('file.' . $ext, true);
             if (isset($archivers[$mime])) {
@@ -2590,7 +2591,6 @@ abstract class elFinderVolumeDriver
                 $mime = $this->mimetype('file.' . $ext, true);
             }
         }
-        $file = $mime = '';
         $ext = $cmd['ext'];
         $res = false;
         $mixed = false;
