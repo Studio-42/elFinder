@@ -1411,7 +1411,7 @@
 								$('#ace_settingsmenu')
 									.css('font-size', '80%')
 									.find('div[contains="setOptions"]').hide().end()
-									.parent().parent().appendTo($('#elfinder'));
+									.parent().appendTo($('#elfinder'));
 							})
 						)
 						.prependTo(taBase.next());
@@ -1914,10 +1914,9 @@
 						base.height(fm.getUI().height() - 100);
 
 						// CKEditor5 configure options
-						opts = {
-							toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'imageUpload', 'ckfinder', 'blockQuote', 'insertTable', 'mediaEmbed', 'undo', 'redo'],
+						opts = Object.assign({
 							language: lang
-						};
+						}, self.confObj.ckeOpts);
 
 						// trigger event 'editEditorPrepare'
 						self.trigger('Prepare', {
@@ -1928,11 +1927,17 @@
 						});
 
 						cEditor
-							.create(editnode, Object.assign(opts, self.confObj.ckeOpts))
+							.create(editnode, opts)
 							.then(function(editor) {
 								var ckf = editor.commands.get('ckfinder'),
 									fileRepo = editor.plugins.get('FileRepository'),
 									prevVars = {}, isImage, insertImages;
+								if (editor.ui.view.toolbar && (mode === 'classic' || mode === 'decoupled-document')) {
+									$(editnode).closest('.elfinder-dialog').children('.ui-widget-header').append(editor.ui.view.toolbar.element);
+								}
+								if (mode === 'classic') {
+									$(editnode).closest('.elfinder-edit-editor').css('overflow', 'auto');
+								}
 								// Set up this elFinder instead of CKFinder
 								if (ckf) {
 									isImage = function(f) {
@@ -2023,30 +2028,39 @@
 							});
 					},
 					uploder = function(loader) {
+						var upload = function(file, resolve, reject) {
+							fm.exec('upload', {files: [file]}, void(0), fm.cwd().hash)
+								.done(function(data){
+									if (data.added && data.added.length) {
+										fm.url(data.added[0].hash, { async: true }).done(function(url) {
+											resolve({
+												'default': fm.convAbsUrl(url)
+											});
+										}).fail(function() {
+											reject('errFileNotFound');
+										});
+									} else {
+										reject(fm.i18n(data.error? data.error : 'errUpload'));
+									}
+								})
+								.fail(function(err) {
+									var error = fm.parseError(err);
+									reject(fm.i18n(error? (error === 'userabort'? 'errAbort' : error) : 'errUploadNoFiles'));
+								})
+								.progress(function(data) {
+									loader.uploadTotal = data.total;
+									loader.uploaded = data.progress;
+								});
+						};
 						this.upload = function() {
 							return new Promise(function(resolve, reject) {
-								fm.exec('upload', {files: [loader.file]}, void(0), fm.cwd().hash)
-									.done(function(data){
-										if (data.added && data.added.length) {
-											fm.url(data.added[0].hash, { async: true }).done(function(url) {
-												resolve({
-													'default': fm.convAbsUrl(url)
-												});
-											}).fail(function() {
-												reject('errFileNotFound');
-											});
-										} else {
-											reject(fm.i18n(data.error? data.error : 'errUpload'));
-										}
-									})
-									.fail(function(err) {
-										var error = fm.parseError(err);
-										reject(fm.i18n(error? (error === 'userabort'? 'errAbort' : error) : 'errUploadNoFiles'));
-									})
-									.progress(function(data) {
-										loader.uploadTotal = data.total;
-										loader.uploaded = data.progress;
+								if (loader.file instanceof Promise || (loader.file && typeof loader.file.then === 'function')) {
+									loader.file.then(function(file) {
+										upload(file, resolve, reject);
 									});
+								} else {
+									upload(loader.file, resolve, reject);
+								}
 							});
 						};
 						this.abort = function() {
@@ -2060,7 +2074,7 @@
 						fm.options.cdns.ckeditor5 + '/' + mode + '/ckeditor.js'
 					], function(editor) {
 						if (!editor) {
-							editor = window.BalloonEditor || window.InlineEditor || window.ClassicEditor;
+							editor = window.BalloonEditor || window.InlineEditor || window.ClassicEditor || window.DecoupledEditor;
 						}
 						if (fm.lang !== 'en') {
 							self.fm.loadScript([

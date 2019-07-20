@@ -740,9 +740,15 @@ elFinder.prototype.commands.quicklook.plugins = [
 				}
 			},
 			loadDash = function(file) {
+				var debug;
 				render(file);
 				pDash = window.dashjs.MediaPlayer().create();
-				pDash.getDebug().setLogToBrowserConsole(false);
+				debug = pDash.getDebug();
+				if (debug.setLogLevel) {
+					debug.setLogLevel(dashjs.Debug.LOG_LEVEL_FATAL);
+				} else if (debug.setLogToBrowserConsole) {
+					debug.setLogToBrowserConsole(false);
+				}
 				pDash.initialize(node[0], fm.openUrl(file.hash), autoplay);
 				pDash.on('error', function(e) {
 					reset(true);
