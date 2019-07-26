@@ -1005,7 +1005,9 @@ var elFinder = function(elm, opts, bootCallback) {
 		if (l = handlers.length) {
 			event = $.Event(type);
 			if (data) {
-				data._event = event;
+				data._getEvent = function() {
+					return event;
+				};
 			}
 			if (allowModify) {
 				event.data = data;
@@ -2587,7 +2589,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					}
 					// trigger "requestError" event
 					self.trigger('requestError', errData);
-					if (errData._event && errData._event.isDefaultPrevented()) {
+					if (errData._getEvent && errData._getEvent().isDefaultPrevented()) {
 						deffail = false;
 						syncOnFail = false;
 						if (error) {
@@ -6557,7 +6559,7 @@ elFinder.prototype = {
 					self.trigger('uploadfail', res);
 					// trigger "requestError" event
 					self.trigger('requestError', errData);
-					if (errData._event && errData._event.isDefaultPrevented()) {
+					if (errData._getEvent && errData._getEvent().isDefaultPrevented()) {
 						res.error = '';
 					}
 					if (res._chunkfailure || res._multiupload) {
