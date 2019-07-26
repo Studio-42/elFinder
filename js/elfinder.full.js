@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.49 (2.1-src Nightly: 45a9341) (2019-07-20)
+ * Version 2.1.49 (2.1-src Nightly: c3910a1) (2019-07-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -1036,7 +1036,9 @@ var elFinder = function(elm, opts, bootCallback) {
 		if (l = handlers.length) {
 			event = $.Event(type);
 			if (data) {
-				data._event = event;
+				data._getEvent = function() {
+					return event;
+				};
 			}
 			if (allowModify) {
 				event.data = data;
@@ -2618,7 +2620,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					}
 					// trigger "requestError" event
 					self.trigger('requestError', errData);
-					if (errData._event && errData._event.isDefaultPrevented()) {
+					if (errData._getEvent && errData._getEvent().isDefaultPrevented()) {
 						deffail = false;
 						syncOnFail = false;
 						if (error) {
@@ -6588,7 +6590,7 @@ elFinder.prototype = {
 					self.trigger('uploadfail', res);
 					// trigger "requestError" event
 					self.trigger('requestError', errData);
-					if (errData._event && errData._event.isDefaultPrevented()) {
+					if (errData._getEvent && errData._getEvent().isDefaultPrevented()) {
 						res.error = '';
 					}
 					if (res._chunkfailure || res._multiupload) {
@@ -10155,7 +10157,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.49 (2.1-src Nightly: 45a9341)';
+elFinder.prototype.version = '2.1.49 (2.1-src Nightly: c3910a1)';
 
 
 
