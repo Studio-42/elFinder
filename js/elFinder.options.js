@@ -663,6 +663,9 @@ elFinder.prototype._options = {
 			// Maximum number of items that can be placed into the Trash at one time
 			toTrashMaxItems : 1000
 		},
+		paste : {
+			moveConfirm : false // Display confirmation dialog when moving items
+		},
 		help : {
 			// Tabs to show
 			view : ['about', 'shortcuts', 'help', 'integrations', 'debug'],
