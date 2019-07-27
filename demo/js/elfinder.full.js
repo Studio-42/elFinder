@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.49 (2.1-src Nightly: c3910a1) (2019-07-26)
+ * Version 2.1.49 (2.1-src Nightly: 46d2a3f) (2019-07-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10157,7 +10157,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.49 (2.1-src Nightly: c3910a1)';
+elFinder.prototype.version = '2.1.49 (2.1-src Nightly: 46d2a3f)';
 
 
 
@@ -11243,6 +11243,9 @@ elFinder.prototype._options = {
 			infoCheckWait : 10,
 			// Maximum number of items that can be placed into the Trash at one time
 			toTrashMaxItems : 1000
+		},
+		paste : {
+			moveConfirm : false // Display confirmation dialog when moving items
 		},
 		help : {
 			// Tabs to show
@@ -12997,7 +13000,7 @@ $.fn.dialogelfinder = function(opts, opts2) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2019-02-18
+ * @version 2019-07-27
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -13291,6 +13294,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'confirmNonUTF8'  : 'Character encoding of this file couldn\'t be detected. It need to temporarily convert to UTF-8 for editting.<br/>Please select character encoding of this file.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'It has been modified.<br/>Losing work if you do not save changes.', // from v2.1 added 15.7.2015
 			'confirmTrash'    : 'Are you sure you want to move items to trash bin?', //from v2.1.24 added 29.4.2017
+			'confirmMove'     : 'Are you sure you want to move items to "$1"?', //from v2.1.50 added 27.7.2019
 			'apllyAll'        : 'Apply to all',
 			'name'            : 'Name',
 			'size'            : 'Size',
@@ -27140,7 +27144,7 @@ elFinder.prototype.commands.paste = function() {
 				
 				return dfrd;
 			},
-			parents, fparents;
+			parents, fparents, cutDfrd;
 
 
 		if (!cnt || !dst || dst.mime != 'directory') {
@@ -27190,22 +27194,48 @@ elFinder.prototype.commands.paste = function() {
 			}
 		});
 
-		if (dfrd.state() == 'rejected') {
+		if (dfrd.state() === 'rejected') {
 			return dfrd;
 		}
 
-		$.when(
-			copy(fcopy),
-			paste(fpaste)
-		)
-		.done(function(cr, pr) {
-			dfrd.resolve(pr && pr.undo? pr : void(0));
-		})
-		.fail(function() {
+		cutDfrd = $.Deferred();
+		if (cut && self.options.moveConfirm) {
+			fm.confirm({
+				title  : 'moveFiles',
+				text   : fm.i18n('confirmMove', dst.i18 || dst.name),
+				accept : {
+					label    : 'btnYes',
+					callback : function() {  
+						cutDfrd.resolve();
+					}
+				},
+				cancel : {
+					label    : 'btnCancel',
+					callback : function() {
+						cutDfrd.reject();
+					}
+				}
+			});
+		} else {
+			cutDfrd.resolve();
+		}
+
+		cutDfrd.done(function() {
+			$.when(
+				copy(fcopy),
+				paste(fpaste)
+			)
+			.done(function(cr, pr) {
+				dfrd.resolve(pr && pr.undo? pr : void(0));
+			})
+			.fail(function() {
+				dfrd.reject();
+			})
+			.always(function() {
+				cut && fm.clipboard([]);
+			});
+		}).fail(function() {
 			dfrd.reject();
-		})
-		.always(function() {
-			cut && fm.clipboard([]);
 		});
 		
 		return dfrd;
