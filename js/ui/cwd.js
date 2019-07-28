@@ -1824,7 +1824,11 @@ $.fn.elfindercwd = function(fm, options) {
 					}
 					if (e.shiftKey && (pl || nl)) {
 						sib = pl ? p.prevUntil('#'+prev.attr('id')) : p.nextUntil('#'+next.attr('id'));
-						sib.add(p).trigger(evtSelect);
+						sib = sib.add(p);
+						if (!pl) {
+							sib  = $(sib.get().reverse());
+						}
+						sib.trigger(evtSelect);
 					} else if (e.ctrlKey || e.metaKey) {
 						p.trigger(p.hasClass(clSelected) ? evtUnselect : evtSelect);
 					} else {
