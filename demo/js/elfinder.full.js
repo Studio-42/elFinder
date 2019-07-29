@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.49 (2.1-src Nightly: 3c11ea5) (2019-07-29)
+ * Version 2.1.49 (2.1-src Nightly: 58bece7) (2019-07-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -2607,7 +2607,7 @@ var elFinder = function(elm, opts, bootCallback) {
 						err: error,
 						xhr: xhr,
 						rc: response
-					};
+					}, errMsg;
 
 					// unset this cmd queue when user canceling
 					// see notify : function - `cancel.reject(0);`
@@ -2634,8 +2634,9 @@ var elFinder = function(elm, opts, bootCallback) {
 						openDir && openDir.volumeid && self.isRoot(openDir) && delete self.volumeExpires[openDir.volumeid];
 					}
 					self.trigger(cmd + 'fail', response);
-					if (error) {
-						deffail ? self.error(error) : self.debug('error', self.i18n(error));
+					errMsg = (typeof error === 'object')? error.error : error;
+					if (errMsg) {
+						deffail ? self.error(errMsg) : self.debug('error', self.i18n(errMsg));
 					}
 					syncOnFail && self.sync();
 				});
@@ -10157,7 +10158,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.49 (2.1-src Nightly: 3c11ea5)';
+elFinder.prototype.version = '2.1.49 (2.1-src Nightly: 58bece7)';
 
 
 
