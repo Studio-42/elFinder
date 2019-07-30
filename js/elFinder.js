@@ -5837,7 +5837,7 @@ elFinder.prototype = {
 		
 		data = self.normalize(data);
 		if (!self.validResponse('upload', data)) {
-			return {error : (response.norError || ['errResponse'])};
+			return {error : (data.norError || ['errResponse'])};
 		}
 		data.removed = $.merge((data.removed || []), $.map(data.added || [], function(f) { return self.file(f.hash)? f.hash : null; }));
 		return data;
