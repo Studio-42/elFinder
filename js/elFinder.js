@@ -9662,14 +9662,16 @@ elFinder.prototype = {
 					if (fileCnt !== false) {
 						if (typeof data.fileCnt === 'undefined') {
 							fileCnt = false;
+						} else {
+							fileCnt += parseInt(data.fileCnt || 0);
 						}
-						fileCnt += parseInt(data.fileCnt || 0);
 					}
 					if (dirCnt !== false) {
 						if (typeof data.dirCnt === 'undefined') {
 							dirCnt = false;
+						} else {
+							dirCnt += parseInt(data.dirCnt || 0);
 						}
-						dirCnt += parseInt(data.dirCnt || 0);
 					}
 				}
 				changed.length && self.change({changed: changed});
