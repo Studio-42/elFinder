@@ -2,7 +2,7 @@
  * Slovak translation
  * @author RobiNN <kelcakrobo@gmail.com>
  * @author Jakub Ďuraš <jkblmr@gmail.com>
- * @version 2019-03-14
+ * @version 2019-08-09
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'RobiNN &lt;kelcakrobo@gmail.com&gt;, Jakub Ďuraš &lt;jkblmr@gmail.com&gt;',
 		language   : 'Slovenčina',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i', // will show like: 14.03.2019 11:05
-		fancyDateFormat : '$1 H:i', // will show like: Dnes 11:05
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 190314-110533
+		dateFormat : 'd.m.Y H:i', // will show like: 09.08.2019 14:11
+		fancyDateFormat : '$1 H:i', // will show like: Dnes 14:11
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 190809-141149
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -303,6 +303,7 @@
 			'confirmNonUTF8'  : 'Kódovanie tohto súboru nemohlo byť detekované. Pre úpravu dočasne potrebujete previesť na UTF-8 .<br/>Prosím, vyberte kódovanie znakov tohto súboru.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'Bol upravený.<br/>Ak zmeny neuložíte, stratíte vykonanú prácu.', // from v2.1 added 15.7.2015
 			'confirmTrash'    : 'Naozaj chcete presunúť položky do koša?', //from v2.1.24 added 29.4.2017
+			'confirmMove'     : 'Naozaj chcete presunúť položky do "$1"?', //from v2.1.50 added 27.7.2019
 			'apllyAll'        : 'Použiť na všetky',
 			'name'            : 'Názov',
 			'size'            : 'Veľkosť',
