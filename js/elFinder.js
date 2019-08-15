@@ -1154,12 +1154,25 @@ var elFinder = function(elm, opts, bootCallback) {
 
 			// additional CSS files
 			if (Array.isArray(self.options.cssAutoLoad)) {
-				if (self.cssloaded === true) {
-					self.loadCss(self.options.cssAutoLoad);
+				if (!self.options.themes.default) {
+					// set as default theme
+					self.options.themes = Object.assign({
+						'default' : {
+							'name': 'default',
+							'cssurls': self.options.cssAutoLoad
+						}
+					}, self.options.themes);
+					if (!self.options.theme) {
+						self.options.theme = 'default';
+					}
 				} else {
-					self.bind('cssloaded', function() {
+					if (self.cssloaded === true) {
 						self.loadCss(self.options.cssAutoLoad);
-					});
+					} else {
+						self.bind('cssloaded', function() {
+							self.loadCss(self.options.cssAutoLoad);
+						});
+					}
 				}
 			}
 
