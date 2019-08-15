@@ -2,7 +2,7 @@
  * Czech translation
  * @author RobiNN <kelcakrobo@gmail.com>
  * @author Jay Gridley <gridley.jay@hotmail.com>
- * @version 2019-03-14
+ * @version 2019-08-09
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'RobiNN &lt;kelcakrobo@gmail.com&gt;, Jay Gridley &lt;gridley.jay@hotmail.com&gt;',
 		language   : 'Čeština',
 		direction  : 'ltr',
-		dateFormat : 'd. m. Y H:i', // will show like: 14. 03. 2019 11:10
-		fancyDateFormat : '$1 H:i', // will show like: Dnes 11:10
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 190314-111058
+		dateFormat : 'd. m. Y H:i', // will show like: 09. 08. 2019 14:18
+		fancyDateFormat : '$1 H:i', // will show like: Dnes 14:18
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 190809-141840
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -303,6 +303,7 @@
 			'confirmNonUTF8'  : 'Kódování tohoto souboru nemoholo rozpoznán. Pro úpravy je třeba dočasně převést do kódování UTF-8.<br/>Prosím, vyberte kódování znaků souboru.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'Byl změněn.<br/>Pokud obsahuje neuložené změny, dojde ke ztrátě práce.', // from v2.1 added 15.7.2015
 			'confirmTrash'    : 'Opravdu chcete položky přesunout do koše?', //from v2.1.24 added 29.4.2017
+			'confirmMove'     : 'Opravdu chcete položky přesunout do "$1"?', //from v2.1.50 added 27.7.2019
 			'apllyAll'        : 'Pro všechny',
 			'name'            : 'Název',
 			'size'            : 'Velikost',
