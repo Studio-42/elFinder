@@ -1,3 +1,18 @@
+2019-08-20  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.50):
+		- [cmd:edit] Fixed #2903 Types that can not be created are hidden in the contextmenu
+		- [VD:abstract] Fixed #2908 MIME type misjudgment of file with upper case extension
+		- [js:main.default] Fixed #2943 add error handling of lang detector
+		- [cmd:paste,VD:abstract] Fixed #2954 make the `paste` command cancelable
+		- [js:core] Fixed #2957 prevent circular reference of data for event call back
+		- [cmd:paste] Fixed #2967 add an option `commandsOptions.paste.moveConfirm`
+		- [js:core] Fixed #2970 "response is not defined" on upload error
+		- [js:core] Fixed #2971 of logic of `getSize()` function
+		- [js:core] Fixed #2863 (again) cssAutoLoad is not working
+		- And some minor bug fixes
+
+
 2019-04-17  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.49):
