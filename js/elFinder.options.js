@@ -18,6 +18,7 @@ elFinder.prototype._options = {
 		ckeditor5  : 'https://cdn.ckeditor.com/ckeditor5/12.3.1',
 		tinymce    : 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.0.14',
 		simplemde  : 'https://cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
+		fabric     : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.4.0',
 		fabric16   : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.6.7',
 		tui        : 'https://uicdn.toast.com',
 		// for quicklook etc.

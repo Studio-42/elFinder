@@ -356,7 +356,7 @@
 					this.disabled = true;
 				} else {
 					this.opts = Object.assign({
-						version: 'v3.5.2'
+						version: 'v3.7.0'
 					}, opts.extraOptions.tuiImgEditOpts || {}, {
 						iconsPath : fm.baseUrl + 'img/tui-',
 						theme : {}
@@ -525,7 +525,7 @@
 					if (fm.hasRequire) {
 						require.config({
 							paths : {
-								'fabric/dist/fabric.require' : cdns.fabric16 + '/fabric.require.min',
+								'fabric/dist/fabric.require' : cdns.fabric + '/fabric.require.min',
 								'tui-code-snippet' : cdns.tui + '/tui.code-snippet/latest/tui-code-snippet.min',
 								'tui-color-picker' : cdns.tui + '/tui-color-picker/latest/tui-color-picker.min',
 								'tui-image-editor' : cdns.tui + '/tui-image-editor/'+ver+'/tui-image-editor.min'
@@ -536,7 +536,7 @@
 						});
 					} else {
 						fm.loadScript([
-							cdns.fabric16 + '/fabric.min.js',
+							cdns.fabric + '/fabric.min.js',
 							cdns.tui + '/tui.code-snippet/latest/tui-code-snippet.min.js'
 						], function() {
 							fm.loadScript([
