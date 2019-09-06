@@ -485,6 +485,13 @@ embed.elfinder-quicklook-preview-audio {
     height: 100%;
 }
 
+/* video.js error message */
+.elfinder-quicklook-preview .vjs-error .vjs-error-display .vjs-modal-dialog-content {
+    font-size: 12pt;
+    padding: 0;
+    color: #fff;
+}
+
 /* allow user select */
 .elfinder .elfinder-quicklook .elfinder-quicklook-info *,
 .elfinder .elfinder-quicklook .elfinder-quicklook-preview * {

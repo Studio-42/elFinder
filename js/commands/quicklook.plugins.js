@@ -887,12 +887,12 @@ elFinder.prototype.commands.quicklook.plugins = [
 								}
 							);
 						}
-					} else {
+					} else if (fm.options.cdns.videojs) {
 						if (cVideojs) {
 							loadVideojs(file);
 						} else {
 							fm.loadScript(
-								[ 'https://cdnjs.cloudflare.com/ajax/libs/video.js/7.5.0/video.min.js' ],
+								[ fm.options.cdns.videojs + '/video.min.js' ],
 								function(res) { 
 									cVideojs = res || window.videojs || false;
 									//window.flvjs = stock;
@@ -904,7 +904,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 										cVideojs = false;
 									}
 								}
-							).loadCss(['https://cdnjs.cloudflare.com/ajax/libs/video.js/7.5.0/video-js.min.css']);
+							).loadCss([fm.options.cdns.videojs + '/video-js.min.css']);
 						}
 					}
 				}
