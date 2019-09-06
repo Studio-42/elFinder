@@ -429,6 +429,8 @@ pre.elfinder-quicklook-preview-text.prettyprint {
     margin: 0;
     padding: 3px 9px;
     border: none;
+    overflow: visible;
+    background: #fff;
     -o-tab-size: 4;
     -moz-tab-size: 4;
     tab-size: 4;
@@ -481,6 +483,13 @@ embed.elfinder-quicklook-preview-audio {
 .elfinder-quicklook-preview-video {
     width: 100%;
     height: 100%;
+}
+
+/* video.js error message */
+.elfinder-quicklook-preview .vjs-error .vjs-error-display .vjs-modal-dialog-content {
+    font-size: 12pt;
+    padding: 0;
+    color: #fff;
 }
 
 /* allow user select */
