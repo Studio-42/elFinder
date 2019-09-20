@@ -401,7 +401,9 @@ elFinder.prototype._options = {
 			// list of allowed mimetypes to edit of text files
 			// if empty - any text files can be edited
 			mimes : [],
-			// MIME-types of text file to make as empty files
+			// MIME-types to unselected as default of "File types to enable with "New file"" in preferences
+			mkfileHideMimes : [],
+			// MIME-types of text file to make empty file
 			makeTextMimes : ['text/plain', 'text/css', 'text/html'],
 			// Use the editor stored in the browser
 			// This value allowd overwrite with user preferences

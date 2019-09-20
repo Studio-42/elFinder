@@ -27,7 +27,7 @@ elFinder.prototype.commands.mkfile = function() {
 
 	this.fm.bind('open reload canMakeEmptyFile', function() {
 		var fm = self.fm,
-			hides = fm.storage('mkfileHides') || {};
+			hides = fm.getCommand('edit').getMkfileHides();
 		self.variants = [];
 		if (fm.mimesCanMakeEmpty) {
 			$.each(fm.mimesCanMakeEmpty, function(mime, type) {
