@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.50 (2.1-src Nightly: 403e51d) (2019-09-06)
+ * Version 2.1.50 (2.1-src Nightly: 8aff15a) (2019-09-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10173,7 +10173,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.50 (2.1-src Nightly: 403e51d)';
+elFinder.prototype.version = '2.1.50 (2.1-src Nightly: 8aff15a)';
 
 
 
@@ -10998,7 +10998,9 @@ elFinder.prototype._options = {
 			// list of allowed mimetypes to edit of text files
 			// if empty - any text files can be edited
 			mimes : [],
-			// MIME-types of text file to make as empty files
+			// MIME-types to unselected as default of "File types to enable with "New file"" in preferences
+			mkfileHideMimes : [],
+			// MIME-types of text file to make empty file
 			makeTextMimes : ['text/plain', 'text/css', 'text/html'],
 			// Use the editor stored in the browser
 			// This value allowd overwrite with user preferences
@@ -24293,7 +24295,7 @@ elFinder.prototype.commands.edit = function() {
 		.bind('canMakeEmptyFile', function(e) {
 			if (e.data && e.data.resetTexts) {
 				var defs = fm.arrayFlip(self.options.makeTextMimes || ['text/plain']),
-					hides = fm.storage('mkfileHides') || {};
+					hides = self.getMkfileHides();
 
 				$.each((fm.storage('mkfileTextMimes') || {}), function(mime, type) {
 					if (!defs[mime]) {
@@ -24390,6 +24392,10 @@ elFinder.prototype.commands.edit = function() {
 		});
 		
 		return dfrd;
+	};
+
+	this.getMkfileHides = function() {
+		return fm.storage('mkfileHides') || fm.arrayFlip(self.options.mkfileHideMimes || []);
 	};
 
 };
@@ -26105,7 +26111,7 @@ elFinder.prototype.commands.mkfile = function() {
 
 	this.fm.bind('open reload canMakeEmptyFile', function() {
 		var fm = self.fm,
-			hides = fm.storage('mkfileHides') || {};
+			hides = fm.getCommand('edit').getMkfileHides();
 		self.variants = [];
 		if (fm.mimesCanMakeEmpty) {
 			$.each(fm.mimesCanMakeEmpty, function(mime, type) {
@@ -27569,11 +27575,11 @@ elFinder.prototype.commands.preference = function() {
 			})());
 			
 			forms.makefileTypes && (forms.makefileTypes = (function() {
-				var hides = fm.storage('mkfileHides') || {},
+				var hides = fm.getCommand('edit').getMkfileHides(),
 					getTag = function() {
 						var tags = [];
 						// re-assign hides
-						hides = fm.storage('mkfileHides') || {};
+						hides = fm.getCommand('edit').getMkfileHides();
 						$.each(fm.mimesCanMakeEmpty, function(mime, type) {
 							var name = fm.getCommand('mkfile').getTypeName(mime, type);
 							tags.push('<span class="elfinder-preference-column-item" title="'+fm.escape(name)+'"><label><input type="checkbox" value="'+mime+'" '+(hides[mime]? '' : 'checked')+'/>'+type+'</label></span>');
