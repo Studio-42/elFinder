@@ -259,11 +259,11 @@ elFinder.prototype.commands.preference = function() {
 			})());
 			
 			forms.makefileTypes && (forms.makefileTypes = (function() {
-				var hides = fm.storage('mkfileHides') || {},
+				var hides = fm.getCommand('edit').getMkfileHides(),
 					getTag = function() {
 						var tags = [];
 						// re-assign hides
-						hides = fm.storage('mkfileHides') || {};
+						hides = fm.getCommand('edit').getMkfileHides();
 						$.each(fm.mimesCanMakeEmpty, function(mime, type) {
 							var name = fm.getCommand('mkfile').getTypeName(mime, type);
 							tags.push('<span class="elfinder-preference-column-item" title="'+fm.escape(name)+'"><label><input type="checkbox" value="'+mime+'" '+(hides[mime]? '' : 'checked')+'/>'+type+'</label></span>');

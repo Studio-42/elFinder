@@ -1051,7 +1051,7 @@ elFinder.prototype.commands.edit = function() {
 		.bind('canMakeEmptyFile', function(e) {
 			if (e.data && e.data.resetTexts) {
 				var defs = fm.arrayFlip(self.options.makeTextMimes || ['text/plain']),
-					hides = fm.storage('mkfileHides') || {};
+					hides = self.getMkfileHides();
 
 				$.each((fm.storage('mkfileTextMimes') || {}), function(mime, type) {
 					if (!defs[mime]) {
@@ -1148,6 +1148,10 @@ elFinder.prototype.commands.edit = function() {
 		});
 		
 		return dfrd;
+	};
+
+	this.getMkfileHides = function() {
+		return fm.storage('mkfileHides') || fm.arrayFlip(self.options.mkfileHideMimes || []);
 	};
 
 };
