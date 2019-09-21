@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.50 (2.1-src Nightly: 8aff15a) (2019-09-21)
+ * Version 2.1.50 (2.1-src Nightly: 42a0180) (2019-09-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10173,7 +10173,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.50 (2.1-src Nightly: 8aff15a)';
+elFinder.prototype.version = '2.1.50 (2.1-src Nightly: 42a0180)';
 
 
 
@@ -24075,8 +24075,7 @@ elFinder.prototype.commands.edit = function() {
 				var name;
 				if ((cnt === 1 || !editor.info.single)
 						&& ((!editor.info || !editor.info.converter)? file.write : cwdWrite)
-						//&& (file.size > 0 || (!editor.info.converter && (editor.info.canMakeEmpty || (editor.info.canMakeEmpty !== false && fm.mimeIsText(file.mime)))))
-						&& (file.size > 0 || (!editor.info.converter && fm.mimesCanMakeEmpty[file.mime]))
+						&& (file.size > 0 || (!editor.info.converter && editor.info.canMakeEmpty !== false && fm.mimesCanMakeEmpty[file.mime]))
 						&& (!editor.info.maxSize || file.size <= editor.info.maxSize)
 						&& mimeMatch(file.mime, editor.mimes || null)
 						&& extMatch(file.name, editor.exts || null)
