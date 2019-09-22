@@ -2771,7 +2771,7 @@
 							i = 0;
 						
 						if (!confObj.ext2mime) {
-							confObj.ext2mime = fm.arrayFlip(fm.mimeTypes);
+							confObj.ext2mime = Object.assign(fm.arrayFlip(fm.mimeTypes), ext2mime);
 						}
 						$.each(set.conv, function(t, c) {
 							var cname = t.toLowerCase(),
