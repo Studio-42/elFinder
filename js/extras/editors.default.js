@@ -2433,7 +2433,7 @@
 				$(ta).data('xhr', fm.request({
 					data: {
 						cmd: 'editor',
-						name: 'ZohoOffice',
+						name: ta.editor.confObj.info.cmdCheck,
 						method: 'init',
 						'args[target]': file.hash,
 						'args[lang]' : fm.lang,

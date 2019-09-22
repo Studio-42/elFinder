@@ -6,10 +6,21 @@ class elFinderEditorZohoOffice extends elFinderEditor
 
     protected $allowed = array('init', 'save', 'chk');
 
+    protected $editor_settings = array(
+        'writer' => array(
+            'unit' => 'mm',
+            'view' => 'pageview'
+        ),
+        'sheet' => array(
+            'country' => 'US'
+        ),
+        'show' => array()
+    );
+
     private $urls = array(
-        'writer' => 'https://writer.zoho.com/writer/remotedoc.im',
-        'sheet' => 'https://sheet.zoho.com/sheet/remotedoc.im',
-        'show' => 'https://show.zoho.com/show/remotedoc.im',
+        'writer' => 'https://writer.zoho.com/writer/officeapi/v1/document',
+        'sheet' => 'https://sheet.zoho.com/sheet/officeapi/v1/spreadsheet',
+        'show' => 'https://show.zoho.com/show/officeapi/v1/presentation',
     );
 
     private $srvs = array(
@@ -32,6 +43,14 @@ class elFinderEditorZohoOffice extends elFinderEditor
         'application/vnd.sun.xml.impress' => 'show',
     );
 
+    private $myName = '';
+
+    public function __construct($elfinder, $args)
+    {
+        parent::__construct($elfinder, $args);
+        $this->myName = preg_replace('/^elFinderEditor/i', '', get_class($this));
+    }
+
     public function enabled()
     {
         return defined('ELFINDER_ZOHO_OFFICE_APIKEY') && ELFINDER_ZOHO_OFFICE_APIKEY && function_exists('curl_init');
@@ -51,7 +70,7 @@ class elFinderEditorZohoOffice extends elFinderEditor
                 $cookie = $this->elfinder->getFetchCookieFile();
                 $save = false;
                 $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, elFinder::getConnectorUrl() . '?cmd=editor&name=ZohoOffice&method=chk&args[target]=' . rawurlencode($hash) . $cdata);
+                curl_setopt($ch, CURLOPT_URL, elFinder::getConnectorUrl() . '?cmd=editor&name=' . $this->myName . '&method=chk&args[target]=' . rawurlencode($hash) . $cdata);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                 if ($cookie) {
                     curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie);
@@ -94,18 +113,28 @@ class elFinderEditorZohoOffice extends elFinderEditor
                 $srvsName = $this->srvs[$file['mime']];
                 $data = array(
                     'apikey' => ELFINDER_ZOHO_OFFICE_APIKEY,
-                    'output' => 'url',
-                    'mode' => 'normaledit',
-                    'filename' => $file['name'],
-                    'id' => $hash,
-                    'format' => $format,
-                    'lang' => $lang
+                    'callback_settings' => array(
+                        'save_format' => $format,
+                        'context_info' => array(
+                            'hash' => $hash
+                        )
+                    ),
+                    'editor_settings' => $this->editor_settings[$srvsName],
+                    'document_info' => array(
+                        'document_name' => substr($file['name'], 0, strlen($file['name']) - strlen($format)- 1)
+                    )
                 );
+                $data['editor_settings']['language'] = $lang;
                 if ($save) {
-                    $data['saveurl'] = elFinder::getConnectorUrl() . '?cmd=editor&name=ZohoOffice&method=save' . $cdata;
+                    $data['callback_settings']['save_url'] = elFinder::getConnectorUrl() . '?cmd=editor&name=' . $this->myName . '&method=save' . $cdata;
+                }
+                foreach($data as $_k => $_v) {
+                    if (is_array($_v)){
+                        $data[$_k] = json_encode($_v);
+                    }
                 }
                 if ($cfile) {
-                    $data['content'] = $cfile;
+                    $data['document'] = $cfile;
                 }
                 $ch = curl_init();
                 curl_setopt($ch, CURLOPT_URL, $this->urls[$srvsName]);
@@ -120,16 +149,12 @@ class elFinderEditorZohoOffice extends elFinderEditor
 
                 $fp && fclose($fp);
 
-                if ($res) {
-                    if (strpos($res, 'RESULT=TRUE') !== false) {
-                        list(, $url) = explode('URL=', $res);
-                        preg_match('/URL=([^\s]+)/', $res, $m);
-
-                        $ret = array('zohourl' => $m[1]);
+                if ($res && $res = @json_decode($res, true)) {
+                    if (!empty($res['document_url'])) {
+                        $ret = array('zohourl' => $res['document_url']);
                         if (!$save) {
                             $ret['warning'] = 'exportToSave';
                         }
-
                         return $ret;
                     } else {
                         $error = $res;
@@ -142,18 +167,22 @@ class elFinderEditorZohoOffice extends elFinderEditor
             }
         }
 
-        return array('error' => array('errCmdParams', 'editor.ZohoOffice.init'));
+        return array('error' => array('errCmdParams', 'editor.' . $this->myName . '.init'));
     }
 
     public function save()
     {
-        if (isset($_POST) && !empty($_POST['id'])) {
-            $hash = $_POST['id'];
-            /** @var elFinderVolumeDriver $volume */
-            if ($volume = $this->elfinder->getVolume($hash)) {
-                $content = file_get_contents($_FILES['content']['tmp_name']);
-                if ($volume->putContents($hash, $content)) {
-                    return array('raw' => true, 'error' => '', 'header' => 'HTTP/1.1 200 OK');
+        if (!empty($_POST) && !empty($_POST['id']) && !empty($_FILES) && !empty($_FILES['content'])) {
+            $data = @json_decode(str_replace('&quot;', '"', $_POST['id']), true);
+            if (!empty($data['hash'])) {
+                $hash = $data['hash'];
+                /** @var elFinderVolumeDriver $volume */
+                if ($volume = $this->elfinder->getVolume($hash)) {
+                    if ($content = file_get_contents($_FILES['content']['tmp_name'])) {
+                        if ($volume->putContents($hash, $content)) {
+                            return array('raw' => true, 'error' => '', 'header' => 'HTTP/1.1 200 OK');
+                        }
+                    }
                 }
             }
         }
