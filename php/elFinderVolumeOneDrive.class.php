@@ -191,7 +191,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     /**
      * Get token and auto refresh.
      *
-     * @return true|Exception
+     * @return true
      * @throws Exception
      */
     protected function _od_refreshToken()
