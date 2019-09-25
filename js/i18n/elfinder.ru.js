@@ -3,7 +3,7 @@
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
  * @author Alex Yashkin <alex@yashkin.by>
- * @version 2019-03-06
+ * @version 2019-09-25
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -18,9 +18,9 @@
 		translator : 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;, Andrew Berezovsky &lt;andrew.berezovsky@gmail.com&gt;, Alex Yashkin &lt;alex@yashkin.by&gt;',
 		language   : 'Русский язык',
 		direction  : 'ltr',
-		dateFormat : 'd M Y H:i', // will show like: 06 Мар 2019 16:56
-		fancyDateFormat : '$1 H:i', // will show like: Сегодня 16:56
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 190306-165630
+		dateFormat : 'd M Y H:i', // will show like: 25 Сен 2019 12:25
+		fancyDateFormat : '$1 H:i', // will show like: Сегодня 12:25
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 190925-122503
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -304,6 +304,7 @@
 			'confirmNonUTF8'  : 'Невозможно определить кодировку файла. Необходима предварительная конвертация файла в UTF-8 для дальнейшего редактирования.<br/>Выберите кодировку файла.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : 'Произошли изменения.<br/>Если не сохраните изменения, то потеряете их.', // from v2.1 added 15.7.2015
 			'confirmTrash'    : 'Вы уверены, что хотите переместить файлы в корзину?', //from v2.1.24 added 29.4.2017
+			'confirmMove'     : 'Вы уверены, что хотите переместить файлы в "$1"?', //from v2.1.50 added 27.7.2019
 			'apllyAll'        : 'Применить для всех',
 			'name'            : 'Имя',
 			'size'            : 'Размер',
