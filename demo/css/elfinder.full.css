@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.50 (2.1-src Nightly: 9ce0cd3) (2019-10-02)
+ * Version 2.1.50 (2.1-src Nightly: 9a3a212) (2019-10-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -945,7 +945,9 @@ ul.elfinder-help-integrations a:hover {
 }
 
 /* style reset */
-div.elfinder * {
+div.elfinder *,
+div.elfinder :after,
+div.elfinder :before {
     box-sizing: content-box;
 }
 
@@ -1943,7 +1945,7 @@ div.elfinder {
     position: absolute;
     left: 0px;
     top: 5px;
-    min-width: 30px;
+    min-width: 20px;
     max-width: 84px;
     text-align: center;
     padding: 0px 4px 1px;
