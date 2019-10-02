@@ -8,7 +8,9 @@
 }
 
 /* style reset */
-div.elfinder * {
+div.elfinder *,
+div.elfinder :after,
+div.elfinder :before {
     box-sizing: content-box;
 }
 
