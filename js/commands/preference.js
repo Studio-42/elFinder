@@ -61,6 +61,7 @@ elFinder.prototype.commands.preference = function() {
 						fa: 'فارسی',
 						fo: 'Føroyskt',
 						fr: 'Français',
+						fr_CA: 'Français (Canada)',
 						he: 'עברית',
 						hr: 'Hrvatski',
 						hu: 'Magyar',
