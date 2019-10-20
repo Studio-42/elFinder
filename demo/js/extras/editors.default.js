@@ -975,6 +975,7 @@
 						opts = Object.assign({
 							type: 'child',
 							parent: container.get(0),
+							output: {format: 'png'},
 							onSave: function(arg) {
 								// Check current file.hash, all callbacks are called on multiple instances
 								var mime = arg.toBlob().type,
@@ -1087,8 +1088,11 @@
 					node = $base.children('img:first'),
 					q;
 				if (base._canvas) {
-					q = $base.data('quty')? Math.max(Math.min($base.data('quty').val(), 100), 1) / 100 : void(0);
-					node.attr('src', base._canvas.toDataURL(self.file.mime, q));
+					if ($base.data('quty')) {
+						q = $base.data('quty').val();
+						q && this.fm.storage('jpgQuality', q);
+					}
+					node.attr('src', base._canvas.toDataURL(self.file.mime, q? Math.max(Math.min(q, 100), 1) / 100 : void(0)));
 				} else if (node.attr('src').substr(0, 5) !== 'data:') {
 					node.attr('src', imgBase64(node, this.file.mime));
 				}
@@ -1136,8 +1140,9 @@
 			load : function(base) {
 				var self = this,
 					fm = this.fm,
-					node = $(base).children('img:first'),
-					dialog = $(base).closest('.ui-dialog'),
+					$base = $(base),
+					node = $base.children('img:first'),
+					dialog = $base.closest('.ui-dialog'),
 					elfNode = fm.getUI(),
 					dfrd = $.Deferred(),
 					container = $('#elfinder-aviary-container'),
@@ -1176,17 +1181,36 @@
 						opts = {
 							apiKey: self.confObj.apiKey,
 							onSave: function(imageID, newURL) {
-								var ext;
+								var noChange = fm.arrayFlip(['jpg', 'png']),
+									ext;
 								featherEditor.showWaitIndicator();
 								ext = newURL.replace(/.+\.([^.]+)$/, '$1');
-								if (node.data('ext') !== ext) {
+								if (!noChange[node.data('ext')] && node.data('ext') !== ext) {
 									node.closest('.ui-dialog').trigger('changeType', {
 										extention: ext,
 										mime : ext2mime[ext]
 									});
+									node.data('mime', ext2mime[ext]);
+								} else {
+									node.data('mime', ext2mime[node.data('ext')]);
 								}
 								node.on('load error', function() {
+										var cavImg;
 										node.data('loading')(true);
+										if (quty && node.attr('src').substr(0, 5) !== 'data:') {
+											cavImg = document.createElement('img');
+											$(cavImg).attr('crossorigin', 'anonymous').on('load', function() {
+												// New Canvas
+												canvas = document.createElement('canvas');
+												canvas.width  = cavImg.width;
+												canvas.height = cavImg.height;
+												// Draw Image
+												canvas.getContext('2d').drawImage(cavImg, 0, 0);
+												base._canvas = canvas;
+												quty && quty.trigger('change');
+											});
+											cavImg.src = newURL;
+										}
 									})
 									.attr('crossorigin', 'anonymous')
 									.attr('src', newURL)
@@ -1201,7 +1225,8 @@
 							},
 							appendTo: container.get(0),
 							maxSize: 2048,
-							language: getLang()
+							language: getLang(),
+							fileFormat: 'png'
 						};
 						// trigger event 'editEditorPrepare'
 						self.trigger('Prepare', {
@@ -1213,7 +1238,7 @@
 						featherEditor = new Aviary.Feather(opts);
 						// return editor instance
 						dfrd.resolve(featherEditor);
-						$(base).on('saveAsFail', launch);
+						$base.on('saveAsFail', launch);
 					},
 					launch = function() {
 						dialog.addClass(fm.res('class', 'preventback'));
@@ -1226,8 +1251,35 @@
 						});
 						node.data('loading')(true);
 					},
-					featherEditor, extraOpts;
+					featherEditor, extraOpts, canvas, quty, qutyTm;
 				
+				// jpeg quality controls
+				if (self.file.mime === 'image/jpeg') {
+					$base.data('quality', fm.storage('jpgQuality') || fm.option('jpgQuality'));
+					quty = $('<input type="number" class="ui-corner-all elfinder-resize-quality elfinder-tabstop"/>')
+						.attr('min', '1')
+						.attr('max', '100')
+						.attr('title', '1 - 100')
+						.on('change', function() {
+							var q = quty.val();
+							$base.data('quality', q);
+							qutyTm && cancelAnimationFrame(qutyTm);
+							if (canvas) {
+								qutyTm = requestAnimationFrame(function() {
+									canvas.toBlob(function(blob) {
+										blob && quty.next('span').text(' (' + fm.formatSize(blob.size) + ')');
+									}, 'image/jpeg', Math.max(Math.min(q, 100), 1) / 100);
+								});
+							}
+						})
+						.val($base.data('quality'));
+					$('<div class="ui-dialog-buttonset elfinder-edit-extras elfinder-edit-extras-quality"/>')
+						.append(
+							$('<span>').html(fm.i18n('quality') + ' : '), quty, $('<span/>')
+						)
+						.prependTo($base.parent().next());
+				}
+
 				// load script then init
 				if (typeof Aviary === 'undefined') {
 					fm.loadScript(['https://dme0ih8comzn4.cloudfront.net/imaging/v3/editor.js'], function() {
@@ -1241,10 +1293,15 @@
 			},
 			// Convert content url to data uri scheme to save content
 			save : function(base) {
-				var node = $(base).children('img:first');
-				if (node.attr('src').substr(0, 5) !== 'data:') {
-					node.attr('src', imgBase64(node, this.file.mime));
+				var node = $(base).children('img:first'),
+					q = $(base).data('quality');
+				if (base._canvas) {
+					q && this.fm.storage('jpgQuality', q);
+					node.attr('src', base._canvas.toDataURL(node.data('mime'), q? Math.max(Math.min(q, 100), 1) / 100 : void(0)));
+				} else if (node.attr('src').substr(0, 5) !== 'data:') {
+					node.attr('src', imgBase64(node, node.data('mime')));
 				}
+
 			}
 		},
 		{
