@@ -525,7 +525,8 @@
 					if (fm.hasRequire) {
 						require.config({
 							paths : {
-								'fabric/dist/fabric.require' : cdns.fabric + '/fabric.require.min',
+								'fabric/dist/fabric.require' : cdns.fabric + '/fabric.require.min', // for fabric < 2.0.1
+								'fabric' : cdns.fabric + '/fabric.min', // for fabric >= 2.0.1
 								'tui-code-snippet' : cdns.tui + '/tui.code-snippet/latest/tui-code-snippet.min',
 								'tui-color-picker' : cdns.tui + '/tui-color-picker/latest/tui-color-picker.min',
 								'tui-image-editor' : cdns.tui + '/tui-image-editor/'+ver+'/tui-image-editor.min'
