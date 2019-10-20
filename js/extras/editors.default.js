@@ -975,6 +975,7 @@
 						opts = Object.assign({
 							type: 'child',
 							parent: container.get(0),
+							output: {format: 'png'},
 							onSave: function(arg) {
 								// Check current file.hash, all callbacks are called on multiple instances
 								var mime = arg.toBlob().type,
