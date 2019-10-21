@@ -49,7 +49,8 @@ class elFinderSession implements elFinderSessionInterface
         'keys' => array(
             'default' => 'elFinderCaches',
             'netvolume' => 'elFinderNetVolumes'
-        )
+        ),
+        'cookieParams' => array()
     );
 
     /**
@@ -64,7 +65,7 @@ class elFinderSession implements elFinderSessionInterface
         $this->opts = array_merge($this->opts, $opts);
         $this->base64encode = !empty($this->opts['base64encode']);
         $this->keys = $this->opts['keys'];
-        if (function_exists('apache_get_version')) {
+        if (function_exists('apache_get_version') || $this->opts['cookieParams']) {
             $this->fixCookieRegist = true;
         }
 
@@ -217,7 +218,14 @@ class elFinderSession implements elFinderSessionInterface
             if ($this->fixCookieRegist === true) {
                 // regist cookie only once for apache2 SAPI
                 $cParm = session_get_cookie_params();
-                setcookie(session_name(), session_id(), 0, $cParm['path'], $cParm['domain'], $cParm['secure'], $cParm['httponly']);
+                if ($this->opts['cookieParams'] && is_array($this->opts['cookieParams'])) {
+                    $cParm = array_merge($cParm, $this->opts['cookieParams']);
+                }
+                if (version_compare(PHP_VERSION, '7.3', '<')) {
+                    setcookie(session_name(), session_id(), 0, $cParm['path'] . (!empty($cParm['SameSite'])? '; SameSite=' . $cParm['SameSite'] : ''), $cParm['domain'], $cParm['secure'], $cParm['httponly']);
+                } else {
+                    setcookie(session_name(), session_id(), $cParm);
+                }
                 $this->fixCookieRegist = false;
             }
             session_write_close();
