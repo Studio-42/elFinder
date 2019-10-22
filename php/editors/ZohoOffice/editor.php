@@ -162,7 +162,7 @@ class elFinderEditorZohoOffice extends elFinderEditor
                 }
 
                 if ($error) {
-                    return array('error' => preg_split('/[\r\n]+/', $error));
+                    return array('error' => is_string($error)? preg_split('/[\r\n]+/', $error) : 'Error code: ' . $error);
                 }
             }
         }
