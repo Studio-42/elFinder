@@ -1526,7 +1526,7 @@
 			},
 			load : function(textarea) {
 				var fm = this.fm,
-					cmUrl = fm.options.cdns.codemirror,
+					cmUrl = fm.convAbsUrl(fm.options.cdns.codemirror),
 					dfrd = $.Deferred(),
 					self = this,
 					start = function(CodeMirror) {
