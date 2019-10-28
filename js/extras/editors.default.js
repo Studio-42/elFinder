@@ -1577,7 +1577,7 @@
 							editor.setOption('mode', spec);
 							CodeMirror.autoLoadMode(editor, mode);
 							// show MIME:mode in title bar
-							base.prev().children('.elfinder-dialog-title').append(' (' + spec + ' : ' + mode + ')');
+							base.prev().children('.elfinder-dialog-title').append(' (' + spec + (mode != 'null'? ' : ' + mode : '') + ')');
 						}
 						
 						// editor base node
