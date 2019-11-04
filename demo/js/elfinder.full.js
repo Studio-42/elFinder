@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.50 (2.1-src Nightly: abc5748) (2019-10-24)
+ * Version 2.1.50 (2.1-src Nightly: e5c685c) (2019-11-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10173,7 +10173,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.50 (2.1-src Nightly: abc5748)';
+elFinder.prototype.version = '2.1.50 (2.1-src Nightly: e5c685c)';
 
 
 
@@ -10609,11 +10609,11 @@ elFinder.prototype._options = {
 	 */
 	cdns : {
 		// for editor etc.
-		ace        : 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.5',
+		ace        : 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.6',
 		codemirror : 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4',
 		ckeditor   : 'https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.12.1',
-		ckeditor5  : 'https://cdn.ckeditor.com/ckeditor5/12.3.1',
-		tinymce    : 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.0.14',
+		ckeditor5  : 'https://cdn.ckeditor.com/ckeditor5/15.0.0',
+		tinymce    : 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.0.16',
 		simplemde  : 'https://cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		fabric     : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.4.0',
 		fabric16   : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.6.7',
