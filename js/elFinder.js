@@ -2111,12 +2111,12 @@ var elFinder = function(elm, opts, bootCallback) {
 			}
 			if (url) {
 				if (file.ts && tmbUrl !== 'self') {
-                    url += (url.match(/\?/) ? '&' : '?') + '_t=' + file.ts;
-                    if (this.customData) {
-                        $.each(this.customData, function (key, val) {
-                            url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(val);
-                        });
-                    }
+					url += (url.match(/\?/) ? '&' : '?') + '_t=' + file.ts;
+					if (this.customData) {
+						$.each(this.customData, function (key, val) {
+							url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(val);
+						});
+					}
 				}
 				return { url: url, className: cls };
 			}
