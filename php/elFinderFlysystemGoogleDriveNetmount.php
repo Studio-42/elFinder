@@ -102,6 +102,15 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends ExtDriver
             $aToken = $options['access_token'];
 
             $rootObj = $service = null;
+
+            if (empty($options['url'])) {
+                $options['url'] = elFinder::getConnectorUrl();
+            }
+
+            $callback = $options['url']. '?cmd=netmount&protocol=googledrive&host=1';
+            $client->setRedirectUri($callback);
+            $client->setScopes(Google_Service_Drive::DRIVE);
+
             if ($aToken) {
                 try {
                     $client->setAccessToken($aToken);
@@ -123,20 +132,22 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends ExtDriver
                         return array('exit' => true, 'error' => elFinder::ERROR_REAUTH_REQUIRE);
                     }
                 }
+            }
 
+            if (!empty($_GET['code']) && !$aToken) {
+                $aToken = $client->fetchAccessTokenWithAuthCode($_GET['code']);
+                $options['access_token'] = $aToken['access_token'];
+                $this->session->set('GoogleDriveTokens', $aToken['access_token'])->set('GoogleDriveAuthParams', $options);
+                $out = array(
+                    'node' => $options['id'],
+                    'json' => '{"protocol": "googledrive", "mode": "done", "reset": 1}',
+                    'bind' => 'netmount'
+                );
+                return array('exit' => 'callback', 'out' => $out);
             }
 
             if ($options['user'] === 'init') {
-                if (empty($options['url'])) {
-                    $options['url'] = elFinder::getConnectorUrl();
-                }
-
-                $callback = $options['url']
-                    . '?cmd=netmount&protocol=googledrive&host=1';
-                $client->setRedirectUri($callback);
-
                 if (!$aToken && empty($_GET['code'])) {
-                    $client->setScopes([Google_Service_Drive::DRIVE]);
                     if (!empty($options['offline'])) {
                         $client->setApprovalPrompt('force');
                         $client->setAccessType('offline');
@@ -159,7 +170,8 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends ExtDriver
                         );
                         return array('exit' => 'callback', 'out' => $out);
                     }
-                } else {
+                }
+                /*else {
                     if (!empty($_GET['code'])) {
                         $aToken = $client->fetchAccessTokenWithAuthCode($_GET['code']);
                         $options['access_token'] = $aToken;
@@ -189,7 +201,7 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends ExtDriver
                     </script>';
                     $this->session->set('GoogleDriveAuthParams', $options);
                     return array('exit' => true, 'body' => $html);
-                }
+                }*/
             }
         } catch (Exception $e) {
             $this->session->remove('GoogleDriveAuthParams')->remove('GoogleDriveTokens');
