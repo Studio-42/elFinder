@@ -13,12 +13,12 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.vi = {
-		translator : 'Chung Thủy f &lt;chungthuyf@gmail.com&gt;,Son Nguyen &lt;son.nguyen@catalyst.net.nz&gt;, Nguyễn Trần Chung &lt;admin@chungnguyen.xyz&gt;',
+		translator : 'Nguyễn Trần Chung &lt;admin@chungnguyen.xyz&gt;',
 		language   : 'Ngôn ngữ Việt Nam',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i', // will show like: 03.12.2019 17:13
-		fancyDateFormat : '$1 H:i', // will show like: Hôm nay 17:13
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 191203-171318
+		dateFormat : 'd.m.Y H:i', // will show like: 03.12.2019 17:28
+		fancyDateFormat : '$1 H:i', // will show like: Hôm nay 17:28
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 191203-172820
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -384,63 +384,63 @@
 			'confirmUnmount'      : 'Are you unmount $1?',  // from v2.1 added 30.04.2012
 			'dropFilesBrowser': 'Drop or Paste files from browser', // from v2.1 added 30.05.2012
 			'dropPasteFiles'  : 'Drop files, Paste URLs or images(clipboard) here', // from v2.1 added 07.04.2014
-			'encoding'        : 'Encoding', // from v2.1 added 19.12.2014
-			'locale'          : 'Locale',   // from v2.1 added 19.12.2014
-			'searchTarget'    : 'Target: $1',                // from v2.1 added 22.5.2015
-			'searchMime'      : 'Search by input MIME Type', // from v2.1 added 22.5.2015
-			'owner'           : 'Owner', // from v2.1 added 20.6.2015
-			'group'           : 'Group', // from v2.1 added 20.6.2015
-			'other'           : 'Other', // from v2.1 added 20.6.2015
-			'execute'         : 'Execute', // from v2.1 added 20.6.2015
-			'perm'            : 'Permission', // from v2.1 added 20.6.2015
-			'mode'            : 'Mode', // from v2.1 added 20.6.2015
-			'emptyFolder'     : 'Folder is empty', // from v2.1.6 added 30.12.2015
-			'emptyFolderDrop' : 'Folder is empty\\A Drop to add items', // from v2.1.6 added 30.12.2015
-			'emptyFolderLTap' : 'Folder is empty\\A Long tap to add items', // from v2.1.6 added 30.12.2015
-			'quality'         : 'Quality', // from v2.1.6 added 5.1.2016
-			'autoSync'        : 'Auto sync',  // from v2.1.6 added 10.1.2016
-			'moveUp'          : 'Move up',  // from v2.1.6 added 18.1.2016
-			'getLink'         : 'Get URL link', // from v2.1.7 added 9.2.2016
-			'selectedItems'   : 'Selected items ($1)', // from v2.1.7 added 2.19.2016
-			'folderId'        : 'Folder ID', // from v2.1.10 added 3.25.2016
-			'offlineAccess'   : 'Allow offline access', // from v2.1.10 added 3.25.2016
-			'reAuth'          : 'To re-authenticate', // from v2.1.10 added 3.25.2016
-			'nowLoading'      : 'Now loading...', // from v2.1.12 added 4.26.2016
-			'openMulti'       : 'Open multiple files', // from v2.1.12 added 5.14.2016
+			'encoding'        : 'Mã hóa', // from v2.1 added 19.12.2014
+			'locale'          : 'Địa phương',   // from v2.1 added 19.12.2014
+			'searchTarget'    : 'Mục tiêu: $1',                // from v2.1 added 22.5.2015
+			'searchMime'      : 'Tìm kiếm theo kiểu tệp (MIME)', // from v2.1 added 22.5.2015
+			'owner'           : 'Chủ sở hữu', // from v2.1 added 20.6.2015
+			'group'           : 'Nhóm', // from v2.1 added 20.6.2015
+			'other'           : 'Khác', // from v2.1 added 20.6.2015
+			'execute'         : 'Thực thi', // from v2.1 added 20.6.2015
+			'perm'            : 'Quyền', // from v2.1 added 20.6.2015
+			'mode'            : 'Chế độ', // from v2.1 added 20.6.2015
+			'emptyFolder'     : 'Thư mục trống', // from v2.1.6 added 30.12.2015
+			'emptyFolderDrop' : 'Thư mục trống\\A Kéo thả vào đây để thêm các mục', // from v2.1.6 added 30.12.2015
+			'emptyFolderLTap' : 'Thư mục trống\\A Nhấn giữ để thêm các mục', // from v2.1.6 added 30.12.2015
+			'quality'         : 'Chất lượng', // from v2.1.6 added 5.1.2016
+			'autoSync'        : 'Tự động động bộ',  // from v2.1.6 added 10.1.2016
+			'moveUp'          : 'Di chuyển lên',  // from v2.1.6 added 18.1.2016
+			'getLink'         : 'Lấy liên kết URL', // from v2.1.7 added 9.2.2016
+			'selectedItems'   : 'Các mục đã chọn ($1)', // from v2.1.7 added 2.19.2016
+			'folderId'        : 'ID thư mục', // from v2.1.10 added 3.25.2016
+			'offlineAccess'   : 'Cho phép truy cập ngoại tuyến', // from v2.1.10 added 3.25.2016
+			'reAuth'          : 'Xác thực lại', // from v2.1.10 added 3.25.2016
+			'nowLoading'      : 'Đang tải...', // from v2.1.12 added 4.26.2016
+			'openMulti'       : 'Mở nhiều tập tin', // from v2.1.12 added 5.14.2016
 			'openMultiConfirm': 'You are trying to open the $1 files. Are you sure you want to open in browser?', // from v2.1.12 added 5.14.2016
-			'emptySearch'     : 'Search results is empty in search target.', // from v2.1.12 added 5.16.2016
-			'editingFile'     : 'It is editing a file.', // from v2.1.13 added 6.3.2016
+			'emptySearch'     : 'Kết quả tìm kiếm trống trong mục tiêu tìm kiếm.', // from v2.1.12 added 5.16.2016
+			'editingFile'     : 'Nó là một tập tin đang chỉnh sửa.', // from v2.1.13 added 6.3.2016
 			'hasSelected'     : 'You have selected $1 items.', // from v2.1.13 added 6.3.2016
 			'hasClipboard'    : 'You have $1 items in the clipboard.', // from v2.1.13 added 6.3.2016
-			'incSearchOnly'   : 'Incremental search is only from the current view.', // from v2.1.13 added 6.30.2016
-			'reinstate'       : 'Reinstate', // from v2.1.15 added 3.8.2016
-			'complete'        : '$1 complete', // from v2.1.15 added 21.8.2016
-			'contextmenu'     : 'Context menu', // from v2.1.15 added 9.9.2016
-			'pageTurning'     : 'Page turning', // from v2.1.15 added 10.9.2016
+			'incSearchOnly'   : 'Tìm kiếm gia tăng chỉ từ hiển thị hiện tại.', // from v2.1.13 added 6.30.2016
+			'reinstate'       : 'Phục hồi', // from v2.1.15 added 3.8.2016
+			'complete'        : '$1 hoàn thành', // from v2.1.15 added 21.8.2016
+			'contextmenu'     : 'Trình đơn ngữ cảnh', // from v2.1.15 added 9.9.2016
+			'pageTurning'     : 'Chuyển trang', // from v2.1.15 added 10.9.2016
 			'volumeRoots'     : 'Volume roots', // from v2.1.16 added 16.9.2016
-			'reset'           : 'Reset', // from v2.1.16 added 1.10.2016
-			'bgcolor'         : 'Background color', // from v2.1.16 added 1.10.2016
-			'colorPicker'     : 'Color picker', // from v2.1.16 added 1.10.2016
+			'reset'           : 'Đặt lại', // from v2.1.16 added 1.10.2016
+			'bgcolor'         : 'Màu nền', // from v2.1.16 added 1.10.2016
+			'colorPicker'     : 'Chọn màu', // from v2.1.16 added 1.10.2016
 			'8pxgrid'         : '8px Grid', // from v2.1.16 added 4.10.2016
-			'enabled'         : 'Enabled', // from v2.1.16 added 4.10.2016
-			'disabled'        : 'Disabled', // from v2.1.16 added 4.10.2016
+			'enabled'         : 'Đã bật', // from v2.1.16 added 4.10.2016
+			'disabled'        : 'Đã tắt', // from v2.1.16 added 4.10.2016
 			'emptyIncSearch'  : 'Search results is empty in current view.\\APress [Enter] to expand search target.', // from v2.1.16 added 5.10.2016
-			'emptyLetSearch'  : 'First letter search results is empty in current view.', // from v2.1.23 added 24.3.2017
-			'textLabel'       : 'Text label', // from v2.1.17 added 13.10.2016
+			'emptyLetSearch'  : 'Kết quả tìm kiếm thư đầu tiên là trống trong chế độ xem hiện tại.', // from v2.1.23 added 24.3.2017
+			'textLabel'       : 'Nhãn văn bản', // from v2.1.17 added 13.10.2016
 			'minsLeft'        : '$1 mins left', // from v2.1.17 added 13.11.2016
 			'openAsEncoding'  : 'Reopen with selected encoding', // from v2.1.19 added 2.12.2016
 			'saveAsEncoding'  : 'Save with the selected encoding', // from v2.1.19 added 2.12.2016
-			'selectFolder'    : 'Select folder', // from v2.1.20 added 13.12.2016
+			'selectFolder'    : 'Chọn thư mục', // from v2.1.20 added 13.12.2016
 			'firstLetterSearch': 'First letter search', // from v2.1.23 added 24.3.2017
-			'presets'         : 'Presets', // from v2.1.25 added 26.5.2017
-			'tooManyToTrash'  : 'It\'s too many items so it can\'t into trash.', // from v2.1.25 added 9.6.2017
+			'presets'         : 'Đặt trước', // from v2.1.25 added 26.5.2017
+			'tooManyToTrash'  : 'Có quá nhiều mục vì vậy không thể cho vào thùng rác.', // from v2.1.25 added 9.6.2017
 			'TextArea'        : 'TextArea', // from v2.1.25 added 14.6.2017
 			'folderToEmpty'   : 'Empty the folder "$1".', // from v2.1.25 added 22.6.2017
 			'filderIsEmpty'   : 'There are no items in a folder "$1".', // from v2.1.25 added 22.6.2017
 			'preference'      : 'Preference', // from v2.1.26 added 28.6.2017
-			'language'        : 'Language', // from v2.1.26 added 28.6.2017
+			'language'        : 'Ngôn ngữ', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': 'Initialize the settings saved in this browser', // from v2.1.26 added 28.6.2017
-			'toolbarPref'     : 'Toolbar settings', // from v2.1.27 added 2.8.2017
+			'toolbarPref'     : 'Cài đặt thanh công cụ', // from v2.1.27 added 2.8.2017
 			'charsLeft'       : '... $1 chars left.',  // from v2.1.29 added 30.8.2017
 			'sum'             : 'Sum', // from v2.1.29 added 28.9.2017
 			'roughFileSize'   : 'Rough file size', // from v2.1.30 added 2.11.2017
@@ -452,9 +452,9 @@
 			'renameMultiple'  : 'Are you sure you want to rename $1 selected items like $2?<br/>This cannot be undone!', // from v2.1.31 added 4.12.2017
 			'batchRename'     : 'Batch rename', // from v2.1.31 added 8.12.2017
 			'plusNumber'      : '+ Number', // from v2.1.31 added 8.12.2017
-			'asPrefix'        : 'Add prefix', // from v2.1.31 added 8.12.2017
-			'asSuffix'        : 'Add suffix', // from v2.1.31 added 8.12.2017
-			'changeExtention' : 'Change extention', // from v2.1.31 added 8.12.2017
+			'asPrefix'        : 'Thêm tiền tố', // from v2.1.31 added 8.12.2017
+			'asSuffix'        : 'Thêm hậu tố', // from v2.1.31 added 8.12.2017
+			'changeExtention' : 'Thay đổi phần mở rộng', // from v2.1.31 added 8.12.2017
 			'columnPref'      : 'Columns settings (List view)', // from v2.1.32 added 6.2.2018
 			'reflectOnImmediate' : 'All changes will reflect immediately to the archive.', // from v2.1.33 added 2.3.2018
 			'reflectOnUnmount'   : 'Any changes will not reflect until un-mount this volume.', // from v2.1.33 added 2.3.2018
@@ -462,7 +462,7 @@
 			'selectionInfo'   : 'Selection Info', // from v2.1.33 added 7.3.2018
 			'hashChecker'     : 'Algorithms to show the file hash', // from v2.1.33 added 10.3.2018
 			'infoItems'       : 'Info Items (Selection Info Panel)', // from v2.1.38 added 28.3.2018
-			'pressAgainToExit': 'Press again to exit.', // from v2.1.38 added 1.4.2018
+			'pressAgainToExit': 'Nhấn một lần nữa để thoát.', // from v2.1.38 added 1.4.2018
 			'toolbar'         : 'Toolbar', // from v2.1.38 added 4.4.2018
 			'workspace'       : 'Work Space', // from v2.1.38 added 4.4.2018
 			'dialog'          : 'Dialog', // from v2.1.38 added 4.4.2018
@@ -575,4 +575,3 @@
 		}
 	};
 }));
-
