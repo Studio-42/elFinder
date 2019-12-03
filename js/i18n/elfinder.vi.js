@@ -1,5 +1,7 @@
 /**
  * Ngôn ngữ Việt Nam translation
+ * @author Chung Thủy f <chungthuyf@gmail.com>
+ * @author Son Nguyen <son.nguyen@catalyst.net.nz>
  * @author Nguyễn Trần Chung <admin@chungnguyen.xyz>
  * @version 2019-12-03
  */
@@ -13,7 +15,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.vi = {
-		translator : 'Nguyễn Trần Chung &lt;admin@chungnguyen.xyz&gt;',
+		translator : 'Chung Thủy f &lt;chungthuyf@gmail.com&gt;, Son Nguyen &lt;son.nguyen@catalyst.net.nz&gt;, Nguyễn Trần Chung &lt;admin@chungnguyen.xyz&gt;',
 		language   : 'Ngôn ngữ Việt Nam',
 		direction  : 'ltr',
 		dateFormat : 'd.m.Y H:i', // will show like: 03.12.2019 17:28
