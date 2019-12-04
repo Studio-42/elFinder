@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.50 (2.1-src Nightly: e5c685c) (2019-11-04)
+ * Version 2.1.50 (2.1-src Nightly: b0ee37f) (2019-12-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -170,6 +170,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			uploadMaxSize : 0,
 			jpgQuality    : 100,
 			tmbCrop       : false,
+			tmbReqCustomData : false,
 			tmb           : false // old API
 		},
 		
@@ -2119,15 +2120,17 @@ var elFinder = function(elm, opts, bootCallback) {
 	this.tmb = function(file) {
 		var tmbUrl, tmbCrop,
 			cls    = 'elfinder-cwd-bgurl',
-			url    = '';
+			url    = '',
+			cData  = {},
+			n      = 0;
 
 		if ($.isPlainObject(file)) {
 			if (self.searchStatus.state && file.hash.indexOf(self.cwd().volumeid) !== 0) {
 				tmbUrl = self.option('tmbUrl', file.hash);
 				tmbCrop = self.option('tmbCrop', file.hash);
 			} else {
-				tmbUrl = cwdOptions['tmbUrl'];
-				tmbCrop = cwdOptions['tmbCrop'];
+				tmbUrl = cwdOptions.tmbUrl;
+				tmbCrop = cwdOptions.tmbCrop;
 			}
 			if (tmbCrop) {
 				cls += ' elfinder-cwd-bgurl-crop';
@@ -2141,8 +2144,19 @@ var elFinder = function(elm, opts, bootCallback) {
 				url = file.tmb;
 			}
 			if (url) {
-				if (file.ts && tmbUrl !== 'self') {
-					url += (url.match(/\?/)? '&' : '?') + '_t=' + file.ts;
+				if (tmbUrl !== 'self') {
+					if (file.ts) {
+						cData._t = file.ts;
+					}
+					if (cwdOptions.tmbReqCustomData && Object.keys(this.customData).length) {
+						cData = Object.assign(cData, this.customData);
+					}
+					if (Object.keys(cData).length) {
+						url += (url.match(/\?/) ? '&' : '?');
+						$.each(cData, function (key, val) {
+							url += ((n++ === 0)? '' : '&') + encodeURIComponent(key) + '=' + encodeURIComponent(val);
+						});
+					}
 				}
 				return { url: url, className: cls };
 			}
@@ -7903,7 +7917,7 @@ elFinder.prototype = {
 			name, i18, i18nFolderName, prevId, cData;
 		
 		// set cunstom data
-		if (data.customData && data.customData !== self.prevCustomData) {
+		if (data.customData && (!self.prevCustomData || (JSON.stringify(data.customData) !== JSON.stringify(self.prevCustomData)))) {
 			self.prevCustomData = data.customData;
 			try {
 				cData = JSON.parse(data.customData);
@@ -10173,7 +10187,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.50 (2.1-src Nightly: e5c685c)';
+elFinder.prototype.version = '2.1.50 (2.1-src Nightly: b0ee37f)';
 
 
 
