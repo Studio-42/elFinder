@@ -350,6 +350,8 @@ abstract class elFinderVolumeDriver
         'tmbSize' => 48,
         // thumbnails crop (true - crop, false - scale image to fit thumbnail size)
         'tmbCrop' => true,
+        // thumbnail URL require custom data as the GET query
+        'tmbReqCustomData' => false,
         // thumbnails background color (hex #rrggbb or 'transparent')
         'tmbBgColor' => 'transparent',
         // image rotate fallback background color (hex #rrggbb)
@@ -1636,6 +1638,7 @@ abstract class elFinderVolumeDriver
             'syncMinMs' => intval($this->options['syncMinMs']),
             'i18nFolderName' => intval($this->options['i18nFolderName']),
             'tmbCrop' => intval($this->options['tmbCrop']),
+            'tmbReqCustomData' => (bool)$this->options['tmbReqCustomData'],
             'substituteImg' => (bool)$this->options['substituteImg'],
             'onetimeUrl' => (bool)$this->options['onetimeUrl'],
         );
