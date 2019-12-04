@@ -7872,7 +7872,7 @@ elFinder.prototype = {
 			name, i18, i18nFolderName, prevId, cData;
 		
 		// set cunstom data
-		if (data.customData && data.customData !== self.prevCustomData) {
+		if (data.customData && (!self.prevCustomData || (JSON.stringify(data.customData) !== JSON.stringify(self.prevCustomData)))) {
 			self.prevCustomData = data.customData;
 			try {
 				cData = JSON.parse(data.customData);
