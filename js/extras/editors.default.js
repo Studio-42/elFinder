@@ -1973,8 +1973,7 @@
 
 						// CKEditor5 configure options
 						opts = Object.assign({
-							//toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'imageUpload', 'ckfinder', 'blockQuote', 'insertTable', 'mediaEmbed', 'undo', 'redo'],
-							toolbar: ["undo", "redo", "alignment", "fontSize", "fontFamily", "highlight", "bold", "italic", "strikethrough", "underline", "blockQuote", "ckfinder", "imageTextAlternative", "imageUpload", "heading", "indent", "outdent", "link", "numberedList", "bulletedList", "mediaEmbed", "insertTable", "tableColumn", "tableRow", "mergeTableCells"],
+							toolbar: ["heading", "|", "fontSize", "fontFamily", "|", "bold", "italic", "underline", "strikethrough", "highlight", "|", "alignment", "|", "numberedList", "bulletedList", "blockQuote", "indent", "outdent", "|", "ckfinder", "link", "imageUpload", "insertTable", "mediaEmbed", "|", "undo", "redo"],
 							language: lang
 						}, self.confObj.ckeOpts);
 
@@ -2077,11 +2076,11 @@
 									'z-index': fm.getMaximizeCss().zIndex + 1
 								});
 								dfrd.resolve(editor);
-								fm.log({
+								/*fm.log({
 									defaultConfig: cEditor.defaultConfig,
 									plugins: cEditor.builtinPlugins.map(function(p) { return p.pluginName; }),
 									toolbars: Array.from(editor.ui.componentFactory.names())
-								});
+								});*/
 							})
 							['catch'](function(error) { // ['cache'] instead .cache for fix error on ie8 
 								fm.error(error);
