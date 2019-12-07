@@ -1956,7 +1956,7 @@
 				var self = this,
 					fm   = this.fm,
 					dfrd = $.Deferred(),
-					mode = self.confObj.ckeditor5Mode || 'inline',
+					mode = self.confObj.ckeditor5Mode || 'decoupled-document',
 					lang = (function() {
 						var l = fm.lang.toLowerCase().replace('_', '-');
 						if (l.substr(0, 2) === 'zh' && l !== 'zh-cn') {
@@ -1992,7 +1992,7 @@
 									fileRepo = editor.plugins.get('FileRepository'),
 									prevVars = {}, isImage, insertImages;
 								if (editor.ui.view.toolbar && (mode === 'classic' || mode === 'decoupled-document')) {
-									$(editnode).closest('.elfinder-dialog').children('.ui-widget-header').append(editor.ui.view.toolbar.element);
+									$(editnode).closest('.elfinder-dialog').children('.ui-widget-header').append($(editor.ui.view.toolbar.element).css({marginRight:'-1em',marginLeft:'-1em'}));
 								}
 								if (mode === 'classic') {
 									$(editnode).closest('.elfinder-edit-editor').css('overflow', 'auto');
