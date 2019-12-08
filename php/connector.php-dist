@@ -20,20 +20,21 @@ if (function_exists('date_default_timezone_set')) {
 // define('ELFINDER_IMAGEMAGICK_PS', true);
 // ===============================================
 
-// load composer autoload before load elFinder autoload If you need composer
+// // load composer autoload before load elFinder autoload If you need composer
+// // You need to run the composer command in the php directory.
 //require './vendor/autoload.php';
 
-// elFinder autoload
+// // elFinder autoload
 require './autoload.php';
 // ===============================================
 
-// Enable FTP connector netmount
+// // Enable FTP connector netmount
 elFinder::$netDrivers['ftp'] = 'FTP';
 // ===============================================
 
 // // Required for Dropbox network mount
 // // Installation by composer
-// // `composer require kunalvarma05/dropbox-php-sdk`
+// // `composer require kunalvarma05/dropbox-php-sdk` on php directory
 // // Enable network mount
 // elFinder::$netDrivers['dropbox2'] = 'Dropbox2';
 // // Dropbox2 Netmount driver need next two settings. You can get at https://www.dropbox.com/developers/apps
@@ -44,7 +45,7 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 
 // // Required for Google Drive network mount
 // // Installation by composer
-// // `composer require google/apiclient:^2.0`
+// // `composer require google/apiclient:^2.0` on php directory
 // // Enable network mount
 // elFinder::$netDrivers['googledrive'] = 'GoogleDrive';
 // // GoogleDrive Netmount driver need next two settings. You can get at https://console.developers.google.com
@@ -57,7 +58,7 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 
 // // Required for Google Drive network mount with Flysystem
 // // Installation by composer
-// // `composer require nao-pon/flysystem-google-drive:~1.1 nao-pon/elfinder-flysystem-driver-ext`
+// // `composer require nao-pon/flysystem-google-drive:~1.1 nao-pon/elfinder-flysystem-driver-ext` on php directory
 // // Enable network mount
 // elFinder::$netDrivers['googledrive'] = 'FlysystemGoogleDriveNetmount';
 // // GoogleDrive Netmount driver need next two settings. You can get at https://console.developers.google.com
@@ -100,7 +101,7 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 
 // // Zip Archive editor
 // // Installation by composer
-// // `composer require barryvdh/elfinder-flysystem-driver league/flysystem-ziparchive`
+// // `composer require barryvdh/elfinder-flysystem-driver league/flysystem-ziparchive` on php directory
 // define('ELFINDER_DISABLE_ZIPEDITOR', false); // set `true` to disable zip editor
 // ===============================================
 
