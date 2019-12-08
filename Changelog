@@ -1,3 +1,15 @@
+2019-12-08  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.51):
+		- [css] fix #2985 conflict css with bootstrap
+		- [cmd:edit,mkfile] fix #3000 add an option `commandsOptions.edit.mkfileHideMimes`
+		- [css:cwd] fix #3008 adjusting the minimum width of the type badge
+		- [php:session] fix #3017 param "SameSite=None" support for CORS
+		- [cmd:edit] fix #3018 CodeMirror lib URL don't work as relative path when using RequireJS
+		- [js:core,VD:abstract] fix #3028 add an option `tmbReqCustomData` to the volume roots
+		- And some minor bug fixes
+
+
 2019-08-20  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.50):
