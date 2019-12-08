@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.50 (2.1-src Nightly: ba922ba) (2019-12-04)
+ * Version 2.1.50 (2.1-src Nightly: 2a16c7f) (2019-12-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10187,7 +10187,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.50 (2.1-src Nightly: ba922ba)';
+elFinder.prototype.version = '2.1.50 (2.1-src Nightly: 2a16c7f)';
 
 
 
@@ -10626,7 +10626,7 @@ elFinder.prototype._options = {
 		ace        : 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.6',
 		codemirror : 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4',
 		ckeditor   : 'https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.12.1',
-		ckeditor5  : 'https://cdn.ckeditor.com/ckeditor5/15.0.0',
+		ckeditor5  : 'https://cdn.ckeditor.com/ckeditor5/16.0.0',
 		tinymce    : 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.0.16',
 		simplemde  : 'https://cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		fabric     : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.4.0',
