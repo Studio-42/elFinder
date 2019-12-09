@@ -188,6 +188,7 @@
     -moz-user-select: text;
     -khtml-user-select: text;
     user-select: text;
+    padding-left: 55px !important;
 }
 
 .elfinder .std42-dialog .ui-dialog-content label {
