@@ -21,7 +21,7 @@
 		translator : 'JPG & Mace &lt;dev@flying-datacenter.de&gt;, tora60 from pragmaMx.org, Timo-Linde &lt;info@timo-linde.de&gt;, OSWorX &lt;info@osworx.net&gt;, Maximilian Schwarz &lt;info@deefuse.de&gt;, SF Webdesign &lt;webdesign@stephan-frank.de&gt;',
 		language   : 'Deutsch',
 		direction  : 'ltr',
-		dateFormat : 'd. F Y H:i', // 13. März 2020 14:58
+		dateFormat : 'j. F Y H:i', // 3. März 2020 14:58
 		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
 		nonameDateFormat : 'ymd-His', // to apply if upload file is noname: 120513172700
 		messages : {
