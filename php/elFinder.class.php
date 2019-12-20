@@ -4530,7 +4530,11 @@ class elFinder
      */
     public static function getConnectorUrl()
     {
-        $https = (isset($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off');
+        if (defined('ELFINDER_CONNECTOR_URL')) {
+            return ELFINDER_CONNECTOR_URL;
+        }
+
+        $https = (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off');
         $url = ($https ? 'https://' : 'http://')
             . $_SERVER['SERVER_NAME']                                              // host
             . (((!$https && $_SERVER['SERVER_PORT'] == 80) || ($https && $_SERVER['SERVER_PORT'] == 443)) ? '' : (':' . $_SERVER['SERVER_PORT']))  // port
