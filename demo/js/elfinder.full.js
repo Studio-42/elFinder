@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: 071a18e) (2019-12-15)
+ * Version 2.1.51 (2.1-src Nightly: 3a7622a) (2019-12-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -2410,18 +2410,10 @@ var elFinder = function(elm, opts, bootCallback) {
 			 * @return void
 			 **/
 			success = function(response) {
-				var d = self.options.debug;
-				
 				// Set currrent request command name
 				self.currentReqCmd = cmd;
 				
-				if (response.debug && (!d || d !== 'all')) {
-					if (!d) {
-						d = self.options.debug = {};
-					}
-					d['backend-error'] = true;
-					d['warning'] = true;
-				}
+				response.debug && self.responseDebug(response);
 				
 				if (raw) {
 					self.abortXHR(xhr);
@@ -6406,7 +6398,10 @@ elFinder.prototype = {
 								});
 							}
 							data.sync && self.sync();
-							data.debug && fm.debug('backend-debug', data);
+							if (data.debug) {
+								self.responseDebug(data);
+								fm.debug('backend-debug', data);
+							}
 						}
 					})
 					.always(function() {
@@ -10002,23 +9997,62 @@ elFinder.prototype = {
 	log : function(m) { window.console && window.console.log && window.console.log(m); return this; },
 	
 	debug : function(type, m) {
-		var d = this.options.debug;
+		var self = this,
+			d = this.options.debug,
+			tb = this.options.toastBackendWarn,
+			tbOpts, showlog;
 
-		if (d && (d === 'all' || d[type])) {
-			window.console && window.console.log && window.console.log('elfinder debug: ['+type+'] ['+this.id+']', m);
-		} 
-		
 		if (type === 'backend-error') {
 			if (! this.cwd().hash || (d && (d === 'all' || d['backend-error']))) {
 				m = Array.isArray(m)? m : [ m ];
 				this.error(m);
 			}
+		} else if (type === 'backend-warning') {
+			showlog = true;
+			if (tb) {
+				tbOpts = $.isPlainObject(tb)? tb : {};
+				$.each(Array.isArray(m)? m : [ m ], function(i, m) {
+					self.toast(Object.assign({
+						mode : 'warning',
+						msg: m
+					}, tbOpts));
+				});
+			}
 		} else if (type === 'backend-debug') {
 			this.trigger('backenddebug', m);
 		}
 		
+		if (showlog || (d && (d === 'all' || d[type]))) {
+			window.console && window.console.log && window.console.log('elfinder debug: ['+type+'] ['+this.id+']', m);
+		}
+
 		return this;
 	},
+
+	/**
+	 * Parse response.debug and trigger debug
+	 *
+	 * @param      Object  response  The response
+	 */
+	responseDebug : function(response) {
+		var rd = response.debug,
+			d;
+		if (rd) {
+			// set options.debug
+			d = this.options.debug;
+			if (!d || d !== 'all') {
+				if (!d) {
+					d = this.options.debug = {};
+				}
+				d['backend-error'] = true;
+				d['warning'] = true;
+			}
+			if (rd.backendErrors && (typeof rd.backendErrors === 'string' || (Array.isArray(rd.backendErrors) && rd.backendErrors.length))) {
+				this.debug('backend-warning', rd.backendErrors);
+			}
+		}
+	},
+
 	time : function(l) { window.console && window.console.time && window.console.time(l); },
 	timeEnd : function(l) { window.console && window.console.timeEnd && window.console.timeEnd(l); }
 	
@@ -10187,7 +10221,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 071a18e)';
+elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 3a7622a)';
 
 
 
@@ -11919,8 +11953,14 @@ elFinder.prototype._options = {
 	 *
 	 * @type Array|String('auto')|Boolean(true|false)
 	 */
-	// debug : true
-	debug : ['error', 'warning', 'event-destroy']
+	debug : ['error', 'warning', 'event-destroy'],
+
+	/**
+	 * Show toast messeges of backend warning (if found data `debug.backendErrors` in backend results)
+	 *
+	 * @type Boolean|Object (toast options)
+	 */
+	toastBackendWarn : true
 };
 
 
