@@ -13,6 +13,26 @@ if (function_exists('date_default_timezone_set')) {
 	date_default_timezone_set('Europe/Moscow');
 }
 
+// // Optional exec path settings (Default is called with command name only)
+// define('ELFINDER_TAR_PATH',      '/PATH/TO/tar');
+// define('ELFINDER_GZIP_PATH',     '/PATH/TO/gzip');
+// define('ELFINDER_BZIP2_PATH',    '/PATH/TO/bzip2');
+// define('ELFINDER_XZ_PATH',       '/PATH/TO/xz');
+// define('ELFINDER_ZIP_PATH',      '/PATH/TO/zip');
+// define('ELFINDER_UNZIP_PATH',    '/PATH/TO/unzip');
+// define('ELFINDER_RAR_PATH',      '/PATH/TO/rar');
+// define('ELFINDER_UNRAR_PATH',    '/PATH/TO/unrar');
+// define('ELFINDER_7Z_PATH',       '/PATH/TO/7za');
+// define('ELFINDER_CONVERT_PATH',  '/PATH/TO/convert');
+// define('ELFINDER_IDENTIFY_PATH', '/PATH/TO/identify');
+// define('ELFINDER_EXIFTRAN_PATH', '/PATH/TO/exiftran');
+// define('ELFINDER_JPEGTRAN_PATH', '/PATH/TO/jpegtran');
+// define('ELFINDER_FFMPEG_PATH',   '/PATH/TO/ffmpeg');
+
+// define('ELFINDER_CONNECTOR_URL', 'URL to this connector script');  // see elFinder::getConnectorUrl()
+
+// define('ELFINDER_DEBUG_ERRORLEVEL', -1); // Error reporting level of debug mode
+
 // // To Enable(true) handling of PostScript files by ImageMagick
 // // It is disabled by default as a countermeasure 
 // // of Ghostscript multiple -dSAFER sandbox bypass vulnerabilities
