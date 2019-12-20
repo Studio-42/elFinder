@@ -1308,6 +1308,12 @@ elFinder.prototype._options = {
 	 *
 	 * @type Array|String('auto')|Boolean(true|false)
 	 */
-	// debug : true
-	debug : ['error', 'warning', 'event-destroy']
+	debug : ['error', 'warning', 'event-destroy'],
+
+	/**
+	 * Show toast messeges of backend warning (if found data `debug.backendErrors` in backend results)
+	 *
+	 * @type Boolean|Object (toast options)
+	 */
+	toastBackendWarn : true
 };
