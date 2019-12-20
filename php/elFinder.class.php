@@ -1172,7 +1172,7 @@ class elFinder
                 'upload' => $this->uploadDebug,
                 'volumes' => array(),
                 'mountErrors' => $this->mountErrors,
-                'phpErrors' => elFinder::$phpErrors
+                'backendErrors' => elFinder::$phpErrors
             );
             elFinder::$phpErrors = array();
 
