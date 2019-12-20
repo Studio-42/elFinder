@@ -349,8 +349,8 @@ class elFinderConnector
         if (!empty($data['raw']) && isset($data['error'])) {
             $out = $data['error'];
         } else {
-            if (isset($data['debug']) && isset($data['debug']['phpErrors'])) {
-                $data['debug']['phpErrors'] = array_merge($data['debug']['phpErrors'], elFinder::$phpErrors);
+            if (isset($data['debug']) && isset($data['debug']['backendErrors'])) {
+                $data['debug']['backendErrors'] = array_merge($data['debug']['backendErrors'], elFinder::$phpErrors);
             }
             $out = json_encode($data);
         }

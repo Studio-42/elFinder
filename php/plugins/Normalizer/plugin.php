@@ -169,7 +169,11 @@ class elFinderPluginNormalizer extends elFinderPlugin
                     $str = Normalizer::normalize($str, Normalizer::FORM_KC);
             } else {
                 if (!class_exists('I18N_UnicodeNormalizer', false)) {
-                    include_once 'I18N/UnicodeNormalizer.php';
+                    if (is_readable('I18N/UnicodeNormalizer.php')) {
+                        include_once 'I18N/UnicodeNormalizer.php';
+                    } else {
+                        trigger_error('Plugin Normalizer\'s options "nfc" or "nfkc" require PHP class "Normalizer" or PEAR package "I18N_UnicodeNormalizer"', E_USER_WARNING);
+                    }
                 }
                 if (class_exists('I18N_UnicodeNormalizer', false)) {
                     $normalizer = new I18N_UnicodeNormalizer();
