@@ -106,7 +106,7 @@
 		 * @return void
 		 **/
 		openedCss = function() {
-			var contain = self.options.contain,
+			var contain = self.options.contain || fm.options.dialogContained,
 				win = contain? fm.getUI() : $(window),
 				elf = fm.getUI().offset(),
 				w = Math.min(width, win.width()-10),
