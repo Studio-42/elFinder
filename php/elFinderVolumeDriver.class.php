@@ -6862,12 +6862,6 @@ abstract class elFinderVolumeDriver
                     $res['rmNames'][] = $name;
                     continue;
                 }
-                if ($chkMime && ($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && !$this->allowPutMime($mimeByName)) {
-                    self::localRmdirRecursive($p);
-                    $res['mimes'][] = $p;
-                    $res['rmNames'][] = $name;
-                    continue;
-                }
                 if ($isDir) {
                     $cRes = $this->checkExtractItems($p, $checks);
                     foreach ($cRes as $k => $v) {
@@ -6878,6 +6872,12 @@ abstract class elFinderVolumeDriver
                         }
                     }
                 } else {
+                    if ($chkMime && ($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && !$this->allowPutMime($mimeByName)) {
+                        self::localRmdirRecursive($p);
+                        $res['mimes'][] = $p;
+                        $res['rmNames'][] = $name;
+                        continue;
+                    }
                     $res['totalSize'] += (int)sprintf('%u', filesize($p));
                 }
             }
