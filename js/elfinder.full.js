@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: 0319b7e) (2019-12-27)
+ * Version 2.1.51 (2.1-src Nightly: bc29ff7) (2019-12-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -10221,7 +10221,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 0319b7e)';
+elFinder.prototype.version = '2.1.51 (2.1-src Nightly: bc29ff7)';
 
 
 
@@ -28074,7 +28074,7 @@ elFinder.prototype.commands.preference = function() {
 		 * @return void
 		 **/
 		openedCss = function() {
-			var contain = self.options.contain,
+			var contain = self.options.contain || fm.options.dialogContained,
 				win = contain? fm.getUI() : $(window),
 				elf = fm.getUI().offset(),
 				w = Math.min(width, win.width()-10),
