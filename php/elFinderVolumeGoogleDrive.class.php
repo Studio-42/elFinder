@@ -958,7 +958,9 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         if (!$this->service) {
             $this->session->remove($this->id . $this->netMountKey);
             if ($aTokenFile) {
-                unlink($aTokenFile);
+                if (is_file($aTokenFile)) {
+                    unlink($aTokenFile);
+                }
             }
             $errors[] = 'Google Drive Service could not be loaded.';
 

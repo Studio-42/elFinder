@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: bc29ff7) (2019-12-28)
+ * Version 2.1.51 (2.1-src Nightly: e788ce5) (2019-12-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -946,6 +946,7 @@ ul.elfinder-help-integrations a:hover {
 
 /* style reset */
 div.elfinder *,
+div.elfinder .ui-dialog-content,
 div.elfinder :after,
 div.elfinder :before {
     box-sizing: content-box;
