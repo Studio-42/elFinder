@@ -4219,7 +4219,10 @@ abstract class elFinderVolumeDriver
                 !empty($file['ts']) && touch($target, $file['ts']);
             } else {
                 $path = $this->decode($hash);
-                if (!$canLink || !($canLink = link($path, $target))) {
+                if (!$canLink || !($canLink = link($path, $target)) || !($canLink = is_readable($path))) {
+                    if (file_exists($path)) {
+                        unlink($path);
+                    }
                     if ($fp = $this->fopenCE($path)) {
                         if ($tfp = fopen($target, 'wb')) {
                             $totalSize += stream_copy_to_stream($fp, $tfp);
