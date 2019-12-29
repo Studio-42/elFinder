@@ -62,9 +62,10 @@ elFinder.prototype.commands.netmount = function() {
 					},
 					opts = {
 						title          : fm.i18n('netMountDialogTitle'),
-						resizable      : false,
+						resizable      : true,
 						modal          : true,
 						destroyOnClose : false,
+						flexibleHeight : true,
 						open           : function() {
 							$(window).on('focus.'+fm.namespace, winFocus);
 							inputs.protocol.trigger('change');
@@ -169,6 +170,7 @@ elFinder.prototype.commands.netmount = function() {
 				content.append(hidden);
 				
 				content.find('.elfinder-netmount-tr').hide();
+				content.find('.elfinder-netmount-tr-' + self.drivers[0]).show();
 
 				opts.buttons[fm.i18n('btnMount')] = doMount;
 

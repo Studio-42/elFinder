@@ -30,13 +30,27 @@ elFinder.prototype.commands.edit = function() {
 			return sel;
 		},
 		getDlgWidth = function() {
-			var m, width;
+			var win = fm.options.dialogContained? fm.getUI() : $(window),
+				m, width;
 			if (typeof self.options.dialogWidth === 'string' && (m = self.options.dialogWidth.match(/(\d+)%/))) {
-				width = parseInt(fm.getUI().width() * (m[1] / 100));
+				width = parseInt(win.width() * (m[1] / 100));
 			} else {
 				width = parseInt(self.options.dialogWidth || 650);
 			}
-			return Math.min(width, $(window).width());
+			return Math.min(width, win.width());
+		},
+		getDlgHeight = function() {
+			if (!self.options.dialogHeight) {
+				return void(0);
+			}
+			var win = fm.options.dialogContained? fm.getUI() : $(window),
+				m, height;
+			if (typeof self.options.dialogHeight === 'string' && (m = self.options.dialogHeight.match(/(\d+)%/))) {
+				height = parseInt(win.height() * (m[1] / 100));
+			} else {
+				height = parseInt(self.options.dialogHeight || win.height());
+			}
+			return Math.min(height, win.height());
 		},
 
 		/**
@@ -258,6 +272,7 @@ elFinder.prototype.commands.edit = function() {
 				opts = {
 					title   : fm.escape(file.name),
 					width   : getDlgWidth(),
+					height  : getDlgHeight(),
 					buttons : {},
 					cssClass  : clsEditing,
 					maxWidth  : 'window',
@@ -580,7 +595,7 @@ elFinder.prototype.commands.edit = function() {
 				});
 			
 			// care to viewport scale change with mobile devices
-			maxW = (fm.options.dialogContained? elfNode : $(window)).width();
+			maxW = (fm.options.dialogContained? fm.getUI() : $(window)).width();
 			(dialogNode.width() > maxW) && dialogNode.width(maxW);
 			
 			return dfrd.promise();

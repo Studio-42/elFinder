@@ -9,6 +9,7 @@
 
 /* style reset */
 div.elfinder *,
+div.elfinder .ui-dialog-content,
 div.elfinder :after,
 div.elfinder :before {
     box-sizing: content-box;

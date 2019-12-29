@@ -561,7 +561,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					} else {
 						h = dialog.height() - oh - dialog.data('margin-y');
 					}
-					self.height(h);
+					self.css(opts.flexibleHeight? 'max-height' : 'height', h);
 					if (init) {
 						return;
 					}
@@ -790,5 +790,6 @@ $.fn.elfinderdialog.defaults = {
 	headerBtnPos : 'auto',
 	headerBtnOrder : 'auto',
 	optimizeNumber : true,
-	propagationEvents : ['mousemove', 'mouseup']
+	propagationEvents : ['mousemove', 'mouseup'],
+	flexibleHeight : false
 };

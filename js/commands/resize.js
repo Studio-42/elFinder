@@ -1290,7 +1290,7 @@ elFinder.prototype.commands.resize = function() {
 						}
 					},
 					preset = (function() {
-						var sets = $('<fieldset class="elfinder-resize-preset-container">').append($('<legend>').html(fm.i18n('presets'))).hide(),
+						var sets = $('<fieldset class="elfinder-resize-preset-container">').append($('<legend>').html(fm.i18n('presets'))).css('box-sizing', 'border-box').hide(),
 							hasC;
 						$.each(presetSize, function(i, s) {
 							if (s.length === 2) {
@@ -1415,10 +1415,10 @@ elFinder.prototype.commands.resize = function() {
 					width          : dialogWidth,
 					resizable      : false,
 					buttons        : buttons,
+					flexibleHeight : true,
 					open           : function() {
 						var substituteImg = (fm.option('substituteImg', file.hash) && file.size > options.dimSubImgSize)? true : false,
 							hasSize = (file.width && file.height)? true : false;
-						dialog.parent().css('overflow', 'hidden');
 						dMinBtn = base.find('.ui-dialog-titlebar .elfinder-titlebar-minimize').hide();
 						fm.bind('resize', dinit);
 						img.attr('src', src);

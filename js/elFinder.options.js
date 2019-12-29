@@ -398,6 +398,8 @@ elFinder.prototype._options = {
 		edit : {
 			// dialog width, integer(px) or integer+'%' (example: 650, '80%' ...)
 			dialogWidth : void(0),
+			// dialog height, integer(px) or integer+'%' (example: 650, '80%' ...)
+			dialogHeight : void(0),
 			// list of allowed mimetypes to edit of text files
 			// if empty - any text files can be edited
 			mimes : [],
