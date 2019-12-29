@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: a8531a9) (2019-12-29)
+ * Version 2.1.51 (2.1-src Nightly: 9ff7076) (2019-12-29)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -946,7 +946,6 @@ ul.elfinder-help-integrations a:hover {
 
 /* style reset */
 div.elfinder *,
-div.elfinder .ui-dialog-content,
 div.elfinder :after,
 div.elfinder :before {
     box-sizing: content-box;
@@ -2909,7 +2908,6 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 /* content */
 .std42-dialog .ui-dialog-content {
     padding: .3em .5em;
-    box-sizing: border-box;
 }
 
 .elfinder .std42-dialog .ui-dialog-content,
