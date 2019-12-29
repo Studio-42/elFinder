@@ -755,6 +755,7 @@ class elFinder
                     continue;
                 }
             }
+            $root['_isNetVolume'] = true;
             $opts['roots'][$key] = $root;
         }
 
@@ -781,15 +782,21 @@ class elFinder
                             $this->default = $this->volumes[$id];
                         }
                     } else {
-                        $this->removeNetVolume($i, $volume);
+                        if (!empty($o['_isNetVolume'])) {
+                            $this->removeNetVolume($i, $volume);
+                        }
                         $this->mountErrors[] = 'Driver "' . $class . '" : ' . implode(' ', $volume->error());
                     }
                 } catch (Exception $e) {
-                    $this->removeNetVolume($i, $volume);
+                    if (!empty($o['_isNetVolume'])) {
+                        $this->removeNetVolume($i, $volume);
+                    }
                     $this->mountErrors[] = 'Driver "' . $class . '" : ' . $e->getMessage();
                 }
             } else {
-                $this->removeNetVolume($i, null);
+                if (!empty($o['_isNetVolume'])) {
+                    $this->removeNetVolume($i, $volume);
+                }
                 $this->mountErrors[] = 'Driver "' . $class . '" does not exist';
             }
         }
