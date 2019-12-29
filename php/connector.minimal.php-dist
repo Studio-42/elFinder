@@ -165,15 +165,6 @@ $opts = array(
 			'uploadOrder'   => array('deny', 'allow'),      // Same as above
 			'accessControl' => 'access',                    // Same as above
 		),
-		// Sample net drive: Dropbox (require Dropbox API - see above)
-		// array(
-		//	'driver'	=> 'Dropbox2'
-		//	'consumerKey'	=> 'YOUR_KEY_HERE',
-		//	'consumerSecret'=> 'YOUR_SECRET_HERE',
-			// if the drive shall be permanent use following option
-		//	'access_token'	=> 'YOUR_ACCESS_TOKEN_HERE',
-		//	'path'		=> '/
-		// )
 	)
 );
 
