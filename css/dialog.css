@@ -179,7 +179,6 @@
 /* content */
 .std42-dialog .ui-dialog-content {
     padding: .3em .5em;
-    box-sizing: border-box;
 }
 
 .elfinder .std42-dialog .ui-dialog-content,

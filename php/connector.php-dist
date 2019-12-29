@@ -529,7 +529,17 @@ $opts = array(
 		// 	// 	)
 		// 	// )
 		// 	
-		// )
+		// ),
+
+		// Sample cloud drive: Dropbox (require Dropbox API - see above)
+		// if the drive shall be permanent use following options
+		// array(
+		//	'driver'	    => 'Dropbox2',
+		//	'consumerKey'	=> 'YOUR_KEY_HERE',
+		//	'consumerSecret'=> 'YOUR_SECRET_HERE',
+		//	'access_token'	=> 'YOUR_ACCESS_TOKEN_HERE', // require for permanent mount
+		//	'path'		    => '/',
+		// ),
 	)
 		
 );
