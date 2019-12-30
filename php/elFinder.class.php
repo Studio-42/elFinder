@@ -4602,7 +4602,9 @@ class elFinder
 
             $transport = ($url['scheme'] === 'https') ? 'tls' : 'tcp';
             $query = isset($url['query']) ? '?' . $url['query'] : '';
-            $stream = stream_socket_client($transport . '://' . $url['host'] . ':' . $url['port']);
+            if (!($stream = stream_socket_client($transport . '://' . $url['host'] . ':' . $url['port']))) {
+                return false;
+            }
             stream_set_timeout($stream, 300);
             fputs($stream, "GET {$url['path']}{$query} HTTP/1.1\r\n");
             fputs($stream, "Host: {$url['host']}\r\n");
