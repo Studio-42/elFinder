@@ -114,11 +114,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver
         }
         // detect systemRoot
         if (!isset($this->options['systemRoot'])) {
-            if ($cwd[0] === $this->separator || $this->root[0] === $this->separator) {
-                $this->systemRoot = $this->separator;
-            } else if (preg_match('/^([a-zA-Z]:' . preg_quote($this->separator, '/') . ')/', $this->root, $m)) {
+            if ($cwd[0] === DIRECTORY_SEPARATOR || $this->root[0] === DIRECTORY_SEPARATOR) {
+                $this->systemRoot = DIRECTORY_SEPARATOR;
+            } else if (preg_match('/^([a-zA-Z]:' . preg_quote(DIRECTORY_SEPARATOR, '/') . ')/', $this->root, $m)) {
                 $this->systemRoot = $m[1];
-            } else if (preg_match('/^([a-zA-Z]:' . preg_quote($this->separator, '/') . ')/', $cwd, $m)) {
+            } else if (preg_match('/^([a-zA-Z]:' . preg_quote(DIRECTORY_SEPARATOR, '/') . ')/', $cwd, $m)) {
                 $this->systemRoot = $m[1];
             }
         }
@@ -150,28 +150,42 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver
      */
     protected function configure()
     {
+        $hiddens = array();
         $root = $this->stat($this->root);
 
-        // chek thumbnails path
-        if ($this->options['tmbPath']) {
-            $this->options['tmbPath'] = strpos($this->options['tmbPath'], DIRECTORY_SEPARATOR) === false
-                // tmb path set as dirname under root dir
-                ? $this->_abspath($this->options['tmbPath'])
-                // tmb path as full path
-                : $this->_normpath($this->options['tmbPath']);
+        // check thumbnails path
+        if (!empty($this->options['tmbPath'])) {
+            if (strpos($this->options['tmbPath'], DIRECTORY_SEPARATOR) === false) {
+                $hiddens['tmb'] = $this->options['tmbPath'];
+                $this->options['tmbPath'] = $this->_abspath($this->options['tmbPath']);
+            } else {
+                $this->options['tmbPath'] = $this->_normpath($this->options['tmbPath']);
+            }
+        }
+        // check temp path
+        if (!empty($this->options['tmpPath'])) {
+            if (strpos($this->options['tmpPath'], DIRECTORY_SEPARATOR) === false) {
+                $hiddens['temp'] = $this->options['tmpPath'];
+                $this->options['tmpPath'] = $this->_abspath($this->options['tmpPath']);
+            } else {
+                $this->options['tmpPath'] = $this->_normpath($this->options['tmpPath']);
+            }
+        }
+        // check quarantine path
+        if (!empty($this->options['quarantine'])) {
+            if (strpos($this->options['quarantine'], DIRECTORY_SEPARATOR) === false) {
+                $hiddens['quarantine'] = $this->options['quarantine'];
+                $this->options['quarantine'] = $this->_abspath($this->options['quarantine']);
+            } else {
+                $this->options['quarantine'] = $this->_normpath($this->options['quarantine']);
+            }
         }
 
         parent::configure();
 
-        // set $this->tmp by options['tmpPath']
-        $this->tmp = '';
-        if (!empty($this->options['tmpPath'])) {
-            if ((is_dir($this->options['tmpPath']) || mkdir($this->options['tmpPath'], 0755, true)) && is_writable($this->options['tmpPath'])) {
-                $this->tmp = $this->options['tmpPath'];
-            }
-        }
-        if (!$this->tmp && ($tmp = elFinder::getStaticVar('commonTempPath'))) {
-            $this->tmp = $tmp;
+        // check tmbPath
+        if (!$this->tmbPath && isset($hiddens['tmb'])) {
+            unset($hiddens['tmb']);
         }
 
         // if no thumbnails url - try detect it
@@ -184,18 +198,29 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver
             }
         }
 
+        // set $this->tmp by options['tmpPath']
+        $this->tmp = '';
+        if (!empty($this->options['tmpPath'])) {
+            if ((is_dir($this->options['tmpPath']) || mkdir($this->options['tmpPath'], $this->options['dirMode'], true)) && is_writable($this->options['tmpPath'])) {
+                $this->tmp = $this->options['tmpPath'];
+            } else {
+                if (isset($hiddens['temp'])) {
+                    unset($hiddens['temp']);
+                }
+            }
+        }
+        if (!$this->tmp && ($tmp = elFinder::getStaticVar('commonTempPath'))) {
+            $this->tmp = $tmp;
+        }
+
         // check quarantine dir
         $this->quarantine = '';
         if (!empty($this->options['quarantine'])) {
-            if (is_dir($this->options['quarantine'])) {
-                if (is_writable($this->options['quarantine'])) {
-                    $this->quarantine = $this->options['quarantine'];
-                }
-                $this->options['quarantine'] = '';
+            if ((is_dir($this->options['quarantine']) || mkdir($this->quarantine, $this->options['dirMode'], true)) && is_writable($this->options['quarantine'])) {
+                $this->quarantine = $this->options['quarantine'];
             } else {
-                $this->quarantine = $this->_abspath($this->options['quarantine']);
-                if ((!is_dir($this->quarantine) && !mkdir($this->quarantine)) || !is_writable($this->quarantine)) {
-                    $this->options['quarantine'] = $this->quarantine = '';
+                if (isset($hiddens['quarantine'])) {
+                    unset($hiddens['quarantine']);
                 }
             }
         }
@@ -209,14 +234,16 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver
             }
         }
 
-        if ($this->options['quarantine']) {
-            $this->attributes[] = array(
-                'pattern' => '~^' . preg_quote(DIRECTORY_SEPARATOR . $this->options['quarantine']) . '$~',
-                'read' => false,
-                'write' => false,
-                'locked' => true,
-                'hidden' => true
-            );
+        if ($hiddens) {
+            foreach ($hiddens as $hidden) {
+                $this->attributes[] = array(
+                    'pattern' => '~^' . preg_quote(DIRECTORY_SEPARATOR . $hidden, '~') . '$~',
+                    'read' => false,
+                    'write' => false,
+                    'locked' => true,
+                    'hidden' => true
+                );
+            }
         }
 
         if (!empty($this->options['keepTimestamp'])) {
@@ -423,8 +450,9 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver
         if ($path === DIRECTORY_SEPARATOR) {
             return $this->root;
         } else {
-            if ($path[0] === DIRECTORY_SEPARATOR) {
-                // for link
+            if (strpos($path, $this->systemRoot) === 0) {
+                return $path;
+            } else if (DIRECTORY_SEPARATOR !== '/' && preg_match('/^[a-zA-Z]:' . preg_quote(DIRECTORY_SEPARATOR, '/') . '/', $path)) {
                 return $path;
             } else {
                 return $this->_joinPath($this->root, $path);
