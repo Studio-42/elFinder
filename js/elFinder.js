@@ -300,7 +300,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			// NOTES: Do not touch data object
 		
 			var volumeid, contextmenu, emptyDirs = {}, stayDirs = {},
-				rmClass, hashes, calc, gc, collapsed, prevcwd, sorterStr;
+				rmClass, hashes, calc, gc, collapsed, prevcwd, sorterStr, diff;
 			
 			if (self.api >= 2.1) {
 				// support volume driver option `uiCmdMap`
@@ -393,6 +393,11 @@ var elFinder = function(elm, opts, bootCallback) {
 			cache(data.files);
 			if (!files[cwd]) {
 				cache([data.cwd]);
+			} else {
+				diff = self.diff([data.cwd], true);
+				if (diff.changed.length) {
+					cache(diff.changed, 'change');
+				}
 			}
 
 			// trigger event 'sorterupdate'
