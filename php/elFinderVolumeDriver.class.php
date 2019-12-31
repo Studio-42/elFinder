@@ -420,6 +420,17 @@ abstract class elFinderVolumeDriver
         'accessControl' => null,
         // some data required by access control
         'accessControlData' => null,
+        // root stat that return without asking the system when mounted and not the current volume. Query to the system with false. array|false
+        'rapidRootStat' => array(
+            'read' => true,
+            'write' => true,
+            'locked' => false,
+            'hidden' => false,
+            'size' => 0,  // Unknown
+            'ts' => 0,    // Unknown
+            'dirs' => -1, // Check on demand for subdirectories
+            'mime' => 'directory'
+        ),
         // default permissions.
         'defaults' => array(
             'read' => true,
@@ -4362,20 +4373,30 @@ abstract class elFinderVolumeDriver
                 }
             }
         }
-        $ret = isset($this->cache[$path])
-            ? $this->cache[$path]
-            : $this->updateCache($path, $this->convEncOut($this->_stat($this->convEncIn($path))));
-        if ($is_root && $this->sessionCaching['rootstat']) {
+        $rootSessCache = false;
+        if (isset($this->cache[$path])) {
+            $ret = $this->cache[$path];
+        } else {
+            if ($is_root && !empty($this->options['rapidRootStat']) && is_array($this->options['rapidRootStat']) && (empty($this->ARGS['target']) || strpos($this->ARGS['target'], $this->id) !== 0)) {
+                $ret = $this->updateCache($path, $this->options['rapidRootStat'], true);
+            } else {
+                $ret = $this->updateCache($path, $this->convEncOut($this->_stat($this->convEncIn($path))), true);
+                if ($is_root && !empty($rootKey) && $this->sessionCaching['rootstat']) {
+                    $rootSessCache = true;
+                }
+            }
+        } 
+        if ($is_root) {
             if ($ret) {
                 $this->rootModified = false;
-                if (!empty($rootKey)) {
+                if ($rootSessCache) {
                     $this->sessionCache['rootstat'][$rootKey] = $ret;
                 }
                 if (isset($this->options['phash'])) {
                     $ret['isroot'] = 1;
                     $ret['phash'] = $this->options['phash'];
                 }
-            } else if (!empty($rootKey)) {
+            } else if (!empty($rootKey) && $this->sessionCaching['rootstat']) {
                 unset($this->sessionCache['rootstat'][$rootKey]);
             }
         }
@@ -4426,6 +4447,12 @@ abstract class elFinderVolumeDriver
     {
         if (empty($stat) || !is_array($stat)) {
             return $this->cache[$path] = array();
+        }
+
+        if (func_num_args() > 2) {
+            $fromStat = func_get_arg(2);
+        } else {
+            $fromStat = false;
         }
 
         $stat['hash'] = $this->encode($path);
@@ -4569,7 +4596,7 @@ abstract class elFinderVolumeDriver
 
         $this->cache[$path] = $stat;
 
-        if ($root && $this->sessionCaching['rootstat']) {
+        if (!$fromStat && $root && $this->sessionCaching['rootstat']) {
             // to update session cache
             $this->stat($path);
         }
@@ -6480,26 +6507,6 @@ abstract class elFinderVolumeDriver
     }
 
     /*********************** misc *************************/
-
-    /**
-     * Return smart formatted date
-     *
-     * @param  int $ts file timestamp
-     *
-     * @return string
-     * @author Dmitry (dio) Levashov
-     **/
-    // protected function formatDate($ts) {
-    // 	if ($ts > $this->today) {
-    // 		return 'Today '.date($this->options['timeFormat'], $ts);
-    // 	}
-    //
-    // 	if ($ts > $this->yesterday) {
-    // 		return 'Yesterday '.date($this->options['timeFormat'], $ts);
-    // 	}
-    //
-    // 	return date($this->options['dateFormat'], $ts);
-    // }
 
     /**
      * Find position of first occurrence of string in a string with multibyte support
