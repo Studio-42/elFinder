@@ -131,8 +131,7 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends ExtDriver
                     $options['url'] = elFinder::getConnectorUrl();
                 }
 
-                $callback = $options['url']
-                    . '?cmd=netmount&protocol=googledrive&host=1';
+                $callback = $options['url'] . (strpos($options['url'], '?') !== false? '&' : '?') . 'cmd=netmount&protocol=googledrive&host=1';
                 $client->setRedirectUri($callback);
 
                 if (!$aToken && empty($_GET['code'])) {

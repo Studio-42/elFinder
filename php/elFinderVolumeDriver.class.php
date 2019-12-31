@@ -3178,7 +3178,8 @@ abstract class elFinderVolumeDriver
                                         'ts' => $file['ts']
                                     );
                                     if (file_put_contents($dat, json_encode($info))) {
-                                        $ret = elFinder::getConnectorUrl() . '?cmd=file&onetime=1&target=' . $token;
+                                        $conUrl = elFinder::getConnectorUrl();
+                                        $ret = $conUrl . (strpos($conUrl, '?') !== false? '&' : '?') . 'cmd=file&onetime=1&target=' . $token;
 
                                     }
                                 }
