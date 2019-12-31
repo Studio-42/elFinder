@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: fa9f999) (2019-12-30)
+ * Version 2.1.51 (2.1-src Nightly: 610bac8) (2019-12-31)
  * http://elfinder.org
  * 
  * Copyright 2009-2019, Studio 42
@@ -331,7 +331,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			// NOTES: Do not touch data object
 		
 			var volumeid, contextmenu, emptyDirs = {}, stayDirs = {},
-				rmClass, hashes, calc, gc, collapsed, prevcwd, sorterStr;
+				rmClass, hashes, calc, gc, collapsed, prevcwd, sorterStr, diff;
 			
 			if (self.api >= 2.1) {
 				// support volume driver option `uiCmdMap`
@@ -424,6 +424,11 @@ var elFinder = function(elm, opts, bootCallback) {
 			cache(data.files);
 			if (!files[cwd]) {
 				cache([data.cwd]);
+			} else {
+				diff = self.diff([data.cwd], true);
+				if (diff.changed.length) {
+					cache(diff.changed, 'change');
+				}
 			}
 
 			// trigger event 'sorterupdate'
@@ -10221,7 +10226,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.51 (2.1-src Nightly: fa9f999)';
+elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 610bac8)';
 
 
 
