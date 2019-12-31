@@ -4602,7 +4602,7 @@ class elFinder
                 }
             }
 
-            $transport = ($url['scheme'] === 'https') ? 'tls' : 'tcp';
+            $transport = ($url['scheme'] === 'https') ? 'ssl' : 'tcp';
             $query = isset($url['query']) ? '?' . $url['query'] : '';
             if (!($stream = stream_socket_client($transport . '://' . $url['host'] . ':' . $url['port']))) {
                 return false;
