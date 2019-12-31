@@ -745,7 +745,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                         $options['url'] = elFinder::getConnectorUrl();
                     }
                     $callback = $options['url']
-                        . '?cmd=netmount&protocol=onedrive&host=onedrive.com&user=init&pass=return&node=' . $options['id'] . $cdata;
+                        . (strpos($options['url'], '?') !== false? '&' : '?') . 'cmd=netmount&protocol=onedrive&host=onedrive.com&user=init&pass=return&node=' . $options['id'] . $cdata;
 
                     try {
                         $this->session->set('OneDriveTokens', (object)array('token' => null));

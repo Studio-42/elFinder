@@ -332,7 +332,7 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
                 }
 
                 $callback = $options['url']
-                    . '?cmd=netmount&protocol=dropbox2&host=1';
+                        . (strpos($options['url'], '?') !== false? '&' : '?') . 'cmd=netmount&protocol=dropbox2&host=1';
 
                 if (!$aToken && empty($_GET['code'])) {
                     $url = $authHelper->getAuthUrl($callback);

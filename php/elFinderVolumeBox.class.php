@@ -652,12 +652,13 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                         $options['url'] = elFinder::getConnectorUrl();
                     }
                     $callback = $options['url']
-                        . '?cmd=netmount&protocol=box&host=box.com&user=init&pass=return&node=' . $options['id'] . $cdata;
+                        . (strpos($options['url'], '?') !== false? '&' : '?') . 'cmd=netmount&protocol=box&host=box.com&user=init&pass=return&node=' . $options['id'] . $cdata;
 
                     try {
                         $this->session->set('BoxTokens', (object)array('token' => null));
 
-                        $url = self::AUTH_URL . '?' . http_build_query(array('response_type' => 'code', 'client_id' => $options['client_id'], 'redirect_uri' => elFinder::getConnectorUrl() . '?cmd=netmount&protocol=box&host=1'));
+                        $url = self::AUTH_URL . '?' . http_build_query(array('response_type' => 'code', 'client_id' => $options['client_id'], 'redirect_uri' => $options['url']
+                        . (strpos($options['url'], '?') !== false? '&' : '?') . 'cmd=netmount&protocol=box&host=1'));
 
                         $url .= '&oauth_callback=' . rawurlencode($callback);
                     } catch (Exception $e) {

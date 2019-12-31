@@ -70,7 +70,8 @@ class elFinderEditorZohoOffice extends elFinderEditor
                 $cookie = $this->elfinder->getFetchCookieFile();
                 $save = false;
                 $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, elFinder::getConnectorUrl() . '?cmd=editor&name=' . $this->myName . '&method=chk&args[target]=' . rawurlencode($hash) . $cdata);
+                $conUrl = elFinder::getConnectorUrl();
+                curl_setopt($ch, CURLOPT_URL, $conUrl . (strpos($conUrl, '?') !== false? '&' : '?') . 'cmd=editor&name=' . $this->myName . '&method=chk&args[target]=' . rawurlencode($hash) . $cdata);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                 if ($cookie) {
                     curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie);
@@ -126,7 +127,8 @@ class elFinderEditorZohoOffice extends elFinderEditor
                 );
                 $data['editor_settings']['language'] = $lang;
                 if ($save) {
-                    $data['callback_settings']['save_url'] = elFinder::getConnectorUrl() . '?cmd=editor&name=' . $this->myName . '&method=save' . $cdata;
+                    $conUrl = elFinder::getConnectorUrl();
+                    $data['callback_settings']['save_url'] = $conUrl . (strpos($conUrl, '?') !== false? '&' : '?') . 'cmd=editor&name=' . $this->myName . '&method=save' . $cdata;
                 }
                 foreach($data as $_k => $_v) {
                     if (is_array($_v)){

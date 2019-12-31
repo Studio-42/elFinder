@@ -1584,7 +1584,9 @@ class elFinder
                 elFinder::extendTimeLimit(30 + $sleep);
                 $_mtime = 0;
                 foreach ($ls as $_f) {
-                    $_mtime = max($_mtime, $_f['ts']);
+                    if (isset($_f['ts'])) {
+                        $_mtime = max($_mtime, $_f['ts']);
+                    }
                 }
                 $compare = strval(count($ls)) . ':' . strval($_mtime);
                 if ($compare !== $args['compare']) {
