@@ -1467,7 +1467,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         }
         $raw = $this->_od_query($itemId, true, false, $options);
 
-        if ($raw && $img = $raw->image) {
+        if ($raw && property_exists($raw, 'image') && $img = $raw->image) {
             if (isset($img->width) && isset($img->height)) {
                 $ret = array('dim' => $img->width . 'x' . $img->height);
                 if ($tmbSize) {
