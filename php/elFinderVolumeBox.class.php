@@ -1385,7 +1385,8 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 $cache['height'] = $size[1];
                 $ret = array('dim' => $size[0] . 'x' . $size[1]);
                 $srcfp = fopen($work, 'rb');
-                if ($subImgLink = $this->getSubstituteImgLink(elFinder::$currentArgs['target'], $size, $srcfp)) {
+                $target = isset(elFinder::$currentArgs['target'])? elFinder::$currentArgs['target'] : '';
+                if ($subImgLink = $this->getSubstituteImgLink($target, $size, $srcfp)) {
                     $ret['url'] = $subImgLink;
                 }
             }
