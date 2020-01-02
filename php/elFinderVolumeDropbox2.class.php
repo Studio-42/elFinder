@@ -1105,7 +1105,8 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
             if ($size) {
                 $ret = array('dim' => $size[0] . 'x' . $size[1]);
                 $srcfp = fopen($tmp, 'rb');
-                if ($subImgLink = $this->getSubstituteImgLink(elFinder::$currentArgs['target'], $size, $srcfp)) {
+                $target = isset(elFinder::$currentArgs['target'])? elFinder::$currentArgs['target'] : '';
+                if ($subImgLink = $this->getSubstituteImgLink($target, $size, $srcfp)) {
                     $ret['url'] = $subImgLink;
                 }
             }
