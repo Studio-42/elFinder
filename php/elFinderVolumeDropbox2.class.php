@@ -890,7 +890,7 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
     public function debug()
     {
         $res = parent::debug();
-        if (isset($this->options['tokens']) && !empty($this->options['tokens']['uid'])) {
+        if (!empty($this->options['netkey']) && isset($this->options['tokens']) && !empty($this->options['tokens']['uid'])) {
             $res['Dropbox uid'] = $this->options['tokens']['uid'];
             $res['access_token'] = $this->options['tokens']['access_token'];
         }

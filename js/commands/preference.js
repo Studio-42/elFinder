@@ -32,6 +32,10 @@ elFinder.prototype.commands.preference = function() {
 				},
 				forms = self.options.prefs || ['language', 'theme', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'makefileTypes', 'useStoredEditor', 'editorMaximized', 'useFullscreen', 'showHidden', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
 			
+			if (!fm.cookieEnabled) {
+				delete cats.language;
+			}
+
 			forms = fm.arrayFlip(forms, true);
 			
 			if (fm.options.getFileCallback) {
@@ -87,6 +91,9 @@ elFinder.prototype.commands.preference = function() {
 						zh_CN: '简体中文',
 						zh_TW: '正體中文'
 					};
+				if (!fm.cookieEnabled) {
+					return $();
+				}
 				$.each(langs, function(lang, name) {
 					optTags.push('<option value="'+lang+'">'+name+'</option>');
 				});
