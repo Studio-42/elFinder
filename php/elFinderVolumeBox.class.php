@@ -213,19 +213,19 @@ class elFinderVolumeBox extends elFinderVolumeDriver
     protected function _bd_refreshToken()
     {
         if (!property_exists($this->token, 'expires') || $this->token->expires < time()) {
-            if (empty($this->token->data->refresh_token)) {
-                throw new \Exception(elFinder::ERROR_REAUTH_REQUIRE);
-            } else {
-                $refresh_token = $this->token->data->refresh_token;
-                $initialToken = empty($this->token->initialToken)? $refresh_token : $this->token->initialToken;
-            }
-
             if (!$this->options['client_id']) {
                 $this->options['client_id'] = ELFINDER_BOX_CLIENTID;
             }
 
             if (!$this->options['client_secret']) {
                 $this->options['client_secret'] = ELFINDER_BOX_CLIENTSECRET;
+            }
+
+            if (empty($this->token->data->refresh_token)) {
+                throw new \Exception(elFinder::ERROR_REAUTH_REQUIRE);
+            } else {
+                $refresh_token = $this->token->data->refresh_token;
+                $initialToken = empty($this->token->initialToken)? md5($this->options['client_id'] . $refresh_token) : $this->token->initialToken;
             }
 
             $url = self::TOKEN_URL;
@@ -591,7 +591,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             $this->tmp = $tmp;
         }
         if ($tmp) {
-            $aTokenFile = $tmp . DIRECTORY_SEPARATOR . md5($this->options['client_id'] . (empty($this->token->initialToken)? $this->token->data->refresh_token : $this->token->initialToken)) . '.btoken';
+            $aTokenFile = $tmp . DIRECTORY_SEPARATOR . (empty($this->token->initialToken)? md5($this->options['client_id'] . $this->token->data->refresh_token) : $this->token->initialToken) . '.btoken';
         }
         return $aTokenFile;
     }
@@ -836,14 +836,18 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
         try {
             $this->token = json_decode($this->options['accessToken']);
+            $this->aTokenFile = $this->_bd_getATokenFile();
             if (empty($this->options['netkey'])) {
-                if ($this->aTokenFile = $this->_bd_getATokenFile()) {
+                if ($this->aTokenFile) {
                     if (is_file($this->aTokenFile)) {
                         $this->token = json_decode(file_get_contents($this->aTokenFile));
                     } else {
                         file_put_contents($this->aTokenFile, $this->token);
                     }
                 }
+            } else if (is_file($this->aTokenFile)) {
+                // If the refresh token is the same as the permanent volume
+                $this->token = json_decode(file_get_contents($this->aTokenFile));
             }
 
             $this->_bd_refreshToken();
