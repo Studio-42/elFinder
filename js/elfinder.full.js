@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: 7595424) (2020-01-02)
+ * Version 2.1.51 (2.1-src Nightly: 79def5c) (2020-01-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -5608,7 +5608,7 @@ elFinder.prototype = {
 	 **/
 	UA : (function(){
 		var self = this,
-			webkit = !document.unqueID && !window.opera && !window.sidebar && window.localStorage && 'WebkitAppearance' in document.documentElement.style,
+			webkit = !document.unqueID && !window.opera && !window.sidebar && 'localStorage' in window && 'WebkitAppearance' in document.documentElement.style,
 			chrome = webkit && window.chrome,
 			/*setRotated = function() {
 				var a = ((screen && screen.orientation && screen.orientation.angle) || window.orientation || 0) + 0;
@@ -5661,6 +5661,20 @@ elFinder.prototype = {
 			return UA;
 	})(),
 	
+	/**
+	 * Is cookie enabled
+	 * 
+	 * @type Boolean
+	 */
+	cookieEnabled : (function() {
+		var res = false,
+			test = 'elftest=';
+		document.cookie = test + '1';
+		res = document.cookie.split(test).length === 2;
+		document.cookie = test + ';max-age=0';
+		return res;
+	})(),
+
 	/**
 	 * Has RequireJS?
 	 * 
@@ -7552,7 +7566,7 @@ elFinder.prototype = {
 		name = 'elfinder-'+name+this.id;
 
 		if (value === void(0)) {
-			if (document.cookie && document.cookie != '') {
+			if (this.cookieEnabled && document.cookie && document.cookie != '') {
 				c = document.cookie.split(';');
 				name += '=';
 				for (i=0; i<c.length; i++) {
@@ -7569,6 +7583,10 @@ elFinder.prototype = {
 				}
 			}
 			return null;
+		}
+
+		if (!this.cookieEnabled) {
+			return '';
 		}
 
 		o = Object.assign({}, this.options.cookie);
@@ -10226,7 +10244,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 7595424)';
+elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 79def5c)';
 
 
 
@@ -22978,7 +22996,7 @@ elFinder.prototype.commands.download = function() {
 		if (fm.api >= 2.1012) {
 			czipdl = fm.getCommand('zipdl');
 		}
-		dlntf = fm.api > 2.1038 && !fm.isCORS;
+		dlntf = fm.cookieEnabled && fm.api > 2.1038 && !fm.isCORS;
 	});
 	
 	this.exec = function(select) {
@@ -25554,7 +25572,7 @@ elFinder.prototype.commands.hide = function() {
 	});
 
 	this.getstate = function(sel) {
-		return (cMenuType !== 'cwd' && (sel || this.fm.selected()).length) || hideCnt? 0 : -1;
+		return (this.fm.cookieEnabled && cMenuType !== 'cwd' && (sel || this.fm.selected()).length) || hideCnt? 0 : -1;
 	};
 
 	this.exec = function(hashes, opts) {
@@ -26240,20 +26258,22 @@ elFinder.prototype.commands.netmount = function() {
 	this.handlers = {
 		load : function() {
 			var fm = self.fm;
-			fm.one('open', function() {
-				self.drivers = fm.netDrivers;
-				if (self.drivers.length) {
-					$.each(self.drivers, function() {
-						var d = self.options[this];
-						if (d) {
-							hasMenus = true;
-							if (d.integrateInfo) {
-								fm.trigger('helpIntegration', Object.assign({cmd: 'netmount'}, d.integrateInfo));
+			if (fm.cookieEnabled) {
+				fm.one('open', function() {
+					self.drivers = fm.netDrivers;
+					if (self.drivers.length) {
+						$.each(self.drivers, function() {
+							var d = self.options[this];
+							if (d) {
+								hasMenus = true;
+								if (d.integrateInfo) {
+									fm.trigger('helpIntegration', Object.assign({cmd: 'netmount'}, d.integrateInfo));
+								}
 							}
-						}
-					});
-				}
-			});
+						});
+					}
+				});
+			}
 		}
 	};
 
@@ -27423,6 +27443,10 @@ elFinder.prototype.commands.preference = function() {
 				},
 				forms = self.options.prefs || ['language', 'theme', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'makefileTypes', 'useStoredEditor', 'editorMaximized', 'useFullscreen', 'showHidden', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
 			
+			if (!fm.cookieEnabled) {
+				delete cats.language;
+			}
+
 			forms = fm.arrayFlip(forms, true);
 			
 			if (fm.options.getFileCallback) {
@@ -27478,6 +27502,9 @@ elFinder.prototype.commands.preference = function() {
 						zh_CN: '简体中文',
 						zh_TW: '正體中文'
 					};
+				if (!fm.cookieEnabled) {
+					return $();
+				}
 				$.each(langs, function(lang, name) {
 					optTags.push('<option value="'+lang+'">'+name+'</option>');
 				});
@@ -30887,7 +30914,7 @@ elFinder.prototype.commands.rename = function() {
 			isRoot = fm.isRoot(sel[0]);
 		}
 
-		state = (cnt === 1 && (isRoot || !sel[0].locked) || (fm.api > 2.1030 && cnt === $.grep(sel, function(f) {
+		state = (cnt === 1 && ((fm.cookieEnabled && isRoot) || !sel[0].locked) || (fm.api > 2.1030 && cnt === $.grep(sel, function(f) {
 			if (!brk && !f.locked && f.phash === phash && !fm.isRoot(f) && (mime === f.mime || ext === fm.splitFileExtention(f.name)[1].toLowerCase())) {
 				return true;
 			} else {
