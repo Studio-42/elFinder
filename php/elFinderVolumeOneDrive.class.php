@@ -1851,6 +1851,16 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         }
 
         try {
+            // for unseekable file pointer
+            if (!elFinder::isSeekableStream($fp)) {
+                if ($tfp = tmpfile()) {
+                    if (stream_copy_to_stream($fp, $tfp, $size? $size : -1) !== false) {
+                        rewind($tfp);
+                        $fp = $tfp;
+                    }
+                }
+            }
+
             //Create or Update a file
             if ($itemId === '') {
                 $url = self::API_URL . $parentId . ':/' . rawurlencode($name) . ':/content';
