@@ -52,7 +52,7 @@ elFinder.prototype.commands.hide = function() {
 	});
 
 	this.getstate = function(sel) {
-		return (cMenuType !== 'cwd' && (sel || this.fm.selected()).length) || hideCnt? 0 : -1;
+		return (this.fm.cookieEnabled && cMenuType !== 'cwd' && (sel || this.fm.selected()).length) || hideCnt? 0 : -1;
 	};
 
 	this.exec = function(hashes, opts) {
