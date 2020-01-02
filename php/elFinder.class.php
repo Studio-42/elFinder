@@ -1286,6 +1286,7 @@ class elFinder
         $netVolumes = $this->getNetVolumes();
         if (is_string($netKey) && isset($netVolumes[$netKey]) && is_string($optionKey)) {
             $netVolumes[$netKey][$optionKey] = $val;
+            $this->saveNetVolumes($netVolumes);
         }
     }
 
