@@ -198,10 +198,15 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
         $decoded = $this->_bd_curlExec($curl, true, array('Content-Length: ' . strlen($fields)));
 
-        return (object)array(
+        $res = (object)array(
             'expires' => time() + $decoded->expires_in - 30,
-            'data' => $decoded,
+            'initialToken' => '',
+            'data' => $decoded
         );
+        if (!empty($decoded->refresh_token)) {
+            $res->initialToken = md5($client_id . $decoded->refresh_token);
+        }
+        return $res;
     }
 
     /**
@@ -265,25 +270,27 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
             $this->token = $token;
 
-            if ($this->aTokenFile) {
-                file_put_contents($this->aTokenFile, json_encode($token));
-            } else if (!empty($this->options['netkey'])) {
-                $json = json_encode($token);
-                // OAuth2 refresh token can be used only once,
-                // so update it if it is the same as the token file
-                $aTokenFile = $this->_bd_getATokenFile();
-                if (is_file($aTokenFile)) {
-                    if ($_token = json_decode(file_get_contents($aTokenFile))) {
-                        if ($_token->data->refresh_token === $refresh_token) {
-                            file_put_contents($aTokenFile, $json);
+            if (!empty($decoded->refresh_token)) {
+                if (empty($this->options['netkey']) && $this->aTokenFile) {
+                    file_put_contents($this->aTokenFile, json_encode($token));
+                } else if (!empty($this->options['netkey'])) {
+                    $json = json_encode($token);
+                    // OAuth2 refresh token can be used only once,
+                    // so update it if it is the same as the token file
+                    $aTokenFile = $this->_bd_getATokenFile();
+                    if (is_file($aTokenFile)) {
+                        if ($_token = json_decode(file_get_contents($aTokenFile))) {
+                            if ($_token->data->refresh_token === $refresh_token) {
+                                file_put_contents($aTokenFile, $json);
+                            }
                         }
                     }
+                    $this->options['accessToken'] = $json;
+                    // update session value
+                    elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'accessToken', $json);
+                } else {
+                    throw new \Exception(ERROR_CREATING_TEMP_DIR);
                 }
-                $this->options['accessToken'] = $json;
-                // update session value
-                elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'accessToken', $json);
-            } else {
-                throw new \Exception(ERROR_CREATING_TEMP_DIR);
             }
         }
 
@@ -582,16 +589,18 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      */
     protected function _bd_getATokenFile()
     {
-        $aTokenFile = '';
-        if (!$this->tmp) {
-            $tmp = elFinder::getStaticVar('commonTempPath');
-            if (!$tmp) {
-                $tmp = $this->getTempPath();
+        $tmp = $aTokenFile = '';
+        if (!empty($this->token->data->refresh_token)) {
+            if (!$this->tmp) {
+                $tmp = elFinder::getStaticVar('commonTempPath');
+                if (!$tmp) {
+                    $tmp = $this->getTempPath();
+                }
+                $this->tmp = $tmp;
             }
-            $this->tmp = $tmp;
-        }
-        if ($tmp) {
-            $aTokenFile = $tmp . DIRECTORY_SEPARATOR . (empty($this->token->initialToken)? md5($this->options['client_id'] . $this->token->data->refresh_token) : $this->token->initialToken) . '.btoken';
+            if ($tmp) {
+                $aTokenFile = $tmp . DIRECTORY_SEPARATOR . (empty($this->token->initialToken)? md5($this->options['client_id'] . $this->token->data->refresh_token) : $this->token->initialToken) . '.btoken';
+            }
         }
         return $aTokenFile;
     }
@@ -768,7 +777,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             return array('exit' => true, 'error' => $this->error());
         }
 
-        $this->session->remove('nodeId')->remove('BoxTokens');
+        $this->session->remove('nodeId');
         unset($options['user'], $options['pass'], $options['id']);
 
         return $options;
@@ -836,18 +845,19 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
         try {
             $this->token = json_decode($this->options['accessToken']);
-            $this->aTokenFile = $this->_bd_getATokenFile();
-            if (empty($this->options['netkey'])) {
-                if ($this->aTokenFile) {
-                    if (is_file($this->aTokenFile)) {
-                        $this->token = json_decode(file_get_contents($this->aTokenFile));
-                    } else {
-                        file_put_contents($this->aTokenFile, $this->token);
+            if ($this->aTokenFile = $this->_bd_getATokenFile()) {
+                if (empty($this->options['netkey'])) {
+                    if ($this->aTokenFile) {
+                        if (is_file($this->aTokenFile)) {
+                            $this->token = json_decode(file_get_contents($this->aTokenFile));
+                        } else {
+                            file_put_contents($this->aTokenFile, $this->token);
+                        }
                     }
+                } else if (is_file($this->aTokenFile)) {
+                    // If the refresh token is the same as the permanent volume
+                    $this->token = json_decode(file_get_contents($this->aTokenFile));
                 }
-            } else if (is_file($this->aTokenFile)) {
-                // If the refresh token is the same as the permanent volume
-                $this->token = json_decode(file_get_contents($this->aTokenFile));
             }
 
             $this->_bd_refreshToken();
