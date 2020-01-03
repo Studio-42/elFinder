@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: 156bf1e) (2020-01-03)
+ * Version 2.1.51 (2.1-src Nightly: 1990f7d) (2020-01-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -9103,7 +9103,8 @@ elFinder.prototype = {
 				host     : $('<span><span class="elfinder-spinner"/></span><input type="hidden"/>'),
 				path     : $('<input type="text" value="'+opts.root+'"/>'),
 				user     : $('<input type="hidden"/>'),
-				pass     : $('<input type="hidden"/>')
+				pass     : $('<input type="hidden"/>'),
+				mnt2res  : $('<input type="hidden"/>')
 			},
 			select: function(fm, ev, d){
 				var f = this.inputs,
@@ -9193,6 +9194,9 @@ elFinder.prototype = {
 					this.vars.mbtn.show();
 					if (data.folders) {
 						addFolders.call(this, fm, f.path, data.folders);
+					}
+					if (data.mnt2res) {
+						f.mnt2res.val('1');
 					}
 					f.user.val('done');
 					f.pass.val('done');
@@ -10244,7 +10248,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 156bf1e)';
+elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 1990f7d)';
 
 
 
@@ -26321,7 +26325,8 @@ elFinder.prototype.commands.netmount = function() {
 					doMount = function() {
 						var protocol = inputs.protocol.val(),
 							data = {cmd : 'netmount', protocol: protocol},
-							cur = o[protocol];
+							cur = o[protocol],
+							mnt2res;
 						$.each(content.find('input.elfinder-netmount-inputs-'+protocol), function(name, input) {
 							var val, elm;
 							elm = $(input);
@@ -26336,15 +26341,20 @@ elFinder.prototype.commands.netmount = function() {
 								data[input.name] = val;
 							}
 						});
-	
+
 						if (!data.host) {
 							return fm.trigger('error', {error : 'errNetMountHostReq', opts : {modal: true}});
 						}
-	
+
+						if (data.mnt2res) {
+							mnt2res = true;
+						}
+
 						fm.request({data : data, notify : {type : 'netmount', cnt : 1, hideCnt : true}})
 							.done(function(data) {
 								var pdir;
 								if (data.added && data.added.length) {
+									mnt2res && inputs.protocol.trigger('change', 'reset');
 									if (data.added[0].phash) {
 										if (pdir = fm.file(data.added[0].phash)) {
 											if (! pdir.dirs) {
