@@ -744,7 +744,8 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                     $folders = ['root' => $rootObj->getName()] + $folders;
                     $folders = json_encode($folders);
                     $expires = empty($aToken['refresh_token']) ? $aToken['created'] + $aToken['expires_in'] - 30 : 0;
-                    $json = '{"protocol": "googledrive", "mode": "done", "folders": ' . $folders . ', "expires": ' . $expires . '}';
+                    $mnt2res = empty($aToken['refresh_token']) ? '' : ', "mnt2res": 1';
+                    $json = '{"protocol": "googledrive", "mode": "done", "folders": ' . $folders . ', "expires": ' . $expires . $mnt2res . '}';
                     $options['pass'] = 'return';
                     $html = 'Google.com';
                     $html .= '<script>

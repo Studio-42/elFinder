@@ -269,16 +269,17 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             );
 
             $this->token = $token;
+            $json = json_encode($token);
 
             if (!empty($decoded->refresh_token)) {
                 if (empty($this->options['netkey']) && $this->aTokenFile) {
                     file_put_contents($this->aTokenFile, json_encode($token));
+                    $this->options['accessToken'] = $json;
                 } else if (!empty($this->options['netkey'])) {
-                    $json = json_encode($token);
                     // OAuth2 refresh token can be used only once,
                     // so update it if it is the same as the token file
                     $aTokenFile = $this->_bd_getATokenFile();
-                    if (is_file($aTokenFile)) {
+                    if ($aTokenFile && is_file($aTokenFile)) {
                         if ($_token = json_decode(file_get_contents($aTokenFile))) {
                             if ($_token->data->refresh_token === $refresh_token) {
                                 file_put_contents($aTokenFile, $json);
@@ -288,6 +289,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                     $this->options['accessToken'] = $json;
                     // update session value
                     elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'accessToken', $json);
+                    $this->session->set('BoxTokens', $token);
                 } else {
                     throw new \Exception(ERROR_CREATING_TEMP_DIR);
                 }
@@ -756,7 +758,8 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                     $folders = json_encode($folders);
 
                     $expires = empty($this->token->data->refresh_token) ? (int)$this->token->expires : 0;
-                    $json = '{"protocol": "box", "mode": "done", "folders": ' . $folders . ', "expires": ' . $expires . '}';
+                    $mnt2res = empty($this->token->data->refresh_token) ? '' : ', "mnt2res": 1';
+                    $json = '{"protocol": "box", "mode": "done", "folders": ' . $folders . ', "expires": ' . $expires . $mnt2res . '}';
                     $html = 'Box.com';
                     $html .= '<script>
 							$("#' . $options['id'] . '").elfinder("instance").trigger("netmount", ' . $json . ');
@@ -772,11 +775,15 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         if ($_aToken = $this->session->get('BoxTokens')) {
             $options['accessToken'] = json_encode($_aToken);
         } else {
+            $this->session->remove('BoxTokens');
             $this->setError(elFinder::ERROR_NETMOUNT, $options['host'], implode(' ', $this->error()));
 
             return array('exit' => true, 'error' => $this->error());
         }
 
+        if (!empty($_aToken->data->refresh_token)) {
+            $this->session->remove('BoxTokens');
+        }
         $this->session->remove('nodeId');
         unset($options['user'], $options['pass'], $options['id']);
 
