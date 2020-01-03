@@ -81,7 +81,8 @@ elFinder.prototype.commands.netmount = function() {
 					doMount = function() {
 						var protocol = inputs.protocol.val(),
 							data = {cmd : 'netmount', protocol: protocol},
-							cur = o[protocol];
+							cur = o[protocol],
+							mnt2res;
 						$.each(content.find('input.elfinder-netmount-inputs-'+protocol), function(name, input) {
 							var val, elm;
 							elm = $(input);
@@ -96,15 +97,20 @@ elFinder.prototype.commands.netmount = function() {
 								data[input.name] = val;
 							}
 						});
-	
+
 						if (!data.host) {
 							return fm.trigger('error', {error : 'errNetMountHostReq', opts : {modal: true}});
 						}
-	
+
+						if (data.mnt2res) {
+							mnt2res = true;
+						}
+
 						fm.request({data : data, notify : {type : 'netmount', cnt : 1, hideCnt : true}})
 							.done(function(data) {
 								var pdir;
 								if (data.added && data.added.length) {
+									mnt2res && inputs.protocol.trigger('change', 'reset');
 									if (data.added[0].phash) {
 										if (pdir = fm.file(data.added[0].phash)) {
 											if (! pdir.dirs) {

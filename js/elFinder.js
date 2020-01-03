@@ -9072,7 +9072,8 @@ elFinder.prototype = {
 				host     : $('<span><span class="elfinder-spinner"/></span><input type="hidden"/>'),
 				path     : $('<input type="text" value="'+opts.root+'"/>'),
 				user     : $('<input type="hidden"/>'),
-				pass     : $('<input type="hidden"/>')
+				pass     : $('<input type="hidden"/>'),
+				mnt2res  : $('<input type="hidden"/>')
 			},
 			select: function(fm, ev, d){
 				var f = this.inputs,
@@ -9162,6 +9163,9 @@ elFinder.prototype = {
 					this.vars.mbtn.show();
 					if (data.folders) {
 						addFolders.call(this, fm, f.path, data.folders);
+					}
+					if (data.mnt2res) {
+						f.mnt2res.val('1');
 					}
 					f.user.val('done');
 					f.pass.val('done');
