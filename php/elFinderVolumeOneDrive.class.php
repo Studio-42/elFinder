@@ -911,7 +911,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
      */
     public function netunmount($netVolumes, $key)
     {
-        if ($tmbs = glob(rtrim($this->options['tmbPath'], '\\/') . DIRECTORY_SEPARATOR . $this->tmbPrefix . '*.png')) {
+        if (!$this->options['useApiThumbnail'] && ($tmbs = glob(rtrim($this->options['tmbPath'], '\\/') . DIRECTORY_SEPARATOR . $this->tmbPrefix . '*.png'))) {
             foreach ($tmbs as $file) {
                 unlink($file);
             }
