@@ -3931,9 +3931,9 @@ class elFinder
 						w.postMessage && w.postMessage(JSON.stringify({bind:\'' . $bind . '\',data:' . $json . '}), \'*\');
 					}';
             }
-            $script .= 'window.close();';
+            $script .= 'window.open("about:blank","_self").close();';
 
-            $out = '<!DOCTYPE html><html><head><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><script>' . $script . '</script></head><body><a href="#" onclick="window.close();return false;">Close this window</a></body></html>';
+            $out = '<!DOCTYPE html><html><head><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><script>' . $script . '</script></head><body><h1><a href="#" onclick="window.open("about:blank","_self").close();return false;">Close this window</a></h1></body></html>';
 
             header('Content-Type: text/html; charset=utf-8');
             header('Content-Length: ' . strlen($out));
