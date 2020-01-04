@@ -221,7 +221,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 throw new \Exception(elFinder::ERROR_REAUTH_REQUIRE);
             } else {
                 $refresh_token = $this->token->data->refresh_token;
-                $initialToken = empty($this->token->initialToken)? md5($this->options['client_id'] . $refresh_token) : $this->token->initialToken;
+                $initialToken = $this->_od_getInitialToken();
             }
 
             $url = self::TOKEN_URL;
@@ -690,10 +690,20 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 $this->tmp = $tmp;
             }
             if ($tmp) {
-                $aTokenFile = $tmp . DIRECTORY_SEPARATOR . (empty($this->token->initialToken)? md5($this->options['client_id'] .  $this->token->data->refresh_token) : $this->token->initialToken) . '.otoken';
+                $aTokenFile = $tmp . DIRECTORY_SEPARATOR . $this->_od_getInitialToken() . '.otoken';
             }
         }
         return $aTokenFile;
+    }
+
+    /**
+     * Get Initial Token (MD5 hash)
+     *
+     * @return string
+     */
+    protected function _od_getInitialToken()
+    {
+        return (empty($this->token->initialToken)? md5($this->options['client_id'] . (!empty($this->token->data->refresh_token)? $this->token->data->refresh_token : $this->token->data->access_token)) : $this->token->initialToken);
     }
 
     /*********************************************************************/
@@ -950,6 +960,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             }
         }
 
+        $error = false;
         try {
             $this->token = json_decode($this->options['accessToken']);
             if ($this->aTokenFile = $this->_od_getATokenFile()) {
@@ -970,18 +981,27 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             $this->_od_refreshToken();
         } catch (Exception $e) {
             $this->token = null;
-
-            return $this->setError($e->getMessage());
+            $error = true;
+            $this->setError($e->getMessage());
         }
 
         $this->expires = empty($this->token->data->refresh_token) ? (int)$this->token->expires : 0;
 
         if (empty($this->options['netkey'])) {
             // make net mount key
-            $_tokenKey = isset($this->token->data->refresh_token) ? $this->token->data->refresh_token : $this->token->data->access_token;
-            $this->netMountKey = md5(implode('-', array('box', $this->options['path'], $_tokenKey)));
+            $this->netMountKey = $this->_od_getInitialToken();
         } else {
             $this->netMountKey = $this->options['netkey'];
+        }
+
+        $this->tmbPrefix = 'onedrive' . base_convert($this->netMountKey, 10, 32);
+
+        if ($error) {
+            if (empty($this->options['netkey'])) {
+                // for delete thumbnail 
+                $this->netunmount();
+            }
+            return false;
         }
 
         // normalize root path
@@ -999,8 +1019,6 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         }
 
         $this->rootName = $this->options['alias'];
-
-        $this->tmbPrefix = 'onedrive' . base_convert($this->netMountKey, 10, 32);
 
         // This driver dose not support `syncChkAsTs`
         $this->options['syncChkAsTs'] = false;
