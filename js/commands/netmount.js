@@ -153,7 +153,7 @@ elFinder.prototype.commands.netmount = function() {
 						}
 					}),
 					hidden  = $('<div/>'),
-					dialog, cb;
+					dialog;
 
 				content = $('<table class="elfinder-info-tb elfinder-netmount-tb"/>')
 					.append($('<tr/>').append($('<td>'+fm.i18n('protocol')+'</td>')).append($('<td/>').append(inputs.protocol)));
@@ -188,21 +188,11 @@ elFinder.prototype.commands.netmount = function() {
 				
 				content.find('select,input').addClass('elfinder-tabstop');
 				
-				dialog = self.fmDialog(form.append(content), opts).ready(function(){
+				dialog = self.fmDialog(form.append(content), opts).ready(function() {
 					inputs.protocol.trigger('change');
 					dialog.elfinderdialog('posInit');
 				});
-				cb = function(e) {
-					var background = document.hidden || document.webkitHidden || document.msHidden;
-					if (!background) {
-						inputs.protocol.trigger('change');
-					}
-				};
-				dialogNode = dialog.closest('.ui-dialog').on('open', function() {
-					$(window).on('visibilitychange.' + fm.namespace, cb);
-				}).on('close', function() {
-					$(window).off('visibilitychange.' + fm.namespace, cb);
-				});
+				dialogNode = dialog.closest('.ui-dialog');
 				return dialog;
 			},
 			dialogNode;
