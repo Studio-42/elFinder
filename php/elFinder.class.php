@@ -3907,29 +3907,34 @@ class elFinder
                 } else {
                     $trigger = $triggerdone = $triggerfail = '';
                 }
+                $origin = elFinder::getConnectorUrl();
+                if (preg_match('~^(https?://[^/]+).*~', $origin, $_m)) {
+                    $origin = $_m[1];
+                }
+                $origin = str_replace('\'', '\\\'', $origin);
                 $script .= '
-					var w = window.opener || window.parent || window;
-					try {
-						var elf = w.document.getElementById(\'' . $node . '\').elfinder;
-						if (elf) {
-							var data = ' . $json . ';
-							if (data.error) {
-								' . $triggerfail . '
-								elf.error(data.error);
-							} else {
-								data.warning && elf.error(data.warning);
-								data.removed && data.removed.length && elf.remove(data);
-								data.added   && data.added.length   && elf.add(data);
-								data.changed && data.changed.length && elf.change(data);
-								' . $trigger . '
-								' . $triggerdone . '
-								data.sync && elf.sync();
-							}
-						}
-					} catch(e) {
-						// for CORS
-						w.postMessage && w.postMessage(JSON.stringify({bind:\'' . $bind . '\',data:' . $json . '}), \'*\');
-					}';
+var w = window.opener || window.parent || window;
+try {
+	var elf = w.document.getElementById(\'' . $node . '\').elfinder;
+	if (elf) {
+		var data = ' . $json . ';
+		if (data.error) {
+			' . $triggerfail . '
+			elf.error(data.error);
+		} else {
+			data.warning && elf.error(data.warning);
+			data.removed && data.removed.length && elf.remove(data);
+			data.added   && data.added.length   && elf.add(data);
+			data.changed && data.changed.length && elf.change(data);
+			' . $trigger . '
+			' . $triggerdone . '
+			data.sync && elf.sync();
+		}
+	}
+} catch(e) {
+	// for CORS
+	w.postMessage && w.postMessage(JSON.stringify({bind:\'' . $bind . '\',data:' . $json . '}), \'' . $origin . '\');
+}';
             }
             $script .= 'window.open("about:blank","_self").close();';
 
