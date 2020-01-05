@@ -3934,7 +3934,7 @@ try {
             }
             $script .= 'window.open("about:blank","_self").close();';
 
-            $out = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta charset="utf-8"><script>' . $script . '</script></head><body><h1><a href="#" onclick="window.open("about:blank","_self").close();return false;">Close this window</a></h1></body></html>';
+            $out = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"><script>' . $script . '</script></head><body><h2><a href="#" onclick="window.open(\'about:blank\',\'_self\').close();return false;">Please close this tab.</a></h2></body></html>';
 
             header('Content-Type: text/html; charset=utf-8');
             header('Content-Length: ' . strlen($out));

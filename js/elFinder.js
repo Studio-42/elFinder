@@ -4715,9 +4715,6 @@ var elFinder = function(elm, opts, bootCallback) {
 			if (self.options.syncStart) {
 				self.autoSync(background? 'stop' : void(0));
 			}
-			if (!background) {
-				window.focus();
-			}
 		});
 	});
 
