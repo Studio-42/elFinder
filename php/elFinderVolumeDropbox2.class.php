@@ -287,7 +287,6 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
         }
 
         try {
-            $this->session->start();
             $app = new DropboxApp($options['app_key'], $options['app_secret']);
             $dropbox = new Dropbox($app);
             $authHelper = $dropbox->getAuthHelper();
@@ -326,7 +325,7 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
                 }
             }
 
-            if ($options['user'] === 'init') {
+            if ((isset($options['user']) && $options['user'] === 'init') || (isset($_GET['host']) && $_GET['host'] == '1')) {
                 if (empty($options['url'])) {
                     $options['url'] = elFinder::getConnectorUrl();
                 }
@@ -357,6 +356,8 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
                     }
                 } else {
                     if (!empty($_GET['code']) && isset($_GET['state'])) {
+                        // see https://github.com/kunalvarma05/dropbox-php-sdk/issues/115
+                        $authHelper->getPersistentDataStore()->set('state', filter_var($_GET['state'], FILTER_SANITIZE_STRING));
                         $tokenObj = $authHelper->getAccessToken($_GET['code'], $_GET['state'], $callback);
                         $options['tokens'] = [
                             'access_token' => $tokenObj->getToken(),
