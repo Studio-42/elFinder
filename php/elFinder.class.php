@@ -3907,38 +3907,34 @@ class elFinder
                 } else {
                     $trigger = $triggerdone = $triggerfail = '';
                 }
-                $origin = elFinder::getConnectorUrl();
-                if (preg_match('~^(https?://[^/]+).*~', $origin, $_m)) {
-                    $origin = $_m[1];
-                }
-                $origin = str_replace('\'', '\\\'', $origin);
+                $origin = isset($_SERVER['HTTP_ORIGIN'])? str_replace('\'', '\\\'', $_SERVER['HTTP_ORIGIN']) : '*';
                 $script .= '
 var w = window.opener || window.parent || window;
 try {
-	var elf = w.document.getElementById(\'' . $node . '\').elfinder;
-	if (elf) {
-		var data = ' . $json . ';
-		if (data.error) {
-			' . $triggerfail . '
-			elf.error(data.error);
-		} else {
-			data.warning && elf.error(data.warning);
-			data.removed && data.removed.length && elf.remove(data);
-			data.added   && data.added.length   && elf.add(data);
-			data.changed && data.changed.length && elf.change(data);
-			' . $trigger . '
-			' . $triggerdone . '
-			data.sync && elf.sync();
-		}
-	}
+    var elf = w.document.getElementById(\'' . $node . '\').elfinder;
+    if (elf) {
+        var data = ' . $json . ';
+        if (data.error) {
+            ' . $triggerfail . '
+            elf.error(data.error);
+        } else {
+            data.warning && elf.error(data.warning);
+            data.removed && data.removed.length && elf.remove(data);
+            data.added   && data.added.length   && elf.add(data);
+            data.changed && data.changed.length && elf.change(data);
+            ' . $trigger . '
+            ' . $triggerdone . '
+            data.sync && elf.sync();
+        }
+    }
 } catch(e) {
-	// for CORS
-	w.postMessage && w.postMessage(JSON.stringify({bind:\'' . $bind . '\',data:' . $json . '}), \'' . $origin . '\');
+    // for CORS
+    w.postMessage && w.postMessage(JSON.stringify({bind:\'' . $bind . '\',data:' . $json . '}), \'' . $origin . '\');
 }';
             }
             $script .= 'window.open("about:blank","_self").close();';
 
-            $out = '<!DOCTYPE html><html><head><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><script>' . $script . '</script></head><body><h1><a href="#" onclick="window.open("about:blank","_self").close();return false;">Close this window</a></h1></body></html>';
+            $out = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta charset="utf-8"><script>' . $script . '</script></head><body><h1><a href="#" onclick="window.open("about:blank","_self").close();return false;">Close this window</a></h1></body></html>';
 
             header('Content-Type: text/html; charset=utf-8');
             header('Content-Length: ' . strlen($out));
