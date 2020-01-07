@@ -4644,7 +4644,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		$(window).on('message.' + namespace, function(e){
 			var res = e.originalEvent || null,
 				obj, data;
-			if (res && (self.options.url.indexOf(res.origin) === 0 || self.uploadURL.indexOf(res.origin) === 0)) {
+			if (res && (self.convAbsUrl(self.options.url).indexOf(res.origin) === 0 || self.convAbsUrl(self.uploadURL).indexOf(res.origin) === 0)) {
 				try {
 					obj = JSON.parse(res.data);
 					data = obj.data || null;
