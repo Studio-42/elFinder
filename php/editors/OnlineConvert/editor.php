@@ -6,7 +6,7 @@ class elFinderEditorOnlineConvert extends elFinderEditor
 
     public function enabled()
     {
-        return !defined('ELFINDER_DISABLE_ONLINE_CONVERT') || !ELFINDER_DISABLE_ONLINE_CONVERT;
+        return defined('ELFINDER_ONLINE_CONVERT_APIKEY') && ELFINDER_ONLINE_CONVERT_APIKEY && (!defined('ELFINDER_DISABLE_ONLINE_CONVERT') || !ELFINDER_DISABLE_ONLINE_CONVERT);
     }
 
     public function init()

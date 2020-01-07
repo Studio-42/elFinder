@@ -3909,32 +3909,44 @@ class elFinder
                 }
                 $origin = isset($_SERVER['HTTP_ORIGIN'])? str_replace('\'', '\\\'', $_SERVER['HTTP_ORIGIN']) : '*';
                 $script .= '
-var w = window.opener || window.parent || window;
-try {
-    var elf = w.document.getElementById(\'' . $node . '\').elfinder;
-    if (elf) {
-        var data = ' . $json . ';
-        if (data.error) {
-            ' . $triggerfail . '
-            elf.error(data.error);
-        } else {
-            data.warning && elf.error(data.warning);
-            data.removed && data.removed.length && elf.remove(data);
-            data.added   && data.added.length   && elf.add(data);
-            data.changed && data.changed.length && elf.change(data);
-            ' . $trigger . '
-            ' . $triggerdone . '
-            data.sync && elf.sync();
-        }
-    }
-} catch(e) {
-    // for CORS
-    w.postMessage && w.postMessage(JSON.stringify({bind:\'' . $bind . '\',data:' . $json . '}), \'' . $origin . '\');
-}';
+var go = function() {
+    var w = window.opener || window.parent || window,
+        close = function(){
+            window.open("about:blank","_self").close();
+            return false;
+        };
+    try {
+        var elf = w.document.getElementById(\'' . $node . '\').elfinder;
+        if (elf) {
+            var data = ' . $json . ';
+            if (data.error) {
+                ' . $triggerfail . '
+                elf.error(data.error);
+            } else {
+                data.warning && elf.error(data.warning);
+                data.removed && data.removed.length && elf.remove(data);
+                data.added   && data.added.length   && elf.add(data);
+                data.changed && data.changed.length && elf.change(data);
+                ' . $trigger . '
+                ' . $triggerdone . '
+                data.sync && elf.sync();
             }
-            $script .= 'window.open("about:blank","_self").close();';
+        }
+    } catch(e) {
+        // for CORS
+        w.postMessage && w.postMessage(JSON.stringify({bind:\'' . $bind . '\',data:' . $json . '}), \'' . $origin . '\');
+    }
+    close();
+    setTimeout(function() {
+        var msg = document.getElementById(\'msg\');
+        msg.style.display = \'inline\';
+        msg.onclick = close;
+    }, 100);
+};
+';
+            }
 
-            $out = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"><script>' . $script . '</script></head><body><h2><a href="#" onclick="window.open(\'about:blank\',\'_self\').close();return false;">Please close this tab.</a></h2></body></html>';
+            $out = '<!DOCTYPE html><html lang="en"><head><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"><script>' . $script . '</script></head><body><h2 id="msg" style="display:none;"><a href="#">Please close this tab.</a></h2><script>go();</script></body></html>';
 
             header('Content-Type: text/html; charset=utf-8');
             header('Content-Length: ' . strlen($out));

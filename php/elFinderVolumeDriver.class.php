@@ -2730,6 +2730,7 @@ abstract class elFinderVolumeDriver
         $this->clearcache();
         $res = false;
         if ($this->convEncOut($this->_filePutContents($this->convEncIn($path), $content))) {
+            $this->rmTmb($file);
             $this->clearstatcache();
             $res = $this->stat($path);
         }
