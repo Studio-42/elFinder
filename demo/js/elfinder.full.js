@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: d414303) (2020-01-07)
+ * Version 2.1.51 (2.1-src Nightly: 78c2491) (2020-01-08)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -4675,7 +4675,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		$(window).on('message.' + namespace, function(e){
 			var res = e.originalEvent || null,
 				obj, data;
-			if (res && (self.options.url.indexOf(res.origin) === 0 || self.uploadURL.indexOf(res.origin) === 0)) {
+			if (res && (self.convAbsUrl(self.options.url).indexOf(res.origin) === 0 || self.convAbsUrl(self.uploadURL).indexOf(res.origin) === 0)) {
 				try {
 					obj = JSON.parse(res.data);
 					data = obj.data || null;
@@ -10248,7 +10248,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.51 (2.1-src Nightly: d414303)';
+elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 78c2491)';
 
 
 
