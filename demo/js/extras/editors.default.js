@@ -38,13 +38,19 @@
 			sketch: 'application/x-sketch'
 		},
 		mime2ext,
-		getExtention = function(mime, fm) {
+		getExtention = function(mime, fm, jpeg) {
 			if (!mime2ext) {
 				mime2ext = fm.arrayFlip(ext2mime);
 			}
 			var ext = mime2ext[mime] || fm.mimeTypes[mime];
-			if (ext === 'jpeg') {
-				ext = 'jpg';
+			if (!jpeg) {
+				if (ext === 'jpeg') {
+					ext = 'jpg';
+				}
+			} else {
+				if (ext === 'jpg') {
+					ext = 'jpeg';
+				}
 			}
 			return ext;
 		},
@@ -577,7 +583,7 @@
 						quality = Math.max(0.1, Math.min(1, quality / 100));
 					}
 					return editor.instance.toDataURL({
-						format: getExtention($base.data('mime'), fm),
+						format: getExtention($base.data('mime'), fm, true),
 						quality: quality
 					});
 				}
