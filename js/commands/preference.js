@@ -199,7 +199,7 @@ elFinder.prototype.commands.preference = function() {
 			
 			forms.iconSize && (forms.iconSize = (function() {
 				var max = fm.options.uiOptions.cwd.iconsView.sizeMax || 3,
-					size = fm.storage('iconsize') || 0,
+					size = fm.storage('iconsize') || fm.options.uiOptions.cwd.iconsView.size || 0,
 					sld = $('<div class="touch-punch"/>').slider({
 						classes: {
 							'ui-slider-handle': 'elfinder-tabstop',
