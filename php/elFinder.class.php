@@ -4084,10 +4084,12 @@ try {
     {
         $exists = array();
         foreach ($files as $i => $file) {
-            if (isset($exists[$file['hash']]) || !empty($file['hidden']) || !$this->default->mimeAccepted($file['mime'])) {
-                unset($files[$i]);
+            if (isset($file['hash'])) {
+                if (isset($exists[$file['hash']]) || !empty($file['hidden']) || !$this->default->mimeAccepted($file['mime'])) {
+                    unset($files[$i]);
+                }
+                $exists[$file['hash']] = true;
             }
-            $exists[$file['hash']] = true;
         }
         return array_values($files);
     }

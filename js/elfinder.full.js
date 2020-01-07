@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: e6226fc) (2020-01-06)
+ * Version 2.1.51 (2.1-src Nightly: 935eeb5) (2020-01-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10248,7 +10248,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.51 (2.1-src Nightly: e6226fc)';
+elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 935eeb5)';
 
 
 
@@ -27619,7 +27619,7 @@ elFinder.prototype.commands.preference = function() {
 			
 			forms.iconSize && (forms.iconSize = (function() {
 				var max = fm.options.uiOptions.cwd.iconsView.sizeMax || 3,
-					size = fm.storage('iconsize') || 0,
+					size = fm.storage('iconsize') || fm.options.uiOptions.cwd.iconsView.size || 0,
 					sld = $('<div class="touch-punch"/>').slider({
 						classes: {
 							'ui-slider-handle': 'elfinder-tabstop',
@@ -32532,6 +32532,7 @@ elFinder.prototype.commands.resize = function() {
 						if (!presetc.children('span.elfinder-resize-preset:visible').length) {
 							presetc.hide();
 						}
+						dialog.elfinderdialog('posInit');
 					},
 					preset = (function() {
 						var sets = $('<fieldset class="elfinder-resize-preset-container">').append($('<legend>').html(fm.i18n('presets'))).css('box-sizing', 'border-box').hide(),
