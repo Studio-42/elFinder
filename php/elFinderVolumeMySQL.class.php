@@ -79,7 +79,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
             'tmbPath' => '',
             'tmpPath' => '',
             'rootCssClass' => 'elfinder-navbar-root-sql',
-            'noSessionCache' => array('hasdirs')
+            'noSessionCache' => array('hasdirs'),
+            'isLocalhost' => false
         );
         $this->options = array_merge($this->options, $opts);
         $this->options['mimeDetect'] = 'internal';
@@ -133,6 +134,9 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
 
         // enable command archive
         $this->options['useRemoteArchive'] = true;
+
+        // check isLocalhost
+        $this->isLocalhost = $this->options['isLocalhost'] || $this->options['host'] === 'localhost' || $this->options['host'] === '127.0.0.1' || $this->options['host'] === '::1';
 
         return true;
     }
@@ -862,8 +866,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
             $size = $stat['size'];
         }
 
-        if (($tmpfile = tempnam($this->tmpPath, $this->id))) {
-            if (($trgfp = fopen($tmpfile, 'wb')) == false) {
+        if ($this->isLocalhost && ($tmpfile = tempnam($this->tmpPath, $this->id))) {
+            debug('local');if (($trgfp = fopen($tmpfile, 'wb')) == false) {
                 unlink($tmpfile);
             } else {
                 elFinder::rewind($fp);
