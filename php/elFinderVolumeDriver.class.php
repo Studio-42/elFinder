@@ -2885,8 +2885,13 @@ abstract class elFinderVolumeDriver
             if ($files) {
                 if ($arc = $this->makeArchive($dir, $files, $name, $arc)) {
                     if ($fp = fopen($arc, 'rb')) {
+                        $fstat = stat($arc);
+                        $stat = array(
+                            'size' => $fstat['size'],
+                            'ts' => $fstat['mtime'],
+                            'mime' => $this->mimetype($arc, $name)
+                        );
                         $path = $this->decode($file0['phash']);
-                        $stat = array();
                         $resPath = $this->saveCE($fp, $path, $name, $stat);
                         fclose($fp);
                     }
