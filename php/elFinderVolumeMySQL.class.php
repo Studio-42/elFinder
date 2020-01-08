@@ -852,26 +852,29 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
         $mime = !empty($stat['mime']) ? $stat['mime'] : $this->mimetype($name, true);
         $w = !empty($stat['width']) ? $stat['width'] : 0;
         $h = !empty($stat['height']) ? $stat['height'] : 0;
+        $ts = !empty($stat['ts']) ? $stat['ts'] : time();
 
         $id = $this->_joinPath($dir, $name);
-        elFinder::rewind($fp);
-        $stat = fstat($fp);
-        $size = $stat['size'];
+        if (!isset($stat['size'])) {
+            $stat = fstat($fp);
+            $size = $stat['size'];
+        } else {
+            $size = $stat['size'];
+        }
 
         if (($tmpfile = tempnam($this->tmpPath, $this->id))) {
             if (($trgfp = fopen($tmpfile, 'wb')) == false) {
                 unlink($tmpfile);
             } else {
-                while (!feof($fp)) {
-                    fwrite($trgfp, fread($fp, 8192));
-                }
+                elFinder::rewind($fp);
+                stream_copy_to_stream($fp, $trgfp);
                 fclose($trgfp);
                 chmod($tmpfile, 0644);
 
                 $sql = $id > 0
                     ? 'REPLACE INTO %s (id, parent_id, name, content, size, mtime, mime, width, height) VALUES (' . $id . ', %d, \'%s\', LOAD_FILE(\'%s\'), %d, %d, \'%s\', %d, %d)'
                     : 'INSERT INTO %s (parent_id, name, content, size, mtime, mime, width, height) VALUES (%d, \'%s\', LOAD_FILE(\'%s\'), %d, %d, \'%s\', %d, %d)';
-                $sql = sprintf($sql, $this->tbf, $dir, $this->db->real_escape_string($name), $this->loadFilePath($tmpfile), $size, time(), $mime, $w, $h);
+                $sql = sprintf($sql, $this->tbf, $dir, $this->db->real_escape_string($name), $this->loadFilePath($tmpfile), $size, $ts, $mime, $w, $h);
 
                 $res = $this->query($sql);
                 unlink($tmpfile);
@@ -892,7 +895,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
         $sql = $id > 0
             ? 'REPLACE INTO %s (id, parent_id, name, content, size, mtime, mime, width, height) VALUES (' . $id . ', %d, \'%s\', \'%s\', %d, %d, \'%s\', %d, %d)'
             : 'INSERT INTO %s (parent_id, name, content, size, mtime, mime, width, height) VALUES (%d, \'%s\', \'%s\', %d, %d, \'%s\', %d, %d)';
-        $sql = sprintf($sql, $this->tbf, $dir, $this->db->real_escape_string($name), $this->db->real_escape_string($content), $size, time(), $mime, $w, $h);
+        $sql = sprintf($sql, $this->tbf, $dir, $this->db->real_escape_string($name), $this->db->real_escape_string($content), $size, $ts, $mime, $w, $h);
 
         unset($content);
 
