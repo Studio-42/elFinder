@@ -5250,6 +5250,11 @@ abstract class elFinderVolumeDriver
 
             $this->added[] = $test;
         } else {
+            // size check
+            if (!isset($source['size']) || $source['size'] > $this->uploadMaxSize) {
+                return $this->setError(elFinder::ERROR_UPLOAD_FILE_SIZE);
+            }
+
             // MIME check
             $mimeByName = $this->mimetype($source['name'], true);
             if ($source['mime'] === $mimeByName) {
