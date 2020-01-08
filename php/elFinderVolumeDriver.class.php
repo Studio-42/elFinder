@@ -366,6 +366,10 @@ abstract class elFinderVolumeDriver
         'tmbVideoConvLen' => 10000000,
         // Captre point seccond
         'tmbVideoConvSec' => 6,
+        // Life time (hour) for thumbnail garbage collection ("0" means no GC)
+        'tmbGcMaxlifeHour' => 0,
+        // Percentage of garbage collection executed for thumbnail creation command ("1" means "1%")
+        'tmbGcPercentage' => 1,
         // Resource path of fallback icon images defailt: php/resouces
         'resourcePath' => '',
         // Jpeg image saveing quality
@@ -2083,6 +2087,14 @@ abstract class elFinderVolumeDriver
                     }
                 }
             }
+            // tmb garbage collection
+            if ($res && $this->options['tmbGcMaxlifeHour'] && $this->options['tmbGcPercentage'] > 0) {
+                $this->options['tmbGcMaxlifeHour'] = 0;
+                $rand = mt_rand(1, 10000);
+                if ($rand <= $this->options['tmbGcPercentage'] * 100) {
+                    register_shutdown_function(array('elFinder', 'GlobGC'), $this->tmbPath . DIRECTORY_SEPARATOR . '*.png', $this->options['tmbGcMaxlifeHour'] * 3600);
+                }
+            }
             return $res;
         }
         return false;
@@ -2873,8 +2885,13 @@ abstract class elFinderVolumeDriver
             if ($files) {
                 if ($arc = $this->makeArchive($dir, $files, $name, $arc)) {
                     if ($fp = fopen($arc, 'rb')) {
+                        $fstat = stat($arc);
+                        $stat = array(
+                            'size' => $fstat['size'],
+                            'ts' => $fstat['mtime'],
+                            'mime' => $this->mimetype($arc, $name)
+                        );
                         $path = $this->decode($file0['phash']);
-                        $stat = array();
                         $resPath = $this->saveCE($fp, $path, $name, $stat);
                         fclose($fp);
                     }
@@ -5233,6 +5250,11 @@ abstract class elFinderVolumeDriver
 
             $this->added[] = $test;
         } else {
+            // size check
+            if (!isset($source['size']) || $source['size'] > $this->uploadMaxSize) {
+                return $this->setError(elFinder::ERROR_UPLOAD_FILE_SIZE);
+            }
+
             // MIME check
             $mimeByName = $this->mimetype($source['name'], true);
             if ($source['mime'] === $mimeByName) {
