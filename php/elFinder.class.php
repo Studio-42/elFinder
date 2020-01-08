@@ -2114,8 +2114,8 @@ class elFinder
     {
         $target = $args['target'];
         $name = $args['name'];
-        $query = (strpos($args['q'], '*') !== false) ? $args['q'] : '';
-        $targets = $args['targets'];
+        $query = (!empty($args['q']) && strpos($args['q'], '*') !== false) ? $args['q'] : '';
+        $targets = !empty($args['targets'])? $args['targets'] : false;
         $rms = array();
         $notfounds = array();
         $locked = array();
