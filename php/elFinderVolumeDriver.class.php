@@ -2885,8 +2885,13 @@ abstract class elFinderVolumeDriver
             if ($files) {
                 if ($arc = $this->makeArchive($dir, $files, $name, $arc)) {
                     if ($fp = fopen($arc, 'rb')) {
+                        $fstat = stat($arc);
+                        $stat = array(
+                            'size' => $fstat['size'],
+                            'ts' => $fstat['mtime'],
+                            'mime' => $this->mimetype($arc, $name)
+                        );
                         $path = $this->decode($file0['phash']);
-                        $stat = array();
                         $resPath = $this->saveCE($fp, $path, $name, $stat);
                         fclose($fp);
                     }
@@ -5245,6 +5250,11 @@ abstract class elFinderVolumeDriver
 
             $this->added[] = $test;
         } else {
+            // size check
+            if (!isset($source['size']) || $source['size'] > $this->uploadMaxSize) {
+                return $this->setError(elFinder::ERROR_UPLOAD_FILE_SIZE);
+            }
+
             // MIME check
             $mimeByName = $this->mimetype($source['name'], true);
             if ($source['mime'] === $mimeByName) {
