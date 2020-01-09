@@ -64,6 +64,7 @@ var dirmode = 0755,
 			[
 				path.join(src, 'php', 'autoload.php'),
 				path.join(src, 'php', 'connector.minimal.php-dist'),
+				path.join(src, 'php', 'connector.maximal.php-dist'),
 				path.join(src, 'php', 'mime.types'),
 				path.join(src, 'php', 'MySQLStorage.sql'),
 				path.join(src, 'php', 'elFinderPlugin.php'),
