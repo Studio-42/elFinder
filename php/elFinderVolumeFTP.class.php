@@ -112,6 +112,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver
             'tmbPath' => '',
             'tmpPath' => '',
             'separator' => '/',
+            'checkSubfolders' => -1,
             'dirMode' => 0755,
             'fileMode' => 0644,
             'rootCssClass' => 'elfinder-navbar-root-ftp',
