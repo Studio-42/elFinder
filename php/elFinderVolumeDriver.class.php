@@ -3566,9 +3566,11 @@ abstract class elFinderVolumeDriver
     {
         foreach (func_get_args() as $err) {
             if (is_array($err)) {
-                $this->error = array_merge($this->error, $err);
+                foreach($err as $er) {
+                    $this->addError($er);
+                }
             } else {
-                $this->error[] = $err;
+                $this->error[] = (string)$err;
             }
         }
         return false;

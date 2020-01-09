@@ -963,6 +963,17 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         $error = false;
         try {
             $this->token = json_decode($this->options['accessToken']);
+            if (!is_object($this->token)) {
+                throw new Exception('Required option `accessToken` is invalid JSON.');
+            }
+
+            // make net mount key
+            if (empty($this->options['netkey'])) {
+                $this->netMountKey = $this->_od_getInitialToken();
+            } else {
+                $this->netMountKey = $this->options['netkey'];
+            }
+
             if ($this->aTokenFile = $this->_od_getATokenFile()) {
                 if (empty($this->options['netkey'])) {
                     if ($this->aTokenFile) {
@@ -979,25 +990,20 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             }
 
             $this->_od_refreshToken();
+
+            $this->expires = empty($this->token->data->refresh_token) ? (int)$this->token->expires : 0;
         } catch (Exception $e) {
             $this->token = null;
             $error = true;
             $this->setError($e->getMessage());
         }
 
-        $this->expires = empty($this->token->data->refresh_token) ? (int)$this->token->expires : 0;
-
-        if (empty($this->options['netkey'])) {
-            // make net mount key
-            $this->netMountKey = $this->_od_getInitialToken();
-        } else {
-            $this->netMountKey = $this->options['netkey'];
+        if ($this->netMountKey) {
+            $this->tmbPrefix = 'onedrive' . base_convert($this->netMountKey, 10, 32);
         }
 
-        $this->tmbPrefix = 'onedrive' . base_convert($this->netMountKey, 10, 32);
-
         if ($error) {
-            if (empty($this->options['netkey'])) {
+            if (empty($this->options['netkey']) && $this->tmbPrefix) {
                 // for delete thumbnail 
                 $this->netunmount();
             }
