@@ -769,14 +769,24 @@ abstract class elFinderVolumeDriver
      *
      * @var boolean
      */
-    protected $needOnline = false;
+    protected $needOnline;
 
     /*********************************************************************/
     /*                            INITIALIZATION                         */
     /*********************************************************************/
 
-    protected function setNeedOnline()
+    /**
+     * Sets the need online.
+     *
+     * @param  boolean  $state  The state
+     */
+    public function setNeedOnline($state = null)
     {
+        if ($state !== null) {
+            $this->needOnline = (bool)$state;
+            return;
+        }
+
         $need = false;
         $arg = $this->ARGS;
         $id = $this->id;
@@ -786,7 +796,6 @@ abstract class elFinderVolumeDriver
         if (!is_array($targets)) {
             $targets = array($targets);
         }
-
 
         if ($target && strpos($target, $id) === 0) {
             $need = true;
@@ -1145,7 +1154,9 @@ abstract class elFinderVolumeDriver
         $argInit = !empty($this->ARGS['init']);
 
         // set $this->needOnline
-        $this->setNeedOnline();
+        if (!is_bool($this->needOnline)) {
+            $this->setNeedOnline();
+        }
 
         // session cache
         if ($argInit) {
