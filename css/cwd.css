@@ -1042,7 +1042,7 @@
 }
 
 .elfinder .elfinder-cwd table td {
-    padding: 4px 12px;
+    padding: 0 12px;
     white-space: pre;
     overflow: hidden;
     text-align: right;
@@ -1111,6 +1111,12 @@ tr.elfinder-cwd-file td .elfinder-cwd-select {
 
 .elfinder-rtl .elfinder-cwd-view-list.elfinder-has-checkbox .elfinder-cwd-file-wrapper {
     margin-right: 8px;
+}
+
+.elfinder-cwd-view-list .elfinder-cwd-filename {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    display: inline-block;
 }
 
 .elfinder-ltr .elfinder-cwd-view-list .elfinder-cwd-filename {
