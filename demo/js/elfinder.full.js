@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: fee9c4d) (2020-01-10)
+ * Version 2.1.51 (2.1-src Nightly: 9aaa0cf) (2020-01-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10267,7 +10267,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.51 (2.1-src Nightly: fee9c4d)';
+elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 9aaa0cf)';
 
 
 
@@ -30715,7 +30715,7 @@ elFinder.prototype.commands.rename = function() {
 			
 			fm.lockfiles({files : sel});
 			
-			if (fm.isRoot(file)) {
+			if (fm.isRoot(file) && !file.netkey) {
 				if (!(rootNames = fm.storage('rootNames'))) {
 					rootNames = {};
 				}
