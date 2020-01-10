@@ -1969,7 +1969,8 @@ $.fn.elfindercwd = function(fm, options) {
 									}
 								}
 								if (disable) {
-									$this.draggable('option', 'disabled', true);
+									// removeClass('ui-state-disabled') for old version of jQueryUI
+									$this.draggable('option', 'disabled', true).removeClass('ui-state-disabled');
 								} else {
 									$this.draggable('option', 'disabled', false)
 										  .removeAttr('draggable')
