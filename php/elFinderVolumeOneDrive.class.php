@@ -885,6 +885,9 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
         if ($_aToken = $this->session->get('OneDriveTokens')) {
             $options['accessToken'] = json_encode($_aToken);
+            if ($this->options['path'] === 'root' || !$this->options['path']) {
+                $this->options['path'] = '/';
+            }
         } else {
             $this->session->remove('OneDriveTokens');
             $this->setError(elFinder::ERROR_NETMOUNT, $options['host'], implode(' ', $this->error()));
@@ -892,9 +895,6 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             return array('exit' => true, 'error' => $this->error());
         }
 
-        if (!empty($_aToken->data->refresh_token)) {
-            $this->session->remove('OneDriveTokens');
-        }
         $this->session->remove('nodeId');
         unset($options['user'], $options['pass'], $options['id']);
 
@@ -1026,7 +1026,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 $this->_od_query(basename($this->options['path']), $fetch_self = true)->name . '@OneDrive';
         }
 
-        $this->rootName = $this->options['alias'];
+        $this->rootName = isset($this->options['alias'])? $this->options['alias'] : 'OneDrive.com';
 
         // This driver dose not support `syncChkAsTs`
         $this->options['syncChkAsTs'] = false;

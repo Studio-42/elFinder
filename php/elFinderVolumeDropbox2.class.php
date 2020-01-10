@@ -508,7 +508,7 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
             $errors[] = $e->getMessage();
         }
 
-        if (!$this->service) {
+        if ($this->needOnline && !$this->service) {
             $errors[] = 'Dropbox Service could not be loaded.';
         }
 

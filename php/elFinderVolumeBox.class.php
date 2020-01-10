@@ -784,6 +784,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
         if ($_aToken = $this->session->get('BoxTokens')) {
             $options['accessToken'] = json_encode($_aToken);
+            if ($this->options['path'] === 'root' || !$this->options['path']) {
+                $this->options['path'] = '/';
+            }
         } else {
             $this->session->remove('BoxTokens');
             $this->setError(elFinder::ERROR_NETMOUNT, $options['host'], implode(' ', $this->error()));
@@ -923,7 +926,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 $this->_bd_query($itemId, $fetch_self = true)->name . '@Box.com';
         }
 
-        $this->rootName = $this->options['alias'];
+        $this->rootName = isset($this->options['alias'])? $this->options['alias'] : 'Box.com';
 
         // This driver dose not support `syncChkAsTs`
         $this->options['syncChkAsTs'] = false;

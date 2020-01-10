@@ -1458,6 +1458,8 @@ class elFinder
         // pass session handler
         $volume->setSession($this->session);
 
+        $volume->setNeedOnline(true);
+
         if (is_callable(array($volume, 'netmountPrepare'))) {
             $options = $volume->netmountPrepare($options);
             if (isset($options['exit'])) {
