@@ -499,6 +499,8 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
             if (!$this->service) {
                 $app = new DropboxApp($this->options['app_key'], $this->options['app_secret'], $aToken);
                 $this->service = new Dropbox($app);
+                // to check access_token
+                $this->service->getCurrentAccount();
             }
         } catch (DropboxClientException $e) {
             $errors[] = 'Dropbox error: ' . $e->getMessage();
@@ -508,7 +510,9 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
 
         if (!$this->service) {
             $errors[] = 'Dropbox Service could not be loaded.';
+        }
 
+        if ($errors) {
             return $this->setError($errors);
         }
 

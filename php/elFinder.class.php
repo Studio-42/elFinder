@@ -1840,7 +1840,8 @@ class elFinder
         $download = !empty($args['download']);
         $onetime = !empty($args['onetime']);
         //$h304     = 'HTTP/1.1 304 Not Modified';
-        //$h403     = 'HTTP/1.0 403 Access Denied';
+        $h403 = 'HTTP/1.0 403 Access Denied';
+        $a403 = array('error' => 'Access Denied', 'header' => $h403, 'raw' => true);
         $h404 = 'HTTP/1.0 404 Not Found';
         $a404 = array('error' => 'File not found', 'header' => $h404, 'raw' => true);
 
@@ -1868,6 +1869,10 @@ class elFinder
         } else {
             if (($volume = $this->volume($target)) == false) {
                 return $a404;
+            }
+
+            if ($volume->commandDisabled('file')) {
+                return $a403;
             }
 
             if (($file = $volume->file($target)) == false) {
@@ -3456,6 +3461,10 @@ class elFinder
 
         if (!$volume || ($file = $volume->file($target)) == false) {
             return array('error' => $this->error(self::ERROR_OPEN, '#' . $target, self::ERROR_FILE_NOT_FOUND));
+        }
+
+        if ($volume->commandDisabled('get')) {
+            return array('error' => $this->error(self::ERROR_OPEN, '#' . $target, self::ERROR_ACCESS_DENIED));
         }
 
         if (($content = $volume->getContents($target)) === false) {
