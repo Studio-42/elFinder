@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: 9aaa0cf) (2020-01-10)
+ * Version 2.1.51 (2.1-src Nightly: 08edfe7) (2020-01-11)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10267,7 +10267,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 9aaa0cf)';
+elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 08edfe7)';
 
 
 
@@ -16525,7 +16525,8 @@ $.fn.elfindercwd = function(fm, options) {
 									}
 								}
 								if (disable) {
-									$this.draggable('option', 'disabled', true);
+									// removeClass('ui-state-disabled') for old version of jQueryUI
+									$this.draggable('option', 'disabled', true).removeClass('ui-state-disabled');
 								} else {
 									$this.draggable('option', 'disabled', false)
 										  .removeAttr('draggable')
