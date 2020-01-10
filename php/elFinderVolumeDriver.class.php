@@ -2311,6 +2311,22 @@ abstract class elFinderVolumeDriver
             return $file;
         }
 
+        if (!empty($this->options['netkey']) && !empty($file['isroot'])) {
+            // change alias of netmount root
+            $rootKey = $this->getRootstatCachekey();
+            // delete old cache data
+            if ($this->sessionCaching['rootstat']) {
+                unset($this->sessionCaching['rootstat'][$rootKey]);
+            }
+            if (elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'alias', $name)) {
+                $this->clearcache();
+                $this->rootName = $this->options['alias'] = $name;
+                return $this->stat($this->root);
+            } else {
+                return $this->setError(elFinder::ERROR_TRGDIR_NOT_FOUND, $name);
+            }
+        }
+
         if (!empty($file['locked'])) {
             return $this->setError(elFinder::ERROR_LOCKED, $file['name']);
         }

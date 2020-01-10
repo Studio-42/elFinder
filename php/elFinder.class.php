@@ -1280,6 +1280,8 @@ class elFinder
      * @param string $netKey
      * @param string $optionKey
      * @param mixed  $val
+     *
+     * @return bool
      */
     public function updateNetVolumeOption($netKey, $optionKey, $val)
     {
@@ -1287,7 +1289,9 @@ class elFinder
         if (is_string($netKey) && isset($netVolumes[$netKey]) && is_string($optionKey)) {
             $netVolumes[$netKey][$optionKey] = $val;
             $this->saveNetVolumes($netVolumes);
+            return true;
         }
+        return false;
     }
 
     /**
@@ -2246,9 +2250,16 @@ class elFinder
             }
             $rm['realpath'] = $volume->realpath($target);
 
-            return ($file = $volume->rename($target, $name)) == false
-                ? array('error' => $this->error(self::ERROR_RENAME, $rm['name'], $volume->error()))
-                : array('added' => array($file), 'removed' => array($rm));
+            $file = $volume->rename($target, $name);
+            if ($file === false) {
+                return array('error' => $this->error(self::ERROR_RENAME, $rm['name'], $volume->error()));
+            } else {
+                if ($file['hash'] !== $rm['hash']) {
+                    return array('added' => array($file), 'removed' => array($rm));
+                } else {
+                    return array('changed' => array($file));
+                }
+            }
         }
     }
 
