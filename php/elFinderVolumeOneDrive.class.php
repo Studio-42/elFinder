@@ -989,9 +989,11 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 }
             }
 
-            $this->_od_refreshToken();
+            if ($this->needOnline) {
+                $this->_od_refreshToken();
 
-            $this->expires = empty($this->token->data->refresh_token) ? (int)$this->token->expires : 0;
+                $this->expires = empty($this->token->data->refresh_token) ? (int)$this->token->expires : 0;
+            }
         } catch (Exception $e) {
             $this->token = null;
             $error = true;
@@ -1019,7 +1021,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
         $this->options['root'] == '' ? $this->options['root'] = 'OneDrive.com' : $this->options['root'];
 
-        if (empty($this->options['alias'])) {
+        if ($this->needOnline && empty($this->options['alias'])) {
             $this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] :
                 $this->_od_query(basename($this->options['path']), $fetch_self = true)->name . '@OneDrive';
         }

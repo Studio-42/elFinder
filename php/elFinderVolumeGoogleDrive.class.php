@@ -908,7 +908,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             }
 
             $errors = [];
-            if (!$this->service) {
+            if ($this->needOnline && !$this->service) {
                 if (($this->options['googleApiClient'] || defined('ELFINDER_GOOGLEDRIVE_GOOGLEAPICLIENT')) && !class_exists('Google_Client')) {
                     include_once $this->options['googleApiClient'] ? $this->options['googleApiClient'] : ELFINDER_GOOGLEDRIVE_GOOGLEAPICLIENT;
                 }
@@ -949,14 +949,16 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                 $this->service = new \Google_Service_Drive($client);
             }
 
-            $this->netMountKey = md5($aToken . '-' . $this->options['path']);
+            if ($this->needOnline) {
+                $this->netMountKey = md5($aToken . '-' . $this->options['path']);
+            }
         } catch (InvalidArgumentException $e) {
             $errors[] = $e->getMessage();
         } catch (Google_Service_Exception $e) {
             $errors[] = $e->getMessage();
         }
 
-        if (!$this->service) {
+        if ($this->needOnline && !$this->service) {
             $this->session->remove($this->id . $this->netMountKey);
             if ($aTokenFile) {
                 if (is_file($aTokenFile)) {
@@ -976,7 +978,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
 
         $this->options['root'] == '' ? $this->options['root'] = $this->_gd_getNameByPath('root') : $this->options['root'];
 
-        if (empty($this->options['alias'])) {
+        if ($this->needOnline && empty($this->options['alias'])) {
             $this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] : sprintf($this->options['gdAlias'], $this->_gd_getNameByPath($this->options['path']));
         }
 
