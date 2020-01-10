@@ -210,6 +210,9 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends ExtDriver
         try {
             $file = $service->files->get($options['path']);
             $options['alias'] = sprintf($this->options['gdAlias'], $file->getName());
+            if (!empty($this->options['netkey'])) {
+                elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'alias', $this->options['alias']);
+            }
         } catch (Google_Service_Exception $e) {
             $err = json_decode($e->getMessage(), true);
             if (isset($err['error']) && $err['error']['code'] == 404) {
@@ -276,7 +279,7 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends ExtDriver
         if (!empty($opts['access_token'])) {
             $client->setAccessToken($opts['access_token']);
         }
-        if ($client->isAccessTokenExpired()) {
+        if ($this->needOnline && $client->isAccessTokenExpired()) {
             try {
                 $creds = $client->fetchAccessTokenWithRefreshToken();
             } catch (LogicException $e) {

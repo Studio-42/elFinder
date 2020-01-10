@@ -22,7 +22,7 @@ elFinder.prototype.commands.rename = function() {
 			
 			fm.lockfiles({files : sel});
 			
-			if (fm.isRoot(file)) {
+			if (fm.isRoot(file) && !file.netkey) {
 				if (!(rootNames = fm.storage('rootNames'))) {
 					rootNames = {};
 				}

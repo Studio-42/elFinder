@@ -794,9 +794,6 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             return array('exit' => true, 'error' => $this->error());
         }
 
-        if (!empty($_aToken->data->refresh_token)) {
-            $this->session->remove('BoxTokens');
-        }
         $this->session->remove('nodeId');
         unset($options['user'], $options['pass'], $options['id']);
 
@@ -924,6 +921,9 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             list(, $itemId) = $this->_bd_splitPath($this->options['path']);
             $this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] :
                 $this->_bd_query($itemId, $fetch_self = true)->name . '@Box.com';
+            if (!empty($this->options['netkey'])) {
+                elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'alias', $this->options['alias']);
+            }
         }
 
         $this->rootName = isset($this->options['alias'])? $this->options['alias'] : 'Box.com';
