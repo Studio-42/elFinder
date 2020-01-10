@@ -496,7 +496,7 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
             $this->netMountKey = md5($aToken . '-' . $this->options['path']);
 
             $errors = [];
-            if (!$this->service) {
+            if ($this->needOnline && !$this->service) {
                 $app = new DropboxApp($this->options['app_key'], $this->options['app_secret'], $aToken);
                 $this->service = new Dropbox($app);
                 // to check access_token
