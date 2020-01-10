@@ -195,8 +195,9 @@ class elFinderVolumeFTP extends elFinderVolumeDriver
 
         if (empty($this->options['alias'])) {
             $this->options['alias'] = $this->options['user'] . '@' . $this->options['host'];
-            // $num = elFinder::$volumesCnt-1;
-            // $this->options['alias'] = $this->root == '/' || $this->root == '.' ? 'FTP folder '.$num : basename($this->root);
+            if (!empty($this->options['netkey'])) {
+                elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'alias', $this->options['alias']);
+            }
         }
 
         $this->rootName = $this->options['alias'];

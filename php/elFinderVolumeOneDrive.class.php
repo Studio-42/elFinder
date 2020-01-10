@@ -1024,6 +1024,9 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         if ($this->needOnline && empty($this->options['alias'])) {
             $this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] :
                 $this->_od_query(basename($this->options['path']), $fetch_self = true)->name . '@OneDrive';
+            if (!empty($this->options['netkey'])) {
+                elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'alias', $this->options['alias']);
+            }
         }
 
         $this->rootName = isset($this->options['alias'])? $this->options['alias'] : 'OneDrive.com';
