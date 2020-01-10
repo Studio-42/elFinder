@@ -210,7 +210,7 @@ class elFinderVolumeFTP extends elFinderVolumeDriver
             $this->ftpListOption = $this->options['ftpListOption'];
         }
 
-        return $this->connect();
+        return $this->needOnline? $this->connect() : true;
 
     }
 

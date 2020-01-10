@@ -764,9 +764,43 @@ abstract class elFinderVolumeDriver
      */
     protected $dirnameValidator;
 
+    /**
+     * This request require online state
+     *
+     * @var boolean
+     */
+    protected $needOnline = false;
+
     /*********************************************************************/
     /*                            INITIALIZATION                         */
     /*********************************************************************/
+
+    protected function setNeedOnline()
+    {
+        $need = false;
+        $arg = $this->ARGS;
+        $id = $this->id;
+
+        $target = !empty($arg['target'])? $arg['target'] : (!empty($arg['dst'])? $arg['dst'] : '');
+        $targets = !empty($arg['targets'])? $arg['targets'] : array();
+        if (!is_array($targets)) {
+            $targets = array($targets);
+        }
+
+
+        if ($target && strpos($target, $id) === 0) {
+            $need = true;
+        } else if ($targets) {
+            foreach($targets as $t) {
+                if ($t && strpos($t, $id) === 0) {
+                    $need = true;
+                    break;
+                }
+            }
+        }
+
+        $this->needOnline = $need;
+    }
 
     /**
      * Prepare driver before mount volume.
@@ -1109,6 +1143,9 @@ abstract class elFinderVolumeDriver
         $this->ARGS = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
 
         $argInit = !empty($this->ARGS['init']);
+
+        // set $this->needOnline
+        $this->setNeedOnline();
 
         // session cache
         if ($argInit) {
@@ -4397,7 +4434,7 @@ abstract class elFinderVolumeDriver
         if (isset($this->cache[$path])) {
             $ret = $this->cache[$path];
         } else {
-            if ($is_root && !empty($this->options['rapidRootStat']) && is_array($this->options['rapidRootStat']) && (empty($this->ARGS['target']) || strpos($this->ARGS['target'], $this->id) !== 0)) {
+            if ($is_root && !empty($this->options['rapidRootStat']) && is_array($this->options['rapidRootStat']) && !$this->needOnline) {
                 $ret = $this->updateCache($path, $this->options['rapidRootStat'], true);
             } else {
                 $ret = $this->updateCache($path, $this->convEncOut($this->_stat($this->convEncIn($path))), true);
@@ -4495,7 +4532,7 @@ abstract class elFinderVolumeDriver
         }
 
         // name check
-        if (!$jeName = json_encode($stat['name'])) {
+        if (isset($stat['name']) && !$jeName = json_encode($stat['name'])) {
             return $this->cache[$path] = array();
         }
         // fix name if required

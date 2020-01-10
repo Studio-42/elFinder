@@ -889,7 +889,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 }
             }
 
-            $this->_bd_refreshToken();
+            $this->needOnline && $this->_bd_refreshToken();
         } catch (Exception $e) {
             $this->token = null;
             $error = true;
@@ -917,7 +917,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
         $this->options['root'] == '' ? $this->options['root'] = 'Box.com' : $this->options['root'];
 
-        if (empty($this->options['alias'])) {
+        if ($this->needOnline && empty($this->options['alias'])) {
             list(, $itemId) = $this->_bd_splitPath($this->options['path']);
             $this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] :
                 $this->_bd_query($itemId, $fetch_self = true)->name . '@Box.com';
