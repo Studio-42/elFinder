@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: be31acc) (2020-01-09)
+ * Version 2.1.51 (2.1-src Nightly: fd51356) (2020-01-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -5077,6 +5077,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				});
 			} else {
 				self.options.getFileCallback = null;
+				delete self.commands.getfile;
 			}
 		}
 
@@ -7703,12 +7704,12 @@ elFinder.prototype = {
 			},
 			normalizeOptions = function(opts) {
 				var getType = function(v) {
-					var type = typeof v;
-					if (type === 'object' && Array.isArray(v)) {
-						type = 'array';
-					}
-					return type;
-				};
+						var type = typeof v;
+						if (type === 'object' && Array.isArray(v)) {
+							type = 'array';
+						}
+						return type;
+					};
 				$.each(self.optionProperties, function(k, empty) {
 					if (empty !== void(0)) {
 						if (opts[k] && getType(opts[k]) !== getType(empty)) {
@@ -7716,10 +7717,28 @@ elFinder.prototype = {
 						}
 					}
 				});
-				if (opts['disabled']) {
-					opts['disabledFlip'] = self.arrayFlip(opts['disabled'], true);
+				if (opts.disabled) {
+					opts.disabledFlip = self.arrayFlip(opts.disabled, true);
+					$.each(self.options.disabledCmdsRels, function(com, rels) {
+						var m, flg;
+						if (opts.disabledFlip[com]) {
+							flg = true;
+						} else if (m = com.match(/^([^&]+)&([^=]+)=(.*)$/)) {
+							if (opts.disabledFlip[m[1]] && opts[m[2]] == m[3]) {
+								flg = true;
+							}
+						}
+						if (flg) {
+							$.each(rels, function(i, rel) {
+								if (!opts.disabledFlip[rel]) {
+									opts.disabledFlip[rel] = true;
+									opts.disabled.push(rel);
+								}
+							});
+						}
+					});
 				} else {
-					opts['disabledFlip'] = {};
+					opts.disabledFlip = {};
 				}
 				return opts;
 			},
@@ -10248,7 +10267,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.51 (2.1-src Nightly: be31acc)';
+elFinder.prototype.version = '2.1.51 (2.1-src Nightly: fd51356)';
 
 
 
@@ -11367,6 +11386,17 @@ elFinder.prototype._options = {
 		}
 	},
 	
+	/**
+	 * Disabled commands relationship
+	 * 
+	 * @type Object
+	 */
+	disabledCmdsRels : {
+		'get'       : ['edit'],
+		'rm'        : ['cut', 'empty'],
+		'file&url=' : ['download', 'zipdl'] // file command and volume options url is empty
+	},
+
 	/**
 	 * Callback for prepare boot up
 	 * 
@@ -26622,12 +26652,19 @@ elFinder.prototype.commands.netunmount = function() {
  * @author Dmitry (dio) Levashov
  **/  
 (elFinder.prototype.commands.open = function() {
-		var fm = this.fm;
+		var fm = this.fm,
+		self = this;
 	this.alwaysEnabled = true;
 	this.noChangeDirOnRemovedCwd = true;
 	
 	this._handlers = {
-		dblclick : function(e) { e.preventDefault(); fm.exec('open', e.data && e.data.file? [ e.data.file ]: void(0)); },
+		dblclick : function(e) {
+			var arg = e.data && e.data.file? [ e.data.file ]: void(0);
+			if (self.getstate(arg) === 0) {
+				e.preventDefault();
+				fm.exec('open', arg);
+			}
+		},
 		'select enable disable reload' : function(e) { this.update(e.type == 'disable' ? -1 : void(0));  }
 	};
 	
@@ -26637,11 +26674,12 @@ elFinder.prototype.commands.netunmount = function() {
 
 	this.getstate = function(select) {
 		var sel = this.files(select),
-			cnt = sel.length;
+			cnt = sel.length,
+			fileDisable = (!fm.option('url') && !fm.isCommandEnabled('file'))? true : false;
 		
 		return cnt == 1 
-			? (sel[0].read? 0 : -1) 
-			: (cnt && !fm.UA.Mobile) ? ($.grep(sel, function(file) { return file.mime == 'directory' || ! file.read ? false : true;}).length == cnt ? 0 : -1) : -1;
+			? (sel[0].read && (!fileDisable || sel[0].mime === 'directory') ? 0 : -1)
+			: (cnt && !fm.UA.Mobile) ? ($.grep(sel, function(file) { return fileDisable || file.mime == 'directory' || ! file.read ? false : true;}).length == cnt ? 0 : -1) : -1;
 	};
 	
 	this.exec = function(hashes, cOpts) {
