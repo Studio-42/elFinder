@@ -863,6 +863,17 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         $error = false;
         try {
             $this->token = json_decode($this->options['accessToken']);
+            if (!is_object($this->token)) {
+                throw new Exception('Required option `accessToken` is invalid JSON.');
+            }
+
+            // make net mount key
+            if (empty($this->options['netkey'])) {
+                $this->netMountKey = $this->_bd_getInitialToken();
+            } else {
+                $this->netMountKey = $this->options['netkey'];
+            }
+
             if ($this->aTokenFile = $this->_bd_getATokenFile()) {
                 if (empty($this->options['netkey'])) {
                     if ($this->aTokenFile) {
@@ -885,17 +896,12 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             $this->setError($e->getMessage());
         }
 
-        if (empty($this->options['netkey'])) {
-            // make net mount key
-            $this->netMountKey = $this->_bd_getInitialToken();
-        } else {
-            $this->netMountKey = $this->options['netkey'];
+        if ($this->netMountKey) {
+            $this->tmbPrefix = 'box' . base_convert($this->netMountKey, 10, 32);
         }
 
-        $this->tmbPrefix = 'box' . base_convert($this->netMountKey, 10, 32);
-
         if ($error) {
-            if (empty($this->options['netkey'])) {
+            if (empty($this->options['netkey']) && $this->tmbPrefix) {
                 // for delete thumbnail 
                 $this->netunmount();
             }

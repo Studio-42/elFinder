@@ -696,6 +696,17 @@ elFinder.prototype._options = {
 	},
 	
 	/**
+	 * Disabled commands relationship
+	 * 
+	 * @type Object
+	 */
+	disabledCmdsRels : {
+		'get'       : ['edit'],
+		'rm'        : ['cut', 'empty'],
+		'file&url=' : ['download', 'zipdl'] // file command and volume options url is empty
+	},
+
+	/**
 	 * Callback for prepare boot up
 	 * 
 	 * - The this object in the function is an elFinder node

@@ -2092,7 +2092,7 @@ abstract class elFinderVolumeDriver
                 $this->options['tmbGcMaxlifeHour'] = 0;
                 $rand = mt_rand(1, 10000);
                 if ($rand <= $this->options['tmbGcPercentage'] * 100) {
-                    register_shutdown_function(array('elFinder', 'GlobGC'), $this->tmbPath . DIRECTORY_SEPARATOR . '*.png', $this->options['tmbGcMaxlifeHour'] * 3600);
+                    register_shutdown_function(array('elFinder', 'GlobGC'), $this->tmbPath . DIRECTORY_SEPARATOR . '*.png', $this->options['tmbGcMaxlifeHour'] * 60);
                 }
             }
             return $res;
@@ -3566,9 +3566,11 @@ abstract class elFinderVolumeDriver
     {
         foreach (func_get_args() as $err) {
             if (is_array($err)) {
-                $this->error = array_merge($this->error, $err);
+                foreach($err as $er) {
+                    $this->addError($er);
+                }
             } else {
-                $this->error[] = $err;
+                $this->error[] = (string)$err;
             }
         }
         return false;

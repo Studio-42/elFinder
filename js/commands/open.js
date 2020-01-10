@@ -6,12 +6,19 @@
  **/  
 (elFinder.prototype.commands.open = function() {
 	"use strict";
-	var fm = this.fm;
+	var fm = this.fm,
+		self = this;
 	this.alwaysEnabled = true;
 	this.noChangeDirOnRemovedCwd = true;
 	
 	this._handlers = {
-		dblclick : function(e) { e.preventDefault(); fm.exec('open', e.data && e.data.file? [ e.data.file ]: void(0)); },
+		dblclick : function(e) {
+			var arg = e.data && e.data.file? [ e.data.file ]: void(0);
+			if (self.getstate(arg) === 0) {
+				e.preventDefault();
+				fm.exec('open', arg);
+			}
+		},
 		'select enable disable reload' : function(e) { this.update(e.type == 'disable' ? -1 : void(0));  }
 	};
 	
@@ -21,11 +28,12 @@
 
 	this.getstate = function(select) {
 		var sel = this.files(select),
-			cnt = sel.length;
+			cnt = sel.length,
+			fileDisable = (!fm.option('url') && !fm.isCommandEnabled('file'))? true : false;
 		
 		return cnt == 1 
-			? (sel[0].read? 0 : -1) 
-			: (cnt && !fm.UA.Mobile) ? ($.grep(sel, function(file) { return file.mime == 'directory' || ! file.read ? false : true;}).length == cnt ? 0 : -1) : -1;
+			? (sel[0].read && (!fileDisable || sel[0].mime === 'directory') ? 0 : -1)
+			: (cnt && !fm.UA.Mobile) ? ($.grep(sel, function(file) { return fileDisable || file.mime == 'directory' || ! file.read ? false : true;}).length == cnt ? 0 : -1) : -1;
 	};
 	
 	this.exec = function(hashes, cOpts) {
