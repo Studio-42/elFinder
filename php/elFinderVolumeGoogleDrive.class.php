@@ -1028,7 +1028,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $this->tmp = $this->tmbPath;
         }
 
-        if ($this->isMyReload()) {
+        if ($this->needOnline && $this->isMyReload()) {
             $this->_gd_getDirectoryData(false);
         }
     }
