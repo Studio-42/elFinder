@@ -374,7 +374,8 @@ $opts['roots'][] = array_merge($tmbConfig, array(
     'driver' => 'FTP',
     'host'   => 'ftp.jaist.ac.jp',
     'user'   => 'anonymous',
-    'path'   => '/', 
+    'path'   => '/',
+    'owner'  => false,
 ));
 
 // To enable the following cloud volumes, first complete the steps 
