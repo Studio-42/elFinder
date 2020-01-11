@@ -1006,7 +1006,16 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         $this->options['searchExDirReg'] = $searchExDirReg;
 
         if ($search) {
-            return $search[0];
+            $f = false;
+            foreach($search as $f) {
+                if ($f['name'] !== $name) {
+                    $f = false;
+                }
+                if ($f) {
+                    break;
+                }
+            }
+            return $f;
         }
 
         return false;
