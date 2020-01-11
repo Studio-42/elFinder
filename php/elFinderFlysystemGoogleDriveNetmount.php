@@ -337,4 +337,18 @@ class elFinderVolumeFlysystemGoogleDriveNetmount extends ExtDriver
         return $this->netMountKey . substr(substr($stat['hash'], strlen($this->id)), -38) . $stat['ts'] . '.png';
     }
 
+    /**
+     * Return debug info for client.
+     *
+     * @return array
+     **/
+    public function debug()
+    {
+        $res = parent::debug();
+        if (!empty($this->options['netkey']) && empty($this->options['refresh_token']) && $this->options['access_token'] && isset($this->options['access_token']['refresh_token'])) {
+            $res['refresh_token'] = $this->options['access_token']['refresh_token'];
+        }
+
+        return $res;
+    }
 }
