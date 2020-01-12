@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: 9924919) (2020-01-11)
+ * Version 2.1.51 (2.1-src Nightly: 24b2607) (2020-01-12)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -428,6 +428,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				diff = self.diff([data.cwd], true);
 				if (diff.changed.length) {
 					cache(diff.changed, 'change');
+					self.change({changed: diff.changed});
 				}
 			}
 
@@ -7029,8 +7030,9 @@ elFinder.prototype = {
 									name = fm.date(fm.nonameDateFormat) + '.png';
 								}
 							} else {
-								if (file.name) {
-									name = file.name;
+								fm.log(file.webkitRelativePath || file.relativePath || file.name);
+								if (name = file.webkitRelativePath || file.relativePath || file.name) {
+									//name = file.name;
 									if (fm.UA.iOS) {
 										if (name.match(/^image\.jpe?g$/i)) {
 											data.overwrite = 0;
@@ -10267,7 +10269,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 9924919)';
+elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 24b2607)';
 
 
 
