@@ -106,13 +106,25 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
             || !$this->options['db']
             || !$this->options['path']
             || !$this->options['files_table']) {
-            return false;
+            return $this->setError('Required options "host", "socket", "user", "pass", "db", "path" or "files_table" are undefined.');
         }
 
+        $err = null;
+        if ($this->db = @new mysqli($this->options['host'], $this->options['user'], $this->options['pass'], $this->options['db'], $this->options['port'], $this->options['socket'])) {
+            if ($this->db && $this->db->connect_error) {
+                $err = $this->db->connect_error;
+            }
+        } else {
+            $err = mysqli_connect_error();
+        }
+        if ($err) {
+            return $this->setError(array('Unable to connect to MySQL server.', $err));
+        }
 
-        $this->db = new mysqli($this->options['host'], $this->options['user'], $this->options['pass'], $this->options['db'], $this->options['port'], $this->options['socket']);
-        if ($this->db->connect_error || mysqli_connect_error()) {
-            return false;
+        if (!$this->needOnline && empty($this->ARGS['init'])) {
+            $this->db->close();
+            $this->db = null;
+            return true;
         }
 
         $this->db->set_charset('utf8');
@@ -127,7 +139,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
         }
 
         if (!$this->tbf) {
-            return false;
+            return $this->setError('The specified database table cannot be found.');
         }
 
         $this->updateCache($this->options['path'], $this->_stat($this->options['path']));
@@ -182,7 +194,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
      **/
     public function umount()
     {
-        $this->db->close();
+        $this->db && $this->db->close();
     }
 
     /**
@@ -255,10 +267,10 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
         $this->dirsCache[$path] = array();
 
         $sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime AS ts, f.mime, f.read, f.write, f.locked, f.hidden, f.width, f.height, IF(ch.id, 1, 0) AS dirs 
-				FROM ' . $this->tbf . ' AS f 
-				LEFT JOIN ' . $this->tbf . ' AS ch ON ch.parent_id=f.id AND ch.mime=\'directory\'
-				WHERE f.parent_id=\'' . $path . '\'
-				GROUP BY f.id, ch.id';
+                FROM ' . $this->tbf . ' AS f 
+                LEFT JOIN ' . $this->tbf . ' AS ch ON ch.parent_id=f.id AND ch.mime=\'directory\'
+                WHERE f.parent_id=\'' . $path . '\'
+                GROUP BY f.id, ch.id';
 
         $res = $this->query($sql);
         if ($res) {
@@ -389,8 +401,8 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
         }
 
         $sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime AS ts, f.mime, f.read, f.write, f.locked, f.hidden, f.width, f.height, 0 AS dirs 
-				FROM %s AS f 
-				WHERE %s';
+                FROM %s AS f 
+                WHERE %s';
 
         $sql = sprintf($sql, $this->tbf, $whr);
 
@@ -457,7 +469,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
      **/
     protected function _basename($path)
     {
-        return ($stat = $this->stat($path)) ? $stat['name'] : false;
+        return (($stat = $this->stat($path)) && isset($stat['name'])) ? $stat['name'] : false;
     }
 
     /**
@@ -581,10 +593,10 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
     protected function _stat($path)
     {
         $sql = 'SELECT f.id, f.parent_id, f.name, f.size, f.mtime AS ts, f.mime, f.read, f.write, f.locked, f.hidden, f.width, f.height, IF(ch.id, 1, 0) AS dirs
-				FROM ' . $this->tbf . ' AS f 
-				LEFT JOIN ' . $this->tbf . ' AS ch ON ch.parent_id=f.id AND ch.mime=\'directory\'
-				WHERE f.id=\'' . $path . '\'
-				GROUP BY f.id, ch.id';
+                FROM ' . $this->tbf . ' AS f 
+                LEFT JOIN ' . $this->tbf . ' AS ch ON ch.parent_id=f.id AND ch.mime=\'directory\'
+                WHERE f.id=\'' . $path . '\'
+                GROUP BY f.id, ch.id';
 
         $res = $this->query($sql);
 
