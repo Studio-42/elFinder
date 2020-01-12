@@ -847,8 +847,8 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
                     $html = '<input id="elf-volumedriver-onedrive-host-btn" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" value="{msg:btnApprove}" type="button" onclick="window.open(\'' . $url . '\')">';
                     $html .= '<script>
-							$("#' . $options['id'] . '").elfinder("instance").trigger("netmount", {protocol: "onedrive", mode: "makebtn"});
-							</script>';
+                            $("#' . $options['id'] . '").elfinder("instance").trigger("netmount", {protocol: "onedrive", mode: "makebtn"});
+                            </script>';
 
                     return array('exit' => true, 'body' => $html);
                 } else {
@@ -873,8 +873,8 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                     $json = '{"protocol": "onedrive", "mode": "done", "folders": ' . $folders . ', "expires": ' . $expires . $mnt2res .'}';
                     $html = 'OneDrive.com';
                     $html .= '<script>
-							$("#' . $options['id'] . '").elfinder("instance").trigger("netmount", ' . $json . ');
-							</script>';
+                            $("#' . $options['id'] . '").elfinder("instance").trigger("netmount", ' . $json . ');
+                            </script>';
 
                     return array('exit' => true, 'body' => $html);
                 }
@@ -979,6 +979,10 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                     if ($this->aTokenFile) {
                         if (is_file($this->aTokenFile)) {
                             $this->token = json_decode(file_get_contents($this->aTokenFile));
+                            if (!is_object($this->token)) {
+                                unlink($this->aTokenFile);
+                                throw new Exception('Required option `accessToken` is invalid JSON.');
+                            }
                         } else {
                             file_put_contents($this->aTokenFile, $this->token);
                         }
@@ -1001,13 +1005,13 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         }
 
         if ($this->netMountKey) {
-            $this->tmbPrefix = 'onedrive' . base_convert($this->netMountKey, 10, 32);
+            $this->tmbPrefix = 'onedrive' . base_convert($this->netMountKey, 16, 32);
         }
 
         if ($error) {
             if (empty($this->options['netkey']) && $this->tmbPrefix) {
                 // for delete thumbnail 
-                $this->netunmount();
+                $this->netunmount(null, null);
             }
             return false;
         }
@@ -1019,17 +1023,21 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
 
         $this->root = $this->options['path'] = $this->_normpath($this->options['path']);
 
-        $this->options['root'] == '' ? $this->options['root'] = 'OneDrive.com' : $this->options['root'];
+        $this->options['root'] = ($this->options['root'] == '')? 'OneDrive.com' : $this->options['root'];
 
-        if ($this->needOnline && empty($this->options['alias'])) {
-            $this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] :
-                $this->_od_query(basename($this->options['path']), $fetch_self = true)->name . '@OneDrive';
-            if (!empty($this->options['netkey'])) {
-                elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'alias', $this->options['alias']);
+        if (empty($this->options['alias'])) {
+            if ($this->needOnline) {
+                $this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] :
+                    $this->_od_query(basename($this->options['path']), $fetch_self = true)->name . '@OneDrive';
+                if (!empty($this->options['netkey'])) {
+                    elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'alias', $this->options['alias']);
+                }
+            } else {
+                $this->options['alias'] = $this->options['root'];
             }
         }
 
-        $this->rootName = isset($this->options['alias'])? $this->options['alias'] : 'OneDrive.com';
+        $this->rootName = $this->options['alias'];
 
         // This driver dose not support `syncChkAsTs`
         $this->options['syncChkAsTs'] = false;

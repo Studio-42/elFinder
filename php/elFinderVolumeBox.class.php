@@ -744,8 +744,8 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
                     $html = '<input id="elf-volumedriver-box-host-btn" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" value="{msg:btnApprove}" type="button" onclick="window.open(\'' . $url . '\')">';
                     $html .= '<script>
-							$("#' . $options['id'] . '").elfinder("instance").trigger("netmount", {protocol: "box", mode: "makebtn"});
-						</script>';
+                            $("#' . $options['id'] . '").elfinder("instance").trigger("netmount", {protocol: "box", mode: "makebtn"});
+                        </script>';
 
                     return array('exit' => true, 'body' => $html);
                 } else {
@@ -772,8 +772,8 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                     $json = '{"protocol": "box", "mode": "done", "folders": ' . $folders . ', "expires": ' . $expires . $mnt2res . '}';
                     $html = 'Box.com';
                     $html .= '<script>
-							$("#' . $options['id'] . '").elfinder("instance").trigger("netmount", ' . $json . ');
-							</script>';
+                            $("#' . $options['id'] . '").elfinder("instance").trigger("netmount", ' . $json . ');
+                            </script>';
 
                     return array('exit' => true, 'body' => $html);
                 }
@@ -879,8 +879,12 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                     if ($this->aTokenFile) {
                         if (is_file($this->aTokenFile)) {
                             $this->token = json_decode(file_get_contents($this->aTokenFile));
+                            if (!is_object($this->token)) {
+                                unlink($this->aTokenFile);
+                                throw new Exception('Required option `accessToken` is invalid JSON.');
+                            }
                         } else {
-                            file_put_contents($this->aTokenFile, $this->token);
+                            file_put_contents($this->aTokenFile, json_encode($this->token));
                         }
                     }
                 } else if (is_file($this->aTokenFile)) {
@@ -897,13 +901,13 @@ class elFinderVolumeBox extends elFinderVolumeDriver
         }
 
         if ($this->netMountKey) {
-            $this->tmbPrefix = 'box' . base_convert($this->netMountKey, 10, 32);
+            $this->tmbPrefix = 'box' . base_convert($this->netMountKey, 16, 32);
         }
 
         if ($error) {
             if (empty($this->options['netkey']) && $this->tmbPrefix) {
                 // for delete thumbnail 
-                $this->netunmount();
+                $this->netunmount(null, null);
             }
             return false;
         }
@@ -915,18 +919,22 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
         $this->root = $this->options['path'] = $this->_normpath($this->options['path']);
 
-        $this->options['root'] == '' ? $this->options['root'] = 'Box.com' : $this->options['root'];
+        $this->options['root'] = ($this->options['root'] == '')? 'Box.com' : $this->options['root'];
 
-        if ($this->needOnline && empty($this->options['alias'])) {
-            list(, $itemId) = $this->_bd_splitPath($this->options['path']);
-            $this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] :
-                $this->_bd_query($itemId, $fetch_self = true)->name . '@Box.com';
-            if (!empty($this->options['netkey'])) {
-                elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'alias', $this->options['alias']);
+        if (empty($this->options['alias'])) {
+            if ($this->needOnline) {
+                list(, $itemId) = $this->_bd_splitPath($this->options['path']);
+                $this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] :
+                    $this->_bd_query($itemId, $fetch_self = true)->name . '@Box';
+                if (!empty($this->options['netkey'])) {
+                    elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'alias', $this->options['alias']);
+                }
+            } else {
+                $this->options['alias'] = $this->options['root'];
             }
         }
 
-        $this->rootName = isset($this->options['alias'])? $this->options['alias'] : 'Box.com';
+        $this->rootName = $this->options['alias'];
 
         // This driver dose not support `syncChkAsTs`
         $this->options['syncChkAsTs'] = false;
