@@ -976,12 +976,16 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
         }
         $this->root = $this->options['path'] = $this->_normpath($this->options['path']);
 
-        $this->options['root'] == '' ? $this->options['root'] = $this->_gd_getNameByPath('root') : $this->options['root'];
-
-        if ($this->needOnline && empty($this->options['alias'])) {
-            $this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] : sprintf($this->options['gdAlias'], $this->_gd_getNameByPath($this->options['path']));
-            if (!empty($this->options['netkey'])) {
-                elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'alias', $this->options['alias']);
+        if (empty($this->options['alias'])) {
+            if ($this->needOnline) {
+                $this->options['root'] = ($this->options['root'] === '')? $this->_gd_getNameByPath('root') : $this->options['root'];
+                $this->options['alias'] = ($this->options['path'] === '/') ? $this->options['root'] : sprintf($this->options['gdAlias'], $this->_gd_getNameByPath($this->options['path']));
+                if (!empty($this->options['netkey'])) {
+                    elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'alias', $this->options['alias']);
+                }
+            } else {
+                $this->options['root'] = ($this->options['root'] === '')? 'GoogleDrive' : $this->options['root'];
+                $this->options['alias'] = $this->options['root'];
             }
         }
 

@@ -1183,7 +1183,7 @@ abstract class elFinderVolumeDriver
 
             foreach ($this->options['attributes'] as $a) {
                 // attributes must contain pattern and at least one rule
-                if (!empty($a['pattern']) || count($a) > 1) {
+                if (!empty($a['pattern']) || (is_array($a) && count($a) > 1)) {
                     $this->attributes[] = $a;
                 }
             }
