@@ -524,7 +524,7 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
         $this->root = $this->options['path'] = $this->_normpath($this->options['path']);
 
         if (empty($this->options['alias'])) {
-            $this->options['alias'] = sprintf($this->options['aliasFormat'], ($this->options['path'] === '/') ? 'Dropbox.com' : ($this->_basename($this->options['path']) . '@Dropbox.com'));
+            $this->options['alias'] = sprintf($this->options['aliasFormat'], ($this->options['path'] === '/') ? 'Root' : $this->_basename($this->options['path']));
             if (!empty($this->options['netkey'])) {
                 elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'alias', $this->options['alias']);
             }
