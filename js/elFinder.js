@@ -397,6 +397,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				diff = self.diff([data.cwd], true);
 				if (diff.changed.length) {
 					cache(diff.changed, 'change');
+					self.change({changed: diff.changed});
 				}
 			}
 
@@ -6998,8 +6999,9 @@ elFinder.prototype = {
 									name = fm.date(fm.nonameDateFormat) + '.png';
 								}
 							} else {
-								if (file.name) {
-									name = file.name;
+								fm.log(file.webkitRelativePath || file.relativePath || file.name);
+								if (name = file.webkitRelativePath || file.relativePath || file.name) {
+									//name = file.name;
 									if (fm.UA.iOS) {
 										if (name.match(/^image\.jpe?g$/i)) {
 											data.overwrite = 0;
