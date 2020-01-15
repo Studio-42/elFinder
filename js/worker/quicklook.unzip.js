@@ -1,6 +1,5 @@
 var type = self.data.type,
 	bin = self.data.bin,
-	formatSize = self.data.formatSize,
 	unzipFiles = function() {
 		/** @type {Array.<string>} */
 		var filenameList = [];
