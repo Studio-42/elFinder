@@ -1007,7 +1007,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 							.done(function(data) {
 								var unzip, filenames;
 								try {
-									wk = new Worker(fm.baseUrl + 'js/worker/worker.js');
+									wk = fm.getWorker();
 									wk.onmessage = function(res) {
 										wk && wk.terminate();
 										loading.remove();

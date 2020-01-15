@@ -9768,7 +9768,23 @@ elFinder.prototype = {
 		
 		return dfrd;
 	},
-	
+
+	/**
+	 * Gets the web worker.
+	 *
+	 * @param      {Object}  options  The options
+	 * @return     {Worker}  The worker.
+	 */
+	getWorker : function(options){
+		var wk;
+		try {
+			wk = new Worker(this.baseUrl + 'js/worker/worker.js', options);
+		} catch(e) {
+			throw e;
+		}
+		return wk;
+	},
+
 	/**
 	 * Gets the theme object by settings of options.themes
 	 *
@@ -10063,6 +10079,9 @@ elFinder.prototype = {
 				}
 				d['backend-error'] = true;
 				d['warning'] = true;
+			}
+			if (rd.mountErrors && (typeof rd.mountErrors === 'string' || (Array.isArray(rd.mountErrors) && rd.mountErrors.length))) {
+				this.debug('backend-error', rd.mountErrors);
 			}
 			if (rd.backendErrors && (typeof rd.backendErrors === 'string' || (Array.isArray(rd.backendErrors) && rd.backendErrors.length))) {
 				this.debug('backend-warning', rd.backendErrors);
