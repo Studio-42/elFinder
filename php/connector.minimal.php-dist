@@ -31,7 +31,7 @@ error_reporting(0); // Set E_ALL for debuging
 
 // // load composer autoload before load elFinder autoload If you need composer
 // // You need to run the composer command in the php directory.
-// require './vendor/autoload.php';
+is_readable('./vendor/autoload.php') && require './vendor/autoload.php';
 
 // // elFinder autoload
 require './autoload.php';
