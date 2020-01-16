@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: 85f065a) (2020-01-16)
+ * Version 2.1.51 (2.1-src Nightly: 080973b) (2020-01-17)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -7003,9 +7003,8 @@ elFinder.prototype = {
 									name = fm.date(fm.nonameDateFormat) + '.png';
 								}
 							} else {
-								fm.log(file.webkitRelativePath || file.relativePath || file.name);
-								if (name = file.webkitRelativePath || file.relativePath || file.name) {
-									//name = file.name;
+								if (file.name) {
+									name = file.name;
 									if (fm.UA.iOS) {
 										if (name.match(/^image\.jpe?g$/i)) {
 											data.overwrite = 0;
@@ -10261,7 +10260,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 85f065a)';
+elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 080973b)';
 
 
 
@@ -11039,8 +11038,10 @@ elFinder.prototype._options = {
 			mediaControlsList : '', // e.g. 'nodownload nofullscreen noremoteplayback'
 			// Show toolbar of PDF preview (with <embed> tag)
 			pdfToolbar : true,
-			// Maximum characters length to preview
-			textMaxlen : 2000,
+			// Maximum lines to preview at initial
+			textInitialLines : 150,
+			// Maximum lines to preview by prettify
+			prettifyMaxLines : 500,
 			// quicklook window must be contained in elFinder node on window open (true|false)
 			contain : false,
 			// preview window into NavDock (0 : undocked | 1 : docked(show) | 2 : docked(hide))
@@ -13135,7 +13136,7 @@ $.fn.dialogelfinder = function(opts, opts2) {
  * English translation
  * @author Troex Nevelin <troex@fury.scancode.ru>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2019-07-27
+ * @version 2020-01-16
  */
 // elfinder.en.js is integrated into elfinder.(full|min).js by jake build
 if (typeof elFinder === 'function' && elFinder.prototype.i18) {
@@ -13569,6 +13570,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'clearBrowserData': 'Initialize the settings saved in this browser', // from v2.1.26 added 28.6.2017
 			'toolbarPref'     : 'Toolbar settings', // from v2.1.27 added 2.8.2017
 			'charsLeft'       : '... $1 chars left.',  // from v2.1.29 added 30.8.2017
+			'linesLeft'       : '... $1 lines left.',  // from v2.1.52 added 16.1.2020
 			'sum'             : 'Sum', // from v2.1.29 added 28.9.2017
 			'roughFileSize'   : 'Rough file size', // from v2.1.30 added 2.11.2017
 			'autoFocusDialog' : 'Focus on the element of dialog with mouseover',  // from v2.1.30 added 2.11.2017
@@ -30491,30 +30493,59 @@ elFinder.prototype.commands.quicklook.plugins = [
 	function(ql) {
 				var fm      = ql.fm,
 			preview = ql.preview,
-			textMaxlen = parseInt(ql.options.textMaxlen) || 2000,
-			prettify = function() {
+			textLines = parseInt(ql.options.textInitialLines) || 150,
+			prettifyLines = parseInt(ql.options.prettifyMaxLines) || 500,
+			PR, _PR,
+			error = function() {
+				prettify = function() { return false; };
+				_PR && (window.PR = _PR);
+				PR = false;
+			},
+			prettify = function(node) {
 				if (fm.options.cdns.prettify) {
-					fm.loadScript([fm.options.cdns.prettify + (fm.options.cdns.prettify.match(/\?/)? '&' : '?') + 'autorun=false']);
-					prettify = function() { return true; };
+					prettify = function(node) {
+						setTimeout(function() {
+							PRcheck(node);
+						}, 100);
+						return 'pending';
+					};
+					if (window.PR) {
+						_PR = window.PR;
+					}
+					fm.loadScript([fm.options.cdns.prettify + (fm.options.cdns.prettify.match(/\?/)? '&' : '?') + 'autorun=false'], function(wPR) {
+						PR = wPR || window.PR;
+						if (typeof PR === 'object') {
+							prettify = function() { return true; };
+							if (_PR) {
+								window.PR = _PR;
+							} else {
+								delete window.PR;
+							}
+							exec(node);
+						} else {
+							error();
+						}
+					}, {
+						tryRequire: true,
+						error : error
+					});
 				} else {
-					prettify = function() { return false; };
+					error();
 				}
 			},
-			PRcheck = function(node, cnt) {
-				if (prettify()) {
-					if (typeof window.PR === 'undefined' && cnt--) {
-						setTimeout(function() { PRcheck(node, cnt); }, 100);
-					} else {
-						if (typeof window.PR === 'object') {
-							node.css('cursor', 'wait');
-							requestAnimationFrame(function() {
-								PR.prettyPrint && PR.prettyPrint(null, node.get(0));
-								node.css('cursor', '');
-							});
-						} else {
-							prettify = function() { return false; };
-						}
-					}
+			exec = function(node) {
+				if (node && !node.hasClass('prettyprinted')) {
+					node.css('cursor', 'wait');
+					requestAnimationFrame(function() {
+						PR.prettyPrint && PR.prettyPrint(null, node.get(0));
+						node.css('cursor', '');
+					});
+				}
+			},
+			PRcheck = function(node) {
+				var status = prettify(node);
+				if (status === true) {
+					exec(node);
 				}
 			};
 		
@@ -30523,10 +30554,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 				mime = file.mime,
 				jqxhr, loading;
 			
-			if (fm.mimeIsText(file.mime) && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax)) {
+			if (fm.mimeIsText(file.mime) && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax) && PR !== false) {
 				e.stopImmediatePropagation();
-				
-				(typeof window.PR === 'undefined') && prettify();
 				
 				loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 
@@ -30543,28 +30572,31 @@ elFinder.prototype.commands.quicklook.plugins = [
 				.done(function(data) {
 					var reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i'),
 						text = data.content,
-						part, more, node, m;
+						part, more, node, lines, m;
 					ql.hideinfo();
 					if (window.atob && (m = text.match(reg))) {
 						text = atob(text.substr(m[1].length));
 					}
 					
-					more = text.length - textMaxlen;
-					if (more > 100) {
-						part = text.substr(0, textMaxlen) + '...';
+					lines = text.match(/([^\r\n]{1,100}[\r\n]*)/g);
+					more = lines.length - textLines;
+					if (more > 10) {
+						part = lines.splice(0, textLines).join('');
 					} else {
 						more = 0;
 					}
-					
+
 					node = $('<div class="elfinder-quicklook-preview-text-wrapper"><pre class="elfinder-quicklook-preview-text prettyprint"></pre></div>');
 					
 					if (more) {
-						node.append($('<div class="elfinder-quicklook-preview-charsleft"><hr/><span>' + fm.i18n('charsLeft', fm.toLocaleString(more)) + '</span></div>')
+						node.append($('<div class="elfinder-quicklook-preview-charsleft"><hr/><span>' + fm.i18n('linesLeft', fm.toLocaleString(more)) + '</span></div>')
 							.on('click', function() {
 								var top = node.scrollTop();
 								$(this).remove();
 								node.children('pre').removeClass('prettyprinted').text(text).scrollTop(top);
-								PRcheck(node, 100);
+								if (lines.length <= prettifyLines) {
+									PRcheck(node);
+								}
 							})
 						);
 					}
@@ -30576,7 +30608,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						}
 					}).appendTo(preview);
 					
-					PRcheck(node, 100);
+					PRcheck(node);
 				})
 				.always(function() {
 					loading.remove();
