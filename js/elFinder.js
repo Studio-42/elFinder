@@ -6972,9 +6972,8 @@ elFinder.prototype = {
 									name = fm.date(fm.nonameDateFormat) + '.png';
 								}
 							} else {
-								fm.log(file.webkitRelativePath || file.relativePath || file.name);
-								if (name = file.webkitRelativePath || file.relativePath || file.name) {
-									//name = file.name;
+								if (file.name) {
+									name = file.name;
 									if (fm.UA.iOS) {
 										if (name.match(/^image\.jpe?g$/i)) {
 											data.overwrite = 0;

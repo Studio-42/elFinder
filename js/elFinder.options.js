@@ -354,8 +354,10 @@ elFinder.prototype._options = {
 			mediaControlsList : '', // e.g. 'nodownload nofullscreen noremoteplayback'
 			// Show toolbar of PDF preview (with <embed> tag)
 			pdfToolbar : true,
-			// Maximum characters length to preview
-			textMaxlen : 2000,
+			// Maximum lines to preview at initial
+			textInitialLines : 150,
+			// Maximum lines to preview by prettify
+			prettifyMaxLines : 500,
 			// quicklook window must be contained in elFinder node on window open (true|false)
 			contain : false,
 			// preview window into NavDock (0 : undocked | 1 : docked(show) | 2 : docked(hide))
