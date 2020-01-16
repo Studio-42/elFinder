@@ -1,4 +1,4 @@
-self.onmessage = e => {
+self.onmessage = function(e) {
 	const d = e.data;
 	try {
 		self.data = d.data;
