@@ -594,6 +594,11 @@ elFinder.prototype._options = {
 			// Array of hash algorisms to show on info dialog
 			// These name are 'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'sha3-224', 'sha3-256', 'sha3-384', 'sha3-512', 'shake128' and 'shake256'
 			showHashAlgorisms : ['md5', 'sha256'],
+			// Options for fm.getContentsHashes()
+			showHashOpts : {
+				shake128len : 256,
+				shake256len : 512
+			},
 			custom : {
 				// /**
 				//  * Example of custom info `desc`
