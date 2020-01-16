@@ -5457,6 +5457,12 @@ abstract class elFinderVolumeDriver
      **/
     protected function canCreateTmb($path, $stat, $checkTmbPath = true)
     {
+        static $gdMimes = null;
+        static $imgmgPS = null;
+        if ($gdMimes === null) {
+            $gdMimes = array_flip(array('image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp'));
+            $imgmgPS = array_flip(array('application/postscript', 'application/pdf'));
+        }
         if ((!$checkTmbPath || $this->tmbPathWritable)
             && (!$this->tmbPath || strpos($path, $this->tmbPath) === false) // do not create thumnbnail for thumnbnail
         ) {
@@ -5472,9 +5478,9 @@ abstract class elFinderVolumeDriver
             }
             return $this->imgLib
                 && (
-                    ($type === 'image' && ($this->imgLib === 'gd' ? in_array($stat['mime'], array('image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp')) : true))
+                    ($type === 'image' && ($this->imgLib === 'gd' ? isset($gdMimes[$stat['mime']]) : true))
                     ||
-                    (ELFINDER_IMAGEMAGICK_PS && $this->imgLib !== 'gd' && in_array($stat['mime'], array('application/postscript', 'application/pdf')))
+                    (ELFINDER_IMAGEMAGICK_PS && isset($imgmgPS[$stat['mime']]) && $this->imgLib !== 'gd')
                 );
         }
         return false;
