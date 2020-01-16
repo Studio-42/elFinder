@@ -1553,30 +1553,59 @@ elFinder.prototype.commands.quicklook.plugins = [
 		"use strict";
 		var fm      = ql.fm,
 			preview = ql.preview,
-			textMaxlen = parseInt(ql.options.textMaxlen) || 2000,
-			prettify = function() {
+			textLines = parseInt(ql.options.textInitialLines) || 150,
+			prettifyLines = parseInt(ql.options.prettifyMaxLines) || 500,
+			PR, _PR,
+			error = function() {
+				prettify = function() { return false; };
+				_PR && (window.PR = _PR);
+				PR = false;
+			},
+			prettify = function(node) {
 				if (fm.options.cdns.prettify) {
-					fm.loadScript([fm.options.cdns.prettify + (fm.options.cdns.prettify.match(/\?/)? '&' : '?') + 'autorun=false']);
-					prettify = function() { return true; };
+					prettify = function(node) {
+						setTimeout(function() {
+							PRcheck(node);
+						}, 100);
+						return 'pending';
+					};
+					if (window.PR) {
+						_PR = window.PR;
+					}
+					fm.loadScript([fm.options.cdns.prettify + (fm.options.cdns.prettify.match(/\?/)? '&' : '?') + 'autorun=false'], function(wPR) {
+						PR = wPR || window.PR;
+						if (typeof PR === 'object') {
+							prettify = function() { return true; };
+							if (_PR) {
+								window.PR = _PR;
+							} else {
+								delete window.PR;
+							}
+							exec(node);
+						} else {
+							error();
+						}
+					}, {
+						tryRequire: true,
+						error : error
+					});
 				} else {
-					prettify = function() { return false; };
+					error();
 				}
 			},
-			PRcheck = function(node, cnt) {
-				if (prettify()) {
-					if (typeof window.PR === 'undefined' && cnt--) {
-						setTimeout(function() { PRcheck(node, cnt); }, 100);
-					} else {
-						if (typeof window.PR === 'object') {
-							node.css('cursor', 'wait');
-							requestAnimationFrame(function() {
-								PR.prettyPrint && PR.prettyPrint(null, node.get(0));
-								node.css('cursor', '');
-							});
-						} else {
-							prettify = function() { return false; };
-						}
-					}
+			exec = function(node) {
+				if (node && !node.hasClass('prettyprinted')) {
+					node.css('cursor', 'wait');
+					requestAnimationFrame(function() {
+						PR.prettyPrint && PR.prettyPrint(null, node.get(0));
+						node.css('cursor', '');
+					});
+				}
+			},
+			PRcheck = function(node) {
+				var status = prettify(node);
+				if (status === true) {
+					exec(node);
 				}
 			};
 		
@@ -1585,10 +1614,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 				mime = file.mime,
 				jqxhr, loading;
 			
-			if (fm.mimeIsText(file.mime) && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax)) {
+			if (fm.mimeIsText(file.mime) && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax) && PR !== false) {
 				e.stopImmediatePropagation();
-				
-				(typeof window.PR === 'undefined') && prettify();
 				
 				loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 
@@ -1605,28 +1632,31 @@ elFinder.prototype.commands.quicklook.plugins = [
 				.done(function(data) {
 					var reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i'),
 						text = data.content,
-						part, more, node, m;
+						part, more, node, lines, m;
 					ql.hideinfo();
 					if (window.atob && (m = text.match(reg))) {
 						text = atob(text.substr(m[1].length));
 					}
 					
-					more = text.length - textMaxlen;
-					if (more > 100) {
-						part = text.substr(0, textMaxlen) + '...';
+					lines = text.match(/([^\r\n]{1,100}[\r\n]*)/g);
+					more = lines.length - textLines;
+					if (more > 10) {
+						part = lines.splice(0, textLines).join('');
 					} else {
 						more = 0;
 					}
-					
+
 					node = $('<div class="elfinder-quicklook-preview-text-wrapper"><pre class="elfinder-quicklook-preview-text prettyprint"></pre></div>');
 					
 					if (more) {
-						node.append($('<div class="elfinder-quicklook-preview-charsleft"><hr/><span>' + fm.i18n('charsLeft', fm.toLocaleString(more)) + '</span></div>')
+						node.append($('<div class="elfinder-quicklook-preview-charsleft"><hr/><span>' + fm.i18n('linesLeft', fm.toLocaleString(more)) + '</span></div>')
 							.on('click', function() {
 								var top = node.scrollTop();
 								$(this).remove();
 								node.children('pre').removeClass('prettyprinted').text(text).scrollTop(top);
-								PRcheck(node, 100);
+								if (lines.length <= prettifyLines) {
+									PRcheck(node);
+								}
 							})
 						);
 					}
@@ -1638,7 +1668,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						}
 					}).appendTo(preview);
 					
-					PRcheck(node, 100);
+					PRcheck(node);
 				})
 				.always(function() {
 					loading.remove();
