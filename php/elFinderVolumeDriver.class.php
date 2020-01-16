@@ -2137,10 +2137,9 @@ abstract class elFinderVolumeDriver
             }
             // tmb garbage collection
             if ($res && $this->options['tmbGcMaxlifeHour'] && $this->options['tmbGcPercentage'] > 0) {
-                $this->options['tmbGcMaxlifeHour'] = 0;
                 $rand = mt_rand(1, 10000);
                 if ($rand <= $this->options['tmbGcPercentage'] * 100) {
-                    register_shutdown_function(array('elFinder', 'GlobGC'), $this->tmbPath . DIRECTORY_SEPARATOR . '*.png', $this->options['tmbGcMaxlifeHour'] * 60);
+                    register_shutdown_function(array('elFinder', 'GlobGC'), $this->tmbPath . DIRECTORY_SEPARATOR . '*.png', $this->options['tmbGcMaxlifeHour'] * 3600);
                 }
             }
             return $res;
@@ -5435,7 +5434,11 @@ abstract class elFinderVolumeDriver
             }
 
             $name = $this->tmbname($stat);
-            if (file_exists($this->tmbPath . DIRECTORY_SEPARATOR . $name)) {
+            $tmb = $this->tmbPath . DIRECTORY_SEPARATOR . $name;
+            if (file_exists($tmb)) {
+                if ($this->options['tmbGcMaxlifeHour'] && $this->options['tmbGcPercentage'] > 0) {
+                    touch($tmb);
+                }
                 return $name;
             }
         }
