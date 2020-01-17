@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: 080973b) (2020-01-17)
+ * Version 2.1.51 (2.1-src Nightly: 670e6bb) (2020-01-17)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -6986,7 +6986,7 @@ elFinder.prototype = {
 				});
 				
 				$.each(files, function(i, file) {
-					var name;
+					var name, relpath;
 					if (file._chunkmerged) {
 						formData.append('chunk', file._chunkmerged);
 						formData.append('upload[]', file._name);
@@ -7014,6 +7014,8 @@ elFinder.prototype = {
 											name = fm.date(fm.nonameDateFormat) + '.mov';
 										}
 									}
+									relpath = (file.webkitRelativePath || file.relativePath || file._relativePath || '').replace(/[^\/]+$/, '');
+									name = relpath + name;
 								}
 							}
 							name? formData.append('upload[]', file, name) : formData.append('upload[]', file);
@@ -7260,6 +7262,7 @@ elFinder.prototype = {
 										data.hashes = {};
 									}
 									result[1] = $.map(result[1], function(p, i) {
+										result[0][i]._relativePath = p.replace(/^\//, '');
 										p = p.replace(/\/[^\/]*$/, '');
 										if (p === '') {
 											return target;
@@ -10260,7 +10263,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 080973b)';
+elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 670e6bb)';
 
 
 
@@ -11039,9 +11042,9 @@ elFinder.prototype._options = {
 			// Show toolbar of PDF preview (with <embed> tag)
 			pdfToolbar : true,
 			// Maximum lines to preview at initial
-			textInitialLines : 150,
+			textInitialLines : 100,
 			// Maximum lines to preview by prettify
-			prettifyMaxLines : 500,
+			prettifyMaxLines : 300,
 			// quicklook window must be contained in elFinder node on window open (true|false)
 			contain : false,
 			// preview window into NavDock (0 : undocked | 1 : docked(show) | 2 : docked(hide))
@@ -11076,9 +11079,9 @@ elFinder.prototype._options = {
 			// Example ['application/msword', 'application/vnd.ms-word', 'application/vnd.ms-excel', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.oasis.opendocument.text', 'application/vnd.oasis.opendocument.spreadsheet', 'application/vnd.oasis.opendocument.presentation']
 			// These MIME types override "googleDocsMimes"
 			officeOnlineMimes : [],
-			// File size (byte) threshold when using the dim command for obtain the image size necessary to image preview
-			getDimThreshold : 200000,
-
+			// File size threshold when using the dim command for obtain the image size necessary to image preview
+			getDimThreshold : '200K',
+			// Max filesize to show filenames of the zip/tar/gzip/bzip file 
 			unzipMaxSize : '50M',
 			// MIME-Type regular expression that does not check empty files
 			mimeRegexNotEmptyCheck : /^application\/vnd\.google-apps\./
@@ -28962,6 +28965,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 	 **/
 	function(ql) {
 				var mimes   = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp'],
+			getDimSize = ql.fm.returnBytes((ql.options.getDimThreshold || 0)),
 			preview = ql.preview,
 			WebP, flipMime;
 		
@@ -29068,7 +29072,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				
 				if (file.width && file.height) {
 					show();
-				} else if (file.size > (ql.options.getDimThreshold || 0)) {
+				} else if (file.size > getDimSize) {
 					dimreq = fm.request({
 						data : {cmd : 'dim', target : file.hash},
 						preventDefault : true
