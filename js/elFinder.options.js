@@ -355,9 +355,9 @@ elFinder.prototype._options = {
 			// Show toolbar of PDF preview (with <embed> tag)
 			pdfToolbar : true,
 			// Maximum lines to preview at initial
-			textInitialLines : 150,
+			textInitialLines : 100,
 			// Maximum lines to preview by prettify
-			prettifyMaxLines : 500,
+			prettifyMaxLines : 300,
 			// quicklook window must be contained in elFinder node on window open (true|false)
 			contain : false,
 			// preview window into NavDock (0 : undocked | 1 : docked(show) | 2 : docked(hide))
@@ -394,7 +394,7 @@ elFinder.prototype._options = {
 			officeOnlineMimes : [],
 			// File size (byte) threshold when using the dim command for obtain the image size necessary to image preview
 			getDimThreshold : 200000,
-
+			// Max filesize to show filenames of the zip/tar/gzip/bzip file 
 			unzipMaxSize : '50M',
 			// MIME-Type regular expression that does not check empty files
 			mimeRegexNotEmptyCheck : /^application\/vnd\.google-apps\./
