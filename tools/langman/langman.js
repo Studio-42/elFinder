@@ -15,13 +15,62 @@ elFinder.prototype.i18 = {};
 			'fancyDateFormat' : '"$1" is replaced "Today" or "Yesterday"',
 			'nonameDateFormat': 'to apply if upload file is noname'
 		};
+		var newLang = 'Please set ISO-639 language code as "xx" or adding ISO-3166 country code as "xx_YY".';
+		var langs = {
+			xx: 'New language',
+			ar: 'العربية',
+			bg: 'Български',
+			ca: 'Català',
+			cs: 'Čeština',
+			da: 'Dansk',
+			de: 'Deutsch',
+			el: 'Ελληνικά',
+			en: 'English',
+			es: 'Español',
+			fa: 'فارسی',
+			fo: 'Føroyskt',
+			fr: 'Français',
+			fr_CA: 'Français (Canada)',
+			he: 'עברית',
+			hr: 'Hrvatski',
+			hu: 'Magyar',
+			id: 'Bahasa Indonesia',
+			it: 'Italiano',
+			ja: '日本語',
+			ko: '한국어',
+			nl: 'Nederlands',
+			no: 'Norsk',
+			pl: 'Polski',
+			pt_BR: 'Português',
+			ro: 'Română',
+			ru: 'Pусский',
+			si: 'සිංහල',
+			sk: 'Slovenčina',
+			sl: 'Slovenščina',
+			sr: 'Srpski',
+			sv: 'Svenska',
+			tr: 'Türkçe',
+			ug_CN: 'ئۇيغۇرچە',
+			uk: 'Український',
+			vi: 'Tiếng Việt',
+			zh_CN: '简体中文',
+			zh_TW: '正體中文'
+		};
 		var setTitle = function(){
 			$('title').text($('title').text().replace(/(elFinder)( [0-9.]+)?/, '$1 '+branch));
 			$('#title').html($('#title').html().replace(/(elFinder)( [0-9.]+)?/, '$1 '+branch));
 		};
 		var init = function(){
+			var optTags = [];
 			setTitle();
 			$("#selbr").val(branch);
+			$.each(langs, function(lang, name) {
+				optTags.push('<option value="'+lang+'">'+name+'</option>');
+			});
+			$("#lngsel").append(optTags.join('')).on('change', function() {
+				$('#lng').val($(this).val());
+				$('#lngbtn').trigger('click');
+			});
 			$('#glbs').empty();
 			$('#content').empty();
 			$('#step').hide();
@@ -54,6 +103,14 @@ elFinder.prototype.i18 = {};
 				$('#lngbtn').on('click focus', function(){
 					lang = $('#lng').val();
 					
+					if (lang === 'xx' || lang === '') {
+						alert(newLang);
+						$('#lng').val('xx').focus().select();
+						return;
+					}
+
+					$('#lngsel').val(lang);
+
 					var slng = elf.i18.REPLACE_WITH_xx_OR_xx_YY_LANG_CODE;
 					var make;
 					var filename = './'+branch+'/i18n/elfinder.'+lang+'.js';
@@ -69,6 +126,7 @@ elFinder.prototype.i18 = {};
 						$('a.editgh').attr('href', 'https://github.com/Studio-42/elFinder/edit/'+tgt+'/js/i18n/elfinder.'+lang+'.js');
 					})
 					.fail(function(){
+						$('#lngsel').val('xx');
 						isNew = true;
 						make = $.extend(true, {}, slng);
 						$('a.editgh').attr('href', 'https://github.com/Studio-42/elFinder/new/'+tgt+'/js/i18n');
@@ -179,6 +237,7 @@ elFinder.prototype.i18 = {};
 				$('span.branch').text(branch);
 				
 				if (lang) {
+					$("#lngsel").val(lang);
 					$('#lng').val(lang);
 					$('#lngbtn').trigger('click');
 				}
