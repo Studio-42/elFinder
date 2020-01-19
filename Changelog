@@ -1,3 +1,37 @@
+2019-xx-xx  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.52):
+		- [js:core] Fixed #3052 a bug where duplicate CSS was loaded by `loadCss()`
+		- [debugger] Fixed #3057 add a client option `toastBackendWarn`
+		- [php:core] Fixed #3062 bugfix of `elFinder::getConnectorUrl()`
+		- [VD:abstract] Fixed #3071 folders in archive may not be extracted
+		- Use square brackets instead of curly braces, because this syntax is deprecated with PHP 7.4 (#3070)
+		- [cmd:quicklook] support the elFinder client option `dialogContained`
+		- [ui:dialog] Fixed wrong dialog sizing with the option `dialogContained`
+		- [VD:abstract] Fixed #3042 stricter processing verification on `getItemsInHand()`
+		- [VD] Fixed #3074 authentification (return) URL not useable if the connctor url has "?"
+		- [VD:abstract] Fixed #3077 support rapid root stat
+		- [VD:Box,OneDrive] Fixed #3082 support permanent mount with connector roots configure
+		- [js] Fixed #3081 handle when browser cookies are disabled
+		- [js:core] Fixed an issue where opened tabs could't be closed, such as when approving netmount
+		- [js:extras:editors.default] Fixed problem that can't save as JPEG with TUI image edtor
+		- [editors:online-convert] online-convert.com can no longer be displayed in iFrames on external sites
+		- [VD:abstract] Fixed #3084 add thumbnail garbage collection function
+		- [VD:FTP] change default option, 'checkSubfolders' to -1
+		- [core] Fixed #3085 malfunction of volume root option "disabled"
+		- [doc,example] Fixed #3079 add connector.maximal.php-dist
+		- [VD] save alias of options to session data of netmount volume
+		- [ui:cwd] Fixed #3087 wrong behavior when dragging with old jQuery UI
+		- [VD:Box] Fixed problem that `isNameExists()` return value is wrong
+		- [js] add worker/worker.js to support the Window.Worker
+		- [cmd:quicklook] add bzip2 preview and use Worker to calc
+		- [js:core] create new method `fm.getWorker(options)`
+		- [i18n:LANG] add new word 'linesLeft' : '... $1 lines left.'
+		- [js:core] Fixed #3069 send relative path on folder uploading
+		- [ui:cwd] Fixed lazy display of oldschool parent directory icon
+		- And some minor bug fixes
+
+
 2019-12-08  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.51):
