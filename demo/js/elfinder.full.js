@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.51 (2.1-src Nightly: 670e6bb) (2020-01-17)
+ * Version 2.1.51 (2.1-src Nightly: 6d4d90b) (2020-01-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -5051,7 +5051,6 @@ var elFinder = function(elm, opts, bootCallback) {
 				});
 			} else {
 				self.options.getFileCallback = null;
-				delete self.commands.getfile;
 			}
 		}
 
@@ -10263,7 +10262,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 670e6bb)';
+elFinder.prototype.version = '2.1.51 (2.1-src Nightly: 6d4d90b)';
 
 
 
@@ -10699,20 +10698,20 @@ elFinder.prototype._options = {
 	 */
 	cdns : {
 		// for editor etc.
-		ace        : 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.6',
+		ace        : 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.7',
 		codemirror : 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.48.4',
 		ckeditor   : 'https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.12.1',
 		ckeditor5  : 'https://cdn.ckeditor.com/ckeditor5/16.0.0',
-		tinymce    : 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.0.16',
+		tinymce    : 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.1.2',
 		simplemde  : 'https://cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
-		fabric     : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.4.0',
+		fabric     : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.6.1',
 		fabric16   : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.6.7',
 		tui        : 'https://uicdn.toast.com',
 		// for quicklook etc.
 		hls        : 'https://cdnjs.cloudflare.com/ajax/libs/hls.js/0.12.4/hls.min.js',
 		dash       : 'https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.0.0/dash.all.min.js',
 		flv        : 'https://cdnjs.cloudflare.com/ajax/libs/flv.js/1.5.0/flv.min.js',
-		videojs    : 'https://cdnjs.cloudflare.com/ajax/libs/video.js/7.6.5',
+		videojs    : 'https://cdnjs.cloudflare.com/ajax/libs/video.js/7.7.1',
 		prettify   : 'https://cdn.jsdelivr.net/gh/google/code-prettify@453bd5f51e61245339b738b1bbdd42d7848722ba/loader/run_prettify.js',
 		psd        : 'https://cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js',
 		rar        : 'https://cdn.jsdelivr.net/gh/nao-pon/rar.js@6cef13ec66dd67992fc7f3ea22f132d770ebaf8b/rar.min.js',
@@ -15387,17 +15386,21 @@ $.fn.elfindercwd = function(fm, options) {
 							oldSchoolItem = $(itemhtml($.extend(true, {}, pdir, {name : '..', i18 : '..', mime : 'directory'})))
 								.addClass('elfinder-cwd-parent')
 								.on('dblclick', function() {
-									var hash = fm.cwdId2Hash(this.id);
-									fm.trigger('select', {selected : [hash]}).exec('open', hash);
+									fm.trigger('select', {selected : [phash]}).exec('open', phash);
 								});
 							(list ? oldSchoolItem.children('td:first') : oldSchoolItem).children('.elfinder-cwd-select').remove();
-							(list ? cwd.find('tbody') : cwd).prepend(oldSchoolItem);
+							if (fm.cwdHash2Elm(phash).length) {
+								fm.cwdHash2Elm(phash).replaceWith(oldSchoolItem);
+							} else {
+								(list ? cwd.find('tbody') : cwd).prepend(oldSchoolItem);
+							}
 							fm.draggingUiHelper && fm.draggingUiHelper.data('refreshPositions', 1);
 						}
 					};
 				if (pdir) {
 					set(pdir);
 				} else {
+					set({hash: phash, read: true, write: true});
 					if (fm.getUI('tree').length) {
 						fm.one('parents', function() {
 							set(fm.file(phash) || null);
