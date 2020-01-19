@@ -5020,7 +5020,6 @@ var elFinder = function(elm, opts, bootCallback) {
 				});
 			} else {
 				self.options.getFileCallback = null;
-				delete self.commands.getfile;
 			}
 		}
 
