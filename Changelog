@@ -1,4 +1,4 @@
-2019-xx-xx  Naoki Sawada  <hypweb+elfinder@gmail.com>
+2020-01-20  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.52):
 		- [js:core] Fixed #3052 a bug where duplicate CSS was loaded by `loadCss()`
@@ -29,6 +29,7 @@
 		- [i18n:LANG] add new word 'linesLeft' : '... $1 lines left.'
 		- [js:core] Fixed #3069 send relative path on folder uploading
 		- [ui:cwd] Fixed lazy display of oldschool parent directory icon
+		- [php:core] Fixed #3093 add a delegate point `get.detectencoding` for the `bind` option
 		- And some minor bug fixes
 
 
