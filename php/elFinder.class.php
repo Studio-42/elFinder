@@ -3508,6 +3508,12 @@ class elFinder
                             $enc = 'unknown';
                         }
                     }
+                    // call callbacks 'get.detectencoding'
+                    if (!empty($this->listeners['get.detectencoding'])) {
+                        foreach ($this->listeners['get.detectencoding'] as $handler) {
+                            call_user_func_array($handler, array('get', &$enc, array_merge($args, array('content' => $content)), $this, $volume));
+                        }
+                    }
                     if ($enc && $enc !== 'unknown') {
                         $utf8 = iconv($enc, 'UTF-8', $content);
                         if ($utf8 === false && function_exists('mb_convert_encoding')) {
