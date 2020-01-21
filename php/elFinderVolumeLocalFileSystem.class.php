@@ -216,7 +216,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver
         // check quarantine dir
         $this->quarantine = '';
         if (!empty($this->options['quarantine'])) {
-            if ((is_dir($this->options['quarantine']) || mkdir($this->quarantine, $this->options['dirMode'], true)) && is_writable($this->options['quarantine'])) {
+            if ((is_dir($this->options['quarantine']) || mkdir($this->options['quarantine'], $this->options['dirMode'], true)) && is_writable($this->options['quarantine'])) {
                 $this->quarantine = $this->options['quarantine'];
             } else {
                 if (isset($hiddens['quarantine'])) {
