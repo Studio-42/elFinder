@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.52 (2.1-src Nightly: 93c2045) (2020-01-21)
+ * Version 2.1.52 (2.1-src Nightly: d38e0b6) (2020-01-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10262,7 +10262,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.52 (2.1-src Nightly: 93c2045)';
+elFinder.prototype.version = '2.1.52 (2.1-src Nightly: d38e0b6)';
 
 
 
@@ -21268,7 +21268,7 @@ $.fn.elfindertree = function(fm, opts) {
 						render();
 					},
 					dir, html, parent, sibling, init, atonce = {}, updates = [], base, node,
-					firstVol = true; // check for netmount volume
+					lastKey, lastNodes = {};
 				
 				while (i--) {
 					dir = dirs[i];
@@ -21279,7 +21279,12 @@ $.fn.elfindertree = function(fm, opts) {
 					done[dir.hash] = true;
 					
 					if ((parent = findSubtree(dir.phash)).length) {
-						if (dir.phash && ((init = !parent.children().length) || parent.hasClass('elfinder-navbar-hasmore') || (sibling = findSibling(parent, dir)).length)) {
+						lastKey = dir.phash || 'treeroot';
+						if (typeof lastNodes[lastKey] === 'undefined') {
+							lastNodes[lastKey] = parent.children(':last');
+						}
+						init = !lastNodes[lastKey].length;
+						if (dir.phash && (init || parent.hasClass('elfinder-navbar-hasmore') || (sibling = findSibling(parent, dir)).length)) {
 							if (init) {
 								if (!atonce[dir.phash]) {
 									atonce[dir.phash] = [];
@@ -21296,8 +21301,11 @@ $.fn.elfindertree = function(fm, opts) {
 							}
 						} else {
 							node = itemhtml(dir);
-							parent[firstVol || dir.phash ? 'append' : 'prepend'](node);
-							firstVol = false;
+							if (init) {
+								parent.prepend(node);
+							} else {
+								lastNodes[lastKey].after(node);
+							}
 							if (!dir.phash || dir.isroot) {
 								base = fm.navHash2Elm(dir.hash).parent();
 							}

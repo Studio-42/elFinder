@@ -4083,9 +4083,12 @@ abstract class elFinderVolumeDriver
                 $_var = false;
                 if (is_string($var)) {
                     $_var = $var;
+                    $errlev = error_reporting();
+                    error_reporting($errlev ^ E_NOTICE);
                     if (false !== ($_var = iconv($from, $to . '//TRANSLIT', $_var))) {
                         $_var = str_replace('?', $unknown, $_var);
                     }
+                    error_reporting($errlev);
                 }
                 if ($_var !== false) {
                     $var = $_var;
