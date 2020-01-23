@@ -318,6 +318,7 @@ abstract class elFinderVolumeDriver
             'ai:application/pdf' => 'application/postscript',
             'cgm:text/plain' => 'image/cgm',
             'dxf:text/plain' => 'image/vnd.dxf',
+            'dds:application/octet-stream' => 'image/vnd-ms.dds',
             'hpgl:text/plain' => 'application/vnd.hp-hpgl',
             'igs:text/plain' => 'model/iges',
             'iges:text/plain' => 'model/iges',
