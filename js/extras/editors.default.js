@@ -690,9 +690,8 @@
 				noContent: true,
 				arrayBufferContent: true,
 				openMaximized: true,
-				// disabled types are not able to save by Photopea's bug.
-				// see https://github.com/photopea/photopea/issues/1905
-				canMakeEmpty: ['image/jpeg', 'image/png', 'image/gif', /*'image/svg+xml',*/ 'image/x-ms-bmp', /*'image/tiff', 'image/x-adobe-dng',*/ 'image/webp', /*'image/x-xcf',*/ 'image/vnd.adobe.photoshop', /*'application/pdf',*/ 'image/x-portable-pixmap', 'image/x-sketch', 'image/x-icon', 'image/vnd-ms.dds', /*'application/x-msmetafile'*/],
+				// Disable file types that cannot be saved on Photopea.
+				canMakeEmpty: ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp', 'image/tiff', /*'image/x-adobe-dng',*/ 'image/webp', /*'image/x-xcf',*/ 'image/vnd.adobe.photoshop', 'application/pdf', 'image/x-portable-pixmap', 'image/x-sketch', 'image/x-icon', 'image/vnd-ms.dds', /*'application/x-msmetafile'*/],
 				integrate: {
 					title: 'Photopea',
 					link: 'https://www.photopea.com/learn/'
