@@ -136,6 +136,70 @@ elFinder.prototype.commands.quicklook.plugins = [
 	},
 	
 	/**
+	 * TIFF image preview
+	 *
+	 * @param  object  ql  elFinder.commands.quicklook
+	 */
+	function(ql) {
+		"use strict";
+		var fm   = ql.fm,
+			mime = 'image/tiff',
+			preview = ql.preview;
+		if (window.Worker && window.Uint8Array) {
+			preview.on(ql.evUpdate, function(e) {
+				var file = e.file,
+					err = function(e) {
+						wk && wk.terminate();
+						loading.remove();
+						fm.debug('error', e);
+					},
+					loading, url, base, wk;
+				if (file.mime === mime) {
+					e.stopImmediatePropagation();
+
+					loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					// stop loading on change file if not loaded yet
+					preview.one('change', function() {
+						wk && wk.terminate();
+						loading.remove();
+					});
+
+					url = fm.openUrl(file.hash);
+					if (!fm.isSameOrigin(url)) {
+						url = fm.openUrl(file.hash, true);
+					}
+					base = $('<div/>').css({width:'100%',height:'100%'}).hide().appendTo(preview);
+					try {
+						wk = fm.getWorker();
+						wk.onmessage = function(res) {
+							var data = res.data,
+								cv, co, id;
+							wk && wk.terminate();
+							cv = document.createElement('canvas');
+							co = cv.getContext('2d');
+							cv.width = data.width;
+							cv.height = data.height;
+							id = co.createImageData(data.width, data.height);
+							(id).data.set(new Uint8Array(data.image));
+							co.putImageData(id, 0, 0);
+							base.append($(cv).css({maxWidth:'100%',maxHeight:'100%'})).show();
+							loading.remove();
+							ql.hideinfo();
+						};
+						wk.onerror = err;
+						wk.postMessage({
+							scripts: [fm.options.cdns.tiff, 'quicklook.tiff.js'],
+							data: { url: url }
+						});
+					} catch(e) {
+						err(e);
+					}
+				}
+			});
+		}
+	},
+
+	/**
 	 * PSD(Adobe Photoshop data) preview plugin
 	 *
 	 * @param elFinder.commands.quicklook
@@ -1007,7 +1071,17 @@ elFinder.prototype.commands.quicklook.plugins = [
 								loading.remove();
 							})
 							.done(function(data) {
-								var unzip, filenames;
+								var unzip, filenames,
+									err = function(e) {
+										wk && wk.terminate();
+										loading.remove();
+										if (isZlib) {
+											Zlib = false;
+										} else if (isBzip2) {
+											bzip2 = false;
+										}
+										fm.debug('error', e);
+									};
 								try {
 									wk = fm.getWorker();
 									wk.onmessage = function(res) {
@@ -1019,9 +1093,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 											makeList(res.data.files);
 										}
 									};
-									wk.onerror = function(e) {
-										throw e;
-									};
+									wk.onerror = err;
 									if (file.mime === 'application/x-tar') {
 										wk.postMessage({
 											scripts: ['quicklook.unzip.js'],
@@ -1045,14 +1117,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 										});
 									}
 								} catch (e) {
-									wk && wk.terminate();
-									loading.remove();
-									if (isZlib) {
-										Zlib = false;
-									} else if (isBzip2) {
-										bzip2 = false;
-									}
-									fm.debug('error', e);
+									err(e);
 								}
 							});
 						},
