@@ -35,7 +35,10 @@
 			tiff: 'image/tiff',
 			webp: 'image/webp',
 			xcf: 'image/x-xcf',
-			sketch: 'application/x-sketch'
+			sketch: 'application/x-sketch',
+			ico: 'image/x-icon',
+			dds: 'image/vnd-ms.dds',
+			emf: 'application/x-msmetafile'
 		},
 		mime2ext,
 		getExtention = function(mime, fm, jpeg) {
@@ -362,7 +365,7 @@
 					this.disabled = true;
 				} else {
 					this.opts = Object.assign({
-						version: 'v3.7.2'
+						version: 'v3.7.3'
 					}, opts.extraOptions.tuiImgEditOpts || {}, {
 						iconsPath : fm.baseUrl + 'img/tui-',
 						theme : {}
@@ -687,13 +690,14 @@
 				noContent: true,
 				arrayBufferContent: true,
 				openMaximized: true,
-				canMakeEmpty: ['image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp', 'image/tiff', 'image/webp', 'image/vnd.adobe.photoshop', 'image/x-portable-pixmap', 'image/x-sketch'],
+				// Disable file types that cannot be saved on Photopea.
+				canMakeEmpty: ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp', 'image/tiff', /*'image/x-adobe-dng',*/ 'image/webp', /*'image/x-xcf',*/ 'image/vnd.adobe.photoshop', 'application/pdf', 'image/x-portable-pixmap', 'image/x-sketch', 'image/x-icon', 'image/vnd-ms.dds', /*'application/x-msmetafile'*/],
 				integrate: {
 					title: 'Photopea',
 					link: 'https://www.photopea.com/learn/'
 				}
 			},
-			mimes : ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp', 'image/tiff', 'image/x-adobe-dng', 'image/webp', 'image/x-xcf', 'image/vnd.adobe.photoshop', 'application/pdf', 'image/x-portable-pixmap', 'image/x-sketch'],
+			mimes : ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/x-ms-bmp', 'image/tiff', 'image/x-adobe-dng', 'image/webp', 'image/x-xcf', 'image/vnd.adobe.photoshop', 'application/pdf', 'image/x-portable-pixmap', 'image/x-sketch', 'image/x-icon', 'image/vnd-ms.dds', 'application/x-msmetafile'],
 			html : '<iframe style="width:100%;height:100%;border:none;"></iframe>',
 			// setup on elFinder bootup
 			setup : function(opts, fm) {
@@ -729,7 +733,7 @@
 						} else if (ext === 'jpeg') {
 							ext = 'jpg';
 						}
-						if (!ext || !!saveMimes[ext]) {
+						if (!ext || !saveMimes[extmime]) {
 							ext = 'psd';
 							extmime = ext2mime[ext];
 							ifm.closest('.ui-dialog').trigger('changeType', {
@@ -758,7 +762,7 @@
 							dfdIni = $.Deferred().done(function() {
 								spnr.remove();
 								phase = 1;
-								wnd.postMessage(data, '*');
+								wnd.postMessage(data, orig);
 							}),
 							dfdGet;
 
@@ -794,6 +798,8 @@
 											dfdGet.reject('errDataEmpty');
 										}
 									}
+								} else if (ev.data === 'Save') {
+									editor.doSave();
 								} else {
 									if (dfdGet && dfdGet.state() === 'pending') {
 										if (typeof ev.data === 'object') {
@@ -840,7 +846,8 @@
 					var d = JSON.stringify({
 						files : [],
 						environment : {
-							lang: fm.lang.replace(/_/g, '-')
+							lang: fm.lang.replace(/_/g, '-'),
+							customIO: {"save": "app.echoToOE(\"Save\");"}
 						}
 					});
 					ifm.attr('src', orig + '/#' + encodeURI(d));
