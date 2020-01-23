@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.52 (2.1-src Nightly: aa2a546) (2020-01-23)
+ * Version 2.1.52 (2.1-src Nightly: a690598) (2020-01-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -4192,7 +4192,8 @@ button.elfinder-info-button {
 }
 
 /* image in preview */
-.elfinder-quicklook-preview img {
+.elfinder-quicklook-preview > img,
+.elfinder-quicklook-preview > div > canvas {
     display: block;
     margin: 0 auto;
 }
