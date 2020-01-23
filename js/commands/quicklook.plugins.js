@@ -359,7 +359,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					var win  = ql.window,
 						file = e.file, node, loading;
 
-					if (mimes[file.mime]) {
+					if (mimes[file.mime] && (!opts.pdfNative || !ql.flags.pdfNative)) {
 						var url = fm.openUrl(file.hash);
 						if (url && fm.isSameOrigin(url)) {
 							e.stopImmediatePropagation();
@@ -417,6 +417,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			});
 		}
 
+		ql.flags.pdfNative = active;
 		if (active) {
 			if (typeof ql.options.pdfToolbar !== 'undefined' && !ql.options.pdfToolbar) {
 				urlhash = '#toolbar=0';
