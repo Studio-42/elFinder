@@ -133,7 +133,7 @@ elFinder.prototype.commands.edit = function() {
 						saveDfd = $.Deferred().fail(function(err) {
 							dialogNode.show().find('button.elfinder-btncnt-0,button.elfinder-btncnt-1').hide();
 						}),
-						conf, res;
+						conf, res, tm;
 					if (!loaded()) {
 						return saveDfd.resolve();
 					}
@@ -147,7 +147,20 @@ elFinder.prototype.commands.edit = function() {
 					res = getContent();
 					setOld(res);
 					if (res.promise) {
-						res.done(function(data) {
+						tm = setTimeout(function() {
+							fm.notify({
+								type : 'chkcontent',
+								cnt : 1,
+								hideCnt: true,
+								cancel : function() {
+									res.reject();
+								}
+							});
+						}, 100);
+						res.always(function() {
+							tm && clearTimeout(tm);
+							fm.notify({ type : 'chkcontent', cnt: -1 });
+						}).done(function(data) {
 							dfrd.notifyWith(ta, [encord, ta.data('hash'), old, saveDfd]);
 						}).fail(function(err) {
 							saveDfd.reject(err);
@@ -253,7 +266,10 @@ elFinder.prototype.commands.edit = function() {
 							fm.notify({
 								type : 'chkcontent',
 								cnt : 1,
-								hideCnt: true
+								hideCnt: true,
+								cancel : function() {
+									res.reject();
+								}
 							});
 						}, 100);
 						res.always(function() {
