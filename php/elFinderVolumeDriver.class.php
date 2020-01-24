@@ -4319,8 +4319,8 @@ abstract class elFinderVolumeDriver
             } else {
                 $path = $this->decode($hash);
                 if (!$canLink || !($canLink = link($path, $target)) || !($canLink = is_readable($path))) {
-                    if (file_exists($path)) {
-                        unlink($path);
+                    if (file_exists($target)) {
+                        unlink($target);
                     }
                     if ($fp = $this->fopenCE($path)) {
                         if ($tfp = fopen($target, 'wb')) {
