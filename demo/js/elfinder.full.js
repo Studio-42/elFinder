@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.52 (2.1-src Nightly: 630a6c3) (2020-01-24)
+ * Version 2.1.52 (2.1-src Nightly: df28195) (2020-01-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10262,7 +10262,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.52 (2.1-src Nightly: 630a6c3)';
+elFinder.prototype.version = '2.1.52 (2.1-src Nightly: df28195)';
 
 
 
@@ -11087,7 +11087,7 @@ elFinder.prototype._options = {
 			// MIME-Type regular expression that does not check empty files
 			mimeRegexNotEmptyCheck : /^application\/vnd\.google-apps\./
 		},
-		// "quicklook" command options.
+		// "edit" command options.
 		edit : {
 			// dialog width, integer(px) or integer+'%' (example: 650, '80%' ...)
 			dialogWidth : void(0),
