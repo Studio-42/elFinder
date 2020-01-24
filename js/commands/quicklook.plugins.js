@@ -423,7 +423,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					var win  = ql.window,
 						file = e.file, node, loading;
 
-					if (mimes[file.mime] && (!opts.pdfNative || !ql.flags.pdfNative)) {
+					if (mimes[file.mime] && (file.mime !== 'application/pdf' || !opts.pdfNative || !ql.flags.pdfNative)) {
 						var url = fm.openUrl(file.hash);
 						if (url && fm.isSameOrigin(url)) {
 							e.stopImmediatePropagation();
