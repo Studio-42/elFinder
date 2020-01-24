@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.52 (2.1-src Nightly: 3513875) (2020-01-24)
+ * Version 2.1.52 (2.1-src Nightly: 630a6c3) (2020-01-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10262,7 +10262,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.52 (2.1-src Nightly: 3513875)';
+elFinder.prototype.version = '2.1.52 (2.1-src Nightly: 630a6c3)';
 
 
 
@@ -25228,7 +25228,7 @@ elFinder.prototype.commands.fullscreen = function() {
 			
 			html.push(sep);
 			html.push('<div class="'+lic+'">Licence: 3-clauses BSD Licence</div>');
-			html.push('<div class="'+lic+'">Copyright © 2009-2019, Studio 42</div>');
+			html.push('<div class="'+lic+'">Copyright © 2009-2020, Studio 42</div>');
 			html.push('<div class="'+lic+'">„ …'+fm.i18n('dontforget')+' ”</div>');
 			html.push('</div>');
 		},
@@ -28667,7 +28667,10 @@ elFinder.prototype.commands.preference = function() {
 					state = animated;
 					win.hasClass(fullscreen) && fsicon.click();
 					(hash && (node = cwd.find('#'+hash)).length)
-						? win.animate(closedCss(node), 500, function() { close(closed, true); })
+						? win.animate(closedCss(node), 500, function() {
+							preview.off('changesize');
+							close(closed, true);
+						})
 						: close(closed, true);
 				} else {
 					dockedNode = fm.getUI('navdock').data('removeNode')(self.window.attr('id'), 'detach');
@@ -29143,6 +29146,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 						loading.remove();
 						fm.debug('error', e);
 					},
+					setdim = function(dim) {
+						var rfile = fm.file(file.hash);
+						rfile.width = dim[0];
+						rfile.height = dim[1];
+					},
 					loading, url, base, wk;
 				if (file.mime === mime) {
 					e.stopImmediatePropagation();
@@ -29163,7 +29171,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						wk = fm.getWorker();
 						wk.onmessage = function(res) {
 							var data = res.data,
-								cv, co, id;
+								cv, co, id, prop;
 							wk && wk.terminate();
 							cv = document.createElement('canvas');
 							co = cv.getContext('2d');
@@ -29172,8 +29180,25 @@ elFinder.prototype.commands.quicklook.plugins = [
 							id = co.createImageData(data.width, data.height);
 							(id).data.set(new Uint8Array(data.image));
 							co.putImageData(id, 0, 0);
-							base.append($(cv).css({maxWidth:'100%',maxHeight:'100%'})).show();
+							base.append(cv).show();
 							loading.remove();
+							prop = (data.width/data.height).toFixed(2);
+							preview.on('changesize', function() {
+								var pw = parseInt(preview.width()),
+									ph = parseInt(preview.height()),
+									w, h;
+								if (prop < (pw/ph).toFixed(2)) {
+									h = ph;
+									w = Math.floor(h * prop);
+								} else {
+									w = pw;
+									h = Math.floor(w/prop);
+								}
+								$(cv).width(w).height(h).css('margin-top', h < ph ? Math.floor((ph - h)/2) : 0);
+							}).trigger('changesize');
+							if (!file.width || !file.height) {
+								setdim([data.width, data.height]);
+							}
 							ql.hideinfo();
 						};
 						wk.onerror = err;
@@ -29403,14 +29428,18 @@ elFinder.prototype.commands.quicklook.plugins = [
 			var fm      = ql.fm,
 				preview = ql.preview,
 				opts    = ql.options.viewerjs,
-				mimes   = opts.url? fm.arrayFlip(opts.mimes || []) : [];
+				mimes   = opts.url? fm.arrayFlip(opts.mimes || []) : [],
+				win     = ql.window,
+				navi    = ql.navbar,
+				setNavi = function() {
+					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '30px' : '');
+				};
 
 			if (opts.url) {
 				preview.on('update', function(e) {
-					var win  = ql.window,
-						file = e.file, node, loading;
+					var file = e.file, node, loading;
 
-					if (mimes[file.mime] && (!opts.pdfNative || !ql.flags.pdfNative)) {
+					if (mimes[file.mime] && (file.mime !== 'application/pdf' || !opts.pdfNative || !ql.flags.pdfNative)) {
 						var url = fm.openUrl(file.hash);
 						if (url && fm.isSameOrigin(url)) {
 							e.stopImmediatePropagation();
@@ -29431,7 +29460,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 								.appendTo(preview)
 								.attr('src', opts.url + '#' + url);
 
+							win.on('viewchange.viewerjs', setNavi);
+							setNavi();
+
 							preview.one('change', function() {
+								win.off('viewchange.viewerjs');
 								loading.remove();
 								node.off('load').remove();
 							});
@@ -29689,7 +29722,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					setNavi();
 				}
 			}
-		}).on('change', reset);
+		}).one('change', reset);
 	},
 	
 	/**
@@ -29958,7 +29991,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					}
 				}
 			}
-		}).on('change', reset);
+		}).one('change', reset);
 	},
 	
 	/**
@@ -29997,7 +30030,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				win.on('viewchange.embed', setNavi);
 				setNavi();
 			}
-		}).on('change', function() {
+		}).one('change', function() {
 			if (node && node.parent().length) {
 				win.off('viewchange.embed');
 				node.remove();
