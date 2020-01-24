@@ -316,7 +316,7 @@
 .elfinder-quicklook-preview > img,
 .elfinder-quicklook-preview > div > canvas {
     display: block;
-    margin: 0 auto;
+    margin: auto;
 }
 
 /* navigation bar on quicklook window bottom */
