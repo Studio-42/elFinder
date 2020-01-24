@@ -1,3 +1,12 @@
+2020-01-24  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.53):
+		- [VD:LocalFileSystem] fix #3095 not able to make `quarantine` directory
+		- [cmd:quicklook] add TIFF image viewer
+		- [VD:abstract] fix #3097 "Unable to create archive" error deletes target files
+		- And some minor bug fixes
+
+
 2020-01-20  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.52):
