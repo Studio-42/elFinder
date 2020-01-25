@@ -400,6 +400,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					self.change({changed: diff.changed});
 				}
 			}
+			data.changed && data.changed.length && cache(data.changed, 'change');
 
 			// trigger event 'sorterupdate'
 			sorterStr = JSON.stringify(self.sorters);
@@ -421,8 +422,10 @@ var elFinder = function(elm, opts, bootCallback) {
 		 * @return void
 		 **/
 		cache = function(data, type) {
-			var defsorter = { name: true, perm: true, date: true,  size: true, kind: true },
-				sorterChk = !self.sorters._checked,
+			var type      = type || 'files',
+				keeps = ['sizeInfo', 'encoding'],
+				defsorter = { name: true, perm: true, date: true,  size: true, kind: true },
+				sorterChk = !self.sorters._checked && (type === 'files'),
 				l         = data.length,
 				setSorter = function(file) {
 					var f = file || {},
@@ -435,11 +438,10 @@ var elFinder = function(elm, opts, bootCallback) {
 					self.sorters = self.arrayFlip(sorters, true);
 					self.sorters._checked = true;
 				},
-				keeps = ['sizeInfo'],
 				changedParents = {},
 				hideData = self.storage('hide') || {},
 				hides = hideData.items || {},
-				f, i, keepProp, parents, hidden;
+				f, i, i1, keepProp, parents, hidden;
 
 			for (i = 0; i < l; i++) {
 				f = Object.assign({}, data[i]);
@@ -451,7 +453,7 @@ var elFinder = function(elm, opts, bootCallback) {
 							sorterChk = false;
 						}
 						
-						if (f.phash && (type === 'add' || type === 'change')) {
+						if (f.phash && (type === 'add' || (type === 'change' && (!files[f.hash] || f.size !== files[f.hash])))) {
 							if (parents = self.parents(f.phash)) {
 								$.each(parents, function() {
 									changedParents[this] = true;
@@ -461,11 +463,11 @@ var elFinder = function(elm, opts, bootCallback) {
 					}
 
 					if (files[f.hash]) {
-						$.each(keeps, function() {
-							if(files[f.hash][this] && ! f[this]) {
-								f[this] = files[f.hash][this];
+						for (i1 =0; i1 < keeps.length; i1++) {
+							if(files[f.hash][keeps[i1]] && ! f[keeps[i1]]) {
+								f[keeps[i1]] = files[f.hash][keeps[i1]];
 							}
-						});
+						}
 						if (f.sizeInfo && !f.size) {
 							f.size = f.sizeInfo.size;
 						}
@@ -576,6 +578,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		 * 
 		 * @param  Array  changed file objects
 		 * @return void
+		 * @deprecated should be use `cache(updatesArrayData, 'change');`
 		 */
 		change = function(changed) {
 			$.each(changed, function(i, file) {
@@ -2290,8 +2293,6 @@ var elFinder = function(elm, opts, bootCallback) {
 					self.updateCache(data);
 				}
 				
-				data.changed && data.changed.length && change(data.changed);
-				
 				self.lazy(function() {
 					// fire some event to update cache/ui
 					data.removed && data.removed.length && self.remove(data);
@@ -2803,13 +2804,14 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * Store info about files/dirs in "files" object.
 	 *
 	 * @param  Array  files
+	 * @param  String type
 	 * @return void
 	 */
-	this.cache = function(dataArray) {
+	this.cache = function(dataArray, type) {
 		if (! Array.isArray(dataArray)) {
 			dataArray = [ dataArray ];
 		}
-		cache(dataArray);
+		cache(dataArray, type);
 	};
 	
 	/**
@@ -2824,7 +2826,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			data.tree && data.tree.length && cache(data.tree, 'tree');
 			data.removed && data.removed.length && remove(data.removed);
 			data.added && data.added.length && cache(data.added, 'add');
-			data.changed && data.changed.length && change(data.changed, 'change');
+			data.changed && data.changed.length && cache(data.changed, 'change');
 		}
 	};
 	

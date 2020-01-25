@@ -1709,7 +1709,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file,
 				mime = file.mime,
-				jqxhr, loading;
+				jqxhr, loading, encSelect;
 			
 			if (fm.mimeIsText(file.mime) && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax) && PR !== false) {
 				e.stopImmediatePropagation();
@@ -1719,10 +1719,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 				// stop loading on change file if not loadin yet
 				preview.one('change', function() {
 					jqxhr.state() == 'pending' && jqxhr.reject();
+					encSelect && encSelect.remove();
 				});
 				
 				jqxhr = fm.request({
-					data           : {cmd : 'get', target : file.hash, conv : 1, _t : file.ts},
+					data           : {cmd : 'get', target : file.hash, conv : (file.encoding || 1), _t : file.ts},
 					options        : {type: 'get', cache : true},
 					preventDefault : true
 				})
@@ -1767,7 +1768,27 @@ elFinder.prototype.commands.quicklook.plugins = [
 					
 					PRcheck(node);
 				})
-				.always(function() {
+				.always(function(data) {
+					var cmdEdit, sel, head;
+					if (cmdEdit = fm.getCommand('edit')) {
+						head = [];
+						if (data && data.encoding) {
+							head.push({value: data.encoding});
+						}
+						head.push({value: 'UTF-8'});
+						sel = cmdEdit.getEncSelect(head);
+						sel.on('change', function() {
+							file.encoding = sel.val();
+							fm.cache(file, 'change');
+							preview.trigger({
+								type: ql.evUpdate,
+								file: file,
+								forceUpdate: true
+							});
+						});
+						encSelect = $('<div class="elfinder-quicklook-encoding"/>').append(sel);
+						ql.window.append(encSelect);
+					}
 					loading.remove();
 				});
 			}

@@ -671,6 +671,10 @@ elFinder.prototype.commands.edit = function() {
 						req.resolve({});
 					}
 				} else {
+					if (conv) {
+						file.encoding = conv;
+						fm.cache(file, 'change');
+					}
 					req = fm.request({
 						data           : {cmd : 'get', target : hash, conv : conv, _t : file.ts},
 						options        : {type: 'get', cache : true},
@@ -926,7 +930,9 @@ elFinder.prototype.commands.edit = function() {
 		},
 		stored;
 	
-	
+	// make public method
+	this.getEncSelect = getEncSelect;
+
 	this.shortcuts = [{
 		pattern     : 'ctrl+e'
 	}];
@@ -1159,7 +1165,7 @@ elFinder.prototype.commands.edit = function() {
 		
 		getEditor().done(function(editor) {
 			while ((file = files.shift())) {
-				list.push(edit(file, void(0), editor).fail(function(error) {
+				list.push(edit(file, (file.encoding || void(0)), editor).fail(function(error) {
 					error && fm.error(error);
 				}));
 			}
