@@ -396,6 +396,26 @@
     display: none;
 }
 
+/* text encoding selector */
+.elfinder-quicklook-encoding {
+    height: 40px;
+}
+.elfinder-quicklook-encoding > select {
+    color: #fff;
+    background: #000;
+    border: 0;
+    font-size: 12px;
+    max-width: 100px;
+    display: inline-block;
+    position: relative;
+    top: 6px;
+    left: 5px;
+}
+.elfinder-navdock .elfinder-quicklook .elfinder-quicklook-encoding {
+    display: none;
+}
+
+
 /* text files preview wrapper */
 .elfinder-quicklook-preview-text-wrapper {
     width: 100%;
