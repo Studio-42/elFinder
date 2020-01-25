@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.52 (2.1-src Nightly: df28195) (2020-01-24)
+ * Version 2.1.52 (2.1-src Nightly: 21e6727) (2020-01-25)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -431,6 +431,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					self.change({changed: diff.changed});
 				}
 			}
+			data.changed && data.changed.length && cache(data.changed, 'change');
 
 			// trigger event 'sorterupdate'
 			sorterStr = JSON.stringify(self.sorters);
@@ -452,8 +453,10 @@ var elFinder = function(elm, opts, bootCallback) {
 		 * @return void
 		 **/
 		cache = function(data, type) {
-			var defsorter = { name: true, perm: true, date: true,  size: true, kind: true },
-				sorterChk = !self.sorters._checked,
+			var type      = type || 'files',
+				keeps = ['sizeInfo', 'encoding'],
+				defsorter = { name: true, perm: true, date: true,  size: true, kind: true },
+				sorterChk = !self.sorters._checked && (type === 'files'),
 				l         = data.length,
 				setSorter = function(file) {
 					var f = file || {},
@@ -466,11 +469,10 @@ var elFinder = function(elm, opts, bootCallback) {
 					self.sorters = self.arrayFlip(sorters, true);
 					self.sorters._checked = true;
 				},
-				keeps = ['sizeInfo'],
 				changedParents = {},
 				hideData = self.storage('hide') || {},
 				hides = hideData.items || {},
-				f, i, keepProp, parents, hidden;
+				f, i, i1, keepProp, parents, hidden;
 
 			for (i = 0; i < l; i++) {
 				f = Object.assign({}, data[i]);
@@ -482,7 +484,7 @@ var elFinder = function(elm, opts, bootCallback) {
 							sorterChk = false;
 						}
 						
-						if (f.phash && (type === 'add' || type === 'change')) {
+						if (f.phash && (type === 'add' || (type === 'change' && (!files[f.hash] || f.size !== files[f.hash])))) {
 							if (parents = self.parents(f.phash)) {
 								$.each(parents, function() {
 									changedParents[this] = true;
@@ -492,11 +494,11 @@ var elFinder = function(elm, opts, bootCallback) {
 					}
 
 					if (files[f.hash]) {
-						$.each(keeps, function() {
-							if(files[f.hash][this] && ! f[this]) {
-								f[this] = files[f.hash][this];
+						for (i1 =0; i1 < keeps.length; i1++) {
+							if(files[f.hash][keeps[i1]] && ! f[keeps[i1]]) {
+								f[keeps[i1]] = files[f.hash][keeps[i1]];
 							}
-						});
+						}
 						if (f.sizeInfo && !f.size) {
 							f.size = f.sizeInfo.size;
 						}
@@ -607,6 +609,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		 * 
 		 * @param  Array  changed file objects
 		 * @return void
+		 * @deprecated should be use `cache(updatesArrayData, 'change');`
 		 */
 		change = function(changed) {
 			$.each(changed, function(i, file) {
@@ -2321,8 +2324,6 @@ var elFinder = function(elm, opts, bootCallback) {
 					self.updateCache(data);
 				}
 				
-				data.changed && data.changed.length && change(data.changed);
-				
 				self.lazy(function() {
 					// fire some event to update cache/ui
 					data.removed && data.removed.length && self.remove(data);
@@ -2834,13 +2835,14 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * Store info about files/dirs in "files" object.
 	 *
 	 * @param  Array  files
+	 * @param  String type
 	 * @return void
 	 */
-	this.cache = function(dataArray) {
+	this.cache = function(dataArray, type) {
 		if (! Array.isArray(dataArray)) {
 			dataArray = [ dataArray ];
 		}
-		cache(dataArray);
+		cache(dataArray, type);
 	};
 	
 	/**
@@ -2855,7 +2857,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			data.tree && data.tree.length && cache(data.tree, 'tree');
 			data.removed && data.removed.length && remove(data.removed);
 			data.added && data.added.length && cache(data.added, 'add');
-			data.changed && data.changed.length && change(data.changed, 'change');
+			data.changed && data.changed.length && cache(data.changed, 'change');
 		}
 	};
 	
@@ -10262,7 +10264,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.52 (2.1-src Nightly: df28195)';
+elFinder.prototype.version = '2.1.52 (2.1-src Nightly: 21e6727)';
 
 
 
@@ -24050,6 +24052,10 @@ elFinder.prototype.commands.edit = function() {
 						req.resolve({});
 					}
 				} else {
+					if (conv) {
+						file.encoding = conv;
+						fm.cache(file, 'change');
+					}
 					req = fm.request({
 						data           : {cmd : 'get', target : hash, conv : conv, _t : file.ts},
 						options        : {type: 'get', cache : true},
@@ -24305,7 +24311,9 @@ elFinder.prototype.commands.edit = function() {
 		},
 		stored;
 	
-	
+	// make public method
+	this.getEncSelect = getEncSelect;
+
 	this.shortcuts = [{
 		pattern     : 'ctrl+e'
 	}];
@@ -24538,7 +24546,7 @@ elFinder.prototype.commands.edit = function() {
 		
 		getEditor().done(function(editor) {
 			while ((file = files.shift())) {
-				list.push(edit(file, void(0), editor).fail(function(error) {
+				list.push(edit(file, (file.encoding || void(0)), editor).fail(function(error) {
 					error && fm.error(error);
 				}));
 			}
@@ -30689,7 +30697,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file,
 				mime = file.mime,
-				jqxhr, loading;
+				jqxhr, loading, encSelect;
 			
 			if (fm.mimeIsText(file.mime) && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax) && PR !== false) {
 				e.stopImmediatePropagation();
@@ -30699,10 +30707,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 				// stop loading on change file if not loadin yet
 				preview.one('change', function() {
 					jqxhr.state() == 'pending' && jqxhr.reject();
+					encSelect && encSelect.remove();
 				});
 				
 				jqxhr = fm.request({
-					data           : {cmd : 'get', target : file.hash, conv : 1, _t : file.ts},
+					data           : {cmd : 'get', target : file.hash, conv : (file.encoding || 1), _t : file.ts},
 					options        : {type: 'get', cache : true},
 					preventDefault : true
 				})
@@ -30747,7 +30756,27 @@ elFinder.prototype.commands.quicklook.plugins = [
 					
 					PRcheck(node);
 				})
-				.always(function() {
+				.always(function(data) {
+					var cmdEdit, sel, head;
+					if (cmdEdit = fm.getCommand('edit')) {
+						head = [];
+						if (data && data.encoding) {
+							head.push({value: data.encoding});
+						}
+						head.push({value: 'UTF-8'});
+						sel = cmdEdit.getEncSelect(head);
+						sel.on('change', function() {
+							file.encoding = sel.val();
+							fm.cache(file, 'change');
+							preview.trigger({
+								type: ql.evUpdate,
+								file: file,
+								forceUpdate: true
+							});
+						});
+						encSelect = $('<div class="elfinder-quicklook-encoding"/>').append(sel);
+						ql.window.append(encSelect);
+					}
 					loading.remove();
 				});
 			}
