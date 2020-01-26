@@ -3518,7 +3518,6 @@ class elFinder
                         $errlev = error_reporting();
                         error_reporting($errlev ^ E_NOTICE);
                         $utf8 = iconv($enc, 'UTF-8', $content);
-                        error_reporting($errlev);
                         if ($utf8 === false && function_exists('mb_convert_encoding')) {
                             $utf8 = mb_convert_encoding($content, 'UTF-8', $enc);
                             if (mb_convert_encoding($utf8, $enc, 'UTF-8') !== $content) {
@@ -3529,6 +3528,7 @@ class elFinder
                                 $enc = 'unknown';
                             }
                         }
+                        error_reporting($errlev);
                         if ($enc !== 'unknown') {
                             $content = $utf8;
                         }
@@ -3551,10 +3551,13 @@ class elFinder
                     $enc = $args['conv'];
                     if (strtoupper($enc) !== 'UTF-8') {
                         $_content = $content;
+                        $errlev = error_reporting();
+                        error_reporting($errlev ^ E_NOTICE);
                         $content = iconv($enc, 'UTF-8', $content);
                         if ($content === false && function_exists('mb_convert_encoding')) {
                             $content = mb_convert_encoding($_content, 'UTF-8', $enc);
                         }
+                        error_reporting($errlev);
                     } else {
                         $enc = '';
                     }
