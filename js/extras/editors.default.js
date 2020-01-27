@@ -1964,6 +1964,7 @@
 					body: body,
 					footer: footer
 				});
+				this._setupSelEncoding(data);
 			},
 			load : function(editnode) {
 				var self = this,
