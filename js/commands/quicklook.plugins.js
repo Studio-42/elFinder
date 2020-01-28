@@ -1731,6 +1731,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 					var reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i'),
 						text = data.content,
 						part, more, node, lines, m;
+					if (typeof text !== 'string') {
+						return;
+					}
 					ql.hideinfo();
 					if (window.atob && (m = text.match(reg))) {
 						text = atob(text.substr(m[1].length));
@@ -1765,7 +1768,14 @@ elFinder.prototype.commands.quicklook.plugins = [
 							e.originalEvent._preventSwipeX = true;
 						}
 					}).appendTo(preview);
-					
+
+					// make toast message
+					if (data.toasts && Array.isArray(data.toasts)) {
+						$.each(data.toasts, function() {
+							this.msg && fm.toast(this);
+						});
+					}
+
 					PRcheck(node);
 				})
 				.always(function(data) {
