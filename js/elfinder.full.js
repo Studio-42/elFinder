@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: 527e530) (2020-01-26)
+ * Version 2.1.53 (2.1-src Nightly: f42305c) (2020-01-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10264,7 +10264,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 527e530)';
+elFinder.prototype.version = '2.1.53 (2.1-src Nightly: f42305c)';
 
 
 
@@ -23495,7 +23495,7 @@ elFinder.prototype.commands.edit = function() {
 		 * @param  String  content  file content
 		 * @return $.Deferred
 		 **/
-		dialog = function(id, file, content, encoding, editor) {
+		dialog = function(id, file, content, encoding, editor, toasts) {
 
 			var dfrd = $.Deferred(),
 				_loaded = false,
@@ -23508,6 +23508,14 @@ elFinder.prototype.commands.edit = function() {
 						return false;
 					}
 					return true;
+				},
+				makeToasts = function() {
+					// make toast message
+					if (toasts && Array.isArray(toasts)) {
+						$.each(toasts, function() {
+							this.msg && fm.toast(this);
+						});
+					}
 				},
 				save = function() {
 					var encord = selEncoding? selEncoding.val():void(0),
@@ -23761,7 +23769,7 @@ elFinder.prototype.commands.edit = function() {
 									error && fm.error(error);
 									ta.elfinderdialog('destroy');
 									return;
-								});
+								}).always(makeToasts);
 							} else {
 								_loaded = true;
 								if (loadRes && (typeof loadRes === 'string' || Array.isArray(loadRes))) {
@@ -23775,6 +23783,7 @@ elFinder.prototype.commands.edit = function() {
 								requestAnimationFrame(function() {
 									dialogNode.trigger('resize');
 								});
+								makeToasts();
 							}
 							conf = ta.editor.confObj;
 							if (conf.info && conf.info.syncInterval) {
@@ -23813,6 +23822,17 @@ elFinder.prototype.commands.edit = function() {
 						}, interval);
 					}
 				},
+				stateChange = function() {
+					if (selEncoding) {
+						changed().done(function(change) {
+							if (change) {
+								selEncoding.attr('title', fm.i18n('saveAsEncoding')).addClass('elfinder-edit-changed');
+							} else {
+								selEncoding.attr('title', fm.i18n('openAsEncoding')).removeClass('elfinder-edit-changed');
+							}
+						});
+					}
+				},
 				saveAsFile = {},
 				ta, old, dialogNode, selEncoding, extEditor, maxW, syncInterval;
 				
@@ -23847,22 +23867,10 @@ elFinder.prototype.commands.edit = function() {
 					return dfrd.reject('errEditorNotFound');
 				}
 				(function() {
-					var stateChange = function() {
-							if (selEncoding) {
-								changed().done(function(change) {
-									if (change) {
-										selEncoding.attr('title', fm.i18n('saveAsEncoding')).addClass('elfinder-edit-changed');
-									} else {
-										selEncoding.attr('title', fm.i18n('openAsEncoding')).removeClass('elfinder-edit-changed');
-									}
-								});
-							}
-						};
-						
 					ta = $('<textarea class="elfinder-file-edit" rows="20" id="'+id+'-ta"></textarea>')
 						.on('input propertychange', stateChange);
 					
-					if (!ta.editor || !ta.editor.info || ta.editor.info.useTextAreaEvent) {
+					if (!editor || !editor.info || editor.info.useTextAreaEvent) {
 						ta.on('keydown', function(e) {
 							var code = e.keyCode,
 								value, start;
@@ -23897,37 +23905,42 @@ elFinder.prototype.commands.edit = function() {
 					}
 
 					ta.initEditArea = function(id, file, content) {
-						var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [],
-							wfake = $('<select/>').hide(),
-							setSelW = function(init) {
-								init && wfake.appendTo(selEncoding.parent());
-								wfake.empty().append($('<option/>').text(selEncoding.val()));
-								selEncoding.width(wfake.width());
-							};
 						// ta.hide() for performance tune. Need ta.show() in `load()` if use textarea node.
 						ta.hide().val(content);
-						if (content === '' || ! encoding || encoding !== 'UTF-8') {
-							heads.push({value: 'UTF-8'});
-						}
-						selEncoding = getEncSelect(heads).on('touchstart', function(e) {
-							// for touch punch event handler
-							e.stopPropagation();
-						}).on('change', function() {
-							// reload to change encoding if not edited
-							changed().done(function(change) {
-								if (! change && getContent() !== '') {
-									cancel();
-									edit(file, selEncoding.val(), editor).fail(function(err) { err && fm.error(err); });
-								}
-							});
-							setSelW();
-						}).on('mouseover', stateChange);
-						ta.parent().next().prepend($('<div class="ui-dialog-buttonset elfinder-edit-extras"/>').append(selEncoding));
-						setSelW(true);
+						this._setupSelEncoding(content);
 					};
 				})();
 			}
-			
+
+			// extended function to setup selector of encoding for text editor
+			ta._setupSelEncoding = function(content) {
+				var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [],
+					wfake = $('<select/>').hide(),
+					setSelW = function(init) {
+						init && wfake.appendTo(selEncoding.parent());
+						wfake.empty().append($('<option/>').text(selEncoding.val()));
+						selEncoding.width(wfake.width());
+					};
+				if (content === '' || ! encoding || encoding !== 'UTF-8') {
+					heads.push({value: 'UTF-8'});
+				}
+				selEncoding = getEncSelect(heads).on('touchstart', function(e) {
+					// for touch punch event handler
+					e.stopPropagation();
+				}).on('change', function() {
+					// reload to change encoding if not edited
+					changed().done(function(change) {
+						if (! change && getContent() !== '') {
+							cancel();
+							edit(file, selEncoding.val(), editor).fail(function(err) { err && fm.error(err); });
+						}
+					});
+					setSelW();
+				}).on('mouseover', stateChange);
+				ta.parent().next().prepend($('<div class="ui-dialog-buttonset elfinder-edit-extras"/>').append(selEncoding));
+				setSelW(true);
+			};
+
 			ta.data('hash', file.hash);
 			
 			if (extEditor) {
@@ -24108,7 +24121,7 @@ elFinder.prototype.commands.edit = function() {
 								}
 							}
 						}
-						dialog(id, file, data.content, data.encoding, editor)
+						dialog(id, file, data.content, data.encoding, editor, data.toasts)
 							.done(function(data) {
 								dfrd.resolve(data);
 							})
@@ -24155,6 +24168,10 @@ elFinder.prototype.commands.edit = function() {
 				.fail(function(error) {
 					var err = fm.parseError(error);
 					err = Array.isArray(err)? err[0] : err;
+					if (file.encoding) {
+						file.encoding = '';
+						fm.cache(file, 'change');
+					}
 					(err !== 'errConvUTF8') && fm.sync();
 					dfrd.reject(error);
 				});
@@ -30719,6 +30736,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 					var reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i'),
 						text = data.content,
 						part, more, node, lines, m;
+					if (typeof text !== 'string') {
+						return;
+					}
 					ql.hideinfo();
 					if (window.atob && (m = text.match(reg))) {
 						text = atob(text.substr(m[1].length));
@@ -30753,7 +30773,14 @@ elFinder.prototype.commands.quicklook.plugins = [
 							e.originalEvent._preventSwipeX = true;
 						}
 					}).appendTo(preview);
-					
+
+					// make toast message
+					if (data.toasts && Array.isArray(data.toasts)) {
+						$.each(data.toasts, function() {
+							this.msg && fm.toast(this);
+						});
+					}
+
 					PRcheck(node);
 				})
 				.always(function(data) {
@@ -31467,7 +31494,8 @@ elFinder.prototype.commands.rename = function() {
  **/
 elFinder.prototype.commands.resize = function() {
 	"use strict";
-	var losslessRotate = 0,
+	var fm = this.fm,
+		losslessRotate = 0,
 		getBounceBox = function(w, h, theta) {
 			var srcPts = [
 					{x: w/2, y: h/2},
@@ -31498,13 +31526,12 @@ elFinder.prototype.commands.resize = function() {
 	this.updateOnSelect = false;
 	
 	this.getstate = function() {
-		var sel = this.fm.selectedFiles();
+		var sel = fm.selectedFiles();
 		return sel.length == 1 && sel[0].read && sel[0].write && sel[0].mime.indexOf('image/') !== -1 ? 0 : -1;
 	};
 	
 	this.resizeRequest = function(data, f, dfrd) {
-		var fm   = this.fm,
-			file = f || fm.file(data.target),
+		var file = f || fm.file(data.target),
 			tmb  = file? file.tmb : null,
 			enabled = fm.isCommandEnabled('resize', data.target);
 		
@@ -31550,7 +31577,6 @@ elFinder.prototype.commands.resize = function() {
 	
 	this.exec = function(hashes) {
 		var self  = this,
-			fm    = this.fm,
 			files = this.files(hashes),
 			dfrd  = $.Deferred(),
 			api2  = (fm.api > 1),
@@ -32242,7 +32268,7 @@ elFinder.prototype.commands.resize = function() {
 					img     = $('<img/>')
 						.on('load', init)
 						.on('error', function() {
-							spinner.text('Unable to load image').css('background', 'transparent');
+							spinner.html(fm.i18n('ntfsmth')).css('background', 'transparent');
 						}),
 					basec = $('<div/>'),
 					imgc = $('<img/>'),
@@ -32876,11 +32902,39 @@ elFinder.prototype.commands.resize = function() {
 					buttons        : buttons,
 					flexibleHeight : true,
 					open           : function() {
-						var substituteImg = (fm.option('substituteImg', file.hash) && file.size > options.dimSubImgSize)? true : false,
+						var doDimReq = function(force) {
+								dimreq = fm.request({
+									data : {cmd : 'dim', target : file.hash, substitute : substituteImg? 400 : ''},
+									preventDefault : true
+								})
+								.done(function(data) {
+									if (!data.url && needPng) {
+										dialog.elfinderdialog('close');
+										fm.error(['errOpen', file.name]);
+									} else {
+										if (data.dim) {
+											var dim = data.dim.split('x');
+											file.width = dim[0];
+											file.height = dim[1];
+											setdim(dim);
+											if (data.url) {
+												img.attr('src', data.url);
+												imgc.attr('src', data.url);
+												imgr.attr('src', data.url);
+											}
+											return init();
+										}
+									}
+								});
+							},
+							needPng = !{'image/jpeg':true,'image/png':true,'image/gif':true,}[file.mime],
+							substituteImg = fm.option('substituteImg', file.hash) && (needPng || file.size > options.dimSubImgSize)? true : false,
 							hasSize = (file.width && file.height)? true : false;
 						dMinBtn = base.find('.ui-dialog-titlebar .elfinder-titlebar-minimize').hide();
 						fm.bind('resize', dinit);
-						img.attr('src', src);
+						img.attr('src', src).one('error.dimreq', function() {
+							doDimReq(true);
+						});
 						imgc.attr('src', src);
 						imgr.attr('src', src);
 						if (api2) {
@@ -32892,24 +32946,8 @@ elFinder.prototype.commands.resize = function() {
 							return init();
 						}
 						if (file.size > (options.getDimThreshold || 0)) {
-							dimreq = fm.request({
-								data : {cmd : 'dim', target : file.hash, substitute : (substituteImg? 400 : '')},
-								preventDefault : true
-							})
-							.done(function(data) {
-								if (data.dim) {
-									var dim = data.dim.split('x');
-									file.width = dim[0];
-									file.height = dim[1];
-									setdim(dim);
-									if (data.url) {
-										img.attr('src', data.url);
-										imgc.attr('src', data.url);
-										imgr.attr('src', data.url);
-									}
-									return init();
-								}
-							});
+							img.off('error.dimreq');
+							doDimReq();
 						} else if (hasSize) {
 							return init();
 						}
