@@ -3333,7 +3333,7 @@ abstract class elFinderVolumeDriver
             register_shutdown_function(array('elFinder', 'GlobGC'), $this->tmpLinkPath . DIRECTORY_SEPARATOR . 'temp_*', elFinder::$tmpLinkLifeTime);
             return array(
                 'path' => $path = $this->tmpLinkPath . DIRECTORY_SEPARATOR . $name,
-                'url' => $this->tmpLinkUrl . '/' . $name
+                'url' => $this->tmpLinkUrl . '/' . rawurlencode($name)
             );
         }
         return false;
@@ -3354,6 +3354,8 @@ abstract class elFinderVolumeDriver
     public function getSubstituteImgLink($target, $srcSize, $srcfp = null, $maxSize = null)
     {
         $url = false;
+        $file = $this->file($target);
+        $force = !in_array($file['mime'], array('image/jpeg', 'image/png', 'image/gif'));
         if (!$maxSize) {
             $args = elFinder::$currentArgs;
             if (!empty($args['substitute'])) {
@@ -3364,13 +3366,14 @@ abstract class elFinderVolumeDriver
             if ($this->getOption('substituteImg')) {
                 $maxSize = intval($maxSize);
                 $zoom = min(($maxSize / $srcSize[0]), ($maxSize / $srcSize[1]));
-                if ($zoom < 1) {
+                if ($force || $zoom < 1) {
                     $width = round($srcSize[0] * $zoom);
                     $height = round($srcSize[1] * $zoom);
                     $jpgQuality = 50;
                     $preserveExif = false;
                     $unenlarge = true;
                     $checkAnimated = true;
+                    $destformat = $file['mime'] === 'image/jpeg'? null : 'png';
                     if (!$srcfp) {
                         elFinder::checkAborted();
                         $srcfp = $this->open($target);
@@ -3380,7 +3383,7 @@ abstract class elFinderVolumeDriver
                         $dest = fopen($tempLink['path'], 'wb');
                         if ($dest && stream_copy_to_stream($srcfp, $dest)) {
                             fclose($dest);
-                            if ($this->imageUtil('resize', $tempLink['path'], compact('width', 'height', 'jpgQuality', 'preserveExif', 'unenlarge', 'checkAnimated'))) {
+                            if ($this->imageUtil('resize', $tempLink['path'], compact('width', 'height', 'jpgQuality', 'preserveExif', 'unenlarge', 'checkAnimated', 'destformat'))) {
                                 $url = $tempLink['url'];
                                 // set expire to 1 min left
                                 touch($tempLink['path'], time() - elFinder::$tmpLinkLifeTime + 60);
@@ -3501,6 +3504,7 @@ abstract class elFinderVolumeDriver
         if (!isset($options['bgColorFb'])) {
             $options['bgColorFb'] = $this->options['bgColorFb'];
         }
+        $destformat = !empty($options['destformat'])? $options['destformat'] : null;
 
         // check 'width' ,'height'
         if (in_array($mode, array('resize', 'propresize', 'crop', 'fitsquare'))) {
@@ -3525,22 +3529,22 @@ abstract class elFinderVolumeDriver
                 if (empty($options['degree'])) {
                     return true;
                 }
-                return (bool)$this->imgRotate($src, $options['degree'], $options['bgColorFb'], null, $options['jpgQuality']);
+                return (bool)$this->imgRotate($src, $options['degree'], $options['bgColorFb'], $destformat, $options['jpgQuality']);
 
             case 'resize':
-                return (bool)$this->imgResize($src, $options['width'], $options['height'], false, true, null, $options['jpgQuality'], $options);
+                return (bool)$this->imgResize($src, $options['width'], $options['height'], false, true, $destformat, $options['jpgQuality'], $options);
 
             case 'propresize':
-                return (bool)$this->imgResize($src, $options['width'], $options['height'], true, true, null, $options['jpgQuality'], $options);
+                return (bool)$this->imgResize($src, $options['width'], $options['height'], true, true, $destformat, $options['jpgQuality'], $options);
 
             case 'crop':
                 if (isset($options['x']) && isset($options['y'])) {
-                    return (bool)$this->imgCrop($src, $options['width'], $options['height'], $options['x'], $options['y'], null, $options['jpgQuality']);
+                    return (bool)$this->imgCrop($src, $options['width'], $options['height'], $options['x'], $options['y'], $destformat, $options['jpgQuality']);
                 }
                 break;
 
             case 'fitsquare':
-                return (bool)$this->imgSquareFit($src, $options['width'], $options['height'], 'center', 'middle', $options['bgcolor'], null, $options['jpgQuality']);
+                return (bool)$this->imgSquareFit($src, $options['width'], $options['height'], 'center', 'middle', $options['bgcolor'], $destformat, $options['jpgQuality']);
 
         }
         return false;
