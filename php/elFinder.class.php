@@ -426,6 +426,30 @@ class elFinder
      */
     protected $throwErrorOnExec = false;
 
+    /**
+     * Default params of toastParams
+     *
+     * @var        array
+     */
+    protected $toastParamsDefault = array(
+        'mode'   => 'warning',
+        'prefix' => ''
+    );
+
+    /**
+     * Toast params of runtime notification
+     *
+     * @var        array
+     */
+    private $toastParams = array();
+
+    /**
+     * Toast messages of runtime notification
+     *
+     * @var        array
+     */
+    private $toastMessages = array();
+
     // Errors messages
     const ERROR_ACCESS_DENIED = 'errAccess';
     const ERROR_ARC_MAXSIZE = 'errArcMaxSize';
@@ -1169,6 +1193,10 @@ class elFinder
         if (!empty($result['changed'])) {
             $result['changed'] = $this->filter($result['changed']);
         }
+        // add toasts
+        if ($this->toastMessages) {
+            $result['toasts'] = array_merge(((isset($result['toasts']) && is_array($result['toasts']))? $result['toasts'] : array()), $this->toastMessages);
+        }
 
         if ($this->debug || !empty($args['debug'])) {
             $result['debug'] = array(
@@ -1178,10 +1206,8 @@ class elFinder
                 'memory' => (function_exists('memory_get_peak_usage') ? ceil(memory_get_peak_usage() / 1024) . 'Kb / ' : '') . ceil(memory_get_usage() / 1024) . 'Kb / ' . ini_get('memory_limit'),
                 'upload' => $this->uploadDebug,
                 'volumes' => array(),
-                'mountErrors' => $this->mountErrors,
-                'backendErrors' => elFinder::$phpErrors
+                'mountErrors' => $this->mountErrors
             );
-            elFinder::$phpErrors = array();
 
             foreach ($this->volumes as $id => $volume) {
                 $result['debug']['volumes'][] = $volume->debug();
@@ -1215,6 +1241,12 @@ class elFinder
         if ($this->customData !== null) {
             $result['customData'] = $this->customData ? json_encode($this->customData) : '';
         }
+
+        if (!empty($result['debug'])) {
+            $result['debug']['backendErrors'] = elFinder::$phpErrors;
+        }
+        elFinder::$phpErrors = array();
+        restore_error_handler();
 
         if (!empty($result['callback'])) {
             $result['callback']['json'] = json_encode($result);
@@ -3553,13 +3585,16 @@ class elFinder
                     if (strtoupper($enc) !== 'UTF-8') {
                         $_content = $content;
                         $errlev = error_reporting();
-                        error_reporting($errlev ^ E_NOTICE);
-                        $content = iconv($enc, 'UTF-8', $content);
+                        $this->setToastErrorHandler(array(
+                            'prefix' => 'Notice: '
+                        ));
+                        error_reporting($errlev | E_NOTICE | E_WARNING);
+                        $content = iconv($enc, 'UTF-8//TRANSLIT', $content);
                         if ($content === false && function_exists('mb_convert_encoding')) {
-                            error_reporting($errlev ^ E_WARNING);
                             $content = mb_convert_encoding($_content, 'UTF-8', $enc);
                         }
                         error_reporting($errlev);
+                        $this->setToastErrorHandler(false);
                     } else {
                         $enc = '';
                     }
@@ -3575,7 +3610,7 @@ class elFinder
                 $json = json_encode($content);
             }
             if ($content === false || $json === false || strlen($json) < strlen($content)) {
-                return array('error' => $this->error(self::ERROR_CONV_UTF8, self::ERROR_NOT_UTF8_CONTENT, $volume->path($target)));
+                return array('doconv' => 'unknown');
             }
         }
 
@@ -4006,6 +4041,29 @@ var go = function() {
     }
 
     /**
+     * Error handler for send toast message to client side
+     *
+     * @param int    $errno
+     * @param string $errstr
+     * @param string $errfile
+     * @param int    $errline
+     *
+     * @return boolean
+     */
+    protected function toastErrorHandler($errno, $errstr, $errfile, $errline)
+    {
+        $proc = false;
+        if (!(error_reporting() & $errno)) {
+            return $proc;
+        }
+        $toast = array();
+        $toast['mode'] = $this->toastParams['mode'];
+        $toast['msg'] = $this->toastParams['prefix'] . $errstr;
+        $this->toastMessages[] = $toast;
+        return true;
+    }
+
+    /**
      * PHP error handler, catch error types only E_WARNING | E_NOTICE | E_USER_WARNING | E_USER_NOTICE
      *
      * @param int    $errno
@@ -4307,6 +4365,22 @@ var go = function() {
             }
         }
         return $res;
+    }
+
+    /**
+     * Sets the toast error handler.
+     *
+     * @param array $opts The options
+     */
+    public function setToastErrorHandler($opts)
+    {
+        $this->toastParams = $this->toastParamsDefault;
+        if (!$opts) {
+            restore_error_handler();
+        } else {
+            $this->toastParams = array_merge($this->toastParams, $opts);
+            set_error_handler(array($this, 'toastErrorHandler'));
+        }
     }
 
     /***************************************************************************/
