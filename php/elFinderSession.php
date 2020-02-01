@@ -124,22 +124,29 @@ class elFinderSession implements elFinderSessionInterface
      */
     public function start()
     {
+        set_error_handler(array($this, 'session_start_error'), E_NOTICE | E_WARNING);
+
+        // apache2 SAPI has a bug of session cookie register
+        // see https://bugs.php.net/bug.php?id=75554
+        // see https://github.com/php/php-src/pull/3231
         if ($this->fixCookieRegist === true) {
-            // apache2 SAPI has a bug of session cookie register
-            // see https://bugs.php.net/bug.php?id=75554
-            // see https://github.com/php/php-src/pull/3231
-            ini_set('session.use_cookies', 0);
+            if ((int)ini_get('session.use_cookies') === 1) {
+                if (ini_set('session.use_cookies', 0) === false) {
+                    $this->fixCookieRegist === false;
+                }
+            }
         }
+
         if (version_compare(PHP_VERSION, '5.4.0', '>=')) {
             if (session_status() !== PHP_SESSION_ACTIVE) {
                 session_start();
             }
         } else {
-            set_error_handler(array($this, 'session_start_error'), E_NOTICE);
             session_start();
-            restore_error_handler();
         }
         $this->started = session_id() ? true : false;
+
+        restore_error_handler();
 
         return $this;
     }
@@ -224,12 +231,6 @@ class elFinderSession implements elFinderSessionInterface
                 if (version_compare(PHP_VERSION, '7.3', '<')) {
                     setcookie(session_name(), session_id(), 0, $cParm['path'] . (!empty($cParm['SameSite'])? '; SameSite=' . $cParm['SameSite'] : ''), $cParm['domain'], $cParm['secure'], $cParm['httponly']);
                 } else {
-                    $allows = array('expires' => true, 'path' => true, 'domain' => true, 'secure' => true, 'httponly' => true, 'samesite' => true);
-                    foreach(array_keys($cParm) as $_k) {
-                        if (!isset($allows[$_k])) {
-                            unset($cParm[$_k]);
-                        }
-                    }
                     setcookie(session_name(), session_id(), $cParm);
                 }
                 $this->fixCookieRegist = false;
