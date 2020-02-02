@@ -114,7 +114,10 @@ class elFinderPluginAutoRotate extends elFinderPlugin
             return false;
         }
         $degree = 0;
+        $errlev =error_reporting();
+        error_reporting($errlev ^ E_WARNING);
         $exif = exif_read_data($src);
+        error_reporting($errlev);
         if ($exif && !empty($exif['Orientation'])) {
             switch ($exif['Orientation']) {
                 case 8:
@@ -127,6 +130,9 @@ class elFinderPluginAutoRotate extends elFinderPlugin
                     $degree = 90;
                     break;
             }
+        }
+        if (!$degree)  {
+            return false;
         }
         $opts = array(
             'degree' => $degree,
