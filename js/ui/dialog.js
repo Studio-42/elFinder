@@ -534,7 +534,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					css && dialog.css(css);
 				})
 				.on('resize', function(e, data) {
-					var oh = 0, init = data && data.init, h, minH, maxH;
+					var oh = 0, init = data && data.init, h, minH, maxH, autoH;
 					if ((data && (data.minimize || data.maxmize)) || dialog.data('minimized')) {
 						return;
 					}
@@ -543,6 +543,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 					dialog.children('.ui-widget-header,.ui-dialog-buttonpane').each(function() {
 						oh += $(this).outerHeight(true);
 					});
+					autoH = (opts.height === 'auto')? true : false;
+					if (autoH) {
+						self.css({'max-height': '', 'height': 'auto'});
+					}
 					if (!init && syncSize.enabled && !e.originalEvent && !dialog.hasClass('elfinder-maximized')) {
 						h = dialog.height();
 						minH = dialog.css('min-height') || h;
@@ -557,11 +561,11 @@ $.fn.elfinderdialog = function(opts, fm) {
 						} else {
 							maxH = parseInt(maxH);
 						}
-						h = Math.min(syncSize.defaultSize.height, Math.max(maxH, minH) - oh - dialog.data('margin-y'));
+						h = Math.min((autoH? dialog.height() : syncSize.defaultSize.height), Math.max(maxH, minH) - oh - dialog.data('margin-y'));
 					} else {
 						h = dialog.height() - oh - dialog.data('margin-y');
 					}
-					self.css(opts.flexibleHeight? 'max-height' : 'height', h);
+					self.css(autoH? 'max-height' : 'height', h);
 					if (init) {
 						return;
 					}
@@ -790,6 +794,5 @@ $.fn.elfinderdialog.defaults = {
 	headerBtnPos : 'auto',
 	headerBtnOrder : 'auto',
 	optimizeNumber : true,
-	propagationEvents : ['mousemove', 'mouseup'],
-	flexibleHeight : false
+	propagationEvents : ['mousemove', 'mouseup']
 };

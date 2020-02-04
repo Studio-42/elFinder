@@ -1415,7 +1415,6 @@ elFinder.prototype.commands.resize = function() {
 					width          : dialogWidth,
 					resizable      : false,
 					buttons        : buttons,
-					flexibleHeight : true,
 					open           : function() {
 						var doDimReq = function(force) {
 								dimreq = fm.request({
