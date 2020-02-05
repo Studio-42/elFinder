@@ -202,7 +202,7 @@ elFinder.prototype.commands.edit = function() {
 				saveAs = function() {
 					if (!loaded()) { return; }
 					var prevOld = old,
-						phash = fm.file(file.phash)? file.phash : fm.cwd().hash,
+						phash = file.phash,
 						fail = function(err) {
 							dialogs.addClass(clsEditing).fadeIn(function() {
 								err && fm.error(err);
@@ -245,6 +245,7 @@ elFinder.prototype.commands.edit = function() {
 							fm.trigger('unselectfiles', { files: [ file.hash ] });
 						},
 						reqOpen = null,
+						reqInfo = null,
 						dialogs = fm.getUI().children('.' + self.dialogClass + ':visible');
 						if (dialogNode.is(':hidden')) {
 							dialogs = dialogs.add(dialogNode);
@@ -255,10 +256,18 @@ elFinder.prototype.commands.edit = function() {
 					
 					if (fm.searchStatus.state < 2 && phash !== fm.cwd().hash) {
 						reqOpen = fm.exec('open', [phash], {thash: phash});
+					} else if (!fm.file(phash)) {
+						reqInfo = fm.request({cmd: 'info', targets: [phash]}); 
 					}
 					
-					$.when([reqOpen]).done(function() {
-						reqOpen? fm.one('cwdrender', make) : make();
+					$.when([reqOpen, reqInfo]).done(function() {
+						if (reqInfo) {
+							fm.one('infodone', function() {
+								fm.file(phash)? make() : fail('errFolderNotFound');
+							});
+						} else {
+							reqOpen? fm.one('cwdrender', make) : make();
+						}
 					}).fail(fail);
 				},
 				changed = function() {
