@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: 3dfd613) (2020-02-02)
+ * Version 2.1.53 (2.1-src Nightly: 3b7a907) (2020-02-06)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10264,7 +10264,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 3dfd613)';
+elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 3b7a907)';
 
 
 
@@ -18070,7 +18070,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					css && dialog.css(css);
 				})
 				.on('resize', function(e, data) {
-					var oh = 0, init = data && data.init, h, minH, maxH;
+					var oh = 0, init = data && data.init, h, minH, maxH, autoH;
 					if ((data && (data.minimize || data.maxmize)) || dialog.data('minimized')) {
 						return;
 					}
@@ -18079,6 +18079,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 					dialog.children('.ui-widget-header,.ui-dialog-buttonpane').each(function() {
 						oh += $(this).outerHeight(true);
 					});
+					autoH = (opts.height === 'auto')? true : false;
+					if (autoH) {
+						self.css({'max-height': '', 'height': 'auto'});
+					}
 					if (!init && syncSize.enabled && !e.originalEvent && !dialog.hasClass('elfinder-maximized')) {
 						h = dialog.height();
 						minH = dialog.css('min-height') || h;
@@ -18093,11 +18097,11 @@ $.fn.elfinderdialog = function(opts, fm) {
 						} else {
 							maxH = parseInt(maxH);
 						}
-						h = Math.min(syncSize.defaultSize.height, Math.max(maxH, minH) - oh - dialog.data('margin-y'));
+						h = Math.min((autoH? dialog.height() : syncSize.defaultSize.height), Math.max(maxH, minH) - oh - dialog.data('margin-y'));
 					} else {
 						h = dialog.height() - oh - dialog.data('margin-y');
 					}
-					self.css(opts.flexibleHeight? 'max-height' : 'height', h);
+					self.css(autoH? 'max-height' : 'height', h);
 					if (init) {
 						return;
 					}
@@ -18326,8 +18330,7 @@ $.fn.elfinderdialog.defaults = {
 	headerBtnPos : 'auto',
 	headerBtnOrder : 'auto',
 	optimizeNumber : true,
-	propagationEvents : ['mousemove', 'mouseup'],
-	flexibleHeight : false
+	propagationEvents : ['mousemove', 'mouseup']
 };
 
 
@@ -23583,7 +23586,7 @@ elFinder.prototype.commands.edit = function() {
 				saveAs = function() {
 					if (!loaded()) { return; }
 					var prevOld = old,
-						phash = fm.file(file.phash)? file.phash : fm.cwd().hash,
+						phash = file.phash,
 						fail = function(err) {
 							dialogs.addClass(clsEditing).fadeIn(function() {
 								err && fm.error(err);
@@ -23626,6 +23629,7 @@ elFinder.prototype.commands.edit = function() {
 							fm.trigger('unselectfiles', { files: [ file.hash ] });
 						},
 						reqOpen = null,
+						reqInfo = null,
 						dialogs = fm.getUI().children('.' + self.dialogClass + ':visible');
 						if (dialogNode.is(':hidden')) {
 							dialogs = dialogs.add(dialogNode);
@@ -23636,10 +23640,18 @@ elFinder.prototype.commands.edit = function() {
 					
 					if (fm.searchStatus.state < 2 && phash !== fm.cwd().hash) {
 						reqOpen = fm.exec('open', [phash], {thash: phash});
+					} else if (!fm.file(phash)) {
+						reqInfo = fm.request({cmd: 'info', targets: [phash]}); 
 					}
 					
-					$.when([reqOpen]).done(function() {
-						reqOpen? fm.one('cwdrender', make) : make();
+					$.when([reqOpen, reqInfo]).done(function() {
+						if (reqInfo) {
+							fm.one('infodone', function() {
+								fm.file(phash)? make() : fail('errFolderNotFound');
+							});
+						} else {
+							reqOpen? fm.one('cwdrender', make) : make();
+						}
 					}).fail(fail);
 				},
 				changed = function() {
@@ -26403,7 +26415,6 @@ elFinder.prototype.commands.netmount = function() {
 						resizable      : true,
 						modal          : true,
 						destroyOnClose : false,
-						flexibleHeight : true,
 						open           : function() {
 							$(window).on('focus.'+fm.namespace, winFocus);
 							inputs.protocol.trigger('change');
@@ -32900,7 +32911,6 @@ elFinder.prototype.commands.resize = function() {
 					width          : dialogWidth,
 					resizable      : false,
 					buttons        : buttons,
-					flexibleHeight : true,
 					open           : function() {
 						var doDimReq = function(force) {
 								dimreq = fm.request({
