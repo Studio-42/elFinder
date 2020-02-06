@@ -67,7 +67,6 @@ elFinder.prototype.commands.netmount = function() {
 						resizable      : true,
 						modal          : true,
 						destroyOnClose : false,
-						flexibleHeight : true,
 						open           : function() {
 							$(window).on('focus.'+fm.namespace, winFocus);
 							inputs.protocol.trigger('change');
