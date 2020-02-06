@@ -450,6 +450,13 @@ class elFinder
      */
     private $toastMessages = array();
 
+    /**
+     * Optional UTF-8 encoder
+     *
+     * @var        callable || null
+     */
+    private $utf8Encoder = null;
+
     // Errors messages
     const ERROR_ACCESS_DENIED = 'errAccess';
     const ERROR_ARC_MAXSIZE = 'errArcMaxSize';
@@ -722,6 +729,11 @@ class elFinder
 
         // set archivers
         elFinder::$archivers = isset($opts['archivers']) && is_array($opts['archivers']) ? $opts['archivers'] : array();
+
+        // set utf8Encoder
+        if (isset($opts['utf8Encoder']) && is_callable($opts['utf8Encoder'])) {
+            $this->utf8Encoder = $opts['utf8Encoder'];
+        }
 
         // bind events listeners
         if (!empty($opts['bind']) && is_array($opts['bind'])) {
@@ -4381,6 +4393,40 @@ var go = function() {
             $this->toastParams = array_merge($this->toastParams, $opts);
             set_error_handler(array($this, 'toastErrorHandler'));
         }
+    }
+
+    /**
+     * String encode convert to UTF-8
+     *
+     * @param      string  $str  Input string
+     *
+     * @return     string  UTF-8 string
+     */
+    public function utf8Encode($str)
+    {
+        static $mbencode = null;
+        $str = (string) $str;
+        if (@iconv('utf-8', 'utf-8//IGNORE', $str) === $str) {
+            return $str;
+        }
+
+        if ($this->utf8Encoder) {
+            return $this->utf8Encoder($str);
+        }
+
+        if ($mbencode === null) {
+            $mbencode = function_exists('mb_convert_encoding') && function_exists('mb_detect_encoding');
+        }
+
+        if ($mbencode) {
+            if ($enc = mb_detect_encoding($str, mb_detect_order(), true)) {
+                $_str = mb_convert_encoding($str, 'UTF-8', $enc);
+                if (@iconv('utf-8', 'utf-8//IGNORE', $_str) === $_str) {
+                    return $_str;
+                }
+            }
+        }
+        return utf8_encode($str);
     }
 
     /***************************************************************************/
