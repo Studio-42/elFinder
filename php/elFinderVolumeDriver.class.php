@@ -6878,76 +6878,80 @@ abstract class elFinderVolumeDriver
         );
 
         if (is_dir($path)) {
-            foreach (self::localScandir($path) as $name) {
-                $p = $path . DIRECTORY_SEPARATOR . $name;
-                if (!is_readable($p)) {
-                    // Perhaps a symbolic link to open_basedir restricted location
-                    self::localRmdirRecursive($p);
-                    $res['symlinks'][] = $p;
-                    $res['rmNames'][] = $name;
-                    continue;
-                }
-                if ($chkSymlink && is_link($p)) {
-                    self::localRmdirRecursive($p);
-                    $res['symlinks'][] = $p;
-                    $res['rmNames'][] = $name;
-                    continue;
-                }
-                $isDir = is_dir($p);
-                if ($chkName && !$this->nameAccepted($name, $isDir)) {
-                    self::localRmdirRecursive($p);
-                    $res['names'][] = $p;
-                    $res['rmNames'][] = $name;
-                    continue;
-                }
-                if ($chkWritable && !$this->attr($p, 'write', null, $isDir)) {
-                    self::localRmdirRecursive($p);
-                    $res['writables'][] = $p;
-                    $res['rmNames'][] = $name;
-                    continue;
-                }
-                if ($isDir) {
-                    $cRes = $this->checkExtractItems($p, $checks);
-                    foreach ($cRes as $k => $v) {
-                        if (is_array($v)) {
-                            $res[$k] = array_merge($res[$k], $cRes[$k]);
-                        } else {
-                            $res[$k] += $cRes[$k];
-                        }
+            $files = self::localScandir($path);
+        } else {
+            $files = array(basename($path));
+            $path = dirname($path);
+        }
+
+        foreach ($files as $name) {
+            $p = $path . DIRECTORY_SEPARATOR . $name;
+            $utf8Name = elFinder::$instance->utf8Encode($name);
+            if ($name !== $utf8Name) {
+                $fsSame = false;
+                if ($this->encoding) {
+                    // test as fs encoding
+                    $_utf8 = @iconv($this->encoding, 'utf-8//IGNORE', $name);
+                    if (@iconv('utf-8', $this->encoding.'//IGNORE', $_utf8) === $name) {
+                        $fsSame = true;
+                        $utf8Name = $_utf8;
+                    } else {
+                        $_name = $this->convEncIn($utf8Name, true);
                     }
                 } else {
-                    if ($chkMime && ($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && !$this->allowPutMime($mimeByName)) {
-                        self::localRmdirRecursive($p);
-                        $res['mimes'][] = $p;
-                        $res['rmNames'][] = $name;
-                        continue;
-                    }
-                    $res['totalSize'] += (int)sprintf('%u', filesize($p));
+                    $_name = $utf8Name;
+                }
+                if (!$fsSame && rename($p, $path . DIRECTORY_SEPARATOR . $_name)) {
+                    $name = $_name;
+                    $p = $path . DIRECTORY_SEPARATOR . $name;
                 }
             }
-            $res['rmNames'] = array_unique($res['rmNames']);
-        } else {
-            $name = basename($path);
-            if ($chkSymlink && is_link($path)) {
-                unlink($path);
-                $res['symlinks'][] = $path;
-                $res['rmNames'][] = basename($path);
-            } else if ($chkName && !$this->nameAccepted($name, false)) {
-                unlink($path);
-                $res['names'][] = $path;
-                $res['rmNames'][] = $name;
-            } else if ($chkWritable && !$this->attr($path, 'write', null, false)) {
-                unlink($path);
-                $res['writables'][] = $path;
-                $res['rmNames'][] = $name;
-            } else if ($chkMime && ($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && !$this->allowPutMime($mimeByName)) {
-                unlink($path);
-                $res['mimes'][] = $path;
-                $res['rmNames'][] = $name;
+            if (!is_readable($p)) {
+                // Perhaps a symbolic link to open_basedir restricted location
+                self::localRmdirRecursive($p);
+                $res['symlinks'][] = $p;
+                $res['rmNames'][] = $utf8Name;
+                continue;
+            }
+            if ($chkSymlink && is_link($p)) {
+                self::localRmdirRecursive($p);
+                $res['symlinks'][] = $p;
+                $res['rmNames'][] = $utf8Name;
+                continue;
+            }
+            $isDir = is_dir($p);
+            if ($chkName && !$this->nameAccepted($name, $isDir)) {
+                self::localRmdirRecursive($p);
+                $res['names'][] = $p;
+                $res['rmNames'][] = $utf8Name;
+                continue;
+            }
+            if ($chkWritable && !$this->attr($p, 'write', null, $isDir)) {
+                self::localRmdirRecursive($p);
+                $res['writables'][] = $p;
+                $res['rmNames'][] = $utf8Name;
+                continue;
+            }
+            if ($isDir) {
+                $cRes = $this->checkExtractItems($p, $checks);
+                foreach ($cRes as $k => $v) {
+                    if (is_array($v)) {
+                        $res[$k] = array_merge($res[$k], $cRes[$k]);
+                    } else {
+                        $res[$k] += $cRes[$k];
+                    }
+                }
             } else {
-                $res['totalSize'] += (int)sprintf('%u', filesize($path));
+                if ($chkMime && ($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && !$this->allowPutMime($mimeByName)) {
+                    self::localRmdirRecursive($p);
+                    $res['mimes'][] = $p;
+                    $res['rmNames'][] = $utf8Name;
+                    continue;
+                }
+                $res['totalSize'] += (int)sprintf('%u', filesize($p));
             }
         }
+        $res['rmNames'] = array_unique($res['rmNames']);
 
         return $res;
     }
