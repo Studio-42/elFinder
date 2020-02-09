@@ -58,11 +58,12 @@ elFinder.prototype.commands.login = function() {
 	this.exec = function() {
 		var dologin = (! self.value),
 			getAjax = function(opt) {
-				return $.ajax(self.options[dologin? 'loginUrl' : 'logoutUrl'], opt).done(function(res){
+				return $.ajax(self.options[dologin? 'loginUrl' : 'logoutUrl'], opt).done(function(res, rc, xhr){
 					if (res.error) {
 						fm.error(res.error);
 					} else {
 						var val = res.uname? res.uname : '';
+						fm.setCustomHeaderByXhr(xhr); // set custom header of options.parrotHeaders
 						self.title = val? fm.i18n('logout', val) : fm.i18n('cmdlogin');
 						self.className = val? 'login elfinder-button-icon-logout' : 'login';
 						self.update(void(0), val);
