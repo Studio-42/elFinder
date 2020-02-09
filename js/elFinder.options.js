@@ -62,6 +62,13 @@ elFinder.prototype._options = {
 	cors : null,
 
 	/**
+	 * Array of header names to return parrot out in HTTP headers received from the server
+	 * 
+	 * @type Array
+	 */
+	parrotHeaders : [],
+
+	/**
 	 * Maximum number of concurrent connections on request
 	 * 
 	 * @type Number

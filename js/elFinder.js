@@ -2391,6 +2391,8 @@ var elFinder = function(elm, opts, bootCallback) {
 				
 				response.debug && self.responseDebug(response);
 				
+				self.setCustomHeaderByXhr(xhr);
+
 				if (raw) {
 					self.abortXHR(xhr);
 					response && response.debug && self.debug('backend-debug', response);
@@ -4520,6 +4522,12 @@ var elFinder = function(elm, opts, bootCallback) {
 		soundPath = this.baseUrl + soundPath;
 	}
 	
+	if (this.options.parrotHeaders && Array.isArray(this.options.parrotHeaders) && this.options.parrotHeaders.length) {
+		this.parrotHeaders = this.options.parrotHeaders;
+	} else {
+		this.parrotHeaders = [];
+	}
+
 	self.one('opendone', function() {
 		var tm;
 		// attach events to document
@@ -6525,6 +6533,8 @@ elFinder.prototype = {
 			xhr.addEventListener('load', function(e) {
 				var status = xhr.status, res, curr = 0, error = '', errData, errObj;
 				
+				self.setCustomHeaderByXhr(xhr);
+
 				if (status >= 400) {
 					if (status > 500) {
 						error = 'errResponse';
@@ -9923,6 +9933,25 @@ elFinder.prototype = {
 			}
 			xhr.abort();
 			xhr = void 0;
+		}
+	},
+
+	/**
+	 * Sets the custom header by xhr response header with options.parrotHeaders
+	 *
+	 * @param Object xhr
+	 * 
+	 * @return void
+	 */
+	setCustomHeaderByXhr : function(xhr) {
+		var self = this;
+		if (xhr.getResponseHeader && self.parrotHeaders && self.parrotHeaders.length) {
+			$.each(self.parrotHeaders, function(i, h) {
+				var val = xhr.getResponseHeader(h);
+				if (val) {
+					self.customHeaders[h] = val;
+				}
+			});
 		}
 	},
 
