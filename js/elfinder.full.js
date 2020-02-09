@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: 685cde0) (2020-02-08)
+ * Version 2.1.53 (2.1-src Nightly: 777d350) (2020-02-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -2422,6 +2422,8 @@ var elFinder = function(elm, opts, bootCallback) {
 				
 				response.debug && self.responseDebug(response);
 				
+				self.setCustomHeaderByXhr(xhr);
+
 				if (raw) {
 					self.abortXHR(xhr);
 					response && response.debug && self.debug('backend-debug', response);
@@ -4551,6 +4553,12 @@ var elFinder = function(elm, opts, bootCallback) {
 		soundPath = this.baseUrl + soundPath;
 	}
 	
+	if (this.options.parrotHeaders && Array.isArray(this.options.parrotHeaders) && this.options.parrotHeaders.length) {
+		this.parrotHeaders = this.options.parrotHeaders;
+	} else {
+		this.parrotHeaders = [];
+	}
+
 	self.one('opendone', function() {
 		var tm;
 		// attach events to document
@@ -6556,6 +6564,8 @@ elFinder.prototype = {
 			xhr.addEventListener('load', function(e) {
 				var status = xhr.status, res, curr = 0, error = '', errData, errObj;
 				
+				self.setCustomHeaderByXhr(xhr);
+
 				if (status >= 400) {
 					if (status > 500) {
 						error = 'errResponse';
@@ -9958,6 +9968,25 @@ elFinder.prototype = {
 	},
 
 	/**
+	 * Sets the custom header by xhr response header with options.parrotHeaders
+	 *
+	 * @param Object xhr
+	 * 
+	 * @return void
+	 */
+	setCustomHeaderByXhr : function(xhr) {
+		var self = this;
+		if (xhr.getResponseHeader && self.parrotHeaders && self.parrotHeaders.length) {
+			$.each(self.parrotHeaders, function(i, h) {
+				var val = xhr.getResponseHeader(h);
+				if (val) {
+					self.customHeaders[h] = val;
+				}
+			});
+		}
+	},
+
+	/**
 	 * Gets the request identifier
 	 *
 	 * @return  String  The request identifier.
@@ -10264,7 +10293,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 685cde0)';
+elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 777d350)';
 
 
 
@@ -10748,6 +10777,13 @@ elFinder.prototype._options = {
 	 * @type Boolean|null  true|false|null(Auto detect)
 	 */
 	cors : null,
+
+	/**
+	 * Array of header names to return parrot out in HTTP headers received from the server
+	 * 
+	 * @type Array
+	 */
+	parrotHeaders : [],
 
 	/**
 	 * Maximum number of concurrent connections on request
