@@ -10007,7 +10007,7 @@ elFinder.prototype = {
 				if (val) {
 					self.customHeaders[h] = val;
 					self.sessionStorage('core-ph:'+h, val);
-				} else {
+				} else if (typeof val === 'string') {
 					delete self.customHeaders[h];
 					self.sessionStorage('core-ph:'+h, null);
 				}
