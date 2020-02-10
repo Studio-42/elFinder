@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: 777d350) (2020-02-10)
+ * Version 2.1.53 (2.1-src Nightly: c876366) (2020-02-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -4555,6 +4555,13 @@ var elFinder = function(elm, opts, bootCallback) {
 	
 	if (this.options.parrotHeaders && Array.isArray(this.options.parrotHeaders) && this.options.parrotHeaders.length) {
 		this.parrotHeaders = this.options.parrotHeaders;
+		// check sessionStorage
+		$.each(this.parrotHeaders, function(i, h) {
+			var v = self.sessionStorage('core-ph:' + h);
+			if (v) {
+				self.customHeaders[h] = v;
+			}
+		});
 	} else {
 		this.parrotHeaders = [];
 	}
@@ -7541,7 +7548,56 @@ elFinder.prototype = {
 		}
 		return retval;
 	},
-	
+
+	/**
+	 * Set/get data into/from sessionStorage
+	 *
+	 * @param  String       key
+	 * @param  String|void  value
+	 * @return String|null
+	 */
+	sessionStorage : function(key, val) {
+		var self   = this,
+			s, retval, t;
+
+		try {
+			s = window.sessionStorage;
+		} catch(e) {}
+
+		if (!s) {
+			return;
+		}
+
+		if (val === null) {
+			return s.removeItem(key);
+		}
+
+		if (val !== void(0)) {
+			t = typeof val;
+			if (t !== 'string' && t !== 'number') {
+				val = JSON.stringify(val);
+			}
+			try {
+				s.setItem(key, val);
+			} catch (e) {
+				try {
+					s.clear();
+					s.setItem(key, val);
+				} catch (e) {
+					self.debug('error', e.toString());
+				}
+			}
+		}
+		retval = s.getItem(key);
+
+		if (retval && (retval.substr(0,1) === '{' || retval.substr(0,1) === '[')) {
+			try {
+				return JSON.parse(retval);
+			} catch(e) {}
+		}
+		return retval;
+	},
+
 	/**
 	 * Get/set cookie
 	 *
@@ -9981,6 +10037,10 @@ elFinder.prototype = {
 				var val = xhr.getResponseHeader(h);
 				if (val) {
 					self.customHeaders[h] = val;
+					self.sessionStorage('core-ph:'+h, val);
+				} else {
+					delete self.customHeaders[h];
+					self.sessionStorage('core-ph:'+h, null);
 				}
 			});
 		}
@@ -10293,7 +10353,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 777d350)';
+elFinder.prototype.version = '2.1.53 (2.1-src Nightly: c876366)';
 
 
 

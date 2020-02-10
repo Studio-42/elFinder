@@ -172,6 +172,16 @@ class elFinderConnector
     }
 
     /**
+     * Sets the header.
+     *
+     * @param array|string  $value HTTP header(s)
+     */
+    public function setHeader($value)
+    {
+        $this->header = $value;
+    }
+
+    /**
      * Output json
      *
      * @param  array  data to output
