@@ -84,7 +84,6 @@
                     url : 'fullscreen.html'
                 }
             },
-	    parrotHeaders: ['X-elFinder-Token'],
             lang: lang
         },
         
