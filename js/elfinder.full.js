@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: 15e5793) (2020-02-10)
+ * Version 2.1.53 (2.1-src Nightly: d711f33) (2020-02-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -2011,7 +2011,8 @@ var elFinder = function(elm, opts, bootCallback) {
 				data : { cmd : 'url', target : hash, options : { onetime: 1 } },
 				preventDefault : true,
 				options: {async: async},
-				notify: {type : 'file', cnt : 1, hideCnt : true}
+				notify: {type : 'file', cnt : 1, hideCnt : true},
+				progressBar: opts.progressBar
 			}).done(function(data) {
 				dfrd.resolve(filter(data.url || ''));
 			}).fail(function() {
@@ -2023,7 +2024,8 @@ var elFinder = function(elm, opts, bootCallback) {
 					data : { cmd : 'url', target : hash, options : { temporary: temp? 1 : 0 } },
 					preventDefault : true,
 					options: {async: async},
-					notify: async? {type : temp? 'file' : 'url', cnt : 1, hideCnt : true} : {}
+					notify: async? {type : temp? 'file' : 'url', cnt : 1, hideCnt : true} : {},
+					progressBar: opts.progressBar
 				})
 				.done(function(data) {
 					file.url = data.url || '';
@@ -2079,17 +2081,19 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * 
 	 * @param  String  file hash
 	 * @param  Boolean for download link
+	 * @param      Object  requestOpts   The request options
 	 * @return String
 	 */
-	this.openUrl = function(hash, download) {
+	this.openUrl = function(hash, download, callback, requestOpts) {
 		var file = files[hash],
-			url  = '';
+			url  = '',
+			onetimeSize = (requestOpts || {}).onetimeSize || (5 * 1024 * 1024);
 		
 		if (!file || !file.read) {
 			return '';
 		}
 		
-		if (!download) {
+		if (!download || download === 'sameorigin') {
 			if (file.url) {
 				if (file.url != 1) {
 					url = file.url;
@@ -2097,27 +2101,69 @@ var elFinder = function(elm, opts, bootCallback) {
 			} else if (cwdOptions.url && file.hash.indexOf(self.cwd().volumeid) === 0) {
 				url = cwdOptions.url + $.map(this.path2array(hash), function(n) { return encodeURIComponent(n); }).slice(1).join('/');
 			}
-			if (url) {
-				url += (url.match(/\?/)? '&' : '?') + '_'.repeat((url.match(/[\?&](_+)t=/g) || ['&t=']).sort().shift().match(/[\?&](_*)t=/)[1].length + 1) + 't=' + (file.ts || parseInt(+new Date()/1000));
-				return url;
+			if (!download || this.isSameOrigin(url)) {
+				if (url) {
+					url += (url.match(/\?/)? '&' : '?') + '_'.repeat((url.match(/[\?&](_+)t=/g) || ['&t=']).sort().shift().match(/[\?&](_*)t=/)[1].length + 1) + 't=' + (file.ts || parseInt(+new Date()/1000));
+					if (callback) {
+						callback(url);
+						return;
+					} else {
+						return url;
+					}
+				}
 			}
 		}
 		
-		url = this.options.url;
-		url = url + (url.indexOf('?') === -1 ? '?' : '&')
-			+ (this.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')
-			+ '&target=' + file.hash
-			+ '&_t=' + (file.ts || parseInt(+new Date()/1000));
-		
-		if (download) {
-			url += '&download=1';
+		if (callback && this.hasParrotHeaders()) {
+			if (!requestOpts) {
+				requestOpts = {};
+			} else {
+				delete requestOpts.onetimeSize;
+			}
+			if (!requestOpts.onetime && !requestOpts.temporary && file.size > onetimeSize) {
+				if (file.mime.match(/^video|audio/)) {
+					requestOpts.temporary = true;
+				} else {
+					requestOpts.onetime = true;
+				}
+			}
+			if (requestOpts.onetime || requestOpts.temporary) {
+				return this.url(file.hash, Object.assign({
+					async: true
+				}, requestOpts)).done(function(url) {
+					callback(url);
+				}).fail(function() {
+					callback('');
+				});
+			} else {
+				return this.getContents(hash, 'blob', requestOpts).done(function(blob){
+					url = (window.URL || window.webkitURL).createObjectURL(blob);
+					callback(url);
+				}).fail(function() {
+					callback('');
+				});
+			}
+		} else {
+			url = this.options.url;
+			url = url + (url.indexOf('?') === -1 ? '?' : '&')
+				+ (this.oldAPI ? 'cmd=open&current='+file.phash : 'cmd=file')
+				+ '&target=' + file.hash
+				+ '&_t=' + (file.ts || parseInt(+new Date()/1000));
+			
+			if (download === true) {
+				url += '&download=1';
+			}
+			
+			$.each(this.customData, function(key, val) {
+				url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(val);
+			});
+			if (callback) {
+				callback(url);
+				return;
+			} else {
+				return url;
+			}
 		}
-		
-		$.each(this.customData, function(key, val) {
-			url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(val);
-		});
-		
-		return url;
 	};
 	
 	/**
@@ -2279,8 +2325,14 @@ var elFinder = function(elm, opts, bootCallback) {
 			deffail  = !(isBinary || opts.preventDefault || opts.preventFail),
 			// call default success callback ?
 			defdone  = !(isBinary || opts.preventDefault || opts.preventDone),
+			// current progress of receive data
+			prog     = opts.progressVal || 20,
+			// timer of fake progress
+			progTm   = null,
+			// whether the notification dialog is currently displayed
+			hasNotify= false,
 			// options for notify dialog
-			notify   = Object.assign({}, opts.notify),
+			notify   = !opts.progressBar? Object.assign({progress: prog}, opts.notify) : {},
 			// make cancel button
 			cancel   = !!opts.cancel,
 			// do not normalize data - return as is
@@ -2306,7 +2358,33 @@ var elFinder = function(elm, opts, bootCallback) {
 				cache    : (self.api >= 2.1029), // api >= 2.1029 has unique request ID
 				data     : data,
 				headers  : this.customHeaders,
-				xhrFields: this.xhrFields
+				xhrFields: this.xhrFields,
+				progress : function(e) {
+					var p = e.loaded / e.total * 100;
+					progTm && clearTimeout(progTm);
+					if (opts.progressBar) {
+						try {
+							opts.progressBar.width(p + '%');
+						} catch(e) {}
+					} else {
+						if (hasNotify && notify.type) {
+							if (prog < p) {
+								self.notify({
+									type: notify.type,
+									progress: p - prog,
+									cnt: 0,
+									hideCnt: notify.hideCnt
+								});
+								prog = p;
+							}
+						}
+					}
+					if (opts.progress) {
+						try {
+							opts.progress(e);
+						} catch(e) {}
+					}
+				}
 			}, opts.options || {}),
 			/**
 			 * Default success handler. 
@@ -2777,10 +2855,14 @@ var elFinder = function(elm, opts, bootCallback) {
 						opts.eachCancel && (notify.id = +new Date());
 					}
 					timeout = setTimeout(function() {
+						// start fake count up
+						progTm = setTimeout(progFakeUp, 1000);
 						self.notify(notify);
+						hasNotify = true;
 						dfrd.always(function() {
 							notify.cnt = -(parseInt(notify.cnt)||0);
 							self.notify(notify);
+							hasNotify = false
 						});
 					}, self.notifyDelay);
 					
@@ -2802,6 +2884,21 @@ var elFinder = function(elm, opts, bootCallback) {
 						requestQueue.push(request);
 					}
 					return dfrd;
+				}
+			},
+			progFakeUp = function() {
+				if (hasNotify && progTm) {
+					progTm = null;
+					self.notify({
+						type: notify.type,
+						progress: 1,
+						cnt: 0,
+						hideCnt: notify.hideCnt
+					});
+					prog++;
+					if (prog < 80) {
+						progTm = setTimeout(progFakeUp, 500);
+					}
 				}
 			},
 			bindData = {opts: opts, result: true},
@@ -3994,7 +4091,12 @@ var elFinder = function(elm, opts, bootCallback) {
 			if (!self.UA.IE) {
 				// keep native xhr object for handling property responseURL
 				opts._xhr = new XMLHttpRequest();
-				opts.xhr = function() { return opts._xhr; };
+				opts.xhr = function() { 
+					if (opts.progress) {
+						opts._xhr.addEventListener('progress', opts.progress); 
+					}
+					return opts._xhr;
+				};
 			}
 			return $.ajax(opts);
 		};
@@ -4066,9 +4168,10 @@ var elFinder = function(elm, opts, bootCallback) {
 	 *
 	 * @param      String  hash          The hash
 	 * @param      String  responseType  'blob' or 'arraybuffer' (default)
+	 * @param      Object  requestOpts   The request options
 	 * @return     arraybuffer|blob  The contents.
 	 */
-	this.getContents = function(hash, responseType) {
+	this.getContents = function(hash, responseType, requestOpts) {
 		var self = this,
 			dfd = $.Deferred(),
 			type = responseType || 'arraybuffer',
@@ -4082,7 +4185,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		if (!self.isSameOrigin(url)) {
 			url = self.openUrl(hash, true);
 		}
-		req = self.request({
+		req = self.request(Object.assign({
 			data    : {cmd : 'get'},
 			options : {
 				url: url,
@@ -4091,8 +4194,14 @@ var elFinder = function(elm, opts, bootCallback) {
 				dataType : 'binary',
 				responseType : type,
 				processData: false
-			}
-		})
+			},
+			notify : {
+				type: 'file',
+				cnt: 1,
+				hideCnt: true
+			},
+			cancel : true
+		}, requestOpts || {}))
 		.fail(function() {
 			dfd.reject();
 		})
@@ -4103,6 +4212,51 @@ var elFinder = function(elm, opts, bootCallback) {
 		return dfd;
 	};
 
+	/**
+	 * Gets the binary by url.
+	 *
+	 * @param      {Object}    opts      The options
+	 * @param      {Function}  callback  The callback
+	 * @param      {Object}    requestOpts The request options
+	 * @return     arraybuffer|blob  The contents.
+	 */
+	this.getBinaryByUrl = function(opts, callback, requestOpts) {
+		var self = this,
+			dfd = $.Deferred(),
+			url, req;
+
+		dfd.fail(function() {
+			req && req.state() === 'pending' && req.reject();
+		});
+
+		req = self.request(Object.assign({
+			data    : {cmd : 'get'},
+			options : Object.assign({
+				type: 'get',
+				cache : true,
+				dataType : 'binary',
+				responseType : 'blob',
+				processData: false
+			}, opts)
+		}, requestOpts || {}))
+		.fail(function() {
+			dfd.reject();
+		})
+		.done(function(data) {
+			callback && callback(data);
+			dfd.resolve(data);
+		});
+
+		return dfd;
+	};
+
+	/**
+	 * Gets the mimetype.
+	 *
+	 * @param      {string}  name     The name
+	 * @param      {string}  orgMime  The organization mime
+	 * @return     {string}  The mimetype.
+	 */
 	this.getMimetype = function(name, orgMime) {
 		var mime = orgMime,
 			ext, m;
@@ -4148,9 +4302,10 @@ var elFinder = function(elm, opts, bootCallback) {
 		 *
 		 * @param      String  target      target file.hash
 		 * @param      Object  needHashes  need hash lib names
+		 * @param      Object  requestOpts The request options
 		 * @return     Object  hashes with lib name as key
 		 */
-		self.getContentsHashes = function(target, needHashes, hashOpts) {
+		self.getContentsHashes = function(target, needHashes, hashOpts, requestOpts) {
 			var dfd = $.Deferred(),
 				needs = self.arrayFlip(needHashes || ['md5'], true),
 				libs = [],
@@ -4167,7 +4322,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			});
 
 			if (Object.keys(hashLibs).length) {
-				req = self.getContents(target).done(function(arrayBuffer) {
+				req = self.getContents(target, 'arraybuffer', requestOpts).done(function(arrayBuffer) {
 					if (needs.md5 && hashLibs.SparkMD5) {
 						jobs.push((function() {
 							var job = $.Deferred();
@@ -8312,9 +8467,19 @@ elFinder.prototype = {
 			cancel   = opts.cancel,
 			clhover  = 'ui-state-hover',
 			close    = function() {
+				var prog = notify.find('.elfinder-notify-progress'),
+					close = function() {
+						notify.remove();
+						!ndialog.children().length && ndialog.elfinderdialog('close');
+					};
 				notify._esc && $(document).off('keydown', notify._esc);
-				notify.remove();
-				!ndialog.children().length && ndialog.elfinderdialog('close');
+				if (progress < 100) {
+					prog.animate({
+						width : '100%'
+					}, 10, close);
+				} else {
+					close();
+				}
 			},
 			cnt, total, prc;
 
@@ -8338,6 +8503,7 @@ elFinder.prototype = {
 					});
 				notify.children('div.elfinder-notify-cancel').append(button);
 			}
+			ndialog.trigger('resize');
 		} else if (typeof opts.msg !== 'undefined') {
 			notify.children('span.elfinder-notify-msg').html(msg);
 		}
@@ -10047,6 +10213,25 @@ elFinder.prototype = {
 	},
 
 	/**
+	 * Determines if parrot headers.
+	 *
+	 * @return     {boolean}  True if parrot headers, False otherwise.
+	 */
+	hasParrotHeaders : function() {
+		var res = false,
+			phs = this.parrotHeaders;
+		if (Object.keys(this.customHeaders).length) {
+			for (var i = 0; i < phs.length; i++) {
+				if (this.customHeaders[phs[i]]) {
+					res = true;
+					break;
+				}
+			}
+		}
+		return res;
+	},
+
+	/**
 	 * Gets the request identifier
 	 *
 	 * @return  String  The request identifier.
@@ -10353,7 +10538,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 15e5793)';
+elFinder.prototype.version = '2.1.53 (2.1-src Nightly: d711f33)';
 
 
 
@@ -10397,66 +10582,115 @@ if ($.ui) {
 
  /**
  *
- * jquery.binarytransport.js
+ * jquery.binarytransport
  *
  * @description. jQuery ajax transport for making binary data type requests.
- * @version 1.0 
- * @author Henry Algus <henryalgus@gmail.com>
  *
  */
 
-// use this transport for "binary" data type
-$.ajaxTransport('+binary', function(options, originalOptions, jqXHR) {
-	// check for conditions and support for blob / arraybuffer response type
-	if (window.FormData && ((options.dataType && (options.dataType == 'binary')) || (options.data && ((window.ArrayBuffer && options.data instanceof ArrayBuffer) || (window.Blob && options.data instanceof Blob)))))
-	{
-		var xhr;
-		return {
-			// create new XMLHttpRequest
-			send: function(headers, callback){
-				// setup all variables
-				xhr = new XMLHttpRequest();
-				var url = options.url,
-					type = options.type,
-					async = options.async || true,
-					// blob or arraybuffer. Default is blob
-					dataType = options.responseType || 'blob',
-					data = options.data || null,
-					username = options.username,
-					password = options.password;
-					
-				xhr.addEventListener('load', function(){
-					var data = {};
-					data[options.dataType] = xhr.response;
-					// make callback and send data
-					callback(xhr.status, xhr.statusText, data, xhr.getAllResponseHeaders());
-				});
+(function($, undefined) {
+	
+	// use this transport for "binary" data type
+	$.ajaxTransport("+binary", function(options, originalOptions, jqXHR) {
+		// check for conditions and support for blob / arraybuffer response type
+		if (window.FormData && ((options.dataType && (options.dataType == 'binary')) || (options.data && ((window.ArrayBuffer && options.data instanceof ArrayBuffer) || (window.Blob && options.data instanceof Blob))))) {
+			var callback;
 
-				xhr.open(type, url, async, username, password);
-				
-				// setup custom headers
-				for (var i in headers ) {
-					xhr.setRequestHeader(i, headers[i] );
-				}
+			// Cross domain only allowed if supported through XMLHttpRequest
+			return {
+				send: function( headers, complete ) {
+					var i,
+						dataType = options.responseType || "blob",
+						xhr = options.xhr();
 
-				// setuo xhrFields
-				if (options.xhrFields) {
-					for (var key in options.xhrFields) {
-						if (key in xhr) {
-							xhr[key] = options.xhrFields[key];
+					xhr.open(
+						options.type,
+						options.url,
+						options.async,
+						options.username,
+						options.password
+					);
+
+					// Apply custom fields if provided
+					if ( options.xhrFields ) {
+						for ( i in options.xhrFields ) {
+							xhr[ i ] = options.xhrFields[ i ];
 						}
 					}
-				}
 
-				xhr.responseType = dataType;
-				xhr.send(data);
-			},
-			abort: function(){
-				xhr.abort();
-			}
-		};
-	}
-});
+					// Override mime type if needed
+					if ( options.mimeType && xhr.overrideMimeType ) {
+						xhr.overrideMimeType( options.mimeType );
+					}
+
+					// X-Requested-With header
+					// For cross-domain requests, seeing as conditions for a preflight are
+					// akin to a jigsaw puzzle, we simply never set it to be sure.
+					// (it can always be set on a per-request basis or even using ajaxSetup)
+					// For same-domain requests, won't change header if already provided.
+					if ( !options.crossDomain && !headers[ "X-Requested-With" ] ) {
+						headers[ "X-Requested-With" ] = "XMLHttpRequest";
+					}
+
+					// Set headers
+					for ( i in headers ) {
+						xhr.setRequestHeader( i, headers[ i ] );
+					}
+
+					// Callback
+					callback = function( type ) {
+						return function() {
+							if ( callback ) {
+								callback = xhr.onload = xhr.onerror = xhr.onabort = xhr.ontimeout = null;
+
+								if ( type === "abort" ) {
+									xhr.abort();
+								} else if ( type === "error" ) {
+									complete(
+										xhr.status,
+										xhr.statusText
+									);
+								} else {
+									var data = {};
+									data[options.dataType] = xhr.response;
+									complete(
+										xhr.status,
+										xhr.statusText,
+										data,
+										xhr.getAllResponseHeaders()
+									);
+								}
+							}
+						};
+					};
+
+					// Listen to events
+					xhr.onload = callback();
+					xhr.onabort = xhr.onerror = xhr.ontimeout = callback( "error" );
+
+					// Create the abort callback
+					callback = callback( "abort" );
+
+					try {
+						xhr.responseType = dataType;
+						// Do send the request (this may raise an exception)
+						xhr.send( options.data || null );
+					} catch ( e ) {
+						if ( callback ) {
+							throw e;
+						}
+					}
+				},
+
+				abort: function() {
+					if ( callback ) {
+						callback();
+					}
+				}
+			};
+		}
+	});
+})(window.jQuery);
 
 /*!
  * jQuery UI Touch Punch 0.2.3
@@ -17325,7 +17559,7 @@ $.fn.elfindercwd = function(fm, options) {
 				});
 			})
 			.bind('viewchange', function() {
-				var l      = fm.storage('view') == 'list',
+				var l      = fm.viewType != 'list',
 					allsel = cwd.hasClass('elfinder-cwd-allselected');
 				
 				if (l != list) {
@@ -23203,28 +23437,8 @@ elFinder.prototype.commands.download = function() {
 						preventDefault : true
 					}).done(function(e) {
 						var zipdl, dialog, btn = {}, dllink, form, iframe, m,
-							uniq = 'dlw' + (+new Date());
-						if (e.error) {
-							fm.error(e.error);
-							dfd.resolve();
-						} else if (e.zipdl) {
-							zipdl = e.zipdl;
-							if (dlName) {
-								m = fm.splitFileExtention(zipdl.name || '');
-								dlName += m[1]? ('.' + m[1]) : '.zip';
-							} else {
-								dlName = zipdl.name;
-							}
-							if ((html5dl && (!fm.UA.Safari || fm.isSameOrigin(fm.options.url))) || linkdl) {
-								url = fm.options.url + (fm.options.url.indexOf('?') === -1 ? '?' : '&')
-								+ 'cmd=zipdl&download=1';
-								$.each([hashes[0], zipdl.file, dlName, zipdl.mime], function(key, val) {
-									url += '&targets%5B%5D='+encodeURIComponent(val);
-								});
-								$.each(fm.customData, function(key, val) {
-									url += '&'+encodeURIComponent(key)+'='+encodeURIComponent(val);
-								});
-								url += '&'+encodeURIComponent(dlName);
+							uniq = 'dlw' + (+new Date()),
+							zipdlFn = function(url) {
 								dllink = $('<a/>')
 									.attr('href', url)
 									.attr('download', fm.escape(dlName))
@@ -23250,6 +23464,40 @@ elFinder.prototype.commands.download = function() {
 								} else {
 									click(dllink.hide().appendTo('body').get(0));
 									dllink.remove();
+								}
+							};
+						if (e.error) {
+							fm.error(e.error);
+							dfd.resolve();
+						} else if (e.zipdl) {
+							zipdl = e.zipdl;
+							if (dlName) {
+								m = fm.splitFileExtention(zipdl.name || '');
+								dlName += m[1]? ('.' + m[1]) : '.zip';
+							} else {
+								dlName = zipdl.name;
+							}
+							if ((html5dl && (!fm.UA.Safari || fm.isSameOrigin(fm.options.url))) || linkdl) {
+								url = fm.options.url + (fm.options.url.indexOf('?') === -1 ? '?' : '&')
+								+ 'cmd=zipdl&download=1';
+								$.each([hashes[0], zipdl.file, dlName, zipdl.mime], function(key, val) {
+									url += '&targets%5B%5D='+encodeURIComponent(val);
+								});
+								$.each(fm.customData, function(key, val) {
+									url += '&'+encodeURIComponent(key)+'='+encodeURIComponent(val);
+								});
+								url += '&'+encodeURIComponent(dlName);
+								if (fm.hasParrotHeaders()) {
+									fm.getBinaryByUrl({url: url}, function(blob) {
+										if (blob instanceof Blob) {
+											url = (window.URL || window.webkitURL).createObjectURL(blob);
+											zipdlFn(url);
+										} else {
+											fm.error(['errUploadTransfer', fm.i18n('kindZIP')]);
+										}
+									});
+								} else {
+									zipdlFn(url);
 								}
 							} else {
 								form = $('<form action="'+fm.options.url+'" method="post" target="'+uniq+'" style="display:none"/>')
@@ -23313,7 +23561,7 @@ elFinder.prototype.commands.download = function() {
 				}
 			},
 			reqids = [],
-			link, html5dl, fileCnt, clickEv, cid, ntftm, reqid;
+			link, html5dl, fileCnt, clickEv, cid, ntftm, reqid, getUrlDfrd, urls;
 			
 		if (!files.length) {
 			return dfrd.reject();
@@ -23350,65 +23598,78 @@ elFinder.prototype.commands.download = function() {
 			return dfrd;
 		} else {
 			reqids = [];
-			for (i = 0; i < files.length; i++) {
-				url = fm.openUrl(files[i].hash, true);
-				if (dlntf && url.substr(0, fm.options.url.length) === fm.options.url) {
-					reqid = fm.getRequestId();
-					reqids.push(reqid);
-					url += '&cpath=' + cpath + '&reqid=' + reqid;
-					ntftm = setTimeout(function() {
-						fm.notify({
-							type : 'download',
-							cnt : 1,
-							cancel : (fm.UA.IE || fm.UA.Edge)? void(0) : function() {
-								if (reqids.length) {
-									$.each(reqids, function() {
-										fm.request({
-											data: {
-												cmd: 'abort',
-												id: this
-											},
-											preventDefault: true
+			getUrlDfrd = $.Deferred().done(function(urls) {
+				for (i = 0; i < urls.length; i++) {
+					url = urls[i];
+					if (dlntf && url.substr(0, fm.options.url.length) === fm.options.url) {
+						reqid = fm.getRequestId();
+						reqids.push(reqid);
+						url += '&cpath=' + cpath + '&reqid=' + reqid;
+						ntftm = setTimeout(function() {
+							fm.notify({
+								type : 'download',
+								cnt : 1,
+								cancel : (fm.UA.IE || fm.UA.Edge)? void(0) : function() {
+									if (reqids.length) {
+										$.each(reqids, function() {
+											fm.request({
+												data: {
+													cmd: 'abort',
+													id: this
+												},
+												preventDefault: true
+											});
 										});
-									});
+									}
+									reqids = [];
 								}
-								reqids = [];
-							}
-						});
-					}, fm.notifyDelay);
-					checkCookie(reqid);
-				}
-				if (html5dl && (!fm.UA.Safari || fm.isSameOrigin(url))) {
-					click(link.attr('href', url)
-						.attr('download', fm.escape(files[i].name))
-						.get(0)
-					);
-				} else {
-					if (fm.UA.Mobile) {
-						setTimeout(function(){
-							if (! window.open(url)) {
-								fm.error('errPopup');
-								ntftm && cleaerTimeout(ntftm);
-								closeNotify();
-							}
-						}, 100);
+							});
+						}, fm.notifyDelay);
+						checkCookie(reqid);
+					}
+					if (html5dl && (!fm.UA.Safari || fm.isSameOrigin(url))) {
+						click(link.attr('href', url)
+							.attr('download', fm.escape(files[i].name))
+							.get(0)
+						);
 					} else {
-						iframes += '<iframe class="downloader" id="downloader-' + files[i].hash+'" style="display:none" src="'+url+'"/>';
+						if (fm.UA.Mobile) {
+							setTimeout(function(){
+								if (! window.open(url)) {
+									fm.error('errPopup');
+									ntftm && cleaerTimeout(ntftm);
+									closeNotify();
+								}
+							}, 100);
+						} else {
+							iframes += '<iframe class="downloader" id="downloader-' + files[i].hash+'" style="display:none" src="'+url+'"/>';
+						}
 					}
 				}
-			}
-			link.remove();
-			$(iframes)
-				.appendTo('body')
-				.ready(function() {
-					setTimeout(function() {
-						$(iframes).each(function() {
-							$('#' + $(this).attr('id')).remove();
-						});
-					}, 20000 + (10000 * i)); // give 20 sec + 10 sec for each file to be saved
+				link.remove();
+				$(iframes)
+					.appendTo('body')
+					.ready(function() {
+						setTimeout(function() {
+							$(iframes).each(function() {
+								$('#' + $(this).attr('id')).remove();
+							});
+						}, 20000 + (10000 * i)); // give 20 sec + 10 sec for each file to be saved
+					});
+				fm.trigger('download', {files : files});
+				dfrd.resolve();
+			});
+			fileCnt = files.length;
+			urls = [];
+			for (i = 0; i < files.length; i++) {
+				fm.openUrl(files[i].hash, true, function(v) {
+					v && urls.push(v);
+					if (--fileCnt < 1) {
+						getUrlDfrd.resolve(urls);
+					}
 				});
-			fm.trigger('download', {files : files});
-			return dfrd.resolve();
+			}
+			return dfrd;
 		}
 	};
 
@@ -26035,7 +26296,7 @@ elFinder.prototype.commands.hide = function() {
 			customActions = [],
 			style = '',
 			hashClass = 'elfinder-font-mono elfinder-info-hash',
-			size, tmb, file, title, dcnt, rdcnt, path, getHashAlgorisms, hideItems;
+			size, tmb, file, title, dcnt, rdcnt, path, getHashAlgorisms, hideItems, hashProg;
 			
 		if (!cnt) {
 			return $.Deferred().reject();
@@ -26147,26 +26408,29 @@ elFinder.prototype.commands.hide = function() {
 				getHashAlgorisms = [];
 				$.each(fm.storage('hashchekcer') || o.showHashAlgorisms, function(i, n) {
 					if (!file[n]) {
-					content.push(row.replace(l, fm.i18n(n)).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', n)));
+						content.push(row.replace(l, fm.i18n(n)).replace(v, tpl.spinner.replace('{text}', msg.calc).replace('{name}', n)));
 						getHashAlgorisms.push(n);
 					} else {
 						content.push(row.replace(l, fm.i18n(n)).replace(v, file[n]).replace('{class}', hashClass));
 					}
 				});
 
-				reqs.push(
-					fm.getContentsHashes(file.hash, getHashAlgorisms, o.showHashOpts).progress(function(hashes) {
-						$.each(getHashAlgorisms, function(i, n) {
-							if (hashes[n]) {
-								replSpinner(hashes[n], n, hashClass);
-							}
-						});
-					}).always(function() {
-						$.each(getHashAlgorisms, function(i, n) {
-							replSpinner(msg.unknown, n);
-						});
-					})
-				);
+				if (getHashAlgorisms.length) {
+					hashProg = $('<div class="elfinder-quicklook-info-progress"/>');
+					reqs.push(
+						fm.getContentsHashes(file.hash, getHashAlgorisms, o.showHashOpts, { progressBar : hashProg }).progress(function(hashes) {
+							$.each(getHashAlgorisms, function(i, n) {
+								if (hashes[n]) {
+									replSpinner(hashes[n], n, hashClass);
+								}
+							});
+						}).always(function() {
+							$.each(getHashAlgorisms, function(i, n) {
+								replSpinner(msg.unknown, n);
+							});
+						})
+					);
+				}
 			}
 			
 			// Add custom info fields
@@ -26221,6 +26485,10 @@ elFinder.prototype.commands.hide = function() {
 		dialog.attr('id', id).one('mousedown', '.elfinder-info-path', function() {
 			$(this).html(applyZWSP($(this).html(), true));
 		});
+
+		if (getHashAlgorisms.length) {
+			hashProg.appendTo(dialog.find('.'+spclass+'-'+getHashAlgorisms[0]).parent());
+		}
 
 		if (fm.UA.Mobile && $.fn.tooltip) {
 			dialog.children('.ui-dialog-content .elfinder-info-title').tooltip({
@@ -26843,12 +27111,11 @@ elFinder.prototype.commands.netunmount = function() {
 
 	this.getstate = function(select) {
 		var sel = this.files(select),
-			cnt = sel.length,
-			fileDisable = (!fm.option('url') && !fm.isCommandEnabled('file'))? true : false;
+			cnt = sel.length;
 		
 		return cnt == 1 
-			? (sel[0].read && (!fileDisable || sel[0].mime === 'directory') ? 0 : -1)
-			: (cnt && !fm.UA.Mobile) ? ($.grep(sel, function(file) { return fileDisable || file.mime == 'directory' || ! file.read ? false : true;}).length == cnt ? 0 : -1) : -1;
+			? (sel[0].read ? 0 : -1)
+			: (cnt && !fm.UA.Mobile) ? ($.grep(sel, function(file) { return file.mime == 'directory' || ! file.read ? false : true;}).length == cnt ? 0 : -1) : -1;
 	};
 	
 	this.exec = function(hashes, cOpts) {
@@ -26904,8 +27171,7 @@ elFinder.prototype.commands.netunmount = function() {
 			}
 	
 			// open files
-			link     = $('<a>').hide().appendTo($('body')),
-			html5dl  = (typeof link.get(0).download === 'string');
+			html5dl  = (typeof $('<a>').get(0).download === 'string');
 			cnt = files.length;
 			while (cnt--) {
 				target = 'elf_open_window';
@@ -26916,96 +27182,98 @@ elFinder.prototype.commands.netunmount = function() {
 				}
 				
 				inline = (reg && file.mime.match(reg));
-				url = fm.openUrl(file.hash, !inline);
-				if (fm.UA.Mobile || !inline) {
-					if (html5dl) {
-						if (!inline) {
-							link.attr('download', file.name);
+				fm.openUrl(file.hash, !inline, function(url) {
+					var link = $('<a>').hide().appendTo($('body'));
+					if (fm.UA.Mobile || !inline) {
+						if (html5dl) {
+							if (!inline) {
+								link.attr('download', file.name);
+							} else {
+								link.attr('target', '_blank');
+							}
+							link.attr('href', url).get(0).click();
 						} else {
-							link.attr('target', '_blank');
+							wnd = window.open(url);
+							if (!wnd) {
+								return dfrd.reject('errPopup');
+							}
 						}
-						link.attr('href', url).get(0).click();
 					} else {
-						wnd = window.open(url);
+						getOnly = (typeof opts.method === 'string' && opts.method.toLowerCase() === 'get');
+						if (!getOnly
+							&& url.indexOf(fm.options.url) === 0
+							&& fm.customData
+							&& Object.keys(fm.customData).length
+							// Since playback by POST request can not be done in Chrome, media allows GET request
+							&& !file.mime.match(/^(?:video|audio)/)
+						) {
+							// Send request as 'POST' method to hide custom data at location bar
+							url = '';
+						}
+						if (into === 'window') {
+							// set window size for image if set
+							imgW = winW = Math.round(2 * screen.availWidth / 3);
+							imgH = winH = Math.round(2 * screen.availHeight / 3);
+							if (parseInt(file.width) && parseInt(file.height)) {
+								imgW = parseInt(file.width);
+								imgH = parseInt(file.height);
+							} else if (file.dim) {
+								s = file.dim.split('x');
+								imgW = parseInt(s[0]);
+								imgH = parseInt(s[1]);
+							}
+							if (winW >= imgW && winH >= imgH) {
+								winW = imgW;
+								winH = imgH;
+							} else {
+								if ((imgW - winW) > (imgH - winH)) {
+									winH = Math.round(imgH * (winW / imgW));
+								} else {
+									winW = Math.round(imgW * (winH / imgH));
+								}
+							}
+							w = 'width='+winW+',height='+winH;
+							wnd = window.open(url, target, w + ',top=50,left=50,scrollbars=yes,resizable=yes,titlebar=no');
+						} else {
+							if (into === 'tabs') {
+								target = file.hash;
+							}
+							wnd = window.open('about:blank', target);
+						}
+						
 						if (!wnd) {
 							return dfrd.reject('errPopup');
 						}
-					}
-				} else {
-					getOnly = (typeof opts.method === 'string' && opts.method.toLowerCase() === 'get');
-					if (!getOnly
-						&& url.indexOf(fm.options.url) === 0
-						&& fm.customData
-						&& Object.keys(fm.customData).length
-						// Since playback by POST request can not be done in Chrome, media allows GET request
-						&& !file.mime.match(/^(?:video|audio)/)
-					) {
-						// Send request as 'POST' method to hide custom data at location bar
-						url = '';
-					}
-					if (into === 'window') {
-						// set window size for image if set
-						imgW = winW = Math.round(2 * screen.availWidth / 3);
-						imgH = winH = Math.round(2 * screen.availHeight / 3);
-						if (parseInt(file.width) && parseInt(file.height)) {
-							imgW = parseInt(file.width);
-							imgH = parseInt(file.height);
-						} else if (file.dim) {
-							s = file.dim.split('x');
-							imgW = parseInt(s[0]);
-							imgH = parseInt(s[1]);
-						}
-						if (winW >= imgW && winH >= imgH) {
-							winW = imgW;
-							winH = imgH;
-						} else {
-							if ((imgW - winW) > (imgH - winH)) {
-								winH = Math.round(imgH * (winW / imgW));
-							} else {
-								winW = Math.round(imgW * (winH / imgH));
-							}
-						}
-						w = 'width='+winW+',height='+winH;
-						wnd = window.open(url, target, w + ',top=50,left=50,scrollbars=yes,resizable=yes,titlebar=no');
-					} else {
-						if (into === 'tabs') {
-							target = file.hash;
-						}
-						wnd = window.open('about:blank', target);
-					}
-					
-					if (!wnd) {
-						return dfrd.reject('errPopup');
-					}
-					
-					if (url === '') {
-						var form = document.createElement("form");
-						form.action = fm.options.url;
-						form.method = 'POST';
-						form.target = target;
-						form.style.display = 'none';
-						var params = Object.assign({}, fm.customData, {
-							cmd: 'file',
-							target: file.hash,
-							_t: file.ts || parseInt(+new Date()/1000)
-						});
-						$.each(params, function(key, val)
-						{
-							var input = document.createElement("input");
-							input.name = key;
-							input.value = val;
-							form.appendChild(input);
-						});
 						
-						document.body.appendChild(form);
-						form.submit();
-					} else if (into !== 'window') {
-						wnd.location = url;
+						if (url === '') {
+							var form = document.createElement("form");
+							form.action = fm.options.url;
+							form.method = 'POST';
+							form.target = target;
+							form.style.display = 'none';
+							var params = Object.assign({}, fm.customData, {
+								cmd: 'file',
+								target: file.hash,
+								_t: file.ts || parseInt(+new Date()/1000)
+							});
+							$.each(params, function(key, val)
+							{
+								var input = document.createElement("input");
+								input.name = key;
+								input.value = val;
+								form.appendChild(input);
+							});
+							
+							document.body.appendChild(form);
+							form.submit();
+						} else if (into !== 'window') {
+							wnd.location = url;
+						}
+						$(wnd).trigger('focus');
 					}
-					$(wnd).trigger('focus');
-				}
+					link.remove();
+				});
 			}
-			link.remove();
 			return dfrd.resolve(hashes);
 		};
 		
@@ -29214,7 +29482,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					// hide info/icon
 					ql.hideinfo();
 				},
-				url, img, loading, m;
+				url, img, loading, prog, m, opDfd;
 
 			if (!flipMime) {
 				flipMime = fm.arrayFlip(mimes);
@@ -29224,9 +29492,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 				e.stopImmediatePropagation();
 
 				loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+				prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
 
-				url = fm.openUrl(file.hash);
-				
 				img = $('<img/>')
 					.hide()
 					.appendTo(preview)
@@ -29236,9 +29503,15 @@ elFinder.prototype.commands.quicklook.plugins = [
 					})
 					.on('error', function() {
 						loading.remove();
-					})
-					.attr('src', url);
-				
+					});
+				opDfd = fm.openUrl(file.hash, false, function(url) {
+					img.attr('src', url);
+				}, { progressBar: prog });
+				// stop loading on change file if not loaded yet
+				preview.one('change', function() {
+					opDfd && opDfd.state && opDfd.state() === 'pending' && opDfd.reject();
+				});
+
 				if (file.width && file.height) {
 					show();
 				} else if (file.size > getDimSize) {
@@ -29283,64 +29556,71 @@ elFinder.prototype.commands.quicklook.plugins = [
 						rfile.width = dim[0];
 						rfile.height = dim[1];
 					},
-					loading, url, base, wk;
+					loading, prog, url, base, wk, opDfd;
 				if (file.mime === mime) {
 					e.stopImmediatePropagation();
 
 					loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
 					// stop loading on change file if not loaded yet
 					preview.one('change', function() {
 						wk && wk.terminate();
 						loading.remove();
 					});
 
-					url = fm.openUrl(file.hash);
-					if (!fm.isSameOrigin(url)) {
-						url = fm.openUrl(file.hash, true);
-					}
-					base = $('<div/>').css({width:'100%',height:'100%'}).hide().appendTo(preview);
-					try {
-						wk = fm.getWorker();
-						wk.onmessage = function(res) {
-							var data = res.data,
-								cv, co, id, prop;
-							wk && wk.terminate();
-							cv = document.createElement('canvas');
-							co = cv.getContext('2d');
-							cv.width = data.width;
-							cv.height = data.height;
-							id = co.createImageData(data.width, data.height);
-							(id).data.set(new Uint8Array(data.image));
-							co.putImageData(id, 0, 0);
-							base.append(cv).show();
-							loading.remove();
-							prop = (data.width/data.height).toFixed(2);
-							preview.on('changesize', function() {
-								var pw = parseInt(preview.width()),
-									ph = parseInt(preview.height()),
-									w, h;
-								if (prop < (pw/ph).toFixed(2)) {
-									h = ph;
-									w = Math.floor(h * prop);
-								} else {
-									w = pw;
-									h = Math.floor(w/prop);
-								}
-								$(cv).width(w).height(h).css('margin-top', h < ph ? Math.floor((ph - h)/2) : 0);
-							}).trigger('changesize');
-							if (!file.width || !file.height) {
-								setdim([data.width, data.height]);
+					opDfd = fm.getContents(file.hash, 'arraybuffer', { progressBar: prog }).done(function(data) {
+						if (data) {
+							base = $('<div/>').css({width:'100%',height:'100%'}).hide().appendTo(preview);
+							try {
+								wk = fm.getWorker();
+								wk.onmessage = function(res) {
+									var data = res.data,
+										cv, co, id, prop;
+									wk && wk.terminate();
+									cv = document.createElement('canvas');
+									co = cv.getContext('2d');
+									cv.width = data.width;
+									cv.height = data.height;
+									id = co.createImageData(data.width, data.height);
+									(id).data.set(new Uint8Array(data.image));
+									co.putImageData(id, 0, 0);
+									base.append(cv).show();
+									loading.remove();
+									prop = (data.width/data.height).toFixed(2);
+									preview.on('changesize', function() {
+										var pw = parseInt(preview.width()),
+											ph = parseInt(preview.height()),
+											w, h;
+										if (prop < (pw/ph).toFixed(2)) {
+											h = ph;
+											w = Math.floor(h * prop);
+										} else {
+											w = pw;
+											h = Math.floor(w/prop);
+										}
+										$(cv).width(w).height(h).css('margin-top', h < ph ? Math.floor((ph - h)/2) : 0);
+									}).trigger('changesize');
+									if (!file.width || !file.height) {
+										setdim([data.width, data.height]);
+									}
+									ql.hideinfo();
+								};
+								wk.onerror = err;
+								wk.postMessage({
+									scripts: [fm.options.cdns.tiff, 'quicklook.tiff.js'],
+									data: { data: data }
+								});
+							} catch(e) {
+								err(e);
 							}
-							ql.hideinfo();
-						};
-						wk.onerror = err;
-						wk.postMessage({
-							scripts: [fm.options.cdns.tiff, 'quicklook.tiff.js'],
-							data: { url: url }
-						});
-					} catch(e) {
-						err(e);
-					}
+						} else {
+							err();
+						}
+					});
+					// stop loading on change file if not loaded yet
+					preview.one('change', function() {
+						opDfd && opDfd.state && opDfd.state() === 'pending' && opDfd.reject();
+					});
 				}
 			});
 		}
@@ -29399,37 +29679,41 @@ elFinder.prototype.commands.quicklook.plugins = [
 		
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file,
-				url, img, loading, m,
-				_define, _require;
+				url, img, loading, prog, m,
+				_define, _require, opDfd;
 
 			if (mimes[file.mime] && fm.options.cdns.psd && ! fm.UA.ltIE10 && ql.dispInlineRegex.test(file.mime)) {
 				// this is our file - stop event propagation
 				e.stopImmediatePropagation();
 
 				loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
-				url = fm.openUrl(file.hash);
-				if (!fm.isSameOrigin(url)) {
-					url = fm.openUrl(file.hash, true);
-				}
-				img = $('<img/>').hide().appendTo(preview);
-				
-				if (PSD) {
-					load(url, img, loading);
-				} else {
-					_define = window.define;
-					_require = window.require;
-					window.require = null;
-					window.define = null;
-					fm.loadScript(
-						[ fm.options.cdns.psd ],
-						function() {
-							PSD = require('psd');
-							_define? (window.define = _define) : (delete window.define);
-							_require? (window.require = _require) : (delete window.require);
+				prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
+				opDfd = fm.openUrl(file.hash, 'sameorigin', function(url) {
+					if (url) {
+						img = $('<img/>').hide().appendTo(preview);
+						if (PSD) {
 							load(url, img, loading);
+						} else {
+							_define = window.define;
+							_require = window.require;
+							window.require = null;
+							window.define = null;
+							fm.loadScript(
+								[ fm.options.cdns.psd ],
+								function() {
+									PSD = require('psd');
+									_define? (window.define = _define) : (delete window.define);
+									_require? (window.require = _require) : (delete window.require);
+									load(url, img, loading);
+								}
+							);
 						}
-					);
-				}
+					}
+				}, { progressBar: prog });
+				// stop loading on change file if not loaded yet
+				preview.one('change', function() {
+					opDfd && opDfd.state && opDfd.state() === 'pending' && opDfd.reject();
+				});
 			}
 		});
 	},
@@ -29445,12 +29729,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 			preview = ql.preview;
 			
 		preview.on(ql.evUpdate, function(e) {
-			var file = e.file, jqxhr, loading;
+			var file = e.file, jqxhr, loading, prog;
 			
 			if (mimes[file.mime] && ql.dispInlineRegex.test(file.mime) && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax)) {
 				e.stopImmediatePropagation();
 
 				loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+				prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
 
 				// stop loading on change file if not loaded yet
 				preview.one('change', function() {
@@ -29460,7 +29745,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 				jqxhr = fm.request({
 					data           : {cmd : 'get', target : file.hash, conv : 1, _t : file.ts},
 					options        : {type: 'get', cache : true},
-					preventDefault : true
+					preventDefault : true,
+					progressBar    : prog
 				})
 				.done(function(data) {
 					ql.hideinfo();
@@ -29500,12 +29786,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 			};
 			
 		preview.on(ql.evUpdate, function(e) {
-			var file = e.file, jqxhr, loading;
+			var file = e.file, jqxhr, loading, prog;
 			
 			if (mimes[file.mime] && fm.options.cdns.marked && marked !== false && ql.dispInlineRegex.test(file.mime) && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax)) {
 				e.stopImmediatePropagation();
 
 				loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+				prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
 
 				// stop loading on change file if not loaded yet
 				preview.one('change', function() {
@@ -29515,7 +29802,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 				jqxhr = fm.request({
 					data           : {cmd : 'get', target : file.hash, conv : 1, _t : file.ts},
 					options        : {type: 'get', cache : true},
-					preventDefault : true
+					preventDefault : true,
+					progressBar    : prog
 				})
 				.done(function(data) {
 					if (marked || window.marked) {
@@ -29569,38 +29857,42 @@ elFinder.prototype.commands.quicklook.plugins = [
 
 			if (opts.url) {
 				preview.on('update', function(e) {
-					var file = e.file, node, loading;
+					var file = e.file, node, loading, prog, opDfd;
 
 					if (mimes[file.mime] && (file.mime !== 'application/pdf' || !opts.pdfNative || !ql.flags.pdfNative)) {
-						var url = fm.openUrl(file.hash);
-						if (url && fm.isSameOrigin(url)) {
-							e.stopImmediatePropagation();
+						e.stopImmediatePropagation();
+						loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+						prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
+						opDfd = fm.openUrl(file.hash, 'sameorigin', function(url) {
+							if (url) {
+								node = $('<iframe class="elfinder-quicklook-preview-iframe"/>')
+									.css('background-color', 'transparent')
+									.on('load', function() {
+										ql.hideinfo();
+										loading.remove();
+										node.css('background-color', '#fff');
+									})
+									.on('error', function() {
+										loading.remove();
+										node.remove();
+									})
+									.appendTo(preview)
+									.attr('src', opts.url + '#' + url);
 
-							loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+								win.on('viewchange.viewerjs', setNavi);
+								setNavi();
 
-							node = $('<iframe class="elfinder-quicklook-preview-iframe"/>')
-								.css('background-color', 'transparent')
-								.on('load', function() {
-									ql.hideinfo();
+								preview.one('change', function() {
+									win.off('viewchange.viewerjs');
 									loading.remove();
-									node.css('background-color', '#fff');
-								})
-								.on('error', function() {
-									loading.remove();
-									node.remove();
-								})
-								.appendTo(preview)
-								.attr('src', opts.url + '#' + url);
-
-							win.on('viewchange.viewerjs', setNavi);
-							setNavi();
-
-							preview.one('change', function() {
-								win.off('viewchange.viewerjs');
-								loading.remove();
-								node.off('load').remove();
-							});
-						}
+									node.off('load').remove();
+								});
+							}
+						}, { progressBar: prog });
+						// stop loading on change file if not loaded yet
+						preview.one('change', function() {
+							opDfd && opDfd.state && opDfd.state() === 'pending' && opDfd.reject();
+						});
 					}
 				});
 			}
@@ -29638,19 +29930,28 @@ elFinder.prototype.commands.quicklook.plugins = [
 				urlhash = '#toolbar=0';
 			}
 			preview.on(ql.evUpdate, function(e) {
-				var file = e.file;
+				var file = e.file,
+					opDfd;
 				
 				if (active && file.mime === mime && ql.dispInlineRegex.test(file.mime)) {
 					e.stopImmediatePropagation();
-					ql.hideinfo();
-					ql.cover.addClass('elfinder-quicklook-coverbg');
-					$('<object class="elfinder-quicklook-preview-pdf" data="'+fm.openUrl(file.hash)+urlhash+'" type="application/pdf" />')
-						.on('error', function(e) {
-							active = false;
-							ql.update(void(0), fm.cwd());
-							ql.update(void(0), file);
-						})
-						.appendTo(preview);
+					opDfd = fm.openUrl(file.hash, 'sameorigin', function(url) {
+						if (url) {
+							ql.hideinfo();
+							ql.cover.addClass('elfinder-quicklook-coverbg');
+							$('<object class="elfinder-quicklook-preview-pdf" data="'+url+urlhash+'" type="application/pdf" />')
+								.on('error', function(e) {
+									active = false;
+									ql.update(void(0), fm.cwd());
+									ql.update(void(0), file);
+								})
+								.appendTo(preview);
+						}
+					});
+					// stop loading on change file if not loaded yet
+					preview.one('change', function() {
+						opDfd && opDfd.state && opDfd.state() === 'pending' && opDfd.reject();
+					});
 				}
 				
 			});
@@ -29678,13 +29979,21 @@ elFinder.prototype.commands.quicklook.plugins = [
 		
 		active && preview.on(ql.evUpdate, function(e) {
 			var file = e.file,
-				node;
+				node, opDfd;
 				
 			if (file.mime === mime && ql.dispInlineRegex.test(file.mime)) {
 				e.stopImmediatePropagation();
-				ql.hideinfo();
-				node = $('<embed class="elfinder-quicklook-preview-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" src="'+fm.openUrl(file.hash)+'" quality="high" type="application/x-shockwave-flash" wmode="transparent" />')
-					.appendTo(preview);
+				opDfd = fm.openUrl(file.hash, false, function(url) {
+					if (url) {
+						ql.hideinfo();
+						node = $('<embed class="elfinder-quicklook-preview-flash" pluginspage="http://www.macromedia.com/go/getflashplayer" src="'+url+'" quality="high" type="application/x-shockwave-flash" wmode="transparent" />')
+							.appendTo(preview);
+					}
+				});
+				// stop loading on change file if not loaded yet
+				preview.one('change', function() {
+					opDfd && opDfd.state && opDfd.state() === 'pending' && opDfd.reject();
+				});
 			}
 		});
 	},
@@ -29738,7 +30047,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 			amrToWavUrl = function(hash) {
 				var dfd = $.Deferred(),
 					loader = $.Deferred().done(function() {
-						fm.getContents(hash).done(function(data) {
+						var opDfd;
+						opDfd = fm.getContents(hash, 'arraybuffer', { progressBar: prog }).done(function(data) {
 							try {
 								var buffer = AMR.toWAV(new Uint8Array(data));
 								if (buffer) {
@@ -29751,6 +30061,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 							}
 						}).fail(function() {
 							dfd.reject();
+						});
+						// stop loading on change file if not loaded yet
+						preview.one('change', function() {
+							opDfd && opDfd.state && opDfd.state() === 'pending' && opDfd.reject();
 						});
 					}).fail(function() {
 						AMR = false;
@@ -29810,22 +30124,25 @@ elFinder.prototype.commands.quicklook.plugins = [
 					node.remove();
 					node = null;
 				}
-			};
+			},
+			loading, prog;
 
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file,
 				type = mimes[file.mime],
-				html5, srcUrl;
+				html5, opDfd;
 
 			if (mimes[file.mime] && ql.dispInlineRegex.test(file.mime) && ((html5 = ql.support.audio[type]) || (type === 'amr'))) {
 				autoplay = ql.autoPlay();
 				curHash = file.hash;
-				srcUrl = html5? fm.openUrl(curHash) : '';
 				if (!html5) {
 					if (fm.options.cdns.amr && type === 'amr' && AMR !== false) {
 						e.stopImmediatePropagation();
-						node = getNode(srcUrl, curHash);
+						loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+						prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
+						node = getNode('', curHash);
 						amrToWavUrl(file.hash).done(function(url) {
+							loading.remove();
 							if (curHash === file.hash) {
 								var elm = node[0];
 								try {
@@ -29848,10 +30165,23 @@ elFinder.prototype.commands.quicklook.plugins = [
 					}
 				} else {
 					e.stopImmediatePropagation();
-					node = getNode(srcUrl, curHash);
-					play(node[0]);
-					win.on('viewchange.audio', setNavi);
-					setNavi();
+					loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
+					opDfd = fm.openUrl(curHash, false, function(url) {
+						loading.remove();
+						if (url) {
+							node = getNode(url, curHash);
+							play(node[0]);
+							win.on('viewchange.audio', setNavi);
+							setNavi();
+						} else {
+							node.remove();
+						}
+					}, { progressBar: prog });
+					// stop loading on change file if not loaded yet
+					preview.one('change', function() {
+						opDfd && opDfd.state && opDfd.state() === 'pending' && opDfd.reject();
+					});
 				}
 			}
 		}).one('change', reset);
@@ -29884,7 +30214,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			node,
 			win  = ql.window,
 			navi = ql.navbar,
-			cHls, cDash, pDash, cFlv, cVideojs, autoplay, tm,
+			cHls, cDash, pDash, cFlv, cVideojs, autoplay, tm, loading, prog,
 			controlsList = typeof ql.options.mediaControlsList === 'string' && ql.options.mediaControlsList? ' controlsList="' + fm.escape(ql.options.mediaControlsList) + '"' : '',
 			setNavi = function() {
 				if (fm.UA.iOS) {
@@ -29942,55 +30272,94 @@ elFinder.prototype.commands.quicklook.plugins = [
 				setNavi();
 			},
 			loadHls = function(file) {
-				var hls;
-				render(file);
-				hls = new cHls();
-				hls.loadSource(fm.openUrl(file.hash));
-				hls.attachMedia(node[0]);
-				if (autoplay) {
-					hls.on(cHls.Events.MANIFEST_PARSED, function() {
-						play(node[0]);
-					});
-				}
+				var hls, opDfd;
+				opDfd = fm.openUrl(file.hash, false, function(url) {
+					loading.remove();
+					if (url) {
+						render(file);
+						hls = new cHls();
+						hls.loadSource(url);
+						hls.attachMedia(node[0]);
+						if (autoplay) {
+							hls.on(cHls.Events.MANIFEST_PARSED, function() {
+								play(node[0]);
+							});
+						}
+					}
+				}, { progressBar: prog });
+				// stop loading on change file if not loaded yet
+				preview.one('change', function() {
+					opDfd && opDfd.state && opDfd.state() === 'pending' && opDfd.reject();
+				});
 			},
 			loadDash = function(file) {
-				var debug;
-				render(file);
-				pDash = window.dashjs.MediaPlayer().create();
-				debug = pDash.getDebug();
-				if (debug.setLogLevel) {
-					debug.setLogLevel(dashjs.Debug.LOG_LEVEL_FATAL);
-				} else if (debug.setLogToBrowserConsole) {
-					debug.setLogToBrowserConsole(false);
-				}
-				pDash.initialize(node[0], fm.openUrl(file.hash), autoplay);
-				pDash.on('error', function(e) {
-					reset(true);
+				var opDfd;
+				opDfd = fm.openUrl(file.hash, false, function(url) {
+					var debug;
+					loading.remove();
+					if (url) {
+						render(file);
+						pDash = window.dashjs.MediaPlayer().create();
+						debug = pDash.getDebug();
+						if (debug.setLogLevel) {
+							debug.setLogLevel(dashjs.Debug.LOG_LEVEL_FATAL);
+						} else if (debug.setLogToBrowserConsole) {
+							debug.setLogToBrowserConsole(false);
+						}
+						pDash.initialize(node[0], url, autoplay);
+						pDash.on('error', function(e) {
+							reset(true);
+						});
+					}
+				}, { progressBar: prog });
+				// stop loading on change file if not loaded yet
+				preview.one('change', function() {
+					opDfd && opDfd.state && opDfd.state() === 'pending' && opDfd.reject();
 				});
 			},
 			loadFlv = function(file) {
+				var opDfd
 				if (!cFlv.isSupported()) {
 					cFlv = false;
 					return;
 				}
-				var player = cFlv.createPlayer({
-					type: 'flv',
-					url: fm.openUrl(file.hash)
+				opDfd = fm.openUrl(file.hash, false, function(url) {
+					loading.remove();
+					if (url) {
+						var player = cFlv.createPlayer({
+							type: 'flv',
+							url: url
+						});
+						render(file);
+						player.on(cFlv.Events.ERROR, function() {
+							player.destroy();
+							reset(true);
+						});
+						player.attachMediaElement(node[0]);
+						player.load();
+						play(player);
+					}
+				}, { progressBar: prog });
+				// stop loading on change file if not loaded yet
+				preview.one('change', function() {
+					opDfd && opDfd.state && opDfd.state() === 'pending' && opDfd.reject();
 				});
-				render(file);
-				player.on(cFlv.Events.ERROR, function() {
-					player.destroy();
-					reset(true);
-				});
-				player.attachMediaElement(node[0]);
-				player.load();
-				play(player);
 			},
 			loadVideojs = function(file) {
-				render(file);
-				node[0].src = fm.openUrl(file.hash);
-				cVideojs(node[0], {
-					src: fm.openUrl(file.hash)
+				var opDfd;
+				opDfd = fm.openUrl(file.hash, false, function(url) {
+					loading.remove();
+					if (url) {
+						render(file);
+						node[0].src = url;
+						cVideojs(node[0], {
+							src: url
+						});
+					}
+				}, { progressBar: prog });
+				// stop loading on change file if not loaded yet
+				preview.one('change', function() {
+					opDfd && opDfd.state && opDfd.state() === 'pending' && opDfd.reject();
 				});
 			},
 			play = function(player) {
@@ -30028,17 +30397,30 @@ elFinder.prototype.commands.quicklook.plugins = [
 			var file = e.file,
 				mime = file.mime.toLowerCase(),
 				type = mimes[mime],
-				stock, playPromise;
+				stock, playPromise, opDfd;
 			
 			if (mimes[mime] && ql.dispInlineRegex.test(file.mime) /*&& (((type === 'm3u8' || (type === 'mpd' && !fm.UA.iOS) || type === 'flv') && !fm.UA.ltIE10) || ql.support.video[type])*/) {
 				autoplay = ql.autoPlay();
+				loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>');
+				prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
 				if (ql.support.video[type] && (type !== 'm3u8' || fm.UA.Safari)) {
 					e.stopImmediatePropagation();
-					render(file, { src: fm.openUrl(file.hash) });
-					play(node[0]);
+					loading.appendTo(ql.info.find('.elfinder-quicklook-info'));
+					opDfd = fm.openUrl(file.hash, false, function(url) {
+						loading.remove();
+						if (url) {
+							render(file, { src: url });
+							play(node[0]);
+						}
+					}, { progressBar: prog });
+					// stop loading on change file if not loaded yet
+					preview.one('change', function() {
+						opDfd && opDfd.state && opDfd.state() === 'pending' && opDfd.reject();
+					});
 				} else {
 					if (cHls !== false && fm.options.cdns.hls && type === 'm3u8') {
 						e.stopImmediatePropagation();
+						loading.appendTo(ql.info.find('.elfinder-quicklook-info'));
 						if (cHls) {
 							loadHls(file);
 						} else {
@@ -30061,6 +30443,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						}
 					} else if (cDash !== false && fm.options.cdns.dash && type === 'mpd') {
 						e.stopImmediatePropagation();
+						loading.appendTo(ql.info.find('.elfinder-quicklook-info'));
 						if (cDash) {
 							loadDash(file);
 						} else {
@@ -30081,6 +30464,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						}
 					} else if (cFlv !== false && fm.options.cdns.flv && type === 'flv') {
 						e.stopImmediatePropagation();
+						loading.appendTo(ql.info.find('.elfinder-quicklook-info'));
 						if (cFlv) {
 							loadFlv(file);
 						} else {
@@ -30102,6 +30486,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 							);
 						}
 					} else if (fm.options.cdns.videojs) {
+						e.stopImmediatePropagation();
+						loading.appendTo(ql.info.find('.elfinder-quicklook-info'));
 						if (cVideojs) {
 							loadVideojs(file);
 						} else {
@@ -30148,19 +30534,30 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on(ql.evUpdate, function(e) {
 			var file  = e.file,
 				mime  = file.mime,
-				video,
+				video, opDfd, loading, prog,
 				setNavi = function() {
 					navi.css('bottom', win.hasClass('elfinder-quicklook-fullscreen')? '50px' : '');
 				};
 			
 			if (mimes[file.mime] && ql.dispInlineRegex.test(file.mime)) {
 				e.stopImmediatePropagation();
-				(video = mime.indexOf('video/') === 0) && ql.hideinfo();
-				node = $('<embed src="'+ql.fm.openUrl(file.hash)+'" type="'+mime+'" class="elfinder-quicklook-preview-'+(video ? 'video' : 'audio')+'"/>')
-					.appendTo(preview);
-				
-				win.on('viewchange.embed', setNavi);
-				setNavi();
+				loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+				prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
+				opDfd = ql.fm.openUrl(file.hash, false, function(url) {
+					loading.remove();
+					if (url) {
+						(video = mime.indexOf('video/') === 0) && ql.hideinfo();
+						node = $('<embed src="'+url+'" type="'+mime+'" class="elfinder-quicklook-preview-'+(video ? 'video' : 'audio')+'"/>')
+							.appendTo(preview);
+						
+						win.on('viewchange.embed', setNavi);
+						setNavi();
+					}
+				}, { progressBar: prog });
+				// stop loading on change file if not loaded yet
+				preview.one('change', function() {
+					opDfd && opDfd.state && opDfd.state() === 'pending' && opDfd.reject();
+				});
 			}
 		}).one('change', function() {
 			if (node && node.parent().length) {
@@ -30196,23 +30593,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 						|| (isBzip2 && bzip2)
 						|| (isZlib && Zlib)
 					)) {
-					var jqxhr, wk, loading, url,
+					var jqxhr, wk, loading, prog, url,
 						req = function() {
-							url = fm.openUrl(file.hash);
-							if (!fm.isSameOrigin(url)) {
-								url = fm.openUrl(file.hash, true);
-							}
-							jqxhr = fm.request({
-								data    : {cmd : 'get'},
-								options : {
-									url: url,
-									type: 'get',
-									cache : true,
-									dataType : 'binary',
-									responseType :'arraybuffer',
-									processData: false
-								}
-							})
+							jqxhr = fm.getContents(file.hash, 'arraybuffer', { progressBar: prog })
 							.fail(function() {
 								loading.remove();
 							})
@@ -30295,6 +30678,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					e.stopImmediatePropagation();
 					
 					loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
 					
 					// stop loading on change file if not loaded yet
 					preview.one('change', function() {
@@ -30324,7 +30708,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			preview.on(ql.evUpdate, function(e) {
 				var file = e.file;
 				if (mimes[file.mime] && fm.options.cdns.rar && RAR !== false) {
-					var loading, url, archive, abort,
+					var loading, prog, url, archive, abort,
 						getList = function(url) {
 							if (abort) {
 								loading.remove();
@@ -30372,12 +30756,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 							RAR = false;
 							loading.remove();
 						},
-						_RAR;
+						_RAR, opDfd;
 
 					// this is our file - stop event propagation
 					e.stopImmediatePropagation();
 					
 					loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
 					
 					// stop loading on change file if not loaded yet
 					preview.one('change', function() {
@@ -30386,44 +30771,48 @@ elFinder.prototype.commands.quicklook.plugins = [
 						abort = true;
 					});
 					
-					url = fm.openUrl(file.hash);
-					if (!fm.isSameOrigin(url)) {
-						url = fm.openUrl(file.hash, true);
-					}
-					if (RAR) {
-						getList(url);
-					} else {
-						if (window.RarArchive) {
-							_RAR = window.RarArchive;
-							delete window.RarArchive;
-						}
-						fm.loadScript(
-							[ fm.options.cdns.rar ],
-							function() {
-								if (fm.hasRequire) {
-									require(['rar'], function(RarArchive) {
-										RAR = RarArchive;
-										getList(url);
-									}, error);
-								} else {
-									if (RAR = window.RarArchive) {
-										if (_RAR) {
-											window.RarArchive = _RAR;
-										} else {
-											delete window.RarArchive;
-										}
-										getList(url);
-									} else {
-										error();
-									}
+					opDfd = fm.openUrl(file.hash, 'sameorigin', function(url) {
+						if (url) {
+							if (RAR) {
+								getList(url);
+							} else {
+								if (window.RarArchive) {
+									_RAR = window.RarArchive;
+									delete window.RarArchive;
 								}
-							},
-							{
-								tryRequire: true,
-								error : error
+								fm.loadScript(
+									[ fm.options.cdns.rar ],
+									function() {
+										if (fm.hasRequire) {
+											require(['rar'], function(RarArchive) {
+												RAR = RarArchive;
+												getList(url);
+											}, error);
+										} else {
+											if (RAR = window.RarArchive) {
+												if (_RAR) {
+													window.RarArchive = _RAR;
+												} else {
+													delete window.RarArchive;
+												}
+												getList(url);
+											} else {
+												error();
+											}
+										}
+									},
+									{
+										tryRequire: true,
+										error : error
+									}
+								);
 							}
-						);
-					}
+						}
+					}, { progressBar: prog, temporary: true });
+					// stop loading on change file if not loaded yet
+					preview.one('change', function() {
+						opDfd && opDfd.state && opDfd.state() === 'pending' && opDfd.reject();
+					});
 				}
 			});
 		}
@@ -30452,7 +30841,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 			var file = e.file;
 			if (mimes[file.mime.toLowerCase()] && !fm.option('onetimeUrl', file.hash)) {
 				var win     = ql.window,
-					loading, url;
+					loading, prog, url;
 				
 				e.stopImmediatePropagation();
 				if (file.url == '1') {
@@ -30463,7 +30852,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 						self.html('<span class="elfinder-spinner">');
 						fm.request({
 							data : {cmd : 'url', target : file.hash},
-							preventDefault : true
+							preventDefault : true,
+							progressBar : prog
 						})
 						.always(function() {
 							self.html('');
@@ -30489,6 +30879,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					}).addClass('elfinder-overflow-auto');
 					
 					loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
 					
 					url = fm.convAbsUrl(fm.url(file.hash));
 					node = $('<iframe class="elfinder-quicklook-preview-iframe" scrolling="no"/>')
@@ -30570,9 +30961,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 				if (mapScr && mimes[file.mime.toLowerCase()]) {
 					var win     = ql.window,
 						getLink = (file.url == '1' && !fm.option('onetimeUrl', file.hash)),
-						loading, url, node;
+						loading, prog, url, node;
 				
 					e.stopImmediatePropagation();
+					loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
 					if (getLink) {
 						preview.hide();
 						$('<div class="elfinder-quicklook-info-data"><button class="elfinder-info-button">'+fm.i18n('getLink')+'</button></div>').appendTo(ql.info.find('.elfinder-quicklook-info'))
@@ -30581,9 +30974,11 @@ elFinder.prototype.commands.quicklook.plugins = [
 							self.html('<span class="elfinder-spinner">');
 							fm.request({
 								data : {cmd : 'url', target : file.hash},
-								preventDefault : true
+								preventDefault : true,
+								progressBar : prog
 							})
 							.always(function() {
+								loading.remove();
 								self.html('');
 							})
 							.done(function(data) {
@@ -30665,7 +31060,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 		if (enable) {
 			preview.on(ql.evUpdate, function(e) {
 				var file = e.file,
-					type;
+					type, dfd;
 				// 25MB is maximum filesize of Google Docs prevew
 				if (file.size <= 26214400 && (type = mimes[file.mime])) {
 					var win     = ql.window,
@@ -30674,7 +31069,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						},
 						ext     = fm.mimeTypes[file.mime],
 						getLink = (file.url == '1' && !fm.option('onetimeUrl', file.hash)),
-						loading, url;
+						loading, prog, url;
 					
 					if (type === 'm') {
 						if ((mLimits[ext] && file.size > mLimits[ext]) || file.size > mLimits.other) {
@@ -30710,6 +31105,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 					if (file.url !== '' && !getLink) {
 						e.stopImmediatePropagation();
 						preview.one('change', function() {
+							dfd && dfd.status && dfd.status() === 'pending' && dfd.reject();
 							win.off('viewchange.googledocs');
 							loading.remove();
 							node.off('load').remove();
@@ -30717,12 +31113,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 						}).addClass('elfinder-overflow-auto');
 						
 						loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
-						
+						prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
+
 						node = $('<iframe class="elfinder-quicklook-preview-iframe"/>')
 							.css('background-color', 'transparent')
 							.appendTo(preview);
 
-						fm.forExternalUrl(file.hash).done(function(url) {
+						dfd = fm.forExternalUrl(file.hash, { progressBar: prog }).done(function(url) {
 							if (url) {
 								if (file.ts) {
 									url += (url.match(/\?/)? '&' : '?') + '_t=' + file.ts;
@@ -30821,12 +31218,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 		preview.on(ql.evUpdate, function(e) {
 			var file = e.file,
 				mime = file.mime,
-				jqxhr, loading, encSelect;
+				jqxhr, loading, prog, encSelect;
 			
 			if (fm.mimeIsText(file.mime) && (!ql.options.getSizeMax || file.size <= ql.options.getSizeMax) && PR !== false) {
 				e.stopImmediatePropagation();
 				
 				loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+				prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(loading);
 
 				// stop loading on change file if not loadin yet
 				preview.one('change', function() {
@@ -30837,7 +31235,8 @@ elFinder.prototype.commands.quicklook.plugins = [
 				jqxhr = fm.request({
 					data           : {cmd : 'get', target : file.hash, conv : (file.encoding || 1), _t : file.ts},
 					options        : {type: 'get', cache : true},
-					preventDefault : true
+					preventDefault : true,
+					progressBar    : prog
 				})
 				.done(function(data) {
 					var reg = new RegExp('^(data:'+file.mime.replace(/([.+])/g, '\\$1')+';base64,)', 'i'),
@@ -31695,7 +32094,7 @@ elFinder.prototype.commands.resize = function() {
 			presetSize = Array.isArray(options.presetSize)? options.presetSize : [],
 			clactive = 'elfinder-dialog-active',
 			clsediting = fm.res('class', 'editing'),
-			open = function(file, id) {
+			open = function(file, id, src) {
 				var isJpeg   = (file.mime === 'image/jpeg'),
 					dialog   = $('<div class="elfinder-resize-container"/>'),
 					input    = '<input type="number" class="ui-corner-all"/>',
@@ -32799,8 +33198,7 @@ elFinder.prototype.commands.resize = function() {
 					hline   = 'elfinder-resize-handle-hline',
 					vline   = 'elfinder-resize-handle-vline',
 					rpoint  = 'elfinder-resize-handle-point',
-					src     = fm.openUrl(file.hash),
-					canvSrc = fm.openUrl(file.hash, !fm.isSameOrigin(src)),
+					canvSrc = src,
 					sizeImg = quality? $('<img>').attr('crossorigin', fm.isCORS? 'use-credentials' : '').attr('src', canvSrc).on('load', function() {
 						try {
 							var canv = document.createElement('canvas');
@@ -33113,7 +33511,10 @@ elFinder.prototype.commands.resize = function() {
 			return dfrd.resolve();
 		}
 		
-		open(files[0], id);
+		
+		fm.openUrl(files[0].hash, 'sameorigin', function(src) {
+			open(files[0], id, src);
+		});
 			
 		return dfrd;
 	};
@@ -35155,7 +35556,9 @@ elFinder.prototype.commands.view = function() {
 
 	this.exec = function() {
 		var self  = this,
-			value = fm.storage('view', this.value == 'list' ? 'icons' : 'list');
+			value = this.value == 'list' ? 'icons' : 'list';
+			
+		fm.storage('view', value);
 		return fm.lazy(function() {
 			fm.viewchange();
 			self.update(void(0), value);
