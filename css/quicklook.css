@@ -261,6 +261,12 @@
     color: #fff;
 }
 
+.elfinder-quicklook-info-progress {
+    width: 0;
+    height: 4px;
+    border-radius: 2px;
+}
+
 /* file icon */
 .elfinder-quicklook .elfinder-cwd-icon {
     position: absolute;

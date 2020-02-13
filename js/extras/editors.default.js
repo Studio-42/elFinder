@@ -102,22 +102,28 @@
 					.html('<span class="elfinder-spinner-text">' + fm.i18n('ntfloadimg') + '</span><span class="elfinder-spinner"/>')
 					.hide()
 					.appendTo(this),
+				setup = function() {
+					node.attr('id', id+'-img')
+						.attr('src', url || content)
+						.css({'height':'', 'max-width':'100%', 'max-height':'100%', 'cursor':'pointer'})
+						.data('loading', function(done) {
+							var btns = node.closest('.elfinder-dialog').find('button,.elfinder-titlebar-button');
+							btns.prop('disabled', !done)[done? 'removeClass' : 'addClass']('ui-state-disabled');
+							node.css('opacity', done? '' : '0.3');
+							spnr[done? 'hide' : 'show']();
+							return node;
+						});
+				},
 				url;
 			
 			if (!content.match(/^data:/)) {
-				url = fm.openUrl(file.hash);
-				node.attr('_src', content);
-			}
-			node.attr('id', id+'-img')
-				.attr('src', url || content)
-				.css({'height':'', 'max-width':'100%', 'max-height':'100%', 'cursor':'pointer'})
-				.data('loading', function(done) {
-					var btns = node.closest('.elfinder-dialog').find('button,.elfinder-titlebar-button');
-					btns.prop('disabled', !done)[done? 'removeClass' : 'addClass']('ui-state-disabled');
-					node.css('opacity', done? '' : '0.3');
-					spnr[done? 'hide' : 'show']();
-					return node;
+				fm.openUrl(file.hash, false, function(v) {
+					url = v;
+					node.attr('_src', content);
 				});
+			} else {
+				setup();
+			}
 		},
 		imgBase64 = function(node, mime) {
 			var style = node.attr('style'),
@@ -752,10 +758,6 @@
 				}
 				if (!confObj.liveMsg) {
 					confObj.liveMsg = function(ifm, spnr, file) {
-						var url = fm.openUrl(file.hash);
-							if (!fm.isSameOrigin(url)) {
-								url = fm.openUrl(file.hash, true);
-							}
 						var wnd = ifm.get(0).contentWindow,
 							phase = 0,
 							data = null,
@@ -767,18 +769,7 @@
 							dfdGet;
 
 						this.load = function() {
-							return fm.request({
-								data    : {cmd : 'get'},
-								options : {
-									url: url,
-									type: 'get',
-									cache : true,
-									dataType : 'binary',
-									responseType :'arraybuffer',
-									processData: false
-								}
-							})
-							.done(function(d) {
+							return fm.getContents(file.hash, 'arraybuffer').done(function(d) {
 								data = d;
 							});
 						};
