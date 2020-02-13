@@ -34,66 +34,116 @@ if ($.ui) {
 
  /**
  *
- * jquery.binarytransport.js
+ * jquery.binarytransport
  *
  * @description. jQuery ajax transport for making binary data type requests.
- * @version 1.0 
- * @author Henry Algus <henryalgus@gmail.com>
  *
  */
 
-// use this transport for "binary" data type
-$.ajaxTransport('+binary', function(options, originalOptions, jqXHR) {
-	// check for conditions and support for blob / arraybuffer response type
-	if (window.FormData && ((options.dataType && (options.dataType == 'binary')) || (options.data && ((window.ArrayBuffer && options.data instanceof ArrayBuffer) || (window.Blob && options.data instanceof Blob)))))
-	{
-		var xhr;
-		return {
-			// create new XMLHttpRequest
-			send: function(headers, callback){
-				// setup all variables
-				xhr = new XMLHttpRequest();
-				var url = options.url,
-					type = options.type,
-					async = options.async || true,
-					// blob or arraybuffer. Default is blob
-					dataType = options.responseType || 'blob',
-					data = options.data || null,
-					username = options.username,
-					password = options.password;
-					
-				xhr.addEventListener('load', function(){
-					var data = {};
-					data[options.dataType] = xhr.response;
-					// make callback and send data
-					callback(xhr.status, xhr.statusText, data, xhr.getAllResponseHeaders());
-				});
+(function($, undefined) {
+	"use strict";
 
-				xhr.open(type, url, async, username, password);
-				
-				// setup custom headers
-				for (var i in headers ) {
-					xhr.setRequestHeader(i, headers[i] );
-				}
+	// use this transport for "binary" data type
+	$.ajaxTransport("+binary", function(options, originalOptions, jqXHR) {
+		// check for conditions and support for blob / arraybuffer response type
+		if (window.FormData && ((options.dataType && (options.dataType == 'binary')) || (options.data && ((window.ArrayBuffer && options.data instanceof ArrayBuffer) || (window.Blob && options.data instanceof Blob))))) {
+			var callback;
 
-				// setuo xhrFields
-				if (options.xhrFields) {
-					for (var key in options.xhrFields) {
-						if (key in xhr) {
-							xhr[key] = options.xhrFields[key];
+			// Cross domain only allowed if supported through XMLHttpRequest
+			return {
+				send: function( headers, complete ) {
+					var i,
+						dataType = options.responseType || "blob",
+						xhr = options.xhr();
+
+					xhr.open(
+						options.type,
+						options.url,
+						options.async,
+						options.username,
+						options.password
+					);
+
+					// Apply custom fields if provided
+					if ( options.xhrFields ) {
+						for ( i in options.xhrFields ) {
+							xhr[ i ] = options.xhrFields[ i ];
 						}
 					}
-				}
 
-				xhr.responseType = dataType;
-				xhr.send(data);
-			},
-			abort: function(){
-				xhr.abort();
-			}
-		};
-	}
-});
+					// Override mime type if needed
+					if ( options.mimeType && xhr.overrideMimeType ) {
+						xhr.overrideMimeType( options.mimeType );
+					}
+
+					// X-Requested-With header
+					// For cross-domain requests, seeing as conditions for a preflight are
+					// akin to a jigsaw puzzle, we simply never set it to be sure.
+					// (it can always be set on a per-request basis or even using ajaxSetup)
+					// For same-domain requests, won't change header if already provided.
+					if ( !options.crossDomain && !headers[ "X-Requested-With" ] ) {
+						headers[ "X-Requested-With" ] = "XMLHttpRequest";
+					}
+
+					// Set headers
+					for ( i in headers ) {
+						xhr.setRequestHeader( i, headers[ i ] );
+					}
+
+					// Callback
+					callback = function( type ) {
+						return function() {
+							if ( callback ) {
+								callback = xhr.onload = xhr.onerror = xhr.onabort = xhr.ontimeout = null;
+
+								if ( type === "abort" ) {
+									xhr.abort();
+								} else if ( type === "error" ) {
+									complete(
+										xhr.status,
+										xhr.statusText
+									);
+								} else {
+									var data = {};
+									data[options.dataType] = xhr.response;
+									complete(
+										xhr.status,
+										xhr.statusText,
+										data,
+										xhr.getAllResponseHeaders()
+									);
+								}
+							}
+						};
+					};
+
+					// Listen to events
+					xhr.onload = callback();
+					xhr.onabort = xhr.onerror = xhr.ontimeout = callback( "error" );
+
+					// Create the abort callback
+					callback = callback( "abort" );
+
+					try {
+						xhr.responseType = dataType;
+						// Do send the request (this may raise an exception)
+						xhr.send( options.data || null );
+					} catch ( e ) {
+						if ( callback ) {
+							throw e;
+						}
+					}
+				},
+
+				abort: function() {
+					if ( callback ) {
+						callback();
+					}
+				}
+			};
+		}
+	});
+})(window.jQuery);
 
 /*!
  * jQuery UI Touch Punch 0.2.3
