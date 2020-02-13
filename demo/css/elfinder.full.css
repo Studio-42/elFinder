@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: 15e5793) (2020-02-10)
+ * Version 2.1.53 (2.1-src Nightly: d711f33) (2020-02-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -4138,6 +4138,12 @@ button.elfinder-info-button {
     clear: both;
     padding-bottom: .2em;
     color: #fff;
+}
+
+.elfinder-quicklook-info-progress {
+    width: 0;
+    height: 4px;
+    border-radius: 2px;
 }
 
 /* file icon */

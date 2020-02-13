@@ -103,6 +103,10 @@
     border-color: #8a8a8a;
 }
 
+.elfinder-quicklook-info-progress {
+    background-color: gray;
+}
+
 .std42-dialog .ui-dialog-titlebar .ui-dialog-titlebar-close:hover .ui-icon,
 .elfinder-mobile .std42-dialog .ui-dialog-titlebar .ui-dialog-titlebar-close .ui-icon,
 .elfinder-quicklook-titlebar-icon .ui-icon.elfinder-icon-close:hover,
