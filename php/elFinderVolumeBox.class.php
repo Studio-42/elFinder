@@ -233,6 +233,18 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 $initialToken = $this->_bd_getInitialToken();
             }
 
+            $lock = '';
+            $aTokenFile = $this->aTokenFile? $this->aTokenFile : $this->_bd_getATokenFile();
+            if ($aTokenFile && is_file($aTokenFile)) {
+                $lock = $aTokenFile . '.lock';
+                if (file_exists($lock)) {
+                    // Probably updating on other instance
+                    return true;
+                }
+                touch($lock);
+                $GLOBALS['elFinderTempFiles'][$lock] = true;
+            }
+
             $url = self::TOKEN_URL;
 
             $curl = curl_init();
@@ -241,20 +253,24 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 // General options.
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_POST => true, // i am sending post data
-                CURLOPT_POSTFIELDS => 'client_id=' . urlencode($this->options['client_id'])
-                    . '&client_secret=' . urlencode($this->options['client_secret'])
-                    . '&grant_type=refresh_token'
-                    . '&refresh_token=' . urlencode($refresh_token),
-
+                CURLOPT_POSTFIELDS => array(
+                    'client_id' => $this->options['client_id'],
+                    'client_secret' => $this->options['client_secret'],
+                    'grant_type' => 'refresh_token',
+                    'refresh_token' => $refresh_token
+                ),
                 CURLOPT_URL => $url,
             ));
-
             $decoded = $this->_bd_curlExec($curl);
 
+            if (!$decoded) {
+                throw new \Exception('Box Error: Tried to renew the access token, but did not get a response from the Box server.');
+            }
+
             if (empty($decoded->access_token)) {
-                if ($this->aTokenFile) {
-                    if (is_file($this->aTokenFile)) {
-                        unlink($this->aTokenFile);
+                if ($aTokenFile) {
+                    if (is_file($aTokenFile)) {
+                        unlink($aTokenFile);
                     }
                 }
                 $err = property_exists($decoded, 'error')? ' ' . $decoded->error : '';
@@ -263,7 +279,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             }
 
             $token = (object)array(
-                'expires' => time() + $decoded->expires_in - 30,
+                'expires' => time() + $decoded->expires_in - 300,
                 'initialToken' => $initialToken,
                 'data' => $decoded,
             );
@@ -272,17 +288,16 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             $json = json_encode($token);
 
             if (!empty($decoded->refresh_token)) {
-                if (empty($this->options['netkey']) && $this->aTokenFile) {
-                    file_put_contents($this->aTokenFile, json_encode($token));
+                if (empty($this->options['netkey']) && $aTokenFile) {
+                    file_put_contents($aTokenFile, json_encode($token), LOCK_EX);
                     $this->options['accessToken'] = $json;
                 } else if (!empty($this->options['netkey'])) {
                     // OAuth2 refresh token can be used only once,
                     // so update it if it is the same as the token file
-                    $aTokenFile = $this->_bd_getATokenFile();
                     if ($aTokenFile && is_file($aTokenFile)) {
                         if ($_token = json_decode(file_get_contents($aTokenFile))) {
                             if ($_token->data->refresh_token === $refresh_token) {
-                                file_put_contents($aTokenFile, $json);
+                                file_put_contents($aTokenFile, $json, LOCK_EX);
                             }
                         }
                     }
@@ -294,6 +309,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                     throw new \Exception(ERROR_CREATING_TEMP_DIR);
                 }
             }
+            $lock && unlink($lock);
         }
 
         return true;
@@ -884,7 +900,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                                 throw new Exception('Required option `accessToken` is invalid JSON.');
                             }
                         } else {
-                            file_put_contents($this->aTokenFile, json_encode($this->token));
+                            file_put_contents($this->aTokenFile, json_encode($this->token), LOCK_EX);
                         }
                     }
                 } else if (is_file($this->aTokenFile)) {
