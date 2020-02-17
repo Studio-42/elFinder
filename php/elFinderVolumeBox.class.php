@@ -245,6 +245,13 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 $GLOBALS['elFinderTempFiles'][$lock] = true;
             }
 
+            $postData = array(
+                'client_id' => $this->options['client_id'],
+                'client_secret' => $this->options['client_secret'],
+                'grant_type' => 'refresh_token',
+                'refresh_token' => $refresh_token
+            );
+
             $url = self::TOKEN_URL;
 
             $curl = curl_init();
@@ -253,18 +260,22 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 // General options.
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_POST => true, // i am sending post data
-                CURLOPT_POSTFIELDS => array(
-                    'client_id' => $this->options['client_id'],
-                    'client_secret' => $this->options['client_secret'],
-                    'grant_type' => 'refresh_token',
-                    'refresh_token' => $refresh_token
-                ),
+                CURLOPT_POSTFIELDS => http_build_query($postData),
                 CURLOPT_URL => $url,
             ));
-            $decoded = $this->_bd_curlExec($curl);
 
-            if (!$decoded) {
-                throw new \Exception('Box Error: Tried to renew the access token, but did not get a response from the Box server.');
+            $decoded = $error = '';
+            try {
+                $decoded = $this->_bd_curlExec($curl, true, array(), $postData);
+            } catch (Exception $e) {
+                $error = $e->getMessage();
+            }
+            if (!$decoded && !$error) {
+                $error = 'Tried to renew the access token, but did not get a response from the Box server.';
+            }
+            if ($error) {
+                $lock && unlink($lock);
+                throw new \Exception('Box access token update failed. ('.$error.') If this message appears repeatedly, please notify the administrator.');
             }
 
             if (empty($decoded->access_token)) {
@@ -395,13 +406,13 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      * @throws \Exception
      * @return mixed
      */
-    protected function _bd_curlExec($curl, $decodeOrParent = true, $headers = array())
+    protected function _bd_curlExec($curl, $decodeOrParent = true, $headers = array(), $postData = array())
     {
         $headers = array_merge(array(
             'Authorization: Bearer ' . $this->token->data->access_token,
         ), $headers);
 
-        $result = elFinder::curlExec($curl, array(), $headers);
+        $result = elFinder::curlExec($curl, array(), $headers, $postData);
 
         if (!$decodeOrParent) {
             return $result;
@@ -409,10 +420,16 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
         $decoded = json_decode($result);
 
-        if (!empty($decoded->error_code)) {
+        if ($error = !empty($decoded->error_code)) {
             $errmsg = $decoded->error_code;
             if (!empty($decoded->message)) {
                 $errmsg .= ': ' . $decoded->message;
+            }
+            throw new \Exception($errmsg);
+        } else if ($error = !empty($decoded->error)) {
+            $errmsg = $decoded->error;
+            if (!empty($decoded->error_description)) {
+                $errmsg .= ': ' . $decoded->error_description;
             }
             throw new \Exception($errmsg);
         }
