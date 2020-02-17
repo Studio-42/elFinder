@@ -4741,6 +4741,7 @@ var go = function() {
                 'cnt' => 0,
                 'url' => $data['target'],
                 'headers' => isset($data['headers']) ? $data['headers'] : array(),
+                'postData' => isset($data['postData']) ? $data['postData'] : array(),
                 'cookies' => array(),
             );
         }
@@ -4779,17 +4780,38 @@ var go = function() {
             if (!($stream = stream_socket_client($transport . '://' . $url['host'] . ':' . $url['port']))) {
                 return false;
             }
-            stream_set_timeout($stream, 300);
-            fputs($stream, "GET {$url['path']}{$query} HTTP/1.1\r\n");
-            fputs($stream, "Host: {$url['host']}\r\n");
+
+            $body = '';
+            if (!empty($data['postData'])) {
+                $method = 'POST';
+                if (is_array($data['postData'])) {
+                    $body = http_build_query($data['postData']);
+                } else {
+                    $body = $data['postData'];
+                }
+            } else {
+                $method = 'GET';
+            }
+
+            $sends = array();
+            $sends[] = "$method {$url['path']}{$query} HTTP/1.1";
+            $sends[] = "Host: {$url['host']}";
             foreach ($headers as $header) {
-                fputs($stream, trim($header, "\r\n") . "\r\n");
+                $sends[] = trim($header, "\r\n");
             }
-            fputs($stream, "Connection: Close\r\n");
+            $sends[] = 'Connection: Close';
             if ($cookies) {
-                fputs($stream, 'Cookie: ' . implode('; ', $cookies) . "\r\n");
+                $sends[] = 'Cookie: ' . implode('; ', $cookies);
             }
-            fputs($stream, "\r\n");
+            if ($method === 'POST') {
+                $sends[] = 'Content-Type: application/x-www-form-urlencoded';
+                $sends[] = 'Content-Length: ' . strlen($body);
+            }
+            $sends[] = "\r\n" . $body;
+
+            stream_set_timeout($stream, 300);
+            fputs($stream, join("\r\n", $sends) . "\r\n");
+
             while (($res = trim(fgets($stream))) !== '') {
                 // find redirect
                 if (preg_match('/^Location: (.+)$/', $res, $m)) {
@@ -4841,12 +4863,13 @@ var go = function() {
      * @param resource $curl
      * @param array    $options
      * @param array    $headers
+     * @param array    $postData
      *
      * @throws \Exception
      * @return mixed
      * @author Naoki Sawada
      */
-    public static function curlExec($curl, $options = array(), $headers = array())
+    public static function curlExec($curl, $options = array(), $headers = array(), $postData = array())
     {
         $followLocation = (!ini_get('safe_mode') && !ini_get('open_basedir'));
         if ($followLocation) {
@@ -4864,7 +4887,7 @@ var go = function() {
         $result = curl_exec($curl);
 
         if (!$followLocation && $redirect = curl_getinfo($curl, CURLINFO_REDIRECT_URL)) {
-            if ($stream = self::getStreamByUrl(array('target' => $redirect, 'headers' => $headers))) {
+            if ($stream = self::getStreamByUrl(array('target' => $redirect, 'headers' => $headers, 'postData' => $postData))) {
                 $result = stream_get_contents($stream);
             }
         }
