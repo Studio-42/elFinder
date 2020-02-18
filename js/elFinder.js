@@ -1951,7 +1951,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 				
 				if (typeof baseUrl === 'undefined') {
-					baseUrl = self.option('url', (!self.isRoot(file) && file.phash) || file.hash);
+					baseUrl = getBaseUrl();
 				}
 				
 				if (baseUrl) {
@@ -1967,14 +1967,17 @@ var elFinder = function(elm, opts, bootCallback) {
 					params.current = file.phash;
 				}
 				return filter(self.options.url + (self.options.url.indexOf('?') === -1 ? '?' : '&') + $.param(params, true));
-			}, 
+			},
+			getBaseUrl = function() {
+				return elf.option('url', (!self.isRoot(file) && file.phash) || file.hash);
+			},
 			baseUrl, res;
 		
 		if (!file || !file.read) {
 			return async? dfrd.resolve('') : '';
 		}
 		
-		if (onetm) {
+		if (onetm && (!file.url || file.url == '1') && !(baseUrl = getBaseUrl())) {
 			async = true;
 			this.request({
 				data : { cmd : 'url', target : hash, options : { onetime: 1 } },
@@ -1988,7 +1991,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				dfrd.resolve('');
 			});
 		} else {
-			if (file.url == '1' || (temp && !file.url && !(baseUrl = self.option('url', (!self.isRoot(file) && file.phash) || file.hash)))) {
+			if (file.url == '1' || (temp && !file.url && !(baseUrl = getBaseUrl()))) {
 				this.request({
 					data : { cmd : 'url', target : hash, options : { temporary: temp? 1 : 0 } },
 					preventDefault : true,
