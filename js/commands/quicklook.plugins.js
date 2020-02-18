@@ -1544,9 +1544,9 @@ elFinder.prototype.commands.quicklook.plugins = [
 			});
 			gMaps = (window.google && google.maps);
 			// start load maps
-			loadMap = function(file, node) {
+			loadMap = function(file, node, prog) {
 				var mapsOpts = ql.options.googleMapsOpts.maps;
-				fm.forExternalUrl(file.hash).done(function(url) {
+				fm.forExternalUrl(file.hash, { progressBar: prog }).done(function(url) {
 					if (url) {
 						try {
 							new gMaps.KmlLayer(url, Object.assign({
@@ -1622,10 +1622,10 @@ elFinder.prototype.commands.quicklook.plugins = [
 						if (!gMaps) {
 							fm.loadScript([mapScr], function() {
 								gMaps = window.google && google.maps;
-								gMaps && loadMap(file, node);
+								gMaps && loadMap(file, node, prog);
 							});
 						} else {
-							loadMap(file, node);
+							loadMap(file, node, prog);
 						}
 					}
 				}
