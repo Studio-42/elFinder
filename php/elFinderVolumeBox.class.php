@@ -1266,27 +1266,8 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      **/
     protected function getSharedWebContentLink($raw)
     {
-        $fExtension = pathinfo($raw->name, PATHINFO_EXTENSION);
-        list($fType) = explode('/', self::mimetypeInternalDetect($raw->name));
-
-        if ($raw->shared_link->url && ($fType == 'image' || $fType == 'video' || $fType == 'audio')) {
-            if ($fExtension == 'jpg' && $fType == 'image') {
-                $url = 'https://app.box.com/representation/file_version_' . $raw->file_version->id . '/image_2048_' . $fExtension . '/1.' . $fExtension . '?shared_name=' . basename($raw->shared_link->url);
-
-                return $url;
-            } elseif ($fExtension !== 'jpg' && $fType == 'image') {
-                $url = 'https://app.box.com/representation/file_version_' . $raw->file_version->id . '/image_2048/1.' . $fExtension . '?shared_name=' . basename($raw->shared_link->url);
-
-                return $url;
-            } elseif ($fType == 'video') {
-                $url = 'https://app.box.com/representation/file_version_' . $raw->file_version->id . '/video_480.' . $fExtension . '?shared_name=' . basename($raw->shared_link->url);
-
-                return $url;
-            } elseif ($fType == 'audio') {
-                $url = 'https://app.box.com/index.php?rm=preview_stream&amp&file_version_' . $raw->file_version->id . '/audio/mpeg:' . $raw->name . '&shared_name=' . basename($raw->shared_link->url);
-
-                return $url;
-            }
+        if ($raw->shared_link->url) {
+            return sprintf('https://app.box.com/index.php?rm=box_download_shared_file&shared_name=%s&file_id=f_%s', basename($raw->shared_link->url), $raw->id);
         } elseif ($raw->shared_link->download_url) {
             return $raw->shared_link->download_url;
         }
