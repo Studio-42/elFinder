@@ -3371,7 +3371,7 @@ class elFinder
                     }
                 }
             }
-            if (!$_target || ($file = $volume->upload($fp, $_target, $name, $tmpname, ($_target === $target) ? $hashes : array())) === false) {
+            if (!$_target || ($file = $volume->upload($fp, $_target, $name, false, $tmpname, ($_target === $target) ? $hashes : array())) === false) {
                 $errors = array_merge($errors, $this->error(self::ERROR_UPLOAD_FILE, $name, $volume->error()));
                 fclose($fp);
                 if (!is_uploaded_file($tmpname) && unlink($tmpname)) {
