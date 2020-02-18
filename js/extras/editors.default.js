@@ -2888,6 +2888,7 @@
 						.hide()
 						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
 						.appendTo(select.parent()),
+					prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(spnr),
 					_url = null,
 					url = function() {
 						var onetime;
@@ -2895,7 +2896,7 @@
 							return $.Deferred().resolve(_url);
 						} else {
 							spnr.show();
-							return fm.forExternalUrl(file.hash).done(function(url) {
+							return fm.forExternalUrl(file.hash, { progressBar: prog }).done(function(url) {
 								_url = url;
 							}).fail(function(error) {
 								error && fm.error(error);
