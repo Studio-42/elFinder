@@ -637,12 +637,12 @@ var elFinder = function(elm, opts, bootCallback) {
 		requestQueue = [],
 		
 		/**
-		 * Flag to cancel the `open` command waiting for connection
+		 * Current open command instance
 		 * 
-		 * @type Boolean
+		 * @type Object
 		 */
-		requestQueueSkipOpen = false,
-		
+		currentOpenCmd = null,
+
 		/**
 		 * Exec shortcut
 		 *
@@ -2672,21 +2672,32 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 				
 				if (isOpen) {
-					if (requestQueueSkipOpen) {
-						return dfrd.reject();
+					if (currentOpenCmd) {
+						if (currentOpenCmd.xhr) {
+							currentOpenCmd.xhr.queueAbort();
+						} else {
+							currentOpenCmd.reject('openabort');
+						}
 					}
-					requestQueueSkipOpen = true;
+					currentOpenCmd = dfrd;
 				}
 				
 				dfrd.always(function() {
 					delete options.headers['X-elFinderReqid'];
 				}).fail(function(error, xhr, response) {
-					var errData = {
+					var errData, errMsg;
+
+					if (isOpen && error === 'openabort') {
+						error = '';
+						syncOnFail = false;
+					}
+
+					errData = {
 						cmd: cmd,
 						err: error,
 						xhr: xhr,
 						rc: response
-					}, errMsg;
+					};
 
 					// unset this cmd queue when user canceling
 					// see notify : function - `cancel.reject(0);`
@@ -2780,8 +2791,9 @@ var elFinder = function(elm, opts, bootCallback) {
 					--requestCnt;
 					if (requestQueue.length) {
 						requestQueue.shift()();
-					} else {
-						requestQueueSkipOpen = false;
+					}
+					if (isOpen) {
+						currentOpenCmd = null;
 					}
 				}).fail(error).done(success);
 				
@@ -2835,7 +2847,7 @@ var elFinder = function(elm, opts, bootCallback) {
 						dfrd.always(function() {
 							notify.cnt = -(parseInt(notify.cnt)||0);
 							self.notify(notify);
-							hasNotify = false
+							hasNotify = false;
 						});
 					}, self.notifyDelay);
 					
@@ -2844,9 +2856,6 @@ var elFinder = function(elm, opts, bootCallback) {
 					});
 				}
 				// queueing
-				if (isOpen) {
-					requestQueueSkipOpen = false;
-				}
 				if (requestCnt < requestMaxConn) {
 					// do request
 					return request();
