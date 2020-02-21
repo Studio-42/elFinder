@@ -1146,7 +1146,7 @@ elFinder.prototype._options = {
 	 * @default {position: {}, width : null} - Apply CSS definition
 	 * position: CSS object | null (null: position center & middle)
 	 */
-	notifyDialog : {position: {}, width : null},
+	notifyDialog : {position : {}, width : null, canClose : false, hiddens : ['open']},
 	
 	/**
 	 * Dialog contained in the elFinder node

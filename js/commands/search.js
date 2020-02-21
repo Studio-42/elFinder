@@ -38,7 +38,8 @@ elFinder.prototype.commands.search = function() {
 					data.type = sType;
 				}
 				return data;
-			};
+			},
+			rootCnt;
 		
 		if (typeof q == 'string' && q) {
 			if (typeof target == 'object') {
@@ -64,10 +65,11 @@ elFinder.prototype.commands.search = function() {
 			
 			if (! onlyMimes.length || mime.length) {
 				if (target === '' && fm.api >= 2.1) {
+					rootCnt = Object.keys(fm.roots).length;
 					$.each(fm.roots, function(id, hash) {
 						reqDef.push(fm.request({
 							data   : setType({cmd : 'search', q : q, target : hash, mimes : mime}),
-							notify : {type : 'search', cnt : 1, hideCnt : (reqDef.length? false : true)},
+							notify : {type : 'search', cnt : 1, hideCnt : (rootCnt > 1? false : true)},
 							cancel : true,
 							preventDone : true
 						}));

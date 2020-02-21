@@ -247,6 +247,12 @@ div.elfinder {
     opacity: .8;
 }
 
+.elfinder div.elfinder-bottomtray > div {
+    top: initial;
+    right: initial;
+    left: initial;
+}
+
 .elfinder.elfinder-ltr div.elfinder-bottomtray {
     left: 0;
 }
@@ -260,4 +266,23 @@ div.elfinder {
 .elfinder .elfinder-ui-tooltip {
     font-size: 14px;
     padding: 2px 4px;
+}
+
+/* progressbar */
+.elfinder-ui-progressbar {
+    pointer-events: none;
+    position: absolute;
+    width: 0;
+    height: 2px;
+    top: 0px;
+    border-radius: 2px;
+    filter: blur(1px);
+}
+
+.elfinder-ltr .elfinder-ui-progressbar {
+    left: 0;
+}
+
+.elfinder-rtl .elfinder-ui-progressbar {
+    right: 0;
 }
