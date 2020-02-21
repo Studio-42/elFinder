@@ -69,6 +69,8 @@ $.fn.elfinderdialog = function(opts, fm) {
 				if (opts === 'destroy') {
 					dialog.remove();
 					fm.trigger('dialogremoved', {dialog: dialog});
+				} else if (dialog.data('minimized')) {
+					dialog.data('minimized').close();
 				}
 			} else if (opts === 'toTop') {
 				dialog.trigger('totop');
@@ -251,13 +253,24 @@ $.fn.elfinderdialog = function(opts, fm) {
 									tray = fm.getUI('bottomtray'),
 									dumStyle = { width: 70, height: 24 },
 									dum = $('<div/>').css(dumStyle).addClass(dialog.get(0).className + ' elfinder-dialog-minimized'),
+									close = function() {
+										mnode.remove();
+										dialog.removeData('minimized').show();
+										self.elfinderdialog('close');
+									},
 									pos = {};
 								
 								e.preventDefault();
 								e.stopPropagation();
 								if (!dialog.data('minimized')) {
 									// minimize
-									doffset = dialog.data('minimized', true).position();
+									doffset = dialog.data('minimized', {
+										dialog : function() { return mnode; },
+										show : function() { mnode.show(); },
+										hide : function() { mnode.hide(); },
+										close : close,
+										title : function(v) { mnode.children('.ui-dialog-titlebar').children('.elfinder-dialog-title').text(v); }
+									}).position();
 									mnode = dialog.clone().on('mousedown', function() {
 										$this.trigger('mousedown');
 									}).removeClass('ui-draggable ui-resizable elfinder-frontmost');
@@ -271,9 +284,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 									mnode.find('.ui-dialog-titlebar-close').on('mousedown', function(e) {
 										e.stopPropagation();
 										e.preventDefault();
-										mnode.remove();
-										dialog.show();
-										self.elfinderdialog('close');
+										close();
 									});
 									mnode.animate(pos, function() {
 										mnode.attr('style', '')

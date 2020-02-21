@@ -400,6 +400,15 @@
     background-color: inherit;
 }
 
+.elfinder-notify-cancel .elfinder-notify-button {
+    background-color: #707070;
+    background-image: url("../img/ui-icons_ffffff_256x240.png");
+}
+
+.elfinder-notify-cancel .elfinder-notify-button.ui-state-hover {
+    background-color: #aaa;
+}
+
 /* edit dialog */
 .elfinder-dialog-edit select.elfinder-edit-changed {
     border-bottom: 2px solid #13ae10;
@@ -413,4 +422,9 @@
 .elfinder-ui-tooltip.ui-widget-shadow,
 .elfinder .elfinder-ui-tooltip.ui-widget-shadow {
     box-shadow: 2px 6px 4px -4px #cecdcd;
+}
+
+/* progressbar */
+.elfinder-ui-progressbar {
+    background-color: #419bf3;
 }
