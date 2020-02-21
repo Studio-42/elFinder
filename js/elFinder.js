@@ -8519,16 +8519,22 @@ elFinder.prototype = {
 			setProgressbar = function() {
 				var cnt = 0,
 					val = 0,
+					ntfs = ndialog.children('.elfinder-notify'),
 					w;
-				ndialog.children('.elfinder-notify').each(function() {
-					cnt++;
-					val += Math.min($(this).data('cur'), 100);
-				});
-				w = cnt? Math.floor(val / (cnt * 100) * 100) + '%' : 0;
-				self.ui.progressbar.width(w);
-				if (dialog.data('minimized')) {
-					dialog.data('minimized').title(w);
-					dialog.data('minimized').dialog().children('.ui-dialog-titlebar').children('.elfinder-ui-progressbar').width(w);
+				if (ntfs.length) {
+					ntfs.each(function() {
+						cnt++;
+						val += Math.min($(this).data('cur'), 100);
+					});
+					w = cnt? Math.floor(val / (cnt * 100) * 100) + '%' : 0;
+					self.ui.progressbar.width(w);
+					if (dialog.data('minimized')) {
+						dialog.data('minimized').title(w);
+						dialog.data('minimized').dialog().children('.ui-dialog-titlebar').children('.elfinder-ui-progressbar').width(w);
+					}
+				} else {
+					self.ui.progressbar.width(0);
+					dialog.data('minimized') && dialog.data('minimized').hide();
 				}
 			},
 			cnt, total, prc;
