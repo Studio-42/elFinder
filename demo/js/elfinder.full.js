@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: 7fa5e7d) (2020-02-21)
+ * Version 2.1.53 (2.1-src Nightly: 758f2dc) (2020-02-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -668,12 +668,12 @@ var elFinder = function(elm, opts, bootCallback) {
 		requestQueue = [],
 		
 		/**
-		 * Flag to cancel the `open` command waiting for connection
+		 * Current open command instance
 		 * 
-		 * @type Boolean
+		 * @type Object
 		 */
-		requestQueueSkipOpen = false,
-		
+		currentOpenCmd = null,
+
 		/**
 		 * Exec shortcut
 		 *
@@ -2703,21 +2703,32 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 				
 				if (isOpen) {
-					if (requestQueueSkipOpen) {
-						return dfrd.reject();
+					if (currentOpenCmd) {
+						if (currentOpenCmd.xhr) {
+							currentOpenCmd.xhr.queueAbort();
+						} else {
+							currentOpenCmd.reject('openabort');
+						}
 					}
-					requestQueueSkipOpen = true;
+					currentOpenCmd = dfrd;
 				}
 				
 				dfrd.always(function() {
 					delete options.headers['X-elFinderReqid'];
 				}).fail(function(error, xhr, response) {
-					var errData = {
+					var errData, errMsg;
+
+					if (isOpen && error === 'openabort') {
+						error = '';
+						syncOnFail = false;
+					}
+
+					errData = {
 						cmd: cmd,
 						err: error,
 						xhr: xhr,
 						rc: response
-					}, errMsg;
+					};
 
 					// unset this cmd queue when user canceling
 					// see notify : function - `cancel.reject(0);`
@@ -2811,8 +2822,9 @@ var elFinder = function(elm, opts, bootCallback) {
 					--requestCnt;
 					if (requestQueue.length) {
 						requestQueue.shift()();
-					} else {
-						requestQueueSkipOpen = false;
+					}
+					if (isOpen) {
+						currentOpenCmd = null;
 					}
 				}).fail(error).done(success);
 				
@@ -2866,7 +2878,7 @@ var elFinder = function(elm, opts, bootCallback) {
 						dfrd.always(function() {
 							notify.cnt = -(parseInt(notify.cnt)||0);
 							self.notify(notify);
-							hasNotify = false
+							hasNotify = false;
 						});
 					}, self.notifyDelay);
 					
@@ -2875,9 +2887,6 @@ var elFinder = function(elm, opts, bootCallback) {
 					});
 				}
 				// queueing
-				if (isOpen) {
-					requestQueueSkipOpen = false;
-				}
 				if (requestCnt < requestMaxConn) {
 					// do request
 					return request();
@@ -10628,7 +10637,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 7fa5e7d)';
+elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 758f2dc)';
 
 
 
@@ -30042,7 +30051,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				
 				if (active && file.mime === mime && ql.dispInlineRegex.test(file.mime)) {
 					e.stopImmediatePropagation();
-					opDfd = fm.openUrl(file.hash, 'sameorigin', function(url) {
+					opDfd = fm.openUrl(file.hash, false, function(url) {
 						if (url) {
 							ql.hideinfo();
 							ql.cover.addClass('elfinder-quicklook-coverbg');
