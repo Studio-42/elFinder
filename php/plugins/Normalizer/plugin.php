@@ -186,7 +186,7 @@ class elFinderPluginNormalizer extends elFinderPlugin
         }
         if ($opts['umlauts']) {
             if (strpos($str = htmlentities($str, ENT_QUOTES, 'UTF-8'), '&') !== false) {
-                $str = html_entity_decode(preg_replace('~&([a-z]{1,2})(?:acute|cedil|circ|grave|lig|orn|ring|slash|tilde|uml);~i', '$1', $str), ENT_QUOTES, 'utf-8');
+                $str = html_entity_decode(preg_replace('~&([a-z]{1,2})(?:acute|caron|cedil|circ|grave|lig|orn|ring|slash|tilde|uml);~i', '$1', $str), ENT_QUOTES, 'utf-8');
             }
         }
         if ($opts['convmap'] && is_array($opts['convmap'])) {

@@ -233,10 +233,10 @@ abstract class elFinderVolumeDriver
         'startPath' => '',
         // how many subdirs levels return per request
         'treeDeep' => 1,
-        // root url, not set to disable sending URL to client (replacement for old "fileURL" option)
+        // root url, not set to URL via the connector. If you want to hide the file URL, do not set this value. (replacement for old "fileURL" option)
         'URL' => '',
-        // enable onetime URL to a file - (true, false or callable (A function that return onetime URL))
-        'onetimeUrl' => false,
+        // enable onetime URL to a file - (true, false, 'auto' (true if a temporary directory is available) or callable (A function that return onetime URL))
+        'onetimeUrl' => 'auto',
         // directory link url to own manager url with folder hash (`true`, `false`, `'hide'`(No show) or default `'auto'`: URL is empty then `true` else `false`)
         'dirUrlOwn' => 'auto',
         // directory separator. required by client to show paths correctly
@@ -898,6 +898,11 @@ abstract class elFinderVolumeDriver
                     'maxlen' => $this->options['tmbVideoConvLen']
                 );
             }
+        }
+
+        // check onetimeUrl
+        if (strtolower($this->options['onetimeUrl']) === 'auto') {
+            $this->options['onetimeUrl'] = elFinder::getStaticVar('commonTempPath')? true : false;
         }
 
         // check archivers
