@@ -546,7 +546,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				
 				if (active && file.mime === mime && ql.dispInlineRegex.test(file.mime)) {
 					e.stopImmediatePropagation();
-					opDfd = fm.openUrl(file.hash, 'sameorigin', function(url) {
+					opDfd = fm.openUrl(file.hash, false, function(url) {
 						if (url) {
 							ql.hideinfo();
 							ql.cover.addClass('elfinder-quicklook-coverbg');
