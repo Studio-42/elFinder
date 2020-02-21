@@ -1969,7 +1969,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				return filter(self.options.url + (self.options.url.indexOf('?') === -1 ? '?' : '&') + $.param(params, true));
 			},
 			getBaseUrl = function() {
-				return elf.option('url', (!self.isRoot(file) && file.phash) || file.hash);
+				return self.option('url', (!self.isRoot(file) && file.phash) || file.hash);
 			},
 			baseUrl, res;
 		
