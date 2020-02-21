@@ -26,12 +26,12 @@ class elFinderVolumeBox extends elFinderVolumeDriver
     /**
      * @var string The base URL for authorization requests
      */
-    const AUTH_URL = 'https://www.box.com/api/oauth2/authorize';
+    const AUTH_URL = 'https://account.box.com/api/oauth2/authorize';
 
     /**
      * @var string The base URL for token requests
      */
-    const TOKEN_URL = 'https://www.box.com/api/oauth2/token';
+    const TOKEN_URL = 'https://api.box.com/oauth2/token';
 
     /**
      * @var string The base URL for upload requests
