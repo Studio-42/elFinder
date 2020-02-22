@@ -601,11 +601,11 @@ $.fn.elfinderplaces = function(fm, opts) {
 							exists[hash] = file;
 							if (!fm.files().hasOwnProperty(file.hash)) {
 								// update cache
-								fm.trigger('tree', {tree: [file]});
+								fm.updateCache({tree: [file]});
 							}
 						});
 						$.each(dirs, function(h, f) {
-							if (f.notfound === Boolean(exists[h])) {
+							if (Boolean(f.notfound) === Boolean(exists[h])) {
 								if ((f.phash === cwd && ev.type !== 'netmount') || (exists[h] && exists[h].mime !== 'directory')) {
 									if (remove(h)) {
 										updated = true;
