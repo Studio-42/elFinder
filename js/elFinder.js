@@ -3067,7 +3067,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				return c;
 			},
 			comp  = compare(),
-			dfrd  = $.Deferred().done(function() { self.trigger('sync'); }),
+			dfrd  = $.Deferred().always(function() { !reqFail && self.trigger('sync'); }),
 			opts = [this.request({
 				data           : {cmd : 'open', reload : 1, target : cwd, tree : (! onlydir && this.ui.tree) ? 1 : 0, compare : comp},
 				preventDefault : true
@@ -3095,7 +3095,8 @@ var elFinder = function(elm, opts, bootCallback) {
 					}
 				}
 				return parents;
-			};
+			},
+			reqFail;
 		
 		if (! onlydir && self.api >= 2) {
 			(cwd !== this.root()) && opts.push(this.request({
@@ -3111,6 +3112,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		}
 		$.when.apply($, opts)
 		.fail(function(error, xhr) {
+			reqFail = (xhr.status != 200);
 			if (! polling || $.inArray('errOpen', error) !== -1) {
 				dfrd.reject(error);
 				self.parseError(error) && self.request({
