@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: 338996d) (2020-02-21)
+ * Version 2.1.53 (2.1-src Nightly: c75c49c) (2020-02-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10643,7 +10643,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 338996d)';
+elFinder.prototype.version = '2.1.53 (2.1-src Nightly: c75c49c)';
 
 
 
@@ -11652,9 +11652,6 @@ elFinder.prototype._options = {
 				pixo: {
 					apikey: ''
 				},
-				// Specify the Creative Cloud API key when using Creative SDK image editor of Creative Cloud.
-				// You can get the API key at https://console.adobe.io/.
-				creativeCloudApiKey : '',
 				// Browsing manager URL for CKEditor, TinyMCE
 				// Uses self location with the empty value or not defined.
 				//managerUrl : 'elfinder.html'
