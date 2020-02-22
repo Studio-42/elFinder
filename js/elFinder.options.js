@@ -536,9 +536,6 @@ elFinder.prototype._options = {
 				pixo: {
 					apikey: ''
 				},
-				// Specify the Creative Cloud API key when using Creative SDK image editor of Creative Cloud.
-				// You can get the API key at https://console.adobe.io/.
-				creativeCloudApiKey : '',
 				// Browsing manager URL for CKEditor, TinyMCE
 				// Uses self location with the empty value or not defined.
 				//managerUrl : 'elfinder.html'
