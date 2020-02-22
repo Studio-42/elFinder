@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: c75c49c) (2020-02-22)
+ * Version 2.1.53 (2.1-src Nightly: cf9015c) (2020-02-22)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10643,7 +10643,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.53 (2.1-src Nightly: c75c49c)';
+elFinder.prototype.version = '2.1.53 (2.1-src Nightly: cf9015c)';
 
 
 
@@ -20015,11 +20015,11 @@ $.fn.elfinderplaces = function(fm, opts) {
 							exists[hash] = file;
 							if (!fm.files().hasOwnProperty(file.hash)) {
 								// update cache
-								fm.trigger('tree', {tree: [file]});
+								fm.updateCache({tree: [file]});
 							}
 						});
 						$.each(dirs, function(h, f) {
-							if (f.notfound === Boolean(exists[h])) {
+							if (Boolean(f.notfound) === Boolean(exists[h])) {
 								if ((f.phash === cwd && ev.type !== 'netmount') || (exists[h] && exists[h].mime !== 'directory')) {
 									if (remove(h)) {
 										updated = true;
