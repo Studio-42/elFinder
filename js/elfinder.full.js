@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: 6f46e53) (2020-02-22)
+ * Version 2.1.53 (2.1-src Nightly: 8db53a1) (2020-02-23)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -3143,7 +3143,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		}
 		$.when.apply($, opts)
 		.fail(function(error, xhr) {
-			reqFail = (xhr.status != 200);
+			reqFail = (xhr && xhr.status != 200);
 			if (! polling || $.inArray('errOpen', error) !== -1) {
 				dfrd.reject(error);
 				self.parseError(error) && self.request({
@@ -10645,7 +10645,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 6f46e53)';
+elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 8db53a1)';
 
 
 

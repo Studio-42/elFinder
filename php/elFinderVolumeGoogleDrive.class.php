@@ -1670,6 +1670,16 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
                             'headers' => array('Authorization: Bearer ' . $access_token),
                         );
 
+                        // to support range request
+                        if (func_num_args() > 2) {
+                            $opts = func_get_arg(2);
+                        } else {
+                            $opts = array();
+                        }
+                        if (!empty($opts['httpheaders'])) {
+                            $data['headers'] = array_merge($opts['httpheaders'], $data['headers']);
+                        }
+
                         return elFinder::getStreamByUrl($data);
                     }
                 }
