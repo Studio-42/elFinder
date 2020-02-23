@@ -457,6 +457,13 @@ class elFinder
      */
     private $utf8Encoder = null;
 
+    /**
+     * Seekable URL file pointer ids -  for getStreamByUrl()
+     *
+     * @var        array
+     */
+    private static $seekableUrlFps = array();
+
     // Errors messages
     const ERROR_ACCESS_DENIED = 'errAccess';
     const ERROR_ARC_MAXSIZE = 'errArcMaxSize';
@@ -1933,7 +1940,11 @@ class elFinder
                 return $a404;
             }
 
-            if (($fp = $volume->open($target)) == false) {
+            $opts = array();
+            if (!empty($_SERVER['HTTP_RANGE'])) {
+                $opts['httpheaders'] = array('Range: ' . $_SERVER['HTTP_RANGE']);
+            }
+            if (($fp = $volume->open($target, $opts)) == false) {
                 return $a404;
             }
         }
@@ -4551,6 +4562,22 @@ var go = function() {
     }
 
     /**
+     * Determines whether the specified resource is seekable url.
+     *
+     * @param      <type>   $resource  The resource
+     *
+     * @return     boolean  True if the specified resource is seekable url, False otherwise.
+     */
+    public static function isSeekableUrl($resource)
+    {
+        $id = (int)$resource;
+        if (isset(elFinder::$seekableUrlFps[$id])) {
+            return elFinder::$seekableUrlFps[$id];
+        }
+        return null;
+    }
+
+    /**
      * serialize and base64_encode of session data (If needed)
      *
      * @deprecated
@@ -4814,7 +4841,7 @@ var go = function() {
 
             while (($res = trim(fgets($stream))) !== '') {
                 // find redirect
-                if (preg_match('/^Location: (.+)$/', $res, $m)) {
+                if (preg_match('/^Location: (.+)$/i', $res, $m)) {
                     $data['url'] = $m[1];
                 }
                 // fetch cookie
@@ -4828,6 +4855,10 @@ var go = function() {
                             $data['cookies'][$domain] = $c2[1];
                         }
                     }
+                }
+                // is seekable url
+                if (preg_match('/^(Accept-Ranges|Content-Range): bytes/i', $res)) {
+                    elFinder::$seekableUrlFps[(int)$stream] = true;
                 }
             }
             if ($data['url']) {

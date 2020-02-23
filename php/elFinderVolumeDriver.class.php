@@ -2181,8 +2181,13 @@ abstract class elFinderVolumeDriver
             || $file['mime'] == 'directory') {
             return false;
         }
-
-        return $this->fopenCE($this->decode($hash), 'rb');
+        // check extra option for network stream pointer
+        if (func_num_args() > 1) {
+            $opts = func_get_arg(1);
+        } else {
+            $opts = array();
+        }
+        return $this->fopenCE($this->decode($hash), 'rb', $opts);
     }
 
     /**
@@ -3766,7 +3771,13 @@ abstract class elFinderVolumeDriver
      */
     protected function fopenCE($path, $mode = 'rb')
     {
-        return (!$this->encoding) ? $this->_fopen($path, $mode) : $this->convEncOut($this->_fopen($this->convEncIn($path), $mode));
+        // check extra option for network stream pointer
+        if (func_num_args() > 2) {
+            $opts = func_get_arg(2);
+        } else {
+            $opts = array();
+        }
+        return (!$this->encoding) ? $this->_fopen($path, $mode, $opts) : $this->convEncOut($this->_fopen($this->convEncIn($path), $mode, $opts));
     }
 
     /**
