@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: 765fb62) (2020-02-24)
+ * Version 2.1.53 (2.1-src Nightly: 24b6991) (2020-02-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -9480,7 +9480,14 @@ elFinder.prototype = {
 					f0 = $(f.host[0]),
 					f1 = $(f.host[1]),
 					expires = '&nbsp;',
-					nm = fm.getCommand('netmount'),
+					vars = this.vars,
+					chk = function() {
+						// To correspond to mobile safari, authentication tab sometimes not closing in CORS environment.
+						if (vars.oauthW && !document.hasFocus()) {
+							p.trigger('change', 'winfocus');
+							vars.tm = setTimeout(chk, 3000);
+						}
+					},
 					btn;
 				
 				opts.noOffline && f.offline.closest('tr').hide();
@@ -9488,22 +9495,28 @@ elFinder.prototype = {
 					f0.removeClass('elfinder-spinner').removeData('expires').removeData('funcexpup');
 					btn = f.host.find('input').on('mouseenter mouseleave', function(){$(this).toggleClass('ui-state-hover');});
 					if (data.url) {
-						btn.on('click', function() { nm.oauthWindow = window.open(data.url); });
+						btn.on('click', function() {
+							vars.oauthW = window.open(data.url);
+							if (fm.isCORS) {
+								vars.tm = setTimeout(chk, 5000);
+							}
+						});
 					}
 					f1.val('');
 					f.path.val(opts.root).next().remove();
 					f.user.val('');
 					f.pass.val('');
 					! opts.noOffline && f.offline.closest('tr').show();
-					this.vars.mbtn.hide();
+					vars.mbtn.hide();
 				} else if (data.mode == 'folders') {
 					if (data.folders) {
 						addFolders.call(this, fm, f.path.nextAll(':last'), data.folders);
 					}
 				} else {
-					if (nm.oauthWindow) {
-						nm.oauthWindow.close();
-						delete nm.oauthWindow;
+					if (vars.oauthW) {
+						vars.tm && clearTimeout(vars.tm);
+						vars.oauthW.close();
+						delete vars.oauthW;
 					}
 					if (data.expires) {
 						expires = '()';
@@ -9536,7 +9549,7 @@ elFinder.prototype = {
 							p.trigger('change', 'reset');
 						}));
 					f1.val(protocol);
-					this.vars.mbtn.show();
+					vars.mbtn.show();
 					if (data.folders) {
 						addFolders.call(this, fm, f.path, data.folders);
 					}
@@ -10654,7 +10667,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 765fb62)';
+elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 24b6991)';
 
 
 
