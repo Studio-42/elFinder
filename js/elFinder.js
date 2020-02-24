@@ -9448,12 +9448,17 @@ elFinder.prototype = {
 					p = this.protocol,
 					f0 = $(f.host[0]),
 					f1 = $(f.host[1]),
-					expires = '&nbsp;';
+					expires = '&nbsp;',
+					nm = fm.getCommand('netmount'),
+					btn;
 				
 				opts.noOffline && f.offline.closest('tr').hide();
 				if (data.mode == 'makebtn') {
 					f0.removeClass('elfinder-spinner').removeData('expires').removeData('funcexpup');
-					f.host.find('input').on('mouseenter mouseleave', function(){$(this).toggleClass('ui-state-hover');});
+					btn = f.host.find('input').on('mouseenter mouseleave', function(){$(this).toggleClass('ui-state-hover');});
+					if (data.url) {
+						btn.on('click', function() { nm.oauthWindow = window.open(data.url); });
+					}
 					f1.val('');
 					f.path.val(opts.root).next().remove();
 					f.user.val('');
@@ -9465,6 +9470,10 @@ elFinder.prototype = {
 						addFolders.call(this, fm, f.path.nextAll(':last'), data.folders);
 					}
 				} else {
+					if (nm.oauthWindow) {
+						nm.oauthWindow.close();
+						delete nm.oauthWindow;
+					}
 					if (data.expires) {
 						expires = '()';
 						f0.data('expires', data.expires);
