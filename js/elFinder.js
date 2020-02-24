@@ -5779,6 +5779,7 @@ elFinder.prototype = {
 				Mobile  : typeof window.orientation != "undefined",
 				Touch   : typeof window.ontouchstart != "undefined",
 				iOS     : navigator.platform.match(/^iP(?:[ao]d|hone)/),
+				Mac     : navigator.platform.match(/^Mac/),
 				Fullscreen : (typeof (document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen) !== 'undefined'),
 				Angle   : 0,
 				Rotated : false,
@@ -9451,8 +9452,7 @@ elFinder.prototype = {
 					expires = '&nbsp;',
 					vars = this.vars,
 					chk = function() {
-						// To correspond to mobile safari, authentication tab sometimes not closing in CORS environment.
-						if (vars.oauthW && !document.hasFocus()) {
+						if (vars.oauthW && !document.hasFocus() && --vars.chkCnt) {
 							p.trigger('change', 'winfocus');
 							vars.tm = setTimeout(chk, 3000);
 						}
@@ -9465,8 +9465,12 @@ elFinder.prototype = {
 					btn = f.host.find('input').on('mouseenter mouseleave', function(){$(this).toggleClass('ui-state-hover');});
 					if (data.url) {
 						btn.on('click', function() {
+							vars.tm && clearTimeout(vars.tm);
 							vars.oauthW = window.open(data.url);
-							if (fm.isCORS) {
+							// To correspond to safari, authentication tab sometimes not closing in CORS environment.
+							// This may be a safari bug and may improve in the future.
+							if ((fm.UA.iOS || fm.UA.Mac) && fm.isCORS && !vars.chkdone) {
+								vars.chkCnt = 60;
 								vars.tm = setTimeout(chk, 5000);
 							}
 						});
@@ -9486,6 +9490,8 @@ elFinder.prototype = {
 						vars.tm && clearTimeout(vars.tm);
 						vars.oauthW.close();
 						delete vars.oauthW;
+						// The problem that Safari's authentication tab doesn't close only affects the first time.
+						vars.chkdone = true;
 					}
 					if (data.expires) {
 						expires = '()';
