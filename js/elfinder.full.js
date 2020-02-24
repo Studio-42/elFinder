@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: f3e167c) (2020-02-23)
+ * Version 2.1.53 (2.1-src Nightly: 765fb62) (2020-02-24)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -9479,12 +9479,17 @@ elFinder.prototype = {
 					p = this.protocol,
 					f0 = $(f.host[0]),
 					f1 = $(f.host[1]),
-					expires = '&nbsp;';
+					expires = '&nbsp;',
+					nm = fm.getCommand('netmount'),
+					btn;
 				
 				opts.noOffline && f.offline.closest('tr').hide();
 				if (data.mode == 'makebtn') {
 					f0.removeClass('elfinder-spinner').removeData('expires').removeData('funcexpup');
-					f.host.find('input').on('mouseenter mouseleave', function(){$(this).toggleClass('ui-state-hover');});
+					btn = f.host.find('input').on('mouseenter mouseleave', function(){$(this).toggleClass('ui-state-hover');});
+					if (data.url) {
+						btn.on('click', function() { nm.oauthWindow = window.open(data.url); });
+					}
 					f1.val('');
 					f.path.val(opts.root).next().remove();
 					f.user.val('');
@@ -9496,6 +9501,10 @@ elFinder.prototype = {
 						addFolders.call(this, fm, f.path.nextAll(':last'), data.folders);
 					}
 				} else {
+					if (nm.oauthWindow) {
+						nm.oauthWindow.close();
+						delete nm.oauthWindow;
+					}
 					if (data.expires) {
 						expires = '()';
 						f0.data('expires', data.expires);
@@ -10645,7 +10654,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.53 (2.1-src Nightly: f3e167c)';
+elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 765fb62)';
 
 
 
