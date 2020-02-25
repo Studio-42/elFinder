@@ -120,6 +120,7 @@
 				fm.openUrl(file.hash, false, function(v) {
 					url = v;
 					node.attr('_src', content);
+					setup();
 				});
 			} else {
 				setup();
