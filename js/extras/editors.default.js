@@ -371,7 +371,7 @@
 					this.disabled = true;
 				} else {
 					this.opts = Object.assign({
-						version: 'v3.7.3'
+						version: 'v3.8.0'
 					}, opts.extraOptions.tuiImgEditOpts || {}, {
 						iconsPath : fm.baseUrl + 'img/tui-',
 						theme : {}
@@ -528,6 +528,15 @@
 							// show initial scale
 							zoom(null);
 						}, 100);
+
+						// show color slider (maybe TUI-Image-Editor's bug)
+						// see https://github.com/nhn/tui.image-editor/issues/153
+						$base.find('.tui-colorpicker-palette-container').on('click', '.tui-colorpicker-palette-preview', function() {
+							$(this).closest('.color-picker-control').height('auto').find('.tui-colorpicker-slider-container').toggle();
+						});
+						$base.on('click', function() {
+							$base.find('.tui-colorpicker-slider-container').hide();
+						});
 					},
 					loader;
 
