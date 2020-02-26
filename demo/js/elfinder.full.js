@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: 74e9b92) (2020-02-25)
+ * Version 2.1.53 (2.1-src Nightly: a8c9cf0) (2020-02-26)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10673,7 +10673,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 74e9b92)';
+elFinder.prototype.version = '2.1.53 (2.1-src Nightly: a8c9cf0)';
 
 
 
@@ -24102,14 +24102,21 @@ elFinder.prototype.commands.edit = function() {
 							self.data = {target : phash};
 							$.proxy(fm.res('mixin', 'make'), self)()
 								.done(function(data) {
+									var oldHash;
 									if (data.added && data.added.length) {
+										oldHash = ta.data('hash');
 										ta.data('hash', data.added[0].hash);
 										save().done(function() {
 											_loaded = false;
 											dialogNode.show();
 											cancel();
 											dialogs.fadeIn();
-										}).fail(fail);
+										}).fail(function() {
+											fm.exec('rm', [data.added[0].hash], { forceRm: true, quiet: true });
+											ta.data('hash', oldHash);
+											dialogNode.find('button.elfinder-btncnt-2').hide();
+											fail();
+										});
 									} else {
 										fail();
 									}
@@ -24179,7 +24186,7 @@ elFinder.prototype.commands.edit = function() {
 						}).done(function(d) {
 							dfd.resolve(old !== d);
 						}).fail(function(err) {
-							dfd.resolve(err || true);
+							dfd.resolve(err || (old === undefined? false : true));
 						});
 					} else {
 						dfd.resolve(old !== res);
@@ -24315,7 +24322,11 @@ elFinder.prototype.commands.edit = function() {
 					}
 				},
 				getContent = function() {
-					return ta.getContent.call(ta, ta[0]);
+					var res = ta.getContent.call(ta, ta[0]);
+					if (res === undefined || res === false || res === null) {
+						res = $.Deferred().reject();
+					}
+					return res;
 				},
 				setOld = function(res) {
 					if (res && res.promise) {
