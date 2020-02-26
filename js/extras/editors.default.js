@@ -665,43 +665,6 @@
 			close : function(base) {}
 		},
 		{
-			// Pixlr Express
-			info : {
-				id: 'pixlrexpress',
-				name : 'Pixlr Express',
-				iconImg : 'img/editor-icons.png 0 -112',
-				urlAsContent: true,
-				schemeContent: true,
-				single: true,
-				canMakeEmpty: false,
-				integrate: {
-					title: 'PIXLR EXPRESS',
-					link: 'https://pixlr.com/express/'
-				}
-			},
-			// MIME types to accept
-			mimes : ['image/jpeg', 'image/png', 'image/gif'],
-			// HTML of this editor
-			html : '<div class="elfinder-edit-imageeditor"><img/></div>',
-			// called on initialization of elFinder cmd edit (this: this editor's config object)
-			setup : function(opts, fm) {
-				pixlrSetup.call(this, opts, fm);
-			},
-			// Initialization of editing node (this: this editors HTML node)
-			init : function(id, file, url, fm) {
-				initImgTag.call(this, id, file, file.size > 0? fm.convAbsUrl(url) : '', fm);
-			},
-			// Get data uri scheme (this: this editors HTML node)
-			getContent : function() {
-				return $(this).children('img:first').attr('src');
-			},
-			load : function(base) {
-				pixlrLoad.call(this, 'express', base);
-			},
-			save : function(base) {},
-			close : function(base) {}
-		},
-		{
 			// Photopea advanced image editor
 			info : {
 				id : 'photopea',
