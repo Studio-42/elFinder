@@ -1144,7 +1144,11 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver
             }
 
             // extract in quarantine
-            $this->unpackArchive($path, $arc, $archive ? true : $dir);
+            try {
+                $this->unpackArchive($path, $arc, $archive ? true : $dir);
+            } catch(Exception $e) {
+                return $this->setError($e->getMessage());
+            }
 
             // get files list
             try {
