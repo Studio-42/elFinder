@@ -214,7 +214,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 								};
 								wk.onerror = err;
 								wk.postMessage({
-									scripts: [fm.options.cdns.tiff, 'quicklook.tiff.js'],
+									scripts: [fm.options.cdns.tiff, fm.getWorkerUrl('quicklook.tiff.js')],
 									data: { data: data }
 								});
 							} catch(e) {
@@ -1241,23 +1241,23 @@ elFinder.prototype.commands.quicklook.plugins = [
 									wk.onerror = err;
 									if (file.mime === 'application/x-tar') {
 										wk.postMessage({
-											scripts: ['quicklook.unzip.js'],
+											scripts: [fm.getWorkerUrl('quicklook.unzip.js')],
 											data: { type: 'tar', bin: data }
 										});
 									} else if (file.mime === 'application/zip') {
 										wk.postMessage({
-											scripts: [fm.options.cdns.zlibUnzip, 'quicklook.unzip.js'],
+											scripts: [fm.options.cdns.zlibUnzip, fm.getWorkerUrl('quicklook.unzip.js')],
 											data: { type: 'zip', bin: data }
 										});
 									} else if (file.mime === 'application/x-gzip') {
 										wk.postMessage({
-											scripts: [fm.options.cdns.zlibGunzip, 'quicklook.unzip.js'],
+											scripts: [fm.options.cdns.zlibGunzip, fm.getWorkerUrl('quicklook.unzip.js')],
 											data: { type: 'gzip', bin: data }
 										});
 
 									} else if (file.mime === 'application/x-bzip2') {
 										wk.postMessage({
-											scripts: [fm.options.cdns.bzip2, 'quicklook.unzip.js'],
+											scripts: [fm.options.cdns.bzip2, fm.getWorkerUrl('quicklook.unzip.js')],
 											data: { type: 'bzip2', bin: data }
 										});
 									}

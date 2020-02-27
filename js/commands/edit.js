@@ -189,6 +189,7 @@ elFinder.prototype.commands.edit = function() {
 				},
 				savecl = function() {
 					if (!loaded()) { return; }
+					dialogNode.hide();
 					save().done(function() {
 						_loaded = false;
 						dialogNode.show();
@@ -197,7 +198,6 @@ elFinder.prototype.commands.edit = function() {
 						dialogNode.show();
 						err && fm.error(err);
 					});
-					dialogNode.hide();
 				},
 				saveAs = function() {
 					if (!loaded()) { return; }
