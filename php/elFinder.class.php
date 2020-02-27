@@ -4716,16 +4716,44 @@ var go = function() {
         }
         $val = trim($val, "bB \t\n\r\0\x0B");
         $last = strtolower($val[strlen($val) - 1]);
-        $val = (int)$val;
+        $val = sprintf('%u', $val);
         switch ($last) {
+            case 'y':
+                $val = elFinder::xKilobyte($val);
+            case 'z':
+                $val = elFinder::xKilobyte($val);
+            case 'e':
+                $val = elFinder::xKilobyte($val);
+            case 'p':
+                $val = elFinder::xKilobyte($val);
             case 't':
-                $val *= 1024;
+                $val = elFinder::xKilobyte($val);
             case 'g':
-                $val *= 1024;
+                $val = elFinder::xKilobyte($val);
             case 'm':
-                $val *= 1024;
+                $val = elFinder::xKilobyte($val);
             case 'k':
-                $val *= 1024;
+                $val = elFinder::xKilobyte($val);
+        }
+        return $val;
+    }
+
+    /**
+     * Return X 1KByte
+     *
+     * @param      integer|string  $val    The value
+     *
+     * @return     number
+     */
+    public static function xKilobyte($val)
+    {
+        if (strpos((string)$val * 1024, 'E') !== false) {
+            if (strpos((string)$val * 1.024, 'E') === false) {
+                $val *= 1.024;
+            }
+            $val .= '000';
+        } else {
+            $val *= 1024;
         }
         return $val;
     }
