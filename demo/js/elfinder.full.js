@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: a8c9cf0) (2020-02-26)
+ * Version 2.1.53 (2.1-src Nightly: 6741b74) (2020-02-28)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -4366,7 +4366,7 @@ var elFinder = function(elm, opts, bootCallback) {
 									job.reject();
 								};
 								wk.postMessage({
-									scripts: [self.options.cdns.sparkmd5, 'calcfilehash.js'],
+									scripts: [self.options.cdns.sparkmd5, self.getWorkerUrl('calcfilehash.js')],
 									data: { type: 'md5', bin: arrayBuffer }
 								});
 								dfd.fail(function() {
@@ -4407,7 +4407,7 @@ var elFinder = function(elm, opts, bootCallback) {
 											job.reject();
 										};
 										wk.postMessage({
-											scripts: [self.options.cdns.jssha, 'calcfilehash.js'],
+											scripts: [self.options.cdns.jssha, self.getWorkerUrl('calcfilehash.js')],
 											data: { type: v, bin: arrayBuffer, hashOpts: opts }
 										});
 										dfd.fail(function() {
@@ -10144,19 +10144,58 @@ elFinder.prototype = {
 	},
 
 	/**
+	 * Worker Object URL for Blob URL of getWorker()
+	 */
+	wkObjUrl : null,
+
+	/**
 	 * Gets the web worker.
 	 *
 	 * @param      {Object}  options  The options
 	 * @return     {Worker}  The worker.
 	 */
 	getWorker : function(options){
+		// for to make blob URL
+		function woker() {
+			self.onmessage = function(e) {
+				var d = e.data;
+				try {
+					self.data = d.data;
+					if (d.scripts) {
+						for(var i = 0; i < d.scripts.length; i++) {
+							importScripts(d.scripts[i]);
+						}
+					}
+					self.postMessage(self.res);
+				} catch (e) {
+					self.postMessage({error: e.toString()});
+				}
+			};
+		}
+		// get woker
 		var wk;
 		try {
-			wk = new Worker(this.baseUrl + 'js/worker/worker.js', options);
+			if (!this.wkObjUrl) {
+				this.wkObjUrl = (window.URL || window.webkitURL).createObjectURL(new Blob(
+					[woker.toString().replace(/\s+/g, ' ').replace(/ *([^\w]) */g, '$1').replace(/^function\b.+?\{|\}$/g, '')],
+					{ type:'text/javascript' }
+				));
+			}
+			wk = new Worker(this.wkObjUrl, options);
 		} catch(e) {
-			throw e;
+			this.debug('error', e.toString());
 		}
 		return wk;
+	},
+
+	/**
+	 * Get worker absolute URL by filename
+	 *
+	 * @param      {string}  filename  The filename
+	 * @return     {<type>}  The worker url.
+	 */
+	getWorkerUrl : function(filename) {
+		return this.convAbsUrl(this.baseUrl + 'js/worker/' + filename);
 	},
 
 	/**
@@ -10673,7 +10712,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.53 (2.1-src Nightly: a8c9cf0)';
+elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 6741b74)';
 
 
 
@@ -24073,6 +24112,7 @@ elFinder.prototype.commands.edit = function() {
 				},
 				savecl = function() {
 					if (!loaded()) { return; }
+					dialogNode.hide();
 					save().done(function() {
 						_loaded = false;
 						dialogNode.show();
@@ -24081,7 +24121,6 @@ elFinder.prototype.commands.edit = function() {
 						dialogNode.show();
 						err && fm.error(err);
 					});
-					dialogNode.hide();
 				},
 				saveAs = function() {
 					if (!loaded()) { return; }
@@ -29767,7 +29806,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 								};
 								wk.onerror = err;
 								wk.postMessage({
-									scripts: [fm.options.cdns.tiff, 'quicklook.tiff.js'],
+									scripts: [fm.options.cdns.tiff, fm.getWorkerUrl('quicklook.tiff.js')],
 									data: { data: data }
 								});
 							} catch(e) {
@@ -30785,23 +30824,23 @@ elFinder.prototype.commands.quicklook.plugins = [
 									wk.onerror = err;
 									if (file.mime === 'application/x-tar') {
 										wk.postMessage({
-											scripts: ['quicklook.unzip.js'],
+											scripts: [fm.getWorkerUrl('quicklook.unzip.js')],
 											data: { type: 'tar', bin: data }
 										});
 									} else if (file.mime === 'application/zip') {
 										wk.postMessage({
-											scripts: [fm.options.cdns.zlibUnzip, 'quicklook.unzip.js'],
+											scripts: [fm.options.cdns.zlibUnzip, fm.getWorkerUrl('quicklook.unzip.js')],
 											data: { type: 'zip', bin: data }
 										});
 									} else if (file.mime === 'application/x-gzip') {
 										wk.postMessage({
-											scripts: [fm.options.cdns.zlibGunzip, 'quicklook.unzip.js'],
+											scripts: [fm.options.cdns.zlibGunzip, fm.getWorkerUrl('quicklook.unzip.js')],
 											data: { type: 'gzip', bin: data }
 										});
 
 									} else if (file.mime === 'application/x-bzip2') {
 										wk.postMessage({
-											scripts: [fm.options.cdns.bzip2, 'quicklook.unzip.js'],
+											scripts: [fm.options.cdns.bzip2, fm.getWorkerUrl('quicklook.unzip.js')],
 											data: { type: 'bzip2', bin: data }
 										});
 									}
