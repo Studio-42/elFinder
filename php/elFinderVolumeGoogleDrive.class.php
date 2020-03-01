@@ -157,8 +157,11 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $id = 'root';
             $parent = '';
         } else {
+            $path = str_replace('\\/', chr(7), $path);
             $paths = explode('/', $path);
             $id = array_pop($paths);
+            $id = str_replace(chr(7), '/', $id);
+            debug($id);
             if ($paths) {
                 $parent = '/' . implode('/', $paths);
                 $pid = array_pop($paths);
@@ -1718,7 +1721,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function _mkdir($path, $name)
     {
-        $path = $this->_joinPath($path, $name);
+        $path = $this->_joinPath($path, str_replace('/', '\\/', $name));
         list($parentId, , $parent) = $this->_gd_splitPath($path);
 
         try {
@@ -1898,7 +1901,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
     protected function _save($fp, $path, $name, $stat)
     {
         if ($name !== '') {
-            $path .= '/' . $name;
+            $path .= '/' . str_replace('/', '\\/', $name);
         }
         list($parentId, $itemId, $parent) = $this->_gd_splitPath($path);
         if ($name === '') {
