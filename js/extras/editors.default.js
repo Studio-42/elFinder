@@ -2352,6 +2352,7 @@
 							host: file.hash,
 							path: file.phash
 						},
+						preventFail: true,
 						notify : {type : 'netmount', cnt : 1, hideCnt : true}
 					}).done(function(data) {
 						var pdir;
