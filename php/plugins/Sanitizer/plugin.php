@@ -9,7 +9,7 @@
  *            'upload.pre mkdir.pre mkfile.pre rename.pre archive.pre ls.pre' => array(
  *                'Plugin.Sanitizer.cmdPreprocess'
  *            ),
- *            'upload.presave' => array(
+ *            'upload.presave paste.copyfrom' => array(
  *                'Plugin.Sanitizer.onUpLoadPreSave'
  *            )
  *        ),
