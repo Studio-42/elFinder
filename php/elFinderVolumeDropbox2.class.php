@@ -68,7 +68,7 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
             'aliasFormat' => '%s@Dropbox',
             'path' => '/',
             'separator' => '/',
-            'acceptedName' => '#^[^/\\?*:|"<>]*[^./\\?*:|"<>]$#',
+            'acceptedName' => '#^[^\\\/]+$#',
             'rootCssClass' => 'elfinder-navbar-root-dropbox',
             'publishPermission' => [
                 'requested_visibility' => 'public',

@@ -157,11 +157,10 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             $id = 'root';
             $parent = '';
         } else {
-            $path = str_replace('\\/', chr(7), $path);
+            $path = str_replace('\\/', chr(0), $path);
             $paths = explode('/', $path);
             $id = array_pop($paths);
-            $id = str_replace(chr(7), '/', $id);
-            debug($id);
+            $id = str_replace(chr(0), '/', $id);
             if ($paths) {
                 $parent = '/' . implode('/', $paths);
                 $pid = array_pop($paths);
