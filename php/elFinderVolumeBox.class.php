@@ -107,7 +107,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
             'tmbPath' => '',
             'tmbURL' => '',
             'tmpPath' => '',
-            'acceptedName' => '#^[^/\\?*:|"<>]*[^./\\?*:|"<>]$#',
+            'acceptedName' => '#^[^\\\/]+$#',
             'rootCssClass' => 'elfinder-navbar-root-box',
         );
         $this->options = array_merge($this->options, $opts);

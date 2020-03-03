@@ -84,6 +84,10 @@ class elFinderPluginAutoResize extends elFinderPlugin
 
     public function onUpLoadPreSave(&$thash, &$name, $src, $elfinder, $volume)
     {
+        if (!$src) {
+            return false;
+        }
+
         $opts = $this->getCurrentOpts($volume);
 
         if (!$this->iaEnabled($opts, $elfinder)) {

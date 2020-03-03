@@ -5329,8 +5329,20 @@ abstract class elFinderVolumeDriver
 
         $errpath = $volume->path($source['hash']);
 
-        if (!$this->nameAccepted($source['name'], $srcIsDir)) {
-            return $this->addError(elFinder::ERROR_COPY, $errpath, $srcIsDir ? elFinder::ERROR_INVALID_DIRNAME : elFinder::ERROR_INVALID_NAME);
+        $errors = array();
+        try {
+            $thash = $this->encode($destination);
+            elFinder::$instance->trigger('paste.copyfrom', array(&$thash, &$name, '', elFinder::$instance, $this), $errors);
+        } catch (elFinderTriggerException $e) {
+            return $this->addError(elFinder::ERROR_COPY, $name, $errors);
+        }
+
+        if (!$this->nameAccepted($name, $srcIsDir)) {
+            return $this->addError(elFinder::ERROR_COPY, $name, $srcIsDir ? elFinder::ERROR_INVALID_DIRNAME : elFinder::ERROR_INVALID_NAME);
+        }
+
+        if (!$this->allowCreate($destination, $name, $srcIsDir)) {
+            return $this->addError(elFinder::ERROR_COPY, $name, elFinder::ERROR_PERM_DENIED);
         }
 
         if (!$source['read']) {
