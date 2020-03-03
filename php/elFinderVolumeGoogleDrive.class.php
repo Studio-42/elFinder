@@ -118,7 +118,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
             'tmbPath' => '',
             'separator' => '/',
             'useGoogleTmb' => true,
-            'acceptedName' => '#^[^/\\?*:|"<>]*[^./\\?*:|"<>]$#',
+            'acceptedName' => '#.#',
             'rootCssClass' => 'elfinder-navbar-root-googledrive',
             'publishPermission' => [
                 'type' => 'anyone',
