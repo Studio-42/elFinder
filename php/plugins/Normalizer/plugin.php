@@ -13,7 +13,7 @@
  *            'upload.pre mkdir.pre mkfile.pre rename.pre archive.pre ls.pre' => array(
  *                'Plugin.Normalizer.cmdPreprocess'
  *            ),
- *            'upload.presave' => array(
+ *            'upload.presave paste.copyfrom' => array(
  *                'Plugin.Normalizer.onUpLoadPreSave'
  *            )
  *        ),
