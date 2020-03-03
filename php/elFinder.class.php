@@ -961,6 +961,35 @@ class elFinder
     }
 
     /**
+     * Trigger binded functions
+     *
+     * @param      string  $cmd     binded command name
+     * @param      array   $vars    variables to pass to listeners
+     * @param      array   $errors  array into which the error is written
+     */
+    public function trigger($cmd, $vars, &$errors)
+    {
+        if (!empty($this->listeners[$cmd])) {
+            foreach ($this->listeners[$cmd] as $handler) {
+                $_res = call_user_func_array($handler, $vars);
+                if ($_res && is_array($_res)) {
+                    $_err = !empty($_res['error'])? $_res['error'] : (!empty($_res['warning'])? $_res['warning'] : null);
+                    if ($_err) {
+                        if (is_array($_err)) {
+                            $errors = array_merge($errors, $_err);
+                        } else {
+                            $errors[] = (string)$_err;
+                        }
+                        if ($_res['error']) {
+                            throw elFinderTriggerException();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Return true if command exists
      *
      * @param  string  command name
@@ -3299,26 +3328,13 @@ class elFinder
             }
 
             // do hook function 'upload.presave'
-            if (!empty($this->listeners['upload.presave'])) {
-                foreach ($this->listeners['upload.presave'] as $handler) {
-                    $_res = call_user_func_array($handler, array(&$thash, &$name, $tmpname, $this, $volume));
-                    if ($_res && is_array($_res)) {
-                        $_err = !empty($_res['error'])? $_res['error'] : (!empty($_res['warning'])? $_res['warning'] : null);
-                        if ($_err) {
-                            if (is_array($_err)) {
-                                $errors = array_merge($errors, $_err);
-                            } else {
-                                $errors[] = (string)$_err;
-                            }
-                            if ($_res['error']) {
-                                if (!is_uploaded_file($tmpname)) {
-                                    if (unlink($tmpname) && $tmpfname) unset($GLOBALS['elFinderTempFiles'][$tmpfname]);
-                                }
-                                continue 2;
-                            }
-                        }
-                    }
+            try {
+                $this->trigger('upload.presave', array(&$thash, &$name, $tmpname, $this, $volume), $errors);
+            } catch (elFinderTriggerException $e) {
+                if (!is_uploaded_file($tmpname) && unlink($tmpname) && $tmpfname) {
+                    unset($GLOBALS['elFinderTempFiles'][$tmpfname]);
                 }
+                continue;
             }
 
             clearstatcache();
@@ -3472,12 +3488,22 @@ class elFinder
                 $file = $srcVolume->file($target);
                 if (isset($renames[$file['name']])) {
                     $dir = $dstVolume->realpath($dst);
+                    $dstName = $file['name'];
+                    if ($srcVolume !== $dstVolume) {
+                        $errors = array();
+                        try {
+                            $this->trigger('paste.copyfrom', array(&$dst, &$dstName, '', $this, $dstVolume), $errors);
+                        } catch (elFinderTriggerException $e) {
+                            $result['warning'] = array_merge($result['warning'], $errors);
+                            continue;
+                        }
+                    }
                     if (isset($hashes[$file['name']])) {
                         $hash = $hashes[$file['name']];
                     } else {
-                        $hash = $dstVolume->getHash($dir, $file['name']);
+                        $hash = $dstVolume->getHash($dir, $dstName);
                     }
-                    $rnres = $this->rename(array('target' => $hash, 'name' => $dstVolume->uniqueName($dir, $file['name'], $suffix, true, 0)));
+                    $rnres = $this->rename(array('target' => $hash, 'name' => $dstVolume->uniqueName($dir, $dstName, $suffix, true, 0)));
                     if (!empty($rnres['error'])) {
                         $result['warning'] = array_merge($result['warning'], $rnres['error']);
                         continue;
@@ -5203,5 +5229,9 @@ var go = function() {
  * Custom exception class for aborting request
  */
 class elFinderAbortException extends Exception
+{
+}
+
+class elFinderTriggerException extends Exception
 {
 }
