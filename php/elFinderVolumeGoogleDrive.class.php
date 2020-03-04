@@ -830,11 +830,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      */
     protected function isNameExists($path)
     {
-        if (func_num_args() > 2) {
-            $dir = func_get_arg(1);
-            $name = func_get_arg(2);
-            $path = $dir . '/' . str_replace('/', '\\/', $name);
-        }
         list($parentId, $name) = $this->_gd_splitPath($path);
         $opts = [
             'q' => sprintf('trashed=false and "%s" in parents and name="%s"', $parentId, $name),
