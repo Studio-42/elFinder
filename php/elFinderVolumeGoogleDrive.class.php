@@ -830,11 +830,6 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      */
     protected function isNameExists($path)
     {
-        if (func_num_args() > 2) {
-            $dir = func_get_arg(1);
-            $name = func_get_arg(2);
-            $path = $dir . '/' . str_replace('/', '\\/', $name);
-        }
         list($parentId, $name) = $this->_gd_splitPath($path);
         $opts = [
             'q' => sprintf('trashed=false and "%s" in parents and name="%s"', $parentId, $name),
@@ -1444,7 +1439,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function _joinPath($dir, $name)
     {
-        return $this->_normpath($dir . '/' . $name);
+        return $this->_normpath($dir . '/' . str_replace('/', '\\/', $name));
     }
 
     /**
@@ -1725,7 +1720,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function _mkdir($path, $name)
     {
-        $path = $this->_joinPath($path, str_replace('/', '\\/', $name));
+        $path = $this->_joinPath($path, $name);
         list($parentId, , $parent) = $this->_gd_splitPath($path);
 
         try {
