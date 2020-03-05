@@ -1439,7 +1439,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function _joinPath($dir, $name)
     {
-        return $this->_normpath($dir . '/' . $name);
+        return $this->_normpath($dir . '/' . str_replace('/', '\\/', $name));
     }
 
     /**
@@ -1720,7 +1720,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function _mkdir($path, $name)
     {
-        $path = $this->_joinPath($path, str_replace('/', '\\/', $name));
+        $path = $this->_joinPath($path, $name);
         list($parentId, , $parent) = $this->_gd_splitPath($path);
 
         try {
