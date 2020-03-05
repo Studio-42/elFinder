@@ -831,31 +831,45 @@ class elFinderVolumeFTP extends elFinderVolumeDriver
                 $res = array(
                     'name' => $this->root,
                     'mime' => 'directory',
-                    'dirs' => $this->_subdirs($path)
+                    'dirs' => -1
                 );
-                if ($this->isMyReload()) {
+                if ($this->needOnline && (($this->ARGS['cmd'] === 'open' && $this->ARGS['target'] === $this->encode($this->root)) || $this->isMyReload())) {
+                    $check = array(
+                        'ts' => true,
+                        'dirs' => true,
+                    );
                     $ts = 0;
                     foreach ($this->ftpRawList($path) as $str) {
-                        if (($stat = $this->parseRaw($str, $path))) {
-                            if (!empty($stat['ts'])) {
+                        $info = preg_split('/\s+/', $str, 9);
+                        if ($info[8] === '.') {
+                            $info[8] = 'root';
+                            if ($stat = $this->parseRaw(join(' ', $info), $path)) {
+                                unset($stat['name']);
+                                $res = array_merge($res, $stat);
+                                if ($res['ts']) {
+                                    $ts = 0;
+                                    unset($check['ts']);
+                                }
+                            }
+                        }
+                        if ($check && ($stat = $this->parseRaw($str, $path))) {
+                            if (isset($stat['ts']) && !empty($stat['ts'])) {
                                 $ts = max($ts, $stat['ts']);
+                            }
+                            if (isset($stat['dirs']) && $stat['mime'] === 'directory') {
+                                $res['dirs'] = 1;
+                                unset($stat['dirs']);
+                            }
+                            if (!$check) {
+                                break;
                             }
                         }
                     }
                     if ($ts) {
                         $res['ts'] = $ts;
                     }
+                    $this->cache[$outPath] = $res;
                 }
-                return $res;
-            }
-            // stat of system root
-            if ($path === $this->separator) {
-                $res = array(
-                    'name' => $this->separator,
-                    'mime' => 'directory',
-                    'dirs' => 1
-                );
-                $this->cache[$outPath] = $res;
                 return $res;
             }
 
