@@ -4784,8 +4784,11 @@ abstract class elFinderVolumeDriver
             $name = $path;
             $nameCheck = true;
         }
+        if (!$this instanceof elFinderVolumeLocalFileSystem) {
+            $nameCheck = true;
+        }
         $ext = (false === $pos = strrpos($name, '.')) ? '' : strtolower(substr($name, $pos + 1));
-        if ($size === null) {
+        if (!$nameCheck && $size === null) {
             $size = file_exists($path) ? filesize($path) : -1;
         }
         if (!$nameCheck && is_readable($path) && $size > 0) {
