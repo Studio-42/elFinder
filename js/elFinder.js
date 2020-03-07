@@ -2672,18 +2672,27 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 				
 				if (isOpen) {
-					if (currentOpenCmd) {
-						if (currentOpenCmd.xhr) {
-							currentOpenCmd.xhr.queueAbort();
+					if (currentOpenCmd && currentOpenCmd.state() === 'pending') {
+						if (currentOpenCmd._target === data.target) {
+							return dfrd.reject('openabort');
 						} else {
-							currentOpenCmd.reject('openabort');
+							if (currentOpenCmd.xhr) {
+								currentOpenCmd.xhr.queueAbort();
+							} else {
+								currentOpenCmd.reject('openabort');
+							}
 						}
 					}
 					currentOpenCmd = dfrd;
+					currentOpenCmd._target = data.target;
 				}
 				
 				dfrd.always(function() {
 					delete options.headers['X-elFinderReqid'];
+					if (isOpen) {
+						currentOpenCmd = null;
+						self.log('currentOpenCmd = null');
+					}
 				}).fail(function(error, xhr, response) {
 					var errData, errMsg;
 
@@ -2791,9 +2800,6 @@ var elFinder = function(elm, opts, bootCallback) {
 					--requestCnt;
 					if (requestQueue.length) {
 						requestQueue.shift()();
-					}
-					if (isOpen) {
-						currentOpenCmd = null;
 					}
 				}).fail(error).done(success);
 				
