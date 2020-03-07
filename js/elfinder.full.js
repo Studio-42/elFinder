@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: 2f71112) (2020-03-05)
+ * Version 2.1.53 (2.1-src Nightly: 687844c) (2020-03-07)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -2703,18 +2703,27 @@ var elFinder = function(elm, opts, bootCallback) {
 				}
 				
 				if (isOpen) {
-					if (currentOpenCmd) {
-						if (currentOpenCmd.xhr) {
-							currentOpenCmd.xhr.queueAbort();
+					if (currentOpenCmd && currentOpenCmd.state() === 'pending') {
+						if (currentOpenCmd._target === data.target) {
+							return dfrd.reject('openabort');
 						} else {
-							currentOpenCmd.reject('openabort');
+							if (currentOpenCmd.xhr) {
+								currentOpenCmd.xhr.queueAbort();
+							} else {
+								currentOpenCmd.reject('openabort');
+							}
 						}
 					}
 					currentOpenCmd = dfrd;
+					currentOpenCmd._target = data.target;
 				}
 				
 				dfrd.always(function() {
 					delete options.headers['X-elFinderReqid'];
+					if (isOpen) {
+						currentOpenCmd = null;
+						self.log('currentOpenCmd = null');
+					}
 				}).fail(function(error, xhr, response) {
 					var errData, errMsg;
 
@@ -2822,9 +2831,6 @@ var elFinder = function(elm, opts, bootCallback) {
 					--requestCnt;
 					if (requestQueue.length) {
 						requestQueue.shift()();
-					}
-					if (isOpen) {
-						currentOpenCmd = null;
 					}
 				}).fail(error).done(success);
 				
@@ -10712,7 +10718,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 2f71112)';
+elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 687844c)';
 
 
 
