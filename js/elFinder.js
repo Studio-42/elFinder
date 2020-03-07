@@ -2691,7 +2691,6 @@ var elFinder = function(elm, opts, bootCallback) {
 					delete options.headers['X-elFinderReqid'];
 					if (isOpen) {
 						currentOpenCmd = null;
-						self.log('currentOpenCmd = null');
 					}
 				}).fail(function(error, xhr, response) {
 					var errData, errMsg;
