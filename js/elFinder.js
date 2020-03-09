@@ -7870,7 +7870,7 @@ elFinder.prototype = {
 	 * @return String
 	 */
 	escape : function(name) {
-		return this._node.text(name).html().replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+		return this._node.text(name).html().replace(/"/g, '&quot;').replace(/'/g, '&#039;').replace("&amp;", "&");
 	},
 	
 	/**
