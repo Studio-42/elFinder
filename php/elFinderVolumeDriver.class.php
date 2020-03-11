@@ -4301,7 +4301,13 @@ abstract class elFinderVolumeDriver
      */
     protected function getItemsInHand($hashes, $dir = null, $canLink = null)
     {
+        static $banChrs = null;
         static $totalSize = 0;
+
+        if  (is_null($banChrs)) {
+            $banChrs = DIRECTORY_SEPARATOR !== '/'? array('\\', '/', ':', '*', '?', '"', '<', '>', '|') : array('\\', '/');
+        }
+
         if (is_null($dir)) {
             $totalSize = 0;
             if (!$tmpDir = $this->getTempPath()) {
@@ -4328,6 +4334,11 @@ abstract class elFinderVolumeDriver
             }
 
             $name = $file['name'];
+            // remove ctrl characters
+            $name = preg_replace('/[[:cntrl:]]+/', '', $name);
+            // replace ban characters
+            $name = str_replace($banChrs, '_', $name);
+
             // for call from search results
             if (isset($files[$name])) {
                 $name = preg_replace('/^(.*?)(\..*)?$/', '$1_' . $files[$name]++ . '$2', $name);
