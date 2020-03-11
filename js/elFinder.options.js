@@ -12,17 +12,17 @@ elFinder.prototype._options = {
 	 */
 	cdns : {
 		// for editor etc.
-		ace        : 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.7',
-		codemirror : 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.51.0',
+		ace        : 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.8',
+		codemirror : 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0',
 		ckeditor   : 'https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.12.1',
-		ckeditor5  : 'https://cdn.ckeditor.com/ckeditor5/16.0.0',
+		ckeditor5  : 'https://cdn.ckeditor.com/ckeditor5/17.0.0',
 		tinymce    : 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.2.0',
 		simplemde  : 'https://cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		fabric     : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/3.6.2',
 		fabric16   : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.6.7',
 		tui        : 'https://uicdn.toast.com',
 		// for quicklook etc.
-		hls        : 'https://cdnjs.cloudflare.com/ajax/libs/hls.js/0.13.1/hls.min.js',
+		hls        : 'https://cdnjs.cloudflare.com/ajax/libs/hls.js/0.13.2/hls.min.js',
 		dash       : 'https://cdnjs.cloudflare.com/ajax/libs/dashjs/3.0.2/dash.all.min.js',
 		flv        : 'https://cdnjs.cloudflare.com/ajax/libs/flv.js/1.5.0/flv.min.js',
 		videojs    : 'https://cdnjs.cloudflare.com/ajax/libs/video.js/7.7.4',
