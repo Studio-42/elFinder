@@ -1444,6 +1444,9 @@ $.fn.elfindercwd = function(fm, options) {
 					bottomMarkerShow(place);
 					if (Object.keys(atmb).length) {
 						Object.assign(bufferExt.attachTmbs, atmb);
+						if (buffer.length < 1) {
+							loadThumbnails();
+						}
 					}
 				}
 			},
