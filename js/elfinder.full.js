@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.53 (2.1-src Nightly: c937fce) (2020-03-12)
+ * Version 2.1.53 (2.1-src Nightly: 4071c1b) (2020-03-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10717,7 +10717,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.53 (2.1-src Nightly: c937fce)';
+elFinder.prototype.version = '2.1.53 (2.1-src Nightly: 4071c1b)';
 
 
 
@@ -31276,7 +31276,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 						},
 						ext     = fm.mimeTypes[file.mime],
 						getLink = (file.url == '1' && !fm.option('onetimeUrl', file.hash)),
-						loading, prog, url;
+						loading, prog, url, tm;
 					
 					if (type === 'm') {
 						if ((mLimits[ext] && file.size > mLimits[ext]) || file.size > mLimits.other) {
@@ -31327,20 +31327,32 @@ elFinder.prototype.commands.quicklook.plugins = [
 							.appendTo(preview);
 
 						dfd = fm.forExternalUrl(file.hash, { progressBar: prog }).done(function(url) {
+							var load = function() {
+									try {
+										if (node && (!node.attr('src') || node.get(0).contentWindow.document/*maybe HTTP 204*/)) {
+											node.attr('src', 'https://' + urls[type] + encodeURIComponent(url));
+											// Retry because Google Docs viewer sometimes returns HTTP 204
+											tm = setTimeout(load, 2000);
+										}
+									} catch(e) {}
+								};
 							if (url) {
 								if (file.ts) {
 									url += (url.match(/\?/)? '&' : '?') + '_t=' + file.ts;
 								}
 								node.on('load', function() {
+									tm && clearTimeout(tm);
 									ql.hideinfo();
 									loading.remove();
 									ql.preview.after(ql.info);
 									$(this).css('background-color', '#fff').show();
 								})
 								.on('error', function() {
+									tm && clearTimeout(tm);
 									loading.remove();
 									ql.preview.after(ql.info);
-								}).attr('src', 'https://' + urls[type] + encodeURIComponent(url));
+								});
+								load();
 							} else {
 								loading.remove();
 								node.remove();
