@@ -1,3 +1,39 @@
+2020-03-14  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.54):
+		- [cmd:edit,quicklook] adjustment about select encoding function
+		- [php:core] add `toastErrorHandler` for send toast message to client side
+		- [cmd:resize] to allow image resize more image type with the ImageMagick
+		- [php:session] Fixed #3103 WARNING: setcookie(): Unrecognized key 'lifetime'
+		- [php:session] Fixed #2857 warning error on start()
+		- [ui:dialog] delete an option `flexibleHeight` so it works well by option `height: "auto"``
+		- [cmd:edit] bugfix of save as on the serach results
+		- [php:core] add a public method `utf8Encode()` and make new main option `utf8Encoder` @callable
+		- [VD:abstract] Fixed #3104 Fixed as much as possible the differences in encoding of archive file names
+		- [php:plugins:Watermark] repeated use of Imagick::compositeImage() may cause PHP to hang, so disable it
+		- [js:core] Fixed #3106 enable to specify header name of parrot return to enable ITP measures
+		- [php:Connector] add a public method `setHeader($value)`
+		- [js:core] support fake progress bar
+		- [VD:OneDrive] bugfix of large file uploading
+		- [VD:Box] Fixed problem where access token could be lost
+		- [VD:Box] Fixed processing of `getSharedWebContentLink()`
+		- [js:core] if the file URL is public, use it as onetime url
+		- [php:plugins:Normalizer] support "caron" with option "umlauts"
+		- [js:core:notify] Fixed #3111 add minimize, close(option) button into notify dialog
+		- [ja:extars:editors.default] Fixed #2600 remove Creative Cloud Image Editor UI
+		- [php] Fixed #3114 stream proxy function using the `file` cmd corresponds to range request
+		- [js:extras:efitors.default] to show color slider of TUI Image Editor
+		- [cmd:edit] error handling of ta.getContent()
+		- [cmd:edit] bugfix of savecl() edit dialog may not re-open in case of error
+		- [js:core] Fixed #3118 web worker does not work when elfinder.js is cross-site loaded
+		- [php:core,VD] Fixed #3119 disallow extract of uncompressed size larger than option "maxArcFilesSize"
+		- [php:core] Fixed #3120 allow plugins (Sanitizer etc) to be applied when pasting from another volume
+		- [php:plugins:Normlizer,Sanitizer] update example commentation, recommend to bind to action "paste.copyfrom"
+		- [VD:FTP] Fixed stat() of root on server with no supports "MLST"
+		- [ui:cwd] Fixed a bug that thumbnails might not be displayed after editing image
+		- And some minor bug fixes
+
+
 2020-01-25  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.53):
