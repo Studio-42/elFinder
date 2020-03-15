@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.54 (2020-03-14)
+ * Version 2.1.54 (2.1-src Nightly: 8b27f11) (2020-03-15)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10717,7 +10717,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.54';
+elFinder.prototype.version = '2.1.54 (2.1-src Nightly: 8b27f11)';
 
 
 
@@ -27369,27 +27369,7 @@ elFinder.prototype.commands.netunmount = function() {
 		}
 		
 		var doOpen = function() {
-			var wnd, target, getOnly;
-			
-			try {
-				reg = new RegExp(fm.option('dispInlineRegex'), 'i');
-			} catch(e) {
-				reg = false;
-			}
-	
-			// open files
-			html5dl  = (typeof $('<a>').get(0).download === 'string');
-			cnt = files.length;
-			while (cnt--) {
-				target = 'elf_open_window';
-				file = files[cnt];
-				
-				if (!file.read) {
-					return dfrd.reject(['errOpen', file.name, 'errPerm']);
-				}
-				
-				inline = (reg && file.mime.match(reg));
-				fm.openUrl(file.hash, !inline, function(url) {
+			var openCB = function(url) {
 					var link = $('<a>').hide().appendTo($('body'));
 					if (fm.UA.Mobile || !inline) {
 						if (html5dl) {
@@ -27479,7 +27459,28 @@ elFinder.prototype.commands.netunmount = function() {
 						$(wnd).trigger('focus');
 					}
 					link.remove();
-				});
+				},
+				wnd, target, getOnly;
+			
+			try {
+				reg = new RegExp(fm.option('dispInlineRegex'), 'i');
+			} catch(e) {
+				reg = false;
+			}
+	
+			// open files
+			html5dl  = (typeof $('<a>').get(0).download === 'string');
+			cnt = files.length;
+			while (cnt--) {
+				target = 'elf_open_window';
+				file = files[cnt];
+				
+				if (!file.read) {
+					return dfrd.reject(['errOpen', file.name, 'errPerm']);
+				}
+				
+				inline = (reg && file.mime.match(reg));
+				fm.openUrl(file.hash, !inline, openCB);
 			}
 			return dfrd.resolve(hashes);
 		};
