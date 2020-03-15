@@ -7216,7 +7216,7 @@ abstract class elFinderVolumeDriver
                 // Check total file size after extraction
                 $num = $zip->numFiles;
                 $size = 0;
-                $maxSize = empty($this->options['maxArcFilesSize'])? '' : (string)$this->options['maxArcFilesSize'];
+                $maxSize = empty(self::$maxArcFilesSize)? '' : (string)self::$maxArcFilesSize;
                 $comp = function_exists('bccomp')? 'bccomp' : 'strnatcmp';
                 for ($i = 0; $i < $num; $i++) {
                     $stat = $zip->statIndex($i);
