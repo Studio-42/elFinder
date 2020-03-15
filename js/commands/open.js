@@ -79,27 +79,7 @@
 		}
 		
 		var doOpen = function() {
-			var wnd, target, getOnly;
-			
-			try {
-				reg = new RegExp(fm.option('dispInlineRegex'), 'i');
-			} catch(e) {
-				reg = false;
-			}
-	
-			// open files
-			html5dl  = (typeof $('<a>').get(0).download === 'string');
-			cnt = files.length;
-			while (cnt--) {
-				target = 'elf_open_window';
-				file = files[cnt];
-				
-				if (!file.read) {
-					return dfrd.reject(['errOpen', file.name, 'errPerm']);
-				}
-				
-				inline = (reg && file.mime.match(reg));
-				fm.openUrl(file.hash, !inline, function(url) {
+			var openCB = function(url) {
 					var link = $('<a>').hide().appendTo($('body'));
 					if (fm.UA.Mobile || !inline) {
 						if (html5dl) {
@@ -189,7 +169,28 @@
 						$(wnd).trigger('focus');
 					}
 					link.remove();
-				});
+				},
+				wnd, target, getOnly;
+			
+			try {
+				reg = new RegExp(fm.option('dispInlineRegex'), 'i');
+			} catch(e) {
+				reg = false;
+			}
+	
+			// open files
+			html5dl  = (typeof $('<a>').get(0).download === 'string');
+			cnt = files.length;
+			while (cnt--) {
+				target = 'elf_open_window';
+				file = files[cnt];
+				
+				if (!file.read) {
+					return dfrd.reject(['errOpen', file.name, 'errPerm']);
+				}
+				
+				inline = (reg && file.mime.match(reg));
+				fm.openUrl(file.hash, !inline, openCB);
 			}
 			return dfrd.resolve(hashes);
 		};
