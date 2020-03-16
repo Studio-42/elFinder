@@ -231,6 +231,12 @@ class elFinderSession implements elFinderSessionInterface
                 if (version_compare(PHP_VERSION, '7.3', '<')) {
                     setcookie(session_name(), session_id(), 0, $cParm['path'] . (!empty($cParm['SameSite'])? '; SameSite=' . $cParm['SameSite'] : ''), $cParm['domain'], $cParm['secure'], $cParm['httponly']);
                 } else {
+                    $allows = array('expires' => true, 'path' => true, 'domain' => true, 'secure' => true, 'httponly' => true, 'samesite' => true);
+                    foreach(array_keys($cParm) as $_k) {
+                        if (!isset($allows[$_k])) {
+                            unset($cParm[$_k]);
+                        }
+                    }
                     setcookie(session_name(), session_id(), $cParm);
                 }
                 $this->fixCookieRegist = false;
