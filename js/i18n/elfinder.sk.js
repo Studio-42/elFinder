@@ -2,7 +2,7 @@
  * Slovak translation
  * @author RobiNN <kelcakrobo@gmail.com>
  * @author Jakub Ďuraš <jkblmr@gmail.com>
- * @version 2019-08-09
+ * @version 2020-03-15
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'RobiNN &lt;kelcakrobo@gmail.com&gt;, Jakub Ďuraš &lt;jkblmr@gmail.com&gt;',
 		language   : 'Slovenčina',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i', // will show like: 09.08.2019 14:11
-		fancyDateFormat : '$1 H:i', // will show like: Dnes 14:11
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 190809-141149
+		dateFormat : 'd.m.Y H:i', // will show like: 15.03.2020 16:42
+		fancyDateFormat : '$1 H:i', // will show like: Dnes 16:42
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 200315-164238
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -443,6 +443,7 @@
 			'clearBrowserData': 'Inicializujte nastavenia uložené v tomto prehliadači', // from v2.1.26 added 28.6.2017
 			'toolbarPref'     : 'Nastavenie panela s nástrojmi', // from v2.1.27 added 2.8.2017
 			'charsLeft'       : '...$1 znakov ostáva.',  // from v2.1.29 added 30.8.2017
+			'linesLeft'       : '...$1 riadkov ostáva.',  // from v2.1.52 added 16.1.2020
 			'sum'             : 'Súčet', // from v2.1.29 added 28.9.2017
 			'roughFileSize'   : 'Hrubá veľkosť súboru', // from v2.1.30 added 2.11.2017
 			'autoFocusDialog' : 'Zameranie na prvok dialógu s mouseover',  // from v2.1.30 added 2.11.2017
