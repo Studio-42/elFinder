@@ -1,3 +1,12 @@
+2020-03-18  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.55):
+		- [VD:abstract] Fixed #3125 Fatal error in zipArchiveUnzip()
+		- [cmd:open] optimization, move function definition in loop to out of loop
+		- [php:session] Fixed #3103 WARNING: setcookie(): Unrecognized key 'lifetime'
+		- [i18n:cs,sk] Updated translations
+
+
 2020-03-14  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.54):
