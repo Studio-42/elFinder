@@ -705,7 +705,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver
     protected function _dimensions($path, $mime)
     {
         clearstatcache();
-        return strpos($mime, 'image') === 0 && is_readable($path) && ($s = getimagesize($path)) !== false
+        return strpos($mime, 'image') === 0 && is_readable($path) && filesize($path) && ($s = getimagesize($path)) !== false
             ? $s[0] . 'x' . $s[1]
             : false;
     }
