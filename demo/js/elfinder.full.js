@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.55 (2.1-src Nightly: 1de97ca) (2020-03-19)
+ * Version 2.1.55 (2.1-src Nightly: 123f0fe) (2020-03-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10717,7 +10717,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.55 (2.1-src Nightly: 1de97ca)';
+elFinder.prototype.version = '2.1.55 (2.1-src Nightly: 123f0fe)';
 
 
 
@@ -18236,7 +18236,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 			headerBtns = {
 				close: function() {
 					titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-button"><span class="ui-icon ui-icon-closethick"/></span>')
-						.on('mousedown', function(e) {
+						.on('mousedown touchstart', function(e) {
 							e.preventDefault();
 							e.stopPropagation();
 							self.elfinderdialog('close');
@@ -18274,7 +18274,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 							}
 						});
 						titlebar.prepend($('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-full"><span class="ui-icon ui-icon-plusthick"/></span>')
-							.on('mousedown', function(e) {
+							.on('mousedown touchstart', function(e) {
 								var elm = $(this);
 								e.preventDefault();
 								e.stopPropagation();
@@ -18293,7 +18293,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					var btn, mnode, doffset;
 					if (opts.allowMinimize) {
 						btn = $('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-minimize"><span class="ui-icon ui-icon-minusthick"/></span>')
-							.on('mousedown', function(e) {
+							.on('mousedown touchstart', function(e) {
 								var $this = $(this),
 									tray = fm.getUI('bottomtray'),
 									dumStyle = { width: 70, height: 24 },
