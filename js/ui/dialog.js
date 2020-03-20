@@ -191,7 +191,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 			headerBtns = {
 				close: function() {
 					titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-button"><span class="ui-icon ui-icon-closethick"/></span>')
-						.on('mousedown', function(e) {
+						.on('mousedown touchstart', function(e) {
 							e.preventDefault();
 							e.stopPropagation();
 							self.elfinderdialog('close');
@@ -229,7 +229,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 							}
 						});
 						titlebar.prepend($('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-full"><span class="ui-icon ui-icon-plusthick"/></span>')
-							.on('mousedown', function(e) {
+							.on('mousedown touchstart', function(e) {
 								var elm = $(this);
 								e.preventDefault();
 								e.stopPropagation();
@@ -248,7 +248,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					var btn, mnode, doffset;
 					if (opts.allowMinimize) {
 						btn = $('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-minimize"><span class="ui-icon ui-icon-minusthick"/></span>')
-							.on('mousedown', function(e) {
+							.on('mousedown touchstart', function(e) {
 								var $this = $(this),
 									tray = fm.getUI('bottomtray'),
 									dumStyle = { width: 70, height: 24 },
