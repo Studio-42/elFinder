@@ -293,7 +293,9 @@ class elFinderConnector
             }
 
             if (!empty($data['volume'])) {
-                $data['volume']->close($data['pointer'], $data['info']['hash']);
+                $data['volume']->close($fp, $data['info']['hash']);
+            } else {
+                fclose($fp);
             }
             exit();
         } else {
