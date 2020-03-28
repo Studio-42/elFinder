@@ -594,6 +594,8 @@ class elFinder
         }
         set_error_handler('elFinder::phpErrorHandler', $errLevel);
 
+        // Associative array of file pointers to close at the end of script: ['temp file pointer' => true]
+        $GLOBALS['elFinderTempFps'] = array();
         // Associative array of files to delete at the end of script: ['temp file path' => true]
         $GLOBALS['elFinderTempFiles'] = array();
         // regist Shutdown function
@@ -3217,10 +3219,15 @@ class elFinder
                         $fp = fopen($tmpfname, 'wb');
                         if ($data = $this->get_remote_contents($url, 30, 5, 'Mozilla/5.0', $fp)) {
                             // to check connection is aborted
-                            elFinder::checkAborted();
+                            try {
+                                elFinder::checkAborted();
+                            } catch(elFinderAbortException $e) {
+                                fclose($fp);
+                                throw $e;
+                            }
                             $_name = preg_replace('~^.*?([^/#?]+)(?:\?.*)?(?:#.*)?$~', '$1', rawurldecode($url));
                             // Check `Content-Disposition` response header
-                            if ($data && ($headers = get_headers($url, true)) && !empty($headers['Content-Disposition'])) {
+                            if (($headers = get_headers($url, true)) && !empty($headers['Content-Disposition'])) {
                                 if (preg_match('/filename\*=(?:([a-zA-Z0-9_-]+?)\'\')"?([a-z0-9_.~%-]+)"?/i', $headers['Content-Disposition'], $m)) {
                                     $_name = rawurldecode($m[2]);
                                     if ($m[1] && strtoupper($m[1]) !== 'UTF-8' && function_exists('mb_convert_encoding')) {
@@ -3230,6 +3237,8 @@ class elFinder
                                     $_name = rawurldecode($m[1]);
                                 }
                             }
+                        } else {
+                            fclose($fp);
                         }
                     }
                     if ($data) {
@@ -3426,7 +3435,7 @@ class elFinder
 
         if ($GLOBALS['elFinderTempFiles']) {
             foreach (array_keys($GLOBALS['elFinderTempFiles']) as $_temp) {
-                is_file($_temp) && unlink($_temp);
+                is_file($_temp) && is_writable($_temp) && unlink($_temp);
             }
         }
         $result['removed'] = $volume->removed();
@@ -5202,9 +5211,14 @@ var go = function() {
     public static function onShutdown()
     {
         self::$abortCheckFile = null;
+        if (!empty($GLOBALS['elFinderTempFps'])) {
+            foreach (array_keys($GLOBALS['elFinderTempFps']) as $fp) {
+                is_resource($fp) && fclose($fp);
+            }
+        }
         if (!empty($GLOBALS['elFinderTempFiles'])) {
             foreach (array_keys($GLOBALS['elFinderTempFiles']) as $f) {
-                is_file($f) && unlink($f);
+                is_file($f) && is_writable($f) && unlink($f);
             }
         }
     }
