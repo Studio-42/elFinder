@@ -267,7 +267,7 @@ elFinder.prototype.commands.download = function() {
 							} else {
 								dlName = zipdl.name;
 							}
-							if ((html5dl && (!fm.UA.Safari || fm.isSameOrigin(fm.options.url))) || linkdl) {
+							if (html5dl || linkdl) {
 								url = fm.options.url + (fm.options.url.indexOf('?') === -1 ? '?' : '&')
 								+ 'cmd=zipdl&download=1';
 								$.each([hashes[0], zipdl.file, dlName, zipdl.mime], function(key, val) {
@@ -417,7 +417,7 @@ elFinder.prototype.commands.download = function() {
 						}, fm.notifyDelay);
 						checkCookie(reqid);
 					}
-					if (html5dl && (!fm.UA.Safari || fm.isSameOrigin(url))) {
+					if (html5dl) {
 						click(link.attr('href', url)
 							.attr('download', fm.escape(files[i].name))
 							.get(0)
