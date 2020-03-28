@@ -1701,7 +1701,7 @@ class elFinderVolumeGoogleDrive extends elFinderVolumeDriver
      **/
     protected function _fclose($fp, $path = '')
     {
-        fclose($fp);
+        is_resource($fp) && fclose($fp);
         if ($path) {
             unlink($this->getTempFile($path));
         }

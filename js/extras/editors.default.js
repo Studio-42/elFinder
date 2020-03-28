@@ -11,15 +11,6 @@
 		// get query of getfile
 		getfile = window.location.search.match(/getfile=([a-z]+)/),
 		useRequire = elFinder.prototype.hasRequire,
-		hasFlash = (function() {
-			var hasFlash;
-			try {
-				hasFlash = !!(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
-			} catch (e) {
-				hasFlash = !!(typeof window.orientation === 'undefined' || (navigator && navigator.mimeTypes["application/x-shockwave-flash"]));
-			}
-			return hasFlash;
-		})(),
 		ext2mime = {
 			bmp: 'image/x-ms-bmp',
 			dng: 'image/x-adobe-dng',
@@ -149,153 +140,6 @@
 			}
 			return data;
 		},
-		pixlrCallBack = function() {
-			if (!hasFlash || window.parent === window) {
-				return;
-			}
-			var pixlr = window.location.search.match(/[?&]pixlr=([^&]+)/),
-				image = window.location.search.match(/[?&]image=([^&]+)/),
-				p, ifm, url, node, ext;
-			if (pixlr) {
-				// case of redirected from pixlr.com
-				p = window.parent;
-				ifm = p.$('#'+pixlr[1]+'iframe').hide();
-				node = p.$('#'+pixlr[1]).data('resizeoff')();
-				if (image[1].substr(0, 4) === 'http') {
-					url = image[1];
-					ext = url.replace(/.+\.([^.]+)$/, '$1');
-					if (node.data('ext') !== ext) {
-						node.closest('.ui-dialog').trigger('changeType', {
-							extention: ext,
-							mime : ext2mime[ext]
-						});
-					}
-					if (window.location.protocol === 'https:') {
-						url = url.replace(/^http:/, 'https:');
-					}
-					node.on('load error', function() {
-							node.data('loading')(true);
-						})
-						.attr('src', url)
-						.data('loading')();
-				} else {
-					node.data('loading')(true);
-				}
-				ifm.trigger('destroy').remove();
-			}
-		},
-		pixlrSetup = function(opts, fm) {
-			if (!hasFlash || fm.UA.ltIE8) {
-				this.disabled = true;
-			}
-		},
-		pixlrLoad = function(mode, base) {
-			if (navigator && !navigator.mimeTypes["application/x-shockwave-flash"]) {
-				var src = 'data:application/x-shockwave-flash;base64,Q1dTCJUCAAB42kxSTW/TQBB9Xjv1hkLamoIvEeJaQBUHjvQjVEUKImnkIK7BjTapi5u1dlfQ/gJ6KjdLCHHl9/CPyszaRexhdt/sm3kzs3uJ+A+QVsCTAEfillZ3DbQmAZmD3jZZOk1ms0k+/5wvld0d5cUKt71QMOv6Nx7De2bLUp/mJZbKfVTGFnoFq9zbMrdnd3jBAOrSKbMi5nF7GK5oX+RzhXlelqiMdtpdVQoXnHd6ZZ26oKsqPy3KwhXK4kub8ClsRS7s4gXONZGPjdEGyhhgMJ0qNzG6ohKWFrWARD9Jfgm8CxgEfe+6kdxtuINXqLuIGUSBFNm3ACKt1xEJGcbcqox8QGfMds3bOEuJhpM6QgQpxwSCtAHdmy0eXLQDYb8uMq0dNlHHjYDEIVHD1AeS2L8afuK7ROcTXjJmhXtec92r3R/f1SQfxPw6VFovqzvwoL1MIDc8lpv/cSh6q+1IkGv/hyAJ9iacP8Lz9zVdDmk2iXc/HL3mbZuJMXwQnp3UG42UiII4ZIlHeykOwjd0vO4TY/RhMD2ajQbDMdxZYZtv4d/QT5pHlbaTj5tMUvj+wizFIcG/AAAA//8DAFw0fxk=';
-				$(base).empty().append('<object data="'+src+'" type="application/x-shockwave-flash" style="width:100%;height:100%"><param name="movie" value="'+src+'"></object>');
-				return;
-			}
-			var self = this,
-				fm = this.fm,
-				clPreventBack = fm.res('class', 'preventback'),
-				node = $(base).children('img:first')
-					.data('loading')()
-					.data('resizeoff', function() {
-						$(window).off('resize.'+node.attr('id'));
-						dialog.addClass(clPreventBack);
-						return node;
-					})
-					.on('click', function() {
-						launch();
-					}),
-				dialog = $(base).closest('.ui-dialog'),
-				elfNode = fm.getUI(),
-				uiToast = fm.getUI('toast'),
-				container = $('<iframe class="ui-front" allowtransparency="true">'),
-				file = this.file,
-				timeout = 15,
-				error = function(error) {
-					if (error) {
-						container.trigger('destroy').remove();
-						node.data('loading')(true);
-						fm.error(error);
-					} else {
-						uiToast.appendTo(dialog.closest('.ui-dialog'));
-						fm.toast({
-							mode: 'info',
-							msg: 'Can not launch Pixlr yet. Waiting ' + timeout + ' seconds.',
-							button: {
-								text: 'Abort',
-								click: function() {
-									container.trigger('destroy').remove();
-									node.data('loading')(true);
-								}
-							},
-							onHidden: function() {
-								uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
-							}
-						});
-						errtm = setTimeout(error, timeout * 1000);
-					}
-				},
-				launch = function() {
-					var src = 'https://pixlr.com/'+mode+'/?s=c',
-						myurl = window.location.href.toString().replace(/#.*$/, ''),
-						opts = {};
-
-					errtm = setTimeout(error, timeout * 1000);
-					myurl += (myurl.indexOf('?') === -1? '?' : '&') + 'pixlr='+node.attr('id');
-					src += '&referrer=elFinder&locktitle=true';
-					src += '&exit='+encodeURIComponent(myurl+'&image=0');
-					src += '&target='+encodeURIComponent(myurl);
-					src += '&title='+encodeURIComponent(file.name);
-					src += '&image='+encodeURIComponent(node.attr('_src'));
-					
-					opts.src = src;
-					opts.css = {
-						width: '100%',
-						height: $(window).height()+'px',
-						position: 'fixed',
-						display: 'block',
-						backgroundColor: 'transparent',
-						border: 'none',
-						top: 0,
-						right: 0
-					};
-
-					// trigger event 'editEditorPrepare'
-					self.trigger('Prepare', {
-						node: base,
-						editorObj: void(0),
-						instance: container,
-						opts: opts
-					});
-
-					container
-						.attr('id', node.attr('id')+'iframe')
-						.attr('src', opts.src)
-						.css(opts.css)
-						.one('load', function() {
-							errtm && clearTimeout(errtm);
-							setTimeout(function() {
-								if (container.is(':hidden')) {
-									error('Please disable your ad blocker.');
-								}
-							}, 1000);
-							dialog.addClass(clPreventBack);
-							fm.toggleMaximize(container, true);
-							fm.toFront(container);
-						})
-						.on('destroy', function() {
-							fm.toggleMaximize(container, false);
-						})
-						.on('error', error)
-						.appendTo(elfNode.hasClass('elfinder-fullscreen')? elfNode : 'body');
-				},
-				errtm;
-			$(base).on('saveAsFail', launch);
-			launch();
-		},
 		iframeClose = function(ifm) {
 			var $ifm = $(ifm),
 				dfd = $.Deferred().always(function() {
@@ -330,9 +174,6 @@
 			chk();
 			return dfd;
 		};
-	
-	// check callback from pixlr
-	pixlrCallBack();
 	
 	// check getfile callback function
 	if (getfile) {
@@ -626,43 +467,6 @@
 					$base.data('mime', file.mime);
 				}
 			}
-		},
-		{
-			// Pixlr Editor
-			info : {
-				id : 'pixlreditor',
-				name : 'Pixlr Editor',
-				iconImg : 'img/editor-icons.png 0 -128',
-				urlAsContent: true,
-				schemeContent: true,
-				single: true,
-				canMakeEmpty: true,
-				integrate: {
-					title: 'PIXLR EDITOR',
-					link: 'https://pixlr.com/editor/'
-				}
-			},
-			// MIME types to accept
-			mimes : ['image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp', 'image/x-pixlr-data'],
-			// HTML of this editor
-			html : '<div class="elfinder-edit-imageeditor"><img/></div>',
-			// called on initialization of elFinder cmd edit (this: this editor's config object)
-			setup : function(opts, fm) {
-				pixlrSetup.call(this, opts, fm);
-			},
-			// Initialization of editing node (this: this editors HTML node)
-			init : function(id, file, url, fm) {
-				initImgTag.call(this, id, file, file.size > 0? fm.convAbsUrl(url) : '', fm);
-			},
-			// Get data uri scheme (this: this editors HTML node)
-			getContent : function() {
-				return $(this).children('img:first').attr('src');
-			},
-			load : function(base) {
-				pixlrLoad.call(this, 'editor', base);
-			},
-			save : function(base) {},
-			close : function(base) {}
 		},
 		{
 			// Photopea advanced image editor
