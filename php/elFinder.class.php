@@ -1864,19 +1864,34 @@ class elFinder
             return array('error' => $error);
         } else {
             // 2nd: Return array contains opened file session key, root itself and required headers
+
+            // Detect Chrome on iOS
+            // It has access twice on downloading
+            $CriOSinit = false;
+            $ua = isset($_SERVER['HTTP_USER_AGENT'])? $_SERVER['HTTP_USER_AGENT'] : '';
+            if (strpos($ua, 'CriOS') !== false) {
+                $accept = isset($_SERVER['HTTP_ACCEPT'])? $_SERVER['HTTP_ACCEPT'] : '';
+                if ($accept && $accept !== '*' && $accept !== '*/*') {
+                    $CriOSinit = true;
+                }
+            }
+            // data check
             if (count($targets) !== 4 || ($volume = $this->volume($targets[0])) == false || !($file = $this->session->get('zipdl' . $targets[1]))) {
                 return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
             }
-            $this->session->remove('zipdl' . $targets[1]);
+            $path = $volume->getTempPath() . DIRECTORY_SEPARATOR . basename($file);
+            if (!$CriOSinit) {
+                // remove session data of "zipdl..."
+                $this->session->remove('zipdl' . $targets[1]);
+                // register auto delete on shutdown
+                $GLOBALS['elFinderTempFiles'][$path] = true;
+            }
             if ($volume->commandDisabled('zipdl')) {
                 return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
             }
-            $path = $volume->getTempPath() . DIRECTORY_SEPARATOR . basename($file);
             if (!is_readable($path) || !is_writable($path)) {
                 return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
             }
-            // register auto delete on shutdown
-            $GLOBALS['elFinderTempFiles'][$path] = true;
             // for HTTP headers
             $name = $targets[2];
             $mime = $targets[3];
@@ -1908,6 +1923,10 @@ class elFinder
                     'Connection: close'
                 )
             );
+            // add cache control headers
+            if ($cacheHeaders = $volume->getOption('cacheHeaders')) {
+                $result['header'] = array_merge($result['header'], $cacheHeaders);
+            }
             return $result;
         }
     }
