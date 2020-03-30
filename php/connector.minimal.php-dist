@@ -48,6 +48,7 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // elFinder::$netDrivers['dropbox2'] = 'Dropbox2';
 // // Dropbox2 Netmount driver need next two settings. You can get at https://www.dropbox.com/developers/apps
 // // AND require register redirect url to "YOUR_CONNECTOR_URL?cmd=netmount&protocol=dropbox2&host=1"
+// // If the elFinder HTML element ID is not "elfinder", you need to change "host=1" to "host=ElementID"
 // define('ELFINDER_DROPBOX_APPKEY',    '');
 // define('ELFINDER_DROPBOX_APPSECRET', '');
 // ===============================================
@@ -59,6 +60,7 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // elFinder::$netDrivers['googledrive'] = 'GoogleDrive';
 // // GoogleDrive Netmount driver need next two settings. You can get at https://console.developers.google.com
 // // AND require register redirect url to "YOUR_CONNECTOR_URL?cmd=netmount&protocol=googledrive&host=1"
+// // If the elFinder HTML element ID is not "elfinder", you need to change "host=1" to "host=ElementID"
 // define('ELFINDER_GOOGLEDRIVE_CLIENTID',     '');
 // define('ELFINDER_GOOGLEDRIVE_CLIENTSECRET', '');
 // // Required case when Google API is NOT added via composer
@@ -72,6 +74,7 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // elFinder::$netDrivers['googledrive'] = 'FlysystemGoogleDriveNetmount';
 // // GoogleDrive Netmount driver need next two settings. You can get at https://console.developers.google.com
 // // AND require register redirect url to "YOUR_CONNECTOR_URL?cmd=netmount&protocol=googledrive&host=1"
+// // If the elFinder HTML element ID is not "elfinder", you need to change "host=1" to "host=ElementID"
 // define('ELFINDER_GOOGLEDRIVE_CLIENTID',     '');
 // define('ELFINDER_GOOGLEDRIVE_CLIENTSECRET', '');
 // // And "php/.tmp" directory must exist and be writable by PHP.
@@ -84,6 +87,7 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // elFinder::$netDrivers['onedrive'] = 'OneDrive';
 // // GoogleDrive Netmount driver need next two settings. You can get at https://dev.onedrive.com
 // // AND require register redirect url to "YOUR_CONNECTOR_URL/netmount/onedrive/1"
+// // If the elFinder HTML element ID is not "elfinder", you need to change "/1" to "/ElementID"
 // define('ELFINDER_ONEDRIVE_CLIENTID',     '');
 // define('ELFINDER_ONEDRIVE_CLIENTSECRET', '');
 // ===============================================
@@ -94,6 +98,7 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // elFinder::$netDrivers['box'] = 'Box';
 // // Box Netmount driver need next two settings. You can get at https://developer.box.com
 // // AND require register redirect url to "YOUR_CONNECTOR_URL?cmd=netmount&protocol=box&host=1"
+// // If the elFinder HTML element ID is not "elfinder", you need to change "host=1" to "host=ElementID"
 // define('ELFINDER_BOX_CLIENTID',     '');
 // define('ELFINDER_BOX_CLIENTSECRET', '');
 // ===============================================

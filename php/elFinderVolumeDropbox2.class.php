@@ -330,10 +330,15 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
                     $options['url'] = elFinder::getConnectorUrl();
                 }
 
-                $callback = $options['url']
-                        . (strpos($options['url'], '?') !== false? '&' : '?') . 'cmd=netmount&protocol=dropbox2&host=1';
+                if (!empty($options['id'])) {
+                    $callback = $options['url']
+                            . (strpos($options['url'], '?') !== false? '&' : '?') . 'cmd=netmount&protocol=dropbox2&host=' . ($options['id'] === 'elfinder'? '1' : $options['id']);
+                }
 
-                if (!$aToken && empty($_GET['code'])) {
+                $itpCare = isset($options['code']);
+                $code = $itpCare? $options['code'] : (isset($_GET['code'])? $_GET['code'] : '');
+                $state = $itpCare? $options['state'] : (isset($_GET['state'])? $_GET['state'] : '');
+                if (!$aToken && empty($code)) {
                     $url = $authHelper->getAuthUrl($callback);
 
                     $html = '<input id="elf-volumedriver-dropbox2-host-btn" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" value="{msg:btnApprove}" type="button">';
@@ -355,22 +360,44 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
                         return ['exit' => 'callback', 'out' => $out];
                     }
                 } else {
-                    if (!empty($_GET['code']) && isset($_GET['state'])) {
-                        // see https://github.com/kunalvarma05/dropbox-php-sdk/issues/115
-                        $authHelper->getPersistentDataStore()->set('state', filter_var($_GET['state'], FILTER_SANITIZE_STRING));
-                        $tokenObj = $authHelper->getAccessToken($_GET['code'], $_GET['state'], $callback);
-                        $options['tokens'] = [
-                            'access_token' => $tokenObj->getToken(),
-                            'uid' => $tokenObj->getUid(),
-                        ];
-                        $this->session->set('Dropbox2Tokens', $options['tokens'])->set('Dropbox2AuthParams', $options);
-                        $out = [
-                            'node' => $options['id'],
-                            'json' => '{"protocol": "dropbox2", "mode": "done", "reset": 1}',
-                            'bind' => 'netmount',
-                        ];
-
-                        return ['exit' => 'callback', 'out' => $out];
+                    if ($code && $state) {
+                        if (!empty($options['id'])) {
+                            // see https://github.com/kunalvarma05/dropbox-php-sdk/issues/115
+                            $authHelper->getPersistentDataStore()->set('state', filter_var($state, FILTER_SANITIZE_STRING));
+                            $tokenObj = $authHelper->getAccessToken($code, $state, $callback);
+                            $options['tokens'] = [
+                                'access_token' => $tokenObj->getToken(),
+                                'uid' => $tokenObj->getUid(),
+                            ];
+                            unset($options['code'], $options['state']);
+                            $this->session->set('Dropbox2Tokens', $options['tokens'])->set('Dropbox2AuthParams', $options);
+                            $out = [
+                                'node' => $options['id'],
+                                'json' => '{"protocol": "dropbox2", "mode": "done", "reset": 1}',
+                                'bind' => 'netmount',
+                            ];
+                        } else {
+                            $nodeid = ($_GET['host'] === '1')? 'elfinder' : $_GET['host'];
+                            $out = [
+                                'node' => $nodeid,
+                                'json' => json_encode(array(
+                                    'protocol' => 'dropbox2',
+                                    'host' => $nodeid,
+                                    'mode' => 'redirect',
+                                    'options' => array(
+                                        'id' => $nodeid,
+                                        'code' => $code,
+                                        'state' => $state
+                                    )
+                                )),
+                                'bind' => 'netmount'
+                            ];
+                        }
+                        if (!$itpCare) {
+                            return array('exit' => 'callback', 'out' => $out);
+                        } else {
+                            return array('exit' => true, 'body' => $out['json']);
+                        }
                     }
                     $path = $options['path'];
                     $folders = [];
