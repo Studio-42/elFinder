@@ -420,6 +420,7 @@ elFinder.prototype.commands.download = function() {
 					if (html5dl) {
 						click(link.attr('href', url)
 							.attr('download', fm.escape(files[i].name))
+							.attr('target', '_blank')
 							.get(0)
 						);
 					} else {
