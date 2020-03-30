@@ -612,7 +612,7 @@ class elFinder
                     foreach (array_keys($this->commands[$_cmd]) as $_k) {
                         if (isset($_ps[$_i])) {
                             if (!isset($_GET[$_k])) {
-                                $_GET[$_k] = $_ps[$_i];
+                                $_GET[$_k] = $_ps[$_i++];
                             }
                         } else {
                             break;
@@ -1834,6 +1834,7 @@ class elFinder
         $targets = $args['targets'];
         $download = !empty($args['download']);
         $h404 = 'HTTP/1.x 404 Not Found';
+        $CriOS = isset($_SERVER['HTTP_USER_AGENT'])? (strpos($_SERVER['HTTP_USER_AGENT'], 'CriOS') !== false) : false;
 
         if (!$download) {
             //1st: Return array contains download archive file info
@@ -1852,7 +1853,7 @@ class elFinder
                     $this->session->set('zipdl' . $uniqid, basename($path));
                     $result = array(
                         'zipdl' => array(
-                            'file' => $uniqid,
+                            'file' => $CriOS? basename($path) : $uniqid,
                             'name' => $name,
                             'mime' => $dlres['mime']
                         )
@@ -1868,21 +1869,20 @@ class elFinder
             // Detect Chrome on iOS
             // It has access twice on downloading
             $CriOSinit = false;
-            $ua = isset($_SERVER['HTTP_USER_AGENT'])? $_SERVER['HTTP_USER_AGENT'] : '';
-            if (strpos($ua, 'CriOS') !== false) {
+            if ($CriOS) {
                 $accept = isset($_SERVER['HTTP_ACCEPT'])? $_SERVER['HTTP_ACCEPT'] : '';
                 if ($accept && $accept !== '*' && $accept !== '*/*') {
                     $CriOSinit = true;
                 }
             }
             // data check
-            if (count($targets) !== 4 || ($volume = $this->volume($targets[0])) == false || !($file = $this->session->get('zipdl' . $targets[1]))) {
+            if (count($targets) !== 4 || ($volume = $this->volume($targets[0])) == false || !($file = $CriOS? $targets[1] : $this->session->get('zipdl' . $targets[1]))) {
                 return array('error' => 'File not found', 'header' => $h404, 'raw' => true);
             }
             $path = $volume->getTempPath() . DIRECTORY_SEPARATOR . basename($file);
+            // remove session data of "zipdl..."
+            $this->session->remove('zipdl' . $targets[1]);
             if (!$CriOSinit) {
-                // remove session data of "zipdl..."
-                $this->session->remove('zipdl' . $targets[1]);
                 // register auto delete on shutdown
                 $GLOBALS['elFinderTempFiles'][$path] = true;
             }

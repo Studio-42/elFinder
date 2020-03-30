@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.55 (2.1-src Nightly: d5aad3a) (2020-03-29)
+ * Version 2.1.55 (2.1-src Nightly: ddd85d5) (2020-03-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10717,7 +10717,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.55 (2.1-src Nightly: d5aad3a)';
+elFinder.prototype.version = '2.1.55 (2.1-src Nightly: ddd85d5)';
 
 
 
@@ -23820,6 +23820,7 @@ elFinder.prototype.commands.download = function() {
 					if (html5dl) {
 						click(link.attr('href', url)
 							.attr('download', fm.escape(files[i].name))
+							.attr('target', '_blank')
 							.get(0)
 						);
 					} else {
@@ -27126,12 +27127,27 @@ elFinder.prototype.commands.netmount = function() {
 
 	self.fm.bind('netmount', function(e) {
 		var d = e.data || null,
-			o = self.options;
+			o = self.options,
+			done = function() {
+				if (o[d.protocol] && typeof o[d.protocol].done == 'function') {
+					o[d.protocol].done(self.fm, d);
+					content.find('select,input').addClass('elfinder-tabstop');
+					self.dialog.elfinderdialog('tabstopsInit');
+				}
+			};
 		if (d && d.protocol) {
-			if (o[d.protocol] && typeof o[d.protocol].done == 'function') {
-				o[d.protocol].done(self.fm, d);
-				content.find('select,input').addClass('elfinder-tabstop');
-				self.dialog.elfinderdialog('tabstopsInit');
+			if (d.mode && d.mode === 'redirect') {
+				// To support of third-party cookie blocking (ITP) on CORS
+				// On iOS and iPadOS 13.4 and Safari 13.1 on macOS, the session cannot be continued when redirecting OAuth in CORS mode
+				self.fm.request({
+					data : {cmd : 'netmount', protocol : d.protocol, host: d.host, user : 'init', pass : 'return', options: d.options}, 
+					preventDefault : true
+				}).done(function(data) {
+					d = JSON.parse(data.body);
+					done();
+				});
+			} else {
+				done();
 			}
 		}
 	});

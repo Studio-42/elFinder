@@ -408,9 +408,11 @@ class elFinderVolumeBox extends elFinderVolumeDriver
      */
     protected function _bd_curlExec($curl, $decodeOrParent = true, $headers = array(), $postData = array())
     {
-        $headers = array_merge(array(
-            'Authorization: Bearer ' . $this->token->data->access_token,
-        ), $headers);
+        if ($this->token) {
+            $headers = array_merge(array(
+                'Authorization: Bearer ' . $this->token->data->access_token,
+            ), $headers);
+        }
 
         $result = elFinder::curlExec($curl, array(), $headers, $postData);
 
@@ -679,7 +681,7 @@ class elFinderVolumeBox extends elFinderVolumeDriver
 
         if (isset($options['id'])) {
             $this->session->set('nodeId', $options['id']);
-        } elseif ($_id = $this->session->get('nodeId')) {
+        } else if ($_id = $this->session->get('nodeId')) {
             $options['id'] = $_id;
             $this->session->set('nodeId', $_id);
         }
@@ -695,20 +697,41 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 return array('exit' => true, 'body' => '{msg:errNetMountNoDriver}');
             }
 
-            if (isset($_GET['code'])) {
+            $itpCare = isset($options['code']);
+            $code = $itpCare? $options['code'] : (isset($_GET['code'])? $_GET['code'] : '');
+            if ($code) {
                 try {
-                    // Obtain the token using the code received by the Box.com API
-                    $this->session->set('BoxTokens',
-                        $this->_bd_obtainAccessToken($options['client_id'], $options['client_secret'], $_GET['code']));
+                    if (!empty($options['id'])) {
+                        // Obtain the token using the code received by the Box.com API
+                        $this->session->set('BoxTokens',
+                            $this->_bd_obtainAccessToken($options['client_id'], $options['client_secret'], $code));
 
-                    $out = array(
-                        'node' => $options['id'],
-                        'json' => '{"protocol": "box", "mode": "done", "reset": 1}',
-                        'bind' => 'netmount',
-
-                    );
-
-                    return array('exit' => 'callback', 'out' => $out);
+                        $out = array(
+                            'node' => $options['id'],
+                            'json' => '{"protocol": "box", "mode": "done", "reset": 1}',
+                            'bind' => 'netmount'
+                        );
+                    } else {
+                        $nodeid = ($_GET['host'] === '1')? 'elfinder' : $_GET['host'];
+                        $out = array(
+                            'node' => $nodeid,
+                            'json' => json_encode(array(
+                                'protocol' => 'box',
+                                'host' => $nodeid,
+                                'mode' => 'redirect',
+                                'options' => array(
+                                    'id' => $nodeid,
+                                    'code'=> $code
+                                )
+                            )),
+                            'bind' => 'netmount'
+                        );
+                    }
+                    if (!$itpCare) {
+                        return array('exit' => 'callback', 'out' => $out);
+                    } else {
+                        return array('exit' => true, 'body' => $out['json']);
+                    }
                 } catch (Exception $e) {
                     $out = array(
                         'node' => $options['id'],
@@ -750,27 +773,12 @@ class elFinderVolumeBox extends elFinderVolumeDriver
                 }
 
                 if ($result === false) {
-                    $cdata = '';
-                    $innerKeys = array('cmd', 'host', 'options', 'pass', 'protocol', 'user');
-                    $this->ARGS = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : $_GET;
-                    foreach ($this->ARGS as $k => $v) {
-                        if (!in_array($k, $innerKeys)) {
-                            $cdata .= '&' . $k . '=' . rawurlencode($v);
-                        }
-                    }
-                    if (empty($options['url'])) {
-                        $options['url'] = elFinder::getConnectorUrl();
-                    }
-                    $callback = $options['url']
-                        . (strpos($options['url'], '?') !== false? '&' : '?') . 'cmd=netmount&protocol=box&host=box.com&user=init&pass=return&node=' . $options['id'] . $cdata;
+                    $redirect = elFinder::getConnectorUrl();
+                    $redirect .= (strpos($redirect, '?') !== false? '&' : '?') . 'cmd=netmount&protocol=box&host=' . ($options['id'] === 'elfinder'? '1' : $options['id']);
 
                     try {
                         $this->session->set('BoxTokens', (object)array('token' => null));
-
-                        $url = self::AUTH_URL . '?' . http_build_query(array('response_type' => 'code', 'client_id' => $options['client_id'], 'redirect_uri' => $options['url']
-                        . (strpos($options['url'], '?') !== false? '&' : '?') . 'cmd=netmount&protocol=box&host=1'));
-
-                        $url .= '&oauth_callback=' . rawurlencode($callback);
+                        $url = self::AUTH_URL . '?' . http_build_query(array('response_type' => 'code', 'client_id' => $options['client_id'], 'redirect_uri' => $redirect));
                     } catch (Exception $e) {
                         return array('exit' => true, 'body' => '{msg:errAccess}');
                     }
