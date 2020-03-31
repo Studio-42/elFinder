@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.55 (2.1-src Nightly: ddd85d5) (2020-03-30)
+ * Version 2.1.55 (2.1-src Nightly: 7cfc906) (2020-04-01)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -10717,7 +10717,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.55 (2.1-src Nightly: ddd85d5)';
+elFinder.prototype.version = '2.1.55 (2.1-src Nightly: 7cfc906)';
 
 
 
@@ -17368,10 +17368,10 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			selectAllCheckbox = selectCheckbox? $('<div class="elfinder-cwd-selectall"><input type="checkbox"/></div>')
 				.attr('title', fm.i18n('selectall'))
-				.on('touchstart mousedown click', function(e) {
+				.on('click', function(e) {
 					e.stopPropagation();
 					e.preventDefault();
-					if ($(this).data('pending') || e.type === 'click') {
+					if ($(this).data('pending')) {
 						return false;
 					}
 					selectAllCheckbox.data('pending', true);
@@ -23820,7 +23820,6 @@ elFinder.prototype.commands.download = function() {
 					if (html5dl) {
 						click(link.attr('href', url)
 							.attr('download', fm.escape(files[i].name))
-							.attr('target', '_blank')
 							.get(0)
 						);
 					} else {
