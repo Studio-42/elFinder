@@ -2296,10 +2296,10 @@ $.fn.elfindercwd = function(fm, options) {
 			
 			selectAllCheckbox = selectCheckbox? $('<div class="elfinder-cwd-selectall"><input type="checkbox"/></div>')
 				.attr('title', fm.i18n('selectall'))
-				.on('touchstart mousedown click', function(e) {
+				.on('click', function(e) {
 					e.stopPropagation();
 					e.preventDefault();
-					if ($(this).data('pending') || e.type === 'click') {
+					if ($(this).data('pending')) {
 						return false;
 					}
 					selectAllCheckbox.data('pending', true);
