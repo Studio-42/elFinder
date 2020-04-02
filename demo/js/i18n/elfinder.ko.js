@@ -3,7 +3,8 @@
  * @author Hwang Ahreum; <luckmagic@naver.com>
  * @author Park Sungyong; <sungyong@gmail.com>
  * @author Yeonjeong Woo <eat_sweetly@naver.com>
- * @version 2018-06-16
+ * @author Kwon Hyungjoo <hyung778@gmail.com>
+ * @version 2020-04-02
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -15,12 +16,12 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.ko = {
-		translator : 'Hwang Ahreum; &lt;luckmagic@naver.com&gt;, Park Sungyong; &lt;sungyong@gmail.com&gt;, Yeonjeong Woo &lt;eat_sweetly@naver.com&gt;',
+		translator : 'Hwang Ahreum; &lt;luckmagic@naver.com&gt;, Park Sungyong; &lt;sungyong@gmail.com&gt;, Yeonjeong Woo &lt;eat_sweetly@naver.com&gt;, Kwon Hyungjoo &lt;hyung778@gmail.com&gt;',
 		language   : 'Korea-한국어',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i', // Mar 13, 2012 05:27 PM
-		fancyDateFormat : '$1 H:i', // will produce smth like: Today 12:25 PM
-		nonameDateFormat : 'ymd-His', // to apply if upload file is noname: 120513172700
+		dateFormat : 'Y-m-d H:i', // will show like: 2020-04-02 09:43
+		fancyDateFormat : '$1 H:i', // will show like: 오늘 09:43
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 200402-094344
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -116,6 +117,7 @@
 			'errEditorNotFound'    : '이 형식의 파일을 편집할 수 없는 에디터를 발견할 수 없습니다.', // from v2.1.25 added 23.5.2017
 			'errServerError'       : '서버측에서 에러가 발생했습니다.', // from v2.1.25 added 16.6.2017
 			'errEmpty'             : '폴더 "$1"를 비우기할 수 없습니다.', // from v2.1.25 added 22.6.2017
+			'moreErrors'           : '$1개의 오류가 더 발생했습니다.', // from v2.1.44 added 9.12.2018
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : '압축파일생성',
@@ -164,6 +166,7 @@
 			'cmdselectnone': '선택 취소', // from v2.1.28 added 15.08.2017
 			'cmdselectinvert': '선택 반전', // from v2.1.28 added 15.08.2017
 			'cmdopennew'   : '새 창으로 열기', // from v2.1.38 added 3.4.2018
+			'cmdhide'      : '숨기기 (설정)', // from v2.1.41 added 24.7.2018
 
 			/*********************************** buttons ***********************************/
 			'btnClose'  : '닫기',
@@ -225,6 +228,7 @@
 			'ntfchkdir'   : '대상 폴더 점검중', // from v2.1.24 added 3.5.2017
 			'ntfundo'     : '이전 작업 취소중', // from v2.1.27 added 31.07.2017
 			'ntfredo'     : '이전 취소 작업 다시 하는 중', // from v2.1.27 added 31.07.2017
+			'ntfchkcontent' : '내용 확인중', // from v2.1.41 added 3.8.2018
 
 			/*********************************** volumes *********************************/
 			'volume_Trash' : '휴지통', //from v2.1.24 added 29.4.2017
@@ -288,6 +292,9 @@
 			'untitled file.txt' : '새파일.txt', // added 10.11.2015
 			'untitled folder'   : '새폴더',   // added 10.11.2015
 			'Archive'           : '새아카이브',  // from v2.1 added 10.11.2015
+			'untitled file'     : '새파일.$1',  // from v2.1.41 added 6.8.2018
+			'extentionfile'     : '$1: 파일',    // from v2.1.41 added 6.8.2018
+			'extentiontype'     : '$1: $2',      // from v2.1.43 added 17.10.2018
 
 			/********************************** messages **********************************/
 			'confirmReq'      : '확인',
@@ -297,7 +304,8 @@
 			'confirmConvUTF8' : 'UTF-8이 아닙니다<br/>UTF-8로 변환할까요?<br/>변환후 저장하면 UTF-8로 됩니다.', // from v2.1 added 08.04.2014
 			'confirmNonUTF8'  : '이 파일의 인코딩 타입을 알아내지 못했습니다. 편집하려면 임시로 UTF-8로 변환해야 합니다.<br/>어떤 인코딩을 할지 선택하십시오.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : '변경한 부분이 있습니다.<br/>저장하지 않는다면 현재 작업중인 내용을 잃을 수 있습니다.', // from v2.1 added 15.7.2015
-			'confirmTrash'    : '휴지통으로 이동시키겠습니까??', //from v2.1.24 added 29.4.2017
+			'confirmTrash'    : '휴지통으로 이동하시겠습니까?', //from v2.1.24 added 29.4.2017
+			'confirmMove'     : '이 파일을 정말 "$1"(으)로 이동하시겠습니까?', //from v2.1.50 added 27.7.2019
 			'apllyAll'        : '모두 적용',
 			'name'            : '이름',
 			'size'            : '크기',
@@ -437,6 +445,7 @@
 			'clearBrowserData': '이 브라우저에 저장된 설정값 초기화하기', // from v2.1.26 added 28.6.2017
 			'toolbarPref'     : '툴바 설정', // from v2.1.27 added 2.8.2017
 			'charsLeft'       : '... $1 글자 남았습니다.',  // from v2.1.29 added 30.8.2017
+			'linesLeft'       : '... $1 줄 남았습니다.',  // from v2.1.52 added 16.1.2020
 			'sum'             : '합계', // from v2.1.29 added 28.9.2017
 			'roughFileSize'   : '대략적인 파일 크기', // from v2.1.30 added 2.11.2017
 			'autoFocusDialog' : '마우스 가져갈 때 대화창에 포커스 주기',  // from v2.1.30 added 2.11.2017
@@ -462,7 +471,29 @@
 			'workspace'       : '작업공간', // from v2.1.38 added 4.4.2018
 			'dialog'          : '대화상자', // from v2.1.38 added 4.4.2018
 			'all'             : '전체', // from v2.1.38 added 4.4.2018
-			'iconSize'        : '아이콘 크기 (아이콘 보기)', // form v2.1.39 added 7.5.2018
+			'iconSize'        : '아이콘 크기 (아이콘 보기)', // from v2.1.39 added 7.5.2018
+			'editorMaximized' : '최대화된 에디터 창을 엽니다', // from v2.1.40 added 30.6.2018
+			'editorConvNoApi' : '현재 API를 통한 변환이 불가능하므로, 웹 사이트에서 변환하시기 바랍니다.', //from v2.1.40 added 8.7.2018
+			'editorConvNeedUpload' : '변환 후 변환된 파일을 저장하기 위해서는 파일 URL이나 다운로드받은 파일을 업로드 해야 합니다.', //from v2.1.40 added 8.7.2018
+			'convertOn'       : '$1 사이트에서 변환하시기 바랍니다.', // from v2.1.40 added 10.7.2018
+			'integrations'    : '통합', // from v2.1.40 added 11.7.2018
+			'integrationWith' : 'elFinder에는 다음과 같은 외부 서비스가 통합되어 있습니다. 이용하기 전에 이용 약관, 개인정보 보호정책 등을 확인하시기 바랍니다.', // from v2.1.40 added 11.7.2018
+			'showHidden'      : '숨겨진 파일 표시', // from v2.1.41 added 24.7.2018
+			'hideHidden'      : '숨겨진 파일 숨기기', // from v2.1.41 added 24.7.2018
+			'toggleHidden'    : '숨겨진 항목 표시/숨기기', // from v2.1.41 added 24.7.2018
+			'makefileTypes'   : '"새 파일"에서 사용할 파일 형식', // from v2.1.41 added 7.8.2018
+			'typeOfTextfile'  : '텍스트 파일 유형', // from v2.1.41 added 7.8.2018
+			'add'             : '추가', // from v2.1.41 added 7.8.2018
+			'theme'           : '테마', // from v2.1.43 added 19.10.2018
+			'default'         : '기본값', // from v2.1.43 added 19.10.2018
+			'description'     : '설명', // from v2.1.43 added 19.10.2018
+			'website'         : '웹사이트', // from v2.1.43 added 19.10.2018
+			'author'          : '저자', // from v2.1.43 added 19.10.2018
+			'email'           : '이메일', // from v2.1.43 added 19.10.2018
+			'license'         : '라이선스', // from v2.1.43 added 19.10.2018
+			'exportToSave'    : '이 파일은 저장될 수 없습니다. 편집한 내용을 유지하려면 PC로 내보내시기 바랍니다.', // from v2.1.44 added 1.12.2018
+			'dblclickToSelect': '파일을 두 번 클릭하여 선택하세요.', // from v2.1.47 added 22.1.2019
+			'useFullscreen'   : '전체 화면 모드 사용', // from v2.1.47 added 19.2.2019
 
 			/********************************** mimetypes **********************************/
 			'kindUnknown'     : '알수없음',
