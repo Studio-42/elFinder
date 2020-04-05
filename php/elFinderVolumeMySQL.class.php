@@ -879,7 +879,7 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
         }
 
         if ($this->isLocalhost && ($tmpfile = tempnam($this->tmpPath, $this->id))) {
-            debug('local');if (($trgfp = fopen($tmpfile, 'wb')) == false) {
+            if (($trgfp = fopen($tmpfile, 'wb')) == false) {
                 unlink($tmpfile);
             } else {
                 elFinder::rewind($fp);

@@ -763,7 +763,6 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             if ($code) {
                 try {
                     if (!empty($options['id'])) {
-                        debug($options['id']);
                         // Obtain the token using the code received by the OneDrive API
                         $this->session->set('OneDriveTokens',
                             $this->_od_obtainAccessToken($options['client_id'], $options['client_secret'], $code, $options['id']));
