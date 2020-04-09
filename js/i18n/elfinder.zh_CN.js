@@ -6,7 +6,8 @@
  * @author Kejun Chang <changkejun@hotmail.com>
  * @author LDMING <china-live@live.cn>
  * @author Andy Lee <oraclei@126.com>
- * @version 2019-06-26
+ * @author Cololi <i@cololi.moe>
+ * @version 2020-04-07
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -18,12 +19,12 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.zh_CN = {
-		translator : '翻译者 deerchao &lt;deerchao@gmail.com&gt;, Andy Hu &lt;andyhu7@yahoo.com.hk&gt;, Max Wen&lt;max.wen@qq.com&gt;, Kejun Chang &lt;changkejun@hotmail.com&gt;, LDMING &lt;china-live@live.cn&gt;, Andy Lee &lt;oraclei@126.com&gt;',
+		translator : '翻译者 deerchao &lt;deerchao@gmail.com&gt;, Andy Hu &lt;andyhu7@yahoo.com.hk&gt;, Max Wen&lt;max.wen@qq.com&gt;, Kejun Chang &lt;changkejun@hotmail.com&gt;, LDMING &lt;china-live@live.cn&gt;, Andy Lee &lt;oraclei@126.com&gt;, Cololi &lt;i@cololi.moe&gt;',
 		language   : '简体中文',
 		direction  : 'ltr',
-		dateFormat : 'Y-m-d H:i', // will show like: 2019-06-26 22:33
-		fancyDateFormat : '$1 H:i', // will show like: 今天 22:33
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 190626-223309
+		dateFormat : 'Y-m-d H:i', // will show like: 2020-04-07 14:53
+		fancyDateFormat : '$1 H:i', // will show like: 今天 14:53
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 200407-145300
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -307,6 +308,7 @@
 			'confirmNonUTF8'  : '无法检测到此文件的字符编码.需要暂时转换此文件为UTF-8编码以进行编辑.<br/>请选择此文件的字符编码.', // from v2.1.19 added 28.11.2016
 			'confirmNotSave'  : '文件已被编辑.<br/>如果不保存直接关闭,将丢失编辑内容.', // from v2.1 added 15.7.2015
 			'confirmTrash'    : '确定要将该项移动到回收站么?', //from v2.1.24 added 29.4.2017
+			'confirmMove'     : '确定要移动该项到 "$1"?', //from v2.1.50 added 27.7.2019
 			'apllyAll'        : '全部应用',
 			'name'            : '名称',
 			'size'            : '大小',
@@ -445,7 +447,8 @@
 			'language'        : '语言设置', // from v2.1.26 added 28.6.2017
 			'clearBrowserData': '清除保存在此浏览器中的偏好设置', // from v2.1.26 added 28.6.2017
 			'toolbarPref'     : '工具栏设置', // from v2.1.27 added 2.8.2017
-			'charsLeft'       : '... $1 chars left.',  // from v2.1.29 added 30.8.2017
+			'charsLeft'       : '... 剩余$1字符',  // from v2.1.29 added 30.8.2017
+			'linesLeft'       : '... 剩余$1行',  // from v2.1.52 added 16.1.2020
 			'sum'             : '总数', // from v2.1.29 added 28.9.2017
 			'roughFileSize'   : '粗略的文件大小', // from v2.1.30 added 2.11.2017
 			'autoFocusDialog' : '鼠标悬停在对话框内可编辑区域时自动获得焦点',  // from v2.1.30 added 2.11.2017
