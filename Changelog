@@ -1,3 +1,16 @@
+2020-04-09  Naoki Sawada  <hypweb+elfinder@gmail.com>
+
+	* elFinder (2.1.56):
+		- [js:extras:editors.default] remove Pixlr editor it is no longer possible to display in IFRAME
+		- [php:core] Fixed #3134 close file pointer before deleting temporary file on shutdown
+		- [VD:abstract] change prefix of zipdl temp file
+		- [php:core] Fixed #3136 zipdl fails on Chrome on iOS / iPadOS
+		- [cmd:netmount] Fixed #3138 OAuth not possible with CORS due to new ITP
+		- [VD:MySQL,OneDrive] Fixed #3142 remove debug code
+		- [i18n:pl,ko] Updated translations
+		- And some minor bug fixes
+
+
 2020-03-18  Naoki Sawada  <hypweb+elfinder@gmail.com>
 
 	* elFinder (2.1.55):
