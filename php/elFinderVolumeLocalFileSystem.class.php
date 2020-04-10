@@ -1419,5 +1419,24 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver
         return ($this->stripos($name, $this->doSearchCurrentQuery['q']) === false) ? false : true;
     }
 
+    /**
+     * Creates a symbolic link
+     *
+     * @param      string   $target  The target
+     * @param      string   $link    The link
+     *
+     * @return     boolean  ( result of symlink() )
+     */
+    protected function localFileSystemSymlink($target, $link)
+    {
+        $res = false;
+        $errlev = error_reporting();
+        error_reporting($errlev ^ E_WARNING);
+        if ($res = symlink(realpath($target), $link)) {
+            $res = is_readable($link);
+        }
+        error_reporting($errlev);
+        return $res;
+    }
 } // END class 
 
