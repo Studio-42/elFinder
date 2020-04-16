@@ -16,7 +16,7 @@ elFinder.prototype.commands.edit = function() {
 			return str.replace(/\s+$/, '');
 		},
 		getEncSelect = function(heads) {
-			var sel = $('<select class="ui-corner-all"/>'),
+			var sel = $('<select class="ui-corner-all"></select>'),
 				hval;
 			if (heads) {
 				$.each(heads, function(i, head) {
@@ -554,10 +554,10 @@ elFinder.prototype.commands.edit = function() {
 			// extended function to setup selector of encoding for text editor
 			ta._setupSelEncoding = function(content) {
 				var heads = (encoding && encoding !== 'unknown')? [{value: encoding}] : [],
-					wfake = $('<select/>').hide(),
+					wfake = $('<select></select>').hide(),
 					setSelW = function(init) {
 						init && wfake.appendTo(selEncoding.parent());
-						wfake.empty().append($('<option/>').text(selEncoding.val()));
+						wfake.empty().append($('<option></option>').text(selEncoding.val()));
 						selEncoding.width(wfake.width());
 					};
 				if (content === '' || ! encoding || encoding !== 'UTF-8') {
@@ -576,7 +576,7 @@ elFinder.prototype.commands.edit = function() {
 					});
 					setSelW();
 				}).on('mouseover', stateChange);
-				ta.parent().next().prepend($('<div class="ui-dialog-buttonset elfinder-edit-extras"/>').append(selEncoding));
+				ta.parent().next().prepend($('<div class="ui-dialog-buttonset elfinder-edit-extras"></div>').append(selEncoding));
 				setSelW(true);
 			};
 
@@ -734,7 +734,7 @@ elFinder.prototype.commands.edit = function() {
 							},
 							optionsCallback : function(options) {
 								options.create = function() {
-									var base = $('<div class="elfinder-dialog-confirm-encoding"/>'),
+									var base = $('<div class="elfinder-dialog-confirm-encoding"></div>'),
 										head = {value: data.doconv},
 										detected;
 									
@@ -1093,7 +1093,7 @@ elFinder.prototype.commands.edit = function() {
 							single(editor);
 							self.extra = {
 								icon: 'menu',
-								node: $('<span/>')
+								node: $('<span></span>')
 									.attr({title: fm.i18n('select')})
 									.on('click touchstart', function(e){
 										if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {

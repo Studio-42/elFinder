@@ -32,14 +32,14 @@ $.fn.elfindertoolbar = function(fm, opts) {
 				l = panels.length;
 				while (l--) {
 					if (panels[l]) {
-						panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>');
+						panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"></div>');
 						i = panels[l].length;
 						while (i--) {
 							name = panels[l][i];
 							if ((!disabled || !disabled[name]) && (cmd = commands[name])) {
 								button = 'elfinder'+cmd.options.ui;
 								if (! buttons[name] && $.fn[button]) {
-									buttons[name] = $('<div/>')[button](cmd);
+									buttons[name] = $('<div></div>')[button](cmd);
 								}
 								if (buttons[name]) {
 									buttons[name].children('.elfinder-button-text')[textLabel? 'show' : 'hide']();
@@ -49,7 +49,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 						}
 						
 						panel.children().length && self.prepend(panel);
-						panel.children(':gt(0)').before('<span class="ui-widget-content elfinder-toolbar-button-separator"/>');
+						panel.children(':gt(0)').before('<span class="ui-widget-content elfinder-toolbar-button-separator"></span>');
 
 					}
 				}
@@ -58,10 +58,10 @@ $.fn.elfindertoolbar = function(fm, opts) {
 					//cmdPref.state = !self.children().length? 0 : -1;
 					if (options.showPreferenceButton === 'always' || (!self.children().length && options.showPreferenceButton === 'auto')) {
 						//cmdPref.state = 0;
-						panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"/>');
+						panel = $('<div class="ui-widget-content ui-corner-all elfinder-buttonset"></div>');
 						name = 'preference';
 						button = 'elfinder'+cmd.options.ui;
-						buttons[name] = $('<div/>')[button](cmdPref);
+						buttons[name] = $('<div></div>')[button](cmdPref);
 						buttons[name].children('.elfinder-button-text')[textLabel? 'show' : 'hide']();
 						panel.prepend(buttons[name]);
 						self.append(panel);
@@ -227,7 +227,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 							btn = buttons[from];
 							if (btn) {
 								if (! buttons[to] && $.fn[button]) {
-									buttons[to] = $('<div/>')[button](cmd);
+									buttons[to] = $('<div></div>')[button](cmd);
 									if (buttons[to]) {
 										buttons[to].children('.elfinder-button-text')[textLabel? 'show' : 'hide']();
 										if (cmd.extendsCmd) {
@@ -269,7 +269,7 @@ $.fn.elfindertoolbar = function(fm, opts) {
 			}
 			
 			fm.bind('load', function() {
-				swipeHandle = $('<div class="elfinder-toolbar-swipe-handle"/>').hide().appendTo(fm.getUI());
+				swipeHandle = $('<div class="elfinder-toolbar-swipe-handle"></div>').hide().appendTo(fm.getUI());
 				if (swipeHandle.css('pointer-events') !== 'none') {
 					swipeHandle.remove();
 					swipeHandle = null;

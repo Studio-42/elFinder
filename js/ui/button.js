@@ -20,7 +20,7 @@ $.fn.elfinderbutton = function(cmd) {
 			prvCname = cmd.className? cmd.className : cmd.name,
 			button   = $(this).addClass('ui-state-default elfinder-button')
 				.attr('title', cmd.title)
-				.append('<span class="elfinder-button-icon elfinder-button-icon-' + prvCname + '"/>', text)
+				.append('<span class="elfinder-button-icon elfinder-button-icon-' + prvCname + '"></span>', text)
 				.on('mouseenter mouseleave', function(e) { !button.hasClass(disabled) && button[e.type == 'mouseleave' ? 'removeClass' : 'addClass'](hover);})
 				.on('click', function(e) { 
 					if (!button.hasClass(disabled)) {
@@ -76,7 +76,7 @@ $.fn.elfinderbutton = function(cmd) {
 		if (Array.isArray(cmd.variants)) {
 			button.addClass('elfinder-menubutton');
 			
-			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu elfinder-button-' + prvCname + '-menu ui-corner-all"/>')
+			menu = $('<div class="ui-front ui-widget ui-widget-content elfinder-button-menu elfinder-button-' + prvCname + '-menu ui-corner-all"></div>')
 				.hide()
 				.appendTo(fm.getUI())
 				.on('mouseenter mouseleave', '.'+item, function() { $(this).toggleClass(hover); })

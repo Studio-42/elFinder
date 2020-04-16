@@ -50,7 +50,7 @@ elFinder.prototype.commands.netmount = function() {
 						inputs.protocol.trigger('change', 'winfocus');
 					},
 					inputs = {
-						protocol : $('<select/>')
+						protocol : $('<select></select>')
 						.on('change', function(e, data){
 							var protocol = this.value;
 							content.find('.elfinder-netmount-tr').hide();
@@ -133,7 +133,7 @@ elFinder.prototype.commands.netmount = function() {
 	
 						self.dialog.elfinderdialog('close');
 					},
-					form = $('<form autocomplete="off"/>').on('keydown', 'input', function(e) {
+					form = $('<form autocomplete="off"></form>').on('keydown', 'input', function(e) {
 						var comp = true,
 							next;
 						if (e.keyCode === $.ui.keyCode.ENTER) {
@@ -151,11 +151,11 @@ elFinder.prototype.commands.netmount = function() {
 							}
 						}
 					}),
-					hidden  = $('<div/>'),
+					hidden  = $('<div></div>'),
 					dialog;
 
-				content = $('<table class="elfinder-info-tb elfinder-netmount-tb"/>')
-					.append($('<tr/>').append($('<td>'+fm.i18n('protocol')+'</td>')).append($('<td/>').append(inputs.protocol)));
+				content = $('<table class="elfinder-info-tb elfinder-netmount-tb"></table>')
+					.append($('<tr></tr>').append($('<td>'+fm.i18n('protocol')+'</td>')).append($('<td></td>').append(inputs.protocol)));
 
 				$.each(self.drivers, function(i, protocol) {
 					if (o[protocol]) {
@@ -164,7 +164,7 @@ elFinder.prototype.commands.netmount = function() {
 							input.attr('name', name);
 							if (input.attr('type') != 'hidden') {
 								input.addClass('ui-corner-all elfinder-netmount-inputs-'+protocol);
-								content.append($('<tr/>').addClass('elfinder-netmount-tr elfinder-netmount-tr-'+protocol).append($('<td>'+fm.i18n(name)+'</td>')).append($('<td/>').append(input)));
+								content.append($('<tr></tr>').addClass('elfinder-netmount-tr elfinder-netmount-tr-'+protocol).append($('<td>'+fm.i18n(name)+'</td>')).append($('<td></td>').append(input)));
 							} else {
 								input.addClass('elfinder-netmount-inputs-'+protocol);
 								hidden.append(input);

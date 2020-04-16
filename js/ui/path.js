@@ -14,7 +14,7 @@ $.fn.elfinderpath = function(fm, options) {
 			place  = 'statusbar',
 			clHover= fm.res('class', 'hover'),
 			prefix = 'path' + (elFinder.prototype.uniqueid? elFinder.prototype.uniqueid : '') + '-',
-			wzbase = $('<div class="ui-widget-header ui-helper-clearfix elfinder-workzone-path"/>'),
+			wzbase = $('<div class="ui-widget-header ui-helper-clearfix elfinder-workzone-path"></div>'),
 			path   = $(this).addClass('elfinder-path').html('&nbsp;')
 				.on('mousedown', 'span.elfinder-path-dir', function(e) {
 					var hash = $(this).attr('id').substr(prefix.length);
@@ -29,7 +29,7 @@ $.fn.elfinderpath = function(fm, options) {
 					}
 				})
 				.prependTo(fm.getUI('statusbar').show()),
-			roots = $('<div class="elfinder-path-roots"/>').on('click', function(e) {
+			roots = $('<div class="elfinder-path-roots"></div>').on('click', function(e) {
 				e.stopPropagation();
 				e.preventDefault();
 				
@@ -54,7 +54,7 @@ $.fn.elfinderpath = function(fm, options) {
 					x: e.pageX,
 					y: e.pageY
 				});
-			}).append('<span class="elfinder-button-icon elfinder-button-icon-menu" />').appendTo(wzbase),
+			}).append('<span class="elfinder-button-icon elfinder-button-icon-menu" ></span>').appendTo(wzbase),
 			render = function(cwd) {
 				var dirs = [],
 					names = [];

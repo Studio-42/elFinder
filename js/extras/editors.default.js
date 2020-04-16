@@ -89,8 +89,8 @@
 		},
 		initImgTag = function(id, file, content, fm) {
 			var node = $(this).children('img:first').data('ext', getExtention(file.mime, fm)),
-				spnr = $('<div class="elfinder-edit-spinner elfinder-edit-image"/>')
-					.html('<span class="elfinder-spinner-text">' + fm.i18n('ntfloadimg') + '</span><span class="elfinder-spinner"/>')
+				spnr = $('<div class="elfinder-edit-spinner elfinder-edit-image"></div>')
+					.html('<span class="elfinder-spinner-text">' + fm.i18n('ntfloadimg') + '</span><span class="elfinder-spinner"></span>')
 					.hide()
 					.appendTo(this),
 				setup = function() {
@@ -246,8 +246,8 @@
 							iconsPath = opts.iconsPath,
 							tmpContainer = $('<div class="tui-image-editor-container">').appendTo(bParent),
 							tmpDiv = [
-								$('<div class="tui-image-editor-submenu"/>').appendTo(tmpContainer),
-								$('<div class="tui-image-editor-controls"/>').appendTo(tmpContainer)
+								$('<div class="tui-image-editor-submenu"></div>').appendTo(tmpContainer),
+								$('<div class="tui-image-editor-controls"></div>').appendTo(tmpContainer)
 							],
 							iEditor = new editor(base, {
 								includeUI: {
@@ -305,9 +305,9 @@
 									}
 								}
 							},
-							zup = $('<span class="ui-icon ui-icon-plusthick"/>').data('val', 10),
-							zdown = $('<span class="ui-icon ui-icon-minusthick"/>').data('val', -10),
-							per = $('<button/>').css('width', '4em').text('%').attr('title', '100%').data('val', 0),
+							zup = $('<span class="ui-icon ui-icon-plusthick"></span>').data('val', 10),
+							zdown = $('<span class="ui-icon ui-icon-minusthick"></span>').data('val', -10),
+							per = $('<button></button>').css('width', '4em').text('%').attr('title', '100%').data('val', 0),
 							quty, qutyTm, zoomTm, zoomMore;
 
 						tmpContainer.remove();
@@ -330,9 +330,9 @@
 									});
 								})
 								.val($base.data('quality'));
-							$('<div class="ui-dialog-buttonset elfinder-edit-extras elfinder-edit-extras-quality"/>')
+							$('<div class="ui-dialog-buttonset elfinder-edit-extras elfinder-edit-extras-quality"></div>')
 								.append(
-									$('<span>').html(fm.i18n('quality') + ' : '), quty, $('<span/>')
+									$('<span>').html(fm.i18n('quality') + ' : '), quty, $('<span></span>')
 								)
 								.prependTo($base.parent().next());
 						} else if (self.file.mime === 'image/svg+xml') {
@@ -343,7 +343,7 @@
 							});
 						}
 						// zoom scale controls
-						$('<div class="ui-dialog-buttonset elfinder-edit-extras"/>')
+						$('<div class="ui-dialog-buttonset elfinder-edit-extras"></div>')
 							.append(
 								zdown, per, zup
 							)
@@ -508,8 +508,8 @@
 						}),
 					editor = this.editor,
 					confObj = editor.confObj,
-					spnr = $('<div class="elfinder-edit-spinner elfinder-edit-photopea"/>')
-						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
+					spnr = $('<div class="elfinder-edit-spinner elfinder-edit-photopea"></div>')
+						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"></span>')
 						.appendTo(ifm.parent()),
 					saveMimes = fm.arrayFlip(confObj.info.canMakeEmpty),
 					getType = function(mime) {
@@ -641,9 +641,9 @@
 							ifm.data('quality', q);
 						})
 						.val(ifm.data('quality'));
-					$('<div class="ui-dialog-buttonset elfinder-edit-extras elfinder-edit-extras-quality"/>')
+					$('<div class="ui-dialog-buttonset elfinder-edit-extras elfinder-edit-extras-quality"></div>')
 						.append(
-							$('<span>').html(fm.i18n('quality') + ' : '), quty, $('<span/>')
+							$('<span>').html(fm.i18n('quality') + ' : '), quty, $('<span></span>')
 						)
 						.prependTo(ifm.parent().next());
 				}
@@ -735,7 +735,7 @@
 						var opts;
 							
 						if (!container.length) {
-							container = $('<div id="elfinder-pixo-container" class="ui-front"/>').css({
+							container = $('<div id="elfinder-pixo-container" class="ui-front"></div>').css({
 								position: 'fixed',
 								top: 0,
 								right: 0,
@@ -848,10 +848,10 @@
 							});
 						})
 						.val(fm.storage('jpgQuality') || fm.option('jpgQuality'));
-					qBase = $('<div class="ui-dialog-buttonset elfinder-edit-extras elfinder-edit-extras-quality"/>')
+					qBase = $('<div class="ui-dialog-buttonset elfinder-edit-extras elfinder-edit-extras-quality"></div>')
 						.hide()
 						.append(
-							$('<span>').html(fm.i18n('quality') + ' : '), quty, $('<span/>')
+							$('<span>').html(fm.i18n('quality') + ' : '), quty, $('<span></span>')
 						)
 						.prependTo($base.parent().next());
 					$base.data('quty', quty);
@@ -950,7 +950,7 @@
 						ace.config.set('basePath', cdn);
 
 						// Base node of Ace editor
-						editorBase = $('<div id="'+id+'" style="width:100%; height:100%;"/>').text(ta.val()).insertBefore(ta.hide());
+						editorBase = $('<div id="'+id+'" style="width:100%; height:100%;"></div>').text(ta.val()).insertBefore(ta.hide());
 
 						// Editor flag
 						ta.data('ace', true);
@@ -1019,9 +1019,9 @@
 						editor.resize();
 
 						// TextArea button and Setting button
-						$('<div class="ui-dialog-buttonset"/>').css('float', 'left')
+						$('<div class="ui-dialog-buttonset"></div>').css('float', 'left')
 						.append(
-							$('<button/>').html(self.fm.i18n('TextArea'))
+							$('<button></button>').html(self.fm.i18n('TextArea'))
 							.button()
 							.on('click', function(){
 								if (ta.data('ace')) {
@@ -1175,9 +1175,9 @@
 						editorBase.height('100%');
 						
 						// TextArea button and Setting button
-						$('<div class="ui-dialog-buttonset"/>').css('float', 'left')
+						$('<div class="ui-dialog-buttonset"></div>').css('float', 'left')
 						.append(
-							$('<button/>').html(self.fm.i18n('TextArea'))
+							$('<button></button>').html(self.fm.i18n('TextArea'))
 							.button()
 							.on('click', function(){
 								if (ta.data('cm')) {
@@ -2062,8 +2062,8 @@
 				var ta = this,
 					ifm = $(this).hide(),
 					uiToast = fm.getUI('toast'),
-					spnr = $('<div class="elfinder-edit-spinner elfinder-edit-zohoeditor"/>')
-						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
+					spnr = $('<div class="elfinder-edit-spinner elfinder-edit-zohoeditor"></div>')
+						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"></span>')
 						.appendTo(ifm.parent()),
 					cdata = function() {
 						var data = '';
@@ -2319,7 +2319,7 @@
 						});
 					},
 					btns = (function() {
-						var btns = $('<div/>').on('click', 'button', function() {
+						var btns = $('<div></div>').on('click', 'button', function() {
 								var b = $(this),
 									opts = b.data('opts') || null,
 									cat = b.closest('.onlineconvert-category').data('cname'),
@@ -2359,9 +2359,9 @@
 								}
 								b.data('opts', o);
 							}),
-							ul = $('<ul/>'),
+							ul = $('<ul></ul>'),
 							oform = function(n, o) {
-								var f = $('<p/>').data('optkey', n).data('type', o.type),
+								var f = $('<p></p>').data('optkey', n).data('type', o.type),
 									checked = '',
 									disabled = '',
 									nozip = false,
@@ -2372,7 +2372,7 @@
 								if (o.pattern) {
 									f.data('pattern', o.pattern);
 								}
-								f.append($('<span/>').text(fm.i18n(n) + ' : '));
+								f.append($('<span></span>').text(fm.i18n(n) + ' : '));
 								if (o.type === 'boolean') {
 									if (o['default'] || (nozip = (n === 'allow_multiple_outputs' && !allowZip))) {
 										checked = ' checked';
@@ -2386,9 +2386,9 @@
 									}
 									f.append($('<input type="checkbox" value="true"'+checked+disabled+'/>'));
 								} else if (o['enum']){
-									elm = $('<select/>').append($('<option value=""/>').text('Select...'));
+									elm = $('<select></select>').append($('<option value=""></option>').text('Select...'));
 									$.each(o['enum'], function(i, v) {
-										elm.append($('<option value="'+v+'"/>').text(v));
+										elm.append($('<option value="'+v+'"></option>').text(v));
 									});
 									f.append(elm);
 								} else {
@@ -2398,10 +2398,10 @@
 							},
 							makeOption = function(o) {
 								var elm = this,
-									b = $('<span class="elfinder-button-icon elfinder-button-icon-preference"/>').on('click', function() {
+									b = $('<span class="elfinder-button-icon elfinder-button-icon-preference"></span>').on('click', function() {
 										f.toggle();
 									}),
-									f = $('<div class="elfinder-edit-onlinconvert-options"/>').hide();
+									f = $('<div class="elfinder-edit-onlinconvert-options"></div>').hide();
 								if (o.options) {
 									$.each(o.options, function(k, v) {
 										k !== 'download_password' && f.append(oform.call(elm, k, v));
@@ -2418,7 +2418,7 @@
 						$.each(set.conv, function(t, c) {
 							var cname = t.toLowerCase(),
 								id = 'elfinder-edit-onlineconvert-' + cname + ts,
-								type = $('<div id="' + id + '" class="onlineconvert-category onlineconvert-category-'+cname+'"/>').data('cname', t),
+								type = $('<div id="' + id + '" class="onlineconvert-category onlineconvert-category-'+cname+'"></div>').data('cname', t),
 								cext;
 							$.each(c, function(n, o) {
 								var nl = n.toLowerCase(),
@@ -2431,16 +2431,16 @@
 									}
 								}
 								if (fm.uploadMimeCheck(confObj.ext2mime[ext], file.phash)) {
-									type.append($('<div class="elfinder-edit-onlineconvert-button onlineconvert-'+nl+'"/>').on('makeoption', function(e, data) {
+									type.append($('<div class="elfinder-edit-onlineconvert-button onlineconvert-'+nl+'"></div>').on('makeoption', function(e, data) {
 										var elm = $(this);
 										if (!elm.children('.elfinder-button-icon-preference').length) {
 											makeOption.call(elm, data);
 										}
-									}).append($('<button/>').text(n).data('conv', n)));
+									}).append($('<button></button>').text(n).data('conv', n)));
 								}
 							});
 							if (type.children().length) {
-								ul.append($('<li/>').append($('<a/>').attr('href', selfUrl + '#' + id).text(t)));
+								ul.append($('<li></li>').append($('<a></a>').attr('href', selfUrl + '#' + id).text(t)));
 								btns.append(type);
 								idxs[cname] = i++;
 							}
@@ -2454,7 +2454,7 @@
 						} else {
 							$.each(set.conv, function(t) {
 								var tl = t.toLowerCase();
-								btns.append($('<fieldset class="onlineconvert-fieldset-' + tl + '"/>').append($('<legend/>').text(t)).append(btns.children('.onlineconvert-category-' + tl)));
+								btns.append($('<fieldset class="onlineconvert-fieldset-' + tl + '"></fieldset>').append($('<legend></legend>').text(t)).append(btns.children('.onlineconvert-category-' + tl)));
 							});
 						}
 						return btns;
@@ -2464,11 +2464,11 @@
 							btns,
 							(set.showLink? $(set.link) : null)
 						),
-					spnr = $('<div class="elfinder-edit-spinner elfinder-edit-onlineconvert"/>')
+					spnr = $('<div class="elfinder-edit-spinner elfinder-edit-onlineconvert"></div>')
 						.hide()
-						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"/>')
+						.html('<span class="elfinder-spinner-text">' + fm.i18n('nowLoading') + '</span><span class="elfinder-spinner"></span>')
 						.appendTo(select.parent()),
-					prog = $('<div class="elfinder-quicklook-info-progress"/>').appendTo(spnr),
+					prog = $('<div class="elfinder-quicklook-info-progress"></div>').appendTo(spnr),
 					_url = null,
 					url = function() {
 						var onetime;

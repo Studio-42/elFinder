@@ -46,9 +46,9 @@ try {
 				if (file.url !== '' && file.url != '1') {
 					e.stopImmediatePropagation();
 
-					loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"/></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
+					loading = $('<div class="elfinder-quicklook-info-data"><span class="elfinder-spinner-text">'+fm.i18n('nowLoading')+'</span><span class="elfinder-spinner"></span></div>').appendTo(ql.info.find('.elfinder-quicklook-info'));
 
-					node = $('<iframe class="elfinder-quicklook-preview-iframe"/>')
+					node = $('<iframe class="elfinder-quicklook-preview-iframe"></iframe>')
 						.css('background-color', 'transparent')
 						.on('load', function() {
 							ql.hideinfo();

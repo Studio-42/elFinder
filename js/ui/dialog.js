@@ -128,13 +128,13 @@ $.fn.elfinderdialog = function(opts, fm) {
 			clmodal    = 'elfinder-dialog-modal',
 			id         = parseInt(Math.random()*1000000),
 			titlebar   = $('<div class="ui-dialog-titlebar ui-widget-header ui-corner-top ui-helper-clearfix"><span class="elfinder-dialog-title">'+opts.title+'</span></div>'),
-			buttonset  = $('<div class="ui-dialog-buttonset"/>'),
-			buttonpane = $('<div class=" ui-helper-clearfix ui-dialog-buttonpane ui-widget-content"/>')
+			buttonset  = $('<div class="ui-dialog-buttonset"></div>'),
+			buttonpane = $('<div class=" ui-helper-clearfix ui-dialog-buttonpane ui-widget-content"></div>')
 				.append(buttonset),
 			btnWidth   = 0,
 			btnCnt     = 0,
 			tabstops   = $(),
-			evCover    = $('<div style="width:100%;height:100%;position:absolute;top:0px;left:0px;"/>').hide(),
+			evCover    = $('<div style="width:100%;height:100%;position:absolute;top:0px;left:0px;"></div>').hide(),
 			numberToTel = function() {
 				if (opts.optimizeNumber) {
 					dialog.find('input[type=number]').each(function() {
@@ -190,7 +190,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 			},
 			headerBtns = {
 				close: function() {
-					titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-button"><span class="ui-icon ui-icon-closethick"/></span>')
+					titlebar.prepend($('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-button"><span class="ui-icon ui-icon-closethick"></span></span>')
 						.on('mousedown touchstart', function(e) {
 							e.preventDefault();
 							e.stopPropagation();
@@ -228,7 +228,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 								dialog.trigger('resize', {init: true});
 							}
 						});
-						titlebar.prepend($('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-full"><span class="ui-icon ui-icon-plusthick"/></span>')
+						titlebar.prepend($('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-full"><span class="ui-icon ui-icon-plusthick"></span></span>')
 							.on('mousedown touchstart', function(e) {
 								var elm = $(this);
 								e.preventDefault();
@@ -247,12 +247,12 @@ $.fn.elfinderdialog = function(opts, fm) {
 				minimize: function() {
 					var btn, mnode, doffset;
 					if (opts.allowMinimize) {
-						btn = $('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-minimize"><span class="ui-icon ui-icon-minusthick"/></span>')
+						btn = $('<span class="ui-widget-header ui-corner-all elfinder-titlebar-button elfinder-titlebar-minimize"><span class="ui-icon ui-icon-minusthick"></span></span>')
 							.on('mousedown touchstart', function(e) {
 								var $this = $(this),
 									tray = fm.getUI('bottomtray'),
 									dumStyle = { width: 70, height: 24 },
-									dum = $('<div/>').css(dumStyle).addClass(dialog.get(0).className + ' elfinder-dialog-minimized'),
+									dum = $('<div></div>').css(dumStyle).addClass(dialog.get(0).className + ' elfinder-dialog-minimized'),
 									close = function() {
 										mnode.remove();
 										dialog.removeData('minimized').show();
@@ -318,7 +318,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					}
 				}
 			},
-			dialog = $('<div class="ui-front ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable std42-dialog touch-punch '+cldialog+' '+opts.cssClass+'"/>')
+			dialog = $('<div class="ui-front ui-dialog ui-widget ui-widget-content ui-corner-all ui-draggable std42-dialog touch-punch '+cldialog+' '+opts.cssClass+'"></div>')
 				.hide()
 				.append(self)
 				.appendTo(elfNode)

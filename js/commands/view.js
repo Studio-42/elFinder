@@ -21,7 +21,7 @@ elFinder.prototype.commands.view = function() {
 	
 	this.extra = {
 		icon: 'menu',
-		node: $('<span/>')
+		node: $('<span></span>')
 			.attr({title: fm.i18n('viewtype')})
 			.on('click touchstart', function(e){
 				if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
@@ -91,7 +91,7 @@ elFinder.prototype.commands.view = function() {
 	}).bind('contextmenucreate', function() {
 		self.extra = {
 			icon: 'menu',
-			node: $('<span/>')
+			node: $('<span></span>')
 				.attr({title: fm.i18n('cmdview')})
 				.on('click touchstart', function(e){
 					if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {

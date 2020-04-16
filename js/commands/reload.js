@@ -31,7 +31,7 @@
 		if (fm.options.sync >= 1000) {
 			self.extra = {
 				icon: 'accept',
-				node: $('<span/>')
+				node: $('<span></span>')
 					.attr({title: fm.i18n('autoSync')})
 					.on('click touchstart', function(e){
 						if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {

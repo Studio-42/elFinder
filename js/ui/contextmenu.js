@@ -104,7 +104,7 @@ $.fn.elfindercontextmenu = function(fm) {
 			ltr = fm.direction === 'ltr',
 			subpos = ltr? 'left' : 'right',
 			types = Object.assign({}, fm.options.contextmenu),
-			tpl     = '<div class="'+cmItem+'{className}"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"{style}/><span>{label}</span></div>',
+			tpl     = '<div class="'+cmItem+'{className}"><span class="elfinder-button-icon {icon} elfinder-contextmenu-icon"{style}></span><span>{label}</span></div>',
 			item = function(label, icon, callback, opts) {
 				var className = '',
 					style = '',
@@ -407,10 +407,10 @@ $.fn.elfindercontextmenu = function(fm) {
 							}
 							node = item(cmd.title, cmd.className? cmd.className : cmd.name, function(){}, cmd.contextmenuOpts);
 							
-							submenu = $('<div class="ui-front ui-corner-all elfinder-contextmenu-sub"/>')
+							submenu = $('<div class="ui-front ui-corner-all elfinder-contextmenu-sub"></div>')
 								.hide()
 								.css('max-height', fm.getUI().height() - 30)
-								.appendTo(node.append('<span class="elfinder-contextmenu-arrow"/>'));
+								.appendTo(node.append('<span class="elfinder-contextmenu-arrow"></span>'));
 							
 							hover = function(show){
 								if (! show) {
@@ -536,11 +536,11 @@ $.fn.elfindercontextmenu = function(fm) {
 								});
 							
 							$.each(cmd.variants, function(i, variant) {
-								var item = variant === '|' ? '<div class="elfinder-contextmenu-separator"/>' :
+								var item = variant === '|' ? '<div class="elfinder-contextmenu-separator"></div>' :
 									$('<div class="'+cmItem+' '+smItem+'"><span>'+variant[1]+'</span></div>').data('exec', variant[0]),
 									iconClass, icon;
 								if (typeof variant[2] !== 'undefined') {
-									icon = $('<span/>').addClass('elfinder-button-icon elfinder-contextmenu-icon');
+									icon = $('<span></span>').addClass('elfinder-button-icon elfinder-contextmenu-icon');
 									if (! /\//.test(variant[2])) {
 										icon.addClass('elfinder-button-icon-'+variant[2]);
 									} else {
@@ -559,7 +559,7 @@ $.fn.elfindercontextmenu = function(fm) {
 								}
 							}, cmd.contextmenuOpts);
 							if (cmd.extra && cmd.extra.node) {
-								$('<span class="elfinder-button-icon elfinder-button-icon-'+(cmd.extra.icon || '')+' '+exIcon+'"/>')
+								$('<span class="elfinder-button-icon elfinder-button-icon-'+(cmd.extra.icon || '')+' '+exIcon+'"></span>')
 									.append(cmd.extra.node).appendTo(node);
 								$(cmd.extra.node).trigger('ready', {targets: targets});
 							} else {
@@ -572,7 +572,7 @@ $.fn.elfindercontextmenu = function(fm) {
 						}
 						
 						if (insSep) {
-							menu.append('<div class="elfinder-contextmenu-separator"/>');
+							menu.append('<div class="elfinder-contextmenu-separator"></div>');
 						}
 						menu.append(node);
 						sep = true;
@@ -600,7 +600,7 @@ $.fn.elfindercontextmenu = function(fm) {
 					var node;
 					
 					if (data === '|') {
-						menu.append('<div class="elfinder-contextmenu-separator"/>');
+						menu.append('<div class="elfinder-contextmenu-separator"></div>');
 					} else if (data.label && typeof data.callback == 'function') {
 						node = item(data.label, data.icon, function() {
 							if (! menu.data('draged')) {

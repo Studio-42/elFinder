@@ -605,7 +605,7 @@ $.fn.elfindertree = function(fm, opts) {
 									}
 								});
 								if (prev > -1) {
-									prevBtn = $('<button class="elfinder-navbar-pager elfinder-navbar-pager-prev"/>')
+									prevBtn = $('<button class="elfinder-navbar-pager elfinder-navbar-pager-prev"></button>')
 										.text(fm.i18n('btnPrevious', page, total))
 										.button({
 											icons: {
@@ -621,7 +621,7 @@ $.fn.elfindertree = function(fm, opts) {
 									prevBtn = $();
 								}
 								if (next) {
-									nextBtn = $('<button class="elfinder-navbar-pager elfinder-navbar-pager-next"/>')
+									nextBtn = $('<button class="elfinder-navbar-pager elfinder-navbar-pager-next"></button>')
 										.text(fm.i18n('btnNext', page + 2, total))
 										.button({
 											icons: {

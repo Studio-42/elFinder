@@ -90,7 +90,7 @@ elFinder.prototype.commands.download = function() {
 				var link = file.url || fm.url(file.hash);
 				return {
 					icon: 'link',
-					node: $('<a/>')
+					node: $('<a></a>')
 						.attr({href: link, target: '_blank', title: fm.i18n('link')})
 						.text(file.name)
 						.on('mousedown click touchstart touchmove touchend contextmenu', function(e){
@@ -102,7 +102,7 @@ elFinder.prototype.commands.download = function() {
 							if (dt) {
 								var icon  = function(f) {
 										var mime = f.mime, i, tmb = fm.tmb(f);
-										i = '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"/>';
+										i = '<div class="elfinder-cwd-icon '+fm.mime2class(mime)+' ui-corner-all"></div>';
 										if (tmb) {
 											i = $(i).addClass(tmb.className).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
 										}
@@ -135,7 +135,7 @@ elFinder.prototype.commands.download = function() {
 					var node;
 					self.extra = {
 						icon: 'link',
-						node: $('<a/>')
+						node: $('<a></a>')
 							.attr({href: '#', title: fm.i18n('getLink'), draggable: 'false'})
 							.text(file.name)
 							.on('click touchstart', function(e){
@@ -229,7 +229,7 @@ elFinder.prototype.commands.download = function() {
 						var zipdl, dialog, btn = {}, dllink, form, iframe, m,
 							uniq = 'dlw' + (+new Date()),
 							zipdlFn = function(url) {
-								dllink = $('<a/>')
+								dllink = $('<a></a>')
 									.attr('href', url)
 									.attr('download', fm.escape(dlName))
 									.on('click', function() {
@@ -290,7 +290,7 @@ elFinder.prototype.commands.download = function() {
 									zipdlFn(url);
 								}
 							} else {
-								form = $('<form action="'+fm.options.url+'" method="post" target="'+uniq+'" style="display:none"/>')
+								form = $('<form action="'+fm.options.url+'" method="post" target="'+uniq+'" style="display:none"></form>')
 								.append('<input type="hidden" name="cmd" value="zipdl"/>')
 								.append('<input type="hidden" name="download" value="1"/>');
 								$.each([hashes[0], zipdl.file, dlName, zipdl.mime], function(key, val) {
@@ -432,7 +432,7 @@ elFinder.prototype.commands.download = function() {
 								}
 							}, 100);
 						} else {
-							iframes += '<iframe class="downloader" id="downloader-' + files[i].hash+'" style="display:none" src="'+url+'"/>';
+							iframes += '<iframe class="downloader" id="downloader-' + files[i].hash+'" style="display:none" src="'+url+'"></iframe>';
 						}
 					}
 				}
