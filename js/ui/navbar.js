@@ -66,7 +66,7 @@ $.fn.elfindernavbar = function(fm, opts) {
 			
 			fm.bind('load', function() {
 				if (nav.children().length) {
-					swipeHandle = $('<div class="elfinder-navbar-swipe-handle"/>').hide().appendTo(wz);
+					swipeHandle = $('<div class="elfinder-navbar-swipe-handle"></div>').hide().appendTo(wz);
 					if (swipeHandle.css('pointer-events') !== 'none') {
 						swipeHandle.remove();
 						swipeHandle = null;

@@ -49,11 +49,11 @@
 	}
 
 	this.tpl = {
-		main       : '<div class="ui-helper-clearfix elfinder-info-title {dirclass}"><span class="elfinder-cwd-icon {class} ui-corner-all"{style}/>{title}</div><table class="elfinder-info-tb">{content}</table>',
+		main       : '<div class="ui-helper-clearfix elfinder-info-title {dirclass}"><span class="elfinder-cwd-icon {class} ui-corner-all"{style}></span>{title}</div><table class="elfinder-info-tb">{content}</table>',
 		itemTitle  : '<strong>{name}</strong><span class="elfinder-info-kind">{kind}</span>',
 		groupTitle : '<strong>{items}: {num}</strong>',
 		row        : '<tr><td class="elfinder-info-label">{label} : </td><td class="{class}">{value}</td></tr>',
-		spinner    : '<span>{text}</span> <span class="'+spclass+' '+spclass+'-{name}"/>'
+		spinner    : '<span>{text}</span> <span class="'+spclass+' '+spclass+'-{name}"></span>'
 	};
 	
 	this.alwaysEnabled = true;
@@ -237,7 +237,7 @@
 				});
 
 				if (getHashAlgorisms.length) {
-					hashProg = $('<div class="elfinder-quicklook-info-progress"/>');
+					hashProg = $('<div class="elfinder-quicklook-info-progress"></div>');
 					reqs.push(
 						fm.getContentsHashes(file.hash, getHashAlgorisms, o.showHashOpts, { progressBar : hashProg }).progress(function(hashes) {
 							$.each(getHashAlgorisms, function(i, n) {

@@ -23,7 +23,7 @@
 		html    = ['<div class="ui-tabs ui-widget ui-widget-content ui-corner-all elfinder-help">', 
 				'<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-top">'],
 		stpl    = '<div class="elfinder-help-shortcut"><div class="elfinder-help-shortcut-pattern">{pattern}</div> {descrip}</div>',
-		sep     = '<div class="elfinder-help-separator"/>',
+		sep     = '<div class="elfinder-help-separator"></div>',
 		selfUrl = $('base').length? document.location.href.replace(/#.*$/, '') : '',
 		clTabActive = fm.res('class', 'tabsactive'),
 		
@@ -38,7 +38,7 @@
 		},
 
 		about = function() {
-			html.push('<div id="'+fm.namespace+'-help-about" class="ui-tabs-panel ui-widget-content ui-corner-bottom"><div class="elfinder-help-logo"/>');
+			html.push('<div id="'+fm.namespace+'-help-about" class="ui-tabs-panel ui-widget-content ui-corner-bottom"><div class="elfinder-help-logo"></div>');
 			html.push('<h3>elFinder</h3>');
 			html.push('<div class="'+prim+'">'+fm.i18n('webfm')+'</div>');
 			html.push('<div class="'+sec+'">'+fm.i18n('ver')+': '+fm.version+'</div>');
@@ -108,7 +108,7 @@
 		useInteg = false,
 		integrations = function() {
 			useInteg = true;
-			html.push('<div id="'+fm.namespace+'-help-integrations" class="ui-tabs-panel ui-widget-content ui-corner-bottom"/>');
+			html.push('<div id="'+fm.namespace+'-help-integrations" class="ui-tabs-panel ui-widget-content ui-corner-bottom"></div>');
 		},
 		useDebug = false,
 		debug = function() {
@@ -122,15 +122,15 @@
 		debugRender = function() {
 			var render = function(elm, obj) {
 				$.each(obj, function(k, v) {
-					elm.append($('<dt/>').text(k));
+					elm.append($('<dt></dt>').text(k));
 					if (typeof v === 'undefined') {
-						elm.append($('<dd/>').append($('<span/>').text('undfined')));
+						elm.append($('<dd></dd>').append($('<span></span>').text('undfined')));
 					} else if (typeof v === 'object' && !v) {
-						elm.append($('<dd/>').append($('<span/>').text('null')));
+						elm.append($('<dd></dd>').append($('<span></span>').text('null')));
 					} else if (typeof v === 'object' && ($.isPlainObject(v) || v.length)) {
-						elm.append( $('<dd/>').append(render($('<dl/>'), v)));
+						elm.append( $('<dd></dd>').append(render($('<dl></dl>'), v)));
 					} else {
-						elm.append($('<dd/>').append($('<span/>').text((v && typeof v === 'object')? '[]' : (v? v : '""'))));
+						elm.append($('<dd></dd>').append($('<span></span>').text((v && typeof v === 'object')? '[]' : (v? v : '""'))));
 					}
 				});
 				return elm;
@@ -153,8 +153,8 @@
 				}
 				
 				tabId = fm.namespace + '-help-debug-' + (+new Date());
-				targetL = $('<li/>').html('<a href="'+selfUrl+'#'+tabId+'">'+self.debug.debug.cmd+'</a>').prependTo(debugUL);
-				target = $('<div id="'+tabId+'"/>').data('debug', self.debug);
+				targetL = $('<li></li>').html('<a href="'+selfUrl+'#'+tabId+'">'+self.debug.debug.cmd+'</a>').prependTo(debugUL);
+				target = $('<div id="'+tabId+'"></div>').data('debug', self.debug);
 				
 				targetL.on('click.debugrender', function() {
 					var debug = target.data('debug');
@@ -162,11 +162,11 @@
 					if (debug) {
 						target.hide();
 						if (debug.debug) {
-							info = $('<fieldset>').append($('<legend/>').text('debug'), render($('<dl/>'), debug.debug));
+							info = $('<fieldset>').append($('<legend></legend>').text('debug'), render($('<dl></dl>'), debug.debug));
 							target.append(info);
 						}
 						if (debug.options) {
-							info = $('<fieldset>').append($('<legend/>').text('options'), render($('<dl/>'), debug.options));
+							info = $('<fieldset>').append($('<legend></legend>').text('options'), render($('<dl></dl>'), debug.options));
 							target.append(info);
 						}
 						target.show();
@@ -246,7 +246,7 @@
 		
 		if (useInteg) {
 			tabInteg = content.find('.elfinder-help-tab-integrations').hide();
-			integDIV = content.find('#'+fm.namespace+'-help-integrations').hide().append($('<div class="elfinder-help-integrations-desc"/>').html(fm.i18n('integrationWith')));
+			integDIV = content.find('#'+fm.namespace+'-help-integrations').hide().append($('<div class="elfinder-help-integrations-desc"></div>').html(fm.i18n('integrationWith')));
 			fm.bind('helpIntegration', function(e) {
 				var ul = integDIV.children('ul:first'),
 					data, elm, cmdUL, cmdCls;
@@ -262,12 +262,12 @@
 								data.title = data.link;
 							}
 							if (data.link) {
-								elm = $('<a/>').attr('href', data.link).attr('target', '_blank').text(data.title);
+								elm = $('<a></a>').attr('href', data.link).attr('target', '_blank').text(data.title);
 							} else {
-								elm = $('<span/>').text(data.title);
+								elm = $('<span></span>').text(data.title);
 							}
 							if (data.banner) {
-								elm = $('<span/>').append($('<img/>').attr(data.banner), elm);
+								elm = $('<span></span>').append($('<img/>').attr(data.banner), elm);
 							}
 						}
 					} else {
@@ -282,18 +282,18 @@
 					if (elm) {
 						tabInteg.show();
 						if (!ul.length) {
-							ul = $('<ul class="elfinder-help-integrations"/>').appendTo(integDIV);
+							ul = $('<ul class="elfinder-help-integrations"></ul>').appendTo(integDIV);
 						}
 						if (data && data.cmd) {
 							cmdCls = 'elfinder-help-integration-' + data.cmd;
 							cmdUL = ul.find('ul.' + cmdCls);
 							if (!cmdUL.length) {
-								cmdUL = $('<ul class="'+cmdCls+'"/>');
-								ul.append($('<li/>').append($('<span/>').html(fm.i18n('cmd'+data.cmd))).append(cmdUL));
+								cmdUL = $('<ul class="'+cmdCls+'"></ul>');
+								ul.append($('<li></li>').append($('<span></span>').html(fm.i18n('cmd'+data.cmd))).append(cmdUL));
 							}
-							elm = cmdUL.append($('<li/>').append(elm));
+							elm = cmdUL.append($('<li></li>').append(elm));
 						} else {
-							ul.append($('<li/>').append(elm));
+							ul.append($('<li></li>').append(elm));
 						}
 					}
 				}

@@ -290,7 +290,7 @@ $.fn.elfinderplaces = function(fm, opts) {
 				save();
 			},
 			// sort button
-			sortBtn = $('<span class="elfinder-button-icon elfinder-button-icon-sort elfinder-places-root-icon" title="'+fm.i18n('cmdsort')+'"/>')
+			sortBtn = $('<span class="elfinder-button-icon elfinder-button-icon-sort elfinder-places-root-icon" title="'+fm.i18n('cmdsort')+'"></span>')
 				.hide()
 				.on('click', function(e) {
 					e.stopPropagation();
@@ -468,8 +468,8 @@ $.fn.elfinderplaces = function(fm, opts) {
 						
 					dir.children().removeClass('ui-state-hover');
 					
-					return $('<div class="ui-widget elfinder-place-drag elfinder-'+fm.direction+'"/>')
-							.append($('<div class="elfinder-navbar"/>').show().append(dir.clone()));
+					return $('<div class="ui-widget elfinder-place-drag elfinder-'+fm.direction+'"></div>')
+							.append($('<div class="elfinder-navbar"></div>').show().append(dir.clone()));
 
 				},
 				stop     : function(e, ui) {

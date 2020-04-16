@@ -8,7 +8,7 @@ $.fn.elfinderstat = function(fm) {
 	"use strict";
 	return this.each(function() {
 		var size       = $(this).addClass('elfinder-stat-size'),
-			sel        = $('<div class="elfinder-stat-selected"/>')
+			sel        = $('<div class="elfinder-stat-selected"></div>')
 				.on('click', 'a', function(e) {
 					var hash = $(this).data('hash');
 					e.preventDefault();

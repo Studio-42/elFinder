@@ -42,7 +42,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		 * @see this.destroy
 		 * @type jQuery
 		 **/
-		prevContent = $('<div/>').append(node.contents()).attr('class', node.attr('class') || '').attr('style', node.attr('style') || ''),
+		prevContent = $('<div></div>').append(node.contents()).attr('class', node.attr('class') || '').attr('style', node.attr('style') || ''),
 		
 		/**
 		 * Instance ID. Required to get/set cookie
@@ -2582,7 +2582,7 @@ var elFinder = function(elm, opts, bootCallback) {
 										if ((data || hashes.length) && t.action && (msg = t.action.msg) && (cmd = t.action.cmd) && (!t.action.cwdNot || t.action.cwdNot !== self.cwd().hash)) {
 											done = t.action.done;
 											data = t.action.data;
-											node = $('<div/>')
+											node = $('<div></div>')
 												.append(
 													$('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"><span class="ui-button-text">'
 														+self.i18n(msg)
@@ -3374,7 +3374,7 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @return jQuery
 	 */
 	this.dialog = function(content, options) {
-		var dialog = $('<div/>').append(content).appendTo(node).elfinderdialog(options, self),
+		var dialog = $('<div></div>').append(content).appendTo(node).elfinderdialog(options, self),
 			dnode  = dialog.closest('.ui-dialog'),
 			resize = function(){
 				! dialog.data('draged') && dialog.is(':visible') && dialog.elfinderdialog('posInit');
@@ -3395,7 +3395,7 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @return jQuery
 	 */
 	this.toast = function(options) {
-		return $('<div class="ui-front"/>').appendTo(this.ui.toast).elfindertoast(options || {}, this);
+		return $('<div class="ui-front"></div>').appendTo(this.ui.toast).elfindertoast(options || {}, this);
 	};
 	
 	/**
@@ -4508,7 +4508,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					Object.assign(opts, e.data.opts);
 				}
 
-				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"/>'+self.i18n(e.data.error), opts);
+				self.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-error"></span>'+self.i18n(e.data.error), opts);
 			} else {
 				last = node.children('.elfinder-dialog-error:last').children('.ui-dialog-content:first');
 				counter = last.children('.elfinder-error-counter');
@@ -5147,10 +5147,10 @@ var elFinder = function(elm, opts, bootCallback) {
 				},
 				helper     : function(e, ui) {
 					var element = this.id ? $(this) : $(this).parents('[id]:first'),
-						helper  = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-status"/></div>'),
+						helper  = $('<div class="elfinder-drag-helper"><span class="elfinder-drag-helper-icon-status"></span></div>'),
 						icon    = function(f) {
 							var mime = f.mime, i, tmb = self.tmb(f);
-							i = '<div class="elfinder-cwd-icon elfinder-cwd-icon-drag '+self.mime2class(mime)+' ui-corner-all"/>';
+							i = '<div class="elfinder-cwd-icon elfinder-cwd-icon-drag '+self.mime2class(mime)+' ui-corner-all"></div>';
 							if (tmb) {
 								i = $(i).addClass(tmb.className).css('background-image', "url('"+tmb.url+"')").get(0).outerHTML;
 							} else if (f.icon) {
@@ -5260,20 +5260,20 @@ var elFinder = function(elm, opts, bootCallback) {
 		 **/
 		self.ui = {
 			// container for nav panel and current folder container
-			workzone : $('<div/>').appendTo(node).elfinderworkzone(self),
+			workzone : $('<div></div>').appendTo(node).elfinderworkzone(self),
 			// contaainer for folders tree / places
-			navbar : $('<div/>').appendTo(node).elfindernavbar(self, self.options.uiOptions.navbar || {}),
+			navbar : $('<div></div>').appendTo(node).elfindernavbar(self, self.options.uiOptions.navbar || {}),
 			// container for for preview etc at below the navbar
-			navdock : $('<div/>').appendTo(node).elfindernavdock(self, self.options.uiOptions.navdock || {}),
+			navdock : $('<div></div>').appendTo(node).elfindernavdock(self, self.options.uiOptions.navdock || {}),
 			// contextmenu
-			contextmenu : $('<div/>').appendTo(node).elfindercontextmenu(self),
+			contextmenu : $('<div></div>').appendTo(node).elfindercontextmenu(self),
 			// overlay
-			overlay : $('<div/>').appendTo(node).elfinderoverlay({
+			overlay : $('<div></div>').appendTo(node).elfinderoverlay({
 				show : function() { self.disable(); },
 				hide : function() { prevEnabled && self.enable(); }
 			}),
 			// current folder container
-			cwd : $('<div/>').appendTo(node).elfindercwd(self, self.options.uiOptions.cwd || {}),
+			cwd : $('<div></div>').appendTo(node).elfindercwd(self, self.options.uiOptions.cwd || {}),
 			// notification dialog window
 			notify : self.dialog('', {
 				cssClass      : 'elfinder-dialog-notify' + (self.options.notifyDialog.canClose? '' : ' elfinder-titlebar-button-hide'),
@@ -5288,8 +5288,8 @@ var elFinder = function(elm, opts, bootCallback) {
 				minHeight     : null,
 				minimize      : function() { self.ui.notify.trigger('minimize'); }
 			}),
-			statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"/>').hide().appendTo(node),
-			toast : $('<div class="elfinder-toast"/>').appendTo(node),
+			statusbar : $('<div class="ui-widget-header ui-helper-clearfix ui-corner-bottom elfinder-statusbar"></div>').hide().appendTo(node),
+			toast : $('<div class="elfinder-toast"></div>').appendTo(node),
 			bottomtray : $('<div class="elfinder-bottomtray">').appendTo(node),
 			progressbar : $('<div class="elfinder-ui-progressbar">').appendTo(node)
 		};
@@ -6414,7 +6414,7 @@ elFinder.prototype = {
 				var check = [];
 				var str = data.files[0];
 				if (data.type == 'html') {
-					var tmp = $("<html/>").append($.parseHTML(str.replace(/ src=/ig, ' _elfsrc='))),
+					var tmp = $("<html></html>").append($.parseHTML(str.replace(/ src=/ig, ' _elfsrc='))),
 						atag;
 					$('img[_elfsrc]', tmp).each(function(){
 						var url, purl,
@@ -7515,12 +7515,12 @@ elFinder.prototype = {
 					notify   && self.notify({type : 'upload', cnt : -cnt});
 					
 					setTimeout(function() {
-						msie && $('<iframe src="javascript:false;"/>').appendTo(form);
+						msie && $('<iframe src="javascript:false;"></iframe>').appendTo(form);
 						form.remove();
 						iframe.remove();
 					}, 100);
 				},
-				iframe = $('<iframe src="'+(msie ? 'javascript:false;' : 'about:blank')+'" name="'+name+'" style="position:absolute;left:-1000px;top:-1000px" />')
+				iframe = $('<iframe src="'+(msie ? 'javascript:false;' : 'about:blank')+'" name="'+name+'" style="position:absolute;left:-1000px;top:-1000px" ></iframe>')
 					.on('load', function() {
 						iframe.off('load')
 							.on('load', function() {
@@ -7861,7 +7861,7 @@ elFinder.prototype = {
 	 * 
 	 * @type jQuery
 	 */
-	_node : $('<span/>'),
+	_node : $('<span></c.length;>'),
 	
 	/**
 	 * Replace not html-safe symbols to html entities
@@ -8480,7 +8480,7 @@ elFinder.prototype = {
 			dialog   = ndialog.closest('.ui-dialog'),
 			notify   = ndialog.children('.elfinder-notify-'+type+(id? ('.'+id) : '')),
 			button   = notify.children('div.elfinder-notify-cancel').children('button'),
-			ntpl     = '<div class="elfinder-notify elfinder-notify-{type}'+(id? (' '+id) : '')+'"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"/><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"/><div class="elfinder-notify-progressbar"><div class="elfinder-notify-progress"/></div><div class="elfinder-notify-cancel"/></div>',
+			ntpl     = '<div class="elfinder-notify elfinder-notify-{type}'+(id? (' '+id) : '')+'"><span class="elfinder-dialog-icon elfinder-dialog-icon-{type}"></span><span class="elfinder-notify-msg">{msg}</span> <span class="elfinder-notify-cnt"></span><div class="elfinder-notify-progressbar"><div class="elfinder-notify-progress"></div></div><div class="elfinder-notify-cancel"></div></div>',
 			delta    = opts.cnt + 0,
 			size     = (typeof opts.size != 'undefined')? parseInt(opts.size) : null,
 			progress = (typeof opts.progress != 'undefined' && opts.progress >= 0) ? opts.progress : null,
@@ -8570,7 +8570,7 @@ elFinder.prototype = {
 			}
 
 			if (cancel) {
-				button = $('<span class="elfinder-notify-button ui-icon ui-icon-close" title="'+this.i18n('btnCancel')+'"/>')
+				button = $('<span class="elfinder-notify-button ui-icon ui-icon-close" title="'+this.i18n('btnCancel')+'"></span>')
 					.on('mouseenter mouseleave', function(e) { 
 						$(this).toggleClass(clhover, e.type === 'mouseenter');
 					});
@@ -8735,7 +8735,7 @@ elFinder.prototype = {
 		
 		if (opts.all) {
 			options.create = function() {
-				var base = $('<div class="elfinder-dialog-confirm-applyall"/>');
+				var base = $('<div class="elfinder-dialog-confirm-applyall"></div>');
 				checkbox = $('<input type="checkbox" />');
 				$(this).next().find('.ui-dialog-buttonset')
 					.prepend(base.append($('<label>'+apply+'</label>').prepend(checkbox)));
@@ -8746,7 +8746,7 @@ elFinder.prototype = {
 			opts.optionsCallback(options);
 		}
 		
-		return this.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-confirm"/>' + this.i18n(opts.text), options);
+		return this.dialog('<span class="elfinder-dialog-icon elfinder-dialog-icon-confirm"></span>' + this.i18n(opts.text), options);
 	},
 	
 	/**
@@ -9395,13 +9395,13 @@ elFinder.prototype = {
 							}
 						}
 					});
-					bro.after($('<div/>').append(select))
+					bro.after($('<div></div>').append(select))
 						.closest('.ui-dialog').trigger('tabstopsInit');
 					select.trigger('focus');
 				}
 			},
 			spinner = function() {
-				return $('<div class="elfinder-netmount-spinner"/>').append('<span class="elfinder-spinner"/>');
+				return $('<div class="elfinder-netmount-spinner"></div>').append('<span class="elfinder-spinner"></span>');
 			},
 			xhr;
 		return {
@@ -9411,7 +9411,7 @@ elFinder.prototype = {
 				offline  : $('<input type="checkbox"/>').on('change', function() {
 					$(this).parents('table.elfinder-netmount-tb').find('select:first').trigger('change', 'reset');
 				}),
-				host     : $('<span><span class="elfinder-spinner"/></span><input type="hidden"/>'),
+				host     : $('<span><span class="elfinder-spinner"></span></span><input type="hidden"/>'),
 				path     : $('<input type="text" value="'+opts.root+'"/>'),
 				user     : $('<input type="hidden"/>'),
 				pass     : $('<input type="hidden"/>'),
@@ -9432,7 +9432,7 @@ elFinder.prototype = {
 					if (oline.parent().children().length === 1) {
 						f.path.parent().prev().html(fm.i18n(opts.pathI18n));
 						oline.attr('title', fm.i18n('offlineAccess'));
-						oline.uniqueId().after($('<label/>').attr('for', oline.attr('id')).html(' '+fm.i18n('offlineAccess')));
+						oline.uniqueId().after($('<label></label>').attr('for', oline.attr('id')).html(' '+fm.i18n('offlineAccess')));
 					}
 					f0.data('inrequest', true).empty().addClass('elfinder-spinner')
 						.parent().find('span.elfinder-button-icon').remove();

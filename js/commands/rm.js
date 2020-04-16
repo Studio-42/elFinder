@@ -9,12 +9,12 @@ elFinder.prototype.commands.rm = function() {
 	"use strict";
 	var self = this,
 		fm = this.fm,
-		tpl = '<div class="ui-helper-clearfix elfinder-rm-title"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}<div class="elfinder-rm-desc">{desc}</div></div>',
+		tpl = '<div class="ui-helper-clearfix elfinder-rm-title"><span class="elfinder-cwd-icon {class} ui-corner-all"></span>{title}<div class="elfinder-rm-desc">{desc}</div></div>',
 		confirm = function(dfrd, targets, files, tHash, addTexts) {
 			var cnt = targets.length,
 				cwd = fm.cwd().hash,
 				descs = [],
-				spinner = fm.i18n('calc') + '<span class="elfinder-spinner"/>',
+				spinner = fm.i18n('calc') + '<span class="elfinder-spinner"></span>',
 				dialog, text, tmb, size, f, fname;
 			
 			if (cnt > 1) {
@@ -387,7 +387,7 @@ elFinder.prototype.commands.rm = function() {
 			if (self.value === 'trash') {
 				self.extra = {
 					icon: 'rm',
-					node: $('<span/>')
+					node: $('<span></span>')
 						.attr({title: fm.i18n('cmdrm')})
 						.on('ready', function(e, data) {
 							targets = data.targets;

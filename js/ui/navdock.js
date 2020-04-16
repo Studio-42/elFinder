@@ -26,7 +26,7 @@ $.fn.elfindernavdock = function(fm, opts) {
 					self.css('overflow', ovf);
 				}
 			},
-			handle = $('<div class="ui-front ui-resizable-handle ui-resizable-n"/>').appendTo(self),
+			handle = $('<div class="ui-front ui-resizable-handle ui-resizable-n"></div>').appendTo(self),
 			sizeSyncs = {},
 			resizeFn = [],
 			initMaxHeight = (parseInt(opts.initMaxHeight) || 50) / 100,

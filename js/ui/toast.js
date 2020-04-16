@@ -70,7 +70,7 @@ $.fn.elfindertoast = function(opts, fm) {
 					rmTm = setTimeout(rm, opts.timeOut);
 				}
 			}
-		}).hide().addClass('toast-' + opts.mode).append($('<div class="elfinder-toast-msg"/>').html(opts.msg.replace(/%([a-zA-Z0-9]+)%/g, function(m, m1) {
+		}).hide().addClass('toast-' + opts.mode).append($('<div class="elfinder-toast-msg"></div>').html(opts.msg.replace(/%([a-zA-Z0-9]+)%/g, function(m, m1) {
 			return fm.i18n(m1);
 		})));
 		
@@ -80,8 +80,8 @@ $.fn.elfindertoast = function(opts, fm) {
 
 		if (opts.button) {
 			self.append(
-				$('<button class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"/>')
-				.append($('<span class="ui-button-text"/>').text(fm.i18n(opts.button.text)))
+				$('<button class="ui-button ui-widget ui-state-default ui-corner-all elfinder-tabstop"></button>')
+				.append($('<span class="ui-button-text"></span>').text(fm.i18n(opts.button.text)))
 				.on('mouseenter mouseleave', function(e) { 
 					$(this).toggleClass('ui-state-hover', e.type == 'mouseenter');
 				})

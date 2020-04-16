@@ -11,8 +11,8 @@ elFinder.prototype.commands.preference = function() {
 		tab     = '<li class="' + fm.res('class', 'tabstab') + ' elfinder-preference-tab-{id}"><a href="#'+fm.namespace+'-preference-{id}" id="'+fm.namespace+'-preference-tab-{id}" class="ui-tabs-anchor {class}">{title}</a></li>',
 		base    = $('<div class="ui-tabs ui-widget ui-widget-content ui-corner-all elfinder-preference">'), 
 		ul      = $('<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-top">'),
-		tabs    = $('<div class="elfinder-preference-tabs ui-tabs-panel ui-widget-content ui-corner-bottom"/>'),
-		sep     = '<div class="elfinder-preference-separator"/>',
+		tabs    = $('<div class="elfinder-preference-tabs ui-tabs-panel ui-widget-content ui-corner-bottom"></div>'),
+		sep     = '<div class="elfinder-preference-separator"></div>',
 		selfUrl = $('base').length? document.location.href.replace(/#.*$/, '') : '',
 		selectTab = function(tab) {
 			$('#'+fm.namespace+'-preference-tab-'+tab).trigger('mouseover').trigger('click');
@@ -46,7 +46,7 @@ elFinder.prototype.commands.preference = function() {
 			}
 
 			forms.language && (forms.language = (function() {
-				var langSel = $('<select/>').on('change', function() {
+				var langSel = $('<select></select>').on('change', function() {
 						var lang = $(this).val();
 						fm.storage('lang', lang);
 						$('#'+fm.id).elfinder('reload');
@@ -105,7 +105,7 @@ elFinder.prototype.commands.preference = function() {
 				if (cnt === 0 || (cnt === 1 && fm.options.themes.default)) {
 					return null;
 				}
-				var themeSel = $('<select/>').on('change', function() {
+				var themeSel = $('<select></select>').on('change', function() {
 						var theme = $(this).val();
 						fm.changeTheme(theme).storage('theme', theme);
 					}),
@@ -118,10 +118,10 @@ elFinder.prototype.commands.preference = function() {
 					items = ['image', 'description', 'author', 'email', 'license'],
 					render = function(key, data) {
 					},
-					defBtn = $('<button class="ui-button ui-corner-all ui-widget elfinder-preference-theme-default"/>').text(fm.i18n('default')).on('click', function(e) {
+					defBtn = $('<button class="ui-button ui-corner-all ui-widget elfinder-preference-theme-default"></button>').text(fm.i18n('default')).on('click', function(e) {
 						themeSel.val('default').trigger('change');
 					}),
-					list = $('<div class="elfinder-reference-hide-taball"/>').on('click', 'button', function() {
+					list = $('<div class="elfinder-reference-hide-taball"></div>').on('click', 'button', function() {
 							var val = $(this).data('themeid');
 							themeSel.val(val).trigger('change');
 					});
@@ -131,7 +131,7 @@ elFinder.prototype.commands.preference = function() {
 				}
 				$.each(fm.options.themes, function(id, val) {
 					var opt = $('<option class="elfinder-theme-option-'+id+'" value="'+id+'">'+fm.i18n(id)+'</option>'),
-						dsc = $('<fieldset class="ui-widget ui-widget-content ui-corner-all elfinder-theme-list-'+id+'"><legend>'+fm.i18n(id)+'</legend><div><span class="elfinder-spinner"/></div></fieldset>'),
+						dsc = $('<fieldset class="ui-widget ui-widget-content ui-corner-all elfinder-theme-list-'+id+'"><legend>'+fm.i18n(id)+'</legend><div><span class="elfinder-spinner"></span></div></fieldset>'),
 						tm;
 					themeSel.append(opt);
 					list.append(dsc);
@@ -141,7 +141,7 @@ elFinder.prototype.commands.preference = function() {
 					fm.getTheme(id).always(function() {
 						tm && clearTimeout(tm);
 					}).done(function(data) {
-						var link, val = $(), dl = $('<dl/>');
+						var link, val = $(), dl = $('<dl></dl>');
 						link = data.link? tpl.link.replace(/\$1/g, data.link).replace(/\$3/g, fm.i18n('website')) : '$2';
 						if (data.name) {
 							opt.html(fm.i18n(data.name));
@@ -161,13 +161,13 @@ elFinder.prototype.commands.preference = function() {
 							}
 						});
 						val = val.add(dl);
-						val = val.add($('<div class="elfinder-preference-theme-btn"/>').append($('<button class="ui-button ui-corner-all ui-widget"/>').data('themeid', id).html(fm.i18n('select'))));
+						val = val.add($('<div class="elfinder-preference-theme-btn"></div>').append($('<button class="ui-button ui-corner-all ui-widget"></button>').data('themeid', id).html(fm.i18n('select'))));
 						dsc.find('span.elfinder-spinner').replaceWith(val);
 					}).fail(function() {
 						dsc.find('span.elfinder-spinner').replaceWith(fm.i18n(['errRead', id]));
 					});
 				});
-				return $('<div/>').append(themeSel.val(fm.theme && fm.theme.id? fm.theme.id : 'default'), defBtn, list);
+				return $('<div></div>').append(themeSel.val(fm.theme && fm.theme.id? fm.theme.id : 'default'), defBtn, list);
 			})());
 
 			forms.toolbarPref && (forms.toolbarPref = (function() {
@@ -200,7 +200,7 @@ elFinder.prototype.commands.preference = function() {
 			forms.iconSize && (forms.iconSize = (function() {
 				var max = fm.options.uiOptions.cwd.iconsView.sizeMax || 3,
 					size = fm.storage('iconsize') || fm.options.uiOptions.cwd.iconsView.size || 0,
-					sld = $('<div class="touch-punch"/>').slider({
+					sld = $('<div class="touch-punch"></div>').slider({
 						classes: {
 							'ui-slider-handle': 'elfinder-tabstop',
 						},
@@ -242,7 +242,7 @@ elFinder.prototype.commands.preference = function() {
 			})());
 			
 			forms.selectAction && (forms.selectAction = (function() {
-				var actSel = $('<select/>').on('change', function() {
+				var actSel = $('<select></select>').on('change', function() {
 						var act = $(this).val();
 						fm.storage('selectAction', act === 'default'? null : act);
 					}),
@@ -278,7 +278,7 @@ elFinder.prototype.commands.preference = function() {
 						});
 						return tags.join(' ');
 					},
-					elm = $('<div/>').on('change', 'input', function() {
+					elm = $('<div></div>').on('change', 'input', function() {
 						var v = $(this).val(),
 							o = $(this).is(':checked');
 						if (!o && !hides[v]) {
@@ -289,11 +289,11 @@ elFinder.prototype.commands.preference = function() {
 						fm.storage('mkfileHides', hides);
 						fm.trigger('canMakeEmptyFile');
 					}).append(getTag()),
-					add = $('<div/>').append(
+					add = $('<div></div>').append(
 						$('<input type="text" placeholder="'+fm.i18n('typeOfTextfile')+'"/>').on('keydown', function(e) {
 							(e.keyCode === $.ui.keyCode.ENTER) && $(this).next().trigger('click');
 						}),
-						$('<button class="ui-button"/>').html(fm.i18n('add')).on('click', function() {
+						$('<button class="ui-button"></button>').html(fm.i18n('add')).on('click', function() {
 							var input = $(this).prev(),
 								val = input.val(),
 								uiToast = fm.getUI('toast'),
@@ -333,7 +333,7 @@ elFinder.prototype.commands.preference = function() {
 								}
 							});
 						}),
-						$('<button class="ui-button"/>').html(fm.i18n('reset')).on('click', function() {
+						$('<button class="ui-button"></button>').html(fm.i18n('reset')).on('click', function() {
 							fm.one('canMakeEmptyFile', {done: function() {
 								elm.empty().append(getTag());
 							}});
@@ -346,7 +346,7 @@ elFinder.prototype.commands.preference = function() {
 						elm.empty().append(getTag());
 					}
 				}});
-				return $('<div/>').append(elm, add);
+				return $('<div></div>').append(elm, add);
 			})());
 
 			forms.useStoredEditor && (forms.useStoredEditor = $('<input type="checkbox"/>').prop('checked', (function() {
@@ -394,7 +394,7 @@ elFinder.prototype.commands.preference = function() {
 							o[$(this).is(':checked')? 'show' : 'hide'] = true;
 							fm.exec('hide', void(0), o);
 						}),
-						btn = $('<button class="ui-button ui-corner-all ui-widget"/>').append(fm.i18n('reset')).on('click', function() {
+						btn = $('<button class="ui-button ui-corner-all ui-widget"></button>').append(fm.i18n('reset')).on('click', function() {
 							fm.exec('hide', void(0), {reset: true});
 							$(this).parent().find('input:first').prop('checked', false);
 							setTitle();
@@ -402,7 +402,7 @@ elFinder.prototype.commands.preference = function() {
 						elms = $().add(chk).add(btn),
 						useTooltip;
 					
-					forms.showHidden = $('<div/>').append(chk, btn);
+					forms.showHidden = $('<div></div>').append(chk, btn);
 					fm.bind('hide', function(e) {
 						var d = e.data;
 						if (!d.opts || (!d.opts.show && !d.opts.hide)) {
@@ -475,7 +475,7 @@ elFinder.prototype.commands.preference = function() {
 				fm.storage('autoFocusDialog', $(this).is(':checked')? 1 : -1);
 			}));
 			
-			forms.clearBrowserData && (forms.clearBrowserData = $('<button/>').text(fm.i18n('reset')).button().on('click', function(e) {
+			forms.clearBrowserData && (forms.clearBrowserData = $('<button></button>').text(fm.i18n('reset')).button().on('click', function(e) {
 				e.preventDefault();
 				fm.storage();
 				$('#'+fm.id).elfinder('reload');
@@ -504,7 +504,7 @@ elFinder.prototype.commands.preference = function() {
 							} else if (cbox.length > 1) {
 								chks = ' elfinder-preference-checkboxes';
 							}
-							dls = dls.add($('<dt class="elfinder-preference-'+n+chks+'">'+title+'</dt>')).add($('<dd class="elfinder-preference-'+n+chks+'"/>').append(f));
+							dls = dls.add($('<dt class="elfinder-preference-'+n+chks+'">'+title+'</dt>')).add($('<dd class="elfinder-preference-'+n+chks+'"></dd>').append(f));
 						}
 					});
 				}
@@ -512,9 +512,9 @@ elFinder.prototype.commands.preference = function() {
 					ul.append(tab[r](/\{id\}/g, id)[r](/\{title\}/, fm.i18n(id))[r](/\{class\}/, openTab === id? 'elfinder-focus' : ''));
 					if (found === 2) {
 						tabs.append(
-							$('<div id="'+fm.namespace+'-preference-'+id+'" class="elfinder-preference-content"/>')
+							$('<div id="'+fm.namespace+'-preference-'+id+'" class="elfinder-preference-content"></div>')
 							.hide()
-							.append($('<dl/>').append(dls))
+							.append($('<dl></dl>').append(dls))
 						);
 					}
 				}

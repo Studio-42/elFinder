@@ -32,13 +32,13 @@ elFinder.prototype.resources = {
 		tabsactive  : 'ui-tabs-active ui-state-active'
 	},
 	tpl : {
-		perms      : '<span class="elfinder-perms"/>',
-		lock       : '<span class="elfinder-lock"/>',
-		symlink    : '<span class="elfinder-symlink"/>',
-		navicon    : '<span class="elfinder-nav-icon"/>',
-		navspinner : '<span class="elfinder-spinner elfinder-navbar-spinner"/>',
-		navdir     : '<div class="elfinder-navbar-wrapper{root}"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"{title}><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon" {style}/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree" style="display:none"/></div>',
-		placedir   : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"{title}><span class="elfinder-navbar-arrow"/><span class="elfinder-navbar-icon" {style}/>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree" style="display:none"/></div>'
+		perms      : '<span class="elfinder-perms"></span>',
+		lock       : '<span class="elfinder-lock"></span>',
+		symlink    : '<span class="elfinder-symlink"></span>',
+		navicon    : '<span class="elfinder-nav-icon"></span>',
+		navspinner : '<span class="elfinder-spinner elfinder-navbar-spinner"></span>',
+		navdir     : '<div class="elfinder-navbar-wrapper{root}"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"{title}><span class="elfinder-navbar-arrow"></span><span class="elfinder-navbar-icon" {style}></span>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree" style="display:none"></div></div>',
+		placedir   : '<div class="elfinder-navbar-wrapper"><span id="{id}" class="ui-corner-all elfinder-navbar-dir {cssclass}"{title}><span class="elfinder-navbar-arrow"></span><span class="elfinder-navbar-icon" {style}></span>{symlink}{permissions}{name}</span><div class="elfinder-navbar-subtree" style="display:none"></div></div>'
 		
 	},
 	// mimes.text will be overwritten with connector config if `textMimes` is included in initial response
@@ -169,7 +169,7 @@ elFinder.prototype.resources = {
 						}
 					}
 				},
-				input = $(tarea? '<textarea/>' : '<input type="text"/>')
+				input = $(tarea? '<textarea></textarea>' : '<input type="text"/>')
 					.on('keyup text', function(){
 						if (tarea) {
 							this.style.height = '1px';

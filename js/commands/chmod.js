@@ -27,7 +27,7 @@ elFinder.prototype.commands.chmod = function() {
 		};
 
 	this.tpl = {
-		main       : '<div class="ui-helper-clearfix elfinder-info-title"><span class="elfinder-cwd-icon {class} ui-corner-all"/>{title}</div>'
+		main       : '<div class="ui-helper-clearfix elfinder-info-title"><span class="elfinder-cwd-icon {class} ui-corner-all"></span>{title}</div>'
 					+'{dataTable}',
 		itemTitle  : '<strong>{name}</strong><span id="elfinder-info-kind">{kind}</span>',
 		groupTitle : '<strong>{items}: {num}</strong>',

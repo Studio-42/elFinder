@@ -178,11 +178,11 @@
 		leftKey = $.ui.keyCode.LEFT,
 		rightKey = $.ui.keyCode.RIGHT,
 		coverEv = 'mousemove touchstart ' + ('onwheel' in document? 'wheel' : 'onmousewheel' in document? 'mousewheel' : 'DOMMouseScroll'),
-		title   = $('<span class="elfinder-dialog-title elfinder-quicklook-title"/>'),
-		icon    = $('<div/>'),
-		info    = $('<div class="elfinder-quicklook-info"/>'),//.hide(),
-		cover   = $('<div class="ui-front elfinder-quicklook-cover"/>'),
-		fsicon  = $('<div class="'+navicon+' '+navicon+'-fullscreen"/>')
+		title   = $('<span class="elfinder-dialog-title elfinder-quicklook-title"></span>'),
+		icon    = $('<div></div>'),
+		info    = $('<div class="elfinder-quicklook-info"></div>'),//.hide(),
+		cover   = $('<div class="ui-front elfinder-quicklook-cover"></div>'),
+		fsicon  = $('<div class="'+navicon+' '+navicon+'-fullscreen"></div>')
 			.on('click touchstart', function(e) {
 				if (navmove) {
 					return;
@@ -335,20 +335,20 @@
 			cover.hide();
 		},
 			
-		prev = $('<div class="'+navicon+' '+navicon+'-prev"/>').on('click touchstart', function(e) { ! navmove && navtrigger(leftKey); return false; }),
-		next = $('<div class="'+navicon+' '+navicon+'-next"/>').on('click touchstart', function(e) { ! navmove && navtrigger(rightKey); return false; }),
-		navbar  = $('<div class="elfinder-quicklook-navbar"/>')
+		prev = $('<div class="'+navicon+' '+navicon+'-prev"></div>').on('click touchstart', function(e) { ! navmove && navtrigger(leftKey); return false; }),
+		next = $('<div class="'+navicon+' '+navicon+'-next"></div>').on('click touchstart', function(e) { ! navmove && navtrigger(rightKey); return false; }),
+		navbar  = $('<div class="elfinder-quicklook-navbar"></div>')
 			.append(prev)
 			.append(fsicon)
 			.append(next)
-			.append('<div class="elfinder-quicklook-navbar-separator"/>')
-			.append($('<div class="'+navicon+' '+navicon+'-close"/>').on('click touchstart', function(e) { ! navmove && self.window.trigger('close'); return false; }))
+			.append('<div class="elfinder-quicklook-navbar-separator"></div>')
+			.append($('<div class="'+navicon+' '+navicon+'-close"></div>').on('click touchstart', function(e) { ! navmove && self.window.trigger('close'); return false; }))
 		,
-		titleClose = $('<span class="ui-front ui-icon elfinder-icon-close ui-icon-closethick"/>').on('mousedown', function(e) {
+		titleClose = $('<span class="ui-front ui-icon elfinder-icon-close ui-icon-closethick"></span>').on('mousedown', function(e) {
 			e.stopPropagation();
 			self.window.trigger('close');
 		}),
-		titleDock = $('<span class="ui-front ui-icon elfinder-icon-minimize ui-icon-minusthick"/>').on('mousedown', function(e) {
+		titleDock = $('<span class="ui-front ui-icon elfinder-icon-minimize ui-icon-minusthick"></span>').on('mousedown', function(e) {
 			e.stopPropagation();
 			if (! self.docked()) {
 				self.window.trigger('navdockin');
@@ -356,7 +356,7 @@
 				self.window.trigger('navdockout');
 			}
 		}),
-		spinner = '<span class="elfinder-spinner-text">' + fm.i18n('calc') + '</span>' + '<span class="elfinder-spinner"/>',
+		spinner = '<span class="elfinder-spinner-text">' + fm.i18n('calc') + '</span>' + '<span class="elfinder-spinner"></span>',
 		navStyle = '',
 		init = true,
 		dockHeight,	getSize, tm4cwd, dockedNode, selectTm;
@@ -370,7 +370,7 @@
 	this.evUpdate = evUpdate;
 	(this.navbar = navbar)._show = navShow;
 	this.resize = 'resize.'+fm.namespace;
-	this.info = $('<div/>').addClass(infocls)
+	this.info = $('<div></div>').addClass(infocls)
 		.append(icon)
 		.append(info);
 	this.autoPlay = function() {
@@ -379,7 +379,7 @@
 		}
 		return false;
 	};
-	this.preview = $('<div class="elfinder-quicklook-preview ui-helper-clearfix"/>')
+	this.preview = $('<div class="elfinder-quicklook-preview ui-helper-clearfix"></div>')
 		// clean info/icon
 		.on('change', function() {
 			navShow();
@@ -479,7 +479,7 @@
 			}
 		});
 
-	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook touch-punch" style="position:absolute"/>')
+	this.window = $('<div class="ui-front ui-helper-reset ui-widget elfinder-quicklook touch-punch" style="position:absolute"></div>')
 		.hide()
 		.addClass(fm.UA.Touch? 'elfinder-touch' : '')
 		.on('click', function(e) {
@@ -492,9 +492,9 @@
 			}
 		})
 		.append(
-			$('<div class="ui-dialog-titlebar ui-widget-header ui-corner-top ui-helper-clearfix elfinder-quicklook-titlebar"/>')
+			$('<div class="ui-dialog-titlebar ui-widget-header ui-corner-top ui-helper-clearfix elfinder-quicklook-titlebar"></div>')
 			.append(
-				$('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-button elfinder-quicklook-titlebar-icon'+(platformWin? ' elfinder-titlebar-button-right' : '')+'"/>').append(
+				$('<span class="ui-widget-header ui-dialog-titlebar-close ui-corner-all elfinder-titlebar-button elfinder-quicklook-titlebar-icon'+(platformWin? ' elfinder-titlebar-button-right' : '')+'"></span>').append(
 					titleClose, titleDock
 				),
 				title
