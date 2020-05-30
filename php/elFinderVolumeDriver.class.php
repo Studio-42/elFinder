@@ -1308,6 +1308,8 @@ abstract class elFinderVolumeDriver
         // Maybe modify _basename instead?
         if ($this->rootName === '') $this->rootName = $this->separator;
 
+        $this->_checkArchivers();
+
         $root = $this->stat($this->root);
 
         if (!$root) {
@@ -1373,8 +1375,6 @@ abstract class elFinderVolumeDriver
         $this->dirnameValidator = !empty($this->options['acceptedDirname']) && (is_callable($this->options['acceptedDirname']) || (is_string($this->options['acceptedDirname']) && preg_match($this->options['acceptedDirname'], '') !== false))
             ? $this->options['acceptedDirname']
             : $this->nameValidator;
-
-        $this->_checkArchivers();
 
         // enabling archivers['create'] with options['useRemoteArchive']
         if ($this->options['useRemoteArchive'] && empty($this->archivers['create']) && $this->getTempPath()) {
