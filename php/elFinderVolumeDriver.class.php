@@ -364,7 +364,7 @@ abstract class elFinderVolumeDriver
         'tmbBgColor' => 'transparent',
         // image rotate fallback background color (hex #rrggbb)
         'bgColorFb' => '#ffffff',
-        // image manipulations library
+        // image manipulations library (imagick|gd|convert|auto|none, none - Does not check the image library at all.)
         'imgLib' => 'auto',
         // Fallback self image to thumbnail (nothing imgLib)
         'tmbFbSelf' => true,
@@ -863,26 +863,30 @@ abstract class elFinderVolumeDriver
         }
 
         // set image manipulation library
-        $type = preg_match('/^(imagick|gd|convert|auto)$/i', $this->options['imgLib'])
+        $type = preg_match('/^(imagick|gd|convert|auto|none)$/i', $this->options['imgLib'])
             ? strtolower($this->options['imgLib'])
             : 'auto';
 
-        if (($type === 'imagick' || $type === 'auto') && extension_loaded('imagick')) {
-            $this->imgLib = 'imagick';
-        } else if (($type === 'gd' || $type === 'auto') && function_exists('gd_info')) {
-            $this->imgLib = 'gd';
+        if ($type === 'none') {
+            $this->imgLib = '';
         } else {
-            $convertCache = 'imgLibConvert';
-            if (($convertCmd = $this->session->get($convertCache, false)) !== false) {
-                $this->imgLib = $convertCmd;
+            if (($type === 'imagick' || $type === 'auto') && extension_loaded('imagick')) {
+                $this->imgLib = 'imagick';
+            } else if (($type === 'gd' || $type === 'auto') && function_exists('gd_info')) {
+                $this->imgLib = 'gd';
             } else {
-                $this->imgLib = ($this->procExec(ELFINDER_CONVERT_PATH . ' -version') === 0) ? 'convert' : '';
-                $this->session->set($convertCache, $this->imgLib);
+                $convertCache = 'imgLibConvert';
+                if (($convertCmd = $this->session->get($convertCache, false)) !== false) {
+                    $this->imgLib = $convertCmd;
+                } else {
+                    $this->imgLib = ($this->procExec(ELFINDER_CONVERT_PATH . ' -version') === 0) ? 'convert' : '';
+                    $this->session->set($convertCache, $this->imgLib);
+                }
             }
-        }
-        if ($type !== 'auto' && $this->imgLib === '') {
-            // fallback
-            $this->imgLib = extension_loaded('imagick') ? 'imagick' : (function_exists('gd_info') ? 'gd' : '');
+            if ($type !== 'auto' && $this->imgLib === '') {
+                // fallback
+                $this->imgLib = extension_loaded('imagick') ? 'imagick' : (function_exists('gd_info') ? 'gd' : '');
+            }
         }
 
         // check video to img converter
@@ -1308,6 +1312,8 @@ abstract class elFinderVolumeDriver
         // Maybe modify _basename instead?
         if ($this->rootName === '') $this->rootName = $this->separator;
 
+        $this->_checkArchivers();
+
         $root = $this->stat($this->root);
 
         if (!$root) {
@@ -1373,8 +1379,6 @@ abstract class elFinderVolumeDriver
         $this->dirnameValidator = !empty($this->options['acceptedDirname']) && (is_callable($this->options['acceptedDirname']) || (is_string($this->options['acceptedDirname']) && preg_match($this->options['acceptedDirname'], '') !== false))
             ? $this->options['acceptedDirname']
             : $this->nameValidator;
-
-        $this->_checkArchivers();
 
         // enabling archivers['create'] with options['useRemoteArchive']
         if ($this->options['useRemoteArchive'] && empty($this->archivers['create']) && $this->getTempPath()) {

@@ -398,6 +398,9 @@ class elFinderVolumeFTP extends elFinderVolumeDriver
             return false;
         }
 
+        if ($info[8] === '') {
+            $info[8] = preg_replace('/^.+?\s(\s*)$/', '$1', $raw);
+        }
         $name = $info[8];
 
         if (preg_match('|(.+)\-\>(.+)|', $name, $m)) {
