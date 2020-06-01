@@ -164,7 +164,10 @@ elFinder.prototype.commands.resize = function() {
 											ctx.restore();
 										}
 										canvas.toBlob(function(blob) {
-											blob && quty.next('span').text(' (' + fm.formatSize(blob.size) + ')');
+											if (blob) {
+												size1 = blob.size;
+												quty.next('span').text(' (' + fm.formatSize(blob.size) + ')');
+											}
 										}, 'image/jpeg', Math.max(Math.min(quty.val(), 100), 1) / 100);
 									}
 								}
@@ -1106,7 +1109,7 @@ elFinder.prototype.commands.resize = function() {
 								fm.error('Invalid image size');
 								return false;
 							}
-							if (w == owidth && h == oheight) {
+							if (w == owidth && h == oheight && parseInt(size0 / 1000) === parseInt(size1/1000)) {
 								fm.error('errResizeNoChange');
 								return false;
 							}
@@ -1311,6 +1314,7 @@ elFinder.prototype.commands.resize = function() {
 					useSaveAs = fm.uploadMimeCheck(file.mime, file.phash),
 					dMinBtn, base;
 				
+				size0 = size1 = file.size;
 				uiresize.append(
 					$(row).append($(label).text(fm.i18n('width')), width),
 					$(row).append($(label).text(fm.i18n('height')), height, $('<div class="elfinder-resize-whctrls">').append(constr, reset)),
@@ -1504,7 +1508,7 @@ elFinder.prototype.commands.resize = function() {
 
 			},
 			
-			id, dialog
+			id, dialog, size0, size1
 			;
 			
 
