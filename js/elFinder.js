@@ -7821,7 +7821,7 @@ elFinder.prototype = {
 			d.setTime(d.getTime()+(o.expires * 86400000));
 			o.expires = d;
 		}
-		document.cookie = name+'='+encodeURIComponent(value)+'; expires='+o.expires.toUTCString()+(o.path ? '; path='+o.path : '')+(o.domain ? '; domain='+o.domain : '')+(o.secure ? '; secure' : '');
+		document.cookie = name+'='+encodeURIComponent(value)+'; expires='+o.expires.toUTCString()+(o.path ? '; path='+o.path : '')+(o.domain ? '; domain='+o.domain : '')+(o.secure ? '; secure' : '')+(o.samesite ? '; samesite='+o.samesite : '');
 		if (value && (value.substr(0,1) === '{' || value.substr(0,1) === '[')) {
 			try {
 				return JSON.parse(value);

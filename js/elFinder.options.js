@@ -1272,10 +1272,11 @@ elFinder.prototype._options = {
 	 * @type Object
 	 */
 	cookie         : {
-		expires : 30,
-		domain  : '',
-		path    : '/',
-		secure  : false
+		expires  : 30,
+		domain   : '',
+		path     : '/',
+		secure   : false,
+		samesite : 'lax'
 	},
 	
 	/**
