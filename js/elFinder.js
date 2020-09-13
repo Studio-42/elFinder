@@ -5810,14 +5810,7 @@ elFinder.prototype = {
 	 * 
 	 * @type Boolean
 	 */
-	cookieEnabled : (function() {
-		var res = false,
-			test = 'elftest=';
-		document.cookie = test + '1';
-		res = document.cookie.split(test).length === 2;
-		document.cookie = test + ';max-age=0';
-		return res;
-	})(),
+	cookieEnabled : window.navigator.cookieEnabled,
 
 	/**
 	 * Has RequireJS?
