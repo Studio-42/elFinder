@@ -26,6 +26,7 @@ function elFinderAutoloader($name)
         'elFinderVolumeGroup' => 'elFinderVolumeGroup.class.php',
         'elFinderVolumeLocalFileSystem' => 'elFinderVolumeLocalFileSystem.class.php',
         'elFinderVolumeMySQL' => 'elFinderVolumeMySQL.class.php',
+        'elFinderVolumeSFTPphpseclib' => 'elFinderVolumeSFTPphpseclib.class.php',
         'elFinderVolumeTrash' => 'elFinderVolumeTrash.class.php',
     );
     if (isset($map[$name])) {

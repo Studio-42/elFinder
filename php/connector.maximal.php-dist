@@ -426,6 +426,21 @@ $opts['roots'][] = array_merge($tmbConfig, array(
     'accessToken' => '',  // @JSON String access token including refresh token
 ));
 
+// SFTP volume
+// Require phpseclib 1 installed (http://phpseclib.sourceforge.net)
+// pear install example:
+//sudo pear channel-discover phpseclib.sourceforge.net
+//sudo pear remote-list -c phpseclib
+//sudo pear install phpseclib/Net_SFTP
+/*$opts['roots'][] = array_merge($tmbConfig, array(
+    'phash'       => 'g1_Lw', // set parent to Volume group (g1_) root "/" (Lw)
+    'driver'      => 'SFTPphpseclib',
+    'host'        => '127.0.0.1',
+    'path'        => '/tmp', // or folder id as root
+    'user'        => 'test',  // @JSON String access token including refresh token
+    'pass'        => 'test',
+));*/
+
 
 // run elFinder
 $connector = new elFinderConnector(new elFinder($opts));
