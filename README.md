@@ -47,7 +47,7 @@ Features
    upload, create folder/file, rename, etc.)
  * High performance server backend and light client UI
  * Multi-root support
- * Local file system, MySQL, FTP, Box, Dropbox, GoogleDrive and OneDrive volume storage drivers
+ * Local file system, MySQL, FTP, SFTP, Box, Dropbox, GoogleDrive and OneDrive volume storage drivers
  * Support AWS S3, Azure, Digital Ocean Spaces and more with [League\Flysystem](https://github.com/barryvdh/elfinder-flysystem-driver) Flysystem driver
  * Cloud storage (Box, Dropbox, GoogleDrive and OneDrive) drivers
  * Background file/folder upload with Drag & Drop HTML5 support
@@ -134,7 +134,6 @@ Demo sites
 ------------
 **2.1.x Nightly**
  + https://studio-42.github.io/elFinder/ (with CORS)
- + https://hypweb.net/elFinder-nightly/demo/2.1/
 
 FAQs
 ------------
@@ -178,7 +177,7 @@ Hint: [How to load CSS with RequireJS?](https://github.com/Studio-42/elFinder/wi
 3rd party Integrations
 --------------------
  * [Django](https://github.com/mikery/django-elfinder)
- * [Drupal](https://www.drupal.org/project/elfinder)
+ * [Drupal](https://gitlab.com/667bdrm/elfinder)
  * [Laravel](https://github.com/barryvdh/laravel-elfinder)
  * [Roundcube](https://github.com/Offerel/roundcube_elfinder)
  * [Symfony](https://github.com/helios-ag/FMElfinderBundle)
@@ -203,7 +202,7 @@ Authors
  * Current main developer: Naoki Sawada <hypweb+elfinder@gmail.com>
  * Chief developer: Dmitry "dio" Levashov <dio@std42.ru>
  * Maintainer: Troex Nevelin <troex@fury.scancode.ru>
- * Developers: Alexey Sukhotin <strogg@yandex.ru>, Naoki Sawada <hypweb+elfinder@gmail.com>
+ * Developers: Alexey Sukhotin, Naoki Sawada <hypweb+elfinder@gmail.com>
  * Icons: PixelMixer, [Yusuke Kamiyamane](http://p.yusukekamiyamane.com), [Icons8](https://icons8.com)
 
 We hope our tools will be helpful for you.
