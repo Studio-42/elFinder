@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.57 (2020-06-05)
+ * Version 2.1.57 (2.1-src Nightly: 0a681ac) (2020-11-30)
  * http://elfinder.org
  * 
  * Copyright 2009-2020, Studio 42
@@ -5841,14 +5841,7 @@ elFinder.prototype = {
 	 * 
 	 * @type Boolean
 	 */
-	cookieEnabled : (function() {
-		var res = false,
-			test = 'elftest=';
-		document.cookie = test + '1';
-		res = document.cookie.split(test).length === 2;
-		document.cookie = test + ';max-age=0';
-		return res;
-	})(),
+	cookieEnabled : window.navigator.cookieEnabled,
 
 	/**
 	 * Has RequireJS?
@@ -7852,7 +7845,7 @@ elFinder.prototype = {
 			d.setTime(d.getTime()+(o.expires * 86400000));
 			o.expires = d;
 		}
-		document.cookie = name+'='+encodeURIComponent(value)+'; expires='+o.expires.toUTCString()+(o.path ? '; path='+o.path : '')+(o.domain ? '; domain='+o.domain : '')+(o.secure ? '; secure' : '');
+		document.cookie = name+'='+encodeURIComponent(value)+'; expires='+o.expires.toUTCString()+(o.path ? '; path='+o.path : '')+(o.domain ? '; domain='+o.domain : '')+(o.secure ? '; secure' : '')+(o.samesite ? '; samesite='+o.samesite : '');
 		if (value && (value.substr(0,1) === '{' || value.substr(0,1) === '[')) {
 			try {
 				return JSON.parse(value);
@@ -10717,7 +10710,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.57';
+elFinder.prototype.version = '2.1.57 (2.1-src Nightly: 0a681ac)';
 
 
 
@@ -12462,10 +12455,11 @@ elFinder.prototype._options = {
 	 * @type Object
 	 */
 	cookie         : {
-		expires : 30,
-		domain  : '',
-		path    : '/',
-		secure  : false
+		expires  : 30,
+		domain   : '',
+		path     : '/',
+		secure   : false,
+		samesite : 'lax'
 	},
 	
 	/**
@@ -25543,10 +25537,13 @@ elFinder.prototype.commands.fullscreen = function() {
 		var self   = this,
 		fm     = this.fm,
 		update = function(e, data) {
+			var full;
 			e.preventDefault();
 			e.stopPropagation();
 			if (data && data.fullscreen) {
-				self.update(void(0), (data.fullscreen === 'on'));
+				full = (data.fullscreen === 'on');
+				self.update(void(0), full);
+				self.title = fm.i18n(full ? 'reinstate' : 'cmdfullscreen');
 			}
 		};
 
