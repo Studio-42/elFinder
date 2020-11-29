@@ -1,6 +1,6 @@
 elFinder is issued under a 3-clauses BSD license.
 
-Copyright (c) 2009-2018, Studio 42
+Copyright (c) 2009-2020, Studio 42
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
