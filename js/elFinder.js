@@ -1105,7 +1105,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			baseUrl = '';
 			myTag = null;
 			$('head > script').each(function() {
-				if (this.src && this.src.match(/js\/elfinder(?:-[a-z0-9_-]+)?\.(?:min|full)\.js$/i)) {
+				if (this.src && this.src.match(/js\/elfinder(?:-[a-z0-9_-]+)?\.(?:min|full)\.js(?:$|\?)/i)) {
 					myTag = $(this);
 					return false;
 				}

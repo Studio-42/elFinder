@@ -176,17 +176,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             CURLOPT_URL => $url,
         ));
 
-        $result = curl_exec($curl);
-
-        if (false === $result) {
-            if (curl_errno($curl)) {
-                throw new \Exception('curl_setopt_array() failed: '
-                    . curl_error($curl));
-            } else {
-                throw new \Exception('curl_setopt_array(): empty response');
-            }
-        }
-        curl_close($curl);
+        $result = elFinder::curlExec($curl);
 
         $decoded = json_decode($result);
 
@@ -245,16 +235,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 CURLOPT_URL => $url,
             ));
 
-            $result = curl_exec($curl);
-
-            if (!$result) {
-                if (curl_errno($curl)) {
-                    throw new \Exception('curl_setopt_array() failed: ' . curl_error($curl));
-                } else {
-                    throw new \Exception('curl_setopt_array(): empty response');
-                }
-            }
-            curl_close($curl);
+            $result = elFinder::curlExec($curl);
 
             $decoded = json_decode($result);
 
@@ -379,8 +360,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
         if ($contents) {
             $res = elFinder::curlExec($curl);
         } else {
-            $result = json_decode(curl_exec($curl));
-            curl_close($curl);
+            $result = json_decode(elFinder::curlExec($curl));
             if (isset($result->value)) {
                 $res = $result->value;
                 unset($result->value);
@@ -567,8 +547,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 CURLOPT_POST => true,
                 CURLOPT_POSTFIELDS => '{}',
             ));
-            $sess = json_decode(curl_exec($curl));
-            curl_close($curl);
+            $sess = json_decode(elFinder::curlExec($curl));
 
             if ($sess) {
                 if (isset($sess->error)) {
@@ -602,8 +581,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                     ),
                 );
                 curl_setopt_array($curl, $options);
-                $sess = json_decode(curl_exec($curl));
-                curl_close($curl);
+                $sess = json_decode(elFinder::curlExec($curl));
                 if ($sess) {
                     if (isset($sess->error)) {
                         throw new Exception($sess->error->message);
@@ -1367,8 +1345,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                     CURLOPT_POSTFIELDS => json_encode($data),
                 ));
 
-                $result = curl_exec($curl);
-                curl_close($curl);
+                $result = elFinder::curlExec($curl);
                 if ($result) {
                     $result = json_decode($result);
                     if (isset($result->link)) {
@@ -1735,8 +1712,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             ));
 
             //create the Folder in the Parent
-            $result = curl_exec($curl);
-            curl_close($curl);
+            $result = elFinder::curlExec($curl);
             $folder = json_decode($result);
 
             return $this->_joinPath($path, $folder->id);
@@ -1814,8 +1790,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 ),
                 CURLOPT_POSTFIELDS => json_encode($data),
             ));
-            $result = curl_exec($curl);
-            curl_close($curl);
+            $result = elFinder::curlExec($curl);
 
             $res = new stdClass();
             if (preg_match('/Location: (.+)/', $result, $m)) {
@@ -1829,8 +1804,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                             'Content-Type: application/json',
                         ),
                     ));
-                    $res = json_decode(curl_exec($curl));
-                    curl_close($curl);
+                    $res = json_decode(elFinder::curlExec($curl));
                     if (isset($res->status)) {
                         if ($res->status === 'completed' || $res->status === 'failed') {
                             break;
@@ -1891,8 +1865,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 CURLOPT_POSTFIELDS => json_encode($data),
             ));
 
-            $result = json_decode(curl_exec($curl));
-            curl_close($curl);
+            $result = json_decode(elFinder::curlExec($curl));
             if ($result && isset($result->id)) {
                 return $targetDir . '/' . $result->id;
             } else {
@@ -1927,8 +1900,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             ));
 
             //unlink or delete File or Folder in the Parent
-            $result = curl_exec($curl);
-            curl_close($curl);
+            $result = elFinder::curlExec($curl);
         } catch (Exception $e) {
             return $this->setError('OneDrive error: ' . $e->getMessage());
         }
@@ -2025,8 +1997,7 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             curl_setopt_array($curl, $options);
 
             //create or update File in the Target
-            $file = json_decode(curl_exec($curl));
-            curl_close($curl);
+            $file = json_decode(elFinder::curlExec($curl));
 
             return $this->_joinPath($parent, $file->id);
         } catch (Exception $e) {
