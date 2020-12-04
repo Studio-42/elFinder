@@ -5,8 +5,15 @@
  * @author Atef Ben Ali <atef.bettaib@gmail.com>
  * @version 2020-12-03
  */
-// elfinder.ar.js is integrated into elfinder.(full|min).js by Khamis Alqutob
-if (typeof elFinder === 'function' && elFinder.prototype.i18) {
+(function(root, factory) {
+	if (typeof define === 'function' && define.amd) {
+		define(['elfinder'], factory);
+	} else if (typeof exports !== 'undefined') {
+		module.exports = factory(require('elfinder'));
+	} else {
+		factory(root.elFinder);
+	}
+}(this, function(elFinder) {
 	elFinder.prototype.i18.ar = {
 		translator : 'Khamis Alqutob &lt;alqutob@outlook.com&gt;, Tawfek Daghistani &lt;tawfekov@gmail.com&gt;, Atef Ben Ali &lt;atef.bettaib@gmail.com&gt;',
 		language   : 'Arabic',
@@ -570,5 +577,4 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'kindVideoOGG'    : 'ملف فيديو Ogg'
 		}
 	};
-}
-
+}));
