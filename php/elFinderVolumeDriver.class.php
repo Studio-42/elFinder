@@ -5529,7 +5529,7 @@ abstract class elFinderVolumeDriver
         static $gdMimes = null;
         static $imgmgPS = null;
         if ($gdMimes === null) {
-            $gdMimes = array_flip(array('image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp'));
+            $gdMimes = array_flip(array('image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp', 'image/webp'));
             $imgmgPS = array_flip(array('application/postscript', 'application/pdf'));
         }
         if ((!$checkTmbPath || $this->tmbPathWritable)
@@ -6413,6 +6413,9 @@ abstract class elFinderVolumeDriver
 
             case 'image/xpm':
                 return imagecreatefromxpm($path);
+
+            case 'image/webp':
+                return imagecreatefromwebp($path);
         }
         return false;
     }
