@@ -988,7 +988,7 @@ class elFinder
                             $errors[] = (string)$_err;
                         }
                         if ($_res['error']) {
-                            throw elFinderTriggerException();
+                            throw new elFinderTriggerException();
                         }
                     }
                 }
