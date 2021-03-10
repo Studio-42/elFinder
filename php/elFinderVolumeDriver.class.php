@@ -5529,7 +5529,11 @@ abstract class elFinderVolumeDriver
         static $gdMimes = null;
         static $imgmgPS = null;
         if ($gdMimes === null) {
-            $gdMimes = array_flip(array('image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp', 'image/webp'));
+            $_mimes = array('image/jpeg', 'image/png', 'image/gif', 'image/x-ms-bmp');
+            if (function_exists('imagecreatefromwebp')) {
+                $_mimes[] = 'image/webp';
+            }
+            $gdMimes = array_flip($_mimes);
             $imgmgPS = array_flip(array('application/postscript', 'application/pdf'));
         }
         if ((!$checkTmbPath || $this->tmbPathWritable)
