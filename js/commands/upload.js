@@ -194,10 +194,17 @@ elFinder.prototype.commands.upload = function() {
 				data = null,
 				target = e._target || null,
 				trf = e.dataTransfer || null,
-				kind = (trf.items && trf.items.length && trf.items[0].kind)? trf.items[0].kind : '',
+				kind = '',
 				errors;
 			
 			if (trf) {
+				if (trf.types && trf.types.length && $.inArray('Files', trf.types) !== -1) {
+				    kind = 'file';
+				}
+				else if (trf.items && trf.items.length && trf.items[0].kind) {
+				    kind = trf.items[0].kind;
+				}
+
 				try {
 					elfFrom = trf.getData('elfinderfrom');
 					if (elfFrom) {
