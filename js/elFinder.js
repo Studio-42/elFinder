@@ -2323,7 +2323,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			useCache = (opts.options || {}).cache,
 			// request options
 			options = Object.assign({
-				url      : o.url,
+				url      : opts.url || o.url,
 				async    : true,
 				type     : this.requestType,
 				dataType : 'json',
