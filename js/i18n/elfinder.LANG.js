@@ -314,6 +314,7 @@
 			'name'            : 'Name',
 			'size'            : 'Size',
 			'perms'           : 'Permissions',
+			'create'          : 'Created',
 			'modify'          : 'Modified',
 			'kind'            : 'Kind',
 			'read'            : 'read',
