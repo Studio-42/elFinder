@@ -16,6 +16,7 @@
 			unknown  : fm.i18n('unknown'),
 			path     : fm.i18n('path'),
 			aliasfor : fm.i18n('aliasfor'),
+			create   : fm.i18n('create'),
 			modify   : fm.i18n('modify'),
 			perms    : fm.i18n('perms'),
 			locked   : fm.i18n('locked'),
@@ -217,6 +218,7 @@
 				}
 			}
 			
+			!hideItems.create && file.cts && content.push(row.replace(l, msg.create).replace(v, fm.formatDate(file, file.cts)));
 			!hideItems.modify && content.push(row.replace(l, msg.modify).replace(v, fm.formatDate(file)));
 			!hideItems.perms && content.push(row.replace(l, msg.perms).replace(v, fm.formatPermissions(file)));
 			!hideItems.locked && content.push(row.replace(l, msg.locked).replace(v, file.locked ? msg.yes : msg.no));
