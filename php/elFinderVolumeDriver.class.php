@@ -2441,6 +2441,7 @@ abstract class elFinderVolumeDriver
      */
     public function upload($fp, $dst, $name, $tmpname, $hashes = array())
     {
+        $name = str_replace(' ','_',$name);
         if ($this->commandDisabled('upload')) {
             return $this->setError(elFinder::ERROR_PERM_DENIED);
         }
