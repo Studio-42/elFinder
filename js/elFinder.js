@@ -1608,7 +1608,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				result  = [],
 				dups    = [],
 				faults  = [],
-				isCopy  = ui.helper.hasClass('elfinder-drag-helper-plus'),
+				isCopy  = ui.helper.hasClass('elfinder-drag-helper-plus') && self._commands['copy'],
 				c       = 'class',
 				cnt, hash, i, h;
 			
