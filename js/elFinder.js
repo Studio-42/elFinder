@@ -5182,7 +5182,9 @@ var elFinder = function(elm, opts, bootCallback) {
 						if (ctr !== chk) {
 							ctr = chk;
 							if (helper.is(':visible') && helper.data('dropover') && ! helper.data('droped')) {
-								helper.toggleClass('elfinder-drag-helper-plus', helper.data('locked')? true : ctr);
+								if (self.options.enableDragCopy) {
+									helper.toggleClass('elfinder-drag-helper-plus', helper.data('locked')? true : ctr);
+								}
 								self.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : hashes, helper: helper});
 							}
 						}
