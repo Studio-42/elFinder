@@ -6353,7 +6353,7 @@ abstract class elFinderVolumeDriver
      * @throws elFinderAbortException
      * @author Alexey Sukhotin
      */
-    protected function procExec($command, &$output = '', &$return_var = -1, &$error_output = '')
+    protected function procExec($command, &$output = '', &$return_var = -1, &$error_output = '', $cwd = null)
     {
         return elFinder::procExec($command, $output, $return_var, $error_output);
     }
@@ -6860,7 +6860,8 @@ abstract class elFinderVolumeDriver
                 $files = array_map('escapeshellarg', $files);
 
                 $cmd = $arc['cmd'] . ' ' . $arc['argc'] . ' ' . escapeshellarg($name) . ' ' . implode(' ', $files);
-                $this->procExec($cmd, $o, $c);
+                $err_out = '';
+                $this->procExec($cmd, $o, $c, $err_out, $dir);
                 chdir($cwd);
             } else {
                 return false;

@@ -5105,12 +5105,13 @@ var go = function() {
      * @param  string $output       stdout strings
      * @param  int    $return_var   process exit code
      * @param  string $error_output stderr strings
+     * @param  null   $cwd          cwd
      *
      * @return int exit code
      * @throws elFinderAbortException
      * @author Alexey Sukhotin
      */
-    public static function procExec($command, &$output = '', &$return_var = -1, &$error_output = '')
+    public static function procExec($command, &$output = '', &$return_var = -1, &$error_output = '', $cwd = null)
     {
 
         static $allowed = null;
@@ -5140,7 +5141,7 @@ var go = function() {
             2 => array("pipe", "w")   // stderr
         );
 
-        $process = proc_open($command, $descriptorspec, $pipes, null, null);
+        $process = proc_open($command, $descriptorspec, $pipes, $cwd, null);
 
         if (is_resource($process)) {
             stream_set_blocking($pipes[1], 0);
