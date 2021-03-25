@@ -1158,7 +1158,7 @@ $.fn.elfindercwd = function(fm, options) {
 						status = 'elfinder-drag-helper-plus';
 					} else {
 						status = 'elfinder-drag-helper-move';
-						if (ctr) {
+						if (ctr && fm.options.enableDragCopy) {
 							status += ' elfinder-drag-helper-plus';
 						}
 					}
