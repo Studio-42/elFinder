@@ -1345,5 +1345,13 @@ elFinder.prototype._options = {
 	 *
 	 * @type Boolean|Object (toast options)
 	 */
-	toastBackendWarn : true
+	toastBackendWarn : true,
+
+	/**
+	 * Allow keyboard modifiers for copy when dragging
+	 *
+	 * @type Boolean
+	 * @default true
+	 */
+	enableDragCopy : true
 };
