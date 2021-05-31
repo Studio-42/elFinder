@@ -2864,7 +2864,8 @@ class elFinder
                 $type = 'finfo';
                 $finfo = finfo_open(FILEINFO_MIME);
             } elseif (function_exists('mime_content_type')
-                && preg_match($regexp, array_shift(explode(';', mime_content_type(__FILE__))))) {
+                && ($_ctypes = explode(';', mime_content_type(__FILE__)))
+                && preg_match($regexp, array_shift($_ctypes))) {
                 $type = 'mime_content_type';
             } elseif (function_exists('getimagesize')) {
                 $type = 'getimagesize';
