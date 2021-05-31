@@ -281,6 +281,7 @@ abstract class elFinderVolumeDriver
             'php5:*' => 'text/x-php',
             'php7:*' => 'text/x-php',
             'phtml:*' => 'text/x-php',
+            'phar:*' => 'text/x-php',
             'cgi:*' => 'text/x-httpd-cgi',
             'pl:*' => 'text/x-perl',
             'asp:*' => 'text/x-asap',
