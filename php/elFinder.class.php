@@ -530,6 +530,7 @@ class elFinder
     const ERROR_UPLOAD_TEMP = 'errUploadTemp';       // 'Unable to make temporary file for upload.'
     const ERROR_UPLOAD_TOTAL_SIZE = 'errUploadTotalSize';  // 'Data exceeds the maximum allowed size.'
     const ERROR_UPLOAD_TRANSFER = 'errUploadTransfer';   // '"$1" transfer error.'
+    const ERROR_MAX_MKDIRS = 'errMaxMkdirs'; // 'You can create up to $1 folders at one time.'
 
     /**
      * Constructor
@@ -2169,6 +2170,10 @@ class elFinder
             return array('error' => $this->error(self::ERROR_MKDIR, $name, self::ERROR_TRGDIR_NOT_FOUND, '#' . $target));
         }
         if ($dirs) {
+            $maxDirs = $volume->getOption('uploadMaxMkdirs');
+            if ($maxDirs && $maxDirs < count($dirs)) {
+                return array('error' => $this->error(self::ERROR_MAX_MKDIRS, $maxDirs));
+            }
             sort($dirs);
             $reset = null;
             $mkdirs = array();
