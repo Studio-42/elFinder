@@ -1279,36 +1279,44 @@ abstract class elFinderVolumeDriver
         $this->mimeDetect = $this->options['mimeDetect'];
 
         // find available mimetype detect method
-        $type = strtolower($this->options['mimeDetect']);
-        $type = preg_match('/^(finfo|mime_content_type|internal|auto)$/i', $type) ? $type : 'auto';
         $regexp = '/text\/x\-(php|c\+\+)/';
+        $auto_types = [];
 
-        if (($type == 'finfo' || $type == 'auto')
-            && class_exists('finfo', false)) {
+        if (class_exists('finfo', false)) {
             $tmpFileInfo = explode(';', finfo_file(finfo_open(FILEINFO_MIME), __FILE__));
-        } else {
-            $tmpFileInfo = false;
-        }
-
-        $type = 'internal';
-        if ($tmpFileInfo && preg_match($regexp, array_shift($tmpFileInfo))) {
-            $type = 'finfo';
-            $this->finfo = finfo_open(FILEINFO_MIME);
-        } elseif (($type == 'mime_content_type' || $type == 'auto') && function_exists('mime_content_type')) {
-            $_mimetypes = explode(';', mime_content_type(__FILE__));
-            if (preg_match($regexp, array_shift($_mimetypes))) {
-                $type = 'mime_content_type';
+             if ($tmpFileInfo && preg_match($regexp, array_shift($tmpFileInfo))) {
+                $auto_types[] = 'finfo';
             }
         }
-        $this->mimeDetect = $type;
+        
+        if (function_exists('mime_content_type')) {
+            $_mimetypes = explode(';', mime_content_type(__FILE__));
+            if (preg_match($regexp, array_shift($_mimetypes))) {
+                $auto_types[] = 'mime_content_type';
+            }
+        }
+            
+        $auto_types[] = 'internal';
 
-        // load mimes from external file for mimeDetect == 'internal'
-        // based on Alexey Sukhotin idea and patch: http://elrte.org/redmine/issues/163
-        // file must be in file directory or in parent one
-        if ($this->mimeDetect === 'internal' && !elFinderVolumeDriver::$mimetypesLoaded) {
-            elFinderVolumeDriver::loadMimeTypes(!empty($this->options['mimefile']) ? $this->options['mimefile'] : '');
+        $type = strtolower($this->options['mimeDetect']);
+        if (!in_array($type, $auto_types)) {
+            $type = 'auto';
         }
 
+        if ($type == 'auto') {
+            $type = array_shift($auto_types);
+        }
+
+        $this->mimeDetect = $type;
+
+        if ($this->mimeDetect == 'finfo') {
+            $this->finfo = finfo_open(FILEINFO_MIME);
+        } else if ($this->mimeDetect == 'internal' && !elFinderVolumeDriver::$mimetypesLoaded) {
+            // load mimes from external file for mimeDetect == 'internal'
+            // based on Alexey Sukhotin idea and patch: http://elrte.org/redmine/issues/163
+            // file must be in file directory or in parent one
+            elFinderVolumeDriver::loadMimeTypes(!empty($this->options['mimefile']) ? $this->options['mimefile'] : '');
+        }
         $this->rootName = empty($this->options['alias']) ? $this->basenameCE($this->root) : $this->options['alias'];
 
         // This get's triggered if $this->root == '/' and alias is empty.
