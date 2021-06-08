@@ -401,6 +401,8 @@ abstract class elFinderVolumeDriver
         'uploadOrder' => array('deny', 'allow'),
         // maximum upload file size. NOTE - this is size for every uploaded files
         'uploadMaxSize' => 0,
+        // Maximum number of folders that can be created at one time. (0: unlimited)
+        'uploadMaxMkdirs' => 0,
         // maximum number of chunked upload connection. `-1` to disable chunked upload
         'uploadMaxConn' => 3,
         // maximum get file size. NOTE - Maximum value is 50% of PHP memory_limit
