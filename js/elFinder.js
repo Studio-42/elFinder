@@ -5178,12 +5178,14 @@ var elFinder = function(elm, opts, bootCallback) {
 					}
 					
 					$(document).on(keyEvt, function(e){
-						var chk = (e.shiftKey||e.ctrlKey||e.metaKey);
-						if (ctr !== chk) {
-							ctr = chk;
-							if (helper.is(':visible') && helper.data('dropover') && ! helper.data('droped')) {
-								helper.toggleClass('elfinder-drag-helper-plus', helper.data('locked')? true : ctr);
-								self.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : hashes, helper: helper});
+						if (self._commands.copy) {
+							var chk = (e.shiftKey||e.ctrlKey||e.metaKey);
+							if (ctr !== chk) {
+								ctr = chk;
+								if (helper.is(':visible') && helper.data('dropover') && ! helper.data('droped')) {
+									helper.toggleClass('elfinder-drag-helper-plus', helper.data('locked')? true : ctr);
+									self.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : hashes, helper: helper});
+								}
 							}
 						}
 					});
