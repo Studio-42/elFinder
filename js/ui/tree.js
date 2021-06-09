@@ -324,7 +324,7 @@ $.fn.elfindertree = function(fm, opts) {
 						status = 'elfinder-drag-helper-plus';
 					} else {
 						status = 'elfinder-drag-helper-move';
-						if (e.shiftKey || e.ctrlKey || e.metaKey) {
+						if (fm._commands.copy && (e.shiftKey || e.ctrlKey || e.metaKey)) {
 							status += ' elfinder-drag-helper-plus';
 						}
 					}
