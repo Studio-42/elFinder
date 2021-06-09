@@ -1,8 +1,8 @@
 ---
 name: Document request
 about: Request to maintain elFinder documentation
-title: ''
-labels: ''
+title: "[DOC] "
+labels: documentation
 assignees: ''
 
 ---
