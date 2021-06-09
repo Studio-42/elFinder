@@ -1,3 +1,21 @@
+2021-06-09  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.58):
+		- [VD:abstract] Fixed #3151 support RAR5 lib
+		- [cmd:fullscreen] Fixed #3177 wrong fullscreen button caption
+		- [js:core] Supports cookie samesite attribute
+		- [VD:SFTP] Add new SFTP driver, via phpseclib library
+		- [js:core] Fixed #3193 auto-detection of baseUrl
+		- [js:upload] Fixed upload bug (#3264)
+		- [VD:abstract,php] make the thumbnail support webp (#3265) 
+		- [php:core] Fixed #3250 error only variables can be passed by reference
+		- [VD:abstract] add 'phar:*' => 'text/x-php' into 'staticMineMap'
+		- [VD:abstract] Fixed #3181 add an option uploadMaxMkdirs
+		- [php:core] Add cwd param to proc_open (#3281)
+		- [VD:abstract] Bugfix of an option mimeDetect (#3291)
+		- [UI] Fixed #3302 problem of d&d when copy of UI command is disabled
+		- And some minor bug fixes
+
+
 2020-06-05  Naoki Sawada  <hypweb+elfinder@gmail.com>
 	* elFinder (2.1.57):
 		- [js] Fixed #3148 to support jQuery 3.5.0 update
