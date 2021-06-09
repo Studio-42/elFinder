@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.57 (2.1-src Nightly: 77e8cad) (2021-06-08)
+ * Version 2.1.58 (2.1-src Nightly: eb2bf30) (2021-06-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2021, Studio 42
@@ -5209,12 +5209,14 @@ var elFinder = function(elm, opts, bootCallback) {
 					}
 					
 					$(document).on(keyEvt, function(e){
-						var chk = (e.shiftKey||e.ctrlKey||e.metaKey);
-						if (ctr !== chk) {
-							ctr = chk;
-							if (helper.is(':visible') && helper.data('dropover') && ! helper.data('droped')) {
-								helper.toggleClass('elfinder-drag-helper-plus', helper.data('locked')? true : ctr);
-								self.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : hashes, helper: helper});
+						if (self._commands.copy) {
+							var chk = (e.shiftKey||e.ctrlKey||e.metaKey);
+							if (ctr !== chk) {
+								ctr = chk;
+								if (helper.is(':visible') && helper.data('dropover') && ! helper.data('droped')) {
+									helper.toggleClass('elfinder-drag-helper-plus', helper.data('locked')? true : ctr);
+									self.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : hashes, helper: helper});
+								}
 							}
 						}
 					});
@@ -10710,7 +10712,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.57 (2.1-src Nightly: 77e8cad)';
+elFinder.prototype.version = '2.1.58 (2.1-src Nightly: eb2bf30)';
 
 
 
@@ -16192,7 +16194,7 @@ $.fn.elfindercwd = function(fm, options) {
 				over : function(e, ui) {
 					var dst    = $(this),
 						helper = ui.helper,
-						ctr    = (e.shiftKey || e.ctrlKey || e.metaKey),
+						ctr    = fm._commands.copy && (e.shiftKey || e.ctrlKey || e.metaKey),
 						hash, status, inParent;
 					e.stopPropagation();
 					helper.data('dropover', helper.data('dropover') + 1);
@@ -17016,7 +17018,8 @@ $.fn.elfindercwd = function(fm, options) {
 
 					if (!mobile && !$this.data('dragRegisted') && !$this.hasClass(clTmp) && !$this.hasClass(clDraggable) && !$this.hasClass(clDisabled)) {
 						$this.data('dragRegisted', true);
-						if (!fm.isCommandEnabled('copy', fm.searchStatus.state > 1 || $this.hasClass('isroot')? fm.cwdId2Hash($this.attr('id')) : void 0)) {
+						if (!fm.isCommandEnabled('copy', fm.searchStatus.state > 1 || $this.hasClass('isroot')? fm.cwdId2Hash($this.attr('id')) : void 0) &&
+							!fm.isCommandEnabled('cut', fm.searchStatus.state > 1 || $this.hasClass('isroot')? fm.cwdId2Hash($this.attr('id')) : void 0)) {
 							return;
 						}
 						$this.on('mousedown', function(e) {
@@ -21451,7 +21454,7 @@ $.fn.elfindertree = function(fm, opts) {
 						status = 'elfinder-drag-helper-plus';
 					} else {
 						status = 'elfinder-drag-helper-move';
-						if (e.shiftKey || e.ctrlKey || e.metaKey) {
+						if (fm._commands.copy && (e.shiftKey || e.ctrlKey || e.metaKey)) {
 							status += ' elfinder-drag-helper-plus';
 						}
 					}
