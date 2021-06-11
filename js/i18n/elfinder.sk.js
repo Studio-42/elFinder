@@ -2,7 +2,7 @@
  * Slovak translation
  * @author RobiNN <kelcakrobo@gmail.com>
  * @author Jakub Ďuraš <jkblmr@gmail.com>
- * @version 2020-03-15
+ * @version 2021-06-10
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'RobiNN &lt;kelcakrobo@gmail.com&gt;, Jakub Ďuraš &lt;jkblmr@gmail.com&gt;',
 		language   : 'Slovenčina',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i', // will show like: 15.03.2020 16:42
-		fancyDateFormat : '$1 H:i', // will show like: Dnes 16:42
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 200315-164238
+		dateFormat : 'd.m.Y H:i', // will show like: 10.06.2021 23:35
+		fancyDateFormat : '$1 H:i', // will show like: Dnes 23:35
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 210610-233522
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -116,6 +116,7 @@
 			'errServerError'       : 'Vyskytla sa chyba na strane servera.', // from v2.1.25 added 16.6.2017
 			'errEmpty'             : 'Nepodarilo sa vyprázdniť priečinok "$1".', // from v2.1.25 added 22.6.2017
 			'moreErrors'           : 'Existujú ešte ďalšie $1 chyby.', // from v2.1.44 added 9.12.2018
+			'errMaxMkdirs'         : 'Môžete vytvoriť až $1 priečinkov naraz.', // from v2.1.58 added 20.6.2021
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Vytvoriť archív',
