@@ -4971,7 +4971,8 @@ var elFinder = function(elm, opts, bootCallback) {
 		 * @return     String  The column name.
 		 */
 		self.getColumnName = function(key) {
-			return columnNames[key] || self.i18n(key);
+			var res = columnNames[key] || self.i18n(key);
+			return typeof res === 'function'? res() : res;
 		};
 
 		/**
