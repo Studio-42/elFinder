@@ -407,10 +407,17 @@ elFinder.prototype.commands.rm = function() {
 	};
 	
 	this.getstate = function(select) {
-		var sel   = this.hashes(select);
+		var sel   = this.hashes(select),
+			filter = function(files) {
+				var fres = true;
+				return $.grep(files, function(h) {
+					var f;
+					fres = fres && (f = fm.file(h)) && ! f.locked && ! fm.isRoot(f)? true : false;
+					return fres;
+				});
+			};
 		
-		return sel.length && $.grep(sel, function(h) { var f = fm.file(h); return f && ! f.locked && ! fm.isRoot(f)? true : false; }).length == sel.length
-			? 0 : -1;
+		return sel.length && filter(sel).length == sel.length ? 0 : -1;
 	};
 	
 	this.exec = function(hashes, cOpts) {

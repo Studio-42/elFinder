@@ -23,7 +23,7 @@ elFinder.prototype.commands.chmod = function() {
 			files    : fm.i18n('files')
 		},
 		isPerm = function(perm){
-			return (!isNaN(parseInt(perm, 8) && parseInt(perm, 8) <= 511) || perm.match(/^([r-][w-][x-]){3}$/i));
+			return (!isNaN(parseInt(perm, 8)) && parseInt(perm, 8) <= 511) || perm.match(/^([r-][w-][x-]){3}$/i);
 		};
 
 	this.tpl = {
@@ -53,12 +53,15 @@ elFinder.prototype.commands.chmod = function() {
 	};
 	
 	this.checkstate = function(sel) {
-		var cnt = sel.length;
-		if (!cnt) return false;
-		var chk = $.grep(sel, function(f) {
-			return (f.isowner && f.perm && isPerm(f.perm) && (cnt == 1 || f.mime != 'directory')) ? true : false;
-		}).length;
-		return (cnt == chk)? true : false;
+		var cnt = sel.length,
+			filter = function(files) {
+				var fres = true;
+				return $.grep(sel, function(f) {
+					fres = fres && f.isowner && f.perm && isPerm(f.perm) && (cnt == 1 || f.mime != 'directory') ? true : false;
+					return fres;
+				});
+			};
+		return (cnt && cnt === filter(sel).length)? true : false;
 	};
 
 	this.exec = function(select) {
