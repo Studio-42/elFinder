@@ -1112,6 +1112,15 @@ elFinder.prototype._options = {
 	height : 400,
 	
 	/**
+	 * Do not resize the elFinder node itself on resize parent node
+	 * Specify `true` when controlling with CSS such as Flexbox
+	 *
+	 * @type Boolean
+	 * @default false
+	 */
+	noResizeBySelf : false,
+
+	/**
 	 * Base node object or selector
 	 * Element which is the reference of the height percentage
 	 *
