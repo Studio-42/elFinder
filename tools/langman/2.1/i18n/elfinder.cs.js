@@ -2,7 +2,7 @@
  * Czech translation
  * @author RobiNN <kelcakrobo@gmail.com>
  * @author Jay Gridley <gridley.jay@hotmail.com>
- * @version 2020-03-15
+ * @version 2021-06-10
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'RobiNN &lt;kelcakrobo@gmail.com&gt;, Jay Gridley &lt;gridley.jay@hotmail.com&gt;',
 		language   : 'Čeština',
 		direction  : 'ltr',
-		dateFormat : 'd. m. Y H:i', // will show like: 15. 03. 2020 16:45
-		fancyDateFormat : '$1 H:i', // will show like: Dnes 16:45
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 200315-164551
+		dateFormat : 'd. m. Y H:i', // will show like: 10. 06. 2021 23:37
+		fancyDateFormat : '$1 H:i', // will show like: Dnes 23:37
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 210610-233701
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -116,6 +116,7 @@
 			'errServerError'       : 'Došlo k chybě na straně serveru.', // from v2.1.25 added 16.6.2017
 			'errEmpty'             : 'Nelze vyprázdnit složku "$1".', // from v2.1.25 added 22.6.2017
 			'moreErrors'           : 'Existují ještě další $1 chyby.', // from v2.1.44 added 9.12.2018
+			'errMaxMkdirs'         : 'Můžete vytvořit až $1 složek najednou.', // from v2.1.58 added 20.6.2021
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Vytvořit archív',
