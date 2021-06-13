@@ -5451,7 +5451,7 @@ abstract class elFinderVolumeDriver
         $stat = $this->stat($path);
 
         if (empty($stat)) {
-            return $this->setError(elFinder::ERROR_RM, $path, elFinder::ERROR_FILE_NOT_FOUND);
+            return $this->setError(elFinder::ERROR_RM, $this->relpathCE($path), elFinder::ERROR_FILE_NOT_FOUND);
         }
 
         $stat['realpath'] = $path;
@@ -6727,7 +6727,7 @@ abstract class elFinderVolumeDriver
             unset($o);
             $this->procExec(ELFINDER_RAR_PATH, $o, $c);
             if ($c == 0 || $c == 7) {
-                $arcs['create']['application/x-rar'] = array('cmd' => ELFINDER_RAR_PATH, 'argc' => 'a -inul' . (defined('ELFINDER_RAR_MA4') && ELFINDER_RAR_MA4? ' -ma4' : ''), 'ext' => 'rar');
+                $arcs['create']['application/x-rar'] = array('cmd' => ELFINDER_RAR_PATH, 'argc' => 'a -inul' . (defined('ELFINDER_RAR_MA4') && ELFINDER_RAR_MA4? ' -ma4' : '') . ' --', 'ext' => 'rar');
             }
             unset($o);
             $this->procExec(ELFINDER_UNRAR_PATH, $o, $c);
@@ -6737,17 +6737,17 @@ abstract class elFinderVolumeDriver
             unset($o);
             $this->procExec(ELFINDER_7Z_PATH, $o, $c);
             if ($c == 0) {
-                $arcs['create']['application/x-7z-compressed'] = array('cmd' => ELFINDER_7Z_PATH, 'argc' => 'a', 'ext' => '7z');
+                $arcs['create']['application/x-7z-compressed'] = array('cmd' => ELFINDER_7Z_PATH, 'argc' => 'a --', 'ext' => '7z');
                 $arcs['extract']['application/x-7z-compressed'] = array('cmd' => ELFINDER_7Z_PATH, 'argc' => 'x -y', 'ext' => '7z', 'toSpec' => '-o', 'getsize' => array('argc' => 'l', 'regex' => '/^.+(?:\r\n|\n|\r)[^\r\n0-9]+([0-9]+)[^\r\n]+$/s', 'replace' => '$1'));
 
                 if (empty($arcs['create']['application/zip'])) {
-                    $arcs['create']['application/zip'] = array('cmd' => ELFINDER_7Z_PATH, 'argc' => 'a -tzip', 'ext' => 'zip');
+                    $arcs['create']['application/zip'] = array('cmd' => ELFINDER_7Z_PATH, 'argc' => 'a -tzip --', 'ext' => 'zip');
                 }
                 if (empty($arcs['extract']['application/zip'])) {
                     $arcs['extract']['application/zip'] = array('cmd' => ELFINDER_7Z_PATH, 'argc' => 'x -tzip -y', 'ext' => 'zip', 'toSpec' => '-o', 'getsize' => array('argc' => 'l', 'regex' => '/^.+(?:\r\n|\n|\r)[^\r\n0-9]+([0-9]+)[^\r\n]+$/s', 'replace' => '$1'));
                 }
                 if (empty($arcs['create']['application/x-tar'])) {
-                    $arcs['create']['application/x-tar'] = array('cmd' => ELFINDER_7Z_PATH, 'argc' => 'a -ttar', 'ext' => 'tar');
+                    $arcs['create']['application/x-tar'] = array('cmd' => ELFINDER_7Z_PATH, 'argc' => 'a -ttar --', 'ext' => 'tar');
                 }
                 if (empty($arcs['extract']['application/x-tar'])) {
                     $arcs['extract']['application/x-tar'] = array('cmd' => ELFINDER_7Z_PATH, 'argc' => 'x -ttar -y', 'ext' => 'tar', 'toSpec' => '-o', 'getsize' => array('argc' => 'l', 'regex' => '/^.+(?:\r\n|\n|\r)[^\r\n0-9]+([0-9]+)[^\r\n]+$/s', 'replace' => '$1'));
@@ -6872,8 +6872,14 @@ abstract class elFinderVolumeDriver
                     $files[$i] = '.' . DIRECTORY_SEPARATOR . basename($file);
                 }
                 $files = array_map('escapeshellarg', $files);
-
-                $cmd = $arc['cmd'] . ' ' . $arc['argc'] . ' ' . escapeshellarg($name) . ' ' . implode(' ', $files);
+                $prefix = $switch = '';
+                // The zip command accepts the "-" at the beginning of the file name as a command switch,
+                // and can't use '--' before archive name, so add "./" to name for security reasons.
+                if ($arc['ext'] === 'zip' && strpos($arc['argc'], '-tzip') === false) {
+                    $prefix = './';
+                    $switch = '-- ';
+                }
+                $cmd = $arc['cmd'] . ' ' . $arc['argc'] . ' ' . $prefix . escapeshellarg($name) . ' ' . $switch . implode(' ', $files);
                 $err_out = '';
                 $this->procExec($cmd, $o, $c, $err_out, $dir);
                 chdir($cwd);
