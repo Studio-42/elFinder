@@ -87,7 +87,7 @@
 		
 		var doOpen = function() {
 			var openCB = function(url) {
-					var link = $('<a>').hide().appendTo($('body'));
+					var link = $('<a rel="noopener">').hide().appendTo($('body'));
 					if (fm.UA.Mobile || !inline) {
 						if (html5dl) {
 							if (!inline) {
