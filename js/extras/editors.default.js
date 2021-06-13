@@ -181,7 +181,7 @@
 		if (getfile === 'ckeditor') {
 			elFinder.prototype._options.getFileCallback = function(file, fm) {
 				window.opener.CKEDITOR.tools.callFunction((function() {
-					var reParam = new RegExp('(?:[\?&]|&amp;)CKEditorFuncNum=([^&]+)', 'i'),
+					var reParam = new RegExp('(?:[?&]|&amp;)CKEditorFuncNum=([^&]+)', 'i'),
 						match = window.location.search.match(reParam);
 					return (match && match.length > 1) ? match[1] : '';
 				})(), fm.convAbsUrl(file.url));
