@@ -1517,6 +1517,9 @@ abstract class elFinderVolumeDriver
         }
 
         // to update options cache
+        if (isset($this->sessionCache['rootstat'])) {
+            unset($this->sessionCache['rootstat'][$this->getRootstatCachekey()]);
+        }
         $this->updateCache($this->root, $root);
 
         return $this->mounted = true;
