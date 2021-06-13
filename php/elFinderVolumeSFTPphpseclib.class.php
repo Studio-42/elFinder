@@ -581,7 +581,7 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
      **/
     protected function _mkdir($path, $name)
     {
-        $path = $this->_joinPath($path, $name);
+        $path = $this->_joinPath($path, $this->_basename($name));
         if ($this->connect->mkdir($path) === false) {
             return false;
         }
@@ -601,7 +601,7 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
      **/
     protected function _mkfile($path, $name)
     {
-        $path = $this->_joinPath($path, $name);
+        $path = $this->_joinPath($path, $this->_basename($name));
         return $this->connect->put($path, '') ? $path : false;
 /*
         if ($this->tmp) {
@@ -630,7 +630,7 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
     {
         $res = false;
 
-        $target = $this->_joinPath($targetDir, $name);
+        $target = $this->_joinPath($targetDir, $this->_basename($name));
         if ($this->tmp) {
             $local = $this->getTempFile();
 
@@ -661,7 +661,7 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
      */
     protected function _move($source, $targetDir, $name)
     {
-        $target = $this->_joinPath($targetDir, $name);
+        $target = $this->_joinPath($targetDir, $this->_basename($name));
         return $this->connect->rename($source, $target) ? $target : false;
     }
 
@@ -706,7 +706,7 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
     protected function _save($fp, $dir, $name, $stat)
     {
         //TODO optionally encrypt $fp before uploading if mime is not already encrypted type
-        $path = $this->_joinPath($dir, $name);
+        $path = $this->_joinPath($dir, $this->_basename($name));
         return $this->connect->put($path, $fp)
             ? $path
             : false;
