@@ -32,7 +32,7 @@ class elFinder
      *
      * @var integer
      */
-    protected static $ApiRevision = 58;
+    protected static $ApiRevision = 59;
 
     /**
      * Storages (root dirs)
