@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.58 (2.1-src Nightly: 90be103) (2021-06-13)
+ * Version 2.1.58 (2.1-src Nightly: 6218e9b) (2021-06-13)
  * http://elfinder.org
  * 
  * Copyright 2009-2021, Studio 42
@@ -10716,7 +10716,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.58 (2.1-src Nightly: 90be103)';
+elFinder.prototype.version = '2.1.58 (2.1-src Nightly: 6218e9b)';
 
 
 
@@ -25843,7 +25843,7 @@ elFinder.prototype.commands.fullscreen = function() {
 				'<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-top">'],
 		stpl    = '<div class="elfinder-help-shortcut"><div class="elfinder-help-shortcut-pattern">{pattern}</div> {descrip}</div>',
 		sep     = '<div class="elfinder-help-separator"></div>',
-		selfUrl = $('base').length? document.location.href.replace(/#.*$/, '') : '',
+		selfUrl = $('base').length? fm.escape(document.location.href.replace(/#.*$/, '')) : '',
 		clTabActive = fm.res('class', 'tabsactive'),
 		
 		getTheme = function() {
@@ -25893,7 +25893,7 @@ elFinder.prototype.commands.fullscreen = function() {
 			
 			html.push(sep);
 			html.push('<div class="'+lic+'">Licence: 3-clauses BSD Licence</div>');
-			html.push('<div class="'+lic+'">Copyright © 2009-2020, Studio 42</div>');
+			html.push('<div class="'+lic+'">Copyright © 2009-2021, Studio 42</div>');
 			html.push('<div class="'+lic+'">„ …'+fm.i18n('dontforget')+' ”</div>');
 			html.push('</div>');
 		},
@@ -27469,7 +27469,7 @@ elFinder.prototype.commands.netunmount = function() {
 		
 		var doOpen = function() {
 			var openCB = function(url) {
-					var link = $('<a>').hide().appendTo($('body'));
+					var link = $('<a rel="noopener">').hide().appendTo($('body'));
 					if (fm.UA.Mobile || !inline) {
 						if (html5dl) {
 							if (!inline) {
