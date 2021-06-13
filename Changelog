@@ -1,3 +1,15 @@
+2021-06-13  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.59):
+		- [Security:php] Fixed multiple vulnerabilities leading to RCE
+		- [php:session] Fixed #3278 wrong code of typo
+		- [js:core] #3351 allow columnsCustomName[x] to be a function
+		- [css:quicklook] Fixed #3240 remove unnecessary color specifications
+		- [cmd:extract] Fixed #3252 for checking the existence of existing files
+		- [js:core] Fixed #3359 add an option "noResizeBySelf"
+		- [VD:abstract] Fixed #3216 missing url option on upload into root
+		- And some minor bug fixes
+
+
 2021-06-09  Naoki Sawada  <hypweb+elfinder@gmail.com>
 	* elFinder (2.1.58):
 		- [VD:abstract] Fixed #3151 support RAR5 lib
