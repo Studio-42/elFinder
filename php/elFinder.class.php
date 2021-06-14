@@ -4240,7 +4240,14 @@ var go = function() {
             return $proc;
         }
 
-        $errfile = str_replace($base, '', $errfile);
+        // Do not report real path
+        if (strpos($errfile, $base) === 0) {
+            $errfile = str_replace($base, '', $errfile);
+        } else if ($pos = strrpos($errfile, '/vendor/')) {
+            $errfile = substr($errfile, $pos + 1);
+        } else {
+            $errfile = basename($errfile);
+        }
 
         switch ($errno) {
             case E_WARNING:

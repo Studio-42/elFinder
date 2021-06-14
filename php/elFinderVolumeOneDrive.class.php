@@ -184,6 +184,14 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
             throw new \Exception('json_decode() failed');
         }
 
+        if (!empty($decoded->error)) {
+            $error = $decoded->error;
+            if (!empty($decoded->error_description)) {
+                $error .= ': ' . $decoded->error_description;
+            }
+            throw new \Exception($error);
+        }
+
         $res = (object)array(
             'expires' => time() + $decoded->expires_in - 30,
             'initialToken' => '',
