@@ -1280,7 +1280,7 @@ abstract class elFinderVolumeDriver
 
         // find available mimetype detect method
         $regexp = '/text\/x\-(php|c\+\+)/';
-        $auto_types = [];
+        $auto_types = array();
 
         if (class_exists('finfo', false)) {
             $tmpFileInfo = explode(';', finfo_file(finfo_open(FILEINFO_MIME), __FILE__));
