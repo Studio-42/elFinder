@@ -8937,6 +8937,11 @@ elFinder.prototype = {
 			} else {
 				kind = this.kinds[mime];
 			}
+		} else if (this.mimeTypes[mime]) {
+			kind = this.mimeTypes[mime].toUpperCase();
+			if (!this.messages['kind'+kind]) {
+				kind = null;
+			}
 		}
 		if (! kind) {
 			if (mime.indexOf('text') === 0) {
