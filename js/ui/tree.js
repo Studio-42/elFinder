@@ -1281,11 +1281,11 @@ $.fn.elfindertree = function(fm, opts) {
 					arrow.data('dfrd', dfrd);
 				})
 				.on('contextmenu', selNavdir, function(e) {
+					e.stopPropagation();
 					var self = $(this);
 					
 					// now dirname editing
 					if (self.find('input:text').length) {
-						e.stopPropagation();
 						return;
 					}
 					
