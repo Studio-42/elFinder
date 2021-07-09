@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.59 (2.1-src Nightly: 84527ee) (2021-07-08)
+ * Version 2.1.59 (2.1-src Nightly: db59327) (2021-07-09)
  * http://elfinder.org
  * 
  * Copyright 2009-2021, Studio 42
@@ -10721,7 +10721,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.59 (2.1-src Nightly: 84527ee)';
+elFinder.prototype.version = '2.1.59 (2.1-src Nightly: db59327)';
 
 
 
@@ -22430,11 +22430,11 @@ $.fn.elfindertree = function(fm, opts) {
 					arrow.data('dfrd', dfrd);
 				})
 				.on('contextmenu', selNavdir, function(e) {
+					e.stopPropagation();
 					var self = $(this);
 					
 					// now dirname editing
 					if (self.find('input:text').length) {
-						e.stopPropagation();
 						return;
 					}
 					
@@ -34684,35 +34684,43 @@ elFinder.prototype.commands.rm = function() {
 	this.value = 'rm';
 	
 	this.init = function() {
-		// re-assign for extended command
-		self = this;
-		fm = this.fm;
-		// bind function of change
-		self.change(function() {
+		var update = function(origin) {
 			var targets;
 			delete self.extra;
 			self.title = fm.i18n('cmd' + self.value);
 			self.className = self.value;
 			self.button && self.button.children('span.elfinder-button-icon')[self.value === 'trash'? 'addClass' : 'removeClass']('elfinder-button-icon-trash');
-			if (self.value === 'trash') {
-				self.extra = {
-					icon: 'rm',
-					node: $('<span></span>')
-						.attr({title: fm.i18n('cmdrm')})
-						.on('ready', function(e, data) {
-							targets = data.targets;
-						})
-						.on('click touchstart', function(e){
-							if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
-								return;
-							}
-							e.stopPropagation();
-							e.preventDefault();
-							fm.getUI().trigger('click'); // to close the context menu immediately
-							fm.exec('rm', targets, {_userAction: true, forceRm : true});
-						})
-				};
+			if (origin && origin !== 'cwd' && (self.state > -1 || origin === 'navbar')) {
+				if (self.value === 'trash') {
+					self.extra = {
+						icon: 'rm',
+						node: $('<span></span>')
+							.attr({title: fm.i18n('cmdrm')})
+							.on('ready', function(e, data) {
+								targets = data.targets;
+							})
+							.on('click touchstart', function(e){
+								if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
+									return;
+								}
+								e.stopPropagation();
+								e.preventDefault();
+								fm.getUI().trigger('click'); // to close the context menu immediately
+								fm.exec('rm', targets, {_userAction: true, forceRm : true});
+							})
+					};
+				}
 			}
+		};
+		// re-assign for extended command
+		self = this;
+		fm = this.fm;
+		// bind function of change
+		self.change(function() {
+			update();
+		});
+		fm.bind('contextmenucreate', function(e) {
+			update(e.data.type);
 		});
 	};
 	
