@@ -4,6 +4,24 @@
  *
  * @author Dmitry (dio) Levashov
  **/
+ 
+
+/* add option to see in full size screen by Dario Passariello */
+html,
+body{
+    margin:0;
+    padding:0;
+    width:100% !important;
+    height:100% !important;
+    overflow:hidden;    
+}
+
+.elfinder{
+    margin:0;
+    padding:0;
+    width:100% !important;
+    height:100% !important;
+}
 
 /* scrollbar for Chrome and Safari */
 .elfinder:not(.elfinder-mobile) *::-webkit-scrollbar {
@@ -77,6 +95,8 @@
 .std42-dialog, .std42-dialog .ui-widget-content {
     background-color: #ededed;
     background-image: none;
+    /* fix bg-clip for safari */
+    -webkit-background-clip: content-box; 
     background-clip: content-box;
 }
 
