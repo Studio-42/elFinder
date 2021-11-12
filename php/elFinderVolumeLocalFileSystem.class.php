@@ -81,6 +81,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver
         $this->options['keepTimestamp'] = array('copy', 'move'); // keep timestamp at inner filesystem allowed 'copy', 'move' and 'upload'
         $this->options['substituteImg'] = true;       // support substitute image with dim command
         $this->options['statCorrector'] = null;       // callable to correct stat data `function(&$stat, $path, $statOwner, $volumeDriveInstance){}`
+        if (DIRECTORY_SEPARATOR === '/') {
+            // Linux
+            $this->options['acceptedName'] = '/^[^\.\/\x00][^\/\x00]*$/';
+        } else {
+            // Windows
+            $this->options['acceptedName'] = '/^[^\.\/\x00\\\:*?"<>|][^\/\x00\\\:*?"<>|]*$/';
+        }
     }
 
     /*********************************************************************/

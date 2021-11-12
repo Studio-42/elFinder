@@ -82,7 +82,8 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // //  * HTTP server PATH_INFO supports required
 // // Enable network mount
 // elFinder::$netDrivers['onedrive'] = 'OneDrive';
-// // GoogleDrive Netmount driver need next two settings. You can get at https://dev.onedrive.com
+// // OneDrive Netmount driver need next two settings. You can get at
+// // https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps
 // // AND require register redirect url to "YOUR_CONNECTOR_URL/netmount/onedrive/1"
 // define('ELFINDER_ONEDRIVE_CLIENTID',     '');
 // define('ELFINDER_ONEDRIVE_CLIENTSECRET', '');
