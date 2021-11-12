@@ -211,6 +211,15 @@ elFinder.prototype._options = {
 	 * @default ""
 	 */
 	i18nBaseUrl : '',
+
+	/**
+	 * Base URL of worker js files
+	 * baseUrl + "js/worker/" when empty value
+	 * 
+	 * @type String
+	 * @default ""
+	 */
+	 workerBaseUrl : '',
 	
 	/**
 	 * Auto load required CSS
