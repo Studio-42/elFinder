@@ -1,3 +1,11 @@
+2021-11-12  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.60):
+		- [VD:OneDrive] show error on _od_obtainAccessToken()
+		- [ui:cwd] make easily able to mapping mimetype to the kind (#3375) 
+		- [cmd:rm] Fixed an issue that sometime ignore the delete button and into the trash
+		- [VD:LocalFileSystem] Fixed #3429 RCE on Windows server
+		- [js:core,options] Fixed #3401 add an option workerBaseUrl
+
 2021-06-13  Naoki Sawada  <hypweb+elfinder@gmail.com>
 	* elFinder (2.1.59):
 		- [Security:php] Fixed multiple vulnerabilities leading to RCE
@@ -32,7 +40,7 @@
 	* elFinder (2.1.57):
 		- [js] Fixed #3148 to support jQuery 3.5.0 update
 		- [php:core] Fixed #3154 volume that require online access cannot be specified
-		- [VD:abstract] Fixed #3161 fix option data of cwd results on after change files
+		- [VD:abstract] Fixed #3161 Fixed option data of cwd results on after change files
 		- [VD:abstract] Fixed #3167 added "none" (no image library check) to `imgLib`
 		- [cmd:resize] Fixed #3158 to make able to change quality without changing dimensions
 		- And some minor bug fixes
@@ -290,8 +298,8 @@
 		- [css:dialog] rel #2724 correction style of `td.elfinder-info-hash`
 		- [ui:navdock] Fixed #2747 theme support of CSS fine tuning part
 		- [ui:navdock] rel #2747 correction of the ui size adjustment
-		- [css:commands] Fixed #2748 fix spinner position in rtl and unify `elfinder-info-spinner` to `elfinder-spinner`
-		- [css:command] rel #2748 typo fix of "spiner" to "spinner"
+		- [css:commands] Fixed #2748 Fixed spinner position in rtl and unify `elfinder-info-spinner` to `elfinder-spinner`
+		- [css:command] rel #2748 typo Fixed of "spiner" to "spinner"
 		- [cmd:quicklook] Fixed #2742 ViewerJS integration for PDF,ODT,ODS,ODP
 		- [ui:toolbar] Fixed #2751 correction rtl-toolbar (float icons in group)
 		- [css:toolbar] rel #2751 mirroring some icons for rtl
@@ -363,7 +371,7 @@
 		- [VD:abstract] Fixed #2564 bugfix of MIME-Type detection
 		- [cmd:quicklook,VD:abstract] Fixed #2575 add CAD-Files and 3D-Models online viewer on sharecad.org
 		- [cmd:edit] Fixed #2570 add online-convert.com integration
-		- [cmd:edit] Fixed #2580 fix detectation of current enabled editors
+		- [cmd:edit] Fixed #2580 Fixed detectation of current enabled editors
 		- [cmd:help] Add a tab "Integrations" to listing external services
 		- [cmd:edit:images] Fixed #2568 open one format save to another
 		- [js:core] Fixed #2582 sync size of list view column headers on browser resize
@@ -544,7 +552,7 @@
 		- [js:core] Fixed #2238 always same filename on upload with some iOS devices
 		- [js:core] Fixed #2240 correspond to parallel request in "Cancel" in notify dialog
 		- [VD:FTP] Fixed #2243 problem of symlink handling
-		- [ui:cwd] bug fix of contextmenu on the "Old School"
+		- [ui:cwd] bug Fixed of contextmenu on the "Old School"
 		- [cmd:quicklook] Fixed #2249 close-able docked preview window
 		- [api] cmd `size` can return size infomation of each targets as `sizes`
 		- [api] accept HTTP header "X-elFinderReqid"
@@ -552,7 +560,7 @@
 		- [VD:abstract] Fixed #2253 `elFinderVolumeDriver::getWorkFile()` dose not work
 		- [cmd:resize] Fixed #2251 add an option `commandsOptions.resize.getDimThreshold` for rapid starting
 		- [VD:abstract] Fixed #2257 save as progressive JPEG on image editing
-		- [VD:abstract] bug fix of detecting of `tmpLinkPath` and `tmpLinkUrl`
+		- [VD:abstract] bug Fixed of detecting of `tmpLinkPath` and `tmpLinkUrl`
 		- [cmd:resize] Fixed #2265 show the jpeg image save file size
 		- [ui:dialog] Fixed #2264 add an option `uiOptions.dualog.focusOnMouseOver`
 		- [cmd:resize] make rotatable directly with mobile devices
@@ -1155,7 +1163,7 @@
 		- Multi-line filename editing on icon view
 		- Auto expands filename editing on list view
 		- Fixed #1124, Uploading problem exactly 20MiB/30MiB/40MiB...
-		- Marged #1125, Fix file permissions for MySQL LOAD_FILE command
+		- Marged #1125, Fixed file permissions for MySQL LOAD_FILE command
 		- Fixed #1127, Supported full path including the drive letter of the Windows server
 		- Marged #1131, #1132, Complete Romanian(ro) translation
 		- Fixed symbolic link file stats `mtime`, `size`
