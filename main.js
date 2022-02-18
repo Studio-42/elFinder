@@ -4,7 +4,7 @@
         rootPath = './demo',
         // jQuery and jQueryUI version
         jqver = '3.6.0',
-        uiver = '1.12.1',
+        uiver = '1.13.1',
         // Detect language (optional)
 		lang = (function() {
 			var locq = window.location.search,
@@ -107,7 +107,8 @@
             });
             
             // load jQueryUI CSS
-            elFinder.prototype.loadCss('//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/themes/smoothness/jquery-ui.css');
+            //elFinder.prototype.loadCss('//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/themes/smoothness/jquery-ui.css');
+	    elFinder.prototype.loadCss('//code.jquery.com/ui/'+uiver+'/themes/smoothness/jquery-ui.css');
             
             $(function() {
                 // Optional for Japanese decoder "extras/encoding-japanese.min"
@@ -201,7 +202,8 @@
         baseUrl : rootPath+'/js',
         paths : {
             'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(old? '1.12.4' : jqver)+'/jquery.min',
-            'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/jquery-ui.min',
+            //'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/jquery-ui.min',
+            'jquery-ui': '//code.jquery.com/ui/'+uiver+'/jquery-ui.min',
             'elfinder' : 'elfinder.min',
             'i18nfmsg' : '../../i18nFolderMsgs',
             'jquery.xdr': '../xdr/jquery.xdr',
