@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.60 (2.1-src Nightly: 3037974) (2022-03-10)
+ * Version 2.1.60 (2.1-src Nightly: acc4970) (2022-03-10)
  * http://elfinder.org
  * 
  * Copyright 2009-2022, Studio 42
@@ -10730,7 +10730,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.60 (2.1-src Nightly: 3037974)';
+elFinder.prototype.version = '2.1.60 (2.1-src Nightly: acc4970)';
 
 
 
@@ -25900,7 +25900,7 @@ elFinder.prototype.commands.fullscreen = function() {
 			html.push('<div class="'+prim+'">'+fm.i18n('team')+'</div>');
 			
 			html.push(atpl[r](author, 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;')[r](work, fm.i18n('chiefdev')));
-			html.push(atpl[r](author, 'Naoki Sawada &lt;hypweb+elfinder@gmail.com&gt;')[r](work, fm.i18n('developer')));
+			html.push(atpl[r](author, 'Naoki Sawada (nao-pon)&lt;hypweb+elfinder@gmail.com&gt;')[r](work, fm.i18n('developer')));
 			html.push(atpl[r](author, 'Troex Nevelin &lt;troex@fury.scancode.ru&gt;')[r](work, fm.i18n('maintainer')));
 			html.push(atpl[r](author, 'Alexey Sukhotin &lt;strogg@yandex.ru&gt;')[r](work, fm.i18n('contributor')));
 			
@@ -25917,7 +25917,7 @@ elFinder.prototype.commands.fullscreen = function() {
 			
 			html.push(sep);
 			html.push('<div class="'+lic+'">Licence: 3-clauses BSD Licence</div>');
-			html.push('<div class="'+lic+'">Copyright © 2009-2021, Studio 42</div>');
+			html.push('<div class="'+lic+'">Copyright © 2009-2022, Studio 42 / nao-pon</div>');
 			html.push('<div class="'+lic+'">„ …'+fm.i18n('dontforget')+' ”</div>');
 			html.push('</div>');
 		},
