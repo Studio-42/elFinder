@@ -3,7 +3,7 @@
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
  * @author Alex Yashkin <alex@yashkin.by>
- * @version 2020-01-24
+ * @version 2022-01-02
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -18,9 +18,9 @@
 		translator : 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;, Andrew Berezovsky &lt;andrew.berezovsky@gmail.com&gt;, Alex Yashkin &lt;alex@yashkin.by&gt;',
 		language   : 'Русский язык',
 		direction  : 'ltr',
-		dateFormat : 'd M Y H:i', // will show like: 24 Янв 2020 15:00
-		fancyDateFormat : '$1 H:i', // will show like: Сегодня 15:00
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 200124-150054
+		dateFormat : 'd M Y H:i', // will show like: 02 Янв 2022 19:53
+		fancyDateFormat : '$1 H:i', // will show like: Сегодня 19:53
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 220102-195313
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -117,6 +117,7 @@
 			'errServerError'       : 'Возникла ошибка на стороне сервера.', // from v2.1.25 added 16.6.2017
 			'errEmpty'             : 'Невозможно очистить папку "$1".', // from v2.1.25 added 22.6.2017
 			'moreErrors'           : 'Еще ошибок: $1', // from v2.1.44 added 9.12.2018
+			'errMaxMkdirs'         : 'Вы можете создать за один раз папок: $1.', // from v2.1.58 added 20.6.2021
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Создать архив',
