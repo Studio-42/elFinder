@@ -265,6 +265,14 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver
         }
 
         $this->statOwner = (!empty($this->options['statOwner']));
+
+        // enable WinRemoveTailDots plugin on Windows server
+        if (DIRECTORY_SEPARATOR !== '/') {
+            if (!isset($this->options['plugin'])) {
+                $this->options['plugin'] = array();
+            }
+            $this->options['plugin']['WinRemoveTailDots'] = array('enable' => true);
+        }
     }
 
     /**
