@@ -386,7 +386,7 @@ elFinder.prototype.commands.quicklook.plugins = [
 				ql.hideinfo();
 				var doc = $('<iframe class="elfinder-quicklook-preview-html"></iframe>').appendTo(preview)[0].contentWindow.document;
 				doc.open();
-				doc.write(marked(data.content));
+				doc.write((marked.parse || marked)(data.content));
 				doc.close();
 				loading.remove();
 			},

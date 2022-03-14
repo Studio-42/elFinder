@@ -6794,14 +6794,22 @@ abstract class elFinderVolumeDriver
             $base = rtrim($base, $separator);
         }
 
-        // 'Here'
-        if ($path === '' || $path === '.' . $separator) return $base;
-
         $sepquoted = preg_quote($separator, '#');
 
+        // normalize `//` to `/`
+        $path = preg_replace('#' . $sepquoted . '+#', $separator, $path); // '#/+#'
+
+        // remove `./`
+        $path = preg_replace('#(?<=^|' . $sepquoted . ')\.' . $sepquoted . '#', '', $path); // '#(?<=^|/)\./#'
+
+        // 'Here'
+        if ($path === '') return $base;
+
+        // join $base to $path if $path start `../`
         if (substr($path, 0, 3) === '..' . $separator) {
             $path = $base . $separator . $path;
         }
+
         // normalize `/../`
         $normreg = '#(' . $sepquoted . ')[^' . $sepquoted . ']+' . $sepquoted . '\.\.' . $sepquoted . '#'; // '#(/)[^\/]+/\.\./#'
         while (preg_match($normreg, $path)) {
@@ -6810,6 +6818,9 @@ abstract class elFinderVolumeDriver
         if ($path !== $systemroot) {
             $path = rtrim($path, $separator);
         }
+
+        // discard the surplus `../`
+        $path = str_replace('..' . $separator, '', $path);
 
         // Absolute path
         if ($path[0] === $separator || strpos($path, $systemroot) === 0) {
