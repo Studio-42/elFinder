@@ -1,3 +1,12 @@
+2022-03-14  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.61):
+		- [security] Fixed #3458 filename bypass leading to RCE on Windows server
+		- [security:CVE-2022-26960] Fixed a path traversal issue
+		- [i18n] Updated ru and fr
+		- [js] Updated CDNs of external libs
+		- And some minor bug fixes
+
+
 2021-11-12  Naoki Sawada  <hypweb+elfinder@gmail.com>
 	* elFinder (2.1.60):
 		- [VD:OneDrive] show error on _od_obtainAccessToken()
@@ -5,6 +14,7 @@
 		- [cmd:rm] Fixed an issue that sometime ignore the delete button and into the trash
 		- [VD:LocalFileSystem] Fixed #3429 RCE on Windows server
 		- [js:core,options] Fixed #3401 add an option workerBaseUrl
+
 
 2021-06-13  Naoki Sawada  <hypweb+elfinder@gmail.com>
 	* elFinder (2.1.59):
