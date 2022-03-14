@@ -485,6 +485,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver
         if ($path === DIRECTORY_SEPARATOR) {
             return $this->root;
         } else {
+            $path = $this->_normpath($path);
             if (strpos($path, $this->systemRoot) === 0) {
                 return $path;
             } else if (DIRECTORY_SEPARATOR !== '/' && preg_match('/^[a-zA-Z]:' . preg_quote(DIRECTORY_SEPARATOR, '/') . '/', $path)) {
