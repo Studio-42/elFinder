@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.61 (2.1-src Nightly: 1733024) (2022-03-15)
+ * Version 2.1.61 (2.1-src Nightly: 91d7435) (2022-04-27)
  * http://elfinder.org
  * 
  * Copyright 2009-2022, Studio 42
@@ -6340,7 +6340,9 @@ elFinder.prototype = {
 						}
 						entry = items[i];
 						if (entry) {
-							if (entry.isFile) {
+							if (entry instanceof File) {
+								pushItem(entry);
+							} else if (entry.isFile) {
 								processing++;
 								entry.file(pushItem, check);
 							} else if (entry.isDirectory) {
@@ -6357,7 +6359,11 @@ elFinder.prototype = {
 				}, hasDirs;
 				
 				items = $.map(data.files.items, function(item){
-					return item.getAsEntry? item.getAsEntry() : item.webkitGetAsEntry();
+					if (item.kind === 'file') {
+						return (item.getAsEntry? item.getAsEntry() : item.webkitGetAsEntry()) || item.getAsFile();
+					} else {
+						return null;
+					}
 				});
 				$.each(items, function(i, item) {
 					if (item.isDirectory) {
@@ -10730,7 +10736,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.61 (2.1-src Nightly: 1733024)';
+elFinder.prototype.version = '2.1.61 (2.1-src Nightly: 91d7435)';
 
 
 
@@ -11217,10 +11223,10 @@ elFinder.prototype._options = {
 	cdns : {
 		// for editor etc.
 		ace        : 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14',
-		codemirror : 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2',
-		ckeditor   : 'https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.17.2',
-		ckeditor5  : 'https://cdn.ckeditor.com/ckeditor5/33.0.0',
-		tinymce    : 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.0.0',
+		codemirror : 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.3',
+		ckeditor   : 'https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.18.0',
+		ckeditor5  : 'https://cdn.ckeditor.com/ckeditor5/34.0.0',
+		tinymce    : 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.0.2',
 		simplemde  : 'https://cdnjs.cloudflare.com/ajax/libs/simplemde/1.11.2',
 		fabric     : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/4.2.0',
 		fabric16   : 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.6.7',
@@ -11229,7 +11235,7 @@ elFinder.prototype._options = {
 		hls        : 'https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.1.5/hls.min.js',
 		dash       : 'https://cdnjs.cloudflare.com/ajax/libs/dashjs/4.3.0/dash.all.min.js',
 		flv        : 'https://cdnjs.cloudflare.com/ajax/libs/flv.js/1.6.2/flv.min.js',
-		videojs    : 'https://cdnjs.cloudflare.com/ajax/libs/video.js/7.18.1',
+		videojs    : 'https://cdnjs.cloudflare.com/ajax/libs/video.js/7.19.2',
 		prettify   : 'https://cdn.jsdelivr.net/gh/google/code-prettify@f1c3473acd1e8ea8c8c1a60c56e89f5cdd06f915/loader/run_prettify.js',
 		psd        : 'https://cdnjs.cloudflare.com/ajax/libs/psd.js/3.4.0/psd.min.js',
 		rar        : 'https://cdn.jsdelivr.net/gh/nao-pon/rar.js@6cef13ec66dd67992fc7f3ea22f132d770ebaf8b/rar.min.js',
@@ -11237,7 +11243,7 @@ elFinder.prototype._options = {
 		zlibGunzip : 'https://cdn.jsdelivr.net/gh/imaya/zlib.js@0.3.1/bin/gunzip.min.js',
 		bzip2      : 'https://cdn.jsdelivr.net/gh/nao-pon/bzip2.js@0.8.0/bzip2.js',
 		marked     : 'https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js',
-		sparkmd5   : 'https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.0/spark-md5.min.js',
+		sparkmd5   : 'https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.2/spark-md5.min.js',
 		jssha      : 'https://cdnjs.cloudflare.com/ajax/libs/jsSHA/3.2.0/sha.min.js',
 		amr        : 'https://cdn.jsdelivr.net/gh/yxl/opencore-amr-js@dcf3d2b5f384a1d9ded2a54e4c137a81747b222b/js/amrnb.js',
 		tiff       : 'https://cdn.jsdelivr.net/gh/seikichi/tiff.js@545ede3ee46b5a5bc5f06d65954e775aa2a64017/tiff.min.js'
@@ -35661,10 +35667,10 @@ elFinder.prototype.commands.upload = function() {
 				target = e._target || null,
 				trf = e.dataTransfer || null,
 				kind = '',
-				errors;
+				idx, errors;
 			
 			if (trf) {
-				if (trf.types && trf.types.length && $.inArray('Files', trf.types) !== -1) {
+				if (trf.types && trf.types.length && (idx = $.inArray('Files', trf.types)) !== -1) {
 				    kind = 'file';
 				}
 				else if (trf.items && trf.items.length && trf.items[0].kind) {
@@ -35682,7 +35688,7 @@ elFinder.prototype.commands.upload = function() {
 					}
 				} catch(e) {}
 				
-				if (kind === 'file' && (trf.items[0].getAsEntry || trf.items[0].webkitGetAsEntry)) {
+				if (kind === 'file' && (trf.items[idx].getAsEntry || trf.items[idx].webkitGetAsEntry || trf.items[idx].getAsFile)) {
 					file = trf;
 					type = 'data';
 				} else if (kind !== 'string' && trf.files && trf.files.length && $.inArray('Text', trf.types) === -1) {
