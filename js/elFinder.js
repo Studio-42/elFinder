@@ -6309,7 +6309,9 @@ elFinder.prototype = {
 						}
 						entry = items[i];
 						if (entry) {
-							if (entry.isFile) {
+							if (entry instanceof File) {
+								pushItem(entry);
+							} else if (entry.isFile) {
 								processing++;
 								entry.file(pushItem, check);
 							} else if (entry.isDirectory) {
@@ -6326,7 +6328,11 @@ elFinder.prototype = {
 				}, hasDirs;
 				
 				items = $.map(data.files.items, function(item){
-					return item.getAsEntry? item.getAsEntry() : item.webkitGetAsEntry();
+					if (item.kind === 'file') {
+						return (item.getAsEntry? item.getAsEntry() : item.webkitGetAsEntry()) || item.getAsFile();
+					} else {
+						return null;
+					}
 				});
 				$.each(items, function(i, item) {
 					if (item.isDirectory) {
