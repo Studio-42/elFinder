@@ -1,6 +1,6 @@
 /**
  * Czech translation
- * @author RobiNN <kelcakrobo@gmail.com>
+ * @author RobiNN <robo@kelcak.com>
  * @author Jay Gridley <gridley.jay@hotmail.com>
  * @version 2021-06-10
  */
@@ -14,7 +14,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.cs = {
-		translator : 'RobiNN &lt;kelcakrobo@gmail.com&gt;, Jay Gridley &lt;gridley.jay@hotmail.com&gt;',
+		translator : 'RobiNN &lt;robo@kelcak.com&gt;, Jay Gridley &lt;gridley.jay@hotmail.com&gt;',
 		language   : 'Čeština',
 		direction  : 'ltr',
 		dateFormat : 'd. m. Y H:i', // will show like: 10. 06. 2021 23:37
