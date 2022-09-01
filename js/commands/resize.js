@@ -920,7 +920,7 @@ elFinder.prototype.commands.resize = function() {
 							if (! animate || fm.UA.Opera || fm.UA.ltIE8) {
 								imgr.rotate(value);
 							} else {
-								imgr.animate({rotate: value + 'deg'});
+								imgr.animate({rotate: value + (fm.UA.Chrome? '' : 'deg')});
 							}
 							value = value % 360;
 							if (value < 0) {

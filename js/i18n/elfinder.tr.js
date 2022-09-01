@@ -3,9 +3,9 @@
  * @author I.Taskinoglu & A.Kaya <alikaya@armsyazilim.com>
  * @author Abdullah ELEN <abdullahelen@msn.com>
  * @author Osman KAYAN <osmnkayan@gmail.com>
- * @author alikayan95@gmail.com
+ * @author Ali KAYAN <alikayan95@gmail.com>
  * @author Cengiz AKCAN cengiz@vobo.company
- * @version 2021-02-20
+ * @version 2022-05-08
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,12 +17,12 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.tr = {
-		translator : 'I.Taskinoglu & A.Kaya &lt;alikaya@armsyazilim.com&gt;, Abdullah ELEN &lt;abdullahelen@msn.com&gt;, Osman KAYAN &lt;osmnkayan@gmail.com&gt;, alikayan95@gmail.com, Cengiz AKCAN cengiz@vobo.company',
+		translator : 'I.Taskinoglu & A.Kaya &lt;alikaya@armsyazilim.com&gt;, Abdullah ELEN &lt;abdullahelen@msn.com&gt;, Osman KAYAN &lt;osmnkayan@gmail.com&gt;, alikayan95@gmail.com, Cengiz AKCAN cengiz@vobo.company, Ali KAYAN &lt;alikayan95@gmail.com&gt;',
 		language   : 'Türkçe',
 		direction  : 'ltr',
-		dateFormat : 'd.m.Y H:i', // will show like: 20.02.2021 19:30
-		fancyDateFormat : '$1 H:i', // will show like: Bugün 19:30
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 210220-193050
+		dateFormat : 'd.m.Y H:i', // will show like: 08.05.2022 21:53
+		fancyDateFormat : '$1 H:i', // will show like: Bugün 21:53
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 220508-215305
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -119,6 +119,7 @@
 			'errServerError'       : 'Sunucu tarafında beklenilmeyen bir hata oluştu.', // from v2.1.25 added 16.6.2017
 			'errEmpty'             : '"$1" klasörü boşaltılamıyor.', // from v2.1.25 added 22.6.2017
 			'moreErrors'           : '"$1" veya daha fazla hata', // from v2.1.44 added 9.12.2018
+			'errMaxMkdirs'         : 'Tek seferde 1$\'a kadar klasör oluşturabilirsiniz.', // from v2.1.58 added 20.6.2021
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : 'Arşiv oluştur',

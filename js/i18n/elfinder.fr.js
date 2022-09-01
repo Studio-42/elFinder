@@ -298,7 +298,7 @@
 			/********************************** messages **********************************/
 			'confirmReq'      : 'Confirmation requise',
 			'confirmRm'       : 'Êtes-vous certain de vouloir supprimer les éléments ?<br/>Cela ne peut être annulé !',
-			'confirmRepl'     : 'Supprimer l\'ancien fichier par le nouveau ?',
+			'confirmRepl'     : 'Remplacer l\'ancien fichier par le nouveau ?',
 			'confirmRest'     : 'Remplacer l\'élément existant par l\'élément de la corbeille ?', // fromv2.1.24 added 5.5.2017
 			'confirmConvUTF8' : 'L\'encodage n\'est pas UTf-8<br/>Convertir en UTF-8 ?<br/>Les contenus deviendront UTF-8 en sauvegardant après la conversion.', // from v2.1 added 08.04.2014
 			'confirmNonUTF8'  : 'Impossible de détecter l\'encodage de ce fichier. Pour être modifié, il doit être temporairement convertit en UTF-8.<br/>Veuillez s\'il vous plaît sélectionner un encodage pour ce fichier.', // from v2.1.19 added 28.11.2016

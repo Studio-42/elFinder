@@ -247,14 +247,13 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
 
         $name = $info['filename'];
 
-        if (preg_match('|(.+)\-\>(.+)|', $name, $m)) {
-            $name = trim($m[1]);
+        if ($info['type'] === 3)) {
             // check recursive processing
             if ($this->cacheDirTarget && $this->_joinPath($base, $name) !== $this->cacheDirTarget) {
                 return array();
             }
             if (!$nameOnly) {
-                $target = trim($m[2]);
+                $target = $this->connect->readlink($name);
                 if (substr($target, 0, 1) !== $this->separator) {
                     $target = $this->getFullPath($target, $base);
                 }
@@ -281,8 +280,19 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
         $owner_computed = isset($stat['isowner']) ? $stat['isowner'] : $this->options['owner'];
         $perm = $this->parsePermissions($info['permissions'], $owner_computed);
         $stat['name'] = $name;
-        $stat['mime'] = $info['type'] == NET_SFTP_TYPE_DIRECTORY ? 'directory' : $this->mimetype($stat['name'], true);
-        $stat['size'] = $stat['mime'] == 'directory' ? 0 : $info['size'];
+        if ($info['type'] === NET_SFTP_TYPE_DIRECTORY) {
+            $stat['mime'] = 'directory';
+            $stat['size'] = 0;
+
+        } elseif ($info['type'] === NET_SFTP_TYPE_SYMLINK) {
+            $stat['mime'] = 'symlink';
+            $stat['size'] = 0;
+
+        } else {
+            $stat['mime'] = $this->mimetype($stat['name'], true);
+            $stat['size'] = $info['size'];
+        }
+
         $stat['read'] = $perm['read'];
         $stat['write'] = $perm['write'];
 
@@ -346,6 +356,8 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
                 $stat = $this->updateCache($p, $stat);
                 if (empty($stat['hidden'])) {
                     if (!$hasDir && $stat['mime'] === 'directory') {
+                        $hasDir = true;
+                    } elseif (!$hasDir && $stat['mime'] === 'symlink') {
                         $hasDir = true;
                     }
                     $this->dirsCache[$path][] = $p;
@@ -519,6 +531,9 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
             $name = $info['filename'];
             if ($name && $name !== '.' && $name !== '..' && $info['type'] == NET_SFTP_TYPE_DIRECTORY) {
                 return true;
+            }
+            if ($name && $name !== '.' && $name !== '..' && $info['type'] == NET_SFTP_TYPE_SYMLINK) {
+                //return true;
             }
         }
 
