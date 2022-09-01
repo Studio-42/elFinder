@@ -1,6 +1,6 @@
 /**
  * Slovak translation
- * @author RobiNN <kelcakrobo@gmail.com>
+ * @author RobiNN <robo@kelcak.com>
  * @author Jakub Ďuraš <jkblmr@gmail.com>
  * @version 2021-06-10
  */
@@ -14,7 +14,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.sk = {
-		translator : 'RobiNN &lt;kelcakrobo@gmail.com&gt;, Jakub Ďuraš &lt;jkblmr@gmail.com&gt;',
+		translator : 'RobiNN &lt;robo@kelcak.com&gt;, Jakub Ďuraš &lt;jkblmr@gmail.com&gt;',
 		language   : 'Slovenčina',
 		direction  : 'ltr',
 		dateFormat : 'd.m.Y H:i', // will show like: 10.06.2021 23:35
