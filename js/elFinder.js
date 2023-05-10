@@ -4821,7 +4821,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		});
 
 		// bind window onmessage for CORS
-		$(window).on('message.' + namespace, function(e){
+		$(window).on('message.' + namespace, function(e) {
 			var res = e.originalEvent || null,
 				obj, data;
 			if (res && (self.convAbsUrl(self.options.url).indexOf(res.origin) === 0 || self.convAbsUrl(self.uploadURL).indexOf(res.origin) === 0)) {
@@ -4848,7 +4848,20 @@ var elFinder = function(elm, opts, bootCallback) {
 						}
 					}
 				} catch (e) {
-					self.sync();
+					try {
+						// Execute only if there is no _syncLocker variable
+						if(self._syncLocker === undefined) {
+							// Create a lock to avoid multiple executions of the sync() method
+							self._syncLocker = true;
+							// Sync and ...
+							self.sync().finally(function() {
+								// .. release lock
+								delete self._syncLocker;
+							});
+						}
+					} catch(ex) {
+						// console.error({ex});
+					}
 				}
 			}
 		});
