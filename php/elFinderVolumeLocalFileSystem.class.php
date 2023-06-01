@@ -373,9 +373,13 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver
         // realpath() returns FALSE if the file does not exist
         if ($path === false || strpos($path, $this->root) !== 0) {
             if (DIRECTORY_SEPARATOR !== '/') {
+                $dir = str_replace('/', DIRECTORY_SEPARATOR, $dir);
                 $name = str_replace('/', DIRECTORY_SEPARATOR, $name);
             }
             // Directory traversal measures
+            if (strpos($dir, '..' . DIRECTORY_SEPARATOR) !== false || substr($dir, -2) == '..') {
+                $dir = $this->root;
+            }
             if (strpos($name, '..' . DIRECTORY_SEPARATOR) !== false) {
                 $name = basename($name);
             }
