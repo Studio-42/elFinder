@@ -972,7 +972,7 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver
      **/
     protected function _symlink($source, $targetDir, $name)
     {
-        return symlink($source, $this->_joinPath($targetDir, $name));
+        return $this->localFileSystemSymlink($source, $this->_joinPath($targetDir, $name));
     }
 
     /**
@@ -1470,12 +1470,14 @@ class elFinderVolumeLocalFileSystem extends elFinderVolumeDriver
     protected function localFileSystemSymlink($target, $link)
     {
         $res = false;
-        $errlev = error_reporting();
-        error_reporting($errlev ^ E_WARNING);
-        if ($res = symlink(realpath($target), $link)) {
-            $res = is_readable($link);
+        if (function_exists('symlink') and is_callable('symlink')) {
+            $errlev = error_reporting();
+            error_reporting($errlev ^ E_WARNING);
+            if ($res = symlink(realpath($target), $link)) {
+                $res = is_readable($link);
+            }
+            error_reporting($errlev);
         }
-        error_reporting($errlev);
         return $res;
     }
 } // END class 
