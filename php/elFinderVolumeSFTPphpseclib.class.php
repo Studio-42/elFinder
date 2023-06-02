@@ -247,7 +247,7 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
 
         $name = $info['filename'];
 
-        if ($info['type'] === 3)) {
+        if ($info['type'] === 3) {
             // check recursive processing
             if ($this->cacheDirTarget && $this->_joinPath($base, $name) !== $this->cacheDirTarget) {
                 return array();

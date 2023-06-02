@@ -184,6 +184,7 @@ Hint: [How to load CSS with RequireJS?](https://github.com/Studio-42/elFinder/wi
  * [Tiki Wiki](https://doc.tiki.org/elFinder)
  * [WordPress](https://wordpress.org/plugins/file-manager/)
  * [XOOPS](https://github.com/nao-pon/xelfinder)
+ * [XOOPSCube](https://github.com/xoopscube/xelfinder) GUI-based control panel: FTP, cloud storage and editors
  * [Yii](http://www.yiiframework.com/extension/elfinder/)
  * [Zenphoto](http://www.zenphoto.org/news/elfinder/)
 
