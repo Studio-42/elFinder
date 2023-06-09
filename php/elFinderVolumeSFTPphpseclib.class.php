@@ -200,14 +200,6 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
     protected function ftpRawList($path)
     {
         return $this->connect->rawlist($path ?: '.') ?: [];
-/*
-        $raw = $this->connect->rawlist($path ?: '.') ?: [];
-        $raw = array_map(function($key, $value) {
-            $value['name'] = $key;
-            return $value;
-        }, array_keys($raw), $raw);
-        return $raw;
-*/
     }
 
     /*********************************************************************/
@@ -229,16 +221,15 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
     /**
      * Parse line from rawlist() output and return file stat (array)
      *
-     * @param  string $raw line from rawlist() output
+     * @param array $info from rawlist() output
      * @param         $base
      * @param bool    $nameOnly
      *
      * @return array
      * @author Dmitry Levashov
      */
-    protected function parseRaw($raw, $base, $nameOnly = false)
+    protected function parseRaw($info, $base, $nameOnly = false)
     {
-        $info = $raw;
         $stat = array();
 
         if ($info['filename'] == '.' || $info['filename'] == '..') {
@@ -339,8 +330,8 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
 
         $list = array();
         $encPath = $this->convEncIn($path);
-        foreach ($this->ftpRawList($encPath) as $raw) {
-            if (($stat = $this->parseRaw($raw, $encPath))) {
+        foreach ($this->ftpRawList($encPath) as $info) {
+            if (($stat = $this->parseRaw($info, $encPath))) {
                 $list[] = $stat;
             }
         }
@@ -459,11 +450,10 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
                     'dirs' => true,
                 );
                 $ts = 0;
-                foreach ($this->ftpRawList($path) as $str) {
-                    $info = preg_split('/\s+/', $str, 9);
-                    if ($info[8] === '.') {
-                        $info[8] = 'root';
-                        if ($stat = $this->parseRaw(join(' ', $info), $path)) {
+                foreach ($this->ftpRawList($path) as $info) {
+                    if ($info['filename'] === '.') {
+                        $info['filename'] = 'root';
+                        if ($stat = $this->parseRaw($info, $path)) {
                             unset($stat['name']);
                             $res = array_merge($res, $stat);
                             if ($res['ts']) {
@@ -472,7 +462,7 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
                             }
                         }
                     }
-                    if ($check && ($stat = $this->parseRaw($str, $path))) {
+                    if ($check && ($stat = $this->parseRaw($info, $path))) {
                         if (isset($stat['ts']) && !empty($stat['ts'])) {
                             $ts = max($ts, $stat['ts']);
                         }
