@@ -3060,11 +3060,22 @@ var elFinder = function(elm, opts, bootCallback) {
 	};
 	
 	/**
+	 * Sync Stopper
+	 * 
+	 * @type Boolean
+	 */
+	this.syncStopper = false;
+
+	/**
 	 * Sync content
 	 * 
 	 * @return jQuery.Deferred
 	 */
 	this.sync = function(onlydir, polling) {
+		if (this.syncStopper) {
+			return $.Deferred().reject();
+		}
+		this.syncStopper = true;
 		this.autoSync('stop');
 		var self  = this,
 			compare = function(){
@@ -3189,6 +3200,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			return dfrd.resolve(diff);
 		})
 		.always(function() {
+			self.syncStopper = false;
 			self.autoSync();
 		});
 		
