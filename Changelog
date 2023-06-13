@@ -1,3 +1,22 @@
+2023-06-14  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.62):
+		- [php:core] prevent garbled file name when URL upload
+		- [js:core,upload] fixed DnD in-browser image upload in Chrome
+		- [js:options] update CDNs
+		- [js:core,upload] fixed DnD in-browser image upload in Chrome
+		- [php] Update elFinderVolumeSFTPphpseclib.class.php (#3483)
+		- [mime.types] Update mime.types to allow MS outlook message files (#3499)
+		- [js:cmd:resize] fix #3513 rotate bug on Chrome
+		- [VD:LocalFileSystem] Security fixes, directory traversal vulnerability fixes
+		  - Awaiting CVE ID.
+		  - This issue was found by Michał Majchrowicz & Livio Victoriano AFINE Team.
+		- Correctly urlencode path in setcookie(); fix #3538 (#3561)
+		- [js:core] fix #3572 Useless backend request during elFinder.sync()
+		- [VD:LocalFileSystem] fix #3543 Can't download folder in PHP 8.1
+		- [php:core] fix #3546 Use elFinder::getCmdOfBind instead of self::getCmdOfBind which is deprecated in PHP v8.2
+		- [VD:SFTP] fix SFTP driver fatal error, cleanup (#3574) 
+
+
 2022-03-14  Naoki Sawada  <hypweb+elfinder@gmail.com>
 	* elFinder (2.1.61):
 		- [security] Fixed #3458 filename bypass leading to RCE on Windows server
