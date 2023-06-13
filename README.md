@@ -1,7 +1,7 @@
 elFinder
 ========
 
-**WARNING: IF YOU HAVE OLDER (IN PARTICULAR 2.1.60 OR EARLIER) VERSIONS OF ELFINDER ON PUBLIC SERVERS, IT MAY CAUSE SERIOUS DAMAGE TO YOUR SERVER AND VISITED USER. YOU SHOULD UPDATE TO THE LATEST VERSION OR REMOVE IT FROM THE SERVER.**
+**WARNING: IF YOU HAVE OLDER (IN PARTICULAR 2.1.62 OR EARLIER) VERSIONS OF ELFINDER ON PUBLIC SERVERS, IT MAY CAUSE SERIOUS DAMAGE TO YOUR SERVER AND VISITED USER. YOU SHOULD UPDATE TO THE LATEST VERSION OR REMOVE IT FROM THE SERVER.**
 
 [![elFinder file manager for the Web](https://studio-42.github.io/elFinder/images/elFinderScr.png "elFinder file manager for the Web")](https://studio-42.github.io/elFinder/)
 
@@ -125,7 +125,7 @@ Installation
 Downloads
 ------------
 **Stable releases** ([Changelog](https://github.com/Studio-42/elFinder/blob/master/Changelog))
- + [elFinder 2.1.61](https://github.com/Studio-42/elFinder/archive/2.1.61.zip)
+ + [elFinder 2.1.62](https://github.com/Studio-42/elFinder/archive/2.1.62.zip)
  + [elFinder 2.0.9](https://github.com/Studio-42/elFinder/archive/2.0.9.zip) (deprecated)
 
 **Nightly builds**
@@ -184,6 +184,7 @@ Hint: [How to load CSS with RequireJS?](https://github.com/Studio-42/elFinder/wi
  * [Tiki Wiki](https://doc.tiki.org/elFinder)
  * [WordPress](https://wordpress.org/plugins/file-manager/)
  * [XOOPS](https://github.com/nao-pon/xelfinder)
+ * [XOOPSCube](https://github.com/xoopscube/xelfinder) GUI-based control panel: FTP, cloud storage and editors
  * [Yii](http://www.yiiframework.com/extension/elfinder/)
  * [Zenphoto](http://www.zenphoto.org/news/elfinder/)
 
