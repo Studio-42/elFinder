@@ -3,8 +3,8 @@
     var i18nFolderMsgs = {},
         rootPath = './demo',
         // jQuery and jQueryUI version
-        jqver = '3.6.0',
-        uiver = '1.13.1',
+        jqver = '3.7.0',
+        uiver = '1.13.2',
         // Detect language (optional)
 		lang = (function() {
 			var locq = window.location.search,
