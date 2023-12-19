@@ -3228,7 +3228,7 @@ var elFinder = function(elm, opts, bootCallback) {
 	this.shortcut = function(s) {
 		var patterns, pattern, code, i, parts;
 		
-		if (this.options.allowShortcuts && s.pattern && $.isFunction(s.callback)) {
+		if (this.options.allowShortcuts && s.pattern && typeof s.callback === 'function') {
 			patterns = s.pattern.toUpperCase().split(/\s+/);
 			
 			for (i= 0; i < patterns.length; i++) {
@@ -5248,10 +5248,10 @@ var elFinder = function(elm, opts, bootCallback) {
 		$.each(self.commands, function(name, cmd) {
 			var proto = Object.assign({}, cmd.prototype),
 				extendsCmd, opts;
-			if ($.isFunction(cmd) && !self._commands[name] && (cmd.prototype.forceLoad || $.inArray(name, self.options.commands) !== -1)) {
+			if (typeof cmd === 'function' && !self._commands[name] && (cmd.prototype.forceLoad || $.inArray(name, self.options.commands) !== -1)) {
 				extendsCmd = cmd.prototype.extendsCmd || '';
 				if (extendsCmd) {
-					if ($.isFunction(self.commands[extendsCmd])) {
+					if (typeof self.commands[extendsCmd] === 'function') {
 						cmd.prototype = Object.assign({}, base, new self.commands[extendsCmd](), cmd.prototype);
 					} else {
 						return true;
@@ -5270,7 +5270,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				if (self._commands[name].linkedCmds.length) {
 					$.each(self._commands[name].linkedCmds, function(i, n) {
 						var lcmd = self.commands[n];
-						if ($.isFunction(lcmd) && !self._commands[n]) {
+						if (typeof lcmd === 'function' && !self._commands[n]) {
 							lcmd.prototype = base;
 							self._commands[n] = new lcmd();
 							self._commands[n].setup(n, self.options.commandsOptions[n]||{});
@@ -8611,7 +8611,7 @@ elFinder.prototype = {
 		
 		if (cnt > 0) {
 			if (cancel && button.length) {
-				if ($.isFunction(cancel) || (typeof cancel === 'object' && cancel.promise)) {
+				if (typeof cancel === 'function' || (typeof cancel === 'object' && cancel.promise)) {
 					notify._esc = function(e) {
 						if (e.type == 'keydown' && e.keyCode != $.ui.keyCode.ESCAPE) {
 							return;
@@ -8768,7 +8768,7 @@ elFinder.prototype = {
 			};
 		}
 		
-		if (opts.optionsCallback && $.isFunction(opts.optionsCallback)) {
+		if (opts.optionsCallback && typeof opts.optionsCallback === 'function') {
 			opts.optionsCallback(options);
 		}
 		
@@ -9262,7 +9262,7 @@ elFinder.prototype = {
 	 * @return void
 	 */
 	registRawStringDecoder : function(rawStringDecoder) {
-		if ($.isFunction(rawStringDecoder)) {
+		if (typeof rawStringDecoder === 'function') {
 			this.decodeRawString = this.options.rawStringDecoder = rawStringDecoder;
 		}
 	},
@@ -9754,7 +9754,7 @@ elFinder.prototype = {
 					}
 				});
 				if (!hasError) {
-					if ($.isFunction(callback)) {
+					if (typeof callback === 'function') {
 						if (check) {
 							if (typeof check.obj[check.name] === 'undefined') {
 								cnt = check.timeout? (check.timeout / 10) : 1;
@@ -9772,7 +9772,7 @@ elFinder.prototype = {
 						}
 					}
 				} else {
-					if (opts.error && $.isFunction(opts.error)) {
+					if (opts.error && typeof opts.error === 'function') {
 						opts.error({ loadResults: results });
 					}
 				}

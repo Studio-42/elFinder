@@ -386,7 +386,7 @@ $.fn.elfinder = function(o, o2) {
 					if (elfinder) {
 						opts = $.extend(true, elfinder.options, $.isPlainObject(o2)? o2 : {});
 						bootCallback = elfinder.bootCallback;
-						if (elfinder.reloadCallback && $.isFunction(elfinder.reloadCallback)) {
+						if (elfinder.reloadCallback && typeof elfinder.reloadCallback === 'function') {
 							elfinder.reloadCallback(opts, bootCallback);
 						} else {
 							elfinder.destroy();

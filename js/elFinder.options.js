@@ -1344,7 +1344,7 @@ elFinder.prototype._options = {
 	 * 
 	 * @type Null|Function
 	 */
-	rawStringDecoder : typeof Encoding === 'object' && $.isFunction(Encoding.convert)? function(str) {
+	rawStringDecoder : typeof Encoding === 'object' && typeof Encoding.convert === 'function'? function(str) {
 		return Encoding.convert(str, {
 			to: 'UNICODE',
 			type: 'string'
