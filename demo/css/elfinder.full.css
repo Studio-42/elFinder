@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.63 (2023-12-20)
+ * Version 2.1.63 (2.1-src Nightly: 2aa7fac) (2023-12-20)
  * http://elfinder.org
  * 
  * Copyright 2009-2023, Studio 42
@@ -3437,8 +3437,10 @@ button.elfinder-info-button {
 }
 
 /* File: /css/fonts.css */
-.dialogelfinder .dialogelfinder-drag, .elfinder-place-drag .elfinder-navbar-dir, 
-.elfinder-quicklook-preview-text-wrapper, .elfinder-info-tb   {
+.dialogelfinder .dialogelfinder-drag,
+.elfinder-place-drag .elfinder-navbar-dir,
+.elfinder-quicklook-preview-text-wrapper,
+.elfinder-info-tb {
     font-size: .9em;
 }
 
@@ -3454,13 +3456,18 @@ button.elfinder-info-button {
     font-size: .76em;
 }
 
-.elfinder-contextmenu .elfinder-contextmenu-item span, .std42-dialog .ui-dialog-content, .elfinder .elfinder-navbar,
- .elfinder-quicklook-info-data, .elfinder-button-menu-item, {
+.elfinder-contextmenu .elfinder-contextmenu-item span,
+.std42-dialog .ui-dialog-content,
+.elfinder .elfinder-navbar,
+.elfinder-quicklook-info-data,
+.elfinder-button-menu-item {
     font-size: .72em;
 }
 
-.elfinder-cwd-view-icons .elfinder-cwd-filename, .elfinder-cwd-view-list td, .elfinder-quicklook-title,
-.elfinder-statusbar div  {
+.elfinder-cwd-view-icons .elfinder-cwd-filename,
+.elfinder-cwd-view-list td,
+.elfinder-quicklook-title,
+.elfinder-statusbar div {
     font-size: .7em;
 }
 
