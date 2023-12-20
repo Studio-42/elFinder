@@ -233,6 +233,23 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
     }
 
     /**
+     * Perform sql prepared statement and return result.
+     * Increase sqlCnt and save error if occurred.
+     *
+     * @param mysqli_stmt $stmt
+     * @return bool
+     */
+    protected function execute($stmt)
+    {
+        $this->sqlCnt++;
+        $res = $stmt->execute();
+        if (!$res) {
+            $this->dbError = $this->db->error;
+        }
+        return $res;
+    }
+
+    /**
      * Create empty object with required mimetype
      *
      * @param  string $path parent dir path
@@ -888,11 +905,13 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
                 chmod($tmpfile, 0644);
 
                 $sql = $id > 0
-                    ? 'REPLACE INTO %s (id, parent_id, name, content, size, mtime, mime, width, height) VALUES (' . $id . ', %d, \'%s\', LOAD_FILE(\'%s\'), %d, %d, \'%s\', %d, %d)'
-                    : 'INSERT INTO %s (parent_id, name, content, size, mtime, mime, width, height) VALUES (%d, \'%s\', LOAD_FILE(\'%s\'), %d, %d, \'%s\', %d, %d)';
-                $sql = sprintf($sql, $this->tbf, $dir, $this->db->real_escape_string($name), $this->loadFilePath($tmpfile), $size, $ts, $mime, $w, $h);
+                    ? 'REPLACE INTO %s (id, parent_id, name, content, size, mtime, mime, width, height) VALUES (' . $id . ', ?, ?, LOAD_FILE(?), ?, ?, ?, ?, ?)'
+                    : 'INSERT INTO %s (parent_id, name, content, size, mtime, mime, width, height) VALUES (?, ?, LOAD_FILE(?), ?, ?, ?, ?, ?)';
+                $stmt = $this->db->prepare(sprintf($sql, $this->tbf));
+                $path = $this->loadFilePath($tmpfile);
+                $stmt->bind_param("issiisii", $dir, $name, $path, $size, $ts, $mime, $w, $h);
 
-                $res = $this->query($sql);
+                $res = $this->execute($stmt);
                 unlink($tmpfile);
 
                 if ($res) {
@@ -909,13 +928,14 @@ class elFinderVolumeMySQL extends elFinderVolumeDriver
         }
 
         $sql = $id > 0
-            ? 'REPLACE INTO %s (id, parent_id, name, content, size, mtime, mime, width, height) VALUES (' . $id . ', %d, \'%s\', \'%s\', %d, %d, \'%s\', %d, %d)'
-            : 'INSERT INTO %s (parent_id, name, content, size, mtime, mime, width, height) VALUES (%d, \'%s\', \'%s\', %d, %d, \'%s\', %d, %d)';
-        $sql = sprintf($sql, $this->tbf, $dir, $this->db->real_escape_string($name), $this->db->real_escape_string($content), $size, $ts, $mime, $w, $h);
+            ? 'REPLACE INTO %s (id, parent_id, name, content, size, mtime, mime, width, height) VALUES (' . $id . ', ?, ?, ?, ?, ?, ?, ?, ?)'
+            : 'INSERT INTO %s (parent_id, name, content, size, mtime, mime, width, height) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+        $stmt = $this->db->prepare(sprintf($sql, $this->tbf));
+        $stmt->bind_param("issiisii", $dir, $name, $content, $size, $ts, $mime, $w, $h);
 
         unset($content);
 
-        if ($this->query($sql)) {
+        if ($this->execute($stmt)) {
             return $id > 0 ? $id : $this->db->insert_id;
         }
 
