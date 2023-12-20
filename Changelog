@@ -1,4 +1,9 @@
 2023-12-20  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.64):
+		- [css] re-fix #3584 css error and CI
+
+
+2023-12-20  Naoki Sawada  <hypweb+elfinder@gmail.com>
 	* elFinder (2.1.63):
 		- [php:core] fix download a file via context menu the windows download popup don't close (#3619)
 		- [VD:MySQL] Use prepared statements instead of escaping when saving file (#3604)
