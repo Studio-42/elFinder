@@ -1,5 +1,7 @@
-.dialogelfinder .dialogelfinder-drag, .elfinder-place-drag .elfinder-navbar-dir, 
-.elfinder-quicklook-preview-text-wrapper, .elfinder-info-tb   {
+.dialogelfinder .dialogelfinder-drag,
+.elfinder-place-drag .elfinder-navbar-dir,
+.elfinder-quicklook-preview-text-wrapper,
+.elfinder-info-tb {
     font-size: .9em;
 }
 
@@ -15,13 +17,18 @@
     font-size: .76em;
 }
 
-.elfinder-contextmenu .elfinder-contextmenu-item span, .std42-dialog .ui-dialog-content, .elfinder .elfinder-navbar,
- .elfinder-quicklook-info-data, .elfinder-button-menu-item, {
+.elfinder-contextmenu .elfinder-contextmenu-item span,
+.std42-dialog .ui-dialog-content,
+.elfinder .elfinder-navbar,
+.elfinder-quicklook-info-data,
+.elfinder-button-menu-item {
     font-size: .72em;
 }
 
-.elfinder-cwd-view-icons .elfinder-cwd-filename, .elfinder-cwd-view-list td, .elfinder-quicklook-title,
-.elfinder-statusbar div  {
+.elfinder-cwd-view-icons .elfinder-cwd-filename,
+.elfinder-cwd-view-list td,
+.elfinder-quicklook-title,
+.elfinder-statusbar div {
     font-size: .7em;
 }
 
