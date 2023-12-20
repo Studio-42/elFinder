@@ -1,3 +1,13 @@
+2023-12-20  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.63):
+		- [php:core] fix download a file via context menu the windows download popup don't close (#3619)
+		- [VD:MySQL] Use prepared statements instead of escaping when saving file (#3604)
+		- [VD:core] fix #3617 Filename Restriction Bypass Leading To Persistent Cross-site Scripting
+		- [js] fix #3614 $.isFunction() is deprecated in jQuery
+		- [js] Update to jQuery 3.7.1 and Jquery UI 1.13.2
+		- [VD:LocalFileSystem] fix #3615 Using .php8 in PHP handler leading to RCE
+		- [cmd:upload] fix #3575 Drag&Drop Upload Issue with Firefox
+
 2023-06-14  Naoki Sawada  <hypweb+elfinder@gmail.com>
 	* elFinder (2.1.62):
 		- [php:core] prevent garbled file name when URL upload
