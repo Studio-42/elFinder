@@ -49,13 +49,13 @@
             sortOrder : 'desc',
             sortStickFolders : false,
             themes : {
-                'dark-slim'     : 'https://johnfort.github.io/elFinder.themes/dark-slim/manifest.json',
-                'material'      : 'https://nao-pon.github.io/elfinder-theme-manifests/material-default.json',
-                'material-gray' : 'https://nao-pon.github.io/elfinder-theme-manifests/material-gray.json',
-                'material-light': 'https://nao-pon.github.io/elfinder-theme-manifests/material-light.json',
-                'bootstrap'     : 'https://nao-pon.github.io/elfinder-theme-manifests/bootstrap.json',
-                'moono'         : 'https://nao-pon.github.io/elfinder-theme-manifests/moono.json',
-                'win10'         : 'https://nao-pon.github.io/elfinder-theme-manifests/win10.json'
+                'dark-slim'   : 'https://johnfort.github.io/elFinder.themes/dark-slim/manifest.json',
+                'mt-darkblue' : 'https://robinn1.github.io/elFinder-Material-Theme/manifests/darkblue.json',
+                'mt-gray'     : 'https://robinn1.github.io/elFinder-Material-Theme/manifests/gray.json',
+                'mt-light'    : 'https://robinn1.github.io/elFinder-Material-Theme/manifests/light.json',
+                'bootstrap'   : 'https://nao-pon.github.io/elfinder-theme-manifests/bootstrap.json',
+                'moono'       : 'https://nao-pon.github.io/elfinder-theme-manifests/moono.json',
+                'win10'       : 'https://nao-pon.github.io/elfinder-theme-manifests/win10.json'
             },
             ui : ['toolbar', 'places', 'tree', 'path', 'stat'],
             commandsOptions : {
