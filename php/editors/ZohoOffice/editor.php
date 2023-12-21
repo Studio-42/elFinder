@@ -18,9 +18,9 @@ class elFinderEditorZohoOffice extends elFinderEditor
     );
 
     private $urls = array(
-        'writer' => 'https://writer.zoho.com/writer/officeapi/v1/document',
-        'sheet' => 'https://sheet.zoho.com/sheet/officeapi/v1/spreadsheet',
-        'show' => 'https://show.zoho.com/show/officeapi/v1/presentation',
+        'writer' => 'https://api.office-integrator.com/writer/officeapi/v1/document',
+        'sheet' => 'https://api.office-integrator.com/sheet/officeapi/v1/spreadsheet',
+        'show' => 'https://api.office-integrator.com/show/officeapi/v1/presentation',
     );
 
     private $srvs = array(
@@ -44,6 +44,28 @@ class elFinderEditorZohoOffice extends elFinderEditor
     );
 
     private $myName = '';
+
+    protected function extentionNormrize($extention, $srvsName) {
+        switch($srvsName) {
+            case 'writer':
+                if (!in_array($extention, array('zdoc', 'docx', 'rtf', 'odt', 'html', 'txt'))) {
+                    $extention = 'docx';
+                }
+                break;
+            case 'sheet':
+                if (!in_array($extention, array('zsheet', 'xls', 'xlsx', 'ods', 'csv', 'tsv'))) {
+                    $extention = 'xlsx';
+                }
+                break;
+            case 'show':
+                if (!in_array($extention, array('zslides', 'pptx', 'pps', 'ppsx', 'odp', 'sxi'))) {
+                    $extention = 'pptx';
+                }
+                break;
+
+        }
+        return $extention;
+    }
 
     public function __construct($elfinder, $args)
     {
@@ -103,7 +125,8 @@ class elFinderEditorZohoOffice extends elFinderEditor
                     }
                 }
                 //$srv = $this->args['service'];
-                $format = $srcVol->getExtentionByMime($file['mime']);
+                $srvsName = $this->srvs[$file['mime']];
+                $format = $this->extentionNormrize($srcVol->getExtentionByMime($file['mime']), $srvsName);
                 if (!$format) {
                     $format = substr($file['name'], strrpos($file['name'], '.') * -1);
                 }
@@ -111,12 +134,11 @@ class elFinderEditorZohoOffice extends elFinderEditor
                 if ($lang === 'jp') {
                     $lang = 'ja';
                 }
-                $srvsName = $this->srvs[$file['mime']];
                 $data = array(
                     'apikey' => ELFINDER_ZOHO_OFFICE_APIKEY,
                     'callback_settings' => array(
                         'save_format' => $format,
-                        'context_info' => array(
+                        'save_url_params' => array(
                             'hash' => $hash
                         )
                     ),
@@ -174,16 +196,13 @@ class elFinderEditorZohoOffice extends elFinderEditor
 
     public function save()
     {
-        if (!empty($_POST) && !empty($_POST['id']) && !empty($_FILES) && !empty($_FILES['content'])) {
-            $data = @json_decode(str_replace('&quot;', '"', $_POST['id']), true);
-            if (!empty($data['hash'])) {
-                $hash = $data['hash'];
-                /** @var elFinderVolumeDriver $volume */
-                if ($volume = $this->elfinder->getVolume($hash)) {
-                    if ($content = file_get_contents($_FILES['content']['tmp_name'])) {
-                        if ($volume->putContents($hash, $content)) {
-                            return array('raw' => true, 'error' => '', 'header' => 'HTTP/1.1 200 OK');
-                        }
+        if (!empty($_POST) && !empty($_POST['hash']) && !empty($_FILES) && !empty($_FILES['content'])) {
+            $hash = $_POST['hash'];
+            /** @var elFinderVolumeDriver $volume */
+            if ($volume = $this->elfinder->getVolume($hash)) {
+                if ($content = file_get_contents($_FILES['content']['tmp_name'])) {
+                    if ($volume->putContents($hash, $content)) {
+                        return array('raw' => true, 'error' => '', 'header' => 'HTTP/1.1 200 OK');
                     }
                 }
             }
