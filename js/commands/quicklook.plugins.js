@@ -852,12 +852,16 @@ elFinder.prototype.commands.quicklook.plugins = [
 						}
 					},
 					err = 0, 
+					cssClass = '',
 					canPlay;
 				//reset();
 				pDash = null;
 				opts = opts || {};
+				if (opts.cssClass) {
+					cssClass = ' ' + opts.cssClass;
+				}
 				ql.hideinfo();
-				node = $('<video class="elfinder-quicklook-preview-video" controls' + controlsList + ' preload="auto" autobuffer playsinline>'
+				node = $('<video class="elfinder-quicklook-preview-video' + cssClass + '" controls' + controlsList + ' preload="auto" autobuffer playsinline>'
 						+'</video>')
 					.on('change', function(e) {
 						// Firefox fire change event on seek or volume change
@@ -964,10 +968,13 @@ elFinder.prototype.commands.quicklook.plugins = [
 				opDfd = fm.openUrl(file.hash, false, function(url) {
 					loading.remove();
 					if (url) {
-						render(file);
+						render(file, {
+							src: url,
+							cssClass: 'video-js'
+						});
 						node[0].src = url;
 						cVideojs(node[0], {
-							src: url
+							autoplay: true
 						});
 					}
 				}, { progressBar: prog });
