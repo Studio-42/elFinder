@@ -1,9 +1,9 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.64 (2.1-src Nightly: cb65186) (2023-12-21)
+ * Version 2.1.65 (2.1-src Nightly: c81d9f8) (2024-01-05)
  * http://elfinder.org
  * 
- * Copyright 2009-2023, Studio 42
+ * Copyright 2009-2024, Studio 42
  * Licensed under a 3-clauses BSD license
  */
 (function(root, factory) {
@@ -10748,7 +10748,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.64 (2.1-src Nightly: cb65186)';
+elFinder.prototype.version = '2.1.65 (2.1-src Nightly: c81d9f8)';
 
 
 
@@ -25934,7 +25934,7 @@ elFinder.prototype.commands.fullscreen = function() {
 			
 			html.push(sep);
 			html.push('<div class="'+lic+'">Licence: 3-clauses BSD Licence</div>');
-			html.push('<div class="'+lic+'">Copyright © 2009-2022, Studio 42 / nao-pon</div>');
+			html.push('<div class="'+lic+'">Copyright © 2009-2024, Studio 42 / nao-pon</div>');
 			html.push('<div class="'+lic+'">„ …'+fm.i18n('dontforget')+' ”</div>');
 			html.push('</div>');
 		},
