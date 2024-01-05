@@ -1,3 +1,9 @@
+2024-01-05  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.65):
+		- [js] update CDNs
+		- [php:editors] Zoho API update
+
+
 2023-12-20  Naoki Sawada  <hypweb+elfinder@gmail.com>
 	* elFinder (2.1.64):
 		- [css] re-fix #3584 css error and CI
