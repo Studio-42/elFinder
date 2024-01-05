@@ -74,7 +74,7 @@
 			
 			html.push(sep);
 			html.push('<div class="'+lic+'">Licence: 3-clauses BSD Licence</div>');
-			html.push('<div class="'+lic+'">Copyright © 2009-2022, Studio 42 / nao-pon</div>');
+			html.push('<div class="'+lic+'">Copyright © 2009-2024, Studio 42 / nao-pon</div>');
 			html.push('<div class="'+lic+'">„ …'+fm.i18n('dontforget')+' ”</div>');
 			html.push('</div>');
 		},
