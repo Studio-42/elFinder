@@ -331,7 +331,7 @@
 			'calc'            : 'Calculer',
 			'path'            : 'Chemin',
 			'aliasfor'        : 'Raccourcis pour',
-			'locked'          : 'Verrouiller',
+			'locked'          : 'Verrouillé',
 			'dim'             : 'Dimensions',
 			'files'           : 'Fichiers',
 			'folders'         : 'Dossiers',
