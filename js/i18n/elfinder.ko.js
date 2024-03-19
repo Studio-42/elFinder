@@ -4,7 +4,7 @@
  * @author Park Sungyong; <sungyong@gmail.com>
  * @author Yeonjeong Woo <eat_sweetly@naver.com>
  * @author Kwon Hyungjoo <hyung778@gmail.com>
- * @version 2020-04-07
+ * @version 2024-03-19
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -19,9 +19,9 @@
 		translator : 'Hwang Ahreum; &lt;luckmagic@naver.com&gt;, Park Sungyong; &lt;sungyong@gmail.com&gt;, Yeonjeong Woo &lt;eat_sweetly@naver.com&gt;, Kwon Hyungjoo &lt;hyung778@gmail.com&gt;',
 		language   : 'Korea-한국어',
 		direction  : 'ltr',
-		dateFormat : 'Y-m-d H:i', // will show like: 2020-04-07 10:24
-		fancyDateFormat : '$1 H:i', // will show like: 오늘 10:24
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 200407-102404
+		dateFormat : 'Y-m-d H:i', // will show like: 2024-03-19 16:27
+		fancyDateFormat : '$1 H:i', // will show like: 오늘 16:27
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 240319-162748
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -118,6 +118,7 @@
 			'errServerError'       : '서버측에서 오류가 발생했습니다.', // from v2.1.25 added 16.6.2017
 			'errEmpty'             : '"$1" 폴더를 비울 수 없습니다.', // from v2.1.25 added 22.6.2017
 			'moreErrors'           : '$1개의 오류가 더 발생했습니다.', // from v2.1.44 added 9.12.2018
+			'errMaxMkdirs'         : 'You can create up to $1 folders at one time.', // from v2.1.58 added 20.6.2021
 
 			/******************************* commands names ********************************/
 			'cmdarchive'   : '압축파일생성',
