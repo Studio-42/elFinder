@@ -5329,7 +5329,16 @@ abstract class elFinderVolumeDriver
         $this->rmTmb($stat); // can not do rmTmb() after _move()
         $this->clearcache();
 
-        if ($res = $this->convEncOut($this->_move($this->convEncIn($src), $this->convEncIn($dst), $this->convEncIn($name)))) {
+        $res = $this->convEncOut($this->_move($this->convEncIn($src), $this->convEncIn($dst), $this->convEncIn($name)));
+        // if moving it didn't work try to copy / delete
+        if (!$res) {
+            $res = $this->copy($src, $dst, $name);
+            if (!$this->remove($src)) {
+                $res = false;
+            }
+        }
+
+        if ($res) {
             $this->clearstatcache();
             if ($stat['mime'] === 'directory') {
                 $this->updateSubdirsCache($dst, true);
