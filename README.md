@@ -1,7 +1,7 @@
 elFinder
 ========
 
-**WARNING: IF YOU HAVE OLDER (IN PARTICULAR 2.1.48 OR EARLIER) VERSIONS OF ELFINDER ON PUBLIC SERVERS, IT MAY CAUSE SERIOUS DAMAGE TO YOUR SERVER AND VISITED USER. YOU SHOULD UPDATE TO THE LATEST VERSION OR REMOVE IT FROM THE SERVER.**
+**WARNING: IF YOU HAVE OLDER (IN PARTICULAR 2.1.62 OR EARLIER) VERSIONS OF ELFINDER ON PUBLIC SERVERS, IT MAY CAUSE SERIOUS DAMAGE TO YOUR SERVER AND VISITED USER. YOU SHOULD UPDATE TO THE LATEST VERSION OR REMOVE IT FROM THE SERVER.**
 
 [![elFinder file manager for the Web](https://studio-42.github.io/elFinder/images/elFinderScr.png "elFinder file manager for the Web")](https://studio-42.github.io/elFinder/)
 
@@ -16,6 +16,7 @@ used in Mac OS X operating system.
 [![CDNJS version](https://img.shields.io/cdnjs/v/elfinder.svg)](https://cdnjs.com/libraries/elfinder)
 [![Donate Paypal(nao-pon)](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FF5FKRSMKYDVA)
 [![Donate Bitcoin(nao-pon)](https://img.shields.io/badge/Donate-Bitcoin-orange.svg)](https://studio-42.github.io/elFinder/tools/donate-bitcoin/)
+[![Buy me a coffee](https://img.shields.io/static/v1.svg?label=Buy%20me%20a%20coffee&message=🥨&color=black&logo=buy%20me%20a%20coffee&logoColor=white&labelColor=6f4e37)](https://www.buymeacoffee.com/naopon)
 
 Contents
 --------
@@ -47,7 +48,7 @@ Features
    upload, create folder/file, rename, etc.)
  * High performance server backend and light client UI
  * Multi-root support
- * Local file system, MySQL, FTP, Box, Dropbox, GoogleDrive and OneDrive volume storage drivers
+ * Local file system, MySQL, FTP, SFTP, Box, Dropbox, GoogleDrive and OneDrive volume storage drivers
  * Support AWS S3, Azure, Digital Ocean Spaces and more with [League\Flysystem](https://github.com/barryvdh/elfinder-flysystem-driver) Flysystem driver
  * Cloud storage (Box, Dropbox, GoogleDrive and OneDrive) drivers
  * Background file/folder upload with Drag & Drop HTML5 support
@@ -124,7 +125,7 @@ Installation
 Downloads
 ------------
 **Stable releases** ([Changelog](https://github.com/Studio-42/elFinder/blob/master/Changelog))
- + [elFinder 2.1.57](https://github.com/Studio-42/elFinder/archive/2.1.57.zip)
+ + [elFinder 2.1.65](https://github.com/Studio-42/elFinder/archive/2.1.65.zip)
  + [elFinder 2.0.9](https://github.com/Studio-42/elFinder/archive/2.0.9.zip) (deprecated)
 
 **Nightly builds**
@@ -134,7 +135,6 @@ Demo sites
 ------------
 **2.1.x Nightly**
  + https://studio-42.github.io/elFinder/ (with CORS)
- + https://hypweb.net/elFinder-nightly/demo/2.1/
 
 FAQs
 ------------
@@ -154,8 +154,7 @@ You can create or modify the language file to use translation tool. Please refer
 
 3rd party connectors
 --------------------
- * [ASP.NET Core](https://github.com/gordon-matt/elFinder.NetCore)
- * [ASP.NET](https://github.com/leniel/elFinder.Net)
+ * [ASP.NET](https://github.com/leniel/elFinder.Net) / [ASP.NET Core](https://github.com/gordon-matt/elFinder.NetCore) / [.NET Standard](https://github.com/mguinness/elFinder.AspNet)
  * [Java Servlet](https://github.com/trustsystems/elfinder-java-connector)
  * [JavaScript/Efw](https://github.com/efwGrp/efw3.X/blob/master/help/tag.elfinder.md)
  * [Nodejs](https://github.com/dekyfin/elfinder-node)
@@ -178,13 +177,14 @@ Hint: [How to load CSS with RequireJS?](https://github.com/Studio-42/elFinder/wi
 3rd party Integrations
 --------------------
  * [Django](https://github.com/mikery/django-elfinder)
- * [Drupal](https://www.drupal.org/project/elfinder)
+ * [Drupal](https://gitlab.com/667bdrm/elfinder)
  * [Laravel](https://github.com/barryvdh/laravel-elfinder)
  * [Roundcube](https://github.com/Offerel/roundcube_elfinder)
  * [Symfony](https://github.com/helios-ag/FMElfinderBundle)
  * [Tiki Wiki](https://doc.tiki.org/elFinder)
  * [WordPress](https://wordpress.org/plugins/file-manager/)
  * [XOOPS](https://github.com/nao-pon/xelfinder)
+ * [XOOPSCube](https://github.com/xoopscube/xelfinder) GUI-based control panel: FTP, cloud storage and editors
  * [Yii](http://www.yiiframework.com/extension/elfinder/)
  * [Zenphoto](http://www.zenphoto.org/news/elfinder/)
 
@@ -200,10 +200,10 @@ Support
 Authors
 -------
 
- * Current main developer: Naoki Sawada <hypweb+elfinder@gmail.com>
+ * Current main developer: Naoki Sawada <hypweb+elfinder@gmail.com> [![Buy me a coffee](https://img.shields.io/static/v1.svg?label=Buy%20me%20a%20coffee&message=🥨&color=black&logo=buy%20me%20a%20coffee&logoColor=white&labelColor=6f4e37)](https://www.buymeacoffee.com/naopon)
  * Chief developer: Dmitry "dio" Levashov <dio@std42.ru>
  * Maintainer: Troex Nevelin <troex@fury.scancode.ru>
- * Developers: Alexey Sukhotin <strogg@yandex.ru>, Naoki Sawada <hypweb+elfinder@gmail.com>
+ * Developers: Alexey Sukhotin, Naoki Sawada <hypweb+elfinder@gmail.com>
  * Icons: PixelMixer, [Yusuke Kamiyamane](http://p.yusukekamiyamane.com), [Icons8](https://icons8.com)
 
 We hope our tools will be helpful for you.

@@ -28,7 +28,14 @@
 
 	this.getstate = function(select) {
 		var sel = this.files(select),
-			cnt = sel.length;
+			cnt = sel.length,
+			filter = function(files) {
+				var fres = true;
+				return $.grep(files, function(file) {
+					fres = fres && file.mime == 'directory' || ! file.read ? false : true;
+					return fres;
+				});
+			};
 		
 		return cnt == 1 
 			? (sel[0].read ? 0 : -1)
@@ -80,7 +87,7 @@
 		
 		var doOpen = function() {
 			var openCB = function(url) {
-					var link = $('<a>').hide().appendTo($('body'));
+					var link = $('<a rel="noopener">').hide().appendTo($('body'));
 					if (fm.UA.Mobile || !inline) {
 						if (html5dl) {
 							if (!inline) {

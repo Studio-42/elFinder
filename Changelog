@@ -1,8 +1,96 @@
+2024-01-05  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.65):
+		- [js] update CDNs
+		- [php:editors] Zoho API update
+
+
+2023-12-20  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.64):
+		- [css] re-fix #3584 css error and CI
+
+
+2023-12-20  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.63):
+		- [php:core] fix download a file via context menu the windows download popup don't close (#3619)
+		- [VD:MySQL] Use prepared statements instead of escaping when saving file (#3604)
+		- [VD:core] fix #3617 Filename Restriction Bypass Leading To Persistent Cross-site Scripting
+		- [js] fix #3614 $.isFunction() is deprecated in jQuery
+		- [js] Update to jQuery 3.7.1 and Jquery UI 1.13.2
+		- [VD:LocalFileSystem] fix #3615 Using .php8 in PHP handler leading to RCE
+		- [cmd:upload] fix #3575 Drag&Drop Upload Issue with Firefox
+
+2023-06-14  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.62):
+		- [php:core] prevent garbled file name when URL upload
+		- [js:core,upload] fixed DnD in-browser image upload in Chrome
+		- [js:options] update CDNs
+		- [js:core,upload] fixed DnD in-browser image upload in Chrome
+		- [php] Update elFinderVolumeSFTPphpseclib.class.php (#3483)
+		- [mime.types] Update mime.types to allow MS outlook message files (#3499)
+		- [js:cmd:resize] fix #3513 rotate bug on Chrome
+		- [VD:LocalFileSystem] Security fixes, directory traversal vulnerability fixes
+		  - Awaiting CVE ID.
+		  - This issue was found by Michał Majchrowicz & Livio Victoriano AFINE Team.
+		- Correctly urlencode path in setcookie(); fix #3538 (#3561)
+		- [js:core] fix #3572 Useless backend request during elFinder.sync()
+		- [VD:LocalFileSystem] fix #3543 Can't download folder in PHP 8.1
+		- [php:core] fix #3546 Use elFinder::getCmdOfBind instead of self::getCmdOfBind which is deprecated in PHP v8.2
+		- [VD:SFTP] fix SFTP driver fatal error, cleanup (#3574) 
+
+
+2022-03-14  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.61):
+		- [security] Fixed #3458 filename bypass leading to RCE on Windows server
+		- [security:CVE-2022-26960] Fixed a path traversal issue
+		- [i18n] Updated ru and fr
+		- [js] Updated CDNs of external libs
+		- And some minor bug fixes
+
+
+2021-11-12  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.60):
+		- [VD:OneDrive] show error on _od_obtainAccessToken()
+		- [ui:cwd] make easily able to mapping mimetype to the kind (#3375) 
+		- [cmd:rm] Fixed an issue that sometime ignore the delete button and into the trash
+		- [VD:LocalFileSystem] Fixed #3429 RCE on Windows server
+		- [js:core,options] Fixed #3401 add an option workerBaseUrl
+
+
+2021-06-13  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.59):
+		- [Security:php] Fixed multiple vulnerabilities leading to RCE
+		- [php:session] Fixed #3278 wrong code of typo
+		- [js:core] #3351 allow columnsCustomName[x] to be a function
+		- [css:quicklook] Fixed #3240 remove unnecessary color specifications
+		- [cmd:extract] Fixed #3252 for checking the existence of existing files
+		- [js:core] Fixed #3359 add an option "noResizeBySelf"
+		- [VD:abstract] Fixed #3216 missing url option on upload into root
+		- And some minor bug fixes
+
+
+2021-06-09  Naoki Sawada  <hypweb+elfinder@gmail.com>
+	* elFinder (2.1.58):
+		- [VD:abstract] Fixed #3151 support RAR5 lib
+		- [cmd:fullscreen] Fixed #3177 wrong fullscreen button caption
+		- [js:core] Supports cookie samesite attribute
+		- [VD:SFTP] Add new SFTP driver, via phpseclib library
+		- [js:core] Fixed #3193 auto-detection of baseUrl
+		- [js:upload] Fixed upload bug (#3264)
+		- [VD:abstract,php] make the thumbnail support webp (#3265) 
+		- [php:core] Fixed #3250 error only variables can be passed by reference
+		- [VD:abstract] add 'phar:*' => 'text/x-php' into 'staticMineMap'
+		- [VD:abstract] Fixed #3181 add an option uploadMaxMkdirs
+		- [php:core] Add cwd param to proc_open (#3281)
+		- [VD:abstract] Bugfix of an option mimeDetect (#3291)
+		- [UI] Fixed #3302 problem of d&d when copy of UI command is disabled
+		- And some minor bug fixes
+
+
 2020-06-05  Naoki Sawada  <hypweb+elfinder@gmail.com>
 	* elFinder (2.1.57):
 		- [js] Fixed #3148 to support jQuery 3.5.0 update
 		- [php:core] Fixed #3154 volume that require online access cannot be specified
-		- [VD:abstract] Fixed #3161 fix option data of cwd results on after change files
+		- [VD:abstract] Fixed #3161 Fixed option data of cwd results on after change files
 		- [VD:abstract] Fixed #3167 added "none" (no image library check) to `imgLib`
 		- [cmd:resize] Fixed #3158 to make able to change quality without changing dimensions
 		- And some minor bug fixes
@@ -260,8 +348,8 @@
 		- [css:dialog] rel #2724 correction style of `td.elfinder-info-hash`
 		- [ui:navdock] Fixed #2747 theme support of CSS fine tuning part
 		- [ui:navdock] rel #2747 correction of the ui size adjustment
-		- [css:commands] Fixed #2748 fix spinner position in rtl and unify `elfinder-info-spinner` to `elfinder-spinner`
-		- [css:command] rel #2748 typo fix of "spiner" to "spinner"
+		- [css:commands] Fixed #2748 Fixed spinner position in rtl and unify `elfinder-info-spinner` to `elfinder-spinner`
+		- [css:command] rel #2748 typo Fixed of "spiner" to "spinner"
 		- [cmd:quicklook] Fixed #2742 ViewerJS integration for PDF,ODT,ODS,ODP
 		- [ui:toolbar] Fixed #2751 correction rtl-toolbar (float icons in group)
 		- [css:toolbar] rel #2751 mirroring some icons for rtl
@@ -333,7 +421,7 @@
 		- [VD:abstract] Fixed #2564 bugfix of MIME-Type detection
 		- [cmd:quicklook,VD:abstract] Fixed #2575 add CAD-Files and 3D-Models online viewer on sharecad.org
 		- [cmd:edit] Fixed #2570 add online-convert.com integration
-		- [cmd:edit] Fixed #2580 fix detectation of current enabled editors
+		- [cmd:edit] Fixed #2580 Fixed detectation of current enabled editors
 		- [cmd:help] Add a tab "Integrations" to listing external services
 		- [cmd:edit:images] Fixed #2568 open one format save to another
 		- [js:core] Fixed #2582 sync size of list view column headers on browser resize
@@ -514,7 +602,7 @@
 		- [js:core] Fixed #2238 always same filename on upload with some iOS devices
 		- [js:core] Fixed #2240 correspond to parallel request in "Cancel" in notify dialog
 		- [VD:FTP] Fixed #2243 problem of symlink handling
-		- [ui:cwd] bug fix of contextmenu on the "Old School"
+		- [ui:cwd] bug Fixed of contextmenu on the "Old School"
 		- [cmd:quicklook] Fixed #2249 close-able docked preview window
 		- [api] cmd `size` can return size infomation of each targets as `sizes`
 		- [api] accept HTTP header "X-elFinderReqid"
@@ -522,7 +610,7 @@
 		- [VD:abstract] Fixed #2253 `elFinderVolumeDriver::getWorkFile()` dose not work
 		- [cmd:resize] Fixed #2251 add an option `commandsOptions.resize.getDimThreshold` for rapid starting
 		- [VD:abstract] Fixed #2257 save as progressive JPEG on image editing
-		- [VD:abstract] bug fix of detecting of `tmpLinkPath` and `tmpLinkUrl`
+		- [VD:abstract] bug Fixed of detecting of `tmpLinkPath` and `tmpLinkUrl`
 		- [cmd:resize] Fixed #2265 show the jpeg image save file size
 		- [ui:dialog] Fixed #2264 add an option `uiOptions.dualog.focusOnMouseOver`
 		- [cmd:resize] make rotatable directly with mobile devices
@@ -1125,7 +1213,7 @@
 		- Multi-line filename editing on icon view
 		- Auto expands filename editing on list view
 		- Fixed #1124, Uploading problem exactly 20MiB/30MiB/40MiB...
-		- Marged #1125, Fix file permissions for MySQL LOAD_FILE command
+		- Marged #1125, Fixed file permissions for MySQL LOAD_FILE command
 		- Fixed #1127, Supported full path including the drive letter of the Windows server
 		- Marged #1131, #1132, Complete Romanian(ro) translation
 		- Fixed symbolic link file stats `mtime`, `size`

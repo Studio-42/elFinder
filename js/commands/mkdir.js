@@ -73,12 +73,19 @@ elFinder.prototype.commands.mkdir = function() {
 	this.getstate = function(select) {
 		var cwd = fm.cwd(),
 			sel = (curOrg === 'navbar' || (select && select[0] !== cwd.hash))? this.files(select || fm.selected()) : [],
-			cnt = sel.length;
+			cnt = sel.length,
+			filter = function(files) {
+				var fres = true;
+				return $.grep(files, function(f) {
+					fres = fres && f.read && ! f.locked? true : false;
+					return fres;
+				});
+			};
 
 		if (curOrg === 'navbar') {
 			return cnt && sel[0].write && sel[0].read? 0 : -1;  
 		} else {
-			return cwd.write && (!cnt || $.grep(sel, function(f) { return f.read && ! f.locked? true : false; }).length == cnt)? 0 : -1;
+			return cwd.write && (!cnt || filter(sel).length == cnt)? 0 : -1;
 		}
 	};
 

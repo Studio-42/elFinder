@@ -814,6 +814,14 @@ var elFinder = function(elm, opts, bootCallback) {
 	this.i18nBaseUrl = '';
 
 	/**
+	 * Base URL of worker js files
+	 * baseUrl + "js/worker/" when empty value
+	 * 
+	 * @type String
+	 */
+	this.workerBaseUrl = '';
+
+	/**
 	 * Is elFinder CSS loaded
 	 * 
 	 * @type Boolean
@@ -1105,7 +1113,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			baseUrl = '';
 			myTag = null;
 			$('head > script').each(function() {
-				if (this.src && this.src.match(/js\/elfinder(?:-[a-z0-9_-]+)?\.(?:min|full)\.js$/i)) {
+				if (this.src && this.src.match(/js\/elfinder(?:-[a-z0-9_-]+)?\.(?:min|full)\.js(?:$|\?)/i)) {
 					myTag = $(this);
 					return false;
 				}
@@ -1132,6 +1140,7 @@ var elFinder = function(elm, opts, bootCallback) {
 	})();
 	
 	this.i18nBaseUrl = (this.options.i18nBaseUrl || this.baseUrl + 'js/i18n').replace(/\/$/, '') + '/';
+	this.workerBaseUrl = (this.options.workerBaseUrl || this.baseUrl + 'js/worker').replace(/\/$/, '') + '/';
 
 	this.options.maxErrorDialogs = Math.max(1, parseInt(this.options.maxErrorDialogs || 5));
 
@@ -3051,11 +3060,22 @@ var elFinder = function(elm, opts, bootCallback) {
 	};
 	
 	/**
+	 * Sync Stopper
+	 * 
+	 * @type Boolean
+	 */
+	this.syncStopper = false;
+
+	/**
 	 * Sync content
 	 * 
 	 * @return jQuery.Deferred
 	 */
 	this.sync = function(onlydir, polling) {
+		if (this.syncStopper) {
+			return $.Deferred().reject();
+		}
+		this.syncStopper = true;
 		this.autoSync('stop');
 		var self  = this,
 			compare = function(){
@@ -3180,6 +3200,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			return dfrd.resolve(diff);
 		})
 		.always(function() {
+			self.syncStopper = false;
 			self.autoSync();
 		});
 		
@@ -3207,7 +3228,7 @@ var elFinder = function(elm, opts, bootCallback) {
 	this.shortcut = function(s) {
 		var patterns, pattern, code, i, parts;
 		
-		if (this.options.allowShortcuts && s.pattern && $.isFunction(s.callback)) {
+		if (this.options.allowShortcuts && s.pattern && typeof s.callback === 'function') {
 			patterns = s.pattern.toUpperCase().split(/\s+/);
 			
 			for (i= 0; i < patterns.length; i++) {
@@ -3448,40 +3469,43 @@ var elFinder = function(elm, opts, bootCallback) {
 			clearTimeout(heightBase.data('resizeTm'));
 		}
 		
-		if (typeof h === 'string') {
-			if (mt = h.match(/^([0-9.]+)%$/)) {
-				// setup heightBase
-				if (! heightBase || ! heightBase.length) {
-					heightBase = $(window);
+		if (! self.options.noResizeBySelf) {
+			if (typeof h === 'string') {
+				if (mt = h.match(/^([0-9.]+)%$/)) {
+					// setup heightBase
+					if (! heightBase || ! heightBase.length) {
+						heightBase = $(window);
+					}
+					if (! heightBase.data('marginToMyNode')) {
+						heightBase.data('marginToMyNode', getMargin());
+					}
+					if (! heightBase.data('fitToBaseFunc')) {
+						heightBase.data('fitToBaseFunc', function(e) {
+							var tm = heightBase.data('resizeTm');
+							e.preventDefault();
+							e.stopPropagation();
+							tm && cancelAnimationFrame(tm);
+							if (! node.hasClass('elfinder-fullscreen') && (!self.UA.Mobile || heightBase.data('rotated') !== self.UA.Rotated)) {
+								heightBase.data('rotated', self.UA.Rotated);
+								heightBase.data('resizeTm', requestAnimationFrame(function() {
+									self.restoreSize();
+								}));
+							}
+						});
+					}
+					if (typeof heightBase.data('rotated') === 'undefined') {
+						heightBase.data('rotated', self.UA.Rotated);
+					}
+					h = heightBase.height() * (mt[1] / 100) - heightBase.data('marginToMyNode');
+					
+					heightBase.off('resize.' + self.namespace, heightBase.data('fitToBaseFunc'));
+					fit && heightBase.on('resize.' + self.namespace, heightBase.data('fitToBaseFunc'));
 				}
-				if (! heightBase.data('marginToMyNode')) {
-					heightBase.data('marginToMyNode', getMargin());
-				}
-				if (! heightBase.data('fitToBaseFunc')) {
-					heightBase.data('fitToBaseFunc', function(e) {
-						var tm = heightBase.data('resizeTm');
-						e.preventDefault();
-						e.stopPropagation();
-						tm && cancelAnimationFrame(tm);
-						if (! node.hasClass('elfinder-fullscreen') && (!self.UA.Mobile || heightBase.data('rotated') !== self.UA.Rotated)) {
-							heightBase.data('rotated', self.UA.Rotated);
-							heightBase.data('resizeTm', requestAnimationFrame(function() {
-								self.restoreSize();
-							}));
-						}
-					});
-				}
-				if (typeof heightBase.data('rotated') === 'undefined') {
-					heightBase.data('rotated', self.UA.Rotated);
-				}
-				h = heightBase.height() * (mt[1] / 100) - heightBase.data('marginToMyNode');
-				
-				heightBase.off('resize.' + self.namespace, heightBase.data('fitToBaseFunc'));
-				fit && heightBase.on('resize.' + self.namespace, heightBase.data('fitToBaseFunc'));
 			}
+			
+			node.css({ width : w, height : parseInt(h) });
 		}
-		
-		node.css({ width : w, height : parseInt(h) });
+
 		size.w = Math.round(node.width());
 		size.h = Math.round(node.height());
 		node.data('resizeSize', size);
@@ -4971,7 +4995,8 @@ var elFinder = function(elm, opts, bootCallback) {
 		 * @return     String  The column name.
 		 */
 		self.getColumnName = function(key) {
-			return columnNames[key] || self.i18n(key);
+			var res = columnNames[key] || self.i18n(key);
+			return typeof res === 'function'? res() : res;
 		};
 
 		/**
@@ -5178,12 +5203,14 @@ var elFinder = function(elm, opts, bootCallback) {
 					}
 					
 					$(document).on(keyEvt, function(e){
-						var chk = (e.shiftKey||e.ctrlKey||e.metaKey);
-						if (ctr !== chk) {
-							ctr = chk;
-							if (helper.is(':visible') && helper.data('dropover') && ! helper.data('droped')) {
-								helper.toggleClass('elfinder-drag-helper-plus', helper.data('locked')? true : ctr);
-								self.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : hashes, helper: helper});
+						if (self._commands.copy) {
+							var chk = (e.shiftKey||e.ctrlKey||e.metaKey);
+							if (ctr !== chk) {
+								ctr = chk;
+								if (helper.is(':visible') && helper.data('dropover') && ! helper.data('droped')) {
+									helper.toggleClass('elfinder-drag-helper-plus', helper.data('locked')? true : ctr);
+									self.trigger(ctr? 'unlockfiles' : 'lockfiles', {files : hashes, helper: helper});
+								}
 							}
 						}
 					});
@@ -5221,10 +5248,10 @@ var elFinder = function(elm, opts, bootCallback) {
 		$.each(self.commands, function(name, cmd) {
 			var proto = Object.assign({}, cmd.prototype),
 				extendsCmd, opts;
-			if ($.isFunction(cmd) && !self._commands[name] && (cmd.prototype.forceLoad || $.inArray(name, self.options.commands) !== -1)) {
+			if (typeof cmd === 'function' && !self._commands[name] && (cmd.prototype.forceLoad || $.inArray(name, self.options.commands) !== -1)) {
 				extendsCmd = cmd.prototype.extendsCmd || '';
 				if (extendsCmd) {
-					if ($.isFunction(self.commands[extendsCmd])) {
+					if (typeof self.commands[extendsCmd] === 'function') {
 						cmd.prototype = Object.assign({}, base, new self.commands[extendsCmd](), cmd.prototype);
 					} else {
 						return true;
@@ -5243,7 +5270,7 @@ var elFinder = function(elm, opts, bootCallback) {
 				if (self._commands[name].linkedCmds.length) {
 					$.each(self._commands[name].linkedCmds, function(i, n) {
 						var lcmd = self.commands[n];
-						if ($.isFunction(lcmd) && !self._commands[n]) {
+						if (typeof lcmd === 'function' && !self._commands[n]) {
 							lcmd.prototype = base;
 							self._commands[n] = new lcmd();
 							self._commands[n].setup(n, self.options.commandsOptions[n]||{});
@@ -5810,14 +5837,7 @@ elFinder.prototype = {
 	 * 
 	 * @type Boolean
 	 */
-	cookieEnabled : (function() {
-		var res = false,
-			test = 'elftest=';
-		document.cookie = test + '1';
-		res = document.cookie.split(test).length === 2;
-		document.cookie = test + ';max-age=0';
-		return res;
-	})(),
+	cookieEnabled : window.navigator.cookieEnabled,
 
 	/**
 	 * Has RequireJS?
@@ -6301,7 +6321,9 @@ elFinder.prototype = {
 						}
 						entry = items[i];
 						if (entry) {
-							if (entry.isFile) {
+							if (entry instanceof File) {
+								pushItem(entry);
+							} else if (entry.isFile) {
 								processing++;
 								entry.file(pushItem, check);
 							} else if (entry.isDirectory) {
@@ -6318,7 +6340,11 @@ elFinder.prototype = {
 				}, hasDirs;
 				
 				items = $.map(data.files.items, function(item){
-					return item.getAsEntry? item.getAsEntry() : item.webkitGetAsEntry();
+					if (item.kind === 'file') {
+						return (item.getAsEntry? item.getAsEntry() : item.webkitGetAsEntry()) || item.getAsFile();
+					} else {
+						return null;
+					}
 				});
 				$.each(items, function(i, item) {
 					if (item.isDirectory) {
@@ -8585,7 +8611,7 @@ elFinder.prototype = {
 		
 		if (cnt > 0) {
 			if (cancel && button.length) {
-				if ($.isFunction(cancel) || (typeof cancel === 'object' && cancel.promise)) {
+				if (typeof cancel === 'function' || (typeof cancel === 'object' && cancel.promise)) {
 					notify._esc = function(e) {
 						if (e.type == 'keydown' && e.keyCode != $.ui.keyCode.ESCAPE) {
 							return;
@@ -8742,7 +8768,7 @@ elFinder.prototype = {
 			};
 		}
 		
-		if (opts.optionsCallback && $.isFunction(opts.optionsCallback)) {
+		if (opts.optionsCallback && typeof opts.optionsCallback === 'function') {
 			opts.optionsCallback(options);
 		}
 		
@@ -8937,6 +8963,11 @@ elFinder.prototype = {
 				kind = 'Root';
 			} else {
 				kind = this.kinds[mime];
+			}
+		} else if (this.mimeTypes[mime]) {
+			kind = this.mimeTypes[mime].toUpperCase();
+			if (!this.messages['kind'+kind]) {
+				kind = null;
 			}
 		}
 		if (! kind) {
@@ -9231,7 +9262,7 @@ elFinder.prototype = {
 	 * @return void
 	 */
 	registRawStringDecoder : function(rawStringDecoder) {
-		if ($.isFunction(rawStringDecoder)) {
+		if (typeof rawStringDecoder === 'function') {
 			this.decodeRawString = this.options.rawStringDecoder = rawStringDecoder;
 		}
 	},
@@ -9723,7 +9754,7 @@ elFinder.prototype = {
 					}
 				});
 				if (!hasError) {
-					if ($.isFunction(callback)) {
+					if (typeof callback === 'function') {
 						if (check) {
 							if (typeof check.obj[check.name] === 'undefined') {
 								cnt = check.timeout? (check.timeout / 10) : 1;
@@ -9741,7 +9772,7 @@ elFinder.prototype = {
 						}
 					}
 				} else {
-					if (opts.error && $.isFunction(opts.error)) {
+					if (opts.error && typeof opts.error === 'function') {
 						opts.error({ loadResults: results });
 					}
 				}
@@ -10169,7 +10200,7 @@ elFinder.prototype = {
 	 * @return     {<type>}  The worker url.
 	 */
 	getWorkerUrl : function(filename) {
-		return this.convAbsUrl(this.baseUrl + 'js/worker/' + filename);
+		return this.convAbsUrl(this.workerBaseUrl + filename);
 	},
 
 	/**
