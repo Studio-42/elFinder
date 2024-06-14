@@ -55,8 +55,19 @@
 .elfinder-navbar-wrapper, .elfinder-place-wrapper {
 }
 
+
+
+ .elfinder-toolbar {
+    background: #3b4047;
+    -webkit-border-radius: 0;
+    border-radius: 0;
+    border: 0;
+    padding: 5px 0;
+}
+
 /* folder */
 .elfinder-navbar-dir {
+    color: #fff;
     position: relative;
     display: block;
     white-space: nowrap;

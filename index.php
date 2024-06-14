@@ -4,9 +4,9 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-	<title>elFinder 2.1.x source version with PHP connector</title>
+	<title>Media</title>
 
-	<!-- Section CSS -->
+	<!-- Section CSS elfinder.src.html -->
 	<!-- jQuery UI (REQUIRED) -->
 	<link rel="stylesheet" href="jquery/jquery-ui-1.13.2.css" type="text/css">
 
@@ -182,8 +182,12 @@
 			);
 		});
 	</script>
+
+	<style type="text/css" media="screen">
+		
+	</style>
 </head>
 <body>
-	<div id="elfinder"></div>
+	<div id="elfinder" style="height:600px!important;"></div>
 </body>
 </html>
