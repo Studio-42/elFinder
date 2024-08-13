@@ -239,7 +239,6 @@ class elFinderSession implements elFinderSessionInterface
                 }
                 $this->fixCookieRegist = false;
             }
-            session_write_close();
         }
         $this->started = false;
 
