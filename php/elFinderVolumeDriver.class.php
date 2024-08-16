@@ -6881,6 +6881,11 @@ abstract class elFinderVolumeDriver
     protected function makeArchive($dir, $files, $name, $arc)
     {
         if ($arc['cmd'] === 'phpfunction') {
+            if (str_contains($arc['argc'], 'self')) {
+                [, $function] = explode('::', $arc['argc']);
+
+                $arc['argc'] = self::{$function};
+            }
             if (is_callable($arc['argc'])) {
                 call_user_func_array($arc['argc'], array($dir, $files, $name));
             }
