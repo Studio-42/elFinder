@@ -2585,21 +2585,24 @@ class elFinder
     protected function validate_address($url)
     {
         $info = parse_url($url);
+		
+		$is_public = !in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost','localdomain','127.0.0.1']);
+		
         $host = trim(strtolower($info['host']), '.');
         // do not support IPv6 address
-        if (preg_match('/^\[.*\]$/', $host)) {
+        if ($is_public && preg_match('/^\[.*\]$/', $host)) {
             return false;
         }
         // do not support non dot host
-        if (strpos($host, '.') === false) {
+        if ($is_public && strpos($host, '.') === false) {
             return false;
         }
         // do not support URL-encoded host
-        if (strpos($host, '%') !== false) {
+        if ($is_public && strpos($host, '%') !== false) {
             return false;
         }
         // disallow including "localhost" and "localdomain"
-        if (preg_match('/\b(?:localhost|localdomain)\b/', $host)) {
+        if ($is_public && preg_match('/\b(?:localhost|localdomain)\b/', $host)) {
             return false;
         }
         // check IPv4 local loopback, private network and link local
@@ -2615,19 +2618,19 @@ class elFinder
             $prv3  = (int)sprintf('%u', ip2long('192.168.255.255')) >> 16;
             $link  = (int)sprintf('%u', ip2long('169.254.255.255')) >> 16;
 
-            if (!isset($this->uploadAllowedLanIpClasses['local']) && $long >> 24 === $local) {
+            if ($is_public && !isset($this->uploadAllowedLanIpClasses['local']) && $long >> 24 === $local) {
                 return false;
             }
-            if (!isset($this->uploadAllowedLanIpClasses['private_a']) && $long >> 24 === $prv1) {
+            if ($is_public && !isset($this->uploadAllowedLanIpClasses['private_a']) && $long >> 24 === $prv1) {
                 return false;
             }
-            if (!isset($this->uploadAllowedLanIpClasses['private_b']) && $long >> 20 === $prv2) {
+            if ($is_public && !isset($this->uploadAllowedLanIpClasses['private_b']) && $long >> 20 === $prv2) {
                 return false;
             }
-            if (!isset($this->uploadAllowedLanIpClasses['private_c']) && $long >> 16 === $prv3) {
+            if ($is_public && !isset($this->uploadAllowedLanIpClasses['private_c']) && $long >> 16 === $prv3) {
                 return false;
             }
-            if (!isset($this->uploadAllowedLanIpClasses['link']) && $long >> 16 === $link) {
+            if ($is_public && !isset($this->uploadAllowedLanIpClasses['link']) && $long >> 16 === $link) {
                 return false;
             }
             $info['ip'] = long2ip($long);
