@@ -363,7 +363,7 @@ class elFinderVolumeDropbox2 extends elFinderVolumeDriver
                     if ($code && $state) {
                         if (!empty($options['id'])) {
                             // see https://github.com/kunalvarma05/dropbox-php-sdk/issues/115
-                            $authHelper->getPersistentDataStore()->set('state', filter_var($state, FILTER_SANITIZE_STRING));
+                            $authHelper->getPersistentDataStore()->set('state', htmlspecialchars($state));
                             $tokenObj = $authHelper->getAccessToken($code, $state, $callback);
                             $options['tokens'] = [
                                 'access_token' => $tokenObj->getToken(),
