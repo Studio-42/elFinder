@@ -3331,7 +3331,7 @@ abstract class elFinderVolumeDriver
             }
         }
         if (empty($file['url']) && $this->URL) {
-            $path = str_replace($this->separator, '/', substr($this->decode($hash), strlen(rtrim($this->root, '/' . $this->separator)) + 1));
+            $path = str_replace($this->separator, '/', substr($this->decode($hash), strlen(trim($this->root, '/' . $this->separator))));
             if ($this->encoding) {
                 $path = $this->convEncIn($path, true);
             }
