@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.65 (2.1-src Nightly: b588e47) (2024-12-04)
+ * Version 2.1.65 (2.1-src Nightly: 5fc559b) (2024-12-04)
  * http://elfinder.org
  * 
  * Copyright 2009-2024, Studio 42
@@ -10266,6 +10266,9 @@ elFinder.prototype = {
 						if (themeObj.cssurls) {
 							themeObj.cssurls = absUrl(themeObj.cssurls, m[1]);
 						}
+						if (themeObj.image) {
+							themeObj.image = absUrl(themeObj.image, m[1]);
+						}
 						dfd.resolve(themeObj);
 					}).fail(function() {
 						dfd.reject();
@@ -10748,7 +10751,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.65 (2.1-src Nightly: b588e47)';
+elFinder.prototype.version = '2.1.65 (2.1-src Nightly: 5fc559b)';
 
 
 
@@ -32569,35 +32572,6 @@ elFinder.prototype.commands.resize = function() {
 						'<input class="api2" type="radio" name="type" id="'+id+'-crop" value="crop" /><label class="api2" for="'+id+'-crop">'+fm.i18n('crop')+'</label>',
 						'<input class="api2" type="radio" name="type" id="'+id+'-rotate" value="rotate" /><label class="api2" for="'+id+'-rotate">'+fm.i18n('rotate')+'</label>'),
 					mode     = 'resize',
-					type     = uitype[ctrgrup]()[ctrgrup]('disable').find('input')
-						.on('change', function() {
-							mode = $(this).val();
-							
-							resetView();
-							resizable(true);
-							croppable(true);
-							rotateable(true);
-							
-							if (mode == 'resize') {
-								uiresize.show();
-								uirotate.hide();
-								uicrop.hide();
-								resizable();
-								isJpeg && grid8px.insertAfter(uiresize.find('.elfinder-resize-grid8'));
-							}
-							else if (mode == 'crop') {
-								uirotate.hide();
-								uiresize.hide();
-								uicrop.show();
-								croppable();
-								isJpeg && grid8px.insertAfter(uicrop.find('.elfinder-resize-grid8'));
-							} else if (mode == 'rotate') {
-								uiresize.hide();
-								uicrop.hide();
-								uirotate.show();
-								rotateable();
-							}
-						}),
 					width   = $(input)
 						.on('change', function() {
 							var w = round(parseInt(width.val())),
@@ -33846,7 +33820,37 @@ elFinder.prototype.commands.resize = function() {
 						}
 					}
 				}).attr('id', id).closest('.ui-dialog').addClass(clsediting);
-				
+
+				// Fix for https://github.com/Studio-42/elFinder/issues/3684
+				uitype[ctrgrup]()[ctrgrup]('disable').find('input').on('change', function() {
+					mode = $(this).val();
+
+					resetView();
+					resizable(true);
+					croppable(true);
+					rotateable(true);
+
+					if (mode == 'resize') {
+						uiresize.show();
+						uirotate.hide();
+						uicrop.hide();
+						resizable();
+						isJpeg && grid8px.insertAfter(uiresize.find('.elfinder-resize-grid8'));
+					}
+					else if (mode == 'crop') {
+						uirotate.hide();
+						uiresize.hide();
+						uicrop.show();
+						croppable();
+						isJpeg && grid8px.insertAfter(uicrop.find('.elfinder-resize-grid8'));
+					} else if (mode == 'rotate') {
+						uiresize.hide();
+						uicrop.hide();
+						uirotate.show();
+						rotateable();
+					}
+				});
+
 				// for IE < 9 dialog mising at open second+ time.
 				if (fm.UA.ltIE8) {
 					$('.elfinder-dialog').css('filter', '');
