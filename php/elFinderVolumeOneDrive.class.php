@@ -1357,8 +1357,9 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 if ($result) {
                     $result = json_decode($result);
                     if (isset($result->link)) {
-                        list(, $res) = explode('?', $result->link->webUrl);
-                        $res = 'https://onedrive.live.com/download.aspx?' . $res;
+                        // list(, $res) = explode('?', $result->link->webUrl);
+                        // $res = 'https://onedrive.live.com/download.aspx?' . $res;
+                        $res = $result->link->webUrl;
                     }
                 }
             } catch (Exception $e) {

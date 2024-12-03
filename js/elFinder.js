@@ -10235,6 +10235,9 @@ elFinder.prototype = {
 						if (themeObj.cssurls) {
 							themeObj.cssurls = absUrl(themeObj.cssurls, m[1]);
 						}
+						if (themeObj.image) {
+							themeObj.image = absUrl(themeObj.image, m[1]);
+						}
 						dfd.resolve(themeObj);
 					}).fail(function() {
 						dfd.reject();
