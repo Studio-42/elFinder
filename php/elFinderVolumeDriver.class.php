@@ -5332,9 +5332,8 @@ abstract class elFinderVolumeDriver
         $res = $this->convEncOut($this->_move($this->convEncIn($src), $this->convEncIn($dst), $this->convEncIn($name)));
         // if moving it didn't work try to copy / delete
         if (!$res) {
-            $res = $this->copy($src, $dst, $name);
-            if (!$this->remove($src)) {
-                $res = false;
+            if ($this->copy($src, $dst, $name)) {
+                $res = $this->remove($src);
             }
         }
 
