@@ -10,6 +10,12 @@
 class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
 
     /**
+     * Simple hack that could break for quick compatibility with phpseclib version 1-3
+     * Same value substitue for reference NET_SFTP_LOCAL_FILE and SFTP::SOURCE_LOCAL_FILE
+     */
+    const NET_SFTP_LOCAL_FILE = 1;
+
+    /**
      * Constructor
      * Extend options with required fields
      *
@@ -237,6 +243,10 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
         }
 
         $name = $info['filename'];
+        //for compatability with phpseclib version 2/3
+        if (empty($info['permissions'])) {
+            $info['permissions'] = $info['mode'];
+        }   
 
         if ($info['type'] === 3) {
             // check recursive processing
@@ -307,7 +317,7 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
     protected function parsePermissions($permissions, $isowner = true)
     {
         $permissions = decoct($permissions);
-        $perm = $isowner ? decbin($permissions[-3]) : decbin($permissions[-1]);
+        $perm = $isowner ? decbin((int)$permissions[-3]) : decbin((int)$permissions[-1]);
 
         return array(
             'read' => $perm[-3],
@@ -612,7 +622,7 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
         if ($this->tmp) {
             $path = $this->_joinPath($path, $name);
             $local = $this->getTempFile();
-            $res = touch($local) && $this->connect->put($path, $local, NET_SFTP_LOCAL_FILE);
+            $res = touch($local) && $this->connect->put($path, $local, self::NET_SFTP_LOCAL_FILE);
             unlink($local);
             return $res ? $path : false;
         }
@@ -640,7 +650,7 @@ class elFinderVolumeSFTPphpseclib extends elFinderVolumeFTP {
             $local = $this->getTempFile();
 
             if ($this->connect->get($source, $local)
-                && $this->connect->put($target, $local, NET_SFTP_LOCAL_FILE)) {
+                && $this->connect->put($target, $local, self::NET_SFTP_LOCAL_FILE)) {
                 $res = true;
             }
             unlink($local);
