@@ -2302,6 +2302,8 @@ var elFinder = function(elm, opts, bootCallback) {
 			isBinary = (opts.options || {}).dataType === 'binary',
 			// current cmd is "open"
 			isOpen   = (!opts.asNotOpen && cmd === 'open'),
+			// the tree option is enabled (for "open" command) 
+			isTree   = (data.tree === 1),
 			// call default fail callback (display error dialog) ?
 			deffail  = !(isBinary || opts.preventDefault || opts.preventFail),
 			// call default success callback ?
@@ -2523,7 +2525,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					},
 					actionTarget;
 					
-					if (isOpen) {
+					if (isOpen && !isTree) {
 						pushLeafRoots('files');
 					} else if (cmd === 'tree') {
 						pushLeafRoots('tree');
