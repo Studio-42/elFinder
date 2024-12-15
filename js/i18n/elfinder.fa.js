@@ -522,6 +522,12 @@
 			'kindTTF'         : 'فونت True Type',
 			'kindOTF'         : 'فونت Open Type',
 			'kindRPM'         : 'بسته RPM',
+			// fonts
+			'kindFont'        : 'فونت',
+			'kindSFNT'        : 'فونت SFNT',
+			'kindEOT'         : 'فونت Embedded Open Type',
+			'kindWOFF'        : 'فونت Web Open Font Format',
+			'kindWOFF2'       : 'فونت Web Open Font Format 2',
 			// texts
 			'kindText'        : 'سند متنی',
 			'kindTextPlain'   : 'سند متنی ساده',

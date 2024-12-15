@@ -527,6 +527,12 @@
 			'kindTTF'         : 'True Type 字型',
 			'kindOTF'         : 'Open Type 字型',
 			'kindRPM'         : 'RPM 封裝檔案',
+			// fonts
+			'kindFont'        : '字型',
+			'kindSFNT'        : 'SFNT 字型',
+			'kindEOT'         : 'Embedded Open Type 字型',
+			'kindWOFF'        : 'Web Open Font Format 字型',
+			'kindWOFF2'       : 'Web Open Font Format 2 字型',
 			// texts
 			'kindText'        : '文字檔案',
 			'kindTextPlain'   : '純文字',

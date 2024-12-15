@@ -522,6 +522,12 @@
 			'kindTTF'         : 'True Type skrift',
 			'kindOTF'         : 'Open Type skrift',
 			'kindRPM'         : 'RPM pakke',
+			// fonts
+			'kindFont'        : 'Skrift',
+			'kindSFNT'        : 'SFNT skrift',
+			'kindEOT'         : 'Embedded Open Type skrift',
+			'kindWOFF'        : 'Web Open Font Format skrift',
+			'kindWOFF2'       : 'Web Open Font Format 2 skrift',
 			// texts
 			'kindText'        : 'Tekstdokument',
 			'kindTextPlain'   : 'Ren tekst',

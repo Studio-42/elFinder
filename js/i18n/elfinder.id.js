@@ -440,6 +440,12 @@
 			'kindTTF'         : 'Huruf True Type',
 			'kindOTF'         : 'Huruf Open Type',
 			'kindRPM'         : 'Paket RPM',
+			// fonts
+			'kindFont'        : 'Huruf',
+			'kindSFNT'        : 'Huruf SFNT',
+			'kindEOT'         : 'Huruf Embedded Open Type',
+			'kindWOFF'        : 'Huruf Web Open Font Format',
+			'kindWOFF2'       : 'Huruf Web Open Font Format 2',
 			// texts
 			'kindText'        : 'Dokumen teks',
 			'kindTextPlain'   : 'Berkas teks biasa',

@@ -526,6 +526,12 @@
 			'kindTTF'         : 'True Type fontu',
 			'kindOTF'         : 'Open Type fontu',
 			'kindRPM'         : 'RPM paketi',
+			// fonts
+			'kindFont'        : 'Fontu',
+			'kindSFNT'        : 'SFNT fontu',
+			'kindEOT'         : 'Embedded Open Type fontu',
+			'kindWOFF'        : 'Web Open Font Format',
+			'kindWOFF2'       : 'Web Open Font Format 2',
 			// texts
 			'kindText'        : 'Metin dosyası',
 			'kindTextPlain'   : 'Düz metin',

@@ -523,6 +523,12 @@
 			'kindTTF'         : 'Tipo verdadeiro da fonte',
 			'kindOTF'         : 'Abrir tipo de fonte',
 			'kindRPM'         : 'Pacote RPM',
+			// fonts
+			'kindFont'        : 'Fonte',
+			'kindSFNT'        : 'SFNT fonte',
+			'kindEOT'         : 'Embedded Open Type fonte',
+			'kindWOFF'        : 'Web Open Font Format fonte',
+			'kindWOFF2'       : 'Web Open Font Format 2 fonte',
 			// texts
 			'kindText'        : 'Arquivo de texto',
 			'kindTextPlain'   : 'Texto simples',

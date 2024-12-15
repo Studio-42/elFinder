@@ -318,6 +318,12 @@
 			'kindTTF'         : 'Tipus de lletra True Type',
 			'kindOTF'         : 'Tipus de lletra Open Type',
 			'kindRPM'         : 'Paquet RPM',
+			// fonts
+			'kindFont'        : 'Tipus de lletra',
+			'kindSFNT'        : 'Tipus de lletra SFNT',
+			'kindEOT'         : 'Tipus de lletra Embedded Open Type',
+			'kindWOFF'        : 'Tipus de lletra Web Open Font Format',
+			'kindWOFF2'       : 'Tipus de lletra Web Open Font Format 2',
 			// texts
 			'kindText'        : 'Document de text',
 			'kindTextPlain'   : 'Document de text net',

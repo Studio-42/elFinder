@@ -318,6 +318,12 @@
 			'kindTTF'         : 'True Type',
 			'kindOTF'         : 'Open Type',
 			'kindRPM'         : 'RPM',
+			// fonts
+			'kindFont'        : 'Font',
+			'kindSFNT'        : 'SFNT',
+			'kindEOT'         : 'Embedded Open Type',
+			'kindWOFF'        : 'Web Open Font Format',
+			'kindWOFF2'       : 'Web Open Font Format 2',
 			// texts
 			'kindText'        : 'Text',
 			'kindTextPlain'   : 'Plain',

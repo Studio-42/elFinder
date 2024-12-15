@@ -522,6 +522,12 @@
 			'kindTTF'         : 'Czcionka TrueType',
 			'kindOTF'         : 'Czcionka OpenType',
 			'kindRPM'         : 'Pakiet RPM',
+			// fonts
+			'kindFont'        : 'Czcionka',
+			'kindSFNT'        : 'Czcionka SFNT',
+			'kindEOT'         : 'Czcionka Embedded Open Type',
+			'kindWOFF'        : 'Czcionka Web Open Font Format',
+			'kindWOFF2'       : 'Czcionka Web Open Font Format 2',
 			// texts
 			'kindText'        : 'Dokument tekstowy',
 			'kindTextPlain'   : 'Zwykły tekst',

@@ -526,6 +526,12 @@
 			'kindTTF'         : 'Font True Type',
 			'kindOTF'         : 'Font Open Type',
 			'kindRPM'         : 'Pacchetto RPM',
+			// fonts
+			'kindFont'        : 'File font',
+			'kindSFNT'        : 'Font SFNT',
+			'kindEOT'         : 'Font Embedded Open Type',
+			'kindWOFF'        : 'Font Web Open Font Format',
+			'kindWOFF2'       : 'Font Web Open Font Format 2',
 			// texts
 			'kindText'        : 'Documento di testo',
 			'kindTextPlain'   : 'Testo Semplice',

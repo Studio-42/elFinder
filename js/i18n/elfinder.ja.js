@@ -523,6 +523,12 @@
 			'kindTTF'         : 'True Type フォント',
 			'kindOTF'         : 'Open Type フォント',
 			'kindRPM'         : 'RPM パッケージ',
+			// fonts
+			'kindFont'        : 'フォント',
+			'kindSFNT'        : 'SFNT フォント',
+			'kindEOT'         : 'Embedded Open Type フォント',
+			'kindWOFF'        : 'Web Open Font Format フォント',
+			'kindWOFF2'       : 'Web Open Font Format 2  フォント',
 			// texts
 			'kindText'        : 'Text ドキュメント',
 			'kindTextPlain'   : 'プレインテキスト',
