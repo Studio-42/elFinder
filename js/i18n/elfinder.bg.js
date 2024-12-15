@@ -502,6 +502,12 @@
 			'kindTTF'         : 'True Type шрифт',
 			'kindOTF'         : 'Open Type шрифт',
 			'kindRPM'         : 'RPM пакет',
+			// fonts
+			'kindFont'        : 'шрифт',
+			'kindSFNT'        : 'SFNT шрифт',
+			'kindEOT'         : 'Embedded Open Type шрифт',
+			'kindWOFF'        : 'Web Open Font Format шрифт',
+			'kindWOFF2'       : 'Web Open Font Format 2 шрифт',
 			// texts
 			'kindText'        : 'Текстов документ',
 			'kindTextPlain'   : 'Чист текст',

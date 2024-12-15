@@ -522,6 +522,12 @@
 			'kindTTF'         : 'Police True Type',
 			'kindOTF'         : 'Police Open Type',
 			'kindRPM'         : 'Package RPM',
+			// fonts
+			'kindFont'        : 'Police',
+			'kindSFNT'        : 'Police SFNT',
+			'kindEOT'         : 'Police Embedded Open Type',
+			'kindWOFF'        : 'Police Web Open Font Format',
+			'kindWOFF2'       : 'Police Web Open Font Format 2',
 			// texts
 			'kindText'        : 'Document Text',
 			'kindTextPlain'   : 'Texte non formaté',

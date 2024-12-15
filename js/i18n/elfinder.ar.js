@@ -523,6 +523,12 @@
 			'kindTTF'         : 'خط True Type ',
 			'kindOTF'         : 'خط Open Type ',
 			'kindRPM'         : 'حزمة RPM',
+			// fonts
+			'kindFont'        : 'خط',
+			'kindSFNT'        : 'خط SFNT',
+			'kindEOT'         : 'خط Embedded Open Type',
+			'kindWOFF'        : 'خط Web Open Font Format',
+			'kindWOFF2'       : 'خط Web Open Font Format 2',
 			// texts
 			'kindText'        : 'وثيقة نصية',
 			'kindTextPlain'   : 'نص عادي',

@@ -525,6 +525,12 @@
 			'kindTTF'         : 'True Type-Schrift',
 			'kindOTF'         : 'Open Type-Schrift',
 			'kindRPM'         : 'RPM-Paket',
+			// fonts
+			'kindFont'        : 'Schriftart',
+			'kindSFNT'        : 'SFNT-Schrift',
+			'kindEOT'         : 'Embedded-Open-Type-Schrift',
+			'kindWOFF'        : 'Web-Open-Font-Format-Schrift',
+			'kindWOFF2'       : 'Web-Open-Font-Format-2-Schrift',
 			// texts
 			'kindText'        : 'Text-Dokument',
 			'kindTextPlain'   : 'Text-Dokument',

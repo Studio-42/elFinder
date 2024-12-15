@@ -5991,6 +5991,17 @@ elFinder.prototype = {
 			'image/vnd.adobe.photoshop'     : 'PSD',
 			'image/xbm'                     : 'XBITMAP',
 			'image/pxm'                     : 'PXM',
+			'application/vnd.ms-fontobject' : 'EOT',
+			'font/sfnt'                     : 'SFNT',
+			'application/font-sfnt'         : 'SFNT',
+			'font/ttf'                      : 'TTF',
+			'font/opentype'                 : 'OTF',
+			'font/otf'                      : 'OTF',
+			'application/x-font-opentype'   : 'OTF',
+			'font/woff'                     : 'WOFF',
+			'application/font-woff'  	    : 'WOFF',
+			'font/woff2'                    : 'WOFF2',
+			'application/font-woff2'   		: 'WOFF2',
 			'audio/mpeg'                    : 'AudioMPEG',
 			'audio/midi'                    : 'AudioMIDI',
 			'audio/ogg'                     : 'AudioOGG',
@@ -8981,6 +8992,8 @@ elFinder.prototype = {
 				kind = 'Video';
 			} else if (mime.indexOf('application') === 0) {
 				kind = 'App';
+			} else if (mime.indexOf('font') === 0) {
+				kind = 'Font';
 			} else {
 				kind = mime;
 			}
