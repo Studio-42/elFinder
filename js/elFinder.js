@@ -2302,6 +2302,8 @@ var elFinder = function(elm, opts, bootCallback) {
 			isBinary = (opts.options || {}).dataType === 'binary',
 			// current cmd is "open"
 			isOpen   = (!opts.asNotOpen && cmd === 'open'),
+			// the tree option is enabled (for "open" command) 
+			isTree   = (data.tree === 1),
 			// call default fail callback (display error dialog) ?
 			deffail  = !(isBinary || opts.preventDefault || opts.preventFail),
 			// call default success callback ?
@@ -2523,7 +2525,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					},
 					actionTarget;
 					
-					if (isOpen) {
+					if (isOpen && !isTree) {
 						pushLeafRoots('files');
 					} else if (cmd === 'tree') {
 						pushLeafRoots('tree');
@@ -3092,9 +3094,11 @@ var elFinder = function(elm, opts, bootCallback) {
 				return c;
 			},
 			comp  = compare(),
+			odataRoots,
 			dfrd  = $.Deferred().always(function() { !reqFail && self.trigger('sync'); }),
+			tree = (! onlydir && this.ui.tree) ? 1 : 0,
 			opts = [this.request({
-				data           : {cmd : 'open', reload : 1, target : cwd, tree : (! onlydir && this.ui.tree) ? 1 : 0, compare : comp},
+				data           : {cmd : 'open', reload : 1, target : cwd, tree : tree, compare : comp},
 				preventDefault : true
 			})],
 			exParents = function() {
@@ -3186,7 +3190,14 @@ var elFinder = function(elm, opts, bootCallback) {
 			if (!self.validResponse('tree', pdata)) {
 				return dfrd.reject((pdata.norError || 'errResponse'));
 			}
-			
+
+			// When tree = 1, the server will return all volumes in response to the open command.
+			// Remove volumes from the tree command that do not exist anymore.
+			if (tree && pdata && pdata.tree) {
+				odataRoots = $.map($.grep(odata.files, function(f) {return f.isroot;}), function(f) {return f.hash;});
+				pdata.tree = $.grep(pdata.tree, function(f) {return !f.isroot || odataRoots.indexOf(f.hash) >= 0;});
+			}
+
 			var diff = self.diff(odata.files.concat(pdata && pdata.tree ? pdata.tree : []), onlydir);
 
 			diff.added.push(odata.cwd);
