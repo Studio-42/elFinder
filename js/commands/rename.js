@@ -9,12 +9,15 @@ elFinder.prototype.commands.rename = function() {
 	"use strict";
 
 	// set alwaysEnabled to allow root rename on client size
-	this.alwaysEnabled = true;
+	if (this.fm.options.enableRootRename !== false) {
+		this.alwaysEnabled = true;
+	}
 
 	this.syncTitleOnChange = true;
 
 	var self = this,
 		fm = self.fm,
+		enableRootRename = fm.options.enableRootRename !== false,
 		request = function(dfrd, targtes, file, name) {
 			var sel = targtes? [file.hash].concat(targtes) : [file.hash],
 				cnt = sel.length,
@@ -22,7 +25,7 @@ elFinder.prototype.commands.rename = function() {
 			
 			fm.lockfiles({files : sel});
 			
-			if (fm.isRoot(file) && !file.netkey) {
+			if (fm.isRoot(file) && !file.netkey && enableRootRename) {
 				if (!(rootNames = fm.storage('rootNames'))) {
 					rootNames = {};
 				}
@@ -268,7 +271,7 @@ elFinder.prototype.commands.rename = function() {
 			isRoot = fm.isRoot(sel[0]);
 		}
 
-		state = (cnt === 1 && ((fm.cookieEnabled && isRoot) || !sel[0].locked) || (fm.api > 2.1030 && cnt === $.grep(sel, function(f) {
+		state = (cnt === 1 && ((enableRootRename && fm.cookieEnabled && isRoot) || !sel[0].locked) || (fm.api > 2.1030 && cnt === $.grep(sel, function(f) {
 			if (!brk && !f.locked && f.phash === phash && !fm.isRoot(f) && (mime === f.mime || ext === fm.splitFileExtention(f.name)[1].toLowerCase())) {
 				return true;
 			} else {
@@ -539,7 +542,7 @@ elFinder.prototype.commands.rename = function() {
 			return dfrd.reject('errCmdParams', this.title);
 		}
 		
-		if (file.locked && !fm.isRoot(file)) {
+		if (file.locked && (!fm.isRoot(file) || !enableRootRename)) {
 			return dfrd.reject(['errLocked', file.name]);
 		}
 		
