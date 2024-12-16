@@ -1363,5 +1363,10 @@ elFinder.prototype._options = {
 	 *
 	 * @type Boolean|Object (toast options)
 	 */
-	toastBackendWarn : true
+	toastBackendWarn : true,
+
+	/**
+	 * Whether renaming root folders is enabled. If true, the alias for the root folder is stored as a preference for the user.
+	 */
+	enableRootRename : true,
 };
