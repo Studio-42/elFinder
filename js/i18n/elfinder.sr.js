@@ -138,6 +138,7 @@
 			'btnCancel' : 'Prekini',
 			'btnNo'     : 'Ne',
 			'btnYes'    : 'Da',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'Mount',
 			
 			/******************************** notifications ********************************/

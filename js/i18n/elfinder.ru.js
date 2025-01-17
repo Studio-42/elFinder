@@ -177,6 +177,7 @@
 			'btnCancel' : 'Отмена',
 			'btnNo'     : 'Нет',
 			'btnYes'    : 'Да',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'Подключить',  // added 18.04.2012
 			'btnApprove': 'Перейти в $1 и применить', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Отключить', // from v2.1 added 30.04.2012

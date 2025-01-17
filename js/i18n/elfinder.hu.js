@@ -174,6 +174,7 @@
 			'btnCancel' : 'Mégsem',
 			'btnNo'     : 'Nem',
 			'btnYes'    : 'Igen',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'Csatlakoztat',  // added 18.04.2012
 			'btnApprove': 'Tovább $1 és jóváhagyás', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Leválaszt', // from v2.1 added 30.04.2012

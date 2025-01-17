@@ -194,6 +194,10 @@ $.fn.elfinderdialog = function(opts, fm) {
 						.on('mousedown touchstart', function(e) {
 							e.preventDefault();
 							e.stopPropagation();
+							if (typeof opts.headerBtnCloseAction === 'function') {
+								opts.headerBtnCloseAction(e);
+								return;
+							}
 							self.elfinderdialog('close');
 						})
 					);
@@ -804,6 +808,7 @@ $.fn.elfinderdialog.defaults = {
 	openMaximized : false,
 	headerBtnPos : 'auto',
 	headerBtnOrder : 'auto',
+	headerBtnCloseAction: null,
 	optimizeNumber : true,
 	propagationEvents : ['mousemove', 'mouseup']
 };

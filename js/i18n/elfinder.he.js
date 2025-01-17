@@ -138,6 +138,7 @@
 			'btnCancel' : 'ביטול',
 			'btnNo'     : 'לא',
 			'btnYes'    : 'כן',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'עיגון',  // added 18.04.2012
 
 			/******************************** notifications ********************************/

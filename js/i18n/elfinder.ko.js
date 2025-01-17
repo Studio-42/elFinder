@@ -177,6 +177,7 @@
 			'btnCancel' : '취소',
 			'btnNo'     : '아니오',
 			'btnYes'    : '예',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : '마운트',  // added 18.04.2012
 			'btnApprove': '$1로 이동 및 승인', // from v2.1 added 26.04.2012
 			'btnUnmount': '마운트 해제', // from v2.1 added 30.04.2012

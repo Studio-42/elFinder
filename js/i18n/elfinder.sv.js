@@ -138,6 +138,7 @@
 			'btnCancel' : 'Ångra',
 			'btnNo'     : 'Nej',
 			'btnYes'    : 'Ja',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'Mount',
 			
 			/******************************** notifications ********************************/

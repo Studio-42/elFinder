@@ -173,6 +173,7 @@
 			'btnCancel' : 'Отказ',
 			'btnNo'     : 'Не',
 			'btnYes'    : 'Да',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'Монтирай',  // added 18.04.2012
 			'btnApprove': 'Отиди на $1 и одобри', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Размонтирай', // from v2.1 added 30.04.2012

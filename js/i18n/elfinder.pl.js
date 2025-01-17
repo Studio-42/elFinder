@@ -174,6 +174,7 @@
 			'btnCancel' : 'Anuluj',
 			'btnNo'     : 'Nie',
 			'btnYes'    : 'Tak',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'Montuj',  // added 18.04.2012
 			'btnApprove': 'Idź do $1 & zatwierdź', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Odmontuj', // from v2.1 added 30.04.2012
