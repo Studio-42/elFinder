@@ -421,9 +421,9 @@ class elFinder
 
     /**
      * LAN class allowed when uploading via URL
-     * 
+     *
      * Array keys are 'local', 'private_a', 'private_b', 'private_c' and 'link'
-     * 
+     *
      * local:     127.0.0.0/8
      * private_a: 10.0.0.0/8
      * private_b: 172.16.0.0/12
@@ -4302,7 +4302,7 @@ var go = function() {
             elFinder::$phpErrors[] = "STRICT: $errstr in $errfile line $errline.";
             $proc = true;
         }
-        
+
         if (defined('E_DEPRECATED')) {
             switch ($errno) {
                 case E_DEPRECATED:
@@ -5230,7 +5230,7 @@ var go = function() {
             $name = str_replace('\\', '/', $name);
         }
         $parts = explode('/', trim($name, '/'));
-        $name = array_pop($parts); 
+        $name = array_pop($parts);
         return $name;
     }
 
