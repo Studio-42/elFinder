@@ -1,6 +1,6 @@
 {
-    "name":        "studio-42/elfinder",
-    "description": "File manager for web",
+    "name":        "stryxx/elfinder",
+    "description": "File manager for web modified by stryxx",
     "license":     "BSD-3-Clause",
     "homepage":    "http://elfinder.org",
     "authors": [
@@ -25,7 +25,7 @@
         }
     ],
     "require": {
-        "php": ">=5.2"
+        "php": ">=8.3"
     },
     "suggest": {
         "kunalvarma05/dropbox-php-sdk": "VolumeDriver `Dropbox`2 require `kunalvarma05/dropbox-php-sdk.",
