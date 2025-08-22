@@ -2001,18 +2001,17 @@ class elFinder
         if ($onetime) {
             $volume = null;
             $tmpdir = elFinder::$commonTempPath;
-            if (!$tmpdir || !is_file($tmpf = $tmpdir . DIRECTORY_SEPARATOR . 'ELF' . $target)) {
+            if (!$tmpdir || !is_file($tmpf = $tmpdir . DIRECTORY_SEPARATOR . 'ELF' . basename($target))) {
                 return $a404;
             }
             $GLOBALS['elFinderTempFiles'][$tmpf] = true;
             if ($file = json_decode(file_get_contents($tmpf), true)) {
-                $src = base64_decode($file['file']);
+                $src = $tmpdir . DIRECTORY_SEPARATOR . basename(base64_decode($file['file']));
                 if (!is_file($src) || !($fp = fopen($src, 'rb'))) {
                     return $a404;
                 }
-                if (strpos($src, $tmpdir) === 0) {
-                    $GLOBALS['elFinderTempFiles'][$src] = true;
-                }
+                $GLOBALS['elFinderTempFiles'][$src] = true;
+                
                 unset($file['file']);
                 $file['read'] = true;
                 $file['size'] = filesize($src);
