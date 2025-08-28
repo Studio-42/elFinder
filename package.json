@@ -3,7 +3,7 @@
   "description": "File manager for web",
   "main": "Jakefile.js",
   "scripts": {
-    "build": "mkdir -p ./build && jake -C ./build elfinder"
+    "build": "mkdir ./build && jake -C ./build elfinder"
   },
   "repository": {
     "type": "git",
