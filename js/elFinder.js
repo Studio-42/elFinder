@@ -6012,6 +6012,7 @@ elFinder.prototype = {
 			'image/vnd.adobe.photoshop'     : 'PSD',
 			'image/xbm'                     : 'XBITMAP',
 			'image/pxm'                     : 'PXM',
+			'image/webp'                    : 'WEBP',
 			'application/vnd.ms-fontobject' : 'EOT',
 			'font/sfnt'                     : 'SFNT',
 			'application/font-sfnt'         : 'SFNT',
