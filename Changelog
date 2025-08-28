@@ -1,3 +1,37 @@
+2025-08-28  Naoki Sawada
+	* elFinder (2.1.66):
+		- [PHP 8.4] Fix: Curl `CURLOPT_BINARYTRANSFER` deprecated
+		- Merge pull request #3629 from Ayesh/php84-curl-depr
+		- translate to Chinese
+		- Update zh_CN.js
+		- Update Chinese help
+		- fix name
+		- Update elfinder.ko.js
+		- try copy / deleting folder if moving it doesn't work
+		- Merge pull request #3636 from vfishv/master
+		- Merge pull request #3647 from allity/patch-1
+		- Merge pull request #3653 from terrafrost/branch-1
+		- Fix #3637 FILTER_SANITIZE_STRING is deprecated (PHP 8.1)
+		- Allow image URL in theme manifest.json to be a relative link as well
+		- Update elfinder.ru.js
+		- Merge pull request #3677 from blutorange/feat-relative-image-link-in-theme-manifest
+		- Merge pull request #3682 from Ruslan-Aleev/patch-1
+		- Fixes #3684 (#3685)
+		- [OneDrive] fix Content URL
+		- Fix #3667 where the Content URL could be invalid
+		- [VD:core] Check if copying was successful when moving files in copy + delete mode
+		- Fix CVE-2025-0818 (#3723)
+		- Fixes #3689, fm.sync removes unavailable volumes. (#3690)
+		- [VD:SFTP] Make compatible with phpseclib version 2 or 3 when returned from connectCallback($options) (#3687)
+		- Add font mime kinds (WOFF, WOFF2, EOT, SFNT, generic font/*) (#3691)
+		- Ignore posted message that are not intended for ElFinder (#3692)
+		- Add option to rename command to disable alias rename (#3693)
+		- Add option commandsOptions.edit.confirmUnsavedBeforeClose (#3698)
+		- Fix build for Windows environment (#3699)
+		- Replace usage of deprecated `E_STRICT` constant (#3705)
+		- Add "WEBP" to File mimetype to kind mapping (#3712)
+		- fix translation mistakes and unification (#3719)
+
 2024-01-05  Naoki Sawada  <hypweb+elfinder@gmail.com>
 	* elFinder (2.1.65):
 		- [js] update CDNs
