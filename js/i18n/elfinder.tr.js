@@ -178,6 +178,7 @@
 			'btnCancel' : 'İptal',
 			'btnNo'     : 'Hayır',
 			'btnYes'    : 'Evet',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'Bağla',  // added 18.04.2012
 			'btnApprove': 'Git $1 & onayla', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Bağlantıyı kes', // from v2.1 added 30.04.2012
@@ -526,6 +527,12 @@
 			'kindTTF'         : 'True Type fontu',
 			'kindOTF'         : 'Open Type fontu',
 			'kindRPM'         : 'RPM paketi',
+			// fonts
+			'kindFont'        : 'Fontu',
+			'kindSFNT'        : 'SFNT fontu',
+			'kindEOT'         : 'Embedded Open Type fontu',
+			'kindWOFF'        : 'Web Open Font Format',
+			'kindWOFF2'       : 'Web Open Font Format 2',
 			// texts
 			'kindText'        : 'Metin dosyası',
 			'kindTextPlain'   : 'Düz metin',

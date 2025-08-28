@@ -177,6 +177,7 @@
 			'btnCancel' : 'Отмена',
 			'btnNo'     : 'Нет',
 			'btnYes'    : 'Да',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'Подключить',  // added 18.04.2012
 			'btnApprove': 'Перейти в $1 и применить', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Отключить', // from v2.1 added 30.04.2012
@@ -525,6 +526,12 @@
 			'kindTTF'         : 'Шрифт True Type',
 			'kindOTF'         : 'Шрифт Open Type',
 			'kindRPM'         : 'Пакет RPM',
+			// fonts
+			'kindFont'        : 'Шрифт',
+			'kindSFNT'        : 'Шрифт SFNT',
+			'kindEOT'         : 'Шрифт Embedded Open Type',
+			'kindWOFF'        : 'Шрифт Web Open Font Format',
+			'kindWOFF2'       : 'Шрифт Web Open Font Format 2',
 			// texts
 			'kindText'        : 'Текстовый документ',
 			'kindTextPlain'   : 'Простой текст',
