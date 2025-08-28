@@ -175,6 +175,7 @@
 			'btnCancel' : 'キャンセル',
 			'btnNo'     : 'いいえ',
 			'btnYes'    : 'はい',
+			'btnDiscard': '変更を破棄',
 			'btnMount'  : 'マウント',  // added 18.04.2012
 			'btnApprove': '$1へ行き認可する', // from v2.1 added 26.04.2012
 			'btnUnmount': 'アンマウント', // from v2.1 added 30.04.2012
@@ -523,6 +524,12 @@
 			'kindTTF'         : 'True Type フォント',
 			'kindOTF'         : 'Open Type フォント',
 			'kindRPM'         : 'RPM パッケージ',
+			// fonts
+			'kindFont'        : 'フォント',
+			'kindSFNT'        : 'SFNT フォント',
+			'kindEOT'         : 'Embedded Open Type フォント',
+			'kindWOFF'        : 'Web Open Font Format フォント',
+			'kindWOFF2'       : 'Web Open Font Format 2  フォント',
 			// texts
 			'kindText'        : 'Text ドキュメント',
 			'kindTextPlain'   : 'プレインテキスト',
