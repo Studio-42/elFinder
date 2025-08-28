@@ -179,6 +179,7 @@
 			'btnCancel' : '取消',
 			'btnNo'     : '否',
 			'btnYes'    : '是',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : '掛接',  // added 18.04.2012
 			'btnApprove': '前往 $1 並核准', // from v2.1 added 26.04.2012
 			'btnUnmount': '卸載', // from v2.1 added 30.04.2012
@@ -527,6 +528,12 @@
 			'kindTTF'         : 'True Type 字型',
 			'kindOTF'         : 'Open Type 字型',
 			'kindRPM'         : 'RPM 封裝檔案',
+			// fonts
+			'kindFont'        : '字型',
+			'kindSFNT'        : 'SFNT 字型',
+			'kindEOT'         : 'Embedded Open Type 字型',
+			'kindWOFF'        : 'Web Open Font Format 字型',
+			'kindWOFF2'       : 'Web Open Font Format 2 字型',
 			// texts
 			'kindText'        : '文字檔案',
 			'kindTextPlain'   : '純文字',
