@@ -8144,7 +8144,7 @@ elFinder.prototype = {
 							}
 						}
 						
-						if (isRoot) {
+						if (isRoot && self.options.enableRootRename !== false) {
 							if (rootNames = self.storage('rootNames')) {
 								if (rootNames[file.hash]) {
 									file._name = file.name;
