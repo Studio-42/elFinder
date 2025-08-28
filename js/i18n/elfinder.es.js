@@ -489,6 +489,12 @@
 			'kindTTF'         : 'Fuente True Type',
 			'kindOTF'         : 'Fuente Open Type',
 			'kindRPM'         : 'Paquete RPM',
+			// fonts
+			'kindFont'        : 'Fuente',
+			'kindSFNT'        : 'Fuente SFNT',
+			'kindEOT'         : 'Fuente Embedded Open Type',
+			'kindWOFF'        : 'Fuente Web Open Font Format',
+			'kindWOFF2'       : 'Fuente Web Open Font Format 2',
 			// texts
 			'kindText'        : 'Documento de texto',
 			'kindTextPlain'   : 'Texto plano',

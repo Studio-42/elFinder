@@ -525,6 +525,12 @@
 			'kindTTF'         : '트루 타입 글꼴',
 			'kindOTF'         : '오픈 타입 글꼴',
 			'kindRPM'         : 'RPM 패키지',
+			// fonts
+			'kindFont'        : '글꼴',
+			'kindSFNT'        : 'SFNT 글꼴',
+			'kindEOT'         : 'Embedded Open Type 글꼴',
+			'kindWOFF'        : 'Web Open Font Format 글꼴',
+			'kindWOFF2'       : 'Web Open Font Format 2 글꼴',
 			// texts
 			'kindText'        : '텍스트 문서',
 			'kindTextPlain'   : '일반 텍스트',

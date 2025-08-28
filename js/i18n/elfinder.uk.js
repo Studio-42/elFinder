@@ -522,6 +522,12 @@
 			'kindTTF'         : 'Шрифт True Type',
 			'kindOTF'         : 'Шрифт Open Type',
 			'kindRPM'         : 'Пакунок RPM',
+			// fonts
+			'kindFont'        : 'Шрифт',
+			'kindSFNT'        : 'Шрифт SFNT',
+			'kindEOT'         : 'Шрифт Embedded Open Type',
+			'kindWOFF'        : 'Шрифт Web Open Font Format',
+			'kindWOFF2'       : 'Шрифт Web Open Font Format 2',
 			// texts
 			'kindText'        : 'Текстовий документ',
 			'kindTextPlain'   : 'Простий текст',

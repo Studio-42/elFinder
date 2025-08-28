@@ -318,6 +318,12 @@
 			'kindTTF'         : 'True Type فونت',
 			'kindOTF'         : 'Open Type فونت',
 			'kindRPM'         : 'RPM',
+			// fonts
+			'kindFont'        : 'فونت',
+			'kindSFNT'        : 'SFNT فونت',
+			'kindEOT'         : 'Embedded Open Type فونت',
+			'kindWOFF'        : 'Web Open Font Format فونت',
+			'kindWOFF2'       : 'Web Open Font Format 2 فونت',
 			// texts
 			'kindText'        : 'تېكىست',
 			'kindTextPlain'   : 'تېكىست',
