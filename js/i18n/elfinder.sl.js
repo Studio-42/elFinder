@@ -138,6 +138,7 @@
 			'btnCancel' : 'Prekliči',
 			'btnNo'     : 'Ne',
 			'btnYes'    : 'Da',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'Mount',
 			
 			/******************************** notifications ********************************/

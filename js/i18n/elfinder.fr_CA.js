@@ -175,6 +175,7 @@
 			'btnCancel' : 'Annuler',
 			'btnNo'     : 'Non',
 			'btnYes'    : 'Oui',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'Monter',  // added 18.04.2012
 			'btnApprove': 'Aller à $1 & approuver', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Démonter', // from v2.1 added 30.04.2012

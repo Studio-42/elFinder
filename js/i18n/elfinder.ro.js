@@ -146,6 +146,7 @@
 			'btnCancel' : 'Anulează',
 			'btnNo'     : 'Nu',
 			'btnYes'    : 'Da',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'Încarcă',  // added 18.04.2012
 			'btnApprove': 'Mergi la $1 și aprobă', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Elimină volum', // from v2.1 added 30.04.2012

@@ -175,6 +175,7 @@
 			'btnCancel' : 'Zrušiť',
 			'btnNo'     : 'Nie',
 			'btnYes'    : 'Áno',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'Pripojiť',  // added 18.04.2012
 			'btnApprove': 'Ísť na $1 & schváliť', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Odpojiť', // from v2.1 added 30.04.2012

@@ -178,6 +178,7 @@
 			'btnCancel' : 'İptal',
 			'btnNo'     : 'Hayır',
 			'btnYes'    : 'Evet',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'Bağla',  // added 18.04.2012
 			'btnApprove': 'Git $1 & onayla', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Bağlantıyı kes', // from v2.1 added 30.04.2012

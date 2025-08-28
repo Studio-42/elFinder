@@ -179,6 +179,7 @@
 			'btnCancel' : '取消',
 			'btnNo'     : '否',
 			'btnYes'    : '是',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : '掛接',  // added 18.04.2012
 			'btnApprove': '前往 $1 並核准', // from v2.1 added 26.04.2012
 			'btnUnmount': '卸載', // from v2.1 added 30.04.2012

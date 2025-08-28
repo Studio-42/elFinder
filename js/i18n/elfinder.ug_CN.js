@@ -138,6 +138,7 @@
 			'btnCancel' : 'بېكارلاش',
 			'btnNo'     : 'ياق',
 			'btnYes'    : 'ھەئە',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'يۈكلەش',  // added 18.04.2012
 
 			/******************************** notifications ********************************/

@@ -174,6 +174,7 @@
 			'btnCancel' : 'انصراف',
 			'btnNo'     : 'خیر',
 			'btnYes'    : 'بلی',
+			'btnDiscard': 'Discard changes',
 			'btnMount'  : 'اتصال',  // added 18.04.2012
 			'btnApprove': 'رفتن به $1 و تایید', // from v2.1 added 26.04.2012
 			'btnUnmount': 'قطع اتصال', // from v2.1 added 30.04.2012
