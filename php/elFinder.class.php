@@ -4184,7 +4184,7 @@ var go = function() {
         }
     } catch(e) {
         // for CORS
-        w.postMessage && w.postMessage(JSON.stringify({bind:\'' . $bind . '\',data:' . $json . '}), \'' . $origin . '\');
+        w.postMessage && w.postMessage(JSON.stringify({type:\'io.studio-42.github\',bind:\'' . $bind . '\',data:' . $json . '}), \'' . $origin . '\');
     }
     close();
     setTimeout(function() {

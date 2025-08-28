@@ -4849,8 +4849,18 @@ var elFinder = function(elm, opts, bootCallback) {
 				obj, data;
 			if (res && (self.convAbsUrl(self.options.url).indexOf(res.origin) === 0 || self.convAbsUrl(self.uploadURL).indexOf(res.origin) === 0)) {
 				try {
-					obj = JSON.parse(res.data);
-					data = obj.data || null;
+					try {
+						if (typeof res.data !== 'string') {
+							return;
+						}
+						obj = JSON.parse(res.data);
+						if (obj.type !== "io.studio-42.github") {
+							return;
+						}
+						data = obj.data || null;
+					} catch (e2) {
+						return;
+					} 
 					if (data) {
 						if (data.error) {
 							if (obj.bind) {
