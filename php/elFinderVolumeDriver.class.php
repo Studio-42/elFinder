@@ -3462,9 +3462,8 @@ abstract class elFinderVolumeDriver
             $tempPath = elFinder::getStaticVar('commonTempPath');
         } else if (function_exists('sys_get_temp_dir')) {
             $tempPath = sys_get_temp_dir();
-        } else if ($this->tmbPathWritable) {
-            $tempPath = $this->tmbPath;
         }
+        
         if ($tempPath && DIRECTORY_SEPARATOR !== '/') {
             $tempPath = str_replace('/', DIRECTORY_SEPARATOR, $tempPath);
         }

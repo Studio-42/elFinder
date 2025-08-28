@@ -414,7 +414,7 @@ task('js/extras', function(){
 	var files = grep(path.join(src, 'js', 'extras'), '\\.js$');
 	var base, name, result;
 	for (var i in files) {
-		name = files[i].replace(/^.+\/([^\/]+)$/, '$1');
+		name = files[i].replace(/\\/g, "/").replace(/^.+\/([^\/]+)$/, '$1');
 		if (! name.match(/\.min\./)) {
 			base = name.replace(/\.js$/, '');
 			name = 'js/extras/' + name;
