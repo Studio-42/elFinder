@@ -421,9 +421,9 @@ class elFinder
 
     /**
      * LAN class allowed when uploading via URL
-     * 
+     *
      * Array keys are 'local', 'private_a', 'private_b', 'private_c' and 'link'
-     * 
+     *
      * local:     127.0.0.0/8
      * private_a: 10.0.0.0/8
      * private_b: 172.16.0.0/12
@@ -606,9 +606,13 @@ class elFinder
         $this->version = (string)self::$ApiVersion;
 
         // set error handler of WARNING, NOTICE
-        $errLevel = E_WARNING | E_NOTICE | E_USER_WARNING | E_USER_NOTICE | E_STRICT | E_RECOVERABLE_ERROR;
+        $errLevel = E_WARNING | E_NOTICE | E_USER_WARNING | E_USER_NOTICE | E_RECOVERABLE_ERROR;
         if (defined('E_DEPRECATED')) {
             $errLevel |= E_DEPRECATED | E_USER_DEPRECATED;
+        }
+        // E_STRICT is deprecated; see https://wiki.php.net/rfc/deprecations_php_8_4#remove_e_strict_error_level_and_deprecate_e_strict_constant
+        if (defined('E_STRICT')) {
+            $errLevel |= @E_STRICT;
         }
         set_error_handler('elFinder::phpErrorHandler', $errLevel);
 
@@ -4288,15 +4292,16 @@ var go = function() {
                 $proc = true;
                 break;
 
-            case E_STRICT:
-                elFinder::$phpErrors[] = "STRICT: $errstr in $errfile line $errline.";
-                $proc = true;
-                break;
-
             case E_RECOVERABLE_ERROR:
                 elFinder::$phpErrors[] = "RECOVERABLE_ERROR: $errstr in $errfile line $errline.";
                 $proc = true;
                 break;
+        }
+
+        // E_STRICT is deprecated; see https://wiki.php.net/rfc/deprecations_php_8_4#remove_e_strict_error_level_and_deprecate_e_strict_constant
+        if (defined('E_STRICT') && $errno === @E_STRICT) {
+            elFinder::$phpErrors[] = "STRICT: $errstr in $errfile line $errline.";
+            $proc = true;
         }
 
         if (defined('E_DEPRECATED')) {
@@ -5226,7 +5231,7 @@ var go = function() {
             $name = str_replace('\\', '/', $name);
         }
         $parts = explode('/', trim($name, '/'));
-        $name = array_pop($parts); 
+        $name = array_pop($parts);
         return $name;
     }
 
