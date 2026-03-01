@@ -88,7 +88,7 @@ elFinder.prototype.commands.chmod = function() {
 			return buttons;
 		},
 		save = function() {
-			var perm = $.trim($('#'+id+'-perm').val()),
+			var perm = $('#'+id+'-perm').val().trim(),
 				reqData;
 			
 			if (!isPerm(perm)) return false;
