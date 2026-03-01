@@ -277,7 +277,7 @@ elFinder.prototype.commands.edit = function() {
 							self.requestCmd = 'mkfile';
 							self.nextAction = {};
 							self.data = {target : phash};
-							$.proxy(fm.res('mixin', 'make'), self)()
+							fm.res('mixin', 'make').bind(self)()
 								.done(function(data) {
 									var oldHash;
 									if (data.added && data.added.length) {
