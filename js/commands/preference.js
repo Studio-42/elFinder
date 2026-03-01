@@ -172,7 +172,7 @@ elFinder.prototype.commands.preference = function() {
 
 			forms.toolbarPref && (forms.toolbarPref = (function() {
 				var pnls = $.map(fm.options.uiOptions.toolbar, function(v) {
-						return $.isArray(v)? v : null;
+						return Array.isArray(v)? v : null;
 					}),
 					tags = [],
 					hides = fm.storage('toolbarhides') || {};
