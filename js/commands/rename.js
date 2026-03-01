@@ -1,586 +1,605 @@
 /**
- * @class elFinder command "rename". 
- * Rename selected file.
+ * @class  elFinder command "preference"
+ * "Preference" dialog
  *
- * @author Dmitry (dio) Levashov, dio@std42.ru
  * @author Naoki Sawada
  **/
-elFinder.prototype.commands.rename = function() {
-	"use strict";
-
-	// set alwaysEnabled to allow root rename on client size
-	if (this.fm.options.enableRootRename !== false) {
-		this.alwaysEnabled = true;
-	}
-
-	this.syncTitleOnChange = true;
-
-	var self = this,
-		fm = self.fm,
-		enableRootRename = fm.options.enableRootRename !== false,
-		request = function(dfrd, targtes, file, name) {
-			var sel = targtes? [file.hash].concat(targtes) : [file.hash],
-				cnt = sel.length,
-				data = {}, rootNames;
-			
-			fm.lockfiles({files : sel});
-			
-			if (fm.isRoot(file) && !file.netkey && enableRootRename) {
-				if (!(rootNames = fm.storage('rootNames'))) {
-					rootNames = {};
-				}
-				if (name === '') {
-					if (rootNames[file.hash]) {
-						file.name = file._name;
-						file.i18 = file._i18;
-						delete rootNames[file.hash];
-						delete file._name;
-						delete file._i18;
-					} else {
-						dfrd && dfrd.reject();
-						fm.unlockfiles({files : sel}).trigger('selectfiles', {files : sel});
-						return;
-					}
-				} else {
-					if (typeof file._name === 'undefined') {
-						file._name = file.name;
-						file._i18 = file.i18;
-					}
-					file.name = rootNames[file.hash] = name;
-					delete file.i18;
-				}
-				fm.storage('rootNames', rootNames);
-				data = { changed: [file] };
-				fm.updateCache(data);
-				fm.change(data);
-				dfrd && dfrd.resolve(data);
-				fm.unlockfiles({files : sel}).trigger('selectfiles', {files : sel});
-				return;
-			}
-
-			data = {
-				cmd : 'rename',
-				name : name,
-				target : file.hash
-			};
-
-			if (cnt > 1) {
-				data['targets'] = targtes;
-				if (name.match(/\*/)) {
-					data['q'] = name;
-				}
-			}
-			
-			fm.request({
-					data   : data,
-					notify : {type : 'rename', cnt : cnt},
-					navigate : {}
-				})
-				.fail(function(error) {
-					var err = fm.parseError(error);
-					dfrd && dfrd.reject();
-					if (! err || ! Array.isArray(err) || err[0] !== 'errRename') {
-						fm.sync();
-					}
-				})
-				.done(function(data) {
-					var cwdHash;
-					if (data.added && data.added.length && cnt === 1) {
-						data.undo = {
-							cmd : 'rename',
-							callback : function() {
-								return fm.request({
-									data   : {cmd : 'rename', target : data.added[0].hash, name : file.name},
-									notify : {type : 'undo', cnt : 1}
-								});
-							}
-						};
-						data.redo = {
-							cmd : 'rename',
-							callback : function() {
-								return fm.request({
-									data   : {cmd : 'rename', target : file.hash, name : name},
-									notify : {type : 'rename', cnt : 1}
-								});
-							}
-						};
-					}
-					dfrd && dfrd.resolve(data);
-					if (!(cwdHash = fm.cwd().hash) || cwdHash === file.hash) {
-						fm.exec('open', $.map(data.added, function(f) {
-							return (f.mime === 'directory')? f.hash : null;
-						})[0]);
-					}
-				})
-				.always(function() {
-					fm.unlockfiles({files : sel}).trigger('selectfiles', {files : sel});
-				}
-			);
+elFinder.prototype.commands.preference = function() {
+	var self    = this,
+		fm      = this.fm,
+		r       = 'replace',
+		tab     = '<li class="' + fm.res('class', 'tabstab') + ' elfinder-preference-tab-{id}"><a href="#'+fm.namespace+'-preference-{id}" id="'+fm.namespace+'-preference-tab-{id}" class="ui-tabs-anchor {class}">{title}</a></li>',
+		base    = $('<div class="ui-tabs ui-widget ui-widget-content ui-corner-all elfinder-preference">'), 
+		ul      = $('<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-top">'),
+		tabs    = $('<div class="elfinder-preference-tabs ui-tabs-panel ui-widget-content ui-corner-bottom"></div>'),
+		sep     = '<div class="elfinder-preference-separator"></div>',
+		selfUrl = $('base').length? document.location.href.replace(/#.*$/, '') : '',
+		selectTab = function(tab) {
+			$('#'+fm.namespace+'-preference-tab-'+tab).trigger('mouseover').trigger('click');
+			openTab = tab;
 		},
-		getHint = function(name, target) {
-			var sel = target || fm.selected(),
-				splits = fm.splitFileExtention(name),
-				f1 = fm.file(sel[0]),
-				f2 = fm.file(sel[1]),
-				ext, hint, add;
+		clTabActive = fm.res('class', 'tabsactive'),
+		build   = function() {
+			var cats = self.options.categories || {
+					'language' : ['language'],
+					'theme' : ['theme'],
+					'toolbar' : ['toolbarPref'],
+					'workspace' : ['iconSize','columnPref', 'selectAction', 'makefileTypes', 'useStoredEditor', 'editorMaximized', 'useFullscreen', 'showHidden'],
+					'dialog' : ['autoFocusDialog'],
+					'selectionInfo' : ['infoItems', 'hashChecker'],
+					'reset' : ['clearBrowserData'],
+					'all' : true
+				},
+				forms = self.options.prefs || ['language', 'theme', 'toolbarPref', 'iconSize', 'columnPref', 'selectAction', 'makefileTypes', 'useStoredEditor', 'editorMaximized', 'useFullscreen', 'showHidden', 'infoItems', 'hashChecker', 'autoFocusDialog', 'clearBrowserData'];
 			
-			ext = splits[1]? ('.' + splits[1]) : '';
-			if (splits[1] && splits[0] === '*') {
-				// change extention
-				hint =  '"' + fm.splitFileExtention(f1.name)[0] + ext + '", ';
-				hint += '"' + fm.splitFileExtention(f2.name)[0] + ext + '"';
-			} else if (splits[0].length > 1) {
-				if (splits[0].substr(-1) === '*') {
-					// add prefix
-					add = splits[0].substr(0, splits[0].length - 1);
-					hint =  '"' + add + f1.name+'", ';
-					hint += '"' + add + f2.name+'"';
-				} else if (splits[0].substr(0, 1) === '*') {
-					// add suffix
-					add = splits[0].substr(1);
-					hint =  '"'+fm.splitFileExtention(f1.name)[0] + add + ext + '", ';
-					hint += '"'+fm.splitFileExtention(f2.name)[0] + add + ext + '"';
-				}
+			if (!fm.cookieEnabled) {
+				delete cats.language;
 			}
-			if (!hint) {
-				hint = '"'+splits[0] + '1' + ext + '", "' + splits[0] + '2' + ext + '"';
-			}
-			if (sel.length > 2) {
-				hint += ' ...';
-			}
-			return hint;
-		},
-		batchRename = function() {
-			var sel = fm.selected(),
-				tplr = '<input name="type" type="radio" class="elfinder-tabstop">',
-				mkChk = function(node, label) {
-					return $('<label class="elfinder-rename-batch-checks">' + fm.i18n(label) + '</label>').prepend(node);
-				},
-				name = $('<input type="text" class="ui-corner-all elfinder-tabstop">'),
-				num  = $(tplr),
-				prefix  = $(tplr),
-				suffix  = $(tplr),
-				extention  = $(tplr),
-				checks = $('<div></div>').append(
-					mkChk(num, 'plusNumber'),
-					mkChk(prefix, 'asPrefix'),
-					mkChk(suffix, 'asSuffix'),
-					mkChk(extention, 'changeExtention')
-				),
-				preview = $('<div class="elfinder-rename-batch-preview"></div>'),
-				node = $('<div class="elfinder-rename-batch"></div>').append(
-						$('<div class="elfinder-rename-batch-name"></div>').append(name),
-						$('<div class="elfinder-rename-batch-type"></div>').append(checks),
-						preview
-					),
-				opts = {
-					title : fm.i18n('batchRename'),
-					modal : true,
-					destroyOnClose : true,
-					width: Math.min(380, fm.getUI().width() - 20),
-					buttons : {},
-					open : function() {
-						name.on('input', mkPrev).trigger('focus');
-					}
-				},
-				getName = function() {
-					var vName = name.val(),
-						ext = fm.splitFileExtention(fm.file(sel[0]).name)[1];
-					if (vName !== '' || num.is(':checked')) {
-						if (prefix.is(':checked')) {
-							vName += '*';
-						} else if (suffix.is(':checked')) {
-							vName = '*' + vName + '.' + ext;
-						} else if (extention.is(':checked')) {
-							vName = '*.' + vName;
-						} else if (ext) {
-							vName += '.' + ext;
-						}
-					}
-					return vName;
-				},
-				mkPrev = function() {
-					var vName = getName();
-					if (vName !== '') {
-						preview.html(fm.i18n(['renameMultiple', sel.length, getHint(vName)]));
-					} else {
-						preview.empty();
-					}
-				},
-				radios = checks.find('input:radio').on('change', mkPrev),
-				dialog;
+
+			forms = fm.arrayFlip(forms, true);
 			
-			opts.buttons[fm.i18n('btnApply')] = function() {
-				var vName = getName(),
-					file, targets;
-				if (vName !== '') {
-					dialog.elfinderdialog('close');
-					targets = sel;
-					file = fm.file(targets.shift());
-					request(void(0), targets, file, vName);
+			if (fm.options.getFileCallback) {
+				delete forms.selectAction;
+			}
+			if (!fm.UA.Fullscreen) {
+				delete forms.useFullscreen;
+			}
+
+			forms.language && (forms.language = (function() {
+				var langSel = $('<select></select>').on('change', function() {
+						var lang = $(this).val();
+						fm.storage('lang', lang);
+						$('#'+fm.id).elfinder('reload');
+					}),
+					optTags = [],
+					langs = self.options.langs || {
+						ar: 'العربية',
+						bg: 'Български',
+						ca: 'Català',
+						cs: 'Čeština',
+						da: 'Dansk',
+						de: 'Deutsch',
+						el: 'Ελληνικά',
+						en: 'English',
+						es: 'Español',
+						fa: 'فارسی',
+						fo: 'Føroyskt',
+						fr: 'Français',
+						fr_CA: 'Français (Canada)',
+						he: 'עברית',
+						hr: 'Hrvatski',
+						hu: 'Magyar',
+						id: 'Bahasa Indonesia',
+						it: 'Italiano',
+						ja: '日本語',
+						ko: '한국어',
+						nl: 'Nederlands',
+						no: 'Norsk',
+						pl: 'Polski',
+						pt_BR: 'Português',
+						ro: 'Română',
+						ru: 'Pусский',
+						si: 'සිංහල',
+						sk: 'Slovenčina',
+						sl: 'Slovenščina',
+						sr: 'Srpski',
+						sv: 'Svenska',
+						tr: 'Türkçe',
+						ug_CN: 'ئۇيغۇرچە',
+						uk: 'Український',
+						vi: 'Tiếng Việt',
+						zh_CN: '简体中文',
+						zh_TW: '正體中文'
+					};
+				if (!fm.cookieEnabled) {
+					return $();
 				}
-			};
-			opts.buttons[fm.i18n('btnCancel')] = function() {
-				dialog.elfinderdialog('close');
-			};
-			if ($.fn.checkboxradio) {
-				radios.checkboxradio({
-					create: function(e, ui) {
-						if (this === num.get(0)) {
-							num.prop('checked', true).change();
-						}
-					}
+				$.each(langs, function(lang, name) {
+					optTags.push('<option value="'+lang+'">'+name+'</option>');
 				});
-			} else {
-				checks.buttonset({
-					create: function(e, ui) {
-						num.prop('checked', true).change();
-					}
-				});
-			}
-			dialog = self.fmDialog(node, opts);
-		};
-	
-	this.noChangeDirOnRemovedCwd = true;
-	
-	this.shortcuts = [{
-		pattern : 'f2' + (fm.OS == 'mac' ? ' enter' : '')
-	}, {
-		pattern : 'shift+f2',
-		description : 'batchRename',
-		callback : function() {
-			fm.selected().length > 1 && batchRename();
-		}
-	}];
-	
-	this.getstate = function(select) {
-		var sel = this.files(select),
-			cnt = sel.length,
-			phash, ext, mime, brk, state, isRoot;
-		
-		if (!cnt) {
-			return -1;
-		}
-		
-		if (cnt > 1 && sel[0].phash) {
-			phash = sel[0].phash;
-			ext = fm.splitFileExtention(sel[0].name)[1].toLowerCase();
-			mime = sel[0].mime;
-		}
-		if (cnt === 1) {
-			isRoot = fm.isRoot(sel[0]);
-		}
-
-		state = (cnt === 1 && ((enableRootRename && fm.cookieEnabled && isRoot) || !sel[0].locked) || (fm.api > 2.1030 && cnt === $.grep(sel, function(f) {
-			if (!brk && !f.locked && f.phash === phash && !fm.isRoot(f) && (mime === f.mime || ext === fm.splitFileExtention(f.name)[1].toLowerCase())) {
-				return true;
-			} else {
-				brk && (brk = true);
-				return false;
-			}
-		}).length)) ? 0 : -1;
-		
-		// because alwaysEnabled = true, it need check disabled on connector 
-		if (!isRoot && state === 0 && fm.option('disabledFlip', sel[0].hash)['rename']) {
-			state = -1;
-		}
-
-		if (state !== -1 && cnt > 1) {
-			self.extra = {
-				icon: 'preference',
-				node: $('<span></span>')
-					.attr({title: fm.i18n('batchRename')})
-					.on('click touchstart', function(e){
-						if (e.type === 'touchstart' && e.originalEvent.touches.length > 1) {
-							return;
-						}
-						e.stopPropagation();
-						e.preventDefault();
-						fm.getUI().trigger('click'); // to close the context menu immediately
-						batchRename();
-					})
-			};
-		} else {
-			delete self.extra;
-		}
+				return langSel.append(optTags.join('')).val(fm.lang);
+			})());
 			
-		return state;
-	};
-	
-	this.exec = function(hashes, cOpts) {
-		var cwd      = fm.getUI('cwd'),
-			sel      = hashes || (fm.selected().length? fm.selected() : false) || [fm.cwd().hash],
-			cnt      = sel.length,
-			file     = fm.file(sel.shift()),
-			filename = '.elfinder-cwd-filename',
-			opts     = cOpts || {},
-			incwd    = (fm.cwd().hash == file.hash),
-			type     = (opts._currentType === 'navbar' || opts._currentType === 'files')? opts._currentType : (incwd? 'navbar' : 'files'),
-			navbar   = (type !== 'files'),
-			target   = fm[navbar? 'navHash2Elm' : 'cwdHash2Elm'](file.hash),
-			tarea    = (!navbar && fm.storage('view') != 'list'),
-			split    = function(name) {
-				var ext = fm.splitFileExtention(name)[1];
-				return [name.substr(0, name.length - ext.length - 1), ext];
-			},
-			unselect = function() {
-				requestAnimationFrame(function() {
-					input && input.trigger('blur');
-				});
-			},
-			rest     = function(){
-				if (!overlay.is(':hidden')) {
-					overlay.elfinderoverlay('hide').off('click close', cancel);
+			forms.theme && (forms.theme = (function() {
+				var cnt = fm.options.themes? Object.keys(fm.options.themes).length : 0;
+				if (cnt === 0 || (cnt === 1 && fm.options.themes.default)) {
+					return null;
 				}
-				pnode.removeClass('ui-front')
-					.css('position', '')
-					.off('unselect.'+fm.namespace, unselect);
-				if (tarea) {
-					node && node.css('max-height', '');
-				} else if (!navbar) {
-					pnode.css('width', '')
-						.parent('td').css('overflow', '');
-				}
-			}, colwidth,
-			dfrd     = $.Deferred()
-				.fail(function(error) {
-					var parent = input.parent(),
-						name   = fm.escape(file.i18 || file.name);
-
-					input.off();
-					if (tarea) {
-						name = name.replace(/([_.])/g, '&#8203;$1');
-					}
-					requestAnimationFrame(function() {
-						if (navbar) {
-							input.replaceWith(name);
-						} else {
-							if (parent.length) {
-								input.remove();
-								parent.html(name);
-							} else {
-								target.find(filename).html(name);
-							}
-						}
+				var themeSel = $('<select></select>').on('change', function() {
+						var theme = $(this).val();
+						fm.changeTheme(theme).storage('theme', theme);
+					}),
+					optTags = [],
+					tpl = {
+						image: '<img class="elfinder-preference-theme elfinder-preference-theme-image" src="$2" />',
+						link: '<a href="$1" target="_blank" title="$3">$2</a>',
+						data: '<dt>$1</dt><dd><span class="elfinder-preference-theme elfinder-preference-theme-$0">$2</span></dd>'
+					},
+					items = ['image', 'description', 'author', 'email', 'license'],
+					render = function(key, data) {
+					},
+					defBtn = $('<button class="ui-button ui-corner-all ui-widget elfinder-preference-theme-default"></button>').text(fm.i18n('default')).on('click', function(e) {
+						themeSel.val('default').trigger('change');
+					}),
+					list = $('<div class="elfinder-reference-hide-taball"></div>').on('click', 'button', function() {
+							var val = $(this).data('themeid');
+							themeSel.val(val).trigger('change');
 					});
-					error && fm.error(error);
-				})
-				.always(function() {
-					rest();
-					fm.unbind('resize', resize);
-					fm.enable();
-				}),
-			blur = function(e) {
-				var name   = $.trim(input.val()),
-				splits = fm.splitFileExtention(name),
-				valid  = true,
-				req = function() {
-					input.off();
-					rest();
-					if (navbar) {
-						input.replaceWith(fm.escape(name));
-					} else {
-						node.html(fm.escape(name));
-					}
-					request(dfrd, sel, file, name);
-				};
 
-				if (!overlay.is(':hidden')) {
-					pnode.css('z-index', '');
+				if (!fm.options.themes.default) {
+					themeSel.append('<option value="default">'+fm.i18n('default')+'</option>');
 				}
-				if (name === '') {
-					if (!fm.isRoot(file)) {
-						return cancel();
-					}
-					if (navbar) {
-						input.replaceWith(fm.escape(file.name));
-					} else {
-						node.html(fm.escape(file.name));
-					}
-				}
-				if (!inError && pnode.length) {
-					
-					input.off('blur');
-					
-					if (cnt === 1 && name === file.name) {
-						return dfrd.reject();
-					}
-					if (fm.options.validName && fm.options.validName.test) {
-						try {
-							valid = fm.options.validName.test(name);
-						} catch(e) {
-							valid = false;
+				$.each(fm.options.themes, function(id, val) {
+					var opt = $('<option class="elfinder-theme-option-'+id+'" value="'+id+'">'+fm.i18n(id)+'</option>'),
+						dsc = $('<fieldset class="ui-widget ui-widget-content ui-corner-all elfinder-theme-list-'+id+'"><legend>'+fm.i18n(id)+'</legend><div><span class="elfinder-spinner"></span></div></fieldset>'),
+						tm;
+					themeSel.append(opt);
+					list.append(dsc);
+					tm = setTimeout(function() {
+						dsc.find('span.elfinder-spinner').replaceWith(fm.i18n(['errRead', id]));
+					}, 10000);
+					fm.getTheme(id).always(function() {
+						tm && clearTimeout(tm);
+					}).done(function(data) {
+						var link, val = $(), dl = $('<dl></dl>');
+						link = data.link? tpl.link.replace(/\$1/g, data.link).replace(/\$3/g, fm.i18n('website')) : '$2';
+						if (data.name) {
+							opt.html(fm.i18n(data.name));
 						}
-					}
-					if (name === '.' || name === '..' || !valid) {
-						inError = true;
-						fm.error(file.mime === 'directory'? 'errInvDirname' : 'errInvName', {modal: true, close: function(){setTimeout(select, 120);}});
-						return false;
-					}
-					if (cnt === 1 && fm.fileByName(name, file.phash)) {
-						inError = true;
-						fm.error(['errExists', name], {modal: true, close: function(){setTimeout(select, 120);}});
-						return false;
-					}
-					
-					if (cnt === 1) {
-						req();
-					} else {
-						fm.confirm({
-							title : 'cmdrename',
-							text  : ['renameMultiple', cnt, getHint(name, [file.hash].concat(sel))],
-							accept : {
-								label : 'btnYes',
-								callback : req
-							},
-							cancel : {
-								label : 'btnCancel',
-								callback : function() {
-									setTimeout(function() {
-										inError = true;
-										select();
-									}, 120);
+						dsc.children('legend').html(link.replace(/\$2/g, fm.i18n(data.name) || id));
+						$.each(items, function(i, key) {
+							var t = tpl[key] || tpl.data,
+								elm;
+							if (data[key]) {
+								elm = t.replace(/\$0/g, fm.escape(key)).replace(/\$1/g, fm.i18n(key)).replace(/\$2/g, fm.i18n(data[key]));
+								if (key === 'image' && data.link) {
+									elm = $(elm).on('click', function() {
+										themeSel.val(id).trigger('change');
+									}).attr('title', fm.i18n('select'));
 								}
+								dl.append(elm);
 							}
 						});
-						setTimeout(function() {
-							fm.trigger('unselectfiles', {files: fm.selected()})
-								.trigger('selectfiles', {files : [file.hash].concat(sel)});
-						}, 120);
+						val = val.add(dl);
+						val = val.add($('<div class="elfinder-preference-theme-btn"></div>').append($('<button class="ui-button ui-corner-all ui-widget"></button>').data('themeid', id).html(fm.i18n('select'))));
+						dsc.find('span.elfinder-spinner').replaceWith(val);
+					}).fail(function() {
+						dsc.find('span.elfinder-spinner').replaceWith(fm.i18n(['errRead', id]));
+					});
+				});
+				return $('<div></div>').append(themeSel.val(fm.theme && fm.theme.id? fm.theme.id : 'default'), defBtn, list);
+			})());
+
+			forms.toolbarPref && (forms.toolbarPref = (function() {
+				var pnls = $.map(fm.options.uiOptions.toolbar, function(v) {
+						return Array.isArray(v)? v : null;
+					}),
+					tags = [],
+					hides = fm.storage('toolbarhides') || {};
+				$.each(pnls, function() {
+					var cmd = this,
+						name = fm.i18n('cmd'+cmd);
+					if (name === 'cmd'+cmd) {
+						name = fm.i18n(cmd);
 					}
-				}
-			},
-			input = $(tarea? '<textarea></textarea>' : '<input type="text"/>')
-				.on('keyup text', function(){
-					if (tarea) {
-						this.style.height = '1px';
-						this.style.height = this.scrollHeight + 'px';
-					} else if (colwidth) {
-						this.style.width = colwidth + 'px';
-						if (this.scrollWidth > colwidth) {
-							this.style.width = this.scrollWidth + 10 + 'px';
+					tags.push('<span class="elfinder-preference-toolbar-item"><label><input type="checkbox" value="'+cmd+'" '+(hides[cmd]? '' : 'checked')+'/>'+name+'</label></span>');
+				});
+				return $(tags.join(' ')).on('change', 'input', function() {
+					var v = $(this).val(),
+						o = $(this).is(':checked');
+					if (!o && !hides[v]) {
+						hides[v] = true;
+					} else if (o && hides[v]) {
+						delete hides[v];
+					}
+					fm.storage('toolbarhides', hides);
+					fm.trigger('toolbarpref');
+				});
+			})());
+			
+			forms.iconSize && (forms.iconSize = (function() {
+				var max = fm.options.uiOptions.cwd.iconsView.sizeMax || 3,
+					size = fm.storage('iconsize') || fm.options.uiOptions.cwd.iconsView.size || 0,
+					sld = $('<div class="touch-punch"></div>').slider({
+						classes: {
+							'ui-slider-handle': 'elfinder-tabstop',
+						},
+						value: size,
+						max: max,
+						slide: function(e, ui) {
+							fm.getUI('cwd').trigger('iconpref', {size: ui.value});
+						},
+						change: function(e, ui) {
+							fm.storage('iconsize', ui.value);
 						}
+					});
+				fm.getUI('cwd').on('iconpref', function(e, data) {
+					sld.slider('option', 'value', data.size);
+				});
+				return sld;
+			})());
+
+			forms.columnPref && (forms.columnPref = (function() {
+				var cols = fm.options.uiOptions.cwd.listView.columns,
+					tags = [],
+					hides = fm.storage('columnhides') || {};
+				$.each(cols, function() {
+					var key = this,
+						name = fm.getColumnName(key);
+					tags.push('<span class="elfinder-preference-column-item"><label><input type="checkbox" value="'+key+'" '+(hides[key]? '' : 'checked')+'/>'+name+'</label></span>');
+				});
+				return $(tags.join(' ')).on('change', 'input', function() {
+					var v = $(this).val(),
+						o = $(this).is(':checked');
+					if (!o && !hides[v]) {
+						hides[v] = true;
+					} else if (o && hides[v]) {
+						delete hides[v];
 					}
-				})
-				.on('keydown', function(e) {
-					e.stopImmediatePropagation();
-					if (e.keyCode == $.ui.keyCode.ESCAPE) {
-						dfrd.reject();
-					} else if (e.keyCode == $.ui.keyCode.ENTER) {
-						e.preventDefault();
-						input.trigger('blur');
+					fm.storage('columnhides', hides);
+					fm.trigger('columnpref', { repaint: true });
+				});
+			})());
+			
+			forms.selectAction && (forms.selectAction = (function() {
+				var actSel = $('<select></select>').on('change', function() {
+						var act = $(this).val();
+						fm.storage('selectAction', act === 'default'? null : act);
+					}),
+					optTags = [],
+					acts = self.options.selectActions,
+					defAct = fm.getCommand('open').options.selectAction || 'open';
+				
+				if ($.inArray(defAct, acts) === -1) {
+					acts.unshift(defAct);
+				}
+				$.each(acts, function(i, act) {
+					var names = $.map(act.split('/'), function(cmd) {
+						var name = fm.i18n('cmd'+cmd);
+						if (name === 'cmd'+cmd) {
+							name = fm.i18n(cmd);
+						}
+						return name;
+					});
+					optTags.push('<option value="'+act+'">'+names.join('/')+'</option>');
+				});
+				return actSel.append(optTags.join('')).val(fm.storage('selectAction') || defAct);
+			})());
+			
+			forms.makefileTypes && (forms.makefileTypes = (function() {
+				var hides = fm.getCommand('edit').getMkfileHides(),
+					getTag = function() {
+						var tags = [];
+						// re-assign hides
+						hides = fm.getCommand('edit').getMkfileHides();
+						$.each(fm.mimesCanMakeEmpty, function(mime, type) {
+							var name = fm.getCommand('mkfile').getTypeName(mime, type);
+							tags.push('<span class="elfinder-preference-column-item" title="'+fm.escape(name)+'"><label><input type="checkbox" value="'+mime+'" '+(hides[mime]? '' : 'checked')+'/>'+type+'</label></span>');
+						});
+						return tags.join(' ');
+					},
+					elm = $('<div></div>').on('change', 'input', function() {
+						var v = $(this).val(),
+							o = $(this).is(':checked');
+						if (!o && !hides[v]) {
+							hides[v] = true;
+						} else if (o && hides[v]) {
+							delete hides[v];
+						}
+						fm.storage('mkfileHides', hides);
+						fm.trigger('canMakeEmptyFile');
+					}).append(getTag()),
+					add = $('<div></div>').append(
+						$('<input type="text" placeholder="'+fm.i18n('typeOfTextfile')+'"/>').on('keydown', function(e) {
+							(e.keyCode === $.ui.keyCode.ENTER) && $(this).next().trigger('click');
+						}),
+						$('<button class="ui-button"></button>').html(fm.i18n('add')).on('click', function() {
+							var input = $(this).prev(),
+								val = input.val(),
+								uiToast = fm.getUI('toast'),
+								err = function() {
+									uiToast.appendTo(input.closest('.ui-dialog'));
+									fm.toast({
+										msg: fm.i18n('errUsupportType'),
+										mode: 'warning',
+										onHidden: function() {
+											uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
+										}
+									});
+									input.trigger('focus');
+									return false;
+								},
+								tmpMimes;
+							if (!val.match(/\//)) {
+								val = fm.arrayFlip(fm.mimeTypes)[val];
+								if (!val) {
+									return err();
+								}
+								input.val(val);
+							}
+							if (!fm.mimeIsText(val) || !fm.mimeTypes[val]) {
+								return err();
+							}
+							fm.trigger('canMakeEmptyFile', {mimes: [val], unshift: true});
+							tmpMimes = {};
+							tmpMimes[val] = fm.mimeTypes[val];
+							fm.storage('mkfileTextMimes', Object.assign(tmpMimes, fm.storage('mkfileTextMimes') || {}));
+							input.val('');
+							uiToast.appendTo(input.closest('.ui-dialog'));
+							fm.toast({
+								msg: fm.i18n(['complete', val + ' (' + tmpMimes[val] + ')']),
+								onHidden: function() {
+									uiToast.children().length === 1 && uiToast.appendTo(fm.getUI());
+								}
+							});
+						}),
+						$('<button class="ui-button"></button>').html(fm.i18n('reset')).on('click', function() {
+							fm.one('canMakeEmptyFile', {done: function() {
+								elm.empty().append(getTag());
+							}});
+							fm.trigger('canMakeEmptyFile', {resetTexts: true});
+						})
+					),
+					tm;
+				fm.bind('canMakeEmptyFile', {done: function(e) {
+					if (e.data && e.data.mimes && e.data.mimes.length) {
+						elm.empty().append(getTag());
 					}
-				})
-				.on('mousedown click dblclick', function(e) {
-					e.stopPropagation();
-					if (e.type === 'dblclick') {
-						e.preventDefault();
+				}});
+				return $('<div></div>').append(elm, add);
+			})());
+
+			forms.useStoredEditor && (forms.useStoredEditor = $('<input type="checkbox"/>').prop('checked', (function() {
+				var s = fm.storage('useStoredEditor');
+				return s? (s > 0) : fm.options.commandsOptions.edit.useStoredEditor;
+			})()).on('change', function(e) {
+				fm.storage('useStoredEditor', $(this).is(':checked')? 1 : -1);
+			}));
+
+			forms.editorMaximized && (forms.editorMaximized = $('<input type="checkbox"/>').prop('checked', (function() {
+				var s = fm.storage('editorMaximized');
+				return s? (s > 0) : fm.options.commandsOptions.edit.editorMaximized;
+			})()).on('change', function(e) {
+				fm.storage('editorMaximized', $(this).is(':checked')? 1 : -1);
+			}));
+
+			forms.useFullscreen && (forms.useFullscreen = $('<input type="checkbox"/>').prop('checked', (function() {
+				var s = fm.storage('useFullscreen');
+				return s? (s > 0) : fm.options.commandsOptions.fullscreen.mode === 'screen';
+			})()).on('change', function(e) {
+				fm.storage('useFullscreen', $(this).is(':checked')? 1 : -1);
+			}));
+
+			if (forms.showHidden) {
+				(function() {
+					var setTitle = function() {
+							var s = fm.storage('hide'),
+								t = [],
+								v;
+							if (s && s.items) {
+								$.each(s.items, function(h, n) {
+									t.push(fm.escape(n));
+								});
+							}
+							elms.prop('disabled', !t.length)[t.length? 'removeClass' : 'addClass']('ui-state-disabled');
+							v = t.length? t.join('\n') : '';
+							forms.showHidden.attr('title',v);
+							useTooltip && forms.showHidden.tooltip('option', 'content', v.replace(/\n/g, '<br>')).tooltip('close');
+						},
+						chk = $('<input type="checkbox"/>').prop('checked', (function() {
+							var s = fm.storage('hide');
+							return s && s.show;
+						})()).on('change', function(e) {
+							var o = {};
+							o[$(this).is(':checked')? 'show' : 'hide'] = true;
+							fm.exec('hide', void(0), o);
+						}),
+						btn = $('<button class="ui-button ui-corner-all ui-widget"></button>').append(fm.i18n('reset')).on('click', function() {
+							fm.exec('hide', void(0), {reset: true});
+							$(this).parent().find('input:first').prop('checked', false);
+							setTitle();
+						}),
+						elms = $().add(chk).add(btn),
+						useTooltip;
+					
+					forms.showHidden = $('<div></div>').append(chk, btn);
+					fm.bind('hide', function(e) {
+						var d = e.data;
+						if (!d.opts || (!d.opts.show && !d.opts.hide)) {
+							setTitle();
+						}
+					});
+					if (fm.UA.Mobile && $.fn.tooltip) {
+						useTooltip = true;
+						forms.showHidden.tooltip({
+							classes: {
+								'ui-tooltip': 'elfinder-ui-tooltip ui-widget-shadow'
+							},
+							tooltipClass: 'elfinder-ui-tooltip ui-widget-shadow',
+							track: true
+						}).css('user-select', 'none');
+						btn.css('user-select', 'none');
 					}
-				})
-				.on('blur', blur)
-				.on('dragenter dragleave dragover drop', function(e) {
-					// stop bubbling to prevent upload with native drop event
-					e.stopPropagation();
-				}),
-			select = function() {
-				var name = fm.splitFileExtention(input.val())[0];
-				if (!inError && fm.UA.Mobile && !fm.UA.iOS) { // since iOS has a bug? (z-index not effect) so disable it
-					overlay.on('click close', cancel).elfinderoverlay('show');
-					pnode.css('z-index', overlay.css('z-index') + 1);
-				}
-				! fm.enabled() && fm.enable();
-				if (inError) {
-					inError = false;
-					input.on('blur', blur);
-				}
-				input.trigger('focus').trigger('select');
-				input[0].setSelectionRange && input[0].setSelectionRange(0, name.length);
-			},
-			node = navbar? target.contents().filter(function(){ return this.nodeType==3 && $(this).parent().attr('id') === fm.navHash2Id(file.hash); })
-					: target.find(filename),
-			pnode = node.parent(),
-			overlay = fm.getUI('overlay'),
-			cancel = function(e) { 
-				if (!overlay.is(':hidden')) {
-					pnode.css('z-index', '');
-				}
-				if (! inError) {
-					dfrd.reject();
-					if (e) {
-						e.stopPropagation();
-						e.preventDefault();
-					}
-				}
-			},
-			resize = function() {
-				target.trigger('scrolltoview', {blink : false});
-			},
-			inError = false;
-		
-		pnode.addClass('ui-front')
-			.css('position', 'relative')
-			.on('unselect.'+fm.namespace, unselect);
-		fm.bind('resize', resize);
-		if (navbar) {
-			node.replaceWith(input.val(file.name));
-		} else {
-			if (tarea) {
-				node.css('max-height', 'none');
-			} else if (!navbar) {
-				colwidth = pnode.width();
-				pnode.width(colwidth - 15)
-					.parent('td').css('overflow', 'visible');
+					setTitle();
+				})();
 			}
-			node.empty().append(input.val(file.name));
+			
+			forms.infoItems && (forms.infoItems = (function() {
+				var items = fm.getCommand('info').items,
+					tags = [],
+					hides = fm.storage('infohides') || fm.arrayFlip(fm.options.commandsOptions.info.hideItems, true);
+				$.each(items, function() {
+					var key = this,
+						name = fm.i18n(key);
+					tags.push('<span class="elfinder-preference-info-item"><label><input type="checkbox" value="'+key+'" '+(hides[key]? '' : 'checked')+'/>'+name+'</label></span>');
+				});
+				return $(tags.join(' ')).on('change', 'input', function() {
+					var v = $(this).val(),
+						o = $(this).is(':checked');
+					if (!o && !hides[v]) {
+						hides[v] = true;
+					} else if (o && hides[v]) {
+						delete hides[v];
+					}
+					fm.storage('infohides', hides);
+					fm.trigger('infopref', { repaint: true });
+				});
+			})());
+			
+			forms.hashChecker && fm.hashCheckers.length && (forms.hashChecker = (function() {
+				var tags = [],
+					enabled = fm.arrayFlip(fm.storage('hashchekcer') || fm.options.commandsOptions.info.showHashAlgorisms, true);
+				$.each(fm.hashCheckers, function() {
+					var cmd = this,
+						name = fm.i18n(cmd);
+					tags.push('<span class="elfinder-preference-hashchecker-item"><label><input type="checkbox" value="'+cmd+'" '+(enabled[cmd]? 'checked' : '')+'/>'+name+'</label></span>');
+				});
+				return $(tags.join(' ')).on('change', 'input', function() {
+					var v = $(this).val(),
+						o = $(this).is(':checked');
+					if (o) {
+						enabled[v] = true;
+					} else if (enabled[v]) {
+						delete enabled[v];
+					}
+					fm.storage('hashchekcer', $.grep(fm.hashCheckers, function(v) {
+						return enabled[v];
+					}));
+				});
+			})());
+
+			forms.autoFocusDialog && (forms.autoFocusDialog = $('<input type="checkbox"/>').prop('checked', (function() {
+				var s = fm.storage('autoFocusDialog');
+				return s? (s > 0) : fm.options.uiOptions.dialog.focusOnMouseOver;
+			})()).on('change', function(e) {
+				fm.storage('autoFocusDialog', $(this).is(':checked')? 1 : -1);
+			}));
+			
+			forms.clearBrowserData && (forms.clearBrowserData = $('<button></button>').text(fm.i18n('reset')).button().on('click', function(e) {
+				e.preventDefault();
+				fm.storage();
+				$('#'+fm.id).elfinder('reload');
+			}));
+			
+			$.each(cats, function(id, prefs) {
+				var dls, found;
+				if (prefs === true) {
+					found = 1;
+				} else if (prefs) {
+					dls = $();
+					$.each(prefs, function(i, n) {
+						var f, title, chks = '', cbox;
+						if (f = forms[n]) {
+							found = 2;
+							title = fm.i18n(n);
+							cbox = $(f).filter('input[type="checkbox"]');
+							if (!cbox.length) {
+								cbox = $(f).find('input[type="checkbox"]');
+							}
+							if (cbox.length === 1) {
+								if (!cbox.attr('id')) {
+									cbox.attr('id', 'elfinder-preference-'+n+'-checkbox');
+								}
+								title = '<label for="'+cbox.attr('id')+'">'+title+'</label>';
+							} else if (cbox.length > 1) {
+								chks = ' elfinder-preference-checkboxes';
+							}
+							dls = dls.add($('<dt class="elfinder-preference-'+n+chks+'">'+title+'</dt>')).add($('<dd class="elfinder-preference-'+n+chks+'"></dd>').append(f));
+						}
+					});
+				}
+				if (found) {
+					ul.append(tab[r](/\{id\}/g, id)[r](/\{title\}/, fm.i18n(id))[r](/\{class\}/, openTab === id? 'elfinder-focus' : ''));
+					if (found === 2) {
+						tabs.append(
+							$('<div id="'+fm.namespace+'-preference-'+id+'" class="elfinder-preference-content"></div>')
+							.hide()
+							.append($('<dl></dl>').append(dls))
+						);
+					}
+				}
+			});
+
+			ul.on('click', 'a', function(e) {
+				var t = $(e.target),
+					h = t.attr('href');
+				e.preventDefault();
+				e.stopPropagation();
+
+				ul.children().removeClass(clTabActive);
+				t.removeClass('ui-state-hover').parent().addClass(clTabActive);
+
+				if (h.match(/all$/)) {
+					tabs.addClass('elfinder-preference-taball').children().show();
+				} else {
+					tabs.removeClass('elfinder-preference-taball').children().hide();
+					$(h).show();
+				}
+			}).on('focus blur', 'a', function(e) {
+				$(this).parent().toggleClass('ui-state-focus', e.type === 'focusin');
+			}).on('mouseenter mouseleave', 'li', function(e) {
+				$(this).toggleClass('ui-state-hover', e.type === 'mouseenter');
+			});
+
+			tabs.find('a,input,select,button').addClass('elfinder-tabstop');
+			base.append(ul, tabs);
+
+			dialog = self.fmDialog(base, {
+				title : self.title,
+				width : self.options.width || 600,
+				height: self.options.height || 400,
+				maxWidth: 'window',
+				maxHeight: 'window',
+				autoOpen : false,
+				destroyOnClose : false,
+				allowMinimize : false,
+				open : function() {
+					openTab && selectTab(openTab);
+					openTab = null;
+				},
+				resize : function() {
+					tabs.height(dialog.height() - ul.outerHeight(true) - (tabs.outerHeight(true) - tabs.height()) - 5);
+				}
+			})
+			.on('click', function(e) {
+				e.stopPropagation();
+			})
+			.css({
+				overflow: 'hidden'
+			});
+
+			dialog.closest('.ui-dialog')
+			.css({
+				overflow: 'hidden'
+			})
+			.addClass('elfinder-bg-translucent');
+			
+			openTab = 'all';
+		},
+		dialog, openTab;
+
+	this.shortcuts = [{
+		pattern     : 'ctrl+comma',
+		description : this.title
+	}];
+
+	this.alwaysEnabled  = true;
+	
+	this.getstate = function() {
+		return 0;
+	};
+	
+	this.exec = function(sel, cOpts) {
+		!dialog && build();
+		if (cOpts) {
+			if (cOpts.tab) {
+				selectTab(cOpts.tab);
+			} else if (cOpts._currentType === 'cwd') {
+				selectTab('workspace');
+			}
 		}
-		
-		if (cnt > 1 && fm.api <= 2.1030) {
-			return dfrd.reject();
-		}
-		
-		if (!file || !node.length) {
-			return dfrd.reject('errCmdParams', this.title);
-		}
-		
-		if (file.locked && (!fm.isRoot(file) || !enableRootRename)) {
-			return dfrd.reject(['errLocked', file.name]);
-		}
-		
-		fm.one('select', function() {
-			input.parent().length && file && $.inArray(file.hash, fm.selected()) === -1 && input.trigger('blur');
-		});
-		
-		input.trigger('keyup');
-		
-		select();
-		
-		return dfrd;
+		dialog.elfinderdialog('open');
+		return $.Deferred().resolve();
 	};
 
-	fm.bind('select contextmenucreate closecontextmenu', function(e) {
-		var sel = (e.data? (e.data.selected || e.data.targets) : null) || fm.selected(),
-			file;
-		if (sel && sel.length === 1 && (file = fm.file(sel[0])) && fm.isRoot(file)) {
-			self.title = fm.i18n('kindAlias') + ' (' + fm.i18n('preference') + ')';
-		} else {
-			self.title = fm.i18n('cmdrename');
-		}
-		if (e.type !== 'closecontextmenu') {
-			self.update(void(0), self.title);
-		} else {
-			requestAnimationFrame(function() {
-				self.update(void(0), self.title);
-			});
-		}
-	}).remove(function(e) {
-		var rootNames;
-		if (e.data && e.data.removed && (rootNames = fm.storage('rootNames'))) {
-			$.each(e.data.removed, function(i, h) {
-				if (rootNames[h]) {
-					delete rootNames[h];
-				}
-			});
-			fm.storage('rootNames', rootNames);
-		}
-	});
 };
