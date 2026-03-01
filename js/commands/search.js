@@ -48,10 +48,10 @@ elFinder.prototype.commands.search = function() {
 			}
 			target = target? target : '';
 			if (mime) {
-				mime = $.trim(mime).replace(',', ' ').split(' ');
+				mime = mime.trim().replace(',', ' ').split(' ');
 				if (onlyMimes.length) {
 					mime = $.map(mime, function(m){ 
-						m = $.trim(m);
+						m = m.trim();
 						return m && ($.inArray(m, onlyMimes) !== -1
 									|| $.grep(onlyMimes, function(om) { return m.indexOf(om) === 0? true : false; }).length
 									)? m : null;
