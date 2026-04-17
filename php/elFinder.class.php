@@ -4432,7 +4432,7 @@ var go = function() {
     protected function utime()
     {
         $time = explode(" ", microtime());
-        return (double)$time[1] + (double)$time[0];
+        return (float)$time[1] + (float)$time[0];
     }
 
     /**
@@ -4511,7 +4511,7 @@ var go = function() {
         foreach ($hashes as $hash) {
             $lock = elFinder::$commonTempPath . DIRECTORY_SEPARATOR . self::filenameDecontaminate($hash) . '.lock';
             if ($this->itemLocked($hash)) {
-                $cnt = file_get_contents($lock) + 1;
+                $cnt = (int)file_get_contents($lock) + 1;
             } else {
                 $cnt = 1;
             }
