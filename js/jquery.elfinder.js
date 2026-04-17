@@ -314,9 +314,9 @@ if ($.ui) {
 	if (self.element.hasClass('touch-punch')) {
 		// Delegate the touch handlers to the widget's element
 		self.element.on({
-		  touchstart: $.proxy(self, '_touchStart'),
-		  touchmove: $.proxy(self, '_touchMove'),
-		  touchend: $.proxy(self, '_touchEnd')
+			touchstart: self.bind('_touchStart'),
+			touchmove: self.bind('_touchMove'),
+			touchend: self.bind('_touchEnd')
 		});
 	}
 
@@ -334,9 +334,9 @@ if ($.ui) {
 	if (self.element.hasClass('touch-punch')) {
 		// Delegate the touch handlers to the widget's element
 		self.element.off({
-		  touchstart: $.proxy(self, '_touchStart'),
-		  touchmove: $.proxy(self, '_touchMove'),
-		  touchend: $.proxy(self, '_touchEnd')
+			touchstart: self.bind('_touchStart'),
+			touchmove: self.bind('_touchMove'),
+			touchend: self.bind('_touchEnd')
 		});
 	}
 
