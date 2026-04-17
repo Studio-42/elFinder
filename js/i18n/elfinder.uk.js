@@ -174,7 +174,7 @@
 			'btnCancel' : 'Скасувати',
 			'btnNo'     : 'Ні',
 			'btnYes'    : 'Так',
-			'btnDiscard': 'Discard changes',
+			'btnDiscard': 'Скасувати зміни',
 			'btnMount'  : 'Підключити',  // added 18.04.2012
 			'btnApprove': 'Перейти в $1 і прийняти', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Відключити', // from v2.1 added 30.04.2012

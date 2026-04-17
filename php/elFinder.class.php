@@ -32,7 +32,7 @@ class elFinder
      *
      * @var integer
      */
-    protected static $ApiRevision = 66;
+    protected static $ApiRevision = 67;
 
     /**
      * Storages (root dirs)
@@ -4090,9 +4090,13 @@ class elFinder
         $x = (int)$args['x'];
         $y = (int)$args['y'];
         $mode = $args['mode'];
-        $bg = $args['bg'];
+        $bg = isset($args['bg']) ? trim((string)$args['bg']) : '';
         $degree = (int)$args['degree'];
         $quality = (int)$args['quality'];
+
+        if ($bg !== '' && !$this->isSafeBgColor($bg)) {
+            return array('error' => $this->error(self::ERROR_RESIZE, self::ERROR_INV_PARAMS));
+        }
 
         if (($volume = $this->volume($target)) == false
             || ($file = $volume->file($target)) == false) {
@@ -4105,6 +4109,40 @@ class elFinder
         return ($file = $volume->resize($target, $width, $height, $x, $y, $mode, $bg, $degree, $quality))
             ? (!empty($file['losslessRotate']) ? $file : array('changed' => array($file)))
             : array('error' => $this->error(self::ERROR_RESIZE, $volume->path($target), $volume->error()));
+    }
+
+    /**
+     * Validate background color for image operations.
+     *
+     * Allowed formats:
+     * - transparent
+     * - #RGB
+     * - #RRGGBB
+     * - #RRGGBBAA
+     * - rgb(r,g,b)
+     * - rgba(r,g,b,a)
+     *
+     * @param string $bg
+     * @return bool
+     */
+    protected function isSafeBgColor($bg) {
+        if ($bg === 'transparent') {
+            return true;
+        }
+
+        if (preg_match('/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/', $bg)) {
+            return true;
+        }
+
+        if (preg_match('/^rgb\(\s*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,\s*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,\s*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*\)$/', $bg)) {
+            return true;
+        }
+
+        if (preg_match('/^rgba\(\s*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,\s*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,\s*(?:25[0-5]|2[0-4]\d|1?\d?\d)\s*,\s*(?:0|0?\.\d+|1(?:\.0+)?)\s*\)$/', $bg)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
