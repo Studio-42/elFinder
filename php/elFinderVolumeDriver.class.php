@@ -273,7 +273,7 @@ abstract class elFinderVolumeDriver
         // mime.types file path (for mimeDetect==internal)
         'mimefile' => '',
         // Static extension/MIME of general server side scripts to security issues
-        'staticMineMap' => array(
+        'staticMimeMap' => array(
             'php:*' => 'text/x-php',
             'pht:*' => 'text/x-php',
             'php3:*' => 'text/x-php',
@@ -317,7 +317,7 @@ abstract class elFinderVolumeDriver
             'oga:application/ogg' => 'audio/ogg',
             'ogv:application/ogg' => 'video/ogg',
             'zip:application/x-zip' => 'application/zip',
-            'm3u8:text/plain' => 'application/x-mpegURL',
+            'm3u8:text/plain' => 'application/x-mpegurl',
             'mpd:text/plain' => 'application/dash+xml',
             'mpd:application/xml' => 'application/dash+xml',
             '*:application/x-dosexec' => 'application/x-executable',
@@ -611,6 +611,7 @@ abstract class elFinderVolumeDriver
         // applications
         'exe' => 'application/x-executable',
         'jar' => 'application/x-jar',
+        'rpm' => 'application/x-rpm',
         // archives
         'gz' => 'application/x-gzip',
         'tgz' => 'application/x-gzip',
@@ -628,7 +629,7 @@ abstract class elFinderVolumeDriver
         'c' => 'text/x-csrc',
         'h' => 'text/x-chdr',
         'cpp' => 'text/x-c++src',
-        'hh' => 'text/x-c++hdr',
+        'hpp' => 'text/x-c++hdr',
         'md' => 'text/x-markdown',
         'markdown' => 'text/x-markdown',
         'yml' => 'text/x-yaml',
@@ -643,10 +644,10 @@ abstract class elFinderVolumeDriver
         'dv' => 'video/x-dv',
         'wm' => 'video/x-ms-wmv',
         'ogm' => 'video/ogg',
-        'm2ts' => 'video/MP2T',
-        'mts' => 'video/MP2T',
-        'ts' => 'video/MP2T',
-        'm3u8' => 'application/x-mpegURL',
+        'm2ts' => 'video/mp2t',
+        'mts' => 'video/mp2t',
+        'ts' => 'video/mp2t',
+        'm3u8' => 'application/x-mpegurl',
         'mpd' => 'application/dash+xml'
     );
 
@@ -947,8 +948,11 @@ abstract class elFinderVolumeDriver
         if (!is_array($this->options['mimeMap'])) {
             $this->options['mimeMap'] = array();
         }
-        if (is_array($this->options['staticMineMap']) && $this->options['staticMineMap']) {
-            $this->options['mimeMap'] = array_merge($this->options['mimeMap'], $this->options['staticMineMap']);
+        if (empty($this->options['staticMimeMap']) && is_array($this->options['staticMineMap']) && $this->options['staticMineMap']) {
+            $this->options['staticMimeMap'] = $this->options['staticMineMap'];
+        }
+        if (is_array($this->options['staticMimeMap']) && $this->options['staticMimeMap']) {
+            $this->options['mimeMap'] = array_merge($this->options['mimeMap'], $this->options['staticMimeMap']);
         }
         if (is_array($this->options['additionalMimeMap']) && $this->options['additionalMimeMap']) {
             $this->options['mimeMap'] = array_merge($this->options['mimeMap'], $this->options['additionalMimeMap']);
