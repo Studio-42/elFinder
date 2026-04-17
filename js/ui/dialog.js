@@ -277,7 +277,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 									}).position();
 									mnode = dialog.clone().on('mousedown', function() {
 										$this.trigger('mousedown');
-									}).removeClass('ui-draggable ui-resizable elfinder-frontmost');
+									}).removeClass('ui-draggable ui-resizable elfinder-frontmost elfinder-maximized');
 									tray.append(dum);
 									Object.assign(pos, dum.offset(), dumStyle);
 									dum.remove();
