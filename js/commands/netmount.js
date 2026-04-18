@@ -87,10 +87,10 @@ elFinder.prototype.commands.netmount = function() {
 							elm = $(input);
 							if (elm.is(':radio,:checkbox')) {
 								if (elm.is(':checked')) {
-									val = $.trim(elm.val());
+									val = elm.val().trim();
 								}
 							} else {
-								val = $.trim(elm.val());
+								val = elm.val().trim();
 							}
 							if (val) {
 								data[input.name] = val;
