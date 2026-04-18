@@ -312,12 +312,13 @@ if ($.ui) {
 	var self = this;
 
 	if (self.element.hasClass('touch-punch')) {
+		self._touchPunchHandlers = self._touchPunchHandlers || {
+			touchstart: self._touchStart.bind(self),
+			touchmove: self._touchMove.bind(self),
+			touchend: self._touchEnd.bind(self)
+		};
 		// Delegate the touch handlers to the widget's element
-		self.element.on({
-			touchstart: self.bind('_touchStart'),
-			touchmove: self.bind('_touchMove'),
-			touchend: self.bind('_touchEnd')
-		});
+		self.element.on(self._touchPunchHandlers);
 	}
 
 	// Call the original $.ui.mouse init method
@@ -331,13 +332,9 @@ if ($.ui) {
 	
 	var self = this;
 
-	if (self.element.hasClass('touch-punch')) {
+	if (self.element.hasClass('touch-punch') && self._touchPunchHandlers) {
 		// Delegate the touch handlers to the widget's element
-		self.element.off({
-			touchstart: self.bind('_touchStart'),
-			touchmove: self.bind('_touchMove'),
-			touchend: self.bind('_touchEnd')
-		});
+		self.element.off(self._touchPunchHandlers);
 	}
 
 	// Call the original $.ui.mouse destroy method

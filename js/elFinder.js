@@ -10635,7 +10635,7 @@ if (!Object.keys) {
 // Array.isArray
 if (!Array.isArray) {
 	Array.isArray = function(arr) {
-		return jQuery.isArray(arr);
+		return Object.prototype.toString.call(arr) === '[object Array]';
 	};
 }
 // Object.assign
