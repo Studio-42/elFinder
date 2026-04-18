@@ -1580,7 +1580,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		} 
 	});
 	
-	this.compare = $.proxy(this.compare, this);
+	this.compare = this.compare.bind(this);
 	
 	/**
 	 * Delay in ms before open notification dialog
@@ -3376,7 +3376,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			this.autoSync('stop');
 		}
 		if (!dstHash && files) {
-			if ($.isArray(files)) {
+			if (Array.isArray(files)) {
 				if (files.length) {
 					dstHash = files[0];
 				}
@@ -4129,14 +4129,14 @@ var elFinder = function(elm, opts, bootCallback) {
 	}
 	
 	if (this.transport.upload == 'iframe') {
-		this.transport.upload = $.proxy(this.uploads.iframe, this);
+		this.transport.upload = this.uploads.iframe.bind(this);
 	} else if (typeof(this.transport.upload) == 'function') {
 		this.dragUpload = !!this.options.dragUploadAllow;
 	} else if (this.xhrUpload && !!this.options.dragUploadAllow) {
-		this.transport.upload = $.proxy(this.uploads.xhr, this);
+		this.transport.upload = this.uploads.xhr.bind(this);
 		this.dragUpload = true;
 	} else {
-		this.transport.upload = $.proxy(this.uploads.iframe, this);
+		this.transport.upload = this.uploads.iframe.bind(this);
 	}
 
 	/**
@@ -6091,7 +6091,7 @@ elFinder.prototype = {
 		var self = this,
 			data;
 		
-		if (!$.trim(text)) {
+		if (!text.trim()) {
 			return {error : ['errResponse', 'errDataEmpty']};
 		}
 		
@@ -6506,7 +6506,7 @@ elFinder.prototype = {
 							};
 						if (text = $(this).text()) {
 							loc = parseUrl($(this).attr('href'));
-							if (loc.href && loc.href.match(/^(?:ht|f)tp/i) && (atag.length === 1 || ! loc.pathname.match(/(?:\.html?|\/[^\/.]*)$/i) || $.trim(text).match(/\.[a-z0-9-]{1,10}$/i))) {
+							if (loc.href && loc.href.match(/^(?:ht|f)tp/i) && (atag.length === 1 || ! loc.pathname.match(/(?:\.html?|\/[^\/.]*)$/i) || text.trim().match(/\.[a-z0-9-]{1,10}$/i))) {
 								if ($.inArray(loc.href, ret) == -1 && $.inArray(loc.href, check) == -1) ret.push(loc.href);
 							}
 						}
@@ -7846,7 +7846,7 @@ elFinder.prototype = {
 				c = document.cookie.split(';');
 				name += '=';
 				for (i=0; i<c.length; i++) {
-					c[i] = $.trim(c[i]);
+					c[i] = c[i].trim();
 					if (c[i].substring(0, name.length) == name) {
 						retval = decodeURIComponent(c[i].substring(name.length));
 						if (retval.substr(0,1) === '{' || retval.substr(0,1) === '[') {
@@ -9213,7 +9213,7 @@ elFinder.prototype = {
 		if (!style) {
 			style = this.options.fileModeStyle.toLowerCase();
 		}
-		p = $.trim(p);
+		p = p.trim();
 		if (p.match(/[rwxs-]{9}$/i)) {
 			str = p = p.substr(-9);
 			if (style == 'string') {
@@ -10467,7 +10467,7 @@ elFinder.prototype = {
 	arrayFlip : function (trans, val) {
 		var key,
 			tmpArr = {},
-			isArr = $.isArray(trans);
+			isArr = Array.isArray(trans);
 		for (key in trans) {
 			if (isArr || trans.hasOwnProperty(key)) {
 				tmpArr[trans[key]] = val || key;
