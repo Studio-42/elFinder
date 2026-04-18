@@ -34,7 +34,7 @@ elFinder.prototype.commands.mkdir = function() {
 		}
 		//this.move = (!onCwd && curOrg !== 'navbar' && fm.selected().length)? true : false;
 		this.move = this.value === fm.i18n('cmdmkdirin');
-		return $.proxy(fm.res('mixin', 'make'), self)();
+		return fm.res('mixin', 'make').bind(self)();
 	};
 	
 	this.shortcuts = [{
