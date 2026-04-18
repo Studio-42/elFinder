@@ -197,7 +197,7 @@ elFinder.prototype.resources = {
 						}
 					})
 					.on('blur', function() {
-						var name   = $.trim(input.val()),
+						var name   = input.val().trim(),
 							parent = input.parent(),
 							valid  = true,
 							cut;
