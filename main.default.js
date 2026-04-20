@@ -113,16 +113,16 @@
 					alert(error.message);
 				}
 			);
-		},
+		};
 		
 	// config of RequireJS (REQUIRED)
 	require.config({
 		baseUrl : 'js',
 		paths : {
 			'jquery'   : '//code.jquery.com/jquery-'+jqver+'.min',
-			'jquery-ui': '//code.jquery.com/ui/'+uiver+'/jquery-ui.min.js',
+			'jquery-ui': '//code.jquery.com/ui/'+uiver+'/jquery-ui.min',
 			'elfinder' : 'elfinder.min',
-			'encoding-japanese': '//cdn.rawgit.com/polygonplanet/encoding.js/1.0.26/encoding.min'
+			'encoding-japanese': '//cdn.jsdelivr.net/npm/encoding-japanese@2.2.0/encoding.min'
 		},
 		waitSeconds : 10 // optional
 	});

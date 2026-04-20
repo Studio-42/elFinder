@@ -68,19 +68,14 @@
 					alert(error.message);
 				}
 			);
-		},
+		};
 		
-		// is IE8 or :? for determine the jQuery version to use (optional)
-		old = (typeof window.addEventListener === 'undefined' && typeof document.getElementsByClassName === 'undefined')
-		       ||
-		      (!window.chrome && !document.unqueID && !window.opera && !window.sidebar && 'WebkitAppearance' in document.documentElement.style && document.body.style && typeof document.body.style.webkitFilter === 'undefined');
-
 	// config of RequireJS (REQUIRED)
 	require.config({
 		baseUrl : 'js',
 		paths : {
 			'jquery'   : '//code.jquery.com/jquery-'+jqver+'.min',
-			'jquery-ui': '//code.jquery.com/ui/'+uiver+'/jquery-ui.min.js',
+			'jquery-ui': '//code.jquery.com/ui/'+uiver+'/jquery-ui.min',
 			'elfinder' : 'elfinder-minimal.min'
 		},
 		waitSeconds : 10 // optional
