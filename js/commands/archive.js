@@ -86,12 +86,12 @@ elFinder.prototype.commands.archive = function() {
 			open = fm.exec('open', cwd.hash).done(function() {
 				fm.one('cwdrender', function() {
 					fm.selectfiles({files : hashes});
-					dfrd = $.proxy(fm.res('mixin', 'make'), self)();
+					dfrd = fm.res('mixin', 'make').bind(self)();
 				});
 			});
 		} else {
 			fm.selectfiles({files : hashes});
-			dfrd = $.proxy(fm.res('mixin', 'make'), self)();
+			dfrd = fm.res('mixin', 'make').bind(self)();
 		}
 		
 		return dfrd;

@@ -89,7 +89,11 @@ class elFinderEditorOnlineConvert extends elFinderEditor
             $response = curl_exec($ch);
             $info = curl_getinfo($ch);
             $error = curl_error($ch);
-            curl_close($ch);
+            if (PHP_VERSION_ID < 80000) {
+                curl_close($ch);
+            } else {
+                unset($ch);
+            }
 
             if (!empty($error)) {
                 $res = array('error' => $error);

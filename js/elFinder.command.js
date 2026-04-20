@@ -230,7 +230,7 @@ elFinder.prototype.command = function(fm) {
 		}
 
 		$.each(Object.assign({}, self._handlers, self.handlers), function(cmd, handler) {
-			fm.bind(cmd, $.proxy(handler, self));
+			fm.bind(cmd, handler.bind(self));
 		});
 
 		for (i = 0; i < this.shortcuts.length; i++) {
