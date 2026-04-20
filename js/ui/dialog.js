@@ -420,7 +420,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 
 					fm.trigger('dialogopen', {dialog: dialog});
 
-					typeof(opts.open) == 'function' && $.proxy(opts.open, self[0])();
+					typeof (opts.open) == 'function' && opts.open.bind(self[0])();
 					
 					if (opts.closeOnEscape) {
 						$(document).on('keydown.'+id, function(e) {
@@ -458,7 +458,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 						dialog.data('modal') && fm.getUI('overlay').elfinderoverlay('hide');
 						
 						if (typeof(opts.close) == 'function') {
-							$.proxy(opts.close, self[0])();
+							opts.close.bind(self[0])();
 						}
 						if (opts.destroyOnClose && dialog.parent().length) {
 							dialog.hide().remove();
@@ -590,7 +590,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					dialog.css('min-height', minH);
 					dialog.data('hasResizable') && dialog.resizable('option', { minHeight: minH });
 					if (typeof(opts.resize) === 'function') {
-						$.proxy(opts.resize, self[0])(e, data);
+						opts.resize.bind(self[0])(e, data);
 					}
 				})
 				.on('tabstopsInit', tabstopsInit)
@@ -682,7 +682,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 					+'elfinder-btncnt-'+(btnCnt++)+' '
 					+cltabstop
 					+'"><span class="ui-button-text">'+name+'</span></button>')
-				.on('click', $.proxy(cb, self[0]));
+				.on('click', cb.bind(self[0]));
 			if (cb._cssClass) {
 				button.addClass(cb._cssClass);
 			}
@@ -760,7 +760,7 @@ $.fn.elfinderdialog = function(opts, fm) {
 		
 		tabstopsInit();
 		
-		typeof(opts.create) == 'function' && $.proxy(opts.create, this)();
+		typeof (opts.create) == 'function' && opts.create.bind(this)();
 		
 		if (opts.autoOpen) {
 			if (opts.open) {

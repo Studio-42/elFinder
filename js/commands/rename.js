@@ -371,7 +371,7 @@ elFinder.prototype.commands.rename = function() {
 					fm.enable();
 				}),
 			blur = function(e) {
-				var name   = $.trim(input.val()),
+				var name   = input.val().trim(),
 				splits = fm.splitFileExtention(name),
 				valid  = true,
 				req = function() {
