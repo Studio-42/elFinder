@@ -2,9 +2,9 @@
  * Русский язык translation
  * @author Dmitry "dio" Levashov <dio@std42.ru>
  * @author Andrew Berezovsky <andrew.berezovsky@gmail.com>
- * @author Alex Yashkin <alex@yashkin.by>
+ * @author Alex Yashkin <alex.yashkin@gmail.com>
  * @author Aleev Ruslan <info@cat-art.ru>
- * @version 2024-11-05
+ * @version 2026-02-01
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -19,9 +19,9 @@
 		translator : 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;, Andrew Berezovsky &lt;andrew.berezovsky@gmail.com&gt;, Alex Yashkin &lt;alex@yashkin.by&gt;, Aleev Ruslan &lt;info@cat-art.ru&gt;',
 		language   : 'Русский язык',
 		direction  : 'ltr',
-		dateFormat : 'd M Y H:i', // will show like: 05 Ноя 2024 21:08
-		fancyDateFormat : '$1 H:i', // will show like: Сегодня 21:08
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 241105-210850
+		dateFormat : 'd M Y H:i', // will show like: 01 Фев 2026 16:56
+		fancyDateFormat : '$1 H:i', // will show like: Сегодня 16:56
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 260201-165637
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -177,7 +177,7 @@
 			'btnCancel' : 'Отмена',
 			'btnNo'     : 'Нет',
 			'btnYes'    : 'Да',
-			'btnDiscard': 'Discard changes',
+			'btnDiscard': 'Отменить изменения',
 			'btnMount'  : 'Подключить',  // added 18.04.2012
 			'btnApprove': 'Перейти в $1 и применить', // from v2.1 added 26.04.2012
 			'btnUnmount': 'Отключить', // from v2.1 added 30.04.2012
