@@ -7,8 +7,8 @@
 (function(){
 	"use strict";
 	var // jQuery and jQueryUI version
-		jqver = '3.6.0',
-		uiver = '1.12.1',
+		jqver = '4.0.0',
+		uiver = '1.14.2',
 		
 		// Detect language (optional)
 		lang = (function() {
@@ -31,7 +31,7 @@
 		// Start elFinder (REQUIRED)
 		start = function(elFinder, config) {
 			// load jQueryUI CSS
-			elFinder.prototype.loadCss('//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/themes/smoothness/jquery-ui.css');
+			elFinder.prototype.loadCss('//code.jquery.com/ui/'+uiver+'/themes/smoothness/jquery-ui.css');
 			
 			$(function() {
 				var opts = {};
@@ -79,8 +79,8 @@
 	require.config({
 		baseUrl : 'js',
 		paths : {
-			'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(old? '1.12.4' : jqver)+'/jquery.min',
-			'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/jquery-ui.min',
+			'jquery'   : '//code.jquery.com/jquery-'+jqver+'.min',
+			'jquery-ui': '//code.jquery.com/ui/'+uiver+'/jquery-ui.min.js',
 			'elfinder' : 'elfinder-minimal.min'
 		},
 		waitSeconds : 10 // optional
