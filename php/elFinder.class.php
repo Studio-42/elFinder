@@ -672,6 +672,12 @@ class elFinder
                 'keys' => array(
                     'default' => !empty($opts['sessionCacheKey']) ? $opts['sessionCacheKey'] : 'elFinderCaches',
                     'netvolume' => !empty($opts['netVolumesSessionKey']) ? $opts['netVolumesSessionKey'] : 'elFinderNetVolumes'
+                ),
+                'cookieParams' => array(
+                    'path' => '/',
+                    'secure' => true,
+                    'httponly' => true,
+                    'samesite' => defined('ELFINDER_COOKIE_SAMESITE')? ELFINDER_COOKIE_SAMESITE : 'Lax'
                 )
             );
             if (!class_exists('elFinderSession')) {
@@ -2087,7 +2093,7 @@ class elFinder
         }
 
         if ($args['cpath'] && $args['reqid']) {
-            setcookie('elfdl' . $args['reqid'], '1', 0, $args['cpath']);
+            setcookie('elfdl' . $args['reqid'], '1', 0, urlencode($args['cpath']));
         }
 
         $result = array(
@@ -2728,7 +2734,11 @@ class elFinder
             }
             return $this->curl_get_contents($new_url, $timeout, $redirect_max - 1, $ua, $outfp, $info);
         }
-        curl_close($ch);
+        if (PHP_VERSION_ID < 80000) {
+            curl_close($ch);
+        } else {
+            unset($ch);
+        }
         return $outfp ? $outfp : $result;
     }
 
@@ -4203,10 +4213,27 @@ class elFinder
                 $script .= '
 var go = function() {
     var w = window.opener || window.parent || window,
-        close = function(){
-            window.open("about:blank","_self").close();
-            return false;
-        };
+    var closeWindow = function(){
+        try {
+            window.close();
+        } catch(e) {}
+        return false;
+    };
+    var showMessage = function() {
+        var msg = document.getElementById(\'msg\');
+        var link = msg && msg.getElementsByTagName(\'a\')[0];
+        if (msg) {
+            msg.style.display = \'inline\';
+        }
+        if (link) {
+            link.onclick = function(ev) {
+                if (ev && ev.preventDefault) {
+                    ev.preventDefault();
+                }
+                return closeWindow();
+            };
+        }
+    };
     try {
         var elf = w.document.getElementById(\'' . $node . '\').elfinder;
         if (elf) {
@@ -4226,14 +4253,17 @@ var go = function() {
         }
     } catch(e) {
         // for CORS
-        w.postMessage && w.postMessage(JSON.stringify({type:\'io.studio-42.github\',bind:\'' . $bind . '\',data:' . $json . '}), \'' . $origin . '\');
+        try {
+            w.postMessage && w.postMessage(JSON.stringify({
+                type: \'io.studio-42.github\',
+                bind: \'' . $bind . '\',
+                data: data
+            }), \'' . $origin . '\');
+        } catch (err) {}
     }
     close();
-    setTimeout(function() {
-        var msg = document.getElementById(\'msg\');
-        msg.style.display = \'inline\';
-        msg.onclick = close;
-    }, 100);
+    setTimeout(showMessage, 100);
+    return false;
 };
 ';
             }
@@ -5135,10 +5165,10 @@ var go = function() {
     /**
      * Call curl_exec() with supported redirect on `safe_mode` or `open_basedir`
      *
-     * @param resource $curl
-     * @param array    $options
-     * @param array    $headers
-     * @param array    $postData
+     * @param \CurlHandle $curl
+     * @param array       $options
+     * @param array       $headers
+     * @param array       $postData
      *
      * @throws \Exception
      * @return mixed
@@ -5175,7 +5205,11 @@ var go = function() {
             }
         }
 
-        curl_close($curl);
+        if (PHP_VERSION_ID < 80000) {
+            curl_close($curl);
+        } else {
+            unset($curl);
+        }
 
         return $result;
     }
