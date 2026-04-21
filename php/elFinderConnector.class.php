@@ -79,13 +79,10 @@ class elFinderConnector
     protected static $csrfProtectedCmds = array(
         'archive' => true,
         'chmod' => true,
-        'dim' => true,
         'duplicate' => true,
-        'editor' => true,
         'extract' => true,
         'mkdir' => true,
         'mkfile' => true,
-        'netmount' => true,
         'paste' => true,
         'put' => true,
         'rename' => true,
@@ -147,7 +144,10 @@ class elFinderConnector
      */
     protected function shouldRefreshCsrfToken($cmd, array $src)
     {
-        return ($cmd === 'info' && !empty($src['reload']));
+        return (
+            ($cmd === 'info' && !empty($src['reload']))
+            || $cmd === 'open'
+        );
     }
 
     /**
@@ -373,10 +373,6 @@ class elFinderConnector
             $this->output(array('error' => $this->elFinder->error(elFinder::ERROR_UNKNOWN_CMD)));
         }
 
-        if ($this->shouldRefreshCsrfToken($cmd, $src)) {
-            $this->refreshCsrfTokenTtl();
-        }
-
         if ($this->csrfProtectedCommand($cmd)) {
             if (!$this->validateCsrfToken()) {
                 $this->outputCsrfError();
@@ -415,8 +411,12 @@ class elFinderConnector
 
         try {
             $result = $this->elFinder->exec($cmd, $args);
-            if ($this->shouldIssueCsrfToken($cmd, $src) && is_array($result) && !isset($result['error'])) {
-                $result[self::$csrfResponseKey] = $this->issueCsrfToken();
+            if (is_array($result) && !isset($result['error'])) {
+                if ($this->shouldIssueCsrfToken($cmd, $src)) {
+                    $result[self::$csrfResponseKey] = $this->issueCsrfToken();
+                } else if ($this->shouldRefreshCsrfToken($cmd, $src)) {
+                    $this->refreshCsrfTokenTtl();
+                }
             }
             $this->output($result);
         } catch (elFinderAbortException $e) {
