@@ -110,6 +110,9 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // // Zoho Office Editor APIKey
 // // https://www.zoho.com/docs/help/office-apis.html
 // define('ELFINDER_ZOHO_OFFICE_APIKEY', '');
+// Zoho Office save callback state TTL in seconds
+// Default: 3600 (1 hour), Max: 86400 (24 hours)
+// define('ELFINDER_ZOHO_OFFICE_CALLBACK_TTL', 3600);
 // ===============================================
 
 // // Online converter (online-convert.com) APIKey
