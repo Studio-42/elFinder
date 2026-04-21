@@ -42,7 +42,7 @@
         // Documentation for client options:
         // https://github.com/Studio-42/elFinder/wiki/Client-configuration-options
         opts = {
-            url : '//hypweb.net/elFinder-nightly/demo/2.1/php/connector.minimal.php',
+            url : '//elfinder.hypweb.net/php/connector.minimal.php',
             soundPath : './demo/sounds',
             sync : 5000,
             sortType : 'date',
