@@ -2840,7 +2840,7 @@ var elFinder = function(elm, opts, bootCallback) {
 						if (error) {
 							error.error = '';
 						}
-					} else if (self.handleCsrfReload(xhr, xhr._elfinderResponse)) {
+					} else if (xhr && self.handleCsrfReload(xhr, xhr._elfinderResponse)) {
 						deffail = false;
 						syncOnFail = false;
 						if (error) {
