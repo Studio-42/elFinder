@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.67 (2.1-src Nightly: 3fbf1cf84) (2.1-src Nightly: 3fbf1cf84) (2026-04-20)
+ * Version 2.1.67 (2.1-src Nightly: 18c7e4013) (2026-04-21)
  * http://elfinder.org
  * 
  * Copyright 2009-2026, Studio 42
@@ -673,6 +673,13 @@ var elFinder = function(elm, opts, bootCallback) {
 		 * @type Object
 		 */
 		currentOpenCmd = null,
+
+		/**
+		 * Current CSRF refresh request instance
+		 *
+		 * @type Object
+		 */
+		currentCsrfRefresh = null,
 
 		/**
 		 * Exec shortcut
@@ -1440,6 +1447,97 @@ var elFinder = function(elm, opts, bootCallback) {
 	 * @default {}
 	*/
 	this.customHeaders = $.isPlainObject(this.options.customHeaders) ? this.options.customHeaders : {};
+
+	/**
+	 * CSRF header name for connector requests
+	 *
+	 * @type String
+	 */
+	this.csrfHeaderName = 'X-elFinder-CSRF';
+
+	/**
+	 * JSON response key for CSRF token
+	 *
+	 * @type String
+	 */
+	this.csrfResponseKey = 'csrf';
+
+	/**
+	 * JSON response key that marks a CSRF-triggered reload request
+	 *
+	 * @type String
+	 */
+	this.csrfReloadKey = 'csrfReload';
+
+	/**
+	 * Store or clear current CSRF token header
+	 *
+	 * @param  {String} token
+	 * @return void
+	 */
+	this.setCsrfToken = function(token) {
+		if (typeof token === 'string' && token) {
+			self.customHeaders[self.csrfHeaderName] = token;
+		} else {
+			delete self.customHeaders[self.csrfHeaderName];
+		}
+	};
+
+	/**
+	 * Determine whether the response represents a CSRF refreshable failure
+	 *
+	 * @param  {Object} xhr
+	 * @param  {Object} response
+	 * @return {Boolean}
+	 */
+	this.isCsrfReloadResponse = function(xhr, response) {
+		return !!(xhr
+			&& xhr.status === 403
+			&& !xhr._csrfRefresh
+			&& response
+			&& response[self.csrfReloadKey]);
+	};
+
+	/**
+	 * Refresh CSRF token via open&init=1 without replaying the failed command
+	 *
+	 * @return {jQuery.Deferred}
+	 */
+	this.refreshCsrfToken = function() {
+		var cwdFile = self.cwd(),
+			target = (cwdFile && cwdFile.hash) || self.lastDir('') || self.startDir();
+
+		if (currentCsrfRefresh && currentCsrfRefresh.state() === 'pending') {
+			return currentCsrfRefresh;
+		}
+
+		currentCsrfRefresh = self.request({
+			data           : {cmd : 'open', target : target, init : 1, tree : 1},
+			preventDefault : true,
+			preventFail    : true,
+			_csrfRefresh   : true
+		}).always(function() {
+			currentCsrfRefresh = null;
+		});
+
+		return currentCsrfRefresh;
+	};
+
+	/**
+	 * Start background CSRF refresh if current failure is refreshable
+	 *
+	 * @param  {Object} xhr
+	 * @param  {Object} response
+	 * @return {Boolean}
+	 */
+	this.handleCsrfReload = function(xhr, response) {
+		if (!self.isCsrfReloadResponse(xhr, response)) {
+			return false;
+		}
+
+		self.refreshCsrfToken();
+		return true;
+	};
 
 	/**
 	 * Any custom xhrFields to send across every ajax request
@@ -2474,6 +2572,7 @@ var elFinder = function(elm, opts, bootCallback) {
 							// check responseText, Is that JSON?
 							try {
 								data = JSON.parse(xhr.responseText);
+								xhr._elfinderResponse = data;
 								if (data && data.error) {
 									error = data.error;
 								}
@@ -2527,7 +2626,13 @@ var elFinder = function(elm, opts, bootCallback) {
 					return dfrd.reject({error :['errResponse', 'errDataEmpty']}, xhr, response);
 				} else if (!$.isPlainObject(response)) {
 					return dfrd.reject({error :['errResponse', 'errDataNotJSON']}, xhr, response);
-				} else if (response.error) {
+				}
+
+				if (isOpen && !!data.init && Object.prototype.hasOwnProperty.call(response, self.csrfResponseKey)) {
+					self.setCsrfToken(response[self.csrfResponseKey]);
+				}
+
+				if (response.error) {
 					if (isOpen) {
 						// check leafRoots
 						$.each(self.leafRoots, function(phash, roots) {
@@ -2766,6 +2871,12 @@ var elFinder = function(elm, opts, bootCallback) {
 						if (error) {
 							error.error = '';
 						}
+					} else if (self.handleCsrfReload(xhr, xhr._elfinderResponse)) {
+						deffail = false;
+						syncOnFail = false;
+						if (error) {
+							error.error = '';
+						}
 					}
 					// abort xhr
 					xhrAbort();
@@ -2843,6 +2954,7 @@ var elFinder = function(elm, opts, bootCallback) {
 						requestQueue.shift()();
 					}
 				}).fail(error).done(success);
+				xhr._csrfRefresh = !!opts._csrfRefresh;
 				
 				if (self.api >= 2.1029) {
 					xhr._requestId = reqId;
@@ -6877,6 +6989,8 @@ elFinder.prototype = {
 					self.trigger('requestError', errData);
 					if (errData._getEvent && errData._getEvent().isDefaultPrevented()) {
 						res.error = '';
+					} else if (self.handleCsrfReload(xhr, res)) {
+						res.error = '';
 					}
 					if (res._chunkfailure || res._multiupload) {
 						abort = true;
@@ -10786,7 +10900,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.67 (2.1-src Nightly: 3fbf1cf84) (2.1-src Nightly: 3fbf1cf84)';
+elFinder.prototype.version = '2.1.67 (2.1-src Nightly: 18c7e4013)';
 
 
 
