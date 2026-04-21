@@ -3,8 +3,8 @@
     var i18nFolderMsgs = {},
         rootPath = './demo',
         // jQuery and jQueryUI version
-        jqver = '3.7.1',
-        uiver = '1.13.2',
+        jqver = '4.0.0',
+        uiver = '1.14.2',
         // Detect language (optional)
 		lang = (function() {
 			var locq = window.location.search,
@@ -42,7 +42,7 @@
         // Documentation for client options:
         // https://github.com/Studio-42/elFinder/wiki/Client-configuration-options
         opts = {
-            url : '//hypweb.net/elFinder-nightly/demo/2.1/php/connector.minimal.php',
+            url : '//elfinder.hypweb.net/php/connector.minimal.php',
             soundPath : './demo/sounds',
             sync : 5000,
             sortType : 'date',
@@ -108,7 +108,7 @@
             
             // load jQueryUI CSS
             //elFinder.prototype.loadCss('//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/themes/smoothness/jquery-ui.css');
-	    elFinder.prototype.loadCss('//code.jquery.com/ui/'+uiver+'/themes/smoothness/jquery-ui.css');
+	        elFinder.prototype.loadCss('//code.jquery.com/ui/'+uiver+'/themes/smoothness/jquery-ui.css');
             
             $(function() {
                 // Optional for Japanese decoder "extras/encoding-japanese.min"
@@ -172,7 +172,6 @@
                     , 'extOpts'
                     , 'extras/quicklook.googledocs.min'                    // optional GoogleDocs preview
                     , 'elfinderBasicAuth'
-                    , xdr
                     , 'blockchain'
                 ],
                 start,
@@ -180,29 +179,13 @@
                     alert(error.message);
                 }
             );
-        },
-        
-        // is IE8 or Safari < 6? for determine the jQuery version to use (optional)
-        old = (typeof window.addEventListener === 'undefined' && typeof document.getElementsByClassName === 'undefined')
-                ||
-                  (!window.chrome && !document.unqueID && !window.opera && !window.sidebar && 'WebkitAppearance' in document.documentElement.style && document.body.style && typeof document.body.style.webkitFilter === 'undefined'),
-        xhr, xdr = null;
+        };
 
-    // load jquery.xdr.js for old IE
-    if (typeof document.uniqueID != 'undefined') {
-        var xhr = new XMLHttpRequest();
-        if (!('withCredentials' in xhr)) {
-            xdr = 'jquery.xdr';
-        }
-        xhr = null;
-    }
-
-    // config of RequireJS (REQUIRED)
+	// config of RequireJS (REQUIRED)
     require.config({
         baseUrl : rootPath+'/js',
         paths : {
-            'jquery'   : '//cdnjs.cloudflare.com/ajax/libs/jquery/'+(old? '1.12.4' : jqver)+'/jquery.min',
-            //'jquery-ui': '//cdnjs.cloudflare.com/ajax/libs/jqueryui/'+uiver+'/jquery-ui.min',
+            'jquery'   : '//code.jquery.com/jquery-'+jqver+'.min',
             'jquery-ui': '//code.jquery.com/ui/'+uiver+'/jquery-ui.min',
             'elfinder' : 'elfinder.min',
             'i18nfmsg' : '../../i18nFolderMsgs',
