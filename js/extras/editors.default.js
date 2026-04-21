@@ -858,7 +858,7 @@
 
 				// load script then init
 				if (typeof Pixo === 'undefined') {
-					fm.loadScript(['https://pixoeditor.com:8443/editor/scripts/bridge.m.js'], function() {
+					fm.loadScript(['https://pixoeditor.com/editor/scripts/bridge.m.js'], function() {
 						init(launch);
 					}, {loadType: 'tag'});
 				} else {
