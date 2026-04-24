@@ -4212,7 +4212,7 @@ class elFinder
                 $origin = isset($_SERVER['HTTP_ORIGIN'])? str_replace('\'', '\\\'', $_SERVER['HTTP_ORIGIN']) : '*';
                 $script .= '
 var go = function() {
-    var w = window.opener || window.parent || window,
+    var w = window.opener || window.parent || window;
     var closeWindow = function(){
         try {
             window.close();

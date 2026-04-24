@@ -44,6 +44,54 @@ class elFinderConnector
     protected static $contentType = 'Content-Type: application/json; charset=utf-8';
 
     /**
+     * CSRF token header name
+     *
+     * @var string
+     */
+    protected static $csrfHeaderName = 'X-elFinder-CSRF';
+
+    /**
+     * JSON response key for CSRF token
+     *
+     * @var string
+     */
+    protected static $csrfResponseKey = 'csrf';
+
+    /**
+     * Session key for CSRF token data
+     *
+     * @var string
+     */
+    protected static $csrfSessionKey = 'elfinder.csrf';
+
+    /**
+     * Default CSRF token TTL seconds
+     *
+     * @var int
+     */
+    protected static $csrfTokenTtl = 900;
+
+    /**
+     * Commands that require CSRF header validation
+     *
+     * @var array
+     */
+    protected static $csrfProtectedCmds = array(
+        'archive' => true,
+        'chmod' => true,
+        'duplicate' => true,
+        'extract' => true,
+        'mkdir' => true,
+        'mkfile' => true,
+        'paste' => true,
+        'put' => true,
+        'rename' => true,
+        'resize' => true,
+        'rm' => true,
+        'upload' => true
+    );
+
+    /**
      * Constructor
      *
      * @param      $elFinder
@@ -59,6 +107,204 @@ class elFinderConnector
         if ($debug) {
             self::$contentType = 'Content-Type: text/plain; charset=utf-8';
         }
+    }
+
+    /**
+     * Determine whether the command requires CSRF validation
+     *
+     * @param string $cmd
+     *
+     * @return bool
+     */
+    protected function csrfProtectedCommand($cmd)
+    {
+        return isset(self::$csrfProtectedCmds[$cmd]);
+    }
+
+    /**
+     * Determine whether current request should issue CSRF token
+     *
+     * @param string $cmd
+     * @param array  $src
+     *
+     * @return bool
+     */
+    protected function shouldIssueCsrfToken($cmd, array $src)
+    {
+        return ($cmd === 'open' && !empty($src['init']));
+    }
+
+    /**
+     * Determine whether current request should refresh CSRF token TTL
+     *
+     * @param string $cmd
+     * @param array  $src
+     *
+     * @return bool
+     */
+    protected function shouldRefreshCsrfToken($cmd, array $src)
+    {
+        return (
+            ($cmd === 'info' && !empty($src['reload']))
+            || $cmd === 'open'
+        );
+    }
+
+    /**
+     * Generate or reuse current CSRF token
+     *
+     * @return string
+     * @throws Exception
+     */
+    protected function issueCsrfToken()
+    {
+        $session = $this->elFinder->getSession();
+        $now = time();
+        $tokenData = $session->get(self::$csrfSessionKey, array());
+
+        if (!is_array($tokenData)) {
+            $tokenData = array();
+        }
+
+        if (empty($tokenData['token']) || empty($tokenData['expires']) || (int)$tokenData['expires'] <= $now) {
+            $tokenData = array(
+                'token' => $this->generateCsrfToken(),
+                'expires' => $now + self::$csrfTokenTtl
+            );
+            $session->set(self::$csrfSessionKey, $tokenData);
+        }
+
+        return $tokenData['token'];
+    }
+
+    /**
+     * Generate a random CSRF token string with old PHP compatibility
+     *
+     * @return string
+     * @throws Exception
+     */
+    protected function generateCsrfToken()
+    {
+        if (function_exists('random_bytes')) {
+            return bin2hex(random_bytes(32));
+        }
+
+        if (function_exists('openssl_random_pseudo_bytes')) {
+            return bin2hex(openssl_random_pseudo_bytes(32));
+        }
+
+        return sha1(uniqid(mt_rand(), true) . microtime(true));
+    }
+
+    /**
+     * Get HTTP request header value
+     *
+     * @param string $name
+     *
+     * @return string
+     */
+    protected function getRequestHeader($name)
+    {
+        $serverKey = 'HTTP_' . strtoupper(str_replace('-', '_', $name));
+        if (isset($_SERVER[$serverKey])) {
+            return trim($_SERVER[$serverKey]);
+        } else {
+            if (function_exists('getallheaders')) {
+                $headers = getallheaders();
+                if (isset($headers[$name])) {
+                    return trim($headers[$name]);
+                }
+            }
+            return '';
+        }
+    }
+
+    /**
+     * Validate CSRF token header for protected commands
+     *
+     * @return bool
+     */
+    protected function validateCsrfToken()
+    {
+        $session = $this->elFinder->getSession();
+        $tokenData = $session->get(self::$csrfSessionKey, array());
+        $headerToken = $this->getRequestHeader(self::$csrfHeaderName);
+        $now = time();
+
+        if (!is_array($tokenData) || empty($tokenData['token']) || empty($tokenData['expires'])) {
+            return false;
+        }
+
+        if ((int)$tokenData['expires'] <= $now) {
+            $session->remove(self::$csrfSessionKey);
+            return false;
+        }
+
+        if ($headerToken === '') {
+            return false;
+        }
+
+        if (function_exists('hash_equals')) {
+            return hash_equals($tokenData['token'], $headerToken);
+        }
+
+        return ($tokenData['token'] === $headerToken);
+    }
+
+    /**
+     * Refresh current CSRF token TTL if header matches the active token
+     *
+     * @return bool
+     */
+    protected function refreshCsrfTokenTtl()
+    {
+        $session = $this->elFinder->getSession();
+        $tokenData = $session->get(self::$csrfSessionKey, array());
+        $headerToken = $this->getRequestHeader(self::$csrfHeaderName);
+        $now = time();
+        $isValid = false;
+
+        if (!is_array($tokenData) || empty($tokenData['token']) || empty($tokenData['expires']) || $headerToken === '') {
+            return false;
+        }
+
+        if ((int)$tokenData['expires'] <= $now) {
+            $session->remove(self::$csrfSessionKey);
+            return false;
+        }
+
+        if (function_exists('hash_equals')) {
+            $isValid = hash_equals($tokenData['token'], $headerToken);
+        } else {
+            $isValid = ($tokenData['token'] === $headerToken);
+        }
+
+        if (!$isValid) {
+            return false;
+        }
+
+        $tokenData['expires'] = $now + self::$csrfTokenTtl;
+        $session->set(self::$csrfSessionKey, $tokenData);
+
+        return true;
+    }
+
+    /**
+     * Output CSRF validation error response
+     *
+     * @return void
+     * @throws elFinderAbortException
+     */
+    protected function outputCsrfError()
+    {
+        $this->output(array(
+            'error' => $this->elFinder->error(elFinder::ERROR_PERM_DENIED, 'Invalid request. Please reload.'),
+            'csrfReload' => true,
+            'header' => array(
+                'HTTP/1.1 403 Forbidden',
+                self::$contentType
+            )
+        ));
     }
 
     /**
@@ -127,6 +373,13 @@ class elFinderConnector
             $this->output(array('error' => $this->elFinder->error(elFinder::ERROR_UNKNOWN_CMD)));
         }
 
+        if ($this->csrfProtectedCommand($cmd)) {
+            if (!$this->validateCsrfToken()) {
+                $this->outputCsrfError();
+            }
+            $this->refreshCsrfTokenTtl();
+        }
+
         // collect required arguments to exec command
         $hasFiles = false;
         foreach ($this->elFinder->commandArgsList($cmd) as $name => $req) {
@@ -157,7 +410,15 @@ class elFinderConnector
         }
 
         try {
-            $this->output($this->elFinder->exec($cmd, $args));
+            $result = $this->elFinder->exec($cmd, $args);
+            if (is_array($result) && !isset($result['error'])) {
+                if ($this->shouldIssueCsrfToken($cmd, $src)) {
+                    $result[self::$csrfResponseKey] = $this->issueCsrfToken();
+                } else if ($this->shouldRefreshCsrfToken($cmd, $src)) {
+                    $this->refreshCsrfTokenTtl();
+                }
+            }
+            $this->output($result);
         } catch (elFinderAbortException $e) {
             // connection aborted
             // unlock session data for multiple access
