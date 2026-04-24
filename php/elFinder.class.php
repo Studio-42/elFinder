@@ -863,6 +863,7 @@ class elFinder
 
             if (class_exists($class)) {
                 /* @var elFinderVolumeDriver $volume */
+                $vName = preg_replace('/^elFinderVolume/', '', $class);
                 $volume = new $class();
 
                 try {
@@ -886,13 +887,13 @@ class elFinder
                         if (!empty($o['_isNetVolume'])) {
                             $this->removeNetVolume($i, $volume);
                         }
-                        $this->mountErrors[] = 'Driver "' . $class . '" : ' . implode(' ', $volume->error());
+                        $this->mountErrors = array_merge($this->mountErrors, array(self::ERROR_NETMOUNT, $vName), $volume->error());
                     }
                 } catch (Exception $e) {
                     if (!empty($o['_isNetVolume'])) {
                         $this->removeNetVolume($i, $volume);
                     }
-                    $this->mountErrors[] = 'Driver "' . $class . '" : ' . $e->getMessage();
+                    $this->mountErrors = array_merge($this->mountErrors, array(self::ERROR_NETMOUNT, $vName, $e->getMessage()));
                 }
             } else {
                 if (!empty($o['_isNetVolume'])) {
