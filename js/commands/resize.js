@@ -1119,7 +1119,7 @@ elFinder.prototype.commands.resize = function() {
 								self.requestCmd = 'mkfile';
 								self.nextAction = {};
 								self.data = {target : file.phash};
-								$.proxy(fm.res('mixin', 'make'), self)()
+								fm.res('mixin', 'make').bind(self)()
 									.done(function(data) {
 										var hash, dfd;
 										if (data.added && data.added.length) {

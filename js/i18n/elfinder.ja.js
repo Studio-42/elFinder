@@ -2,7 +2,7 @@
  * Japanese translation
  * @author Tomoaki Yoshida <info@yoshida-studio.jp>
  * @author Naoki Sawada <hypweb+elfinder@gmail.com>
- * @version 2021-06-02
+ * @version 2026-04-29
  */
 (function(root, factory) {
 	if (typeof define === 'function' && define.amd) {
@@ -17,9 +17,9 @@
 		translator : 'Tomoaki Yoshida &lt;info@yoshida-studio.jp&gt;, Naoki Sawada &lt;hypweb+elfinder@gmail.com&gt;',
 		language   : 'Japanese',
 		direction  : 'ltr',
-		dateFormat : 'Y/m/d h:i A', // will show like: 2018/08/24 04:37 PM
-		fancyDateFormat : '$1 h:i A', // will show like: 今日 04:37 PM
-		nonameDateFormat : 'ymd-His', // noname upload will show like: 180824-163717
+		dateFormat : 'Y/m/d h:i A', // will show like: 2026/04/29 11:30 PM
+		fancyDateFormat : '$1 h:i A', // will show like: 今日 11:30 PM
+		nonameDateFormat : 'ymd-His', // noname upload will show like: 260429-233058
 		messages   : {
 
 			/********************************** errors **********************************/
@@ -293,7 +293,7 @@
 			'untitled folder'   : '新規フォルダ',   // added 10.11.2015
 			'Archive'           : '新規アーカイブ',  // from v2.1 added 10.11.2015
 			'untitled file'     : '新規ファイル.$1',  // from v2.1.41 added 6.8.2018
-			'extentionfile'     : '$1: ファイル',     // from v2.1.41 added 6.8.2018
+			'extentionfile'     : '$1: ファイル',    // from v2.1.41 added 6.8.2018
 			'extentiontype'     : '$1: $2',      // from v2.1.43 added 17.10.2018
 
 			/********************************** messages **********************************/
@@ -564,6 +564,8 @@
 			'kindPSD'         : 'Adobe Photoshop イメージ',
 			'kindXBITMAP'     : 'X bitmap イメージ',
 			'kindPXM'         : 'Pixelmator イメージ',
+			'kindWEBP'        : 'WEBP イメージ',
+			'kindSVG'         : 'SVG イメージ',
 			// media
 			'kindAudio'       : 'オーディオメディア',
 			'kindAudioMPEG'   : 'MPEG オーディオ',

@@ -388,6 +388,61 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     }
 
     /**
+     * Get preauthenticated download URL of a file.
+     *
+     * @param string $itemId
+     *
+     * @return string
+     */
+    protected function _od_getDownloadUrl($path)
+    {
+        $dlurl = '';
+        $stat = array();
+        list(, $itemId) = $this->_od_splitPath($path);
+        if (isset($this->cache[$path])) {
+            $stat = $this->cache[$path];
+            if (isset($this->cache[$path]['url']) && $this->cache[$path]['url'] !== '1') {
+                return $this->cache[$path]['url'];
+            }
+        }
+        try {
+            $res = $this->_od_query($itemId, true, false, array(
+                'query' => array(
+                    'select' => 'id,@microsoft.graph.downloadUrl',
+                ),
+            ));
+            if (is_object($res) && property_exists($res, '@microsoft.graph.downloadUrl')) {
+                $dlurl = (string)$res->{'@microsoft.graph.downloadUrl'};
+            }
+        } catch (Exception $e) {
+        }
+
+        if (!$dlurl) {
+            try {
+                $url = self::API_URL . $itemId . '/content';
+                $curl = $this->_od_prepareCurl($url);
+                curl_setopt_array($curl, array(
+                    CURLOPT_HEADER => true,
+                    CURLOPT_NOBODY => true,
+                    CURLOPT_FOLLOWLOCATION => false,
+                ));
+                $result = elFinder::curlExec($curl);
+                if (preg_match('/^Location:\s*(.+)\r?$/mi', $result, $m)) {
+                    $dlurl = trim($m[1]);
+                }
+            } catch (Exception $e) {
+            }
+        }
+
+        if ($dlurl && $stat) {
+            $stat['url'] = $dlurl;
+            $this->updateCache($path, $stat);
+        }
+        return $dlurl;
+     }
+
+
+    /**
      * Drive query and fetchAll.
      *
      * @param       $itemId
@@ -1336,35 +1391,18 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
                 return $url;
             }
         }
+
+        if (($file = $this->file($hash)) && !empty($file['url']) && $file['url'] !== '1' && $file['url'] !== 1) {
+            return $file['url'];
+        }
+
         $res = '';
-        if (($file = $this->file($hash)) == false || !$file['url'] || $file['url'] == 1) {
-            $path = $this->decode($hash);
+        $path = $this->decode($hash);
 
-            list(, $itemId) = $this->_od_splitPath($path);
-            try {
-                $url = self::API_URL . $itemId . '/createLink';
-                $data = (object)array(
-                    'type' => 'embed',
-                    'scope' => 'anonymous',
-                );
-                $curl = $this->_od_prepareCurl($url);
-                curl_setopt_array($curl, array(
-                    CURLOPT_POST => true,
-                    CURLOPT_POSTFIELDS => json_encode($data),
-                ));
-
-                $result = elFinder::curlExec($curl);
-                if ($result) {
-                    $result = json_decode($result);
-                    if (isset($result->link)) {
-                        // list(, $res) = explode('?', $result->link->webUrl);
-                        // $res = 'https://onedrive.live.com/download.aspx?' . $res;
-                        $res = $result->link->webUrl;
-                    }
-                }
-            } catch (Exception $e) {
-                $res = '';
-            }
+        try {
+            $res = $this->_od_getDownloadUrl($path);
+        } catch (Exception $e) {
+            $res = '';
         }
 
         return $res;
@@ -1649,18 +1687,31 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     protected function _fopen($path, $mode = 'rb')
     {
         if ($mode === 'rb' || $mode === 'r') {
-            list(, $itemId) = $this->_od_splitPath($path);
-            $data = array(
-                'target' => self::API_URL . $itemId . '/content',
-                'headers' => array('Authorization: Bearer ' . $this->token->data->access_token),
-            );
-
             // to support range request
             if (func_num_args() > 2) {
                 $opts = func_get_arg(2);
             } else {
                 $opts = array();
             }
+
+            $downloadUrl = $this->_od_getDownloadUrl($path);
+            if ($downloadUrl) {
+                $data = array(
+                    'target' => $downloadUrl,
+                );
+                if (!empty($opts['httpheaders'])) {
+                    $data['headers'] = $opts['httpheaders'];
+                }
+
+                return elFinder::getStreamByUrl($data);
+            }
+
+            list(, $itemId) = $this->_od_splitPath($path);
+            $data = array(
+                'target' => self::API_URL . $itemId . '/content',
+                'headers' => array('Authorization: Bearer ' . $this->token->data->access_token),
+            );
+
             if (!empty($opts['httpheaders'])) {
                 $data['headers'] = array_merge($opts['httpheaders'], $data['headers']);
             }
@@ -2025,15 +2076,21 @@ class elFinderVolumeOneDrive extends elFinderVolumeDriver
     protected function _getContents($path)
     {
         $contents = '';
-
         try {
-            list(, $itemId) = $this->_od_splitPath($path);
-            $url = self::API_URL . $itemId . '/content';
-            $contents = $this->_od_createCurl($url, $contents = true);
+            if ($url = $this->_od_getDownloadUrl($path)) {
+                $curl = curl_init($url);
+                curl_setopt_array($curl, array(
+                    CURLOPT_RETURNTRANSFER => true,
+                ));
+                $contents = elFinder::curlExec($curl);
+            } else {
+                list(, $itemId) = $this->_od_splitPath($path);
+                $url = self::API_URL . $itemId . '/content';
+                $contents = $this->_od_createCurl($url, $contents = true);
+            }
         } catch (Exception $e) {
             return $this->setError('OneDrive error: ' . $e->getMessage());
         }
-
         return $contents;
     }
 

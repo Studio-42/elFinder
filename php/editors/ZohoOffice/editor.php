@@ -80,6 +80,8 @@ class elFinderEditorZohoOffice extends elFinderEditor
 
     public function init()
     {
+        $this->gcCallbackStates();
+
         if (!defined('ELFINDER_ZOHO_OFFICE_APIKEY') || !function_exists('curl_init')) {
             return array('error', array(elFinder::ERROR_CONF, '`ELFINDER_ZOHO_OFFICE_APIKEY` or curl extension'));
         }
@@ -100,7 +102,11 @@ class elFinderEditorZohoOffice extends elFinderEditor
                     curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie);
                 }
                 $res = curl_exec($ch);
-                curl_close($ch);
+                if (PHP_VERSION_ID < 80000) {
+                    curl_close($ch);
+                } else {
+                    unset($ch);
+                }
                 if ($res) {
                     if ($data = json_decode($res, true)) {
                         $save = !empty($data['cansave']);
@@ -139,7 +145,7 @@ class elFinderEditorZohoOffice extends elFinderEditor
                     'callback_settings' => array(
                         'save_format' => $format,
                         'save_url_params' => array(
-                            'hash' => $hash
+                            'content' => 'content'
                         )
                     ),
                     'editor_settings' => $this->editor_settings[$srvsName],
@@ -148,6 +154,26 @@ class elFinderEditorZohoOffice extends elFinderEditor
                     )
                 );
                 $data['editor_settings']['language'] = $lang;
+                if ($save) {
+                    $ttl = defined('ELFINDER_ZOHO_OFFICE_CALLBACK_TTL')
+                        ? (int)ELFINDER_ZOHO_OFFICE_CALLBACK_TTL
+                        : 3600;
+
+                    if ($ttl <= 0) {
+                        $ttl = 3600;
+                    } else if ($ttl > 86400) {
+                        $ttl = 86400;
+                    }
+                    $saveParams = $this->createCallbackState('save', $hash, $this->getCallbackStateSecret(), array(), $ttl);
+                    if ($saveParams === false) {
+                        $save = false;
+                    } else {
+                        $data['callback_settings']['save_url_params'] = array_merge(
+                            $data['callback_settings']['save_url_params'],
+                            $saveParams
+                        );
+                    }
+                }
                 if ($save) {
                     $conUrl = elFinder::getConnectorUrl();
                     $data['callback_settings']['save_url'] = $conUrl . (strpos($conUrl, '?') !== false? '&' : '?') . 'cmd=editor&name=' . $this->myName . '&method=save' . $cdata;
@@ -169,7 +195,11 @@ class elFinderEditorZohoOffice extends elFinderEditor
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
                 $res = curl_exec($ch);
                 $error = curl_error($ch);
-                curl_close($ch);
+                if (PHP_VERSION_ID < 80000) {
+                    curl_close($ch);
+                } else {
+                    unset($ch);
+                }
 
                 $fp && fclose($fp);
 
@@ -196,17 +226,33 @@ class elFinderEditorZohoOffice extends elFinderEditor
 
     public function save()
     {
-        if (!empty($_POST) && !empty($_POST['hash']) && !empty($_FILES) && !empty($_FILES['content'])) {
-            $hash = $_POST['hash'];
-            /** @var elFinderVolumeDriver $volume */
-            if ($volume = $this->elfinder->getVolume($hash)) {
-                if ($content = file_get_contents($_FILES['content']['tmp_name'])) {
-                    if ($volume->putContents($hash, $content)) {
-                        return array('raw' => true, 'error' => '', 'header' => 'HTTP/1.1 200 OK');
-                    }
-                }
+        $state = $this->verifyCallbackRequest('save', $_POST, $this->getCallbackStateSecret());
+        if ($state === false) {
+            return array('raw' => true, 'error' => '', 'header' => 'HTTP/1.1 403 Forbidden');
+        }
+
+        if (empty($_FILES['content']) || (isset($_FILES['content']['error']) && (int)$_FILES['content']['error'] !== 0)) {
+            return array('raw' => true, 'error' => '', 'header' => 'HTTP/1.1 500 Internal Server Error');
+        }
+
+        $tmpName = isset($_FILES['content']['tmp_name']) ? $_FILES['content']['tmp_name'] : '';
+        if (!$tmpName || !is_uploaded_file($tmpName) && !is_file($tmpName)) {
+            return array('raw' => true, 'error' => '', 'header' => 'HTTP/1.1 500 Internal Server Error');
+        }
+
+        $content = file_get_contents($tmpName);
+        if ($content === false) {
+            return array('raw' => true, 'error' => '', 'header' => 'HTTP/1.1 500 Internal Server Error');
+        }
+
+        $hash = $state['hash'];
+        /** @var elFinderVolumeDriver $volume */
+        if ($volume = $this->elfinder->getVolume($hash)) {
+            if ($volume->putContents($hash, $content)) {
+                return array('raw' => true, 'error' => '', 'header' => 'HTTP/1.1 200 OK');
             }
         }
+
         return array('raw' => true, 'error' => '', 'header' => 'HTTP/1.1 500 Internal Server Error');
     }
 
@@ -221,5 +267,14 @@ class elFinderEditorZohoOffice extends elFinderEditor
             }
         }
         return array('cansave' => $res);
+    }
+
+    protected function getCallbackStateSecret()
+    {
+        return hash('sha256', implode('|', array(
+            __CLASS__,
+            __FILE__,
+            ELFINDER_ZOHO_OFFICE_APIKEY
+        )));
     }
 }

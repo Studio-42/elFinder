@@ -20,6 +20,8 @@ error_reporting(0); // Set E_ALL for debuging
 
 // define('ELFINDER_CONNECTOR_URL', 'URL to this connector script');  // see elFinder::getConnectorUrl()
 
+// define('ELFINDER_COOKIE_SAMESITE', 'None'); // It require when configuring with CORS.
+
 // define('ELFINDER_DEBUG_ERRORLEVEL', -1); // Error reporting level of debug mode
 
 // // To Enable(true) handling of PostScript files by ImageMagick
@@ -108,6 +110,9 @@ elFinder::$netDrivers['ftp'] = 'FTP';
 // // Zoho Office Editor APIKey
 // // https://www.zoho.com/docs/help/office-apis.html
 // define('ELFINDER_ZOHO_OFFICE_APIKEY', '');
+// Zoho Office save callback state TTL in seconds
+// Default: 3600 (1 hour), Max: 86400 (24 hours)
+// define('ELFINDER_ZOHO_OFFICE_CALLBACK_TTL', 3600);
 // ===============================================
 
 // // Online converter (online-convert.com) APIKey

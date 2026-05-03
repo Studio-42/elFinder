@@ -177,31 +177,31 @@ class elFinderPluginWatermark extends elFinderPlugin
             return false;
         }
 
-        $watermark_width = $watermarkImgInfo[0];
-        $watermark_height = $watermarkImgInfo[1];
+        $watermark_width = (int)$watermarkImgInfo[0];
+        $watermark_height = (int)$watermarkImgInfo[1];
 
         // Specified as a ratio to the image size
         if ($opts['ratio'] && $opts['ratio'] > 0 && $opts['ratio'] <= 1) {
             $maxW = $srcImgInfo[0] * $opts['ratio'] - ($opts['marginX'] * 2);
             $maxH = $srcImgInfo[1] * $opts['ratio'] - ($opts['marginY'] * 2);
             $dx = $dy = 0;
-            if (($maxW >= $watermarkImgInfo[0] && $maxH >= $watermarkImgInfo[0]) || ($maxW <= $watermarkImgInfo[0] && $maxH <= $watermarkImgInfo[0])) {
-                $dx = abs($srcImgInfo[0] - $watermarkImgInfo[0]);
-                $dy = abs($srcImgInfo[1] - $watermarkImgInfo[1]);
-            } else if ($maxW < $watermarkImgInfo[0]) {
+            if (($maxW >= $watermark_width && $maxH >= $watermark_width) || ($maxW <= $watermark_width && $maxH <= $watermark_width)) {
+                $dx = abs($srcImgInfo[0] - $watermark_width);
+                $dy = abs($srcImgInfo[1] - $watermark_height);
+            } else if ($maxW < $watermark_width) {
                 $dx = -1;
             } else {
                 $dy = -1;
             }
             if ($dx < $dy) {
                 $ww = $maxW;
-                $wh = $watermarkImgInfo[1] * ($ww / $watermarkImgInfo[0]);
+                $wh = $watermark_height * ($ww / $watermark_width);
             } else {
                 $wh = $maxH;
-                $ww = $watermarkImgInfo[0] * ($wh / $watermarkImgInfo[1]);
+                $ww = $watermark_width * ($wh / $watermark_height);
             }
-            $watermarkImgInfo[0] = $ww;
-            $watermarkImgInfo[1] = $wh;
+            $watermark_width = (int)$ww;
+            $watermark_height = (int)$wh;
         } else {
             $opts['ratio'] = null;
         }
@@ -214,10 +214,10 @@ class elFinderPluginWatermark extends elFinderPlugin
             $dest_x = $opts['marginX'];
         } else if (strpos($opts['position'], 'M') !== false) {
             // Middle
-            $dest_x = ($srcImgInfo[0] - $watermarkImgInfo[0]) / 2;
+            $dest_x = ($srcImgInfo[0] - $watermark_width) / 2;
         } else {
             // Bottom
-            $dest_x = $srcImgInfo[0] - $watermarkImgInfo[0] - max($opts['marginBottom'], $opts['marginX']);
+            $dest_x = $srcImgInfo[0] - $watermark_width - max($opts['marginBottom'], $opts['marginX']);
         }
 
         // Set horizontal position
@@ -226,10 +226,10 @@ class elFinderPluginWatermark extends elFinderPlugin
             $dest_y = $opts['marginY'];
         } else if (strpos($opts['position'], 'C') !== false) {
             // Middle
-            $dest_y = ($srcImgInfo[1] - $watermarkImgInfo[1]) / 2;
+            $dest_y = ($srcImgInfo[1] - $watermark_height) / 2;
         } else {
             // Right
-            $dest_y = $srcImgInfo[1] - $watermarkImgInfo[1] - max($opts['marginRight'], $opts['marginY']);
+            $dest_y = $srcImgInfo[1] - $watermark_height - max($opts['marginRight'], $opts['marginY']);
         }
 
 
@@ -258,7 +258,7 @@ class elFinderPluginWatermark extends elFinderPlugin
 
             // zoom
             if ($opts['ratio']) {
-                $watermark->scaleImage($watermarkImgInfo[0], $watermarkImgInfo[1]);
+                $watermark->scaleImage((int)$watermarkImgInfo[0], (int)$watermarkImgInfo[1]);
             }
 
             // Set transparency
@@ -296,8 +296,8 @@ class elFinderPluginWatermark extends elFinderPlugin
     private function watermarkPrint_gd($src, $watermark, $dest_x, $dest_y, $quality, $transparency, $watermarkImgInfo, $srcImgInfo, $opts)
     {
 
-        $watermark_width = $watermarkImgInfo[0];
-        $watermark_height = $watermarkImgInfo[1];
+        $watermark_width = (int)$watermarkImgInfo[0];
+        $watermark_height = (int)$watermarkImgInfo[1];
 
         $ermsg = '';
         switch ($watermarkImgInfo['mime']) {
@@ -339,11 +339,13 @@ class elFinderPluginWatermark extends elFinderPlugin
         if (!$ermsg) {
             // zoom
             if ($opts['ratio']) {
-                $tmpImg = imagecreatetruecolor($watermarkImgInfo[0], $watermarkImgInfo[1]);
+                $tmpImg = imagecreatetruecolor($watermark_width, $watermark_height);
                 imagealphablending($tmpImg, false);
                 imagesavealpha($tmpImg, true);
-                imagecopyresampled($tmpImg, $oWatermarkImg, 0, 0, 0, 0, $watermarkImgInfo[0], $watermarkImgInfo[1], imagesx($oWatermarkImg), imagesy($oWatermarkImg));
-                imageDestroy($oWatermarkImg);
+                imagecopyresampled($tmpImg, $oWatermarkImg, 0, 0, 0, 0, $watermark_width, $watermark_height, imagesx($oWatermarkImg), imagesy($oWatermarkImg));
+                if (function_exists('imagedestroy')) {
+                    @imageDestroy($oWatermarkImg);
+                }
                 $oWatermarkImg = $tmpImg;
                 $tmpImg = null;
             }
@@ -424,8 +426,10 @@ class elFinderPluginWatermark extends elFinderPlugin
                 break;
         }
 
-        imageDestroy($oSrcImg);
-        imageDestroy($oWatermarkImg);
+        if (function_exists('imagedestroy')) {
+            @imageDestroy($oSrcImg);
+            @imageDestroy($oWatermarkImg);
+        }
 
         return true;
     }

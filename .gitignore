@@ -12,3 +12,4 @@ node_modules
 connector.php
 .jshintrc
 .idea
+php/connector.minimal.php

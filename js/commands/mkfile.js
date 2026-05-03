@@ -48,7 +48,7 @@ elFinder.prototype.commands.mkfile = function() {
 			if (fm.uploadMimeCheck(mime)) {
 				this.mime = mime;
 				this.prefix = fm.i18n(['untitled file', type]);
-				return $.proxy(fm.res('mixin', 'make'), self)();
+				return fm.res('mixin', 'make').bind(self)();
 			}
 			err = ['errMkfile', self.getTypeName(mime, type)];
 		}

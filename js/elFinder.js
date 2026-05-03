@@ -644,6 +644,13 @@ var elFinder = function(elm, opts, bootCallback) {
 		currentOpenCmd = null,
 
 		/**
+		 * Current CSRF refresh request instance
+		 *
+		 * @type Object
+		 */
+		currentCsrfRefresh = null,
+
+		/**
 		 * Exec shortcut
 		 *
 		 * @param  jQuery.Event  keydown/keypress event
@@ -1411,6 +1418,97 @@ var elFinder = function(elm, opts, bootCallback) {
 	this.customHeaders = $.isPlainObject(this.options.customHeaders) ? this.options.customHeaders : {};
 
 	/**
+	 * CSRF header name for connector requests
+	 *
+	 * @type String
+	 */
+	this.csrfHeaderName = 'X-elFinder-CSRF';
+
+	/**
+	 * JSON response key for CSRF token
+	 *
+	 * @type String
+	 */
+	this.csrfResponseKey = 'csrf';
+
+	/**
+	 * JSON response key that marks a CSRF-triggered reload request
+	 *
+	 * @type String
+	 */
+	this.csrfReloadKey = 'csrfReload';
+
+	/**
+	 * Store or clear current CSRF token header
+	 *
+	 * @param  {String} token
+	 * @return void
+	 */
+	this.setCsrfToken = function(token) {
+		if (typeof token === 'string' && token) {
+			self.customHeaders[self.csrfHeaderName] = token;
+		} else {
+			delete self.customHeaders[self.csrfHeaderName];
+		}
+	};
+
+	/**
+	 * Determine whether the response represents a CSRF refreshable failure
+	 *
+	 * @param  {Object} xhr
+	 * @param  {Object} response
+	 * @return {Boolean}
+	 */
+	this.isCsrfReloadResponse = function(xhr, response) {
+		return !!(xhr
+			&& xhr.status === 403
+			&& !xhr._csrfRefresh
+			&& response
+			&& response[self.csrfReloadKey]);
+	};
+
+	/**
+	 * Refresh CSRF token via open&init=1 without replaying the failed command
+	 *
+	 * @return {jQuery.Deferred}
+	 */
+	this.refreshCsrfToken = function() {
+		var cwdFile = self.cwd(),
+			target = (cwdFile && cwdFile.hash) || self.lastDir('') || self.startDir();
+
+		if (currentCsrfRefresh && currentCsrfRefresh.state() === 'pending') {
+			return currentCsrfRefresh;
+		}
+
+		currentCsrfRefresh = self.request({
+			data           : {cmd : 'open', target : target, init : 1, tree : 1},
+			preventDefault : true,
+			preventFail    : true,
+			_csrfRefresh   : true
+		}).always(function() {
+			currentCsrfRefresh = null;
+		});
+
+		return currentCsrfRefresh;
+	};
+
+	/**
+	 * Start background CSRF refresh if current failure is refreshable
+	 *
+	 * @param  {Object} xhr
+	 * @param  {Object} response
+	 * @return {Boolean}
+	 */
+	this.handleCsrfReload = function(xhr, response) {
+		if (!self.isCsrfReloadResponse(xhr, response)) {
+			return false;
+		}
+
+		self.refreshCsrfToken();
+		return true;
+	};
+
+	/**
 	 * Any custom xhrFields to send across every ajax request
 	 *
 	 * @type Object
@@ -1580,7 +1678,7 @@ var elFinder = function(elm, opts, bootCallback) {
 		} 
 	});
 	
-	this.compare = $.proxy(this.compare, this);
+	this.compare = this.compare.bind(this);
 	
 	/**
 	 * Delay in ms before open notification dialog
@@ -2443,6 +2541,7 @@ var elFinder = function(elm, opts, bootCallback) {
 							// check responseText, Is that JSON?
 							try {
 								data = JSON.parse(xhr.responseText);
+								xhr._elfinderResponse = data;
 								if (data && data.error) {
 									error = data.error;
 								}
@@ -2496,7 +2595,13 @@ var elFinder = function(elm, opts, bootCallback) {
 					return dfrd.reject({error :['errResponse', 'errDataEmpty']}, xhr, response);
 				} else if (!$.isPlainObject(response)) {
 					return dfrd.reject({error :['errResponse', 'errDataNotJSON']}, xhr, response);
-				} else if (response.error) {
+				}
+
+				if (isOpen && !!data.init && Object.prototype.hasOwnProperty.call(response, self.csrfResponseKey)) {
+					self.setCsrfToken(response[self.csrfResponseKey]);
+				}
+
+				if (response.error) {
 					if (isOpen) {
 						// check leafRoots
 						$.each(self.leafRoots, function(phash, roots) {
@@ -2735,6 +2840,12 @@ var elFinder = function(elm, opts, bootCallback) {
 						if (error) {
 							error.error = '';
 						}
+					} else if (xhr && self.handleCsrfReload(xhr, xhr._elfinderResponse)) {
+						deffail = false;
+						syncOnFail = false;
+						if (error) {
+							error.error = '';
+						}
 					}
 					// abort xhr
 					xhrAbort();
@@ -2812,6 +2923,7 @@ var elFinder = function(elm, opts, bootCallback) {
 						requestQueue.shift()();
 					}
 				}).fail(error).done(success);
+				xhr._csrfRefresh = !!opts._csrfRefresh;
 				
 				if (self.api >= 2.1029) {
 					xhr._requestId = reqId;
@@ -3376,7 +3488,7 @@ var elFinder = function(elm, opts, bootCallback) {
 			this.autoSync('stop');
 		}
 		if (!dstHash && files) {
-			if ($.isArray(files)) {
+			if (Array.isArray(files)) {
 				if (files.length) {
 					dstHash = files[0];
 				}
@@ -4129,14 +4241,14 @@ var elFinder = function(elm, opts, bootCallback) {
 	}
 	
 	if (this.transport.upload == 'iframe') {
-		this.transport.upload = $.proxy(this.uploads.iframe, this);
+		this.transport.upload = this.uploads.iframe.bind(this);
 	} else if (typeof(this.transport.upload) == 'function') {
 		this.dragUpload = !!this.options.dragUploadAllow;
 	} else if (this.xhrUpload && !!this.options.dragUploadAllow) {
-		this.transport.upload = $.proxy(this.uploads.xhr, this);
+		this.transport.upload = this.uploads.xhr.bind(this);
 		this.dragUpload = true;
 	} else {
-		this.transport.upload = $.proxy(this.uploads.iframe, this);
+		this.transport.upload = this.uploads.iframe.bind(this);
 	}
 
 	/**
@@ -6091,7 +6203,7 @@ elFinder.prototype = {
 		var self = this,
 			data;
 		
-		if (!$.trim(text)) {
+		if (!text.trim()) {
 			return {error : ['errResponse', 'errDataEmpty']};
 		}
 		
@@ -6506,7 +6618,7 @@ elFinder.prototype = {
 							};
 						if (text = $(this).text()) {
 							loc = parseUrl($(this).attr('href'));
-							if (loc.href && loc.href.match(/^(?:ht|f)tp/i) && (atag.length === 1 || ! loc.pathname.match(/(?:\.html?|\/[^\/.]*)$/i) || $.trim(text).match(/\.[a-z0-9-]{1,10}$/i))) {
+							if (loc.href && loc.href.match(/^(?:ht|f)tp/i) && (atag.length === 1 || ! loc.pathname.match(/(?:\.html?|\/[^\/.]*)$/i) || text.trim().match(/\.[a-z0-9-]{1,10}$/i))) {
 								if ($.inArray(loc.href, ret) == -1 && $.inArray(loc.href, check) == -1) ret.push(loc.href);
 							}
 						}
@@ -6845,6 +6957,8 @@ elFinder.prototype = {
 					// trigger "requestError" event
 					self.trigger('requestError', errData);
 					if (errData._getEvent && errData._getEvent().isDefaultPrevented()) {
+						res.error = '';
+					} else if (self.handleCsrfReload(xhr, res)) {
 						res.error = '';
 					}
 					if (res._chunkfailure || res._multiupload) {
@@ -7846,7 +7960,7 @@ elFinder.prototype = {
 				c = document.cookie.split(';');
 				name += '=';
 				for (i=0; i<c.length; i++) {
-					c[i] = $.trim(c[i]);
+					c[i] = c[i].trim();
 					if (c[i].substring(0, name.length) == name) {
 						retval = decodeURIComponent(c[i].substring(name.length));
 						if (retval.substr(0,1) === '{' || retval.substr(0,1) === '[') {
@@ -9213,7 +9327,7 @@ elFinder.prototype = {
 		if (!style) {
 			style = this.options.fileModeStyle.toLowerCase();
 		}
-		p = $.trim(p);
+		p = p.trim();
 		if (p.match(/[rwxs-]{9}$/i)) {
 			str = p = p.substr(-9);
 			if (style == 'string') {
@@ -10467,7 +10581,7 @@ elFinder.prototype = {
 	arrayFlip : function (trans, val) {
 		var key,
 			tmpArr = {},
-			isArr = $.isArray(trans);
+			isArr = Array.isArray(trans);
 		for (key in trans) {
 			if (isArr || trans.hasOwnProperty(key)) {
 				tmpArr[trans[key]] = val || key;
@@ -10635,7 +10749,7 @@ if (!Object.keys) {
 // Array.isArray
 if (!Array.isArray) {
 	Array.isArray = function(arr) {
-		return jQuery.isArray(arr);
+		return Object.prototype.toString.call(arr) === '[object Array]';
 	};
 }
 // Object.assign
