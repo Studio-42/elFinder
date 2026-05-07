@@ -319,6 +319,7 @@ abstract class elFinderVolumeDriver
             'zip:application/x-zip' => 'application/zip',
             'm3u8:text/plain' => 'application/x-mpegurl',
             'mpd:text/plain' => 'application/dash+xml',
+            'mpd:text/xml' => 'application/dash+xml',
             'mpd:application/xml' => 'application/dash+xml',
             '*:application/x-dosexec' => 'application/x-executable',
             'doc:application/vnd.ms-office' => 'application/msword',
