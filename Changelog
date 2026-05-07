@@ -1,3 +1,38 @@
+2026-05-07  Naoki Sawada
+	* elFinder (2.1.68):
+		- Fixing bug where uploading large files sometimes fails (#3761)
+		- Fix incorrect URL generation in getContentUrl() (#3759)
+		- pressing minimized button ( - ) on the editor while the editor is maximized will close the editor (#3737)
+		- Update deprecated php type casts (#3739)
+		- fix(mime): normalize MIME mappings and regenerate elFinder.mimetypes.js
+		- Update Russian translation and authorship details (#3757)
+		- chore(dev): add MIME mapping generator script
+		- Use Array.isArray instead of $.isArray (#3771)
+		- added "SVG image" & "WEBP image" file type description to "Kind" column when in list view (#3738)
+		- Correctly urlencode path in setcookie(); fix Studio-42#3538 (#3754)
+		- Create SECURITY.md
+		- fix: Pixo Image Editor JS path
+		- update: [css] change font-size of preview
+		- fix: improve PHP 8 compatibility in session, cURL, and callback handling (#3780)
+		- Prepare elFinder for jQuery 4 sup (#3781)
+		- fix: example html, js
+		- build: add elfinder-minimal
+		- feat(editor): add signed callback state storage for external save handlers
+		- fix(connector): add CSRF token validation and refresh flow
+		- fix(connector): refine CSRF token refresh timing and protected commands
+		- fix(js): guard CSRF reload check when xhr is missing
+		- fix(onedrive): prefer cached Graph download URLs for file access
+		- Preserve i18n keys in mount errors
+		- fix:#3782 avoid E_STRICT on PHP 8.4+
+		- Update safe CDN versions for external JS libs
+		- Normalize MPD text/xml MIME type
+		- [i18n:ja] Update elfinder.ja.js
+		- fix(connector): normalize PHP error handling and mount failures
+		- chore(js): update default CDN library versions
+		- chore: ignore local IDE project files
+		- docs: fix correct the incorrect date
+		- [security] [VD:MySQL] normalize numeric object ids for SQL usage
+
 2026-04-17  Naoki Sawada
 	* elFinder (2.1.67):
 		[security] fix command injection vulnerability in `resize` background color handling when using the ImageMagick CLI backend
