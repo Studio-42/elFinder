@@ -611,8 +611,8 @@ class elFinder
             $errLevel |= E_DEPRECATED | E_USER_DEPRECATED;
         }
         // E_STRICT is deprecated; see https://wiki.php.net/rfc/deprecations_php_8_4#remove_e_strict_error_level_and_deprecate_e_strict_constant
-        if (defined('E_STRICT')) {
-            $errLevel |= @E_STRICT;
+        if (PHP_VERSION_ID < 80400 && defined('E_STRICT')) {
+            $errLevel |= E_STRICT;
         }
         set_error_handler('elFinder::phpErrorHandler', $errLevel);
 
@@ -863,6 +863,7 @@ class elFinder
 
             if (class_exists($class)) {
                 /* @var elFinderVolumeDriver $volume */
+                $vName = preg_replace('/^elFinderVolume/', '', $class);
                 $volume = new $class();
 
                 try {
@@ -886,13 +887,13 @@ class elFinder
                         if (!empty($o['_isNetVolume'])) {
                             $this->removeNetVolume($i, $volume);
                         }
-                        $this->mountErrors[] = 'Driver "' . $class . '" : ' . implode(' ', $volume->error());
+                        $this->mountErrors = array_merge($this->mountErrors, array(self::ERROR_NETMOUNT, $vName), $volume->error());
                     }
                 } catch (Exception $e) {
                     if (!empty($o['_isNetVolume'])) {
                         $this->removeNetVolume($i, $volume);
                     }
-                    $this->mountErrors[] = 'Driver "' . $class . '" : ' . $e->getMessage();
+                    $this->mountErrors = array_merge($this->mountErrors, array(self::ERROR_NETMOUNT, $vName, $e->getMessage()));
                 }
             } else {
                 if (!empty($o['_isNetVolume'])) {
@@ -4367,7 +4368,7 @@ var go = function() {
         }
 
         // E_STRICT is deprecated; see https://wiki.php.net/rfc/deprecations_php_8_4#remove_e_strict_error_level_and_deprecate_e_strict_constant
-        if (defined('E_STRICT') && $errno === @E_STRICT) {
+        if (PHP_VERSION_ID < 80400 && defined('E_STRICT') && $errno === E_STRICT) {
             elFinder::$phpErrors[] = "STRICT: $errstr in $errfile line $errline.";
             $proc = true;
         }
