@@ -1,4 +1,4 @@
-2025-08-28  Naoki Sawada
+2026-04-17  Naoki Sawada
 	* elFinder (2.1.67):
 		[security] fix command injection vulnerability in `resize` background color handling when using the ImageMagick CLI backend
 
