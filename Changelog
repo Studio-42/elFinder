@@ -1,4 +1,8 @@
 2026-05-07  Naoki Sawada
+	* elFinder (2.1.69):
+		- Only fixes a release error; there are no changes to the functionality.
+
+2026-05-07  Naoki Sawada
 	* elFinder (2.1.68):
 		- Fixing bug where uploading large files sometimes fails (#3761)
 		- Fix incorrect URL generation in getContentUrl() (#3759)
