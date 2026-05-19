@@ -383,7 +383,6 @@
 						$base.on('click', function() {
 							$base.find('.tui-colorpicker-slider-container').hide();
 						});
-						self.loadedFile = fm.file($base.data('hash'));
 					},
 					loader;
 
@@ -463,8 +462,7 @@
 					this.fm.storage('jpgQuality', quality);
 				}
 				if (hash) {
-					file = this.fm.file(hash);
-					$base.data('mime', file? file.mime : this.loadedFile.mime);
+					$base.data('mime', this.file.mime);
 				}
 			}
 		},
@@ -658,7 +656,6 @@
 				} else {
 					$base.on('contentsloaded', function() {
 						dfd.resolve(self.liveMsg);
-						self.loadedFile = fm.file($base.data('hash'));
 					});
 				}
 				return dfd;
@@ -675,8 +672,7 @@
 					this.fm.storage('jpgQuality', quality);
 				}
 				if (hash) {
-					file = this.fm.file(hash);
-					$base.data('mime', file? file.mime : this.loadedFile.mime);
+					$base.data('mime', this.file.mime);
 				} else {
 					$base.removeData('mime');
 				}
