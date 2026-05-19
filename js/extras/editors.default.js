@@ -462,8 +462,7 @@
 					this.fm.storage('jpgQuality', quality);
 				}
 				if (hash) {
-					file = this.fm.file(hash);
-					$base.data('mime', file.mime);
+					$base.data('mime', this.file.mime);
 				}
 			}
 		},
@@ -673,8 +672,7 @@
 					this.fm.storage('jpgQuality', quality);
 				}
 				if (hash) {
-					file = this.fm.file(hash);
-					$base.data('mime', file.mime);
+					$base.data('mime', this.file.mime);
 				} else {
 					$base.removeData('mime');
 				}
