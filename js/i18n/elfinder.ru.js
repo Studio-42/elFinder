@@ -16,7 +16,7 @@
 	}
 }(this, function(elFinder) {
 	elFinder.prototype.i18.ru = {
-		translator : 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;, Andrew Berezovsky &lt;andrew.berezovsky@gmail.com&gt;, Alex Yashkin &lt;alex@yashkin.by&gt;, Aleev Ruslan &lt;info@cat-art.ru&gt;',
+		translator : 'Dmitry "dio" Levashov &lt;dio@std42.ru&gt;, Andrew Berezovsky &lt;andrew.berezovsky@gmail.com&gt;, Alex Yashkin &lt;alex.yashkin@gmail.com&gt;, Aleev Ruslan &lt;info@cat-art.ru&gt;',
 		language   : 'Русский язык',
 		direction  : 'ltr',
 		dateFormat : 'd M Y H:i', // will show like: 16 Июл 2026 23:34
