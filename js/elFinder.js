@@ -4979,9 +4979,6 @@ var elFinder = function(elm, opts, bootCallback) {
 			try {
 				trusted[new URL(self.convAbsUrl(self.uploadURL)).origin] = true;
 			} catch (ignore) {}
-			try {
-				trusted[window.location.origin] = true;
-			} catch (ignore) {}
 			if (res && res.origin && trusted[res.origin]) {
 				try {
 					try {
@@ -4998,7 +4995,7 @@ var elFinder = function(elm, opts, bootCallback) {
 					} 
 					if (data) {
 						bind = obj.bind;
-						if (bind && !/^[a-zA-Z0-9;._-]+$/.test(bind)) {
+						if (bind && !/^[a-zA-Z0-9._-]+$/.test(bind)) {
 							bind = '';
 						}
 						if (data.error) {
