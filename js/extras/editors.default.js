@@ -461,8 +461,8 @@
 				if (typeof quality !== 'undefined') {
 					this.fm.storage('jpgQuality', quality);
 				}
-				if (hash) {
-					$base.data('mime', this.file.mime);
+				if (hash && (file = this.fm.file(hash))) {
+					$base.data('mime', file.mime);
 				}
 			}
 		},
@@ -672,9 +672,12 @@
 					this.fm.storage('jpgQuality', quality);
 				}
 				if (hash) {
-					$base.data('mime', this.file.mime);
+				    file = this.fm.file(hash);
+				    if (file) {
+				        $base.data('mime', file.mime);
+				    }
 				} else {
-					$base.removeData('mime');
+				    $base.removeData('mime');
 				}
 			},
 			// On dialog closed
