@@ -1,6 +1,6 @@
 /*!
  * elFinder - file manager for web
- * Version 2.1.69 (2.1-src Nightly: 97992de7d) (2026-08-02)
+ * Version 2.1.69 (2.1-src Nightly: 903fc8b04) (2026-08-02)
  * http://elfinder.org
  * 
  * Copyright 2009-2026, Studio 42
@@ -4745,9 +4745,22 @@ var elFinder = function(elm, opts, bootCallback) {
 	if (true === this.options.sound) {
 		this.bind('playsound', function(e) {
 			var play  = beeper.canPlayType && beeper.canPlayType('audio/wav; codecs="1"'),
-				file = e.data && e.data.soundFile;
+				file = e.data && e.data.soundFile,
+				source;
 
-			play && file && play != '' && play != 'no' && $(beeper).html('<source src="' + soundPath + file + '" type="audio/wav">')[0].play();
+			// Reject non-wav / path-traversal / HTML-breakout soundFile values (DOM XSS)
+			if (!(play && file && play != '' && play != 'no')) {
+				return;
+			}
+			if (typeof file !== 'string' || !/^[A-Za-z0-9._-]+\.wav$/.test(file)) {
+				return;
+			}
+			beeper.innerHTML = '';
+			source = document.createElement('source');
+			source.src = soundPath + file;
+			source.type = 'audio/wav';
+			beeper.appendChild(source);
+			beeper.play();
 		});
 	}
 
@@ -4989,8 +5002,15 @@ var elFinder = function(elm, opts, bootCallback) {
 		// bind window onmessage for CORS
 		$(window).on('message.' + namespace, function(e){
 			var res = e.originalEvent || null,
-				obj, data;
-			if (res && (self.convAbsUrl(self.options.url).indexOf(res.origin) === 0 || self.convAbsUrl(self.uploadURL).indexOf(res.origin) === 0)) {
+				obj, data, bind, trusted = {};
+			// Exact-origin match only (prefix indexOf check allowed origin bypass)
+			try {
+				trusted[new URL(self.convAbsUrl(self.options.url)).origin] = true;
+			} catch (ignore) {}
+			try {
+				trusted[new URL(self.convAbsUrl(self.uploadURL)).origin] = true;
+			} catch (ignore) {}
+			if (res && res.origin && trusted[res.origin]) {
 				try {
 					try {
 						if (typeof res.data !== 'string') {
@@ -5005,9 +5025,13 @@ var elFinder = function(elm, opts, bootCallback) {
 						return;
 					} 
 					if (data) {
+						bind = obj.bind;
+						if (bind && !/^[a-zA-Z0-9._-]+$/.test(bind)) {
+							bind = '';
+						}
 						if (data.error) {
-							if (obj.bind) {
-								self.trigger(obj.bind+'fail', data);
+							if (bind) {
+								self.trigger(bind+'fail', data);
 							}
 							self.error(data.error);
 						} else {
@@ -5016,9 +5040,9 @@ var elFinder = function(elm, opts, bootCallback) {
 							data.removed && data.removed.length && self.remove(data);
 							data.added   && data.added.length   && self.add(data);
 							data.changed && data.changed.length && self.change(data);
-							if (obj.bind) {
-								self.trigger(obj.bind, data);
-								self.trigger(obj.bind+'done');
+							if (bind) {
+								self.trigger(bind, data);
+								self.trigger(bind+'done');
 							}
 							data.sync && self.sync();
 						}
@@ -10900,7 +10924,7 @@ if (!window.cancelAnimationFrame) {
  *
  * @type String
  **/
-elFinder.prototype.version = '2.1.69 (2.1-src Nightly: 97992de7d)';
+elFinder.prototype.version = '2.1.69 (2.1-src Nightly: 903fc8b04)';
 
 
 
