@@ -672,12 +672,12 @@
 					this.fm.storage('jpgQuality', quality);
 				}
 				if (hash) {
-				    file = this.fm.file(hash);
-				    if (file) {
-				        $base.data('mime', file.mime);
-				    }
+					file = this.fm.file(hash);
+					if (file) {
+						$base.data('mime', file.mime);
+					}
 				} else {
-				    $base.removeData('mime');
+					$base.removeData('mime');
 				}
 			},
 			// On dialog closed
