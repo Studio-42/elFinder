@@ -203,6 +203,20 @@ class elFinder
     protected $urlUploadFilter = null;
 
     /**
+     * Headers of last remote content response
+     *
+     * @var array
+     */
+    protected $remoteContentHeaders = array();
+
+    /**
+     * Error code of last remote content request
+     *
+     * @var string
+     */
+    protected $remoteContentError = '';
+
+    /**
      * Connection flag files path that connection check of current request
      *
      * @var string
@@ -545,6 +559,7 @@ class elFinder
     const ERROR_UPLOAD_TEMP = 'errUploadTemp';       // 'Unable to make temporary file for upload.'
     const ERROR_UPLOAD_TOTAL_SIZE = 'errUploadTotalSize';  // 'Data exceeds the maximum allowed size.'
     const ERROR_UPLOAD_TRANSFER = 'errUploadTransfer';   // '"$1" transfer error.'
+    const ERROR_UPLOAD_URL_NO_CURL = 'errUploadUrlNoCurl'; // 'URL upload requires the PHP cURL extension.'
     const ERROR_MAX_MKDIRS = 'errMaxMkdirs'; // 'You can create up to $1 folders at one time.'
 
     /**
@@ -2672,7 +2687,13 @@ class elFinder
      **/
     protected function get_remote_contents(&$url, $timeout = 30, $redirect_max = 5, $ua = 'Mozilla/5.0', $fp = null)
     {
+        $this->remoteContentHeaders = array();
+        $this->remoteContentError = '';
         if (preg_match('~^(?:ht|f)tps?://[-_.!\~*\'()a-z0-9;/?:\@&=+\$,%#\*\[\]]+~i', $url)) {
+            if (!function_exists('curl_init') || !function_exists('curl_exec')) {
+                $this->remoteContentError = self::ERROR_UPLOAD_URL_NO_CURL;
+                return false;
+            }
             $info = $this->validate_address($url);
             if ($info === false) {
                 return false;
@@ -2685,8 +2706,7 @@ class elFinder
                     return false;
                 }
             }
-            $method = (function_exists('curl_exec')) ? 'curl_get_contents' : 'fsock_get_contents';
-            return $this->$method($url, $timeout, $redirect_max, $ua, $fp, $info);
+            return $this->curl_get_contents($url, $timeout, $redirect_max, $ua, $fp, $info);
         }
         return false;
     }
@@ -2711,9 +2731,11 @@ class elFinder
         if ($redirect_max == 0) {
             return false;
         }
+        $this->remoteContentHeaders = array();
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION, array($this, 'curlHeader'));
         if ($outfp) {
             curl_setopt($ch, CURLOPT_FILE, $outfp);
         } else {
@@ -2729,11 +2751,24 @@ class elFinder
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         if ($http_code == 301 || $http_code == 302) {
             $new_url = curl_getinfo($ch, CURLINFO_REDIRECT_URL);
+            if (PHP_VERSION_ID < 80000) {
+                curl_close($ch);
+            } else {
+                unset($ch);
+            }
             $info = $this->validate_address($new_url);
             if ($info === false) {
                 return false;
             }
             return $this->curl_get_contents($new_url, $timeout, $redirect_max - 1, $ua, $outfp, $info);
+        }
+        if ($result === false) {
+            if (PHP_VERSION_ID < 80000) {
+                curl_close($ch);
+            } else {
+                unset($ch);
+            }
+            return false;
         }
         if (PHP_VERSION_ID < 80000) {
             curl_close($ch);
@@ -2744,7 +2779,39 @@ class elFinder
     }
 
     /**
+     * cURL response header callback
+     *
+     * @param  resource $curl
+     * @param  string   $header
+     *
+     * @return int
+     * @author Naoki Sawada
+     */
+    public function curlHeader($curl, $header)
+    {
+        $length = strlen($header);
+        $header = trim($header);
+        if ($header !== '' && strpos($header, ':') !== false) {
+            list($name, $value) = explode(':', $header, 2);
+            $name = strtolower(trim($name));
+            $value = trim($value);
+            if (isset($this->remoteContentHeaders[$name])) {
+                if (is_array($this->remoteContentHeaders[$name])) {
+                    $this->remoteContentHeaders[$name][] = $value;
+                } else {
+                    $this->remoteContentHeaders[$name] = array($this->remoteContentHeaders[$name], $value);
+                }
+            } else {
+                $this->remoteContentHeaders[$name] = $value;
+            }
+        }
+        return $length;
+    }
+
+    /**
      * Get remote contents with fsockopen()
+     *
+     * @deprecated URL uploads require PHP cURL; this fallback is not used.
      *
      * @param  string   $url          url
      * @param  int      $timeout      timeout (sec)
@@ -2899,6 +2966,36 @@ class elFinder
         fclose($fp);
 
         return $outfp ? $outfp : $body; // Data
+    }
+
+    /**
+     * Get filename from Content-Disposition of last remote content response
+     *
+     * @return string
+     * @author Naoki Sawada
+     */
+    protected function getRemoteContentDispositionFileName()
+    {
+        if (empty($this->remoteContentHeaders['content-disposition'])) {
+            return '';
+        }
+        $header = $this->remoteContentHeaders['content-disposition'];
+        if (is_array($header)) {
+            $header = end($header);
+        }
+
+        if (preg_match('/filename\*=(?:([a-zA-Z0-9_-]+?)\'\')"?([a-z0-9_.~%-]+)"?/i', $header, $m)) {
+            $name = rawurldecode($m[2]);
+            if ($m[1] && strtoupper($m[1]) !== 'UTF-8' && function_exists('mb_convert_encoding')) {
+                $name = mb_convert_encoding($name, 'UTF-8', $m[1]);
+            }
+            return $name;
+        }
+        if (preg_match('/filename="?([ a-z0-9_.~%-]+)"?/i', $header, $m)) {
+            return rawurldecode($m[1]);
+        }
+
+        return '';
     }
 
     /**
@@ -3283,6 +3380,7 @@ class elFinder
         $cid = $args['cid'] ? (int)$args['cid'] : '';
         $mtimes = $args['mtime'] ? $args['mtime'] : array();
         $tmpfname = '';
+        $urlUploadErrors = array();
 
         if (!$volume) {
             return array_merge(array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_TRGDIR_NOT_FOUND, '#' . $target)), $header);
@@ -3362,18 +3460,17 @@ class elFinder
                             $url = iconv('UTF-8', 'UTF-8//IGNORE', $url);
                             $_name = preg_replace('~^.*?([^/#?]+)(?:\?.*)?(?:#.*)?$~', '$1', $url);
                             // Check `Content-Disposition` response header
-                            if (($headers = get_headers($url, true)) && !empty($headers['Content-Disposition'])) {
-                                if (preg_match('/filename\*=(?:([a-zA-Z0-9_-]+?)\'\')"?([a-z0-9_.~%-]+)"?/i', $headers['Content-Disposition'], $m)) {
-                                    $_name = rawurldecode($m[2]);
-                                    if ($m[1] && strtoupper($m[1]) !== 'UTF-8' && function_exists('mb_convert_encoding')) {
-                                        $_name = mb_convert_encoding($_name, 'UTF-8', $m[1]);
-                                    }
-                                } else if (preg_match('/filename="?([ a-z0-9_.~%-]+)"?/i', $headers['Content-Disposition'], $m)) {
-                                    $_name = rawurldecode($m[1]);
-                                }
+                            if ($contentDispositionName = $this->getRemoteContentDispositionFileName()) {
+                                $_name = $contentDispositionName;
                             }
                         } else {
+                            if ($this->remoteContentError) {
+                                $urlUploadErrors[$this->remoteContentError] = true;
+                            }
                             fclose($fp);
+                            if (is_file($tmpfname) && unlink($tmpfname)) {
+                                unset($GLOBALS['elFinderTempFiles'][$tmpfname]);
+                            }
                         }
                     }
                     if ($data) {
@@ -3417,7 +3514,8 @@ class elFinder
                 }
             }
             if (empty($files)) {
-                return array_merge(array('error' => $this->error(self::ERROR_UPLOAD, self::ERROR_UPLOAD_NO_FILES)), $header);
+                $error = $urlUploadErrors ? array_keys($urlUploadErrors) : self::ERROR_UPLOAD_NO_FILES;
+                return array_merge(array('error' => $this->error(self::ERROR_UPLOAD, $error)), $header);
             }
         }
 
@@ -3566,6 +3664,9 @@ class elFinder
 
         if ($errors) {
             $result['warning'] = $errors;
+        }
+        if ($urlUploadErrors) {
+            $result['warning'] = $this->error(isset($result['warning']) ? $result['warning'] : array(), array_keys($urlUploadErrors));
         }
 
         if ($GLOBALS['elFinderTempFiles']) {
