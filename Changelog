@@ -1,3 +1,10 @@
+2026-08-03  Naoki Sawada
+	* elFinder (2.1.70):
+		- Security: Fix CSRF protection for the `netmount` command
+		- Security: Fix MIME validation during ZIP archive extraction
+		- Security: Require cURL for URL uploads to prevent SSRF protection bypass in the `fsock_get_contents()` fallback
+		- Fix postMessage origin bypass and playsound DOM XSS
+
 2026-05-07  Naoki Sawada
 	* elFinder (2.1.69):
 		- Only fixes a release error; there are no changes to the functionality.
