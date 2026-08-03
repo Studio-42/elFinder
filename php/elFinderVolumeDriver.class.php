@@ -7107,11 +7107,19 @@ abstract class elFinderVolumeDriver
                     }
                 }
             } else {
-                if ($chkMime && ($mimeByName = elFinderVolumeDriver::mimetypeInternalDetect($name)) && !$this->allowPutMime($mimeByName)) {
-                    self::localRmdirRecursive($p);
-                    $res['mimes'][] = $p;
-                    $res['rmNames'][] = $utf8Name;
-                    continue;
+                if ($chkMime) {
+                    $mimeByName = $this->mimeTypeNormalize(
+                        elFinderVolumeDriver::mimetypeInternalDetect($name),
+                        $name,
+                        pathinfo($name, PATHINFO_EXTENSION)
+                    );
+
+                    if ($mimeByName && !$this->allowPutMime($mimeByName)) {
+                        self::localRmdirRecursive($p);
+                        $res['mimes'][] = $p;
+                        $res['rmNames'][] = $utf8Name;
+                        continue;
+                    }
                 }
                 $res['totalSize'] += (int)sprintf('%u', filesize($p));
             }
