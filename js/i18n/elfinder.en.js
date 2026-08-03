@@ -62,6 +62,7 @@ if (typeof elFinder === 'function' && elFinder.prototype.i18) {
 			'errUploadFileSize'    : 'File exceeds maximum allowed size.', //  old name - errFileMaxSize
 			'errUploadMime'        : 'File type not allowed.',
 			'errUploadTransfer'    : '"$1" transfer error.',
+			'errUploadUrlNoCurl'    : 'URL upload requires the PHP cURL extension.',
 			'errUploadTemp'        : 'Unable to make temporary file for upload.', // from v2.1 added 26.09.2015
 			'errNotReplace'        : 'Object "$1" already exists at this location and can not be replaced by object with another type.', // new
 			'errReplace'           : 'Unable to replace "$1".',

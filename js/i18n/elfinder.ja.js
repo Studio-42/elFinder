@@ -69,6 +69,7 @@
 			'errUploadFileSize'    : 'ファイルが許容サイズを超えています。', //  old name - errFileMaxSize
 			'errUploadMime'        : '許可されていないファイル形式です。',
 			'errUploadTransfer'    : '"$1" 転送エラーです。',
+			'errUploadUrlNoCurl'    : 'URLアップロードには PHP cURL 拡張機能が必要です。',
 			'errUploadTemp'        : 'アップロード用一時ファイルを作成できません。', // from v2.1 added 26.09.2015
 			'errNotReplace'        : 'アイテム "$1" はすでにこの場所にあり、アイテムのタイプが違うので置き換えることはできません。', // new
 			'errReplace'           : '"$1" を置き換えることができません。',
