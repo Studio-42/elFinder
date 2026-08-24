@@ -2363,7 +2363,7 @@ abstract class elFinderVolumeDriver
             $rootKey = $this->getRootstatCachekey();
             // delete old cache data
             if ($this->sessionCaching['rootstat']) {
-                unset($this->sessionCaching['rootstat'][$rootKey]);
+                unset($this->sessionCache['rootstat'][$rootKey]);
             }
             if (elFinder::$instance->updateNetVolumeOption($this->options['netkey'], 'alias', $name)) {
                 $this->clearcache();
