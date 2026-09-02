@@ -169,7 +169,7 @@ abstract class elFinderVolumeDriver
 
     /**
      * Static var of $this->options['maxArcFilesSize']
-     * 
+     *
      * @var int|string
      */
     protected static $maxArcFilesSize;
@@ -1295,14 +1295,14 @@ abstract class elFinderVolumeDriver
                 $auto_types[] = 'finfo';
             }
         }
-        
+
         if (function_exists('mime_content_type')) {
             $_mimetypes = explode(';', mime_content_type(__FILE__));
             if (preg_match($regexp, array_shift($_mimetypes))) {
                 $auto_types[] = 'mime_content_type';
             }
         }
-            
+
         $auto_types[] = 'internal';
 
         $type = strtolower($this->options['mimeDetect']);
@@ -3468,7 +3468,7 @@ abstract class elFinderVolumeDriver
         } else if (function_exists('sys_get_temp_dir')) {
             $tempPath = sys_get_temp_dir();
         }
-        
+
         if ($tempPath && DIRECTORY_SEPARATOR !== '/') {
             $tempPath = str_replace('/', DIRECTORY_SEPARATOR, $tempPath);
         }
@@ -4542,7 +4542,7 @@ abstract class elFinderVolumeDriver
                     $rootSessCache = true;
                 }
             }
-        } 
+        }
         if ($is_root) {
             if ($ret) {
                 $this->rootModified = false;
@@ -6920,6 +6920,13 @@ abstract class elFinderVolumeDriver
     protected function makeArchive($dir, $files, $name, $arc)
     {
         if ($arc['cmd'] === 'phpfunction') {
+            if (is_array($arc['argc']) && isset($arc['argc'][0], $arc['argc'][1])) {
+                if ($arc['argc'][0] === 'self' || $arc['argc'][0] === 'static') {
+                    // PHP 8.4+ Replace with the name of the currently called class (child of abstract class)
+                    $arc['argc'][0] = get_called_class();
+                }
+            }
+
             if (is_callable($arc['argc'])) {
                 call_user_func_array($arc['argc'], array($dir, $files, $name));
             }
@@ -6976,6 +6983,13 @@ abstract class elFinderVolumeDriver
         $dir = realpath($dir);
         $path = realpath($path);
         if ($arc['cmd'] === 'phpfunction') {
+            if (is_array($arc['argc']) && isset($arc['argc'][0], $arc['argc'][1])) {
+                if ($arc['argc'][0] === 'self' || $arc['argc'][0] === 'static') {
+                    // PHP 8.4+ Replace with the name of the currently called class (child of abstract class)
+                    $arc['argc'][0] = get_called_class();
+                }
+            }
+
             if (is_callable($arc['argc'])) {
                 call_user_func_array($arc['argc'], array($path, $dir));
             }
