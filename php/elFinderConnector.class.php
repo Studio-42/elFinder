@@ -578,8 +578,10 @@ class elFinderConnector
     {
         static $magic_quotes_gpc = NULL;
 
-        if ($magic_quotes_gpc === NULL)
-            $magic_quotes_gpc = (version_compare(PHP_VERSION, '5.4', '<') && get_magic_quotes_gpc());
+        if ($magic_quotes_gpc === NULL) {
+            // magic_quotes_gpc removed in PHP 8.0; disabled since PHP 5.4 (WordPress minimum).
+            $magic_quotes_gpc = false;
+        }
 
         if (is_array($args)) {
             return array_map(array(& $this, 'input_filter'), $args);
