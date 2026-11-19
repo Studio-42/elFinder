@@ -4919,7 +4919,7 @@ abstract class elFinderVolumeDriver
             elFinderVolumeDriver::loadMimeTypes();
         }
         $ext = '';
-        if ($path) {
+        if (is_string($path) && $path !== '') {
             $pinfo = pathinfo($path);
             $ext = isset($pinfo['extension']) ? strtolower($pinfo['extension']) : '';
         }
